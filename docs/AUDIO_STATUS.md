@@ -1,13 +1,25 @@
 # Audio Implementation Status
 
-Ordinary LD-SBR external comparisons now explicitly select complex QMF in FDK.
-Its automatic ELD mode is Low Power;that explained the two zero-core twi waveform
-mismatches. Complex full-stream RMS errors are about9e-6/1e-5 with unchanged
-native PCM.24 new own programmes/48 movies qualify zero-core harmonic energy,
-exact8x amplitude steps,MP4/Matroska and worker navigation;real macOS device drain
-also passes.23 scoped tests pass. Other24 original inputs still have raw waveform
-differences. Core time-origin qualification,full waveform conformance and
-codec-gap completion remain open. See validation/aac-ld-sbr-qmf-reference-2026-11-01.md.
+AAC-ELD now emits the causal AU interval after the window's zero leading quarter,
+including the known EOF quarter. Both original24-bit ISO core references match
+at zero lag over their complete streams within one PCM24 LSB. The24 nonzero-core
+LD-SBR comparisons improve137–16259x;the two zero-core controls stay unchanged.
+Remaining LD-SBR waveform differences and broader codec qualification remain
+open. See validation/aac-eld-au-origin-2026-11-01.md. Earlier reports below retain
+their historical results and do not describe the corrected core origin.
+
+Four original PCM24 LD-SBR WAV controls corroborate complex reference rendering.
+The large e1_32 EOF error versus FDK is not native:against the original WAV,native
+maximum error is4e-6 versus FDK0.02586. Native gh1_44 and stereo s2_48 still differ
+from original WAVs and remain open;no full waveform conformance is claimed.
+
+The preceding explicit-QMF reference audit selected complex in FDK because its
+automatic ordinary ELD mode is Low Power. At that checkpoint,the two zero-core
+twi comparisons improved to about9e-6/1e-5 RMS without changing native PCM.
+Its24 own programmes qualified zero-core harmonic energy,exact8x amplitude
+steps,both transports and worker/device navigation;23 scoped tests passed then.
+The current core-origin correction is a separate native DSP fix.
+See validation/aac-ld-sbr-qmf-reference-2026-11-01.md for that earlier audit.
 
 Nominal LD-SBR analysis uses canonical CLDFB phase2n-95. Own nonzero PCM
 regressions qualify the correction. The October31 scoped gate passed1138 tests,

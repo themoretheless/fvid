@@ -1,0 +1,185 @@
+{
+  "complete": true,
+  "scope": "Four original ISO LD-SBR PCM24 references; full streams; zero lag; aggregate RMS across channels; no full-codec conformance verdict",
+  "source": "https://standards.iso.org/iso-iec/14496/-26/ed-2/en/referencesWav.zip",
+  "inventory_sha256": "865521883bbc19db177c71c00fcb57bd3619a8ae73a05a21532c3fc22cc13e92",
+  "native_probe_sha256": "5f050a5565b7165a840a6e25dd1ece6c6604b3a24c5c89b76676cee505dbe3fa",
+  "fdk_probe_sha256": "811f39fb89134b65cc220eb5d7b0c85c79ac27a9ef2873e528e2f57ad35eee80",
+  "fdk_source_git_tree": {
+    "commit": "ee76460efbdb147e26d804c798949c23f174460b",
+    "archive_sha256": "d018f6356b7d7bca5af4df9eca076fe21ece81e5251854882989c51e37af6286",
+    "git_tree_sha1": "c3900d70bbdf4129d37f8cd5ab4a6589a34eb95b",
+    "files": 425,
+    "source_bytes": 9746870
+  },
+  "cases": [
+    {
+      "name": "er_eld_sbr_e_1_32.wav",
+      "channels": 1,
+      "rate": 48000,
+      "bits": 24,
+      "reference_scalars": 616448,
+      "metrics": [
+        {
+          "renderer": "native-complex",
+          "compatible": true,
+          "explicit_lag": 0,
+          "rmse": 1.742472449416618e-07,
+          "max_abs": 4.015862941741943e-06
+        },
+        {
+          "renderer": "FDK-complex",
+          "compatible": true,
+          "explicit_lag": 0,
+          "rmse": 0.00030674626797720834,
+          "max_abs": 0.025855422019958496
+        },
+        {
+          "renderer": "FDK-auto",
+          "compatible": true,
+          "explicit_lag": 0,
+          "rmse": 0.005646495593347409,
+          "max_abs": 0.2951047420501709
+        }
+      ],
+      "original_reference": {
+        "name": "er_eld_sbr_e_1_32.wav",
+        "member": "../mpeg4audio-conformance2ndEd_20230125/referencesWav/add-opt/er_eld_sbr_e_1_32.wav",
+        "bytes": 1849498,
+        "iso_md5": "20223e82a4074f85d2dcdcc26f760988",
+        "sha256": "3581c720c3340457d29c14b49cf1afacaeb3d044fa895064525258c4ab396b8e"
+      },
+      "input_sha256": "5a08d12a43855894a06ee1bd15104c621f329a2322fb464df1af5bbf78f345df",
+      "original_records_sha256": "032d335cfcaa18e643d7831242a8c81b8d18628fcf02af3c8847b53e743f02ac",
+      "native_pcm_sha256": "a9c7cc3897aba1692a762d53215ecfc50009eccc92d01820fd93cd0554410a83",
+      "fdk_pcm_sha256": "63ca1e17d489d9e8509f9fb5124a72785559dd617beb9f2f6eac8797a8cf2dd3",
+      "fdk_auto_pcm_sha256": "a68b5b4ab180279da3e7e2ab2a9aa39abe2767877e30ac7d67b8bfd7f96255a7"
+    },
+    {
+      "name": "er_eld_sbr_gh_1_44.wav",
+      "channels": 1,
+      "rate": 44100,
+      "bits": 24,
+      "reference_scalars": 1026048,
+      "metrics": [
+        {
+          "renderer": "native-complex",
+          "compatible": true,
+          "explicit_lag": 0,
+          "rmse": 3.233451591390257e-05,
+          "max_abs": 0.0023795776069164276
+        },
+        {
+          "renderer": "FDK-complex",
+          "compatible": true,
+          "explicit_lag": 0,
+          "rmse": 1.1406662152974834e-05,
+          "max_abs": 4.971027374267578e-05
+        },
+        {
+          "renderer": "FDK-auto",
+          "compatible": true,
+          "explicit_lag": 0,
+          "rmse": 0.0032039628572055855,
+          "max_abs": 0.05977630615234375
+        }
+      ],
+      "original_reference": {
+        "name": "er_eld_sbr_gh_1_44.wav",
+        "member": "../mpeg4audio-conformance2ndEd_20230125/referencesWav/add-opt/er_eld_sbr_gh_1_44.wav",
+        "bytes": 3078298,
+        "iso_md5": "07e909931dc15987cbd4886c9a316879",
+        "sha256": "313f9fc83437b048a9f7b974558989498cad8900492a0f7f9d2884a730f8571c"
+      },
+      "input_sha256": "9b9b8c1a8e1ded1f2db6c6b5efa8067cc5cc81382003b03a5a83d5f1c9374e8e",
+      "original_records_sha256": "0524de96adb3900f40f2cdd25ecad8a9d9a5562a151bc32d461f111ef9a796c5",
+      "native_pcm_sha256": "ec4233958b17114a2c6b981a1a1e1fd7776c4b5406c2eefa99cf438261272e93",
+      "fdk_pcm_sha256": "ff6b95f819673917173c455fb11080a20fcc4771b5806e104612e9566908a473",
+      "fdk_auto_pcm_sha256": "d5abf7be3722906e5425c9103a37a6824694dce137af8ea422478a9798760ea1"
+    },
+    {
+      "name": "er_eld_sbr_s_2_48.wav",
+      "channels": 2,
+      "rate": 48000,
+      "bits": 24,
+      "reference_scalars": 821248,
+      "metrics": [
+        {
+          "renderer": "native-complex",
+          "compatible": true,
+          "explicit_lag": 0,
+          "rmse": 8.221562094985764e-05,
+          "max_abs": 0.0005353912711143494
+        },
+        {
+          "renderer": "FDK-complex",
+          "compatible": true,
+          "explicit_lag": 0,
+          "rmse": 1.0034783908258551e-05,
+          "max_abs": 3.9577484130859375e-05
+        },
+        {
+          "renderer": "FDK-auto",
+          "compatible": true,
+          "explicit_lag": 0,
+          "rmse": 0.0013331036291990212,
+          "max_abs": 0.01478266716003418
+        }
+      ],
+      "original_reference": {
+        "name": "er_eld_sbr_s_2_48.wav",
+        "member": "../mpeg4audio-conformance2ndEd_20230125/referencesWav/add-opt/er_eld_sbr_s_2_48.wav",
+        "bytes": 2463898,
+        "iso_md5": "30666094e2837206b3240dd1def425f1",
+        "sha256": "ef8f3d44717a357c072d7946cdbfb2635110ccffc567d057906b6b3ac31a72bd"
+      },
+      "input_sha256": "dafd68ac71331f60376fc8cf465542468205183954ff169b0206b6a676c1a285",
+      "original_records_sha256": "9e1f5acc71fcc3b40dfa0b4c04663743a85b5ae73f0ff7f655cd9878b1d35b6b",
+      "native_pcm_sha256": "819ac2edd49558caf0e28014503d6c48f88bb3df70dd1a7962ee4aca4a7e2d5b",
+      "fdk_pcm_sha256": "ceaa70c9c4f3856c6794ad513525e75a697b2139b5876cf2b28c4c6b415ed320",
+      "fdk_auto_pcm_sha256": "f7dead722b8f49d6a4ae2be1da180d0dc38a2f23315ab58544a65a4c3a0cd017"
+    },
+    {
+      "name": "er_eld_sbr_twi_1_48.wav",
+      "channels": 1,
+      "rate": 48000,
+      "bits": 24,
+      "reference_scalars": 49152,
+      "metrics": [
+        {
+          "renderer": "native-complex",
+          "compatible": true,
+          "explicit_lag": 0,
+          "rmse": 1.6424727282347332e-07,
+          "max_abs": 1.0132789611816406e-06
+        },
+        {
+          "renderer": "FDK-complex",
+          "compatible": true,
+          "explicit_lag": 0,
+          "rmse": 1.0519841556190201e-05,
+          "max_abs": 4.57763671875e-05
+        },
+        {
+          "renderer": "FDK-auto",
+          "compatible": true,
+          "explicit_lag": 0,
+          "rmse": 0.016493548439328386,
+          "max_abs": 0.23362505435943604
+        }
+      ],
+      "original_reference": {
+        "name": "er_eld_sbr_twi_1_48.wav",
+        "member": "../mpeg4audio-conformance2ndEd_20230125/referencesWav/add-opt/er_eld_sbr_twi_1_48.wav",
+        "bytes": 147610,
+        "iso_md5": "973a2276aaa03711b2a8ec650b143143",
+        "sha256": "bc55167e874091fe3969dcc27b9914cbcf0751e220ce77a8e0bbf17e1bc3bb05"
+      },
+      "input_sha256": "6f2290f439f22b3e85196520a896c4702ff1d9e28a3486a5bb027bfa27622c5c",
+      "original_records_sha256": "e2da0a9da118c2b866c250387cc6b2b82c05250af080c66a703ba8c78432e317",
+      "native_pcm_sha256": "733405ce4e36c59b3532d246e925520bf84fe94bd52218c952fba3300a751899",
+      "fdk_pcm_sha256": "561d47c8ab8925935e6f68870ee75814c03d02c8343dfd3bd1c512e67e00cecc",
+      "fdk_auto_pcm_sha256": "7de68a9a284c6d86c0449fd76a1cc2f35b2e63dc2e889b865a1d05c6b66052eb"
+    }
+  ]
+}

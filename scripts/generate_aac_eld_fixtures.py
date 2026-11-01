@@ -72,6 +72,7 @@ def generate(include_payload_bits=False, specs=None, include_category_bits=False
         assert sn>0 and n%sn==0 and rate*sn%n==0
         output_rate=rate*sn//n
         w=window(sn)if synthesis_window is None else synthesis_window(sn)
+        assert all(v==0 for v in w[:sn//4])
         overlap=[[0.]*(3*sn)for _ in mapping];noise=Noise();pcm=[];rows=[];packets=[]
         count,last=geometry(n,max(22050,min(48000,rate)))if high else(2,4)
         offsets=[0,4]if count==2 else [0]+[4*i for i in range(1,count)]+[n]
@@ -150,7 +151,9 @@ def generate(include_payload_bits=False, specs=None, include_category_bits=False
                 values=[spectrum.get(k,0.)if k<sn else 0. for k in positions]
                 transformed=[-sum(v*x for v,x in zip(values,row))/n for row in cos]
                 accumulated=[x*w[i]+(overlap[c][i]if i<3*sn else 0.)for i,x in enumerate(transformed)]
-                outputs.append(accumulated[:sn]);overlap[c]=accumulated[sn:]
+                # The next window's first quarter is identically zero,so the
+                # current AU already determines this entire aligned interval.
+                outputs.append(accumulated[sn//4:sn+sn//4]);overlap[c]=accumulated[sn:]
             for i in range(sn):
                 row=[0.]*channels
                 for c,target in enumerate(mapping):row[target]=outputs[c][i]/32768

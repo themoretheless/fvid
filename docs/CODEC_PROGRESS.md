@@ -1,3 +1,15 @@
+## Causal AAC-ELD origin, 2026-11-01
+
+Removed the extra quarter-frame delay from ELD synthesis while retaining the
+same history hop. Complete original24/48-kHz core WAV comparisons now match
+within one PCM24 LSB at zero lag,including startup/EOF. Twelve own programmes
+isolate the original PCM failure and qualify immediate frame emission and the
+nonzero EOF quarter. Independent dependent PCM oracles are regenerated;original
+compressed inputs are preserved. Worker/device navigation is qualified separately.
+The24 nonzero-core LD-SBR reference errors improve137–16259x;remaining waveform
+differences are open and no full-codec conformance is claimed.
+[Evidence](validation/aac-eld-au-origin-2026-11-01.md).
+
 ## Explicit complex LD-SBR reference and silent-core harmonics, 2026-11-01
 
 Corrected the optional FDK reference configuration:automatic ordinary ELD selects

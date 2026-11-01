@@ -1,0 +1,49 @@
+{
+  "scope": "Two original ELD core streams; complete PCM; zero lag; not full codec conformance",
+  "complete": true,
+  "native_probe_sha256": "5f050a5565b7165a840a6e25dd1ece6c6604b3a24c5c89b76676cee505dbe3fa",
+  "inventory_sha256": "865521883bbc19db177c71c00fcb57bd3619a8ae73a05a21532c3fc22cc13e92",
+  "cases": [
+    {
+      "name": "er_eld1000np_24",
+      "rate": 24000,
+      "channels": 1,
+      "reference_bits": 24,
+      "frames": 1573376,
+      "explicit_lag": 0,
+      "hidden_edits": 1,
+      "source_sha256": "34d31f66e9ac22db3a1d7898f34460d95ebabb36430eee79becb4430dff70203",
+      "reference_sha256": "d34d79251b613f1bb0b98072011d9c2f7203f85c9ca446749cdeefa1d0d8ae32",
+      "records_sha256": "365c32d35a53ccd053edcee16581105f46fcefcb94cfd9c7847c0bb47d0ac4e1",
+      "native_pcm_sha256": "b1356645ad4fa0432db0a719a98ef1269d45bafbc8cbeb4d16c03d066b385106",
+      "rmse": 3.635729751021316e-08,
+      "max_abs_error": 8.940696716308594e-08,
+      "first_quarter_max_error": 0.0,
+      "final_quarter_max_error": 0.0,
+      "bound": 1.1920928955078125e-07,
+      "passed": true,
+      "native_log": "mode=Complex packets=3073 rate=24000 channels=1 scalars=1573376"
+    },
+    {
+      "name": "er_eld1000np_48",
+      "rate": 48000,
+      "channels": 1,
+      "reference_bits": 24,
+      "frames": 3146752,
+      "explicit_lag": 0,
+      "hidden_edits": 1,
+      "source_sha256": "64acfe4c29a7733a2f09a0e1d6ba297f932e0ca7c888cdd650b4da69055f7f37",
+      "reference_sha256": "825ef202ebfaa75c9737c72a68d06daa6ca6de28e3c0a1683b641666e2543614",
+      "records_sha256": "acd1d9c5c2666758100eb3ac8a54a9d6b3416e6aa8a1b6f4f2ae8775362892c1",
+      "native_pcm_sha256": "e84e72d82a730d447071d8cf165f82596d86e9a2ae5d447ace7cf9237dcd2eb3",
+      "rmse": 3.648397604756995e-08,
+      "max_abs_error": 8.940696716308594e-08,
+      "first_quarter_max_error": 0.0,
+      "final_quarter_max_error": 0.0,
+      "bound": 1.1920928955078125e-07,
+      "passed": true,
+      "native_log": "mode=Complex packets=6146 rate=48000 channels=1 scalars=3146752"
+    }
+  ],
+  "passed": true
+}

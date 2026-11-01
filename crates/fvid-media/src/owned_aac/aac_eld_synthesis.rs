@@ -1,4 +1,4 @@
-//! Owned ELD inverse modulation and four-block normative-window overlap.
+//! Owned ELD inverse modulation,four-block overlap and causal AU output origin.
 use super::{
     Result, aac_eld_downscale_window, aac_eld_windows, aac_imdct::Imdct, invalid, memory::Footprint,
 };
@@ -65,6 +65,7 @@ impl EldSynthesis {
         Self::with_window(source_samples, n, window)
     }
     fn with_window(source_samples: usize, n: usize, window: Window) -> Result<Self> {
+        debug_assert!(window.values()[..n / 4].iter().all(|v| *v == 0.0));
         let transform = Imdct::new(n)?;
         Ok(Self {
             complex: vec![[0.; 2]; transform.scratch_len()],
@@ -126,7 +127,12 @@ impl EldSynthesis {
                     0.
                 };
         }
-        let output: Vec<f32> = accumulated[..n]
+        // The window's leading N/4 is zero. Consequently the next AU cannot
+        // contribute to this already-computed quarter beyond the window hop.
+        // Emit the causal AU-aligned interval now,including its final quarter;
+        // retaining the zero prefix adds latency and loses known EOF samples.
+        // Overlap history still advances by exactly N,independent of origin.
+        let output: Vec<f32> = accumulated[n / 4..n + n / 4]
             .iter()
             .map(|v| (*v * (n as f64 / self.source_samples as f64) / 65536.) as f32)
             .collect();

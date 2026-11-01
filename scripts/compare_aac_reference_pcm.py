@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Compare raw decoded f32le with a PCM16 WAVE reference, without a delay search.
+"""Compare raw decoded f32le with signed integer WAVE, without a delay search.
 
 --lag is explicit: actual[reference_frame + lag] is compared with reference.
 Metrics alone are not a codec conformance verdict. Select the appropriate
@@ -15,7 +15,7 @@ import struct
 import sys
 
 
-def pcm16_wave(data):
+def integer_wave(data):
     if len(data) < 12 or data[:4] != b'RIFF' or data[8:12] != b'WAVE':
         raise ValueError('expected RIFF/WAVE reference')
     end = 8 + struct.unpack_from('<I', data, 4)[0]
@@ -44,19 +44,33 @@ def pcm16_wave(data):
     kind, channels, rate, byte_rate, stride, depth = struct.unpack_from('<HHIIHH', fmt)
     if kind == 0xfffe:
         guid = bytes.fromhex('0100000000001000800000aa00389b71')
-        if len(fmt) < 40 or struct.unpack_from('<H', fmt, 16)[0] < 22 or fmt[24:40] != guid:
+        if (len(fmt) < 40 or struct.unpack_from('<H', fmt, 16)[0] < 22
+                or 18 + struct.unpack_from('<H', fmt, 16)[0] > len(fmt) or fmt[24:40] != guid):
             raise ValueError('unsupported extensible WAVE reference')
-        if struct.unpack_from('<H', fmt, 18)[0] != 16:
-            raise ValueError('reference requires 16 valid PCM bits')
+        if struct.unpack_from('<H', fmt, 18)[0] != depth:
+            raise ValueError('reference valid/container PCM bits differ')
     elif kind != 1:
         raise ValueError('reference requires integer PCM')
-    if not channels or not rate or depth != 16 or stride != channels*2 or byte_rate != rate*stride:
-        raise ValueError('inconsistent PCM16 reference geometry')
+    if (not channels or not rate or depth not in [16, 24, 32]
+            or stride != channels*(depth//8) or byte_rate != rate*stride):
+        raise ValueError('inconsistent signed integer reference geometry')
     if len(payload) % stride:
         raise ValueError('partial PCM reference frame')
-    samples = array.array('h', payload)
-    if sys.byteorder != 'little':
+    if depth == 24:
+        samples = array.array('i', (int.from_bytes(payload[i:i+3], 'little', signed=True)
+                                    for i in range(0, len(payload), 3)))
+    else:
+        samples = array.array('h' if depth == 16 else 'i', payload)
+    if depth != 24 and sys.byteorder != 'little':
         samples.byteswap()
+    return channels, rate, depth, samples
+
+
+def pcm16_wave(data):
+    """Retain the strict PCM16 contract of existing external comparison callers."""
+    channels, rate, depth, samples = integer_wave(data)
+    if depth != 16:
+        raise ValueError('reference requires 16 valid PCM bits')
     return channels, rate, samples
 
 
@@ -68,7 +82,8 @@ def main():
     args = parser.parse_args()
     reference_bytes = args.reference.read_bytes()
     actual_bytes = args.actual.read_bytes()
-    channels, rate, reference = pcm16_wave(reference_bytes)
+    channels, rate, depth, reference = integer_wave(reference_bytes)
+    divisor = float(1 << (depth-1))
     if len(actual_bytes) % (4*channels):
         raise ValueError('partial actual f32 sample frame')
     actual = array.array('f', actual_bytes)
@@ -84,7 +99,7 @@ def main():
     for ch in range(channels):
         error = energy = maximum = 0.0
         for i in range(start, end):
-            value = reference[i*channels+ch]/32768
+            value = reference[i*channels+ch]/divisor
             delta = actual[(i+args.lag)*channels+ch]-value
             error += delta*delta
             energy += value*value
@@ -94,6 +109,7 @@ def main():
                            snr_db=10*math.log10(energy/error) if energy and error else None))
     print(json.dumps(dict(conformance_verdict=None, reference_sha256=hashlib.sha256(reference_bytes).hexdigest(),
                           actual_sha256=hashlib.sha256(actual_bytes).hexdigest(), rate=rate,
+                          reference_bits=depth,
                           channels=channels, input_frames=frames, compared_frames=end-start,
                           explicit_lag=args.lag, per_channel=output), indent=2))
 

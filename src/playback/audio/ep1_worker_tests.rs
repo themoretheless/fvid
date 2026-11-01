@@ -599,3 +599,8 @@ fn canonical_cldfb_phase_keeps_worker_audio_and_navigation() {
 fn silent_core_harmonics_keep_worker_phase_across_seek_and_rewind() {
     check_corpus("aac-ld-sbr-silent-harmonics");
 }
+
+#[test]
+fn eld_au_origin_keeps_worker_pcm_timestamps_and_navigation() {
+    check_corpus("aac-eld-au-origin");
+}

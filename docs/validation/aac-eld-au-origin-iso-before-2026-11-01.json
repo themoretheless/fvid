@@ -1,0 +1,49 @@
+{
+  "scope": "Two original ELD core streams; complete PCM; zero lag; not full codec conformance",
+  "complete": true,
+  "native_probe_sha256": "31a4adc02fa53ece13f9885ce65ffcc29d432503670cf6f9a0e78c621447bc9b",
+  "inventory_sha256": "865521883bbc19db177c71c00fcb57bd3619a8ae73a05a21532c3fc22cc13e92",
+  "cases": [
+    {
+      "name": "er_eld1000np_24",
+      "rate": 24000,
+      "channels": 1,
+      "reference_bits": 24,
+      "frames": 1573376,
+      "explicit_lag": 0,
+      "hidden_edits": 1,
+      "source_sha256": "34d31f66e9ac22db3a1d7898f34460d95ebabb36430eee79becb4430dff70203",
+      "reference_sha256": "d34d79251b613f1bb0b98072011d9c2f7203f85c9ca446749cdeefa1d0d8ae32",
+      "records_sha256": "365c32d35a53ccd053edcee16581105f46fcefcb94cfd9c7847c0bb47d0ac4e1",
+      "native_pcm_sha256": "3f0a124a3f7828d6ede6a546e0e549e9dba338609645f2c3c3c48afa0b181570",
+      "rmse": 0.2871536326043492,
+      "max_abs_error": 0.6362793743610382,
+      "first_quarter_max_error": 0.0,
+      "final_quarter_max_error": 0.0,
+      "bound": 1.1920928955078125e-07,
+      "passed": false,
+      "native_log": "mode=Complex packets=3073 rate=24000 channels=1 scalars=1573376"
+    },
+    {
+      "name": "er_eld1000np_48",
+      "rate": 48000,
+      "channels": 1,
+      "reference_bits": 24,
+      "frames": 3146752,
+      "explicit_lag": 0,
+      "hidden_edits": 1,
+      "source_sha256": "64acfe4c29a7733a2f09a0e1d6ba297f932e0ca7c888cdd650b4da69055f7f37",
+      "reference_sha256": "825ef202ebfaa75c9737c72a68d06daa6ca6de28e3c0a1683b641666e2543614",
+      "records_sha256": "acd1d9c5c2666758100eb3ac8a54a9d6b3416e6aa8a1b6f4f2ae8775362892c1",
+      "native_pcm_sha256": "6ac0fe3a2b5e2d1809b6b6dcc6a15931919f3b72d5349356a640c692ac4d3565",
+      "rmse": 0.28025853062753375,
+      "max_abs_error": 0.6416769027709961,
+      "first_quarter_max_error": 0.0,
+      "final_quarter_max_error": 0.0,
+      "bound": 1.1920928955078125e-07,
+      "passed": false,
+      "native_log": "mode=Complex packets=6146 rate=48000 channels=1 scalars=3146752"
+    }
+  ],
+  "passed": false
+}
