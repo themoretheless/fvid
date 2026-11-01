@@ -1,0 +1,16 @@
+{
+  "baseline_and_candidate_test_sha256": "a9a5c36ab44fac2cf1df425c2a770365800a8cca5b8fd521e1a3cfd68b891416",
+  "test_unchanged": true,
+  "existing_tests_modified": false,
+  "baseline": {
+    "passed": 4,
+    "failed": 3,
+    "exit_code": 101
+  },
+  "stand_admission": "stand-audit.json",
+  "focused_candidate": {
+    "passed": 7,
+    "failed": 0,
+    "exit_code": 0
+  }
+}

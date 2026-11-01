@@ -1,0 +1,6 @@
+{
+  "exit_code": 101,
+  "passed": 4,
+  "failed": 3,
+  "failure": "Replacement backend running with resume1 and4800seek/6404buffering PCM bytes before actual video reads become available. Existing handle correctly paused."
+}

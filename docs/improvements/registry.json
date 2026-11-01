@@ -1,8 +1,8 @@
 {
   "target": 1000,
   "counting_rule": "One independently confirmed problem or useful capability; fixture variants and baseline integration repairs are excluded. Only accepted entries count.",
-  "accepted_count": 470,
-  "next_id": "FVID-0471",
+  "accepted_count": 471,
+  "next_id": "FVID-0472",
   "entries": [
     {
       "id": "FVID-0001",
@@ -5303,6 +5303,17 @@
       "result": "Prefer pending seek and logical terminal intent,retain an active unshifted source-audio clock,and convert picture-owned phase back to source time. Sound-only transport keeps its raw clock,including healthy EOF. Twelve unchanged regressions verify native selected PCM prefixes,pause/resume,positive/negative delay,missing sound,terminal bounds in both modes,pending seek,exact video RGB/generation and final-picture seek/EOF. Twenty repeats pass240cases;all9gates pass1608physical-source-distinct checks and both builds with five old ignores unchanged. Private factory delivery is verified behavior-preserving and adds0IDs. Stand repairs,additional cases and unaccepted candidate corrections add0IDs. No performance,physical audio or new native-window duration claim.",
       "status": "accepted",
       "validation": "batch-470-validation.json"
+    },
+    {
+      "id": "FVID-0471",
+      "batch": 471,
+      "title": "Hold replacement audio until native video buffering and seek preroll finish",
+      "source": "src/player.rs",
+      "regression": "src/player_track_preroll_tests.rs",
+      "before": "Identical seven-case baseline passes exact two-track native video/PCM/EOF,paused-buffer,ready-video and sound-only controls,but three real blocked-input replacements run too early. New backend reports running,resume1 and4800seek/6404buffer PCM bytes while video reads remain blocked and its original audio handle correctly acknowledges pause.",
+      "result": "Include buffering and seek-preview permission when deciding whether to play the new audio handle. Existing presentation readiness releases it once the current-generation picture is ready. Seven unchanged regressions verify acknowledged silence before input release,one resume afterward,native selected PCM prefixes,actual displayed RGB/current generation,final-picture seek and EOF. Twenty repeats pass140cases;all9gates pass1615physical-source-distinct checks and both builds with five old ignores unchanged. Distinct double-marker acknowledgments prevent deferred-Play observation races. Stand guard/pixel/resume observation repairs add0IDs and relax no existing assertions. No performance,physical audio or new native-window duration claim.",
+      "status": "accepted",
+      "validation": "batch-471-validation.json"
     }
   ]
 }

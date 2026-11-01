@@ -1,0 +1,25 @@
+"""Accept only the unchanged fully qualified replacement audio video-hold fix."""
+from pathlib import Path
+import hashlib,json,sys
+q=Path(__file__).resolve().parent
+checks=json.loads((q/'qualification-results.json').read_text())
+assert len(checks)==9 and all(v['exit_code']==0 and v['failed']==0 for v in checks.values())
+for v in checks.values():assert hashlib.sha256((q/v['archive']).read_bytes()).hexdigest()==v['archived_sha256']
+for n,h in json.loads((q/'after-source.json').read_text()).items():assert hashlib.sha256(Path(n).read_bytes()).hexdigest()==h,n
+rep=json.loads((q/'repeat.json').read_text());assert len(rep['runs'])==20 and rep['total_case_executions']==140
+assert all(r['exit_code']==0 and r['passed']==7 for r in rep['runs'])
+d=json.loads((q/'deduplication.json').read_text());assert d['distinct_passed']==1615
+assert d['ignored_by_gate']==json.loads((q.parent/'player-track-clock/deduplication.json').read_text())['ignored_by_gate']
+sys.dont_write_bytecode=True;sys.path.insert(0,'scripts');from generate_player_track_preroll import generate
+for n,b in generate().items():assert (Path('tests/fixtures/playback-errors/player-track-preroll')/n).read_bytes()==b
+before=json.loads((q/'before-source.json').read_text());after=json.loads((q/'after-source.json').read_text())
+t='src/player_track_preroll_tests.rs';assert before[t]==after[t]
+reg=Path('docs/improvements/registry.json');j=json.loads(reg.read_text());assert j['accepted_count']==470 and j['next_id']=='FVID-0471'
+j['entries'].append(dict(id='FVID-0471',batch=471,title='Hold replacement audio until native video buffering and seek preroll finish',source='src/player.rs',regression=t,before='Identical seven-case baseline passes exact two-track native video/PCM/EOF,paused-buffer,ready-video and sound-only controls,but three real blocked-input replacements run too early. New backend reports running,resume1 and4800seek/6404buffer PCM bytes while video reads remain blocked and its original audio handle correctly acknowledges pause.',result='Include buffering and seek-preview permission when deciding whether to play the new audio handle. Existing presentation readiness releases it once the current-generation picture is ready. Seven unchanged regressions verify acknowledged silence before input release,one resume afterward,native selected PCM prefixes,actual displayed RGB/current generation,final-picture seek and EOF. Twenty repeats pass140cases;all9gates pass1615physical-source-distinct checks and both builds with five old ignores unchanged. Distinct double-marker acknowledgments prevent deferred-Play observation races. Stand guard/pixel/resume observation repairs add0IDs and relax no existing assertions. No performance,physical audio or new native-window duration claim.',status='accepted',validation='batch-471-validation.json'))
+j['accepted_count']=471;j['next_id']='FVID-0472';reg.write_text(json.dumps(j,indent=2)+'\n')
+b=dict(status='accepted',accepted_ids=['FVID-0471'],count_delta=1,accepted_count=471,before_commit=(q/'base.txt').read_text().strip(),baseline=dict(passed=4,failed=3,evidence='evidence/player-track-preroll/before.log'),focused_after=dict(passed=7,failed=0,evidence='evidence/player-track-preroll/after-focused.log'),repetition=dict(runs=20,case_executions=140,failed=0,excluded_from_distinct_and_improvement_counts=True),checks=checks,physical_source_distinct_passed=1615,ignored_tests_unchanged=True,test_integrity='evidence/player-track-preroll/test-integrity.json',evidence='evidence/player-track-preroll/README.md',limitations=['Real native decoding/audio worker and headless egui controller with controlled output clock;no physical audio.','No new native-window duration qualification;pre-existing viewport-close-request limitation remains at evidence/player-ab-clock/native-smoke/finding.json.','No performance or hardware-codec claim.'])
+Path('docs/improvements/batch-471-validation.json').write_text(json.dumps(b,indent=2)+'\n')
+p=q/'README.md';s=p.read_text().replace('Unaccepted audit. Proposed FVID-0471 is','Accepted FVID-0471 after all nine gates and twenty repetitions passed. FVID-0471 is');s+='\nFinal unchanged seven-case baseline:4pass3fail,candidate:7pass0fail. Twenty repetitions pass140case executions. All9gates pass1615physical-source-distinct checks and both builds;five old ignores unchanged. Initial guard ownership and asynchronous/planar stand observations are preserved in stand-audit.json and diagnostic snapshots,not counted as separate media defects. The existing-handle hold and470clock-origin behavior remain intact.\n';p.write_text(s)
+i=json.loads((q/'test-integrity.json').read_text());i['focused_candidate']=dict(passed=7,failed=0,exit_code=0);(q/'test-integrity.json').write_text(json.dumps(i,indent=2)+'\n')
+(q/'progress.json').write_text(json.dumps(dict(status='qualified;pending delivery',accepted_count=471,next_id='FVID-0472',accepted_ids=['FVID-0471'],active_session=None),indent=2)+'\n')
+print('Accepted FVID-0471,471/1000;all gates,source and fixtures verified')

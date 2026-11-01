@@ -2604,7 +2604,7 @@ impl Player {
             .or_else(|| self.audio.as_ref().filter(|_| !picture || !self.audio_ended)
                 .map(|audio| audio.transport_position()))
             .or_else(|| self.presentation_clock().map(source_phase));
-        let playing = !self.paused && !self.ended;
+        let playing = !self.paused && !self.ended && !self.buffering && !self.seek_preview;
         // Dropping the old handle stops its thread before the new one starts.
         self.audio = None;
         if !self.try_start_audio_choice_with_backend(&path, Some(nth), backend) {
@@ -13234,3 +13234,7 @@ mod audio_seek_intent_regressions;
 #[cfg(test)]
 #[path = "player_track_clock_tests.rs"]
 mod track_clock_regressions;
+
+#[cfg(test)]
+#[path = "player_track_preroll_tests.rs"]
+mod track_preroll_regressions;

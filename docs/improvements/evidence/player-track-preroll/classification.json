@@ -1,0 +1,10 @@
+{
+  "proposed_id": "FVID-0471",
+  "count_delta": 1,
+  "baseline_commit": "37e9c32cf43e067da6313370de14f649ef358dee",
+  "older_commit": "9ca4c32089c216f82574c0895da3a0bdbbd76c57",
+  "unchanged_resume_permission": "let playing = !self.paused && !self.ended;",
+  "independent_of": "FVID-0470 repairs clock origin;FVID-0077 pauses existing handles. This failure creates and runs a replacement handle while the existing handle correctly remains held.",
+  "variants_controls_and_stand_repairs_count_delta": 0,
+  "historical_fragment_checked_inside_cycle_method": true
+}

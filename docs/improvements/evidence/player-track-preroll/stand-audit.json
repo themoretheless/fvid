@@ -1,0 +1,12 @@
+{
+  "initial": {
+    "passed": 4,
+    "failed": 3
+  },
+  "changes": "Replace forgotten preparation guard with explicit optional-Arc ownership transfer;add assertion of old-worker pause acknowledgment before replacement.",
+  "assertions_removed_or_relaxed": false,
+  "count_delta": 0,
+  "baseline_defect": "New handle plays while the original handle correctly honors the video hold.",
+  "candidate_stand_diagnosis": "New audio is correctly held before input release. Post-ready Play may share a command batch with the level marker,so explicitly await existing resume1 assertion. Planar presentation intentionally has no RGB cache;compare actual display_rgb(presented) to the same native RGB oracle.",
+  "marker_strengthening": "Use unique1001 acknowledgment followed by restoring1000 acknowledgment. First marker drains after all prior Play commands;second marker is sent after that handler,so cannot run until deferred Play commits. Prevents both late-positive and false-negative single-marker observations."
+}

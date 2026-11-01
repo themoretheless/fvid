@@ -1,0 +1,5 @@
+{
+  "src/player.rs": "42e7287e3e769fdf8318d3f925a546bd36c6a829c5ad3c83af37817bee20d543",
+  "src/player_track_preroll_tests.rs": "7d65d737e8f269589c395aae5a1c7c574f9dcc537ae76161e50a92810765f406",
+  "scripts/generate_player_track_preroll.py": "8affb09f1c7ebd89f6d91a137569a111e68a7bf7cc34c0dd3cd1292ca85b7c45"
+}

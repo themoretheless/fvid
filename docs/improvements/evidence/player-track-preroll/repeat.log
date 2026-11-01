@@ -1,0 +1,259 @@
+run 1
+
+running 7 tests
+test player::track_preroll_regressions::exact_mp4_two_track_video_pcm_and_native_eof_controls ... ok
+test player::track_preroll_regressions::backward_replacement_waits_for_actual_seek_preroll ... ok
+test player::track_preroll_regressions::forward_replacement_waits_for_actual_seek_preroll ... ok
+test player::track_preroll_regressions::ready_video_replacement_still_starts_normally_control ... ok
+test player::track_preroll_regressions::paused_buffer_replacement_stays_silent_until_explicit_resume ... ok
+test player::track_preroll_regressions::sound_only_replacement_still_starts_normally_control ... ok
+test player::track_preroll_regressions::replacement_during_real_buffering_waits_for_data ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 1191 filtered out; finished in 2.49s
+
+run 2
+
+running 7 tests
+test player::track_preroll_regressions::exact_mp4_two_track_video_pcm_and_native_eof_controls ... ok
+test player::track_preroll_regressions::backward_replacement_waits_for_actual_seek_preroll ... ok
+test player::track_preroll_regressions::forward_replacement_waits_for_actual_seek_preroll ... ok
+test player::track_preroll_regressions::ready_video_replacement_still_starts_normally_control ... ok
+test player::track_preroll_regressions::paused_buffer_replacement_stays_silent_until_explicit_resume ... ok
+test player::track_preroll_regressions::sound_only_replacement_still_starts_normally_control ... ok
+test player::track_preroll_regressions::replacement_during_real_buffering_waits_for_data ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 1191 filtered out; finished in 2.48s
+
+run 3
+
+running 7 tests
+test player::track_preroll_regressions::exact_mp4_two_track_video_pcm_and_native_eof_controls ... ok
+test player::track_preroll_regressions::backward_replacement_waits_for_actual_seek_preroll ... ok
+test player::track_preroll_regressions::forward_replacement_waits_for_actual_seek_preroll ... ok
+test player::track_preroll_regressions::ready_video_replacement_still_starts_normally_control ... ok
+test player::track_preroll_regressions::paused_buffer_replacement_stays_silent_until_explicit_resume ... ok
+test player::track_preroll_regressions::sound_only_replacement_still_starts_normally_control ... ok
+test player::track_preroll_regressions::replacement_during_real_buffering_waits_for_data ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 1191 filtered out; finished in 2.49s
+
+run 4
+
+running 7 tests
+test player::track_preroll_regressions::exact_mp4_two_track_video_pcm_and_native_eof_controls ... ok
+test player::track_preroll_regressions::backward_replacement_waits_for_actual_seek_preroll ... ok
+test player::track_preroll_regressions::forward_replacement_waits_for_actual_seek_preroll ... ok
+test player::track_preroll_regressions::ready_video_replacement_still_starts_normally_control ... ok
+test player::track_preroll_regressions::paused_buffer_replacement_stays_silent_until_explicit_resume ... ok
+test player::track_preroll_regressions::sound_only_replacement_still_starts_normally_control ... ok
+test player::track_preroll_regressions::replacement_during_real_buffering_waits_for_data ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 1191 filtered out; finished in 2.49s
+
+run 5
+
+running 7 tests
+test player::track_preroll_regressions::exact_mp4_two_track_video_pcm_and_native_eof_controls ... ok
+test player::track_preroll_regressions::backward_replacement_waits_for_actual_seek_preroll ... ok
+test player::track_preroll_regressions::forward_replacement_waits_for_actual_seek_preroll ... ok
+test player::track_preroll_regressions::ready_video_replacement_still_starts_normally_control ... ok
+test player::track_preroll_regressions::paused_buffer_replacement_stays_silent_until_explicit_resume ... ok
+test player::track_preroll_regressions::sound_only_replacement_still_starts_normally_control ... ok
+test player::track_preroll_regressions::replacement_during_real_buffering_waits_for_data ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 1191 filtered out; finished in 2.49s
+
+run 6
+
+running 7 tests
+test player::track_preroll_regressions::exact_mp4_two_track_video_pcm_and_native_eof_controls ... ok
+test player::track_preroll_regressions::backward_replacement_waits_for_actual_seek_preroll ... ok
+test player::track_preroll_regressions::forward_replacement_waits_for_actual_seek_preroll ... ok
+test player::track_preroll_regressions::ready_video_replacement_still_starts_normally_control ... ok
+test player::track_preroll_regressions::paused_buffer_replacement_stays_silent_until_explicit_resume ... ok
+test player::track_preroll_regressions::sound_only_replacement_still_starts_normally_control ... ok
+test player::track_preroll_regressions::replacement_during_real_buffering_waits_for_data ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 1191 filtered out; finished in 2.49s
+
+run 7
+
+running 7 tests
+test player::track_preroll_regressions::exact_mp4_two_track_video_pcm_and_native_eof_controls ... ok
+test player::track_preroll_regressions::backward_replacement_waits_for_actual_seek_preroll ... ok
+test player::track_preroll_regressions::forward_replacement_waits_for_actual_seek_preroll ... ok
+test player::track_preroll_regressions::ready_video_replacement_still_starts_normally_control ... ok
+test player::track_preroll_regressions::paused_buffer_replacement_stays_silent_until_explicit_resume ... ok
+test player::track_preroll_regressions::sound_only_replacement_still_starts_normally_control ... ok
+test player::track_preroll_regressions::replacement_during_real_buffering_waits_for_data ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 1191 filtered out; finished in 2.50s
+
+run 8
+
+running 7 tests
+test player::track_preroll_regressions::exact_mp4_two_track_video_pcm_and_native_eof_controls ... ok
+test player::track_preroll_regressions::backward_replacement_waits_for_actual_seek_preroll ... ok
+test player::track_preroll_regressions::forward_replacement_waits_for_actual_seek_preroll ... ok
+test player::track_preroll_regressions::ready_video_replacement_still_starts_normally_control ... ok
+test player::track_preroll_regressions::paused_buffer_replacement_stays_silent_until_explicit_resume ... ok
+test player::track_preroll_regressions::sound_only_replacement_still_starts_normally_control ... ok
+test player::track_preroll_regressions::replacement_during_real_buffering_waits_for_data ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 1191 filtered out; finished in 2.49s
+
+run 9
+
+running 7 tests
+test player::track_preroll_regressions::exact_mp4_two_track_video_pcm_and_native_eof_controls ... ok
+test player::track_preroll_regressions::backward_replacement_waits_for_actual_seek_preroll ... ok
+test player::track_preroll_regressions::forward_replacement_waits_for_actual_seek_preroll ... ok
+test player::track_preroll_regressions::ready_video_replacement_still_starts_normally_control ... ok
+test player::track_preroll_regressions::paused_buffer_replacement_stays_silent_until_explicit_resume ... ok
+test player::track_preroll_regressions::sound_only_replacement_still_starts_normally_control ... ok
+test player::track_preroll_regressions::replacement_during_real_buffering_waits_for_data ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 1191 filtered out; finished in 2.52s
+
+run 10
+
+running 7 tests
+test player::track_preroll_regressions::exact_mp4_two_track_video_pcm_and_native_eof_controls ... ok
+test player::track_preroll_regressions::backward_replacement_waits_for_actual_seek_preroll ... ok
+test player::track_preroll_regressions::forward_replacement_waits_for_actual_seek_preroll ... ok
+test player::track_preroll_regressions::ready_video_replacement_still_starts_normally_control ... ok
+test player::track_preroll_regressions::paused_buffer_replacement_stays_silent_until_explicit_resume ... ok
+test player::track_preroll_regressions::sound_only_replacement_still_starts_normally_control ... ok
+test player::track_preroll_regressions::replacement_during_real_buffering_waits_for_data ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 1191 filtered out; finished in 2.53s
+
+run 11
+
+running 7 tests
+test player::track_preroll_regressions::exact_mp4_two_track_video_pcm_and_native_eof_controls ... ok
+test player::track_preroll_regressions::backward_replacement_waits_for_actual_seek_preroll ... ok
+test player::track_preroll_regressions::forward_replacement_waits_for_actual_seek_preroll ... ok
+test player::track_preroll_regressions::ready_video_replacement_still_starts_normally_control ... ok
+test player::track_preroll_regressions::paused_buffer_replacement_stays_silent_until_explicit_resume ... ok
+test player::track_preroll_regressions::sound_only_replacement_still_starts_normally_control ... ok
+test player::track_preroll_regressions::replacement_during_real_buffering_waits_for_data ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 1191 filtered out; finished in 2.50s
+
+run 12
+
+running 7 tests
+test player::track_preroll_regressions::exact_mp4_two_track_video_pcm_and_native_eof_controls ... ok
+test player::track_preroll_regressions::backward_replacement_waits_for_actual_seek_preroll ... ok
+test player::track_preroll_regressions::forward_replacement_waits_for_actual_seek_preroll ... ok
+test player::track_preroll_regressions::ready_video_replacement_still_starts_normally_control ... ok
+test player::track_preroll_regressions::paused_buffer_replacement_stays_silent_until_explicit_resume ... ok
+test player::track_preroll_regressions::sound_only_replacement_still_starts_normally_control ... ok
+test player::track_preroll_regressions::replacement_during_real_buffering_waits_for_data ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 1191 filtered out; finished in 2.50s
+
+run 13
+
+running 7 tests
+test player::track_preroll_regressions::exact_mp4_two_track_video_pcm_and_native_eof_controls ... ok
+test player::track_preroll_regressions::backward_replacement_waits_for_actual_seek_preroll ... ok
+test player::track_preroll_regressions::forward_replacement_waits_for_actual_seek_preroll ... ok
+test player::track_preroll_regressions::ready_video_replacement_still_starts_normally_control ... ok
+test player::track_preroll_regressions::paused_buffer_replacement_stays_silent_until_explicit_resume ... ok
+test player::track_preroll_regressions::sound_only_replacement_still_starts_normally_control ... ok
+test player::track_preroll_regressions::replacement_during_real_buffering_waits_for_data ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 1191 filtered out; finished in 2.50s
+
+run 14
+
+running 7 tests
+test player::track_preroll_regressions::exact_mp4_two_track_video_pcm_and_native_eof_controls ... ok
+test player::track_preroll_regressions::backward_replacement_waits_for_actual_seek_preroll ... ok
+test player::track_preroll_regressions::forward_replacement_waits_for_actual_seek_preroll ... ok
+test player::track_preroll_regressions::ready_video_replacement_still_starts_normally_control ... ok
+test player::track_preroll_regressions::paused_buffer_replacement_stays_silent_until_explicit_resume ... ok
+test player::track_preroll_regressions::sound_only_replacement_still_starts_normally_control ... ok
+test player::track_preroll_regressions::replacement_during_real_buffering_waits_for_data ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 1191 filtered out; finished in 2.52s
+
+run 15
+
+running 7 tests
+test player::track_preroll_regressions::exact_mp4_two_track_video_pcm_and_native_eof_controls ... ok
+test player::track_preroll_regressions::backward_replacement_waits_for_actual_seek_preroll ... ok
+test player::track_preroll_regressions::forward_replacement_waits_for_actual_seek_preroll ... ok
+test player::track_preroll_regressions::ready_video_replacement_still_starts_normally_control ... ok
+test player::track_preroll_regressions::paused_buffer_replacement_stays_silent_until_explicit_resume ... ok
+test player::track_preroll_regressions::sound_only_replacement_still_starts_normally_control ... ok
+test player::track_preroll_regressions::replacement_during_real_buffering_waits_for_data ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 1191 filtered out; finished in 2.53s
+
+run 16
+
+running 7 tests
+test player::track_preroll_regressions::exact_mp4_two_track_video_pcm_and_native_eof_controls ... ok
+test player::track_preroll_regressions::backward_replacement_waits_for_actual_seek_preroll ... ok
+test player::track_preroll_regressions::forward_replacement_waits_for_actual_seek_preroll ... ok
+test player::track_preroll_regressions::ready_video_replacement_still_starts_normally_control ... ok
+test player::track_preroll_regressions::paused_buffer_replacement_stays_silent_until_explicit_resume ... ok
+test player::track_preroll_regressions::sound_only_replacement_still_starts_normally_control ... ok
+test player::track_preroll_regressions::replacement_during_real_buffering_waits_for_data ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 1191 filtered out; finished in 2.51s
+
+run 17
+
+running 7 tests
+test player::track_preroll_regressions::exact_mp4_two_track_video_pcm_and_native_eof_controls ... ok
+test player::track_preroll_regressions::backward_replacement_waits_for_actual_seek_preroll ... ok
+test player::track_preroll_regressions::forward_replacement_waits_for_actual_seek_preroll ... ok
+test player::track_preroll_regressions::ready_video_replacement_still_starts_normally_control ... ok
+test player::track_preroll_regressions::paused_buffer_replacement_stays_silent_until_explicit_resume ... ok
+test player::track_preroll_regressions::sound_only_replacement_still_starts_normally_control ... ok
+test player::track_preroll_regressions::replacement_during_real_buffering_waits_for_data ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 1191 filtered out; finished in 2.51s
+
+run 18
+
+running 7 tests
+test player::track_preroll_regressions::exact_mp4_two_track_video_pcm_and_native_eof_controls ... ok
+test player::track_preroll_regressions::backward_replacement_waits_for_actual_seek_preroll ... ok
+test player::track_preroll_regressions::forward_replacement_waits_for_actual_seek_preroll ... ok
+test player::track_preroll_regressions::ready_video_replacement_still_starts_normally_control ... ok
+test player::track_preroll_regressions::paused_buffer_replacement_stays_silent_until_explicit_resume ... ok
+test player::track_preroll_regressions::sound_only_replacement_still_starts_normally_control ... ok
+test player::track_preroll_regressions::replacement_during_real_buffering_waits_for_data ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 1191 filtered out; finished in 2.52s
+
+run 19
+
+running 7 tests
+test player::track_preroll_regressions::exact_mp4_two_track_video_pcm_and_native_eof_controls ... ok
+test player::track_preroll_regressions::backward_replacement_waits_for_actual_seek_preroll ... ok
+test player::track_preroll_regressions::forward_replacement_waits_for_actual_seek_preroll ... ok
+test player::track_preroll_regressions::ready_video_replacement_still_starts_normally_control ... ok
+test player::track_preroll_regressions::paused_buffer_replacement_stays_silent_until_explicit_resume ... ok
+test player::track_preroll_regressions::sound_only_replacement_still_starts_normally_control ... ok
+test player::track_preroll_regressions::replacement_during_real_buffering_waits_for_data ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 1191 filtered out; finished in 2.50s
+
+run 20
+
+running 7 tests
+test player::track_preroll_regressions::exact_mp4_two_track_video_pcm_and_native_eof_controls ... ok
+test player::track_preroll_regressions::backward_replacement_waits_for_actual_seek_preroll ... ok
+test player::track_preroll_regressions::forward_replacement_waits_for_actual_seek_preroll ... ok
+test player::track_preroll_regressions::ready_video_replacement_still_starts_normally_control ... ok
+test player::track_preroll_regressions::paused_buffer_replacement_stays_silent_until_explicit_resume ... ok
+test player::track_preroll_regressions::sound_only_replacement_still_starts_normally_control ... ok
+test player::track_preroll_regressions::replacement_during_real_buffering_waits_for_data ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 1191 filtered out; finished in 2.50s

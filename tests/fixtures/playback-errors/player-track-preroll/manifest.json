@@ -1,0 +1,15 @@
+{
+  "provenance": "Authored1.5s five-frame16x16 VP9 MP4 with two distinct600ms mono8kHz PCM tracks and scalar YUV/F32 oracles. Actual one-byte input gates sample2 after the first video frame;ordinary volume-command acknowledgments observe backend running state. No private media,FFmpeg,encoder or network.",
+  "video_ms": 1500,
+  "audio_ms": 600,
+  "seek_ms": 450,
+  "gated_video_sample": 2,
+  "sha256": {
+    "frame-0.yuv16": "b4cc94ff03bd17b32107a79a64ba427cd43b6e49d209bb4d29190f3deb737a11",
+    "frame-1.yuv16": "31d05f629132273f660622387ef2865866de6688c0969265e891ad9d4c936237",
+    "frame-2.yuv16": "2f59155bee83baf25a0d39c17290257f055569e5b1d77ca8b866b1a4b2cee6f7",
+    "track-0.f32le": "35ae17cde80a4f6aab0cbcbbc5ed00d93530921eabe3a1f45f1928ef81128ca5",
+    "track-1.f32le": "6bda0815b82d65817a535c4f576d1b76b3b980567944dc92f5ed86d9e9623023",
+    "movie.mp4": "1569ca9690f5a618f6c74bdd93500b62442446360034cce9a5fd065771c4ba1d"
+  }
+}

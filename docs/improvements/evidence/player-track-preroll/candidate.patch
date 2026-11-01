@@ -1,0 +1,12 @@
+diff --git a/src/player.rs b/src/player.rs
+index 93673e74ca..41a4c89426 100644
+--- a/src/player.rs
++++ b/src/player.rs
+@@ -2607 +2607 @@ impl Player {
+-        let playing = !self.paused && !self.ended;
++        let playing = !self.paused && !self.ended && !self.buffering && !self.seek_preview;
+@@ -13236,0 +13237,4 @@ mod track_clock_regressions;
++
++#[cfg(test)]
++#[path = "player_track_preroll_tests.rs"]
++mod track_preroll_regressions;

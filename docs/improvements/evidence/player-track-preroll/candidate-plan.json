@@ -1,0 +1,6 @@
+{
+  "production_change": "New audio starts only when neither user/terminal pause nor video buffering/seek-preview hold owns playback. Existing present readiness performs the eventual resume.",
+  "public_interfaces_changed": false,
+  "performance_claim": false,
+  "patch_sha256": "b5e3850e241056e207b4547615b3ba5b63f5eda8f6a491e9be0a7c9a2f72e787"
+}

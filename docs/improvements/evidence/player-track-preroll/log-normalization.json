@@ -1,0 +1,8 @@
+[
+  {
+    "path": "repeat.log",
+    "before_sha256": "ca8956c97f5602ef98606adbbc7948fc39abfc22d7b668cb77503af0910391eb",
+    "after_sha256": "4460339d83a1a382ae96972f4c0ff5d57085e7756ea484e5afe9be8cf4094b28",
+    "change": "Trailing whitespace and terminal blank lines only;diagnostic lines retained."
+  }
+]
