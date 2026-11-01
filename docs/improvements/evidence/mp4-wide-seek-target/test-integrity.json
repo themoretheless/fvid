@@ -1,0 +1,7 @@
+{
+  "unchanged_regression_source": {
+    "tests/mp4_wide_seek_target.rs": "4224065f413d6e6c0784bebba708864de9446075bde94eac8b296dc44f4ff2f6"
+  },
+  "unchanged_generator_source": "d123be3f9a0e66d52d16c3fa9787d0c5df7629f98a194ce85f01ebdb03771d01",
+  "existing_rust_tests_modified": false
+}

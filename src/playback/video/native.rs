@@ -628,6 +628,10 @@ impl<R: BufRead + Seek> NativeReader<R> {
             }
             return result;
         }
+        // MP4 has an indexed presentation extent. Clamp in Duration before
+        // narrowing the request into signed track ticks; an arbitrarily large
+        // request still denotes the final displayed interval.
+        let target = self.duration().map_or(target, |end| target.min(end));
         let Self::Avc {
             source,
             media_start,

@@ -1,0 +1,202 @@
+{
+  "status": "accepted",
+  "accepted_ids": [
+    "FVID-0481"
+  ],
+  "count_delta": 1,
+  "accepted_count": 481,
+  "next_id": "FVID-0482",
+  "qualification": {
+    "integration": {
+      "command": [
+        "cargo",
+        "test",
+        "--locked",
+        "--offline",
+        "--no-default-features",
+        "--features",
+        "player",
+        "--no-fail-fast",
+        "--test",
+        "mp4_wide_seek_target",
+        "--test",
+        "mp4_reordered_seek",
+        "--test",
+        "mp4_seek_io_regressions",
+        "--test",
+        "mp4_interrupted_seek",
+        "--test",
+        "mp4_layered_seek_coverage",
+        "--test",
+        "mp4_seek_reordered_coverage",
+        "--test",
+        "mp4_decode_only_seek",
+        "--test",
+        "mp4_reconfigured_seek_endpoint",
+        "--test",
+        "mp4_edit_window_eof",
+        "--test",
+        "mp4_edit_loop",
+        "--test",
+        "mp4_open_ended_edit",
+        "--test",
+        "mp4_open_edit_tail",
+        "--test",
+        "mp4_variable_rate_edits",
+        "--test",
+        "mp4_wide_decode_clock",
+        "--test",
+        "mp4_audio_packet_seek",
+        "--test",
+        "mp4_ac3_sample_clock",
+        "--test",
+        "mp4_quantized_audio_clock",
+        "--test",
+        "mp4_eac3_programme_clock",
+        "--test",
+        "mp4_subtitle_edits",
+        "--test",
+        "mp4_subtitle_negative_clock",
+        "--test",
+        "mp4_edit_packet_admission",
+        "--test",
+        "mp4_concat_edit_work"
+      ],
+      "exit_code": 0,
+      "passed": 94,
+      "failed": 0,
+      "ignored": 0,
+      "archive": "integration.log",
+      "archived_sha256": "5fcf3e1e062ba77d003224afcc680e3781bc3992a26047cd11d946f58e7edccb"
+    },
+    "root-mp4": {
+      "command": [
+        "cargo",
+        "test",
+        "--locked",
+        "--offline",
+        "--no-default-features",
+        "--features",
+        "player",
+        "--lib",
+        "mp4",
+        "--",
+        "--test-threads=2"
+      ],
+      "exit_code": 0,
+      "passed": 83,
+      "failed": 0,
+      "ignored": 1,
+      "archive": "root-mp4.log",
+      "archived_sha256": "c18705442d3ef03d207536232cbb9218bfa913a23e68a9585e756ecf7e45069e"
+    },
+    "root-webm": {
+      "command": [
+        "cargo",
+        "test",
+        "--locked",
+        "--offline",
+        "--no-default-features",
+        "--features",
+        "player",
+        "--lib",
+        "webm",
+        "--",
+        "--test-threads=2"
+      ],
+      "exit_code": 0,
+      "passed": 67,
+      "failed": 0,
+      "ignored": 0,
+      "archive": "root-webm.log",
+      "archived_sha256": "1bb087a5ba65b6dcede69d4bb5e9242ef28b3e9c26e01b1fa63faf0dafabb906"
+    },
+    "core-parser-controls": {
+      "command": [
+        "cargo",
+        "test",
+        "--locked",
+        "--offline",
+        "--no-default-features",
+        "--test",
+        "mp4_seek_io_regressions",
+        "--test",
+        "mp4_interrupted_seek"
+      ],
+      "exit_code": 0,
+      "passed": 8,
+      "failed": 0,
+      "ignored": 0,
+      "archive": "core-parser-controls.log",
+      "archived_sha256": "2e7ec0936a2ba46f2673f2cb01a33bc44f54b3d7dda7772f3cc0a50e5eb590cd"
+    },
+    "media-units": {
+      "command": [
+        "cargo",
+        "test",
+        "-p",
+        "fvid-media",
+        "--locked",
+        "--offline",
+        "--no-default-features",
+        "--features",
+        "player",
+        "--lib",
+        "--",
+        "--test-threads=2"
+      ],
+      "exit_code": 0,
+      "passed": 547,
+      "failed": 0,
+      "ignored": 1,
+      "archive": "media-units.log",
+      "archived_sha256": "0ffd6df00ab907f001ece7fc1ef73692ef6cd50e6b5e22b2bf6104c6d71fd0df"
+    },
+    "core-check": {
+      "command": [
+        "cargo",
+        "check",
+        "--locked",
+        "--offline",
+        "--no-default-features"
+      ],
+      "exit_code": 0,
+      "passed": 0,
+      "failed": 0,
+      "ignored": 0,
+      "archive": "core-check.log",
+      "archived_sha256": "c5460bb6ec0f3e7f10b435b25741bb7f1bae2373ae69fc8944b17e170482bb43"
+    },
+    "player-check": {
+      "command": [
+        "cargo",
+        "check",
+        "--locked",
+        "--offline",
+        "--no-default-features",
+        "--features",
+        "player"
+      ],
+      "exit_code": 0,
+      "passed": 0,
+      "failed": 0,
+      "ignored": 0,
+      "archive": "player-check.log",
+      "archived_sha256": "16eaadbc97fcb0e0daf8d40a1df272e9b6aa47fe7b2e5d2431edc6dd8f6821aa"
+    }
+  },
+  "source_hashes": "evidence/mp4-wide-seek-target/batch-source.json",
+  "fixture_hashes": "evidence/mp4-wide-seek-target/fixture-verification.json",
+  "fixture_file_count": 11,
+  "core_parser_reexecutions_excluded_from_distinct_claims": true,
+  "physical_source_distinct_count_not_claimed": true,
+  "old_ignored_tests_unchanged": true,
+  "evidence": [
+    "evidence/mp4-wide-seek-target/README.md"
+  ],
+  "limitations": [
+    "MP4 indexed duration clamping only; WebM delegation and unsupported Y4M seeking retain existing behavior.",
+    "Native software picture/seek/EOF checks; no physical audio/GPU or new native-window duration qualification.",
+    "No performance claim."
+  ]
+}

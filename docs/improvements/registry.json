@@ -1,8 +1,8 @@
 {
   "target": 1000,
   "counting_rule": "One independently confirmed problem or useful capability; fixture variants and baseline integration repairs are excluded. Only accepted entries count.",
-  "accepted_count": 480,
-  "next_id": "FVID-0481",
+  "accepted_count": 481,
+  "next_id": "FVID-0482",
   "entries": [
     {
       "id": "FVID-0001",
@@ -5420,6 +5420,17 @@
       "result": "Pass the movie clock into shared admission and derive the required source prefix from the same exact integer edit schedule, retaining preroll and repeats. Initial decoder memory remains charged for silence-only edits; delayed/reconfigured/non-native-grid paths retain conservative admission. Six regressions and all eight qualification gates pass.",
       "status": "accepted",
       "validation": "batch-477-validation.json"
+    },
+    {
+      "id": "FVID-0481",
+      "batch": 478,
+      "title": "Clamp wide indexed MP4 seek requests before signed tick conversion",
+      "source": "src/playback/video/native.rs",
+      "regression": "tests/mp4_wide_seek_target.rs",
+      "before": "Duration::MAX, maximum seconds and first-overflow requests failed before the advertised endpoint clamp on valid tiny MP4 movies. Identical baseline: one source/control test passes, one acceptance fails in 24 clock/edit/raw/RGB variants.",
+      "result": "Bound MP4 Duration requests by the indexed presentation extent before narrowing to signed track ticks. Both APIs select the same final picture/interval as ordinary end seeks and reach EOF. Both regressions and all seven qualification gates pass; WebM delegation and existing decoder/I/O checks remain unchanged.",
+      "status": "accepted",
+      "validation": "batch-478-validation.json"
     }
   ]
 }
