@@ -19,6 +19,7 @@ int main(int argc,char**argv){
   s->surroundGain=sample(in);s->lfeGain=sample(in);
   for(int c=0;c<MAX_OUTPUT_CHANNELS_AT;c++)for(int b=0;b<MAX_PARAMETER_BANDS;b++)s->prevGainAT[c][b]=1.0f;
   for(int block=0;block<blocks;block++){
+   for(int c=0;c<s->numOutputChannelsAT;c++)s->bsConfig.bsOutputChannelPosAT[c]=word(in);
    s->timeSlots=word(in);s->numParameterSets=word(in);
    for(int i=0;i<s->numParameterSets;i++)s->paramSlot[i]=word(in);
    for(int i=0;i<s->numParameterSets;i++)for(int b=0;b<boxes;b++)for(int q=0;q<s->numParameterBands;q++)s->ottCLD[b][i][q]=sample(in);

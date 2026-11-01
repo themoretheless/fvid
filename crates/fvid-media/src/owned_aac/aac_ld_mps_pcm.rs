@@ -645,7 +645,6 @@ mod arbitrary_tree_state_tests {
         gain.downmix_gain = 1;
         d.reconfigure(&gain).unwrap();
         assert_eq!(d.arbitrary, old.arbitrary);
-        let saved = d.clone();
         let mut changed = gain.clone();
         let super::super::aac_ld_mps_config::ExtensionValue::ArbitraryTree { positions, .. } =
             &mut changed.extensions[0].value
@@ -654,11 +653,20 @@ mod arbitrary_tree_state_tests {
         };
         positions.swap(0, 1);
         changed.extensions[0].payload = vec![0x80, 0x20, 0x10];
+        d.reconfigure(&changed).unwrap();
+        let saved = d.clone();
+        let super::super::aac_ld_mps_config::ExtensionValue::ArbitraryTree { nodes, .. } =
+            &mut changed.extensions[0].value
+        else {
+            unreachable!()
+        };
+        *nodes = vec![vec![false], vec![true, false, false]];
+        changed.extensions[0].payload = vec![0x40, 0x20, 0x10];
         let error = d.reconfigure(&changed).unwrap_err().to_string();
         assert!(error.contains("layout/grid change"), "{error}");
         assert_eq!(d, saved);
         d.reset();
-        let fresh = Decoder::new(&gain, Mode::Complex).unwrap();
+        let fresh = Decoder::new(&d.config, Mode::Complex).unwrap();
         assert_eq!(d.arbitrary, fresh.arbitrary);
     }
 }

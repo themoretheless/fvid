@@ -1,6 +1,6 @@
-use std::io::Cursor;
 use fvid_media::owned_aac::{aac_ld_mps_arbitrary_tree::Decoder, aac_sbr_qmf::Complex};
 use serde_json::Value;
+use std::io::Cursor;
 fn root() -> std::path::PathBuf {
     std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
         .join("tests/fixtures/playback-errors/aac-ld-mps-arbitrary-tree")
@@ -24,11 +24,15 @@ fn post_shape_routing_matches_unmodified_iso_c_with_history_reset_and_rollback()
     let expected = std::fs::read(root().join("component-expected.f32le")).unwrap();
     let mut count = 0;
     let mut maximum = 0.0f64;
+    let mut reset_difference = 0.0f64;
     assert_eq!(m["cases"].as_array().unwrap().len(), 42);
+    assert_eq!(m["permutations"].as_array().unwrap().len(), 42);
+    assert_eq!(oracle["cases"].as_array().unwrap().len(), 84);
     for (case, reference) in m["cases"]
         .as_array()
         .unwrap()
         .iter()
+        .chain(m["permutations"].as_array().unwrap().iter())
         .zip(oracle["cases"].as_array().unwrap())
     {
         let nodes: Vec<Vec<bool>> = serde_json::from_value(case["nodes"].clone()).unwrap();
@@ -37,7 +41,7 @@ fn post_shape_routing_matches_unmodified_iso_c_with_history_reset_and_rollback()
         let map: Vec<u8> = serde_json::from_value(case["map"].clone()).unwrap();
         let fixed: Vec<f64> = serde_json::from_value(case["fixed"].clone()).unwrap();
         let mut d = Decoder::new(&nodes, &cutoffs, &positions, n(&case["bands"]) as u8).unwrap();
-        let initial = d.clone();
+        let mut final_positions = positions.clone();
         for (block, gold) in case["blocks"]
             .as_array()
             .unwrap()
@@ -63,12 +67,38 @@ fn post_shape_routing_matches_unmodified_iso_c_with_history_reset_and_rollback()
             }
             let endpoints: Vec<u8> = serde_json::from_value(block["endpoints"].clone()).unwrap();
             let cld: Vec<Vec<Vec<f64>>> = serde_json::from_value(block["cld"].clone()).unwrap();
+            if !block["positions"].is_null() {
+                final_positions = serde_json::from_value(block["positions"].clone()).unwrap();
+                let before = d.clone();
+                let mut duplicate = final_positions.clone();
+                duplicate[1] = duplicate[0];
+                assert!(d.set_output_positions(&duplicate).is_err());
+                assert_eq!(d, before);
+                d.set_output_positions(&final_positions).unwrap();
+            }
             let checkpoint = d.clone();
             let mut bad = source.clone();
             bad[slots - 1][channels - 1][bank - 1].re = f64::NAN;
             assert!(d.process(&bad, &endpoints, &cld, &map, &fixed).is_err());
             assert_eq!(d, checkpoint);
             let got = d.process(&source, &endpoints, &cld, &map, &fixed).unwrap();
+            if !block["positions"].is_null() {
+                let mut restarted = checkpoint.clone();
+                restarted.reset();
+                let reset = restarted
+                    .process(&source, &endpoints, &cld, &map, &fixed)
+                    .unwrap();
+                for (a, b) in got
+                    .iter()
+                    .flatten()
+                    .flatten()
+                    .zip(reset.iter().flatten().flatten())
+                {
+                    reset_difference = reset_difference
+                        .max((a.re - b.re).abs())
+                        .max((a.im - b.im).abs());
+                }
+            }
             let mut replay = checkpoint;
             assert_eq!(
                 got,
@@ -98,9 +128,16 @@ fn post_shape_routing_matches_unmodified_iso_c_with_history_reset_and_rollback()
             }
         }
         d.reset();
-        assert_eq!(d, initial);
+        assert_eq!(
+            d,
+            Decoder::new(&nodes, &cutoffs, &final_positions, n(&case["bands"]) as u8).unwrap()
+        );
     }
-    eprintln!("Arbitrary-tree original C: {count} scalar outputs, max error {maximum}");
+    assert!(
+        reset_difference > 1e-4,
+        "reset must be distinguishable from retained leaf history"
+    );
+    eprintln!("Arbitrary-tree original C: {count} scalar outputs, max error {maximum}; reset-control difference {reset_difference}");
 }
 #[test]
 fn extra_ott_movie_accepts_complete_valid_parameters_and_matches_analytic_gain_composition() {
@@ -387,7 +424,7 @@ fn downscaled_spatial_playback_seek_and_rewind_keep_source_windows() {
 #[test]
 fn native_extra_channels_preserve_clocks_checkpoints_and_failed_suffix_retry() {
     use fvid_media::owned_aac::{
-        aac_ld_mps_decor::Mode, AacDecodeOptions, config::AudioSpecificConfig, NativeAacDecoder,
+        aac_ld_mps_decor::Mode, config::AudioSpecificConfig, AacDecodeOptions, NativeAacDecoder,
     };
     let m = json("manifest.json");
     let c = &m["cases"][0];
@@ -411,7 +448,15 @@ fn native_extra_channels_preserve_clocks_checkpoints_and_failed_suffix_retry() {
         assert_eq!(d.channel_mask(), 0);
         assert!(d.channel_positions().unwrap().is_none());
         let mut actual = Vec::new();
-        let mut control = NativeAacDecoder::new_with_options(&asc,AacDecodeOptions {output_sample_rate:Some(24000),spatial_decorrelation:mode,..Default::default()}).unwrap();
+        let mut control = NativeAacDecoder::new_with_options(
+            &asc,
+            AacDecodeOptions {
+                output_sample_rate: Some(24000),
+                spatial_decorrelation: mode,
+                ..Default::default()
+            },
+        )
+        .unwrap();
         for (i, r) in c["frames"].as_array().unwrap().iter().enumerate() {
             let at = n(&r["offset"]);
             let packet = &blob[at..at + n(&r["bytes"])];
@@ -438,7 +483,7 @@ fn native_extra_channels_preserve_clocks_checkpoints_and_failed_suffix_retry() {
                     > d.retained_payload_bytes().unwrap()
             );
             if let Some(f) = got {
-                assert_eq!(f.samples.len(), 256*3);
+                assert_eq!(f.samples.len(), 256 * 3);
                 assert_eq!(f.pts, pts);
                 assert_eq!(f.duration, 256);
                 actual.extend(f.samples.iter().flat_map(|v| v.to_le_bytes()));

@@ -1,5 +1,9 @@
 # Native full-band arbitrary-tree playback integration
 
+Historical integration milestone at4388ad0a84. Dense in-band output permutation
+changes are now qualified; see `aac-ld-mps-arbitrary-permutations-2026-11-01.md`.
+Topology/grid and sparse-position boundaries remain open.
+
 This supersedes the component-only playback boundary recorded at8429dc0934.
 The owned post-shaping arbitrary-tree stage is now connected between the
 base-tree dry/wet sum and spatial PCM synthesis. Its configured dense leaf

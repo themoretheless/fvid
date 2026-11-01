@@ -15,6 +15,21 @@ pub struct Decoder {
     leaves: Vec<Leaf>,
     previous: Vec<Vec<f64>>,
 }
+fn dense_positions(positions: &[u8]) -> Result<()> {
+    let mut seen = vec![false; positions.len()];
+    for &p in positions {
+        let Some(v) = seen.get_mut(usize::from(p)) else {
+            return Err(unsupported(
+                "sparse arbitrary-tree output positions require qualification",
+            ));
+        };
+        if *v {
+            return Err(invalid("duplicate arbitrary-tree output position"));
+        }
+        *v = true;
+    }
+    Ok(())
+}
 impl Decoder {
     /// Preorder split/leaf flags per base-tree output. Positions must be a
     /// permutation of dense output indices. Every split spans the full grid.
@@ -32,18 +47,7 @@ impl Decoder {
                 "partial-band arbitrary-tree splits require qualification",
             ));
         }
-        let mut seen = vec![false; positions.len()];
-        for &p in positions {
-            let Some(v) = seen.get_mut(usize::from(p)) else {
-                return Err(unsupported(
-                    "sparse arbitrary-tree output positions require qualification",
-                ));
-            };
-            if *v {
-                return Err(invalid("duplicate arbitrary-tree output position"));
-            }
-            *v = true;
-        }
+        dense_positions(positions)?;
         let mut leaves = Vec::new();
         let mut boxes = 0;
         for (source, row) in nodes.iter().enumerate() {
@@ -92,6 +96,18 @@ impl Decoder {
             leaves,
             previous,
         })
+    }
+    /// Change only the output permutation. Histories belong to preorder leaves,
+    /// not output indices; validation finishes before any route is changed.
+    pub fn set_output_positions(&mut self, positions: &[u8]) -> Result<()> {
+        if positions.len() != self.leaves.len() {
+            return Err(invalid("arbitrary-tree output permutation count mismatch"));
+        }
+        dense_positions(positions)?;
+        for (leaf, &position) in self.leaves.iter_mut().zip(positions) {
+            leaf.output = usize::from(position);
+        }
+        Ok(())
     }
     pub fn reset(&mut self) {
         for p in &mut self.previous {
@@ -254,7 +270,13 @@ impl Stage {
     pub(crate) fn inherit(&mut self, old: &Self) -> Result<()> {
         if self.extension != old.extension
             || self.decoder.bands != old.decoder.bands
-            || self.decoder.leaves != old.decoder.leaves
+            || self.decoder.leaves.len() != old.decoder.leaves.len()
+            || self
+                .decoder
+                .leaves
+                .iter()
+                .zip(&old.decoder.leaves)
+                .any(|(a, b)| a.source != b.source || a.path != b.path)
         {
             return Err(unsupported(
                 "LD-MPS arbitrary-tree layout/grid change requires stream reconfiguration",
