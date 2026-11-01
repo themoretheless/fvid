@@ -1,0 +1,6 @@
+{
+  "src/playback/audio/mp4_audio.rs": "36e9d202ee793df2f1672b16deb305a160b3c6df899384fdd2ef9d6d30376607",
+  "src/playback/audio/mp4_clock_recovery.rs": "22925104abf31242eaf6cb3e6540970f3102ed7ff349d218d64b0d35ff53b47f",
+  "tests/mp4_recovered_silence_seek.rs": "14c43577fc827fbc0691318e1013503e0d97f5895ce6a86f7d9a8381079acc2d",
+  "scripts/generate_mp4_recovered_silence_seek.py": "3f648b18122fa3abd62b342c4f4e911c04f413cbd40c6da97673290509a1ae3d"
+}

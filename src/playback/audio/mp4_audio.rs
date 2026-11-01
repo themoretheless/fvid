@@ -445,7 +445,7 @@ impl<R: Read + Seek> Mp4AudioReader<R> {
         }
         Ok(None)
     }
-    fn align_variable_seek(&self,mut position:EditTime)->Result<EditTime> {
+    fn align_variable_seek(&self,mut position:EditTime,sample_aligned_silence:bool)->Result<EditTime> {
         let timeline=self.variable_edits.as_ref().ok_or_else(||invalid("missing MP4 edit timeline"))?;
         loop {
             timeline.cursor.set(position);
@@ -456,10 +456,10 @@ impl<R: Read + Seek> Mp4AudioReader<R> {
             if let Some((begin,end))=self.source_gap_at(segment,position)?
                 && position.cmp(begin)!=std::cmp::Ordering::Less
                 && position.cmp(end)==std::cmp::Ordering::Less {
-                if self.clock.is_some() {return Ok(position);}
-                // Exact AAC edit seeks must anchor on the same native silence
+                if self.clock.is_some() && !sample_aligned_silence {return Ok(position);}
+                // Exact wall-time seeks anchor on the same native silence
                 // lattice as next_source_silence, including the clipped end.
-                let rate=self.negotiated_rate();
+                let rate=if let Some(clock)=&self.clock {clock.rate(self.gap_scan.get())?}else{self.negotiated_rate()};
                 let offset=position.sub(begin)?.ceil_frames(rate)?;
                 let aligned=begin.add(EditTime::new(offset,u128::from(rate))?)?;
                 let stop=if end.cmp(segment.end)==std::cmp::Ordering::Greater {segment.end}else{end};
@@ -474,22 +474,24 @@ impl<R: Read + Seek> Mp4AudioReader<R> {
                 let mapped=landed.add(segment.start)?.sub(media)?;
                 if mapped.cmp(segment.end)!=std::cmp::Ordering::Less {position=segment.end;continue;}
                 position=position.max(mapped);
-            } else if self.clock.is_none() {
-                let offset=position.sub(segment.start)?.ceil_frames(self.negotiated_rate())?;
-                position=segment.start.add(EditTime::new(offset,u128::from(self.negotiated_rate()))?)?;
+            } else if self.clock.is_none() || sample_aligned_silence {
+                // Explicit empty edits use the opening source configuration.
+                let rate=if let Some(clock)=&self.clock {clock.rate(0)?}else{self.negotiated_rate()};
+                let offset=position.sub(segment.start)?.ceil_frames(rate)?;
+                position=segment.start.add(EditTime::new(offset,u128::from(rate))?)?;
                 if position.cmp(segment.end)!=std::cmp::Ordering::Less {position=segment.end;continue;}
             }
             return Ok(position);
         }
     }
-    fn seek_exact(&mut self,wanted:EditTime)->Result<i64> {
+    fn seek_exact(&mut self,wanted:EditTime,sample_aligned_silence:bool)->Result<i64> {
         if self.variable_edits.is_none() {return self.seek_recovered(wanted);}
         self.rewind();
         let timeline=self.variable_edits.as_ref().unwrap();
         let position=if wanted.cmp(timeline.end)==std::cmp::Ordering::Greater {timeline.end}else{wanted};
         timeline.cursor.set(position);
         let position=timeline.locate().map_or(position,|i|position.max(timeline.minimum_starts[i]));
-        let position=self.align_variable_seek(position)?;timeline.cursor.set(position);
+        let position=self.align_variable_seek(position,sample_aligned_silence)?;timeline.cursor.set(position);
         self.variable_edits.as_mut().unwrap().active=None;
         let returned=i64::try_from(position.floor_ticks(self.track().timescale)?).map_err(|_|invalid("MP4 seek clock overflow"))?;
         self.clock_anchor.set(Some((returned,position)));Ok(returned)
@@ -1451,7 +1453,7 @@ impl<R: Read + Seek + Send> crate::audio::AudioStream for Mp4AudioReader<R> {
             && self.track().sample_descriptions.first().is_some_and(|first|
                 self.track().sample_descriptions.iter().all(|entry|entry==first));
         if self.clock.is_some() || exact_aac_edits {
-            let time=EditTime::new(target.as_nanos() as i128,1_000_000_000).and_then(|t|self.seek_exact(t));
+            let time=EditTime::new(target.as_nanos() as i128,1_000_000_000).and_then(|t|self.seek_exact(t,true));
             return match time {Ok(at)=>at,Err(error)=>{self.navigation_error=Some(error);0}};
         }
         let scale=u128::from(self.track().timescale);let mut ticks=target.as_nanos()*scale/1_000_000_000;
@@ -1489,7 +1491,7 @@ impl<R: Read + Seek + Send> crate::audio::AudioStream for Mp4AudioReader<R> {
     }
     fn seek_to(&mut self, pts: i64) -> i64 {
         if self.clock.is_some() {
-            let result=EditTime::signed_ticks(pts.max(0),self.track().timescale).and_then(|t|self.seek_exact(t));
+            let result=EditTime::signed_ticks(pts.max(0),self.track().timescale).and_then(|t|self.seek_exact(t,false));
             return match result {Ok(at)=>at,Err(error)=>{self.navigation_error=Some(error);0}};
         }
         if self.variable_edits.is_some() {

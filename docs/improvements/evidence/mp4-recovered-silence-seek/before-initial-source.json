@@ -1,0 +1,8 @@
+{
+  "base_commit": "eb59debc8afba2aed3b5bc2fd8a95f010d38a598",
+  "sha256": {
+    "src/playback/audio/mp4_audio.rs": "80a27b6ddc108a792483a0313caec843c475b922b8e9e07277da06acab5494d4",
+    "tests/mp4_recovered_silence_seek.rs": "991acdf1b785e7aae341acd3e5d2dcb49fe15b390cedb4d827a75fef49a036f7",
+    "scripts/generate_mp4_recovered_silence_seek.py": "5e1156eaf36bf13d5a42d07d1f5595a0041a7c2fccb75806c361b9f449982511"
+  }
+}

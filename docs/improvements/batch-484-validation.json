@@ -1,0 +1,234 @@
+{
+  "status": "accepted",
+  "accepted_ids": [],
+  "follow_up_ids": [
+    "FVID-0484"
+  ],
+  "count_delta": 0,
+  "accepted_count": 485,
+  "next_id": "FVID-0486",
+  "qualification": {
+    "integration": {
+      "command": [
+        "cargo",
+        "test",
+        "--locked",
+        "--offline",
+        "--no-default-features",
+        "--features",
+        "player",
+        "--no-fail-fast",
+        "--test",
+        "mp4_aac_subtick_seek",
+        "--test",
+        "mp4_audio_eof_seek_clock",
+        "--test",
+        "mp4_audio_packet_seek",
+        "--test",
+        "mp4_audio_wide_time",
+        "--test",
+        "mp4_quantized_audio_clock",
+        "--test",
+        "mp4_aac_edit_phase",
+        "--test",
+        "mp4_aac_fractional_origin",
+        "--test",
+        "mp4_open_ended_edit_audio",
+        "--test",
+        "mp4_audio_clocks",
+        "--test",
+        "mp4_variable_rate_edits",
+        "--test",
+        "mp4_edit_loop",
+        "--test",
+        "mp4_audio_reconfiguration",
+        "--test",
+        "mp4_aac_transitions",
+        "--test",
+        "mp4_unedited_audio_tail",
+        "--test",
+        "mp4_audio_presentation_end",
+        "--test",
+        "mp4_audio_composition_order",
+        "--test",
+        "mp4_unused_audio_descriptions",
+        "--test",
+        "mp4_audio_selection",
+        "--test",
+        "mp4_audio_preroll_navigation",
+        "--test",
+        "mp4_audio_partial_window",
+        "--test",
+        "mp4_audio_zero_window",
+        "--test",
+        "mp4_aac_split_subtick_seek",
+        "--test",
+        "mp4_audio_middle_gap",
+        "--test",
+        "mp4_audio_composition_gap",
+        "--test",
+        "mp4_fixed_audio_edits",
+        "--test",
+        "mp4_aac_gap_subtick_seek",
+        "--test",
+        "mp4_clock_description_scan",
+        "--test",
+        "mp4_recovered_silence_seek"
+      ],
+      "exit_code": 0,
+      "totals": {
+        "passed": 128,
+        "failed": 0,
+        "ignored": 0
+      },
+      "log": "docs/improvements/evidence/mp4-recovered-silence-seek/integration.log"
+    },
+    "root-mp4": {
+      "command": [
+        "cargo",
+        "test",
+        "--locked",
+        "--offline",
+        "--no-default-features",
+        "--features",
+        "player",
+        "--lib",
+        "mp4",
+        "--",
+        "--test-threads=2"
+      ],
+      "exit_code": 0,
+      "totals": {
+        "passed": 84,
+        "failed": 0,
+        "ignored": 1
+      },
+      "log": "docs/improvements/evidence/mp4-recovered-silence-seek/root-mp4.log"
+    },
+    "root-webm": {
+      "command": [
+        "cargo",
+        "test",
+        "--locked",
+        "--offline",
+        "--no-default-features",
+        "--features",
+        "player",
+        "--lib",
+        "webm",
+        "--",
+        "--test-threads=2"
+      ],
+      "exit_code": 0,
+      "totals": {
+        "passed": 67,
+        "failed": 0,
+        "ignored": 0
+      },
+      "log": "docs/improvements/evidence/mp4-recovered-silence-seek/root-webm.log"
+    },
+    "audio-worker": {
+      "command": [
+        "cargo",
+        "test",
+        "--locked",
+        "--offline",
+        "--no-default-features",
+        "--features",
+        "player",
+        "--lib",
+        "audio_thread",
+        "--",
+        "--test-threads=2"
+      ],
+      "exit_code": 0,
+      "totals": {
+        "passed": 39,
+        "failed": 0,
+        "ignored": 0
+      },
+      "log": "docs/improvements/evidence/mp4-recovered-silence-seek/audio-worker.log"
+    },
+    "media-units": {
+      "command": [
+        "cargo",
+        "test",
+        "-p",
+        "fvid-media",
+        "--locked",
+        "--offline",
+        "--no-default-features",
+        "--features",
+        "player",
+        "--lib",
+        "--",
+        "--test-threads=2"
+      ],
+      "exit_code": 0,
+      "totals": {
+        "passed": 548,
+        "failed": 0,
+        "ignored": 1
+      },
+      "log": "docs/improvements/evidence/mp4-recovered-silence-seek/media-units.log"
+    },
+    "core-check": {
+      "command": [
+        "cargo",
+        "check",
+        "--locked",
+        "--offline",
+        "--no-default-features"
+      ],
+      "exit_code": 0,
+      "totals": {
+        "passed": 0,
+        "failed": 0,
+        "ignored": 0
+      },
+      "log": "docs/improvements/evidence/mp4-recovered-silence-seek/core-check.log"
+    },
+    "player-check": {
+      "command": [
+        "cargo",
+        "check",
+        "--locked",
+        "--offline",
+        "--no-default-features",
+        "--features",
+        "player"
+      ],
+      "exit_code": 0,
+      "totals": {
+        "passed": 0,
+        "failed": 0,
+        "ignored": 0
+      },
+      "log": "docs/improvements/evidence/mp4-recovered-silence-seek/player-check.log"
+    }
+  },
+  "repeat_runs": 3,
+  "repeat_passed_each": 19,
+  "source_frozen": {
+    "src/playback/audio/mp4_audio.rs": "36e9d202ee793df2f1672b16deb305a160b3c6df899384fdd2ef9d6d30376607",
+    "src/playback/audio/mp4_clock_recovery.rs": "22925104abf31242eaf6cb3e6540970f3102ed7ff349d218d64b0d35ff53b47f",
+    "tests/mp4_recovered_silence_seek.rs": "14c43577fc827fbc0691318e1013503e0d97f5895ce6a86f7d9a8381079acc2d",
+    "scripts/generate_mp4_recovered_silence_seek.py": "3f648b18122fa3abd62b342c4f4e911c04f413cbd40c6da97673290509a1ae3d"
+  },
+  "before": {
+    "exit_code": 101,
+    "passed": 2,
+    "failed": 2,
+    "direct_anchor_discrepancies": 11,
+    "worker_flush_discrepancies": 11,
+    "worker_eof_discrepancies": 2,
+    "log": "docs/improvements/evidence/mp4-recovered-silence-seek/before-final.log"
+  },
+  "existing_tests_unchanged": true,
+  "old_ignores": 2,
+  "raw_tick_compatibility_control": "Owned900Hz PS-edit raw navigation retains1/900s anchor and later native first sample,with identical rewind/reseek packets.",
+  "limitations": [
+    "No performance or physical audio-device claim.",
+    "Same native silence anchoring cause as FVID-0484;three movies and raw control add zero accepted IDs."
+  ]
+}

@@ -5467,7 +5467,9 @@
       "follow_up_validation": "batch-481-validation.json",
       "follow_up_note": "Zero-count extension: identical-header AAC split edits now retain arbitrary Duration floors and native packet phase, including explicit initial silence. Four authored video controls and actual workers prove full PCM, exact suffixes/PTS, EOF and raw-navigation recovery. All seven qualification gates and three repeated ten-test runs pass; configuration-changing paths retain prior behavior.",
       "source_gap_follow_up_validation": "batch-482-validation.json",
-      "source_gap_follow_up_note": "Zero-count exact AAC source-gap anchor extension: derive the backend flush clock from the same native silence lattice as emitted PCM and clamp to the edited endpoint. Identical baseline passes independent nonzero PCM/gap/video controls but fails both direct and actual-worker clock regressions. Seven gates and three repeated thirteen-test runs pass; recovered-clock and raw-navigation behavior unchanged."
+      "source_gap_follow_up_note": "Zero-count exact AAC source-gap anchor extension: derive the backend flush clock from the same native silence lattice as emitted PCM and clamp to the edited endpoint. Identical baseline passes independent nonzero PCM/gap/video controls but fails both direct and actual-worker clock regressions. Seven gates and three repeated thirteen-test runs pass; recovered-clock and raw-navigation behavior unchanged.",
+      "recovered_silence_follow_up_validation": "batch-484-validation.json",
+      "recovered_silence_follow_up_note": "Zero-count native silence anchoring extension for recovered clocks. Exact Duration seeks align source gaps at the preceding coded run rate and empty edits at the opening rate. Three authored movies cover49Hz AAC phase and8kHz-to16kHz PCM changes. Full PCM/video and raw900Hz grid controls pass before/after;two original direct/worker regressions fail then pass. Seven gates pass866 test executions;three repeats pass19 tests each. Raw tick compatibility retained;no performance or physical audio claim."
     },
     {
       "id": "FVID-0485",

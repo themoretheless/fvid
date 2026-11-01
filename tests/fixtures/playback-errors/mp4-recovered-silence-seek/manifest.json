@@ -1,0 +1,196 @@
+{
+  "provenance": "Own AAC960 and neutral VP9 at49Hz. Exact rational native silence and recovered PCM phases;no private input,FFmpeg or network.",
+  "cases": [
+    {
+      "file": "gap49.mp4",
+      "leading": false,
+      "frames": 96,
+      "duration_ns": 2000000,
+      "queries": [
+        {
+          "target_ns": "0",
+          "first": 0,
+          "anchor_ns": 0
+        },
+        {
+          "target_ns": "1",
+          "first": 1,
+          "anchor_ns": 20833
+        },
+        {
+          "target_ns": "500001",
+          "first": 25,
+          "anchor_ns": 520833
+        },
+        {
+          "target_ns": "1000000",
+          "first": 48,
+          "anchor_ns": 1008503
+        },
+        {
+          "target_ns": "1000001",
+          "first": 48,
+          "anchor_ns": 1008503
+        },
+        {
+          "target_ns": "1500001",
+          "first": 72,
+          "anchor_ns": 1508503
+        },
+        {
+          "target_ns": "1999999",
+          "first": 96,
+          "anchor_ns": 2000000
+        },
+        {
+          "target_ns": "2000000",
+          "first": 96,
+          "anchor_ns": 2000000
+        },
+        {
+          "target_ns": "18446744073709551615999999999",
+          "first": 96,
+          "anchor_ns": 2000000
+        }
+      ],
+      "scale": 49,
+      "first_duration": 1
+    },
+    {
+      "file": "leading49.mp4",
+      "leading": true,
+      "frames": 144,
+      "duration_ns": 3000000,
+      "queries": [
+        {
+          "target_ns": "0",
+          "first": 0,
+          "anchor_ns": 0
+        },
+        {
+          "target_ns": "1",
+          "first": 1,
+          "anchor_ns": 20833
+        },
+        {
+          "target_ns": "500001",
+          "first": 25,
+          "anchor_ns": 520833
+        },
+        {
+          "target_ns": "999999",
+          "first": 48,
+          "anchor_ns": 1000000
+        },
+        {
+          "target_ns": "1000000",
+          "first": 48,
+          "anchor_ns": 1000000
+        },
+        {
+          "target_ns": "1000001",
+          "first": 49,
+          "anchor_ns": 1020833
+        },
+        {
+          "target_ns": "2000000",
+          "first": 96,
+          "anchor_ns": 2008503
+        },
+        {
+          "target_ns": "2000001",
+          "first": 96,
+          "anchor_ns": 2008503
+        },
+        {
+          "target_ns": "2999999",
+          "first": 144,
+          "anchor_ns": 3000000
+        },
+        {
+          "target_ns": "3000000",
+          "first": 144,
+          "anchor_ns": 3000000
+        },
+        {
+          "target_ns": "18446744073709551615999999999",
+          "first": 144,
+          "anchor_ns": 3000000
+        }
+      ],
+      "scale": 49,
+      "first_duration": 1
+    },
+    {
+      "file": "changing-pcm-gap.mp4",
+      "pcm": true,
+      "frames": 24,
+      "scale": 1000,
+      "first_duration": 8,
+      "duration_ns": 2000000,
+      "queries": [
+        {
+          "target_ns": "0",
+          "first": 0,
+          "anchor_ns": 0
+        },
+        {
+          "target_ns": "1",
+          "first": 1,
+          "anchor_ns": 125000
+        },
+        {
+          "target_ns": "500001",
+          "first": 5,
+          "anchor_ns": 625000
+        },
+        {
+          "target_ns": "999999",
+          "first": 8,
+          "anchor_ns": 1000000
+        },
+        {
+          "target_ns": "1000000",
+          "first": 8,
+          "anchor_ns": 1000000
+        },
+        {
+          "target_ns": "1000001",
+          "first": 9,
+          "anchor_ns": 1062500
+        },
+        {
+          "target_ns": "1100001",
+          "first": 10,
+          "anchor_ns": 1125000
+        },
+        {
+          "target_ns": "1500001",
+          "first": 17,
+          "anchor_ns": 1562500
+        },
+        {
+          "target_ns": "1999999",
+          "first": 24,
+          "anchor_ns": 2000000
+        },
+        {
+          "target_ns": "2000000",
+          "first": 24,
+          "anchor_ns": 2000000
+        },
+        {
+          "target_ns": "18446744073709551615999999999",
+          "first": 24,
+          "anchor_ns": 2000000
+        }
+      ]
+    }
+  ],
+  "sha256": {
+    "reference.f32le": "f07d53bc0449246b5c609729704b20868e8c081258b744ab40c194a57fc00d3d",
+    "gap49.mp4": "bd922acf9be220f3b2675c6a69fb267b235fb8d1897dac3c3f2a5011671a4eb2",
+    "leading49.mp4": "39e44551c7dd01f16060b7b25e462a6fb5479deb448a47a0e3909cabf834d1a1",
+    "changing-pcm-gap.mp4": "d47779576cbd2bc0d3252f1e6158d7fd18d16a760fe3a7fd5fadabf07394311b"
+  }
+}

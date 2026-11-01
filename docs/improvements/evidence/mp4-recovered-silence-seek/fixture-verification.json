@@ -1,0 +1,11 @@
+{
+  "exact_regeneration": true,
+  "files": 5,
+  "sha256": {
+    "reference.f32le": "f07d53bc0449246b5c609729704b20868e8c081258b744ab40c194a57fc00d3d",
+    "gap49.mp4": "bd922acf9be220f3b2675c6a69fb267b235fb8d1897dac3c3f2a5011671a4eb2",
+    "leading49.mp4": "39e44551c7dd01f16060b7b25e462a6fb5479deb448a47a0e3909cabf834d1a1",
+    "changing-pcm-gap.mp4": "d47779576cbd2bc0d3252f1e6158d7fd18d16a760fe3a7fd5fadabf07394311b",
+    "manifest.json": "c2bca3d74c00faaf11011a7d209d89b91abf0b563455cacb9769b00ed647929a"
+  }
+}

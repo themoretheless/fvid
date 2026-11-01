@@ -1,0 +1,253 @@
+#![cfg(feature = "player")]
+#[path = "support/audio_transitions.rs"]
+mod transitions;
+use fvid::{audio::AudioStream, playback_mp4_audio::Mp4AudioReader};
+use std::{
+    io::Cursor,
+    path::{Path, PathBuf},
+    time::Duration,
+};
+fn root() -> PathBuf {
+    Path::new(env!("CARGO_MANIFEST_DIR"))
+        .join("tests/fixtures/playback-errors/mp4-recovered-silence-seek")
+}
+fn bytes(n: &str) -> Vec<u8> {
+    std::fs::read(root().join(n)).unwrap()
+}
+fn cases() -> Vec<serde_json::Value> {
+    serde_json::from_slice::<serde_json::Value>(&bytes("manifest.json")).unwrap()["cases"]
+        .as_array()
+        .unwrap()
+        .clone()
+}
+fn open(n: &str) -> Mp4AudioReader<Cursor<Vec<u8>>> {
+    Mp4AudioReader::open(Cursor::new(bytes(n)), Default::default()).unwrap()
+}
+fn compare(actual: &[u8], expected: &[u8]) {
+    assert_eq!(actual.len(), expected.len());
+    for (a, b) in actual.chunks_exact(4).zip(expected.chunks_exact(4)) {
+        let a = f32::from_le_bytes(a.try_into().unwrap());
+        let b = f32::from_le_bytes(b.try_into().unwrap());
+        assert!(
+            a.is_finite() && b.is_finite() && (a - b).abs() < 2e-6,
+            "{a}!={b}"
+        );
+    }
+}
+fn expected(c: &serde_json::Value) -> Vec<u8> {
+    if c["pcm"] == true {
+        return [0.125f32.to_le_bytes().repeat(8), vec![0; 16 * 4]].concat();
+    }
+    let r = bytes("reference.f32le");
+    if c["leading"] == true {
+        [
+            vec![0; 48 * 4],
+            r[..48 * 4].to_vec(),
+            r[980 * 4..1028 * 4].to_vec(),
+        ]
+        .concat()
+    } else {
+        [r[..48 * 4].to_vec(), vec![0; 48 * 4]].concat()
+    }
+}
+fn target(q: &serde_json::Value) -> Duration {
+    let n: u128 = q["target_ns"].as_str().unwrap().parse().unwrap();
+    Duration::new((n / 1_000_000_000) as u64, (n % 1_000_000_000) as u32)
+}
+#[test]
+fn recovered_native_pcm_silence_phases_and_short_video_are_valid() {
+    for c in cases() {
+        let name = c["file"].as_str().unwrap();
+        let mut r = open(name);
+        assert_eq!(r.track().timescale as u64, c["scale"].as_u64().unwrap());
+        assert_eq!(
+            r.track().samples.get(0).unwrap().duration as u64,
+            c["first_duration"].as_u64().unwrap()
+        );
+        assert_eq!(
+            r.duration(),
+            Some(Duration::from_nanos(c["duration_ns"].as_u64().unwrap()))
+        );
+        let pcm: Vec<_> = transitions::collect(&mut r)
+            .into_iter()
+            .flat_map(|p| p.3)
+            .collect();
+        compare(&pcm, &expected(&c));
+        let mut video =
+            fvid::playback_native::NativeReader::software(Cursor::new(bytes(name)), 32 << 20)
+                .unwrap();
+        for _ in 0..3 {
+            assert_eq!(
+                video
+                    .read_frame_raw()
+                    .unwrap()
+                    .unwrap()
+                    .into_rgb(32 << 20)
+                    .unwrap(),
+                vec![130; 16 * 16 * 3]
+            );
+        }
+        assert!(video.read_frame_raw().unwrap().is_none());
+    }
+}
+#[test]
+fn recovered_silence_seek_anchor_matches_independent_rational_lattice() {
+    let mut failures = Vec::new();
+    for c in cases() {
+        let name = c["file"].as_str().unwrap();
+        let oracle = expected(&c);
+        let mut r = open(name);
+        for q in c["queries"].as_array().unwrap() {
+            let t = target(q);
+            let at = r.seek_time(t);
+            let clock = r.time_of(at);
+            let got = transitions::collect(&mut r);
+            let pcm: Vec<_> = got.iter().flat_map(|p| p.3.iter().copied()).collect();
+            let first = q["first"].as_u64().unwrap() as usize;
+            compare(&pcm, &oracle[first * 4..]);
+            let expected = Duration::from_nanos(q["anchor_ns"].as_u64().unwrap());
+            if clock != expected {
+                failures.push(format!("{name}:{t:?}:clock{clock:?},expected{expected:?}"));
+            }
+            if let Some(p) = got.first() {
+                assert_eq!(p.2, expected);
+            }
+        }
+    }
+    assert!(failures.is_empty(), "{failures:?}");
+}
+use fvid::audio::AudioBackend as _;
+struct FlushCapture {
+    inner: transitions::Capture,
+    anchors: std::sync::Arc<std::sync::Mutex<Vec<Duration>>>,
+}
+impl fvid::audio::AudioBackend for FlushCapture {
+    fn start(&mut self, s: fvid::audio::AudioSpec) -> Result<(), fvid::audio::AudioError> {
+        self.inner.start(s)
+    }
+    fn push(&mut self, p: fvid::audio::AudioPacket) -> Result<(), fvid::audio::AudioError> {
+        self.inner.push(p)
+    }
+    fn position(&self) -> Duration {
+        self.inner.position()
+    }
+    fn flush(&mut self, at: Duration) -> Result<(), fvid::audio::AudioError> {
+        self.anchors.lock().unwrap().push(at);
+        self.inner.flush(at)
+    }
+    fn begin_drain(&mut self) -> Result<(), fvid::audio::AudioError> {
+        self.inner.begin_drain()
+    }
+    fn drain_status(&self) -> Result<bool, fvid::audio::AudioError> {
+        self.inner.drain_status()
+    }
+    fn end_drain(&mut self) -> Result<(), fvid::audio::AudioError> {
+        self.inner.end_drain()
+    }
+    fn pause(&mut self) -> Result<(), fvid::audio::AudioError> {
+        self.inner.pause()
+    }
+    fn resume(&mut self) -> Result<(), fvid::audio::AudioError> {
+        self.inner.resume()
+    }
+    fn stop(&mut self) -> Result<(), fvid::audio::AudioError> {
+        self.inner.stop()
+    }
+    fn reconfigure(
+        &mut self,
+        s: fvid::audio::AudioSpec,
+        r: Option<fvid_media::owned_stereo_router::StereoRouter>,
+        at: Duration,
+        p: bool,
+    ) -> Result<(), fvid::audio::AudioError> {
+        self.inner.reconfigure(s, r, at, p)
+    }
+}
+
+#[test]
+fn actual_worker_recovered_silence_flushes_on_first_native_sample_or_end() {
+    use fvid::audio_thread::AudioPlayback;
+    use std::sync::{Arc, Mutex};
+    use transitions::{Capture, Trace, ended};
+    let mut failures = Vec::new();
+    for c in cases() {
+        let name = c["file"].as_str().unwrap();
+        let oracle = expected(&c);
+        let trace = Arc::new(Mutex::new(Trace::default()));
+        let anchors = Arc::new(Mutex::new(Vec::new()));
+        let shared = trace.clone();
+        let times = anchors.clone();
+        let mut worker = AudioPlayback::start(Box::new(open(name)), move || {
+            Box::new(FlushCapture {
+                inner: Capture::new(shared),
+                anchors: times,
+            })
+        });
+        worker.play();
+        ended(&worker, 0);
+        compare(
+            &trace
+                .lock()
+                .unwrap()
+                .packets
+                .iter()
+                .flat_map(|p| p.3.iter().copied())
+                .collect::<Vec<_>>(),
+            &oracle,
+        );
+        for q in c["queries"].as_array().unwrap() {
+            anchors.lock().unwrap().clear();
+            let t = target(q);
+            worker.seek(t);
+            ended(&worker, worker.generation());
+            let expected = Duration::from_nanos(q["anchor_ns"].as_u64().unwrap());
+            let actual = anchors.lock().unwrap().clone();
+            if actual != vec![expected] {
+                failures.push(format!("{name}:{t:?}:flush{actual:?},expected{expected:?}"));
+            }
+            let first = q["first"].as_u64().unwrap() as usize;
+            let guard = trace.lock().unwrap();
+            compare(
+                &guard
+                    .packets
+                    .iter()
+                    .flat_map(|p| p.3.iter().copied())
+                    .collect::<Vec<_>>(),
+                &oracle[first * 4..],
+            );
+            if let Some(p) = guard.packets.first() {
+                assert_eq!(p.2, expected);
+            } else if worker.position() != expected {
+                failures.push(format!(
+                    "{name}:{t:?}:EOF{:?},expected{expected:?}",
+                    worker.position()
+                ));
+            }
+        }
+    }
+    assert!(failures.is_empty(), "{failures:?}");
+}
+#[test]
+fn raw_tick_silence_navigation_retains_its_declared_grid_contract() {
+    let path = Path::new(env!("CARGO_MANIFEST_DIR"))
+        .join("tests/fixtures/playback-errors/mp4-quantized-audio-clock/ps-edits-900-floor.mp4");
+    let mut r = Mp4AudioReader::open(
+        Cursor::new(std::fs::read(path).unwrap()),
+        Default::default(),
+    )
+    .unwrap();
+    assert_eq!(r.track().timescale, 900);
+    let rate = u64::from(r.sample_rate());
+    let at = r.seek_to(1);
+    let raw = Duration::from_nanos(1_000_000_000 / 900);
+    assert_eq!(r.time_of(at), raw);
+    let expected = Duration::from_nanos(rate.div_ceil(900) * 1_000_000_000 / rate);
+    assert!(expected > raw);
+    let first = transitions::collect(&mut r);
+    assert_eq!(first[0].2, expected);
+    r.rewind();
+    let at = r.seek_to(1);
+    assert_eq!(r.time_of(at), raw);
+    let second = transitions::collect(&mut r);
+    transitions::compare(&first, &second);
+}
