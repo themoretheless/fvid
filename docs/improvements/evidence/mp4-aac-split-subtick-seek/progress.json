@@ -1,8 +1,9 @@
 {
-  "status": "accepted follow-up; publication pending",
+  "status": "accepted follow-up and published",
   "count_delta": 0,
   "accepted_count": 484,
   "next_id": "FVID-0485",
   "goal_complete": false,
-  "owned_build_target_absent": true
+  "owned_build_target_absent": true,
+  "source_commit": "97adae7012a6c9a76a4b47fc60732833d864452a"
 }
