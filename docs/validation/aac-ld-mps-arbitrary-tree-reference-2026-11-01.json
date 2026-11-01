@@ -1,0 +1,11 @@
+{
+  "archive_sha256": "b6b27e2f9af6ee8f950af8d7074afc467e66d93372328c0ec55282fff71d1f83",
+  "algorithm_sha256": "9b73935063f3b188a010b0a8da69f114648f4c3a7b6769878071b641e107f2e7",
+  "initial_gain_source_sha256": "06b308c62ee31705d47a37d779e2ac8ba6ce7acad9c668624ae14c242a36438b",
+  "driver_sha256": "cc6fe438ad6374646042cae67da0518060b8baada8d448f2b0d9bdaf459098e5",
+  "generator_sha256": "1ffabda8006dbe395f68ef64fcac73ac497d4be5564223159ef44343e33e0768",
+  "input_sha256": "1696b2bb644c441e637f3bb2c483c05ff13f907e0a584b97453664476b487ec1",
+  "expected_sha256": "2d96af68ca6176b96ecf747cf20b68bea0f90d07d7f804eb4377e4b9096f0b0c",
+  "programmes": 42,
+  "scope": "Explicit reference-only C executable, not production or ordinary tests. Full-band splits and dense output permutation only. Original initialization prevGainAT=1.0."
+}

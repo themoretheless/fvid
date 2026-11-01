@@ -159,6 +159,7 @@ pub mod aac_ld_mps_ttt;
 pub mod aac_ld_mps_ttt_tree;
 pub mod aac_ld_mps_route;
 pub mod aac_ld_mps_assemble;
+pub mod aac_ld_mps_arbitrary_tree;
 pub mod aac_ld_mps_qmf;
 pub mod aac_ld_mps_ges;
 pub mod aac_ld_mps_stp_energy;
