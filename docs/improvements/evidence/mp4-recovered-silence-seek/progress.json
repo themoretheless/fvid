@@ -1,9 +1,10 @@
 {
-  "status": "accepted zero-count follow-up; publication pending",
+  "status": "accepted zero-count follow-up and published",
   "accepted_count": 485,
   "next_id": "FVID-0486",
   "count_delta": 0,
   "goal_complete": false,
   "owned_build_target_absent": true,
-  "temporary_restore_backup_removed": true
+  "temporary_restore_backup_removed": true,
+  "source_commit": "2581a177b20f73573e5a5ccb7061559968054ced"
 }
