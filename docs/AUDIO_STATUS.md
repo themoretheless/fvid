@@ -10,6 +10,14 @@ See validation/aac-ld-mps-single-rate-2026-11-01.md. AAC-LD5151 numerical residu
 and broader LD-MPS tools/profiles remain open.
 
 
+Original AAC-LD core controls now have an explicit offline PNS-aware diagnostic.
+The480-sample24kHz control has full PCM24 RMS3.46e-8. The512-sample48kHz
+control's large raw-wave difference is confined to PNS-dependent AUs;the
+syntax-derived deterministic partition has RMS3.40e-8. Full-stream metrics stay
+visible;this is not a weaker conformance gate. LD5151 has no PNS/LTP,so its
+small numerical residual remains a separate open comparison.
+See validation/aac-ld-core-original-2026-11-01.md.
+
 Coupled SBR noise now follows the normative L/R balance orientation. This
 closes the three remaining ordinary LD-SBR S2 waveform discrepancies: all26
 original ISO PCM24 streams have per-channel RMS at most2.016e-7,with zero lag

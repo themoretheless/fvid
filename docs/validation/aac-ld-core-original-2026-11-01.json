@@ -1,0 +1,149 @@
+{
+  "complete": true,
+  "conformance_verdict": null,
+  "delay_search": false,
+  "gain_fit": false,
+  "explicit_lag": 0,
+  "inventory_sha256": "865521883bbc19db177c71c00fcb57bd3619a8ae73a05a21532c3fc22cc13e92",
+  "native_probe_sha256": "8d8c90621ea95b93882c0e499d8577d42aa5e12a28680a0c2bbd40d39ab298ed",
+  "inspect_probe_sha256": "e6b7ae7993e78b1b8c70c2830b2258ca9d37c4c783a708553c4bea929abafdab",
+  "validator_sha256": "9f1da3edb06bf37b8a7ee605253fad4cef2cec90ac7a10a1059778a1a539fc03",
+  "inputs": [
+    {
+      "name": "er_ad1020np_48_ep0.mp4",
+      "sha256": "dc7171311a8038ba697ec878dbaf7b03f3c046716bd06eddc493903df56ff71d",
+      "iso_md5": "7f9011d75ade6c9d8bb4c29f9e27b142",
+      "bytes": 300998
+    },
+    {
+      "name": "er_ad1020np_48.wav",
+      "sha256": "b92073a7e31966703a8bdb8862ad8daaf37b67d6e880c0213fae8f8aea6ccbdc",
+      "iso_md5": "a31deb1470592f3be93302a70624496b",
+      "bytes": 5124284
+    },
+    {
+      "name": "er_ad1120np_24_ep0.mp4",
+      "sha256": "ac7fc0552e09f30fa2ff37a63e819306d0bdc23788112f551e5736f14ad03ffa",
+      "iso_md5": "79f793ae16763c91aa0803b75abfb219",
+      "bytes": 293648
+    },
+    {
+      "name": "er_ad1120np_24.wav",
+      "sha256": "bb6e6d0c3b79229d4ef280706d679d31fdec2b900fe319ce8bdb0296633f2869",
+      "iso_md5": "2f51639b59cc9848eceb96b8c035f431",
+      "bytes": 2561914
+    },
+    {
+      "name": "er_ad_ldmps_tree_5151.mp4",
+      "sha256": "d226163325605ebc73a6aaaaf6fd1a0c4d7ef70a998068f34ee8402f6859ce64",
+      "iso_md5": "9195fbdc7765e9ac77407c4a4a85647a",
+      "bytes": 494575
+    }
+  ],
+  "cases": [
+    {
+      "name": "er_ad1020np_48_ep0",
+      "whole_stream": {
+        "conformance_verdict": null,
+        "reference_sha256": "b92073a7e31966703a8bdb8862ad8daaf37b67d6e880c0213fae8f8aea6ccbdc",
+        "actual_sha256": "a56e13073e4a545dd8ca0002e116d22f227fa80454da591d21ee7921bdb6994b",
+        "rate": 48000,
+        "reference_bits": 24,
+        "channels": 1,
+        "input_frames": 1708032,
+        "compared_frames": 1708032,
+        "explicit_lag": 0,
+        "per_channel": [
+          {
+            "channel": 0,
+            "rmse": 0.011168022256208592,
+            "max_abs_error": 0.43207982182502747,
+            "snr_db": 15.647674422487087
+          }
+        ]
+      },
+      "syntax": {
+        "aus": 3336,
+        "frame_samples": 512,
+        "pns_aus": 2448,
+        "ltp_aus": 0,
+        "window_shapes": {
+          "Sine": 3275,
+          "LowOverlap": 61
+        },
+        "metadata_sha256": "1279ce5a721b67a45fbf67c8d0b460b439d3661c6ab58d5ba9de558ce53d3ccf",
+        "raw_asc_au_records_sha256": "78083064243abc9d57fcf4131563478ced60b6b589fe7bf81b70d812fe189221"
+      },
+      "deterministic_diagnostic": {
+        "scalars": 341504,
+        "rmse": 3.4017593824999774e-08,
+        "max_abs_error": 8.940696716308594e-08
+      },
+      "pns_affected_diagnostic": {
+        "scalars": 1366528,
+        "rmse": 0.012485760636570574,
+        "max_abs_error": 0.43207982182502747
+      },
+      "partition": "Current or previous AU has PNS. Fixed2N LD overlap,no LTP/spatial filtering. Syntax-derived diagnostic only;whole stream retained."
+    },
+    {
+      "name": "er_ad1120np_24_ep0",
+      "whole_stream": {
+        "conformance_verdict": null,
+        "reference_sha256": "bb6e6d0c3b79229d4ef280706d679d31fdec2b900fe319ce8bdb0296633f2869",
+        "actual_sha256": "0127fd7f7606dc213fbbb17f38febea41d8d9caeb11f1b1c87f1ba66c175f1ef",
+        "rate": 24000,
+        "reference_bits": 24,
+        "channels": 1,
+        "input_frames": 853920,
+        "compared_frames": 853920,
+        "explicit_lag": 0,
+        "per_channel": [
+          {
+            "channel": 0,
+            "rmse": 3.45534236804481e-08,
+            "max_abs_error": 1.341104507446289e-07,
+            "snr_db": 125.70421721867245
+          }
+        ]
+      },
+      "syntax": {
+        "aus": 1779,
+        "frame_samples": 480,
+        "pns_aus": 0,
+        "ltp_aus": 0,
+        "window_shapes": {
+          "Sine": 1715,
+          "LowOverlap": 64
+        },
+        "metadata_sha256": "8af871dc17b71bba915e73b0ba4b255270da5f3516007aee2736fd413aa8fa0d",
+        "raw_asc_au_records_sha256": "3578d0cf8c43169b3843d25edd45529b26e99b3d740f68cbcb51ccd8ffa707a0"
+      },
+      "deterministic_diagnostic": {
+        "scalars": 853920,
+        "rmse": 3.45534236804481e-08,
+        "max_abs_error": 1.341104507446289e-07
+      },
+      "pns_affected_diagnostic": null,
+      "partition": "Current or previous AU has PNS. Fixed2N LD overlap,no LTP/spatial filtering. Syntax-derived diagnostic only;whole stream retained."
+    }
+  ],
+  "spatial_input_core_diagnostic": {
+    "aus": 2820,
+    "frame_samples": 512,
+    "pns_aus": 0,
+    "ltp_aus": 0,
+    "window_shapes": {
+      "Sine": 2803,
+      "LowOverlap": 17
+    },
+    "metadata_sha256": "2c23d0850a3c2d7cf23001740b91cbc59555dc9ff8679f8d40f2a64fae6960b4",
+    "raw_asc_au_records_sha256": "615b5b6da42d5455982670e24e09046d978f596d1161078ea3f8e1b21137e42c"
+  },
+  "scope": "Original mono AAC-LD480/512 controls and optional LD5151 core syntax. PNS random waveform identity is not a normative requirement. Diagnostic partitions do not replace full waveform results or establish whole-profile/PNS statistical conformance.",
+  "fetch_workflow": {
+    "flag": "--ld-core-controls",
+    "verified_members": 4,
+    "fetcher_sha256": "21ac3e1c78d47a7e8452c523b470b133651412f7e36599b9e2229bed7b0b1b85"
+  }
+}

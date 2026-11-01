@@ -35,6 +35,7 @@ def main():
  import argparse,hashlib
  parser=argparse.ArgumentParser(description=__doc__)
  parser.add_argument('output',type=pathlib.Path)
+ parser.add_argument('--ld-core-controls',action='store_true',help='fetch paired480/512 AAC-LD core controls instead of the four LD-MPS inputs')
  args=parser.parse_args()
  args.output.mkdir(parents=True,exist_ok=True)
  checksum_name='mpeg4audio-conformance2ndEd_20230125.md5'
@@ -46,9 +47,10 @@ def main():
  sums={}
  for line in checksum.decode().splitlines():
   digest,path=line.split(None,1);sums[path.lstrip('./')]=digest
- names={'er_ad_ldmps_tree_5151','er_eld_ldmps_tree_5151','er_eld_ldmps_ldqmf_1','er_eld_ldmps_ldqmf_2'}
+ pairs=({'er_ad1020np_48_ep0':'er_ad1020np_48','er_ad1120np_24_ep0':'er_ad1120np_24'}if args.ld_core_controls else {n:n for n in ['er_ad_ldmps_tree_5151','er_eld_ldmps_tree_5151','er_eld_ldmps_ldqmf_1','er_eld_ldmps_ldqmf_2']})
  report=[]
  for archive,folder,ext in [('compressedMp4.zip','compressedMp4','.mp4'),('referencesWav.zip','referencesWav','.wav')]:
+  names=set(pairs if ext=='.mp4'else pairs.values())
   remote=Remote(archive)
   found=set()
   with zipfile.ZipFile(remote) as z:

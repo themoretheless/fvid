@@ -1,3 +1,13 @@
+## AAC-LD original core/PNS diagnostic, 2026-11-01
+
+New bounded mono core inspector and optional offline audit qualify source
+geometry480/512 and distinguish PNS waveform randomness from deterministic
+PCM differences. The24kHz control has full RMS3.46e-8;the48kHz non-PNS-current/
+previous partition has RMS3.40e-8 while its complete raw result stays recorded.
+No production bug or new codec acceptance is inferred from this partition.
+Original LD5151 core has no PNS/LTP;its numerical residual remains open.
+[Evidence](validation/aac-ld-core-original-2026-11-01.md).
+
 ## Shared single-rate AAC LD-QMF synthesis, 2026-11-01
 
 Corrected the AAC LD-SBR/MPS32 synthesis convention from generic2n-127 to2n-31.
