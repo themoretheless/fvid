@@ -1,0 +1,14 @@
+[
+  {
+    "path": "repeat.log",
+    "before_sha256": "bbe7bdb6f4da53e4ee7356f79a7d394cf56ea633518b8c401429d724e3c88a33",
+    "after_sha256": "548267d82bfb4a06288985131f2846203b540d9a1a109f7ee73afd0911222013",
+    "change": "Trailing whitespace and terminal blank lines only;diagnostic lines retained."
+  },
+  {
+    "path": "seven-case/repeat.log",
+    "before_sha256": "80c2104ec6fdfcd9800b7e667d9fbd5d03ff6bd4518a055ecfa35b63f1163df5",
+    "after_sha256": "48b36e5d4b7239e5438dd47bf55e590da0928dbd1b4d9e79e17f11872a2f5241",
+    "change": "Trailing whitespace and terminal blank lines only;diagnostic lines retained."
+  }
+]

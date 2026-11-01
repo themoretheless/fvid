@@ -2511,6 +2511,14 @@ impl Player {
         self.try_start_audio_choice(path,Some(nth))
     }
     fn try_start_audio_choice(&mut self, path: &Path, selected: Option<usize>) -> bool {
+        let output = self.preferred_output.clone();
+        self.try_start_audio_choice_with_backend(path, selected, move || {
+            Box::new(crate::audio::PlatformBackend::with_output_device(output))
+        })
+    }
+
+    fn try_start_audio_choice_with_backend<F>(&mut self, path: &Path, selected: Option<usize>, backend: F) -> bool
+    where F: FnOnce() -> Box<dyn crate::audio::AudioBackend> + Send + 'static {
         let mut stream = None;
         for attempt in AUDIO_READERS {
             if let Some(found) = attempt.open(path, selected) {
@@ -2529,10 +2537,7 @@ impl Player {
         // sounding, which is what the panel is asked to name.
         self.sound_codec = sound_codec(stream.codec());
         self.audio_track = selected.unwrap_or_else(||stream.audio_track_index());
-        let output = self.preferred_output.clone();
-        self.audio = Some(crate::audio_thread::AudioPlayback::start_with_dolby_policy(stream, self.dolby_policy, move || {
-            Box::new(crate::audio::PlatformBackend::with_output_device(output))
-        }));
+        self.audio = Some(crate::audio_thread::AudioPlayback::start_with_dolby_policy(stream, self.dolby_policy, backend));
         true
     }
 
@@ -2570,6 +2575,14 @@ impl Player {
     /// new thread starts from where the picture stands, so switching tracks does
     /// not rewind the video or restart the item.
     fn cycle_audio_track(&mut self, forward: bool) {
+        let output = self.preferred_output.clone();
+        self.cycle_audio_track_with_backend(forward, move || {
+            Box::new(crate::audio::PlatformBackend::with_output_device(output))
+        });
+    }
+
+    fn cycle_audio_track_with_backend<F>(&mut self, forward: bool, backend: F)
+    where F: FnOnce() -> Box<dyn crate::audio::AudioBackend> + Send + 'static {
         let len = self.audio_tracks.len();
         if len < 2 {
             self.show_osd(if len == 0 { "No audio" } else { "Audio 1/1" });
@@ -2579,11 +2592,22 @@ impl Player {
             return;
         };
         let nth = track_step(self.audio_track, len, forward);
-        let at = self.timeline().0;
+        // Preserve pending/terminal transport intent first. Otherwise keep an
+        // active source audio clock unchanged; applying its A/V shift twice
+        // would skip or repeat sound. A picture-owned phase needs the inverse
+        // shift, while sound-only transport never uses that video delay.
+        let picture = self.playback.is_some();
+        let inverse_delay = self.audio_delay_ms.saturating_neg();
+        let source_phase = |at| if picture { delayed_clock(at, inverse_delay) } else { at };
+        let at = self.seek_target
+            .or_else(|| self.terminal_clock.map(source_phase))
+            .or_else(|| self.audio.as_ref().filter(|_| !picture || !self.audio_ended)
+                .map(|audio| audio.transport_position()))
+            .or_else(|| self.presentation_clock().map(source_phase));
         let playing = !self.paused && !self.ended;
         // Dropping the old handle stops its thread before the new one starts.
         self.audio = None;
-        if !self.try_start_audio(&path, nth) {
+        if !self.try_start_audio_choice_with_backend(&path, Some(nth), backend) {
             self.show_osd("Audio track unavailable");
             return;
         }
@@ -13206,3 +13230,7 @@ mod sound_eof_loop_regressions;
 #[cfg(test)]
 #[path = "player_audio_seek_intent_tests.rs"]
 mod audio_seek_intent_regressions;
+
+#[cfg(test)]
+#[path = "player_track_clock_tests.rs"]
+mod track_clock_regressions;

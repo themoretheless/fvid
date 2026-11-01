@@ -1,8 +1,8 @@
 {
   "target": 1000,
   "counting_rule": "One independently confirmed problem or useful capability; fixture variants and baseline integration repairs are excluded. Only accepted entries count.",
-  "accepted_count": 469,
-  "next_id": "FVID-0470",
+  "accepted_count": 470,
+  "next_id": "FVID-0471",
   "entries": [
     {
       "id": "FVID-0001",
@@ -5292,6 +5292,17 @@
       "result": "Retain accepted navigation intent separately from actual device position until the worker commits its latest seek/rewind after successful flush and sample anchoring. Use it only for sound-only navigation/timeline;public position and A/V sync keep actual clocks. Seven unchanged regressions verify requested versus actual phase,exact native PCM suffixes,paused resume,quantized75ms+1ns release and natural EOF. Twenty repeats pass140cases;all9gates pass1596physical-source-distinct checks and both builds with five old ignores unchanged. Existing Worker/mock fixtures receive required private fields only;assertions/bodies are independently verified unchanged. No performance,physical audio or new native-window duration claim.",
       "status": "accepted",
       "validation": "batch-469-validation.json"
+    },
+    {
+      "id": "FVID-0470",
+      "batch": 470,
+      "title": "Keep the active A-V phase when replacing a native audio track",
+      "source": "src/player.rs",
+      "regression": "src/player_track_clock_tests.rs",
+      "before": "Identical final12case baseline passes5controls but fails7real track transports. Future300ms picture origin replaces live75/175ms,converted absent-audio25ms and logical stopped50ms. The first unaccepted presentation-clock proposal additionally applies A-V delay twice;offset diagnostics and its seven-case qualification are retained but excluded from final acceptance.",
+      "result": "Prefer pending seek and logical terminal intent,retain an active unshifted source-audio clock,and convert picture-owned phase back to source time. Sound-only transport keeps its raw clock,including healthy EOF. Twelve unchanged regressions verify native selected PCM prefixes,pause/resume,positive/negative delay,missing sound,terminal bounds in both modes,pending seek,exact video RGB/generation and final-picture seek/EOF. Twenty repeats pass240cases;all9gates pass1608physical-source-distinct checks and both builds with five old ignores unchanged. Private factory delivery is verified behavior-preserving and adds0IDs. Stand repairs,additional cases and unaccepted candidate corrections add0IDs. No performance,physical audio or new native-window duration claim.",
+      "status": "accepted",
+      "validation": "batch-470-validation.json"
     }
   ]
 }

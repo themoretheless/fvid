@@ -1,0 +1,14 @@
+{
+  "offline": true,
+  "requires_ffmpeg": false,
+  "requires_network": false,
+  "files": {
+    "frame-2.yuv16": "2f59155bee83baf25a0d39c17290257f055569e5b1d77ca8b866b1a4b2cee6f7",
+    "frame-0.yuv16": "b4cc94ff03bd17b32107a79a64ba427cd43b6e49d209bb4d29190f3deb737a11",
+    "track-0.f32le": "35ae17cde80a4f6aab0cbcbbc5ed00d93530921eabe3a1f45f1928ef81128ca5",
+    "manifest.json": "4d2bf1032fd247fb1a963a8054a388b6c9b40961231d3c53c7716c33ff7b5dcc",
+    "track-1.f32le": "6bda0815b82d65817a535c4f576d1b76b3b980567944dc92f5ed86d9e9623023",
+    "frame-1.yuv16": "31d05f629132273f660622387ef2865866de6688c0969265e891ad9d4c936237",
+    "movie.mp4": "1569ca9690f5a618f6c74bdd93500b62442446360034cce9a5fd065771c4ba1d"
+  }
+}

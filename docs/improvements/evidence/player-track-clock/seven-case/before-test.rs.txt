@@ -1,0 +1,126 @@
+//! Native MP4 track replacement must retain the live picture phase.
+use super::*;
+use std::{
+    io::Cursor,
+    sync::{
+        Arc, Mutex,
+        atomic::{AtomicBool, AtomicU64, Ordering},
+    },
+};
+fn root() -> PathBuf {
+    PathBuf::from(env!("CARGO_MANIFEST_DIR"))
+        .join("tests/fixtures/playback-errors/player-track-clock")
+}
+fn bytes(n: &str) -> Vec<u8> {
+    std::fs::read(root().join(n)).unwrap()
+}
+fn tick(p: &mut Player, ctx: &egui::Context) {
+    let mut out = ctx.run_ui(Default::default(), |ui| p.present(ui.ctx()));
+    out.textures_delta.clear();
+}
+#[derive(Default)]
+struct Trace {
+    pcm: Vec<u8>,
+    flushes: Vec<Duration>,
+    pauses: usize,
+    resumes: usize,
+}
+struct Device {
+    clock: Arc<AtomicU64>,
+    trace: Arc<Mutex<Trace>>,
+    fail: Arc<AtomicBool>,
+    running: bool,
+    anchor: Duration,
+    frontier: Duration,
+}
+impl crate::audio::AudioBackend for Device {
+    fn start(&mut self, s: crate::audio::AudioSpec) -> Result<(), crate::audio::AudioError> {
+        assert_eq!((s.sample_rate, s.channels), (8000, 1));
+        Ok(())
+    }
+    fn position(&self) -> Duration {
+        if self.running {
+            Duration::from_nanos(self.clock.load(Ordering::SeqCst))
+        } else {
+            self.anchor
+        }
+    }
+    fn push(&mut self, p: crate::audio::AudioPacket) -> Result<(), crate::audio::AudioError> {
+        self.frontier =
+            p.presentation_time() + Duration::from_nanos(p.data.len() as u64 / 4 * 125000);
+        self.trace.lock().unwrap().pcm.extend(p.data);
+        Ok(())
+    }
+    fn flush(&mut self, t: Duration) -> Result<(), crate::audio::AudioError> {
+        self.trace.lock().unwrap().flushes.push(t);
+        self.anchor = t;
+        self.frontier = t; // Flush discards the previous queued output.
+        self.clock.store(t.as_nanos() as u64, Ordering::SeqCst);
+        Ok(())
+    }
+    fn pause(&mut self) -> Result<(), crate::audio::AudioError> {
+        self.anchor = self.position();
+        self.running = false;
+        self.trace.lock().unwrap().pauses += 1;
+        Ok(())
+    }
+    fn resume(&mut self) -> Result<(), crate::audio::AudioError> {
+        self.running = true;
+        self.trace.lock().unwrap().resumes += 1;
+        Ok(())
+    }
+    fn stop(&mut self) -> Result<(), crate::audio::AudioError> {
+        self.running = false;
+        Ok(())
+    }
+    fn drain_status(&self) -> Result<bool, crate::audio::AudioError> {
+        if self.fail.load(Ordering::SeqCst) {
+            Err(crate::audio::AudioError::PlaybackError(
+                "synthetic output drain failure".into(),
+            ))
+        } else {
+            Ok(self.position() >= self.frontier)
+        }
+    }
+}
+
+fn until(mut ready:impl FnMut()->bool){let end=Instant::now()+Duration::from_secs(5);while !ready(){assert!(Instant::now()<end,"native track clock timed out");std::thread::sleep(Duration::from_millis(1));}}
+fn factory(clock:Arc<AtomicU64>,trace:Arc<Mutex<Trace>>)->impl FnOnce()->Box<dyn crate::audio::AudioBackend>+Send+'static{move||Box::new(Device{clock,trace,fail:Arc::new(AtomicBool::new(false)),running:false,anchor:Duration::ZERO,frontier:Duration::ZERO})}
+fn open(ctx:&egui::Context,phase:u64,nth:usize)->(Player,Arc<AtomicU64>,Arc<Mutex<Trace>>){
+    let mut p=Player{queue:vec![root().join("movie.mp4")],no_audio:true,asynchronous_open:false,..Default::default()};p.play_index(0);
+    until(||{tick(&mut p,ctx);assert!(p.error.is_none());p.presented.is_some()&&!p.buffering&&!p.seek_preview});assert_eq!(p.interval,Some((0,300,1000)));
+    let clock=Arc::new(AtomicU64::new(phase*1_000_000));let trace=Arc::new(Mutex::new(Trace::default()));let path=root().join("movie.mp4");
+    assert!(p.try_start_audio_choice_with_backend(&path,Some(nth),factory(clock.clone(),trace.clone())));
+    p.audio.as_ref().unwrap().play();until(||p.audio.as_ref().unwrap().position()==Duration::from_millis(phase));
+    tick(&mut p,ctx);assert_eq!(p.audio_track,nth);assert_eq!(p.audio_tracks.len(),2);assert_eq!(p.interval,Some((0,300,1000)));assert_eq!(p.presentation_clock(),Some(Duration::from_millis(phase)));
+    (p,clock,trace)
+}
+fn finish(p:&mut Player,ctx:&egui::Context,clock:&AtomicU64){clock.store(600_000_000,Ordering::SeqCst);until(||{tick(p,ctx);p.audio_ended});p.seek_time(Duration::from_millis(1200));until(||{tick(p,ctx);!p.seek_preview&&!p.buffering});assert_eq!(p.interval,Some((1200,1500,1000)));until(||{tick(p,ctx);p.ended});assert!(p.error.is_none());}
+#[test]
+fn exact_mp4_two_track_pcm_video_seek_and_eof_controls(){
+    let mut r=crate::playback_mp4::Mp4VideoReader::open_software(Cursor::new(bytes("movie.mp4")),Default::default(),32<<20).unwrap();for i in 0..5{let f=r.read_frame().unwrap().unwrap();assert_eq!((f.sample_index,f.presentation_time.ticks,f.duration.ticks),(i,i as i64*300,300));let yuv:Vec<_>=f.picture.y.iter().chain(&f.picture.cb).chain(&f.picture.cr).flat_map(|v|v.to_le_bytes()).collect();assert_eq!(yuv,bytes(&format!("frame-{}.yuv16",i%3)));}assert!(r.read_frame().unwrap().is_none());
+    for nth in 0..2{let source=crate::playback_mp4_audio::Mp4AudioReader::open_at(Cursor::new(bytes("movie.mp4")),Default::default(),nth).unwrap();let c=Arc::new(AtomicU64::new(600_000_000));let t=Arc::new(Mutex::new(Trace::default()));let a=crate::audio_thread::AudioPlayback::start(Box::new(source),factory(c,t.clone()));a.play();until(||matches!(a.poll(),Some(crate::audio_thread::AudioEvent::Ended(_))));assert_eq!(t.lock().unwrap().pcm,bytes(&format!("track-{nth}.f32le")));assert_eq!(a.duration(),Some(Duration::from_millis(600)));}
+}
+fn switch(phase:u64,from:usize,forward:bool,paused:bool){
+    let ctx=egui::Context::default();let(mut p,_old_clock,old_trace)=open(&ctx,phase,from);if paused{p.toggle_pause();until(||old_trace.lock().unwrap().pauses==1);}
+    let image=p.rgb_frame.clone();let generation=p.playback.as_ref().unwrap().generation();let next=Arc::new(AtomicU64::new(0));let trace=Arc::new(Mutex::new(Trace::default()));
+    p.cycle_audio_track_with_backend(forward,factory(next.clone(),trace.clone()));let wanted=Duration::from_millis(phase);until(||!trace.lock().unwrap().flushes.is_empty());let targets={trace.lock().unwrap().flushes.clone()};assert_eq!(targets,[wanted],"track switch jumped to the future picture end");assert_eq!(p.audio_track,1-from);assert_eq!(p.paused,paused);assert_eq!(p.playback.as_ref().unwrap().generation(),generation);assert_eq!(p.rgb_frame,image);
+    if paused{assert_eq!(trace.lock().unwrap().resumes,0);p.toggle_pause();}
+    until(||!trace.lock().unwrap().pcm.is_empty());let actual=trace.lock().unwrap().pcm.clone();let oracle=bytes(&format!("track-{}.f32le",1-from));let start=phase as usize*8*4;assert_eq!(actual,&oracle[start..start+actual.len()]);until(||p.audio.as_ref().unwrap().position()==wanted);tick(&mut p,&ctx);assert_eq!(p.presentation_clock(),Some(wanted));assert_eq!(p.interval,Some((0,300,1000)));finish(&mut p,&ctx,&next);
+}
+#[test]fn forward_track_switch_keeps_live75ms_phase(){switch(75,0,true,false);}
+#[test]fn backward_track_switch_keeps_live175ms_phase(){switch(175,1,false,false);}
+#[test]fn paused_track_switch_keeps_phase_and_stays_silent_until_resume(){switch(75,0,true,true);}
+#[test]
+fn pending_paused_video_seek_keeps_explicit_target_as_track_origin(){
+    let ctx=egui::Context::default();let(mut p,_clock,old)=open(&ctx,75,0);p.toggle_pause();until(||old.lock().unwrap().pauses==1);p.seek_time(Duration::from_millis(175));
+    let clock=Arc::new(AtomicU64::new(0));let trace=Arc::new(Mutex::new(Trace::default()));p.cycle_audio_track_with_backend(true,factory(clock.clone(),trace.clone()));until(||!trace.lock().unwrap().flushes.is_empty());assert_eq!(trace.lock().unwrap().flushes.clone(),[Duration::from_millis(175)]);until(||p.audio.as_ref().unwrap().position()==Duration::from_millis(175));assert!(p.paused);assert_eq!(trace.lock().unwrap().resumes,0);
+    until(||{tick(&mut p,&ctx);!p.seek_preview&&!p.buffering});assert!(p.paused);p.toggle_pause();finish(&mut p,&ctx,&clock);
+}
+#[test]
+fn sound_only_track_switch_keeps_its_actual_audio_phase_control(){
+    let ctx=egui::Context::default();let(mut p,_clock,_old)=open(&ctx,75,0);p.playback=None;p.presented=None;p.interval=None;
+    let clock=Arc::new(AtomicU64::new(0));let trace=Arc::new(Mutex::new(Trace::default()));p.cycle_audio_track_with_backend(true,factory(clock.clone(),trace.clone()));until(||!trace.lock().unwrap().flushes.is_empty());assert_eq!(trace.lock().unwrap().flushes.clone(),[Duration::from_millis(75)]);until(||p.audio.as_ref().unwrap().position()==Duration::from_millis(75));clock.store(600_000_000,Ordering::SeqCst);until(||{tick(&mut p,&ctx);p.ended});assert!(p.audio_ended&&p.error.is_none());
+}
+#[test]
+fn one_listed_track_does_not_replace_the_running_worker(){let ctx=egui::Context::default();let(mut p,_clock,_old)=open(&ctx,75,0);p.audio_tracks.truncate(1);p.cycle_audio_track_with_backend(true,||panic!("single-track navigation opened another device"));assert_eq!(p.audio_track,0);assert_eq!(p.presentation_clock(),Some(Duration::from_millis(75)));assert_eq!(p.audio.as_ref().unwrap().generation(),0);}

@@ -1,0 +1,31 @@
+diff --git a/src/player.rs b/src/player.rs
+index 2d786c5779..9e18280911 100644
+--- a/src/player.rs
++++ b/src/player.rs
+@@ -2513,0 +2514,8 @@ impl Player {
++        let output = self.preferred_output.clone();
++        self.try_start_audio_choice_with_backend(path, selected, move || {
++            Box::new(crate::audio::PlatformBackend::with_output_device(output))
++        })
++    }
++
++    fn try_start_audio_choice_with_backend<F>(&mut self, path: &Path, selected: Option<usize>, backend: F) -> bool
++    where F: FnOnce() -> Box<dyn crate::audio::AudioBackend> + Send + 'static {
+@@ -2532,4 +2540 @@ impl Player {
+-        let output = self.preferred_output.clone();
+-        self.audio = Some(crate::audio_thread::AudioPlayback::start_with_dolby_policy(stream, self.dolby_policy, move || {
+-            Box::new(crate::audio::PlatformBackend::with_output_device(output))
+-        }));
++        self.audio = Some(crate::audio_thread::AudioPlayback::start_with_dolby_policy(stream, self.dolby_policy, backend));
+@@ -2572,0 +2578,8 @@ impl Player {
++        let output = self.preferred_output.clone();
++        self.cycle_audio_track_with_backend(forward, move || {
++            Box::new(crate::audio::PlatformBackend::with_output_device(output))
++        });
++    }
++
++    fn cycle_audio_track_with_backend<F>(&mut self, forward: bool, backend: F)
++    where F: FnOnce() -> Box<dyn crate::audio::AudioBackend> + Send + 'static {
+@@ -2586 +2599 @@ impl Player {
+-        if !self.try_start_audio(&path, nth) {
++        if !self.try_start_audio_choice_with_backend(&path, Some(nth), backend) {

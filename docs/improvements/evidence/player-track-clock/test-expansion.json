@@ -1,0 +1,19 @@
+{
+  "initial_tests": 7,
+  "final_tests": 12,
+  "additional_cases": [
+    "Positive audio delay",
+    "Negative audio delay",
+    "Absent-audio inverse clock conversion",
+    "Ended sound-only track ignores video delay",
+    "Logical terminal stop phase in both video and sound-only modes"
+  ],
+  "first_candidate": {
+    "passed": 7,
+    "failed": 3
+  },
+  "numerical_original_seven_case_expectations_preserved_at_zero_delay": true,
+  "count_delta": 0,
+  "acceptance": "Only final identical12case baseline/candidate qualifies.",
+  "additional_candidate_control_failure": "500ms instead of native599.875ms end anchor;final sound-only path keeps raw audio clock."
+}

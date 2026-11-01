@@ -1,0 +1,12 @@
+{
+  "baseline_and_candidate_test_sha256": "e5acd22da6b72506526fbe68a5c58d99259c7b1c89e8ee5126799f14dbffe2bb",
+  "test_unchanged": true,
+  "existing_tests_modified": false,
+  "baseline": {
+    "passed": 4,
+    "failed": 3,
+    "exit_code": 101
+  },
+  "stand_diagnostics": "stand-audit.json",
+  "factory_refactor": "refactor-verification.json"
+}

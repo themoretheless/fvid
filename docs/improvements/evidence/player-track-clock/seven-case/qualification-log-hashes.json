@@ -1,0 +1,56 @@
+{
+  "integration": {
+    "raw_sha256": "25d63a5af70568cf9cad9e1489df5ca2a81e96c8d08fc8511cdb4007dca16198",
+    "archived_sha256": "79e08be94ca7a76305a4ae0baa96e36a4fb2abbc4b4489079c9070a75ea3f4f4",
+    "archive": "qualification/integration.log",
+    "raw_unavailable_after_interruption": false
+  },
+  "root-mp4": {
+    "raw_sha256": "d201da6c82b1761b301e501b8885e3dabd8a467c26f197cbcc3158948ec47b9a",
+    "archived_sha256": "71107d28fc1692aca99fbfd51667df674ec961c02277d885aed274ae4902f6c6",
+    "archive": "qualification/root-mp4.log",
+    "raw_unavailable_after_interruption": false
+  },
+  "root-webm": {
+    "raw_sha256": "1497b3a7c5c3aabb76ce560fa8c657373fd03766bbe315447c8c55930da3aa61",
+    "archived_sha256": "3aab53da4282cc924d64a206619d292f81504145030eb6c567c20761732e086c",
+    "archive": "qualification/root-webm.log",
+    "raw_unavailable_after_interruption": false
+  },
+  "player-units": {
+    "raw_sha256": "e09d8b52765c4736242bcc2f3a94296e56424dc810e1e4a4e1d3a10b61ee2c3f",
+    "archived_sha256": "56c67dfd7923288721571d95e8de3ca9934a8152496c3e2dbe69530e037fcf65",
+    "archive": "qualification/player-units.log",
+    "raw_unavailable_after_interruption": false
+  },
+  "media": {
+    "raw_sha256": "894750634e0bb6e71430ec80e5b117266d86a25c0a8d89bc831a7e5c7d7bc04d",
+    "archived_sha256": "e0e27eba401dae8b3d6aa1970c16fdbaebdd940838b50cf892f9ccc25230b9e8",
+    "archive": "qualification/media.log",
+    "raw_unavailable_after_interruption": false
+  },
+  "core-check": {
+    "raw_sha256": "66365869d5f96636f441e09d0d8ee25a50e965e34325e0e7314862d2808578c7",
+    "archived_sha256": "66365869d5f96636f441e09d0d8ee25a50e965e34325e0e7314862d2808578c7",
+    "archive": "qualification/core-check.log",
+    "raw_unavailable_after_interruption": false
+  },
+  "player-check": {
+    "raw_sha256": "c891f179352612aeb8d65eb151a7ef9bd3e1764ec12cb34e2f7ebc9e730bd358",
+    "archived_sha256": "c891f179352612aeb8d65eb151a7ef9bd3e1764ec12cb34e2f7ebc9e730bd358",
+    "archive": "qualification/player-check.log",
+    "raw_unavailable_after_interruption": false
+  },
+  "audio-thread": {
+    "raw_sha256": "b2a758f26c6819956f744291b4b21c3b7d86e8126001131409ed99bde7bb2568",
+    "archived_sha256": "e5905f21a1d8eac101230c7aa2087943ce69c7986d20d175fb7d303736571ea8",
+    "archive": "qualification/audio-thread.log",
+    "raw_unavailable_after_interruption": false
+  },
+  "video-thread": {
+    "raw_sha256": "7529d82c9e81799e4833e9a855d5f8ea9cc64eb5e3ed9de883fb339f43e39382",
+    "archived_sha256": "9f7a3f206e1857397962e8ea8a2ea2724ac61b32022020932dda97b4a4d92e2a",
+    "archive": "qualification/video-thread.log",
+    "raw_unavailable_after_interruption": false
+  }
+}

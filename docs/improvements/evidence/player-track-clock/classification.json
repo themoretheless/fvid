@@ -1,0 +1,9 @@
+{
+  "proposed_id": "FVID-0470",
+  "count_delta": 1,
+  "baseline_commit": "009612632f7de1730f51870ddf554f0cf7fc5976",
+  "older_commit": "9ca4c32089c216f82574c0895da3a0bdbbd76c57",
+  "unchanged_track_replacement_sha256": "b15e963be08d72464a34eb6da0a4d09baa278edca0306faaa3d38ebd39083997",
+  "independent_problem": "Native selected-track seek origin uses future picture end,not active audio/paused phase. This branch predates recent transport-clock fixes.",
+  "factory_plumbing_controls_directions_and_stand_repairs_count_delta": 0
+}

@@ -1,0 +1,6 @@
+{
+  "exit_code": 101,
+  "passed": 5,
+  "failed": 7,
+  "failure": "Track switches use future300ms instead of live75/175ms,converted25ms or logical stopped50ms;positive/negative delays also shift new audio incorrectly."
+}

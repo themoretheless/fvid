@@ -1,0 +1,23 @@
+{
+  "baseline_and_candidate_test_sha256": "1174345de12fae8b158ba6aebf9c6f7432d108db43cdf3ba3a9866cdf1c16e05",
+  "test_unchanged": true,
+  "existing_tests_modified": false,
+  "baseline": {
+    "passed": 5,
+    "failed": 7,
+    "exit_code": 101
+  },
+  "factory_refactor": "refactor-verification.json",
+  "stand_diagnostics": "stand-audit.json",
+  "expanded_cases": "test-expansion.json",
+  "historical_seven_case": "seven-case/scope.json",
+  "unaccepted_candidate_diagnostics": [
+    "offset-diagnostic.log",
+    "sound-only-offset-diagnostic.log"
+  ],
+  "focused_candidate": {
+    "passed": 12,
+    "failed": 0,
+    "exit_code": 0
+  }
+}

@@ -1,0 +1,12 @@
+{
+  "initial": {
+    "passed": 3,
+    "failed": 4
+  },
+  "confirmed_defects": "Three switches requested300ms instead of75/175ms.",
+  "excluded": "Pending-paused positive control timed out;diagnose stand before qualification. Secondary lock poisoning follows assertion failure and is not a separate defect.",
+  "changes": "Wait for actual worker position after observed flush;clone trace before assertions;stage diagnostics only. No assertion removed or relaxed.",
+  "count_delta": 0,
+  "resolved_cause": "Controlled backend flush retained its previous600ms frontier. MP4 end seek lands599.875ms and publishes no new PCM,so fake drain never completed. Reset frontier to the actual flush anchor,as the flush contract requires. No production change or weakened assertion.",
+  "final_assertions_preserved": true
+}

@@ -1,0 +1,9 @@
+{
+  "status": "qualified;pending delivery",
+  "accepted_count": 470,
+  "next_id": "FVID-0471",
+  "accepted_ids": [
+    "FVID-0470"
+  ],
+  "active_session": null
+}

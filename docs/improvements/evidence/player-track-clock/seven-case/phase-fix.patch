@@ -1,0 +1,5 @@
+--- a/src/player.rs
++++ b/src/player.rs
+@@ -2595 +2595 @@
+-        let at = self.timeline().0;
++        let at = self.presentation_clock();

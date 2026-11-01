@@ -1,0 +1,11 @@
+{
+  "count_delta": 0,
+  "public_api_changed": false,
+  "native_factory_unchanged": "Both default wrappers construct PlatformBackend::with_output_device from the same cloned preference.",
+  "opening_body_equal_except_factory_delivery": true,
+  "cycle_body_equal_except_factory_delivery": true,
+  "baseline_keeps_original_timeline_origin": true,
+  "published_player_sha256": "f3a870baea2a2398d91b27e6fddb54c331eae17a1e738ec416d6e8ee7473e9d4",
+  "published_methods_sha256": "09462d0ca2ad1af65345d3ff0e5114c2861601a9fa40796b8c6fe702c4b2efdd",
+  "purpose": "Real selected-file native audio worker regression without a physical output device or test-only control hook."
+}

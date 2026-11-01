@@ -1,0 +1,359 @@
+run 1
+
+running 12 tests
+test player::track_clock_regressions::ended_sound_only_track_keeps_unshifted_source_clock_control ... ok
+test player::track_clock_regressions::exact_mp4_two_track_pcm_video_seek_and_eof_controls ... ok
+test player::track_clock_regressions::backward_track_switch_keeps_live175ms_phase ... ok
+test player::track_clock_regressions::forward_track_switch_keeps_live75ms_phase ... ok
+test player::track_clock_regressions::one_listed_track_does_not_replace_the_running_worker ... ok
+test player::track_clock_regressions::negative_audio_delay_is_retained_once_during_track_switch ... ok
+test player::track_clock_regressions::paused_track_switch_keeps_phase_and_stays_silent_until_resume ... ok
+test player::track_clock_regressions::pending_paused_video_seek_keeps_explicit_target_as_track_origin ... ok
+test player::track_clock_regressions::positive_audio_delay_is_retained_once_during_track_switch ... ok
+test player::track_clock_regressions::replacing_absent_sound_converts_paused_picture_phase_back_to_audio_phase ... ok
+test player::track_clock_regressions::sound_only_track_switch_keeps_its_actual_audio_phase_control ... ok
+test player::track_clock_regressions::stopped_track_switch_keeps_terminal_phase_in_video_and_audio_modes ... ok
+
+test result: ok. 12 passed; 0 failed; 0 ignored; 0 measured; 1179 filtered out; finished in 3.14s
+
+run 2
+
+running 12 tests
+test player::track_clock_regressions::ended_sound_only_track_keeps_unshifted_source_clock_control ... ok
+test player::track_clock_regressions::exact_mp4_two_track_pcm_video_seek_and_eof_controls ... ok
+test player::track_clock_regressions::backward_track_switch_keeps_live175ms_phase ... ok
+test player::track_clock_regressions::forward_track_switch_keeps_live75ms_phase ... ok
+test player::track_clock_regressions::one_listed_track_does_not_replace_the_running_worker ... ok
+test player::track_clock_regressions::negative_audio_delay_is_retained_once_during_track_switch ... ok
+test player::track_clock_regressions::paused_track_switch_keeps_phase_and_stays_silent_until_resume ... ok
+test player::track_clock_regressions::pending_paused_video_seek_keeps_explicit_target_as_track_origin ... ok
+test player::track_clock_regressions::positive_audio_delay_is_retained_once_during_track_switch ... ok
+test player::track_clock_regressions::replacing_absent_sound_converts_paused_picture_phase_back_to_audio_phase ... ok
+test player::track_clock_regressions::sound_only_track_switch_keeps_its_actual_audio_phase_control ... ok
+test player::track_clock_regressions::stopped_track_switch_keeps_terminal_phase_in_video_and_audio_modes ... ok
+
+test result: ok. 12 passed; 0 failed; 0 ignored; 0 measured; 1179 filtered out; finished in 3.13s
+
+run 3
+
+running 12 tests
+test player::track_clock_regressions::ended_sound_only_track_keeps_unshifted_source_clock_control ... ok
+test player::track_clock_regressions::exact_mp4_two_track_pcm_video_seek_and_eof_controls ... ok
+test player::track_clock_regressions::backward_track_switch_keeps_live175ms_phase ... ok
+test player::track_clock_regressions::forward_track_switch_keeps_live75ms_phase ... ok
+test player::track_clock_regressions::one_listed_track_does_not_replace_the_running_worker ... ok
+test player::track_clock_regressions::negative_audio_delay_is_retained_once_during_track_switch ... ok
+test player::track_clock_regressions::paused_track_switch_keeps_phase_and_stays_silent_until_resume ... ok
+test player::track_clock_regressions::pending_paused_video_seek_keeps_explicit_target_as_track_origin ... ok
+test player::track_clock_regressions::positive_audio_delay_is_retained_once_during_track_switch ... ok
+test player::track_clock_regressions::replacing_absent_sound_converts_paused_picture_phase_back_to_audio_phase ... ok
+test player::track_clock_regressions::sound_only_track_switch_keeps_its_actual_audio_phase_control ... ok
+test player::track_clock_regressions::stopped_track_switch_keeps_terminal_phase_in_video_and_audio_modes ... ok
+
+test result: ok. 12 passed; 0 failed; 0 ignored; 0 measured; 1179 filtered out; finished in 3.12s
+
+run 4
+
+running 12 tests
+test player::track_clock_regressions::ended_sound_only_track_keeps_unshifted_source_clock_control ... ok
+test player::track_clock_regressions::exact_mp4_two_track_pcm_video_seek_and_eof_controls ... ok
+test player::track_clock_regressions::backward_track_switch_keeps_live175ms_phase ... ok
+test player::track_clock_regressions::forward_track_switch_keeps_live75ms_phase ... ok
+test player::track_clock_regressions::one_listed_track_does_not_replace_the_running_worker ... ok
+test player::track_clock_regressions::negative_audio_delay_is_retained_once_during_track_switch ... ok
+test player::track_clock_regressions::paused_track_switch_keeps_phase_and_stays_silent_until_resume ... ok
+test player::track_clock_regressions::pending_paused_video_seek_keeps_explicit_target_as_track_origin ... ok
+test player::track_clock_regressions::positive_audio_delay_is_retained_once_during_track_switch ... ok
+test player::track_clock_regressions::replacing_absent_sound_converts_paused_picture_phase_back_to_audio_phase ... ok
+test player::track_clock_regressions::sound_only_track_switch_keeps_its_actual_audio_phase_control ... ok
+test player::track_clock_regressions::stopped_track_switch_keeps_terminal_phase_in_video_and_audio_modes ... ok
+
+test result: ok. 12 passed; 0 failed; 0 ignored; 0 measured; 1179 filtered out; finished in 3.08s
+
+run 5
+
+running 12 tests
+test player::track_clock_regressions::ended_sound_only_track_keeps_unshifted_source_clock_control ... ok
+test player::track_clock_regressions::exact_mp4_two_track_pcm_video_seek_and_eof_controls ... ok
+test player::track_clock_regressions::backward_track_switch_keeps_live175ms_phase ... ok
+test player::track_clock_regressions::forward_track_switch_keeps_live75ms_phase ... ok
+test player::track_clock_regressions::one_listed_track_does_not_replace_the_running_worker ... ok
+test player::track_clock_regressions::negative_audio_delay_is_retained_once_during_track_switch ... ok
+test player::track_clock_regressions::paused_track_switch_keeps_phase_and_stays_silent_until_resume ... ok
+test player::track_clock_regressions::pending_paused_video_seek_keeps_explicit_target_as_track_origin ... ok
+test player::track_clock_regressions::positive_audio_delay_is_retained_once_during_track_switch ... ok
+test player::track_clock_regressions::replacing_absent_sound_converts_paused_picture_phase_back_to_audio_phase ... ok
+test player::track_clock_regressions::sound_only_track_switch_keeps_its_actual_audio_phase_control ... ok
+test player::track_clock_regressions::stopped_track_switch_keeps_terminal_phase_in_video_and_audio_modes ... ok
+
+test result: ok. 12 passed; 0 failed; 0 ignored; 0 measured; 1179 filtered out; finished in 3.05s
+
+run 6
+
+running 12 tests
+test player::track_clock_regressions::ended_sound_only_track_keeps_unshifted_source_clock_control ... ok
+test player::track_clock_regressions::exact_mp4_two_track_pcm_video_seek_and_eof_controls ... ok
+test player::track_clock_regressions::backward_track_switch_keeps_live175ms_phase ... ok
+test player::track_clock_regressions::forward_track_switch_keeps_live75ms_phase ... ok
+test player::track_clock_regressions::one_listed_track_does_not_replace_the_running_worker ... ok
+test player::track_clock_regressions::negative_audio_delay_is_retained_once_during_track_switch ... ok
+test player::track_clock_regressions::paused_track_switch_keeps_phase_and_stays_silent_until_resume ... ok
+test player::track_clock_regressions::pending_paused_video_seek_keeps_explicit_target_as_track_origin ... ok
+test player::track_clock_regressions::positive_audio_delay_is_retained_once_during_track_switch ... ok
+test player::track_clock_regressions::replacing_absent_sound_converts_paused_picture_phase_back_to_audio_phase ... ok
+test player::track_clock_regressions::sound_only_track_switch_keeps_its_actual_audio_phase_control ... ok
+test player::track_clock_regressions::stopped_track_switch_keeps_terminal_phase_in_video_and_audio_modes ... ok
+
+test result: ok. 12 passed; 0 failed; 0 ignored; 0 measured; 1179 filtered out; finished in 3.05s
+
+run 7
+
+running 12 tests
+test player::track_clock_regressions::ended_sound_only_track_keeps_unshifted_source_clock_control ... ok
+test player::track_clock_regressions::exact_mp4_two_track_pcm_video_seek_and_eof_controls ... ok
+test player::track_clock_regressions::backward_track_switch_keeps_live175ms_phase ... ok
+test player::track_clock_regressions::forward_track_switch_keeps_live75ms_phase ... ok
+test player::track_clock_regressions::one_listed_track_does_not_replace_the_running_worker ... ok
+test player::track_clock_regressions::negative_audio_delay_is_retained_once_during_track_switch ... ok
+test player::track_clock_regressions::paused_track_switch_keeps_phase_and_stays_silent_until_resume ... ok
+test player::track_clock_regressions::pending_paused_video_seek_keeps_explicit_target_as_track_origin ... ok
+test player::track_clock_regressions::positive_audio_delay_is_retained_once_during_track_switch ... ok
+test player::track_clock_regressions::replacing_absent_sound_converts_paused_picture_phase_back_to_audio_phase ... ok
+test player::track_clock_regressions::sound_only_track_switch_keeps_its_actual_audio_phase_control ... ok
+test player::track_clock_regressions::stopped_track_switch_keeps_terminal_phase_in_video_and_audio_modes ... ok
+
+test result: ok. 12 passed; 0 failed; 0 ignored; 0 measured; 1179 filtered out; finished in 3.06s
+
+run 8
+
+running 12 tests
+test player::track_clock_regressions::ended_sound_only_track_keeps_unshifted_source_clock_control ... ok
+test player::track_clock_regressions::exact_mp4_two_track_pcm_video_seek_and_eof_controls ... ok
+test player::track_clock_regressions::backward_track_switch_keeps_live175ms_phase ... ok
+test player::track_clock_regressions::forward_track_switch_keeps_live75ms_phase ... ok
+test player::track_clock_regressions::one_listed_track_does_not_replace_the_running_worker ... ok
+test player::track_clock_regressions::negative_audio_delay_is_retained_once_during_track_switch ... ok
+test player::track_clock_regressions::paused_track_switch_keeps_phase_and_stays_silent_until_resume ... ok
+test player::track_clock_regressions::pending_paused_video_seek_keeps_explicit_target_as_track_origin ... ok
+test player::track_clock_regressions::positive_audio_delay_is_retained_once_during_track_switch ... ok
+test player::track_clock_regressions::replacing_absent_sound_converts_paused_picture_phase_back_to_audio_phase ... ok
+test player::track_clock_regressions::sound_only_track_switch_keeps_its_actual_audio_phase_control ... ok
+test player::track_clock_regressions::stopped_track_switch_keeps_terminal_phase_in_video_and_audio_modes ... ok
+
+test result: ok. 12 passed; 0 failed; 0 ignored; 0 measured; 1179 filtered out; finished in 3.08s
+
+run 9
+
+running 12 tests
+test player::track_clock_regressions::ended_sound_only_track_keeps_unshifted_source_clock_control ... ok
+test player::track_clock_regressions::exact_mp4_two_track_pcm_video_seek_and_eof_controls ... ok
+test player::track_clock_regressions::backward_track_switch_keeps_live175ms_phase ... ok
+test player::track_clock_regressions::forward_track_switch_keeps_live75ms_phase ... ok
+test player::track_clock_regressions::one_listed_track_does_not_replace_the_running_worker ... ok
+test player::track_clock_regressions::negative_audio_delay_is_retained_once_during_track_switch ... ok
+test player::track_clock_regressions::paused_track_switch_keeps_phase_and_stays_silent_until_resume ... ok
+test player::track_clock_regressions::pending_paused_video_seek_keeps_explicit_target_as_track_origin ... ok
+test player::track_clock_regressions::positive_audio_delay_is_retained_once_during_track_switch ... ok
+test player::track_clock_regressions::replacing_absent_sound_converts_paused_picture_phase_back_to_audio_phase ... ok
+test player::track_clock_regressions::sound_only_track_switch_keeps_its_actual_audio_phase_control ... ok
+test player::track_clock_regressions::stopped_track_switch_keeps_terminal_phase_in_video_and_audio_modes ... ok
+
+test result: ok. 12 passed; 0 failed; 0 ignored; 0 measured; 1179 filtered out; finished in 3.08s
+
+run 10
+
+running 12 tests
+test player::track_clock_regressions::ended_sound_only_track_keeps_unshifted_source_clock_control ... ok
+test player::track_clock_regressions::exact_mp4_two_track_pcm_video_seek_and_eof_controls ... ok
+test player::track_clock_regressions::backward_track_switch_keeps_live175ms_phase ... ok
+test player::track_clock_regressions::forward_track_switch_keeps_live75ms_phase ... ok
+test player::track_clock_regressions::one_listed_track_does_not_replace_the_running_worker ... ok
+test player::track_clock_regressions::negative_audio_delay_is_retained_once_during_track_switch ... ok
+test player::track_clock_regressions::paused_track_switch_keeps_phase_and_stays_silent_until_resume ... ok
+test player::track_clock_regressions::pending_paused_video_seek_keeps_explicit_target_as_track_origin ... ok
+test player::track_clock_regressions::positive_audio_delay_is_retained_once_during_track_switch ... ok
+test player::track_clock_regressions::replacing_absent_sound_converts_paused_picture_phase_back_to_audio_phase ... ok
+test player::track_clock_regressions::sound_only_track_switch_keeps_its_actual_audio_phase_control ... ok
+test player::track_clock_regressions::stopped_track_switch_keeps_terminal_phase_in_video_and_audio_modes ... ok
+
+test result: ok. 12 passed; 0 failed; 0 ignored; 0 measured; 1179 filtered out; finished in 3.06s
+
+run 11
+
+running 12 tests
+test player::track_clock_regressions::ended_sound_only_track_keeps_unshifted_source_clock_control ... ok
+test player::track_clock_regressions::exact_mp4_two_track_pcm_video_seek_and_eof_controls ... ok
+test player::track_clock_regressions::backward_track_switch_keeps_live175ms_phase ... ok
+test player::track_clock_regressions::forward_track_switch_keeps_live75ms_phase ... ok
+test player::track_clock_regressions::one_listed_track_does_not_replace_the_running_worker ... ok
+test player::track_clock_regressions::negative_audio_delay_is_retained_once_during_track_switch ... ok
+test player::track_clock_regressions::paused_track_switch_keeps_phase_and_stays_silent_until_resume ... ok
+test player::track_clock_regressions::pending_paused_video_seek_keeps_explicit_target_as_track_origin ... ok
+test player::track_clock_regressions::positive_audio_delay_is_retained_once_during_track_switch ... ok
+test player::track_clock_regressions::replacing_absent_sound_converts_paused_picture_phase_back_to_audio_phase ... ok
+test player::track_clock_regressions::sound_only_track_switch_keeps_its_actual_audio_phase_control ... ok
+test player::track_clock_regressions::stopped_track_switch_keeps_terminal_phase_in_video_and_audio_modes ... ok
+
+test result: ok. 12 passed; 0 failed; 0 ignored; 0 measured; 1179 filtered out; finished in 3.06s
+
+run 12
+
+running 12 tests
+test player::track_clock_regressions::ended_sound_only_track_keeps_unshifted_source_clock_control ... ok
+test player::track_clock_regressions::exact_mp4_two_track_pcm_video_seek_and_eof_controls ... ok
+test player::track_clock_regressions::backward_track_switch_keeps_live175ms_phase ... ok
+test player::track_clock_regressions::forward_track_switch_keeps_live75ms_phase ... ok
+test player::track_clock_regressions::one_listed_track_does_not_replace_the_running_worker ... ok
+test player::track_clock_regressions::negative_audio_delay_is_retained_once_during_track_switch ... ok
+test player::track_clock_regressions::paused_track_switch_keeps_phase_and_stays_silent_until_resume ... ok
+test player::track_clock_regressions::pending_paused_video_seek_keeps_explicit_target_as_track_origin ... ok
+test player::track_clock_regressions::positive_audio_delay_is_retained_once_during_track_switch ... ok
+test player::track_clock_regressions::replacing_absent_sound_converts_paused_picture_phase_back_to_audio_phase ... ok
+test player::track_clock_regressions::sound_only_track_switch_keeps_its_actual_audio_phase_control ... ok
+test player::track_clock_regressions::stopped_track_switch_keeps_terminal_phase_in_video_and_audio_modes ... ok
+
+test result: ok. 12 passed; 0 failed; 0 ignored; 0 measured; 1179 filtered out; finished in 3.05s
+
+run 13
+
+running 12 tests
+test player::track_clock_regressions::ended_sound_only_track_keeps_unshifted_source_clock_control ... ok
+test player::track_clock_regressions::exact_mp4_two_track_pcm_video_seek_and_eof_controls ... ok
+test player::track_clock_regressions::backward_track_switch_keeps_live175ms_phase ... ok
+test player::track_clock_regressions::forward_track_switch_keeps_live75ms_phase ... ok
+test player::track_clock_regressions::one_listed_track_does_not_replace_the_running_worker ... ok
+test player::track_clock_regressions::negative_audio_delay_is_retained_once_during_track_switch ... ok
+test player::track_clock_regressions::paused_track_switch_keeps_phase_and_stays_silent_until_resume ... ok
+test player::track_clock_regressions::pending_paused_video_seek_keeps_explicit_target_as_track_origin ... ok
+test player::track_clock_regressions::positive_audio_delay_is_retained_once_during_track_switch ... ok
+test player::track_clock_regressions::replacing_absent_sound_converts_paused_picture_phase_back_to_audio_phase ... ok
+test player::track_clock_regressions::sound_only_track_switch_keeps_its_actual_audio_phase_control ... ok
+test player::track_clock_regressions::stopped_track_switch_keeps_terminal_phase_in_video_and_audio_modes ... ok
+
+test result: ok. 12 passed; 0 failed; 0 ignored; 0 measured; 1179 filtered out; finished in 3.11s
+
+run 14
+
+running 12 tests
+test player::track_clock_regressions::ended_sound_only_track_keeps_unshifted_source_clock_control ... ok
+test player::track_clock_regressions::exact_mp4_two_track_pcm_video_seek_and_eof_controls ... ok
+test player::track_clock_regressions::backward_track_switch_keeps_live175ms_phase ... ok
+test player::track_clock_regressions::forward_track_switch_keeps_live75ms_phase ... ok
+test player::track_clock_regressions::one_listed_track_does_not_replace_the_running_worker ... ok
+test player::track_clock_regressions::negative_audio_delay_is_retained_once_during_track_switch ... ok
+test player::track_clock_regressions::paused_track_switch_keeps_phase_and_stays_silent_until_resume ... ok
+test player::track_clock_regressions::pending_paused_video_seek_keeps_explicit_target_as_track_origin ... ok
+test player::track_clock_regressions::positive_audio_delay_is_retained_once_during_track_switch ... ok
+test player::track_clock_regressions::replacing_absent_sound_converts_paused_picture_phase_back_to_audio_phase ... ok
+test player::track_clock_regressions::sound_only_track_switch_keeps_its_actual_audio_phase_control ... ok
+test player::track_clock_regressions::stopped_track_switch_keeps_terminal_phase_in_video_and_audio_modes ... ok
+
+test result: ok. 12 passed; 0 failed; 0 ignored; 0 measured; 1179 filtered out; finished in 3.10s
+
+run 15
+
+running 12 tests
+test player::track_clock_regressions::ended_sound_only_track_keeps_unshifted_source_clock_control ... ok
+test player::track_clock_regressions::exact_mp4_two_track_pcm_video_seek_and_eof_controls ... ok
+test player::track_clock_regressions::backward_track_switch_keeps_live175ms_phase ... ok
+test player::track_clock_regressions::forward_track_switch_keeps_live75ms_phase ... ok
+test player::track_clock_regressions::one_listed_track_does_not_replace_the_running_worker ... ok
+test player::track_clock_regressions::negative_audio_delay_is_retained_once_during_track_switch ... ok
+test player::track_clock_regressions::paused_track_switch_keeps_phase_and_stays_silent_until_resume ... ok
+test player::track_clock_regressions::pending_paused_video_seek_keeps_explicit_target_as_track_origin ... ok
+test player::track_clock_regressions::positive_audio_delay_is_retained_once_during_track_switch ... ok
+test player::track_clock_regressions::replacing_absent_sound_converts_paused_picture_phase_back_to_audio_phase ... ok
+test player::track_clock_regressions::sound_only_track_switch_keeps_its_actual_audio_phase_control ... ok
+test player::track_clock_regressions::stopped_track_switch_keeps_terminal_phase_in_video_and_audio_modes ... ok
+
+test result: ok. 12 passed; 0 failed; 0 ignored; 0 measured; 1179 filtered out; finished in 3.15s
+
+run 16
+
+running 12 tests
+test player::track_clock_regressions::ended_sound_only_track_keeps_unshifted_source_clock_control ... ok
+test player::track_clock_regressions::exact_mp4_two_track_pcm_video_seek_and_eof_controls ... ok
+test player::track_clock_regressions::backward_track_switch_keeps_live175ms_phase ... ok
+test player::track_clock_regressions::forward_track_switch_keeps_live75ms_phase ... ok
+test player::track_clock_regressions::one_listed_track_does_not_replace_the_running_worker ... ok
+test player::track_clock_regressions::negative_audio_delay_is_retained_once_during_track_switch ... ok
+test player::track_clock_regressions::paused_track_switch_keeps_phase_and_stays_silent_until_resume ... ok
+test player::track_clock_regressions::pending_paused_video_seek_keeps_explicit_target_as_track_origin ... ok
+test player::track_clock_regressions::positive_audio_delay_is_retained_once_during_track_switch ... ok
+test player::track_clock_regressions::replacing_absent_sound_converts_paused_picture_phase_back_to_audio_phase ... ok
+test player::track_clock_regressions::sound_only_track_switch_keeps_its_actual_audio_phase_control ... ok
+test player::track_clock_regressions::stopped_track_switch_keeps_terminal_phase_in_video_and_audio_modes ... ok
+
+test result: ok. 12 passed; 0 failed; 0 ignored; 0 measured; 1179 filtered out; finished in 3.10s
+
+run 17
+
+running 12 tests
+test player::track_clock_regressions::ended_sound_only_track_keeps_unshifted_source_clock_control ... ok
+test player::track_clock_regressions::exact_mp4_two_track_pcm_video_seek_and_eof_controls ... ok
+test player::track_clock_regressions::backward_track_switch_keeps_live175ms_phase ... ok
+test player::track_clock_regressions::forward_track_switch_keeps_live75ms_phase ... ok
+test player::track_clock_regressions::one_listed_track_does_not_replace_the_running_worker ... ok
+test player::track_clock_regressions::negative_audio_delay_is_retained_once_during_track_switch ... ok
+test player::track_clock_regressions::paused_track_switch_keeps_phase_and_stays_silent_until_resume ... ok
+test player::track_clock_regressions::pending_paused_video_seek_keeps_explicit_target_as_track_origin ... ok
+test player::track_clock_regressions::positive_audio_delay_is_retained_once_during_track_switch ... ok
+test player::track_clock_regressions::replacing_absent_sound_converts_paused_picture_phase_back_to_audio_phase ... ok
+test player::track_clock_regressions::sound_only_track_switch_keeps_its_actual_audio_phase_control ... ok
+test player::track_clock_regressions::stopped_track_switch_keeps_terminal_phase_in_video_and_audio_modes ... ok
+
+test result: ok. 12 passed; 0 failed; 0 ignored; 0 measured; 1179 filtered out; finished in 3.13s
+
+run 18
+
+running 12 tests
+test player::track_clock_regressions::ended_sound_only_track_keeps_unshifted_source_clock_control ... ok
+test player::track_clock_regressions::exact_mp4_two_track_pcm_video_seek_and_eof_controls ... ok
+test player::track_clock_regressions::backward_track_switch_keeps_live175ms_phase ... ok
+test player::track_clock_regressions::forward_track_switch_keeps_live75ms_phase ... ok
+test player::track_clock_regressions::one_listed_track_does_not_replace_the_running_worker ... ok
+test player::track_clock_regressions::negative_audio_delay_is_retained_once_during_track_switch ... ok
+test player::track_clock_regressions::paused_track_switch_keeps_phase_and_stays_silent_until_resume ... ok
+test player::track_clock_regressions::pending_paused_video_seek_keeps_explicit_target_as_track_origin ... ok
+test player::track_clock_regressions::positive_audio_delay_is_retained_once_during_track_switch ... ok
+test player::track_clock_regressions::replacing_absent_sound_converts_paused_picture_phase_back_to_audio_phase ... ok
+test player::track_clock_regressions::sound_only_track_switch_keeps_its_actual_audio_phase_control ... ok
+test player::track_clock_regressions::stopped_track_switch_keeps_terminal_phase_in_video_and_audio_modes ... ok
+
+test result: ok. 12 passed; 0 failed; 0 ignored; 0 measured; 1179 filtered out; finished in 3.16s
+
+run 19
+
+running 12 tests
+test player::track_clock_regressions::ended_sound_only_track_keeps_unshifted_source_clock_control ... ok
+test player::track_clock_regressions::exact_mp4_two_track_pcm_video_seek_and_eof_controls ... ok
+test player::track_clock_regressions::backward_track_switch_keeps_live175ms_phase ... ok
+test player::track_clock_regressions::forward_track_switch_keeps_live75ms_phase ... ok
+test player::track_clock_regressions::one_listed_track_does_not_replace_the_running_worker ... ok
+test player::track_clock_regressions::negative_audio_delay_is_retained_once_during_track_switch ... ok
+test player::track_clock_regressions::paused_track_switch_keeps_phase_and_stays_silent_until_resume ... ok
+test player::track_clock_regressions::pending_paused_video_seek_keeps_explicit_target_as_track_origin ... ok
+test player::track_clock_regressions::positive_audio_delay_is_retained_once_during_track_switch ... ok
+test player::track_clock_regressions::replacing_absent_sound_converts_paused_picture_phase_back_to_audio_phase ... ok
+test player::track_clock_regressions::sound_only_track_switch_keeps_its_actual_audio_phase_control ... ok
+test player::track_clock_regressions::stopped_track_switch_keeps_terminal_phase_in_video_and_audio_modes ... ok
+
+test result: ok. 12 passed; 0 failed; 0 ignored; 0 measured; 1179 filtered out; finished in 3.15s
+
+run 20
+
+running 12 tests
+test player::track_clock_regressions::ended_sound_only_track_keeps_unshifted_source_clock_control ... ok
+test player::track_clock_regressions::exact_mp4_two_track_pcm_video_seek_and_eof_controls ... ok
+test player::track_clock_regressions::backward_track_switch_keeps_live175ms_phase ... ok
+test player::track_clock_regressions::forward_track_switch_keeps_live75ms_phase ... ok
+test player::track_clock_regressions::one_listed_track_does_not_replace_the_running_worker ... ok
+test player::track_clock_regressions::negative_audio_delay_is_retained_once_during_track_switch ... ok
+test player::track_clock_regressions::paused_track_switch_keeps_phase_and_stays_silent_until_resume ... ok
+test player::track_clock_regressions::pending_paused_video_seek_keeps_explicit_target_as_track_origin ... ok
+test player::track_clock_regressions::positive_audio_delay_is_retained_once_during_track_switch ... ok
+test player::track_clock_regressions::replacing_absent_sound_converts_paused_picture_phase_back_to_audio_phase ... ok
+test player::track_clock_regressions::sound_only_track_switch_keeps_its_actual_audio_phase_control ... ok
+test player::track_clock_regressions::stopped_track_switch_keeps_terminal_phase_in_video_and_audio_modes ... ok
+
+test result: ok. 12 passed; 0 failed; 0 ignored; 0 measured; 1179 filtered out; finished in 3.16s

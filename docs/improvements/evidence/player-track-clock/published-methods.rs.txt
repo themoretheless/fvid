@@ -1,0 +1,57 @@
+        let mut stream = None;
+        for attempt in AUDIO_READERS {
+            if let Some(found) = attempt.open(path, selected) {
+                stream = Some(found);
+                break;
+            }
+        }
+        let Some(stream) = stream else {
+            return false;
+        };
+        // The container lists every track it can hand to a decoder, so the track
+        // key knows how far to walk without opening the file again.
+        self.audio_tracks = stream.audio_tracks();
+        // The tag is read from the stream itself rather than from the track
+        // list: the decoder was built for it, so this is the coding actually
+        // sounding, which is what the panel is asked to name.
+        self.sound_codec = sound_codec(stream.codec());
+        self.audio_track = selected.unwrap_or_else(||stream.audio_track_index());
+        let output = self.preferred_output.clone();
+        self.audio = Some(crate::audio_thread::AudioPlayback::start_with_dolby_policy(stream, self.dolby_policy, move || {
+            Box::new(crate::audio::PlatformBackend::with_output_device(output))
+        }));
+        true
+    }
+
+        let len = self.audio_tracks.len();
+        if len < 2 {
+            self.show_osd(if len == 0 { "No audio" } else { "Audio 1/1" });
+            return;
+        }
+        let Some(path) = self.opened.clone() else {
+            return;
+        };
+        let nth = track_step(self.audio_track, len, forward);
+        let at = self.timeline().0;
+        let playing = !self.paused && !self.ended;
+        // Dropping the old handle stops its thread before the new one starts.
+        self.audio = None;
+        if !self.try_start_audio(&path, nth) {
+            self.show_osd("Audio track unavailable");
+            return;
+        }
+        self.audio_ended = false;
+        if let (Some(at), Some(audio)) = (at, &mut self.audio) {
+            audio.seek(at);
+        }
+        self.apply_audio_controls();
+        if playing && let Some(audio) = &self.audio {
+            audio.play();
+        }
+        self.show_osd(format!(
+            "Audio {}/{} {}",
+            nth + 1,
+            len,
+            self.audio_tracks[nth].label()
+        ));
+    }

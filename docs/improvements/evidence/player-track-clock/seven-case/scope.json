@@ -1,0 +1,10 @@
+{
+  "status": "historical first candidate,not accepted",
+  "passed_gates": 9,
+  "distinct_passed": 1603,
+  "repeats": 20,
+  "case_executions": 140,
+  "reason": "Expanded A/V-delay cases required before accepting the track-switch change.",
+  "log_paths": "Archived normalized gate logs and hashes belong to this seven-case source snapshot. Original temporary paths may be reused by the later final cohort.",
+  "count_delta": 0
+}

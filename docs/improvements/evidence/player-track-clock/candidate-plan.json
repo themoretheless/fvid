@@ -1,0 +1,7 @@
+{
+  "public_interfaces_changed": false,
+  "performance_claim": false,
+  "behavior_fix": "Prioritize pending/terminal intent,then active raw audio clock,then inverse-shifted picture phase;audio-only phase remains raw.",
+  "factory_delivery": "Private shared production path;default PlatformBackend remains identical;refactor-verification.json.",
+  "patch_sha256": "b169ea8b8507705aeedf51dfccaf7a593bf5bd4f0e836901e1dce4f1cfb6f09e"
+}

@@ -1,0 +1,50 @@
+diff --git a/src/player.rs b/src/player.rs
+index 2d786c5779..93673e74ca 100644
+--- a/src/player.rs
++++ b/src/player.rs
+@@ -2513,0 +2514,8 @@ impl Player {
++        let output = self.preferred_output.clone();
++        self.try_start_audio_choice_with_backend(path, selected, move || {
++            Box::new(crate::audio::PlatformBackend::with_output_device(output))
++        })
++    }
++
++    fn try_start_audio_choice_with_backend<F>(&mut self, path: &Path, selected: Option<usize>, backend: F) -> bool
++    where F: FnOnce() -> Box<dyn crate::audio::AudioBackend> + Send + 'static {
+@@ -2532,4 +2540 @@ impl Player {
+-        let output = self.preferred_output.clone();
+-        self.audio = Some(crate::audio_thread::AudioPlayback::start_with_dolby_policy(stream, self.dolby_policy, move || {
+-            Box::new(crate::audio::PlatformBackend::with_output_device(output))
+-        }));
++        self.audio = Some(crate::audio_thread::AudioPlayback::start_with_dolby_policy(stream, self.dolby_policy, backend));
+@@ -2572,0 +2578,8 @@ impl Player {
++        let output = self.preferred_output.clone();
++        self.cycle_audio_track_with_backend(forward, move || {
++            Box::new(crate::audio::PlatformBackend::with_output_device(output))
++        });
++    }
++
++    fn cycle_audio_track_with_backend<F>(&mut self, forward: bool, backend: F)
++    where F: FnOnce() -> Box<dyn crate::audio::AudioBackend> + Send + 'static {
+@@ -2582 +2595,12 @@ impl Player {
+-        let at = self.timeline().0;
++        // Preserve pending/terminal transport intent first. Otherwise keep an
++        // active source audio clock unchanged; applying its A/V shift twice
++        // would skip or repeat sound. A picture-owned phase needs the inverse
++        // shift, while sound-only transport never uses that video delay.
++        let picture = self.playback.is_some();
++        let inverse_delay = self.audio_delay_ms.saturating_neg();
++        let source_phase = |at| if picture { delayed_clock(at, inverse_delay) } else { at };
++        let at = self.seek_target
++            .or_else(|| self.terminal_clock.map(source_phase))
++            .or_else(|| self.audio.as_ref().filter(|_| !picture || !self.audio_ended)
++                .map(|audio| audio.transport_position()))
++            .or_else(|| self.presentation_clock().map(source_phase));
+@@ -2586 +2610 @@ impl Player {
+-        if !self.try_start_audio(&path, nth) {
++        if !self.try_start_audio_choice_with_backend(&path, Some(nth), backend) {
+@@ -13208,0 +13233,4 @@ mod audio_seek_intent_regressions;
++
++#[cfg(test)]
++#[path = "player_track_clock_tests.rs"]
++mod track_clock_regressions;

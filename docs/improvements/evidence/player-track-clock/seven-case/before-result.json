@@ -1,0 +1,6 @@
+{
+  "exit_code": 101,
+  "passed": 4,
+  "failed": 3,
+  "failure": "All three real selected-track switches flush at future picture end300ms instead of live75/175ms."
+}
