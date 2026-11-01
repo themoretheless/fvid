@@ -1,0 +1,9 @@
+{
+  "base_commit": "cb49847885db262e60a805610289add7c824d31f",
+  "sha256": {
+    "src/playback/audio/mp4_audio.rs": "b02b4dccc192ee49927010b3b44feeaabca48785c697c8512cb11e618eae5668",
+    "src/playback/audio/mp4_clock_recovery.rs": "4bd9dc0452bc30e79dad6985e57085cff81da2f522426c037930c3f27e3abad6",
+    "tests/mp4_aac_native_grid_seek.rs": "bea9755248018c63dddf695410566df8d7ff15f6fa0958f5f9e0688ceee1cd39",
+    "scripts/generate_mp4_aac_native_grid_seek.py": "bfa35c2e0b41bc47f85b7c316dbb7905a3b76aa6e3b7ae904602ac7feed55d7b"
+  }
+}

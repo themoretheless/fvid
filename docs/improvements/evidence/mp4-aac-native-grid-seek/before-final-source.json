@@ -1,0 +1,28 @@
+{
+  "base": "cb49847885db262e60a805610289add7c824d31f",
+  "baseline": {
+    "passed": 3,
+    "failed": 2,
+    "expected_exit": 101
+  },
+  "sha256": {
+    "src/playback/audio/mp4_audio.rs": "b02b4dccc192ee49927010b3b44feeaabca48785c697c8512cb11e618eae5668",
+    "src/playback/audio/mp4_clock_recovery.rs": "4bd9dc0452bc30e79dad6985e57085cff81da2f522426c037930c3f27e3abad6",
+    "tests/mp4_aac_native_grid_seek.rs": "8738bef1a1ed0354032ce2357e94ff468acc1429106ebfe0d7f12ea8f0cb5ce8",
+    "tests/mp4_aac_native_grid_missing_extent_seek.rs": "5d14c45d8f226e132621eb5414487b27c4720305e05f11ea8668403d8ac74db1",
+    "scripts/generate_mp4_aac_native_grid_seek.py": "cc1a22fe18e6a1c400fcb6a85912352291430660ee719cc18b0167051b63cb6d",
+    "scripts/generate_mp4_aac_native_grid_missing_extent_seek.py": "f059c5fe0b8bc289aacc08196f5cbdfd501aa00eb1c51e8cbd79741d85f1ac1e",
+    "tests/fixtures/playback-errors/mp4-aac-native-grid-seek/changes-two-edits.mp4": "8f472fdd305a7475fafea717ae595c2ffc489a0bd1b0d07d0444d9dc25980b5b",
+    "tests/fixtures/playback-errors/mp4-aac-native-grid-seek/fragmented-two-edits.mp4": "459a9ede1618df9634e5d7caaec79df67d1170ea01bc260f9457325c0ab83eff",
+    "tests/fixtures/playback-errors/mp4-aac-native-grid-seek/manifest.json": "894b49ea3cab2669a6c17b059889ee7cfbd23c813f16e20897eb3553d29135d5",
+    "tests/fixtures/playback-errors/mp4-aac-native-grid-seek/reference-0.f32le": "b21cbb581d6b9d4f35663e060565f0de73bbe830d544337867101a50e8ce2a5b",
+    "tests/fixtures/playback-errors/mp4-aac-native-grid-seek/reference-1.f32le": "c0bee1750b3e67796f09bb2ed032d9e9cd48f015bdb4f7d36fbc20ce548e7272",
+    "tests/fixtures/playback-errors/mp4-aac-native-grid-seek/reference-2.f32le": "8e1a73f8065ebe05708169b0226689f0c19890334c61e0a4599683c5888ccaa0",
+    "tests/fixtures/playback-errors/mp4-aac-native-grid-seek/third-two-edits.mp4": "83dafaec3ed72cf5e83870cfee11a02877f08346d7ef925b6dc1b78602d388c1",
+    "tests/fixtures/playback-errors/mp4-aac-native-grid-seek/unused-first.mp4": "6093f756e8950e77ea87be98b07fb9bd1b4b5e0caaeb6013505031dea0a8b7d1",
+    "tests/fixtures/playback-errors/mp4-aac-native-grid-seek/unused-last.mp4": "c613787603d89fd571004793fae055efb10b166e88125c8ff2429ce135f844a2",
+    "tests/fixtures/playback-errors/mp4-aac-native-grid-seek/whole-last-aac.mp4": "f47a09fb33010d65411886d81166291278ef9b6ef0a391f88a853aae9fb82d88",
+    "tests/fixtures/playback-errors/mp4-aac-native-grid-missing-extent-seek/manifest.json": "8175f52d3501db450ef4b9eda343151bc47e813ff522c6e6bca0d230bf36884a",
+    "tests/fixtures/playback-errors/mp4-aac-native-grid-missing-extent-seek/past-source-aac.mp4": "5214e354bf4d7d05051286bbd4d793d7f860845ffd4b3c7724e8269554609c3d"
+  }
+}

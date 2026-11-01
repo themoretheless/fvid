@@ -1,0 +1,6 @@
+{
+  "provenance": "Own LC/Main AAC pulses and neutral VP9. One1ms edit starts10ms beyond the coded endpoint;complete packet bodies and native-grid timing. No private input,FFmpeg or network.",
+  "sha256": {
+    "past-source-aac.mp4": "5214e354bf4d7d05051286bbd4d793d7f860845ffd4b3c7724e8269554609c3d"
+  }
+}

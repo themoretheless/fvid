@@ -1,0 +1,18 @@
+{
+  "mp4_aac_native_grid_seek": {
+    "reference-0.f32le": "b21cbb581d6b9d4f35663e060565f0de73bbe830d544337867101a50e8ce2a5b",
+    "reference-1.f32le": "c0bee1750b3e67796f09bb2ed032d9e9cd48f015bdb4f7d36fbc20ce548e7272",
+    "changes-two-edits.mp4": "8f472fdd305a7475fafea717ae595c2ffc489a0bd1b0d07d0444d9dc25980b5b",
+    "third-two-edits.mp4": "83dafaec3ed72cf5e83870cfee11a02877f08346d7ef925b6dc1b78602d388c1",
+    "fragmented-two-edits.mp4": "459a9ede1618df9634e5d7caaec79df67d1170ea01bc260f9457325c0ab83eff",
+    "unused-last.mp4": "c613787603d89fd571004793fae055efb10b166e88125c8ff2429ce135f844a2",
+    "unused-first.mp4": "6093f756e8950e77ea87be98b07fb9bd1b4b5e0caaeb6013505031dea0a8b7d1",
+    "whole-last-aac.mp4": "f47a09fb33010d65411886d81166291278ef9b6ef0a391f88a853aae9fb82d88",
+    "reference-2.f32le": "8e1a73f8065ebe05708169b0226689f0c19890334c61e0a4599683c5888ccaa0",
+    "manifest.json": "894b49ea3cab2669a6c17b059889ee7cfbd23c813f16e20897eb3553d29135d5"
+  },
+  "mp4_aac_native_grid_missing_extent_seek": {
+    "past-source-aac.mp4": "5214e354bf4d7d05051286bbd4d793d7f860845ffd4b3c7724e8269554609c3d",
+    "manifest.json": "8175f52d3501db450ef4b9eda343151bc47e813ff522c6e6bca0d230bf36884a"
+  }
+}
