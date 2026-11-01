@@ -74,3 +74,5 @@ with active arbitrary trees, active unequal-grid HRTF and inherited-fragment
 prefix loss remain open. This does not complete LD-MPS or the codec-gap goal.
 
 Current boundary update (2026-11-02): covered partial grids are now accepted when every actual QMF bin has a coded coefficient. See [covered partial qualification](aac-ld-mps-arbitrary-partial-2026-11-02.md). Earlier refusal statements in this historical report describe its original snapshot.
+
+Current boundary update (2026-11-02): relocation of an unchanged ArbitraryTree between SSC extension indexes is now supported with gain history retained. See [extension relocation qualification](aac-ld-mps-arbitrary-reindex-2026-11-02.md); earlier extension-index refusals above describe the historical snapshot.

@@ -67,3 +67,5 @@ Remaining work includes partial-band/LFE splits, sparse positions, arbitrary-
 tree layout/grid changes, and nonzero EBQ with active arbitrary trees. General
 active unequal-grid HRTF and inherited-fragment prefix loss also remain open.
 Full LD-MPS and the overall codec-gap goal are not complete.
+
+Current boundary update (2026-11-02): relocation of an unchanged ArbitraryTree between SSC extension indexes is now supported with gain history retained. See [extension relocation qualification](aac-ld-mps-arbitrary-reindex-2026-11-02.md); earlier extension-index refusals above describe the historical snapshot.

@@ -324,8 +324,9 @@ impl Stage {
         self.decoder.leaves.len()
     }
     pub(crate) fn inherit(&mut self, old: &Self) -> Result<()> {
-        if self.extension != old.extension
-            || self.decoder.bands != old.decoder.bands
+        // Extension position identifies current-frame parameters, not gain history.
+        // The inherited history belongs to the unchanged source/split paths.
+        if self.decoder.bands != old.decoder.bands
             || self.decoder.leaves.len() != old.decoder.leaves.len()
             || self
                 .decoder

@@ -1,0 +1,70 @@
+{
+  "date": "2026-11-02",
+  "scope": "Unchanged ArbitraryTree relocated between SSC extension indexes 0/1/0; not topology/grid conversion",
+  "regression_before_fix": {
+    "exit_code": 1,
+    "stdout": "",
+    "stderr": "Error: Invalid(\"AAC decode: LD-MPS arbitrary-tree layout/grid change requires stream reconfiguration\")\n",
+    "executable_sha256": "905e808beeee570284f27795437d17f192f31dbdec520a451757552520e29038"
+  },
+  "authored_generation": {
+    "programmes": 48,
+    "files": 146,
+    "byte_identical": true,
+    "network_and_process_creation_forbidden": true
+  },
+  "integration": {
+    "command": "CARGO_TARGET_DIR=/Users/themoretheless/.codex/worktrees/aac-eld-extension-gaps/target CARGO_BUILD_JOBS=2 cargo --config profile.dev.package.fvid-media.opt-level=2 test --offline --no-default-features --features player --test aac_ld_mps_arbitrary_reindex --test aac_ld_mps_arbitrary_partial --test aac_ld_mps_arbitrary_permutations",
+    "passed": 15,
+    "failed": 0,
+    "ignored": 0,
+    "log_sha256": "cd789fb16fd33c0e0cefb9aa583d63baa973ee32956feb5a39950a04620cd976",
+    "test_results": [
+      [
+        "7",
+        "0",
+        "0"
+      ],
+      [
+        "4",
+        "0",
+        "0"
+      ],
+      [
+        "4",
+        "0",
+        "0"
+      ]
+    ]
+  },
+  "remaining": [
+    "general topology/grid changes",
+    "sparse positions",
+    "active-uncovered partial bands",
+    "nonzero EBQ with active arbitrary trees",
+    "active unequal-grid HRTF"
+  ],
+  "state_unit": {
+    "command": "CARGO_TARGET_DIR=/Users/themoretheless/.codex/worktrees/aac-eld-extension-gaps/target CARGO_BUILD_JOBS=2 cargo --config profile.dev.package.fvid-media.opt-level=2 test -p fvid-media --offline --no-default-features --lib arbitrary_history_survives_same_layout_headers_and_layout_errors_are_atomic",
+    "passed": 1,
+    "failed": 0,
+    "filtered": 591,
+    "log": {
+      "path": "/tmp/fvid-arbitrary-reindex-state.log",
+      "sha256": "a118c1cf5f6e182f035d30303318fc4a5cd0d6b32f48aee5ecfa769be7821964"
+    }
+  },
+  "focused_total_passed": 16,
+  "device": {
+    "runs": 12,
+    "completed_phases": 48,
+    "report": {
+      "path": "docs/validation/aac-ld-mps-arbitrary-reindex-device-2026-11-02.json",
+      "sha256": "8ed3f9d648fc089e86d1eca4243fc716df3ac199b2ebcf125327cd4688557541"
+    },
+    "build_log": {
+      "path": "/tmp/fvid-arbitrary-reindex-device-build.log",
+      "sha256": "95036b8cd8f612c67690bebb9cb71fe363ec9805eedb0fe4264903dc30764814"
+    }
+  }
+}
