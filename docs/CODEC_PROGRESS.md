@@ -24533,3 +24533,11 @@ independent80-digit sparse-M1 oracle, unity PCM equality and reader navigation.
 The former constructor-refusal expectation is replaced by admission plus this
 acceptance corpus. Original C qualifies gain conversion only; no foreign full
 757/212 ADG composition comparison is claimed. See [qualification](validation/aac-ld-mps-arbdmx-columns-2026-11-02.md). HRTF and other gaps remain open.
+
+### 2026-11-02: unused HRTF metadata in full-output OTT trees
+
+Trees 0/1/5/6 now admit valid unused HRTF metadata, including unequal grids and
+in-band metadata changes, without changing multichannel PCM. Qualification
+uses 1,512 own programmes, 168 controls, source-C equivalence and device playback.
+Active HRTF projection and binaural rendering are outside this milestone;
+metadata validation remains enforced. See [qualification](validation/aac-ld-mps-hrtf-unused-2026-11-02.md).

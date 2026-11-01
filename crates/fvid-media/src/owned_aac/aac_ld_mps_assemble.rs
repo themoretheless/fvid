@@ -78,7 +78,7 @@ fn value(p: &Prepared, id: ParameterId, set: usize, band: u8) -> Result<f64> {
 impl Decoder {
     pub fn new(config: &Config) -> Result<Self> {
         let physical = aac_ld_mps_prepare::Decoder::new(config)?;
-        if config.hrtf.is_some() && !matches!(config.tree.code, 2..=4)
+        if config.hrtf.is_some() && config.tree.code == 7
             || config
                 .extensions
                 .iter()
@@ -112,15 +112,15 @@ impl Decoder {
             vec![]
         };
         if let Some(hrtf) = &config.hrtf {
-            // Standard inversion supersedes HRTF projection in every active
-            // band for these modes (see ttt_tree::build_with_spatial). Keep
-            // validating metadata, but require matching grids only if used.
+            // Full-output OTT-only paths do not use stereo HRTF projection.
+            // Standard inversion can also supersede it in TTT paths. Validate
+            // the metadata itself; matching spatial grids are needed only if used.
             let standard_priority = config.matrix_mode == Some(true)
                 && !modes.is_empty()
                 && modes.iter().all(|m| matches!(m, 0 | 1 | 2 | 4));
             super::aac_ld_mps_3d::validate(
                 hrtf,
-                if standard_priority {
+                if config.tree.ttt_boxes == 0 || standard_priority {
                     hrtf.bands
                 } else {
                     config.parameter_bands

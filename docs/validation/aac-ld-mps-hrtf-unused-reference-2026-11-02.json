@@ -1,0 +1,27 @@
+{
+  "scope": "Unchanged original full-output5151/5152/7571/7572 routines under3D flag0/1, no binaural rendering or active HRTF projection",
+  "pairs": 600,
+  "compared_scalars": 88200,
+  "byte_identical": true,
+  "finite": true,
+  "trees": [
+    0,
+    1,
+    5,
+    6
+  ],
+  "archive_sha256": "b6b27e2f9af6ee8f950af8d7074afc467e66d93372328c0ec55282fff71d1f83",
+  "original_algorithm_sha256": "ebdb752a1d74a5f7e5638366867b3b477918aa9f4d94169ee3b2e30bfbce6153",
+  "source_changes": [],
+  "harness_sha256": "99b1a1f68176e23912f9645666ada3c53a3fafddfa598bc96d49ac729cb2fa7c",
+  "input_sha256": "33c0f8d1dce23aca4949f6e5b30878b1fcc76af0d51d1ceaf825005286cecb9d",
+  "output_sha256": "0ebed3d33b9356a33724f9c895eb36a46cc7a516a481b1b31243c22b2b531109",
+  "compiler": "Apple clang version 21.0.0 (clang-2100.3.34.2)\nTarget: arm64-apple-darwin25.6.0\nThread model: posix\nInstalledDir: /Library/Developer/CommandLineTools/usr/bin\n",
+  "flags": [
+    "-O2",
+    "-DLD_MPS",
+    "-ffunction-sections",
+    "-fdata-sections",
+    "-Wl,-dead_strip"
+  ]
+}
