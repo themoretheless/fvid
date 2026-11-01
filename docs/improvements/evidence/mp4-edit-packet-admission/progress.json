@@ -1,6 +1,7 @@
 {
-  "status": "qualified;pending delivery",
+  "status": "delivered",
   "accepted_count": 480,
   "next_id": "FVID-0481",
+  "receipt": "delivery.json",
   "session": null
 }
