@@ -24558,3 +24558,13 @@ integer/float conversion acceptance is pending compatibility work, not a
 physical-device-only skip. Active LD-MPS gaps remain open. See
 [baseline](validation/codec-library-audit-2026-11-02.md) and
 [admission routes](validation/codec-admission-route-audit-2026-11-02.md).
+
+### 2026-11-02: external exposure conversion isolated from native kernel
+
+The explicit benchmark reproduces the stored RGB16 identity difference with
+only packed/float conversion, and matches half exposure using an independent
+half operation between the external converters. Native identity preservation
+now has acceptance over the authored RGB8/RGB16 videos. Eight focused tests
+passed; complete external integer-conversion compatibility remains explicitly
+ignored. No runtime kernel or codec admission was changed. See
+[diagnostic](validation/exposure-conversion-isolation-2026-11-02.md).

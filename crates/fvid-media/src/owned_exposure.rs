@@ -134,6 +134,20 @@ mod tests {
         assert_eq!(pixel, [-512.0, 0.0, 512.0, 0.25]);
     }
     #[test]
+    fn integer_identity_retains_authored_video_codes_and_alpha() {
+        let root = std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
+            .join("../../tests/fixtures/playback-errors");
+        for depth in [8, 16] {
+            let input = std::fs::read(root.join(format!("vibrance-grid-{depth}.rgba"))).unwrap();
+            let mut actual = input.clone();
+            Exposure::parse("")
+                .unwrap()
+                .apply_rgb(&mut actual, depth, 4)
+                .unwrap();
+            assert_eq!(actual, input, "native identity at depth {depth}");
+        }
+    }
+    #[test]
     fn integer_clipping_and_atomic_validation() {
         let mut pixel = [32, 64, 192, 17];
         Exposure::parse("1")
