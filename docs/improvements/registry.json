@@ -1,8 +1,8 @@
 {
   "target": 1000,
   "counting_rule": "One independently confirmed problem or useful capability; fixture variants and baseline integration repairs are excluded. Only accepted entries count.",
-  "accepted_count": 479,
-  "next_id": "FVID-0480",
+  "accepted_count": 480,
+  "next_id": "FVID-0481",
   "entries": [
     {
       "id": "FVID-0001",
@@ -5409,6 +5409,17 @@
       "result": "Edited sources count actual work through the admitted bounded MP4 decoder into io::sink, with no progress or spool; unedited sources retain index counting. All six regressions pass, including preroll, checkpoints/repeats, exact exhaustion, complete PCM concat and native video seek/EOF.",
       "status": "accepted",
       "validation": "batch-476-validation.json"
+    },
+    {
+      "id": "FVID-0480",
+      "batch": 477,
+      "title": "Scope stable immediate MP4 audio packet admission to the edited source prefix",
+      "source": "crates/fvid-media/src/owned_mp4_audio_timeline_impl.rs",
+      "regression": "tests/mp4_edit_packet_admission.rs",
+      "before": "Finite edits without an explicit interval/work cap admitted every indexed packet, falsely refusing valid stable PCM/ALAC because of an unread larger final packet. Identical final baseline: four controls pass, two tests fail across 248 plan/decode variants.",
+      "result": "Pass the movie clock into shared admission and derive the required source prefix from the same exact integer edit schedule, retaining preroll and repeats. Initial decoder memory remains charged for silence-only edits; delayed/reconfigured/non-native-grid paths retain conservative admission. Six regressions and all eight qualification gates pass.",
+      "status": "accepted",
+      "validation": "batch-477-validation.json"
     }
   ]
 }

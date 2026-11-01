@@ -300,7 +300,7 @@ pub(crate) fn admit_audio_reader_with_interval<R: Read + Seek>(
         .tracks()
         .get(index)
         .ok_or_else(|| invalid("selected audio stream is absent"))?;
-    let active_samples = mp4_active_samples(track, interval, options.max_packets);
+    let active_samples = mp4_active_samples(track, reader.movie_timescale(), interval, options.max_packets);
     let largest_packet = match &track.samples {
         crate::owned_mp4::SampleIndex::Expanded(samples) => samples
             .iter()
@@ -325,8 +325,11 @@ pub(crate) fn admit_audio_reader_with_interval<R: Read + Seek>(
     let mut decoder = 0usize;
     let mut checkpoint = 0usize;
     let mut configuration = 0usize;
+    let initial_description = track.samples.get(0).map(|s| s.description_index);
     for i in 0..track.sample_descriptions.len() {
-        if !(0..active_samples).any(|n| track.samples.get(n).is_some_and(|s| s.description_index as usize == i+1)) { continue; }
+        // Decoder initialization precedes scheduling even for a silence-only edit.
+        if initial_description != Some((i+1) as u32)
+            && !(0..active_samples).any(|n| track.samples.get(n).is_some_and(|s| s.description_index as usize == i+1)) { continue; }
         let setup = track.decoder_setup((i+1) as u32)?;
         let state = mp4_decoder_admission(&setup)?;
         decoder = decoder.max(state);
@@ -502,6 +505,7 @@ pub(crate) fn decode_mp4_audio_pcm_targeted<R: Read + Seek>(
 }
 use crate::owned_mp4_audio_normalization::coefficients as mp4_normalization_coefficients;
 type Mp4NormalizationTrack = crate::owned_mp4::Track;
+type Mp4NormalizationSampleIndex = crate::owned_mp4::SampleIndex;
 type Mp4PcmScalar = f32;
 type Mp4OutputResampler = crate::owned_resample::Resampler<Vec<u8>>;
 #[allow(dead_code)] // Export uses only the arithmetic subset of the shared playback clock.

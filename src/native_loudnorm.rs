@@ -302,7 +302,7 @@ pub fn try_plan(
                     if let Some(track) = reader.tracks().get(idx) {
                         let max_samples = crate::native_media::mp4_active_samples(
                             track,
-                            None,
+                            reader.movie_timescale(), None,
                             options.max_packets,
                         );
                         let exceeds = match &track.samples {

@@ -1,0 +1,9 @@
+{
+  "status": " M crates/fvid-media/src/owned_aac_export_routing.rs\n M crates/fvid-media/src/owned_mp4_audio.rs\n M crates/fvid-media/src/owned_mp4_audio_export.rs\n M crates/fvid-media/src/owned_mp4_audio_normalized_impl.rs\n M crates/fvid-media/src/owned_mp4_audio_timeline_impl.rs\n M src/native_audio_mix.rs\n M src/native_export/pcm_matroska.rs\n M src/native_loudnorm.rs\n M src/native_media.rs\n M src/native_pcm/loudness.rs\n M src/native_plan.rs\n?? docs/improvements/evidence/mp4-edit-packet-admission/\n?? scripts/generate_mp4_edit_packet_admission.py\n?? tests/fixtures/playback-errors/mp4-edit-packet-admission/\n?? tests/mp4_edit_packet_admission.rs\n",
+  "worktrees": "/Users/themoretheless/Documents/Sources/fvid                       eb0c0148fe [main]\n/private/tmp/fvid-export-20261025-freeze                           ff68df1f36 [codex/aac-eld-ld-sbr-20261026] prunable\n/Users/themoretheless/.codex/worktrees/aac-eld-extension-gaps/fvid 26b1d066fd [codex/aac-ep-srcpc-20261028]\n/Users/themoretheless/.codex/worktrees/fvid-push-20261029/fvid     51c2ab2c11 [codex/deliver-fvid-20261029]\n/Users/themoretheless/.codex/worktrees/verify-av1-alt-lf/fvid      fcf429296d [codex/preserve-av1-active-20261009-final]\n",
+  "stashes": "stash@{0}: On main: Preserve local Finder metadata before final consolidation\nstash@{1}: On main: Runtime SQLite sidecars preserved before branch consolidation 2026-10-04\nstash@{2}: On main: reader table cleanup\nstash@{3}: On main: save reader table\n",
+  "remotes": "origin\thttps://github.com/themoretheless/fvid.git (fetch)\norigin\thttps://github.com/themoretheless/fvid.git (push)\n",
+  "head": "51c2ab2c11892228aecb5b267ae7aa6db44e7833\n",
+  "branch": "codex/deliver-fvid-20261029\n",
+  "remote_refs": "51c2ab2c11892228aecb5b267ae7aa6db44e7833\trefs/heads/codex/deliver-fvid-20261029\n51c2ab2c11892228aecb5b267ae7aa6db44e7833\trefs/heads/main\n"
+}

@@ -1,0 +1,557 @@
+{
+  "provenance": "Authored neutral VP9 and analytic PCM. A valid 640-byte final packet is beyond the finite first-packet edit; full controls retain all packet windows.",
+  "cases": [
+    {
+      "file": "pcm-clock8000-v0-early.mp4",
+      "oracle": "pcm-clock8000-v0-early.mp4.f32le",
+      "frames": 160,
+      "work": 1,
+      "cap": 400
+    },
+    {
+      "file": "pcm-clock8000-v0-preroll.mp4",
+      "oracle": "pcm-clock8000-v0-preroll.mp4.f32le",
+      "frames": 160,
+      "work": 2,
+      "cap": 400
+    },
+    {
+      "file": "pcm-clock8000-v0-repeat.mp4",
+      "oracle": "pcm-clock8000-v0-repeat.mp4.f32le",
+      "frames": 320,
+      "work": 2,
+      "cap": 400
+    },
+    {
+      "file": "pcm-clock8000-v0-gap.mp4",
+      "oracle": "pcm-clock8000-v0-gap.mp4.f32le",
+      "frames": 320,
+      "work": 1,
+      "cap": 400
+    },
+    {
+      "file": "pcm-clock8000-v0-silence.mp4",
+      "oracle": "pcm-clock8000-v0-silence.mp4.f32le",
+      "frames": 160,
+      "work": 0,
+      "cap": 400
+    },
+    {
+      "file": "pcm-clock8000-v1-early.mp4",
+      "oracle": "pcm-clock8000-v1-early.mp4.f32le",
+      "frames": 160,
+      "work": 1,
+      "cap": 400
+    },
+    {
+      "file": "pcm-clock8000-v1-preroll.mp4",
+      "oracle": "pcm-clock8000-v1-preroll.mp4.f32le",
+      "frames": 160,
+      "work": 2,
+      "cap": 400
+    },
+    {
+      "file": "pcm-clock8000-v1-repeat.mp4",
+      "oracle": "pcm-clock8000-v1-repeat.mp4.f32le",
+      "frames": 320,
+      "work": 2,
+      "cap": 400
+    },
+    {
+      "file": "pcm-clock8000-v1-gap.mp4",
+      "oracle": "pcm-clock8000-v1-gap.mp4.f32le",
+      "frames": 320,
+      "work": 1,
+      "cap": 400
+    },
+    {
+      "file": "pcm-clock8000-v1-silence.mp4",
+      "oracle": "pcm-clock8000-v1-silence.mp4.f32le",
+      "frames": 160,
+      "work": 0,
+      "cap": 400
+    },
+    {
+      "file": "pcm-clock1000-v0-early.mp4",
+      "oracle": "pcm-clock1000-v0-early.mp4.f32le",
+      "frames": 160,
+      "work": 1,
+      "cap": 400
+    },
+    {
+      "file": "pcm-clock1000-v0-preroll.mp4",
+      "oracle": "pcm-clock1000-v0-preroll.mp4.f32le",
+      "frames": 160,
+      "work": 2,
+      "cap": 400
+    },
+    {
+      "file": "pcm-clock1000-v0-repeat.mp4",
+      "oracle": "pcm-clock1000-v0-repeat.mp4.f32le",
+      "frames": 320,
+      "work": 2,
+      "cap": 400
+    },
+    {
+      "file": "pcm-clock1000-v0-gap.mp4",
+      "oracle": "pcm-clock1000-v0-gap.mp4.f32le",
+      "frames": 320,
+      "work": 1,
+      "cap": 400
+    },
+    {
+      "file": "pcm-clock1000-v0-silence.mp4",
+      "oracle": "pcm-clock1000-v0-silence.mp4.f32le",
+      "frames": 160,
+      "work": 0,
+      "cap": 400
+    },
+    {
+      "file": "pcm-clock1000-v1-early.mp4",
+      "oracle": "pcm-clock1000-v1-early.mp4.f32le",
+      "frames": 160,
+      "work": 1,
+      "cap": 400
+    },
+    {
+      "file": "pcm-clock1000-v1-preroll.mp4",
+      "oracle": "pcm-clock1000-v1-preroll.mp4.f32le",
+      "frames": 160,
+      "work": 2,
+      "cap": 400
+    },
+    {
+      "file": "pcm-clock1000-v1-repeat.mp4",
+      "oracle": "pcm-clock1000-v1-repeat.mp4.f32le",
+      "frames": 320,
+      "work": 2,
+      "cap": 400
+    },
+    {
+      "file": "pcm-clock1000-v1-gap.mp4",
+      "oracle": "pcm-clock1000-v1-gap.mp4.f32le",
+      "frames": 320,
+      "work": 1,
+      "cap": 400
+    },
+    {
+      "file": "pcm-clock1000-v1-silence.mp4",
+      "oracle": "pcm-clock1000-v1-silence.mp4.f32le",
+      "frames": 160,
+      "work": 0,
+      "cap": 400
+    },
+    {
+      "file": "pcm-clock1001-v0-early.mp4",
+      "oracle": "pcm-clock1001-v0-early.mp4.f32le",
+      "frames": 160,
+      "work": 1,
+      "cap": 400
+    },
+    {
+      "file": "pcm-clock1001-v0-preroll.mp4",
+      "oracle": "pcm-clock1001-v0-preroll.mp4.f32le",
+      "frames": 160,
+      "work": 2,
+      "cap": 400
+    },
+    {
+      "file": "pcm-clock1001-v0-repeat.mp4",
+      "oracle": "pcm-clock1001-v0-repeat.mp4.f32le",
+      "frames": 320,
+      "work": 2,
+      "cap": 400
+    },
+    {
+      "file": "pcm-clock1001-v0-gap.mp4",
+      "oracle": "pcm-clock1001-v0-gap.mp4.f32le",
+      "frames": 320,
+      "work": 1,
+      "cap": 400
+    },
+    {
+      "file": "pcm-clock1001-v0-silence.mp4",
+      "oracle": "pcm-clock1001-v0-silence.mp4.f32le",
+      "frames": 160,
+      "work": 0,
+      "cap": 400
+    },
+    {
+      "file": "pcm-clock1001-v1-early.mp4",
+      "oracle": "pcm-clock1001-v1-early.mp4.f32le",
+      "frames": 160,
+      "work": 1,
+      "cap": 400
+    },
+    {
+      "file": "pcm-clock1001-v1-preroll.mp4",
+      "oracle": "pcm-clock1001-v1-preroll.mp4.f32le",
+      "frames": 160,
+      "work": 2,
+      "cap": 400
+    },
+    {
+      "file": "pcm-clock1001-v1-repeat.mp4",
+      "oracle": "pcm-clock1001-v1-repeat.mp4.f32le",
+      "frames": 320,
+      "work": 2,
+      "cap": 400
+    },
+    {
+      "file": "pcm-clock1001-v1-gap.mp4",
+      "oracle": "pcm-clock1001-v1-gap.mp4.f32le",
+      "frames": 320,
+      "work": 1,
+      "cap": 400
+    },
+    {
+      "file": "pcm-clock1001-v1-silence.mp4",
+      "oracle": "pcm-clock1001-v1-silence.mp4.f32le",
+      "frames": 160,
+      "work": 0,
+      "cap": 400
+    },
+    {
+      "file": "alac-clock8000-v0-early.mp4",
+      "oracle": "alac-clock8000-v0-early.mp4.f32le",
+      "frames": 160,
+      "work": 1,
+      "cap": 400
+    },
+    {
+      "file": "alac-clock8000-v0-preroll.mp4",
+      "oracle": "alac-clock8000-v0-preroll.mp4.f32le",
+      "frames": 160,
+      "work": 2,
+      "cap": 400
+    },
+    {
+      "file": "alac-clock8000-v0-repeat.mp4",
+      "oracle": "alac-clock8000-v0-repeat.mp4.f32le",
+      "frames": 320,
+      "work": 2,
+      "cap": 400
+    },
+    {
+      "file": "alac-clock8000-v0-gap.mp4",
+      "oracle": "alac-clock8000-v0-gap.mp4.f32le",
+      "frames": 320,
+      "work": 1,
+      "cap": 400
+    },
+    {
+      "file": "alac-clock8000-v0-silence.mp4",
+      "oracle": "alac-clock8000-v0-silence.mp4.f32le",
+      "frames": 160,
+      "work": 0,
+      "cap": 400
+    },
+    {
+      "file": "alac-clock8000-v1-early.mp4",
+      "oracle": "alac-clock8000-v1-early.mp4.f32le",
+      "frames": 160,
+      "work": 1,
+      "cap": 400
+    },
+    {
+      "file": "alac-clock8000-v1-preroll.mp4",
+      "oracle": "alac-clock8000-v1-preroll.mp4.f32le",
+      "frames": 160,
+      "work": 2,
+      "cap": 400
+    },
+    {
+      "file": "alac-clock8000-v1-repeat.mp4",
+      "oracle": "alac-clock8000-v1-repeat.mp4.f32le",
+      "frames": 320,
+      "work": 2,
+      "cap": 400
+    },
+    {
+      "file": "alac-clock8000-v1-gap.mp4",
+      "oracle": "alac-clock8000-v1-gap.mp4.f32le",
+      "frames": 320,
+      "work": 1,
+      "cap": 400
+    },
+    {
+      "file": "alac-clock8000-v1-silence.mp4",
+      "oracle": "alac-clock8000-v1-silence.mp4.f32le",
+      "frames": 160,
+      "work": 0,
+      "cap": 400
+    },
+    {
+      "file": "alac-clock1000-v0-early.mp4",
+      "oracle": "alac-clock1000-v0-early.mp4.f32le",
+      "frames": 160,
+      "work": 1,
+      "cap": 400
+    },
+    {
+      "file": "alac-clock1000-v0-preroll.mp4",
+      "oracle": "alac-clock1000-v0-preroll.mp4.f32le",
+      "frames": 160,
+      "work": 2,
+      "cap": 400
+    },
+    {
+      "file": "alac-clock1000-v0-repeat.mp4",
+      "oracle": "alac-clock1000-v0-repeat.mp4.f32le",
+      "frames": 320,
+      "work": 2,
+      "cap": 400
+    },
+    {
+      "file": "alac-clock1000-v0-gap.mp4",
+      "oracle": "alac-clock1000-v0-gap.mp4.f32le",
+      "frames": 320,
+      "work": 1,
+      "cap": 400
+    },
+    {
+      "file": "alac-clock1000-v0-silence.mp4",
+      "oracle": "alac-clock1000-v0-silence.mp4.f32le",
+      "frames": 160,
+      "work": 0,
+      "cap": 400
+    },
+    {
+      "file": "alac-clock1000-v1-early.mp4",
+      "oracle": "alac-clock1000-v1-early.mp4.f32le",
+      "frames": 160,
+      "work": 1,
+      "cap": 400
+    },
+    {
+      "file": "alac-clock1000-v1-preroll.mp4",
+      "oracle": "alac-clock1000-v1-preroll.mp4.f32le",
+      "frames": 160,
+      "work": 2,
+      "cap": 400
+    },
+    {
+      "file": "alac-clock1000-v1-repeat.mp4",
+      "oracle": "alac-clock1000-v1-repeat.mp4.f32le",
+      "frames": 320,
+      "work": 2,
+      "cap": 400
+    },
+    {
+      "file": "alac-clock1000-v1-gap.mp4",
+      "oracle": "alac-clock1000-v1-gap.mp4.f32le",
+      "frames": 320,
+      "work": 1,
+      "cap": 400
+    },
+    {
+      "file": "alac-clock1000-v1-silence.mp4",
+      "oracle": "alac-clock1000-v1-silence.mp4.f32le",
+      "frames": 160,
+      "work": 0,
+      "cap": 400
+    },
+    {
+      "file": "alac-clock1001-v0-early.mp4",
+      "oracle": "alac-clock1001-v0-early.mp4.f32le",
+      "frames": 160,
+      "work": 1,
+      "cap": 400
+    },
+    {
+      "file": "alac-clock1001-v0-preroll.mp4",
+      "oracle": "alac-clock1001-v0-preroll.mp4.f32le",
+      "frames": 160,
+      "work": 2,
+      "cap": 400
+    },
+    {
+      "file": "alac-clock1001-v0-repeat.mp4",
+      "oracle": "alac-clock1001-v0-repeat.mp4.f32le",
+      "frames": 320,
+      "work": 2,
+      "cap": 400
+    },
+    {
+      "file": "alac-clock1001-v0-gap.mp4",
+      "oracle": "alac-clock1001-v0-gap.mp4.f32le",
+      "frames": 320,
+      "work": 1,
+      "cap": 400
+    },
+    {
+      "file": "alac-clock1001-v0-silence.mp4",
+      "oracle": "alac-clock1001-v0-silence.mp4.f32le",
+      "frames": 160,
+      "work": 0,
+      "cap": 400
+    },
+    {
+      "file": "alac-clock1001-v1-early.mp4",
+      "oracle": "alac-clock1001-v1-early.mp4.f32le",
+      "frames": 160,
+      "work": 1,
+      "cap": 400
+    },
+    {
+      "file": "alac-clock1001-v1-preroll.mp4",
+      "oracle": "alac-clock1001-v1-preroll.mp4.f32le",
+      "frames": 160,
+      "work": 2,
+      "cap": 400
+    },
+    {
+      "file": "alac-clock1001-v1-repeat.mp4",
+      "oracle": "alac-clock1001-v1-repeat.mp4.f32le",
+      "frames": 320,
+      "work": 2,
+      "cap": 400
+    },
+    {
+      "file": "alac-clock1001-v1-gap.mp4",
+      "oracle": "alac-clock1001-v1-gap.mp4.f32le",
+      "frames": 320,
+      "work": 1,
+      "cap": 400
+    },
+    {
+      "file": "alac-clock1001-v1-silence.mp4",
+      "oracle": "alac-clock1001-v1-silence.mp4.f32le",
+      "frames": 160,
+      "work": 0,
+      "cap": 400
+    }
+  ],
+  "sha256": {
+    "early.m4a": "d4ece0fa1b541e263c1f8a9928e091790e6a755bb73752f279588330e358a264",
+    "full.m4a": "3e4ae8ff2d71b74060a65e1bec33043a2bbfaf5ef79abbf3bbe7a5322a87112f",
+    "early.mp4": "0eb748c522f96960bb011a3d89005b647e3f7422b6cde4d6ce667bf7eddc188e",
+    "full.mp4": "06da37d606d67b3c9c98e29c9977cef99136a57bcb9cb267fe6039e843995484",
+    "early.f32le": "25ba3c1471eb64a1ab8ac1d91cad8205e3abbef1cd7bc700249520816f2f6d76",
+    "full.f32le": "fbdb42ac4eb6f259aa4e98001a43a676ba3204e1af62e6d1bb608f781a905189",
+    "pcm-full-control.mp4": "06da37d606d67b3c9c98e29c9977cef99136a57bcb9cb267fe6039e843995484",
+    "pcm-full-control.f32le": "fbdb42ac4eb6f259aa4e98001a43a676ba3204e1af62e6d1bb608f781a905189",
+    "pcm-clock8000-v0-early.mp4": "0eb748c522f96960bb011a3d89005b647e3f7422b6cde4d6ce667bf7eddc188e",
+    "pcm-clock8000-v0-early.mp4.f32le": "25ba3c1471eb64a1ab8ac1d91cad8205e3abbef1cd7bc700249520816f2f6d76",
+    "pcm-clock8000-v0-preroll.mp4": "404ed5784bc5581b0e3181508c3f11640532bd08d4bb9b59e8a76f6a6ca1a4e7",
+    "pcm-clock8000-v0-preroll.mp4.f32le": "b2aa477d6d6f0d4b8a1eeb205a2cb75dcaf88ca90bed46999714378547ecd8f0",
+    "pcm-clock8000-v0-repeat.mp4": "a45fa4c3d51b6afa426ec1d3bbaaceccbe369fabe154ccfc472d7f77c1597593",
+    "pcm-clock8000-v0-repeat.mp4.f32le": "77dacd8511c6d964aabd919a1aff2e632bf4cf04cad9afef5e3051354f3c87d8",
+    "pcm-clock8000-v0-gap.mp4": "04d95431239bc437a10f6c88aadb155f05f8b70e0778b49a16c4e140d917a2b6",
+    "pcm-clock8000-v0-gap.mp4.f32le": "c06647c7263f85c0bb2ac946ee1a8392863ddef93da1fddbd5494b126ad4f197",
+    "pcm-clock8000-v0-silence.mp4": "379ea66c0528510764c1af6d8601343ec7d945824d189728311a50fc103950c0",
+    "pcm-clock8000-v0-silence.mp4.f32le": "9e132485d5107211de325a45e7917cbe3e4b5b9cde3e4ee91d7d2102317759ee",
+    "pcm-clock8000-v1-early.mp4": "bff8e68273510695a5ae7e8a7e486aeb83ed0057d68713e4cf6846bab82a623a",
+    "pcm-clock8000-v1-early.mp4.f32le": "25ba3c1471eb64a1ab8ac1d91cad8205e3abbef1cd7bc700249520816f2f6d76",
+    "pcm-clock8000-v1-preroll.mp4": "6ef9e74be644440e11885550b436d619acadfdc30ea8aab5cad109ff718a7fcb",
+    "pcm-clock8000-v1-preroll.mp4.f32le": "b2aa477d6d6f0d4b8a1eeb205a2cb75dcaf88ca90bed46999714378547ecd8f0",
+    "pcm-clock8000-v1-repeat.mp4": "a4942367f43b3c203e89ee5bb901e9380d4b2c1dca594bd169b1fb495ed58595",
+    "pcm-clock8000-v1-repeat.mp4.f32le": "77dacd8511c6d964aabd919a1aff2e632bf4cf04cad9afef5e3051354f3c87d8",
+    "pcm-clock8000-v1-gap.mp4": "d7d9cd472c140aa2ad0adc4cb4582f407ff108d6ef0eaf36d4e5e52967d460db",
+    "pcm-clock8000-v1-gap.mp4.f32le": "c06647c7263f85c0bb2ac946ee1a8392863ddef93da1fddbd5494b126ad4f197",
+    "pcm-clock8000-v1-silence.mp4": "dba260d801c35e5b50963a1a12bcedbb828ce616df78332646bd8b71e45b50c5",
+    "pcm-clock8000-v1-silence.mp4.f32le": "9e132485d5107211de325a45e7917cbe3e4b5b9cde3e4ee91d7d2102317759ee",
+    "pcm-clock1000-v0-early.mp4": "f3ea853c1622c0a221ca166270899735bfc72631bf53001a26fd02fd960c1968",
+    "pcm-clock1000-v0-early.mp4.f32le": "25ba3c1471eb64a1ab8ac1d91cad8205e3abbef1cd7bc700249520816f2f6d76",
+    "pcm-clock1000-v0-preroll.mp4": "f09fa9804c9eb07ac634a3854295296c962d883808aa4f9f006dac39dbd2e99b",
+    "pcm-clock1000-v0-preroll.mp4.f32le": "b2aa477d6d6f0d4b8a1eeb205a2cb75dcaf88ca90bed46999714378547ecd8f0",
+    "pcm-clock1000-v0-repeat.mp4": "4764d39f92f820cc95d663f879cf1c8878532151dee0e40a8b1948b0a1d10faa",
+    "pcm-clock1000-v0-repeat.mp4.f32le": "77dacd8511c6d964aabd919a1aff2e632bf4cf04cad9afef5e3051354f3c87d8",
+    "pcm-clock1000-v0-gap.mp4": "c075a887a4a50e31ab64a1d81a66224df1dd8a5e683c525e0ec1d6fec2c5a464",
+    "pcm-clock1000-v0-gap.mp4.f32le": "c06647c7263f85c0bb2ac946ee1a8392863ddef93da1fddbd5494b126ad4f197",
+    "pcm-clock1000-v0-silence.mp4": "53a9d439f60bd20d81f75c7d633984bcb248d07995ba728d524a75308e4350aa",
+    "pcm-clock1000-v0-silence.mp4.f32le": "9e132485d5107211de325a45e7917cbe3e4b5b9cde3e4ee91d7d2102317759ee",
+    "pcm-clock1000-v1-early.mp4": "2cb47bb86e8caee407d70db188790fbb20b6838269caa1e094649bcf0f6182f3",
+    "pcm-clock1000-v1-early.mp4.f32le": "25ba3c1471eb64a1ab8ac1d91cad8205e3abbef1cd7bc700249520816f2f6d76",
+    "pcm-clock1000-v1-preroll.mp4": "2e5befa485c46bceaa199cefb13506d01a17b2d72475ba5e2eb39ae1d3e3c961",
+    "pcm-clock1000-v1-preroll.mp4.f32le": "b2aa477d6d6f0d4b8a1eeb205a2cb75dcaf88ca90bed46999714378547ecd8f0",
+    "pcm-clock1000-v1-repeat.mp4": "bb3e64a0283a36d815416ee2c949d57201dc9d413d2d7e12af564b50de764ed8",
+    "pcm-clock1000-v1-repeat.mp4.f32le": "77dacd8511c6d964aabd919a1aff2e632bf4cf04cad9afef5e3051354f3c87d8",
+    "pcm-clock1000-v1-gap.mp4": "ba9b2f9d415a08d8fc43468b0009be0100f8acc8795b452cae2b71f91197b617",
+    "pcm-clock1000-v1-gap.mp4.f32le": "c06647c7263f85c0bb2ac946ee1a8392863ddef93da1fddbd5494b126ad4f197",
+    "pcm-clock1000-v1-silence.mp4": "8100c0b6d43a396adc000597f11de8603f445640ac76c1a692adc4922d417e07",
+    "pcm-clock1000-v1-silence.mp4.f32le": "9e132485d5107211de325a45e7917cbe3e4b5b9cde3e4ee91d7d2102317759ee",
+    "pcm-clock1001-v0-early.mp4": "49209b9e0c8a90617df03fb2d13c191d89ad4da461b99051586b6ba3cef03ca2",
+    "pcm-clock1001-v0-early.mp4.f32le": "25ba3c1471eb64a1ab8ac1d91cad8205e3abbef1cd7bc700249520816f2f6d76",
+    "pcm-clock1001-v0-preroll.mp4": "6092dcce6f1938419b2ba1d7576d293c0e38c304a7640548c33f40434a62bddd",
+    "pcm-clock1001-v0-preroll.mp4.f32le": "b2aa477d6d6f0d4b8a1eeb205a2cb75dcaf88ca90bed46999714378547ecd8f0",
+    "pcm-clock1001-v0-repeat.mp4": "f18a590ac6f34ff0370f8fbdf974661c9a3a0686d7f01e1f161941d9f5215c9b",
+    "pcm-clock1001-v0-repeat.mp4.f32le": "77dacd8511c6d964aabd919a1aff2e632bf4cf04cad9afef5e3051354f3c87d8",
+    "pcm-clock1001-v0-gap.mp4": "c426001c1c6b28a385910b007b70c8622df04890f1d3b53e04a46cf533a34b9e",
+    "pcm-clock1001-v0-gap.mp4.f32le": "c06647c7263f85c0bb2ac946ee1a8392863ddef93da1fddbd5494b126ad4f197",
+    "pcm-clock1001-v0-silence.mp4": "11c14acb9f4f6389a5b26c5bd1a5860945edb310fe2422c57baaf3012fcd0b1c",
+    "pcm-clock1001-v0-silence.mp4.f32le": "9e132485d5107211de325a45e7917cbe3e4b5b9cde3e4ee91d7d2102317759ee",
+    "pcm-clock1001-v1-early.mp4": "9f38bab531cde20cffa8acd05dd926bd854da6aa52d44d466731e0c5cb55b05e",
+    "pcm-clock1001-v1-early.mp4.f32le": "25ba3c1471eb64a1ab8ac1d91cad8205e3abbef1cd7bc700249520816f2f6d76",
+    "pcm-clock1001-v1-preroll.mp4": "8946b70b59f6728d56b4c12e917823733d7d3245784b3b88e14f2fe69a472015",
+    "pcm-clock1001-v1-preroll.mp4.f32le": "b2aa477d6d6f0d4b8a1eeb205a2cb75dcaf88ca90bed46999714378547ecd8f0",
+    "pcm-clock1001-v1-repeat.mp4": "ec19e6d6b54be45565d3d1ce2afab4743eb499fec73b5e49ed810c7fda195569",
+    "pcm-clock1001-v1-repeat.mp4.f32le": "77dacd8511c6d964aabd919a1aff2e632bf4cf04cad9afef5e3051354f3c87d8",
+    "pcm-clock1001-v1-gap.mp4": "e195ae9c66d4c87a8cee7592c65bb7c77f2a1f2dc012428187b366cc73300704",
+    "pcm-clock1001-v1-gap.mp4.f32le": "c06647c7263f85c0bb2ac946ee1a8392863ddef93da1fddbd5494b126ad4f197",
+    "pcm-clock1001-v1-silence.mp4": "718c4637b4e88990f1a67c59853e7d0453521d62e239769203ace1cbbe9e7595",
+    "pcm-clock1001-v1-silence.mp4.f32le": "9e132485d5107211de325a45e7917cbe3e4b5b9cde3e4ee91d7d2102317759ee",
+    "alac-full-control.mp4": "45db5a565ab4aa7b5f7531fb9f7e9795b9dfcc667af07112cd85e472313be74b",
+    "alac-full-control.f32le": "fbdb42ac4eb6f259aa4e98001a43a676ba3204e1af62e6d1bb608f781a905189",
+    "alac-clock8000-v0-early.mp4": "04861e052af6fa2d3ca6fdbb7e43a28e118b738511797a48e8a75df3b26e9ed0",
+    "alac-clock8000-v0-early.mp4.f32le": "25ba3c1471eb64a1ab8ac1d91cad8205e3abbef1cd7bc700249520816f2f6d76",
+    "alac-clock8000-v0-preroll.mp4": "385eae0bd6b74d334a0f7a7042a3ead0b62a8386ed7940eccd3462e14dcee8a3",
+    "alac-clock8000-v0-preroll.mp4.f32le": "b2aa477d6d6f0d4b8a1eeb205a2cb75dcaf88ca90bed46999714378547ecd8f0",
+    "alac-clock8000-v0-repeat.mp4": "df57ede50f6d6f04de557ad458283c0363c3081c622d871ae58ffbea51c2c564",
+    "alac-clock8000-v0-repeat.mp4.f32le": "77dacd8511c6d964aabd919a1aff2e632bf4cf04cad9afef5e3051354f3c87d8",
+    "alac-clock8000-v0-gap.mp4": "429238edf58b744246b4afa263bf2514b5ed0ccbbc965921b22713e7b2b34957",
+    "alac-clock8000-v0-gap.mp4.f32le": "c06647c7263f85c0bb2ac946ee1a8392863ddef93da1fddbd5494b126ad4f197",
+    "alac-clock8000-v0-silence.mp4": "4c08ae528cd158730606ed3592b9d6fd8cd06165da882a22317a6b9348bfb9f5",
+    "alac-clock8000-v0-silence.mp4.f32le": "9e132485d5107211de325a45e7917cbe3e4b5b9cde3e4ee91d7d2102317759ee",
+    "alac-clock8000-v1-early.mp4": "0dcca1db90ee0090c15b0ed67bfd5bdb86b97c1642b9391afd3b0586bed97a24",
+    "alac-clock8000-v1-early.mp4.f32le": "25ba3c1471eb64a1ab8ac1d91cad8205e3abbef1cd7bc700249520816f2f6d76",
+    "alac-clock8000-v1-preroll.mp4": "4234e0c020f15ad1db36fb1dc1717c7241cfb7f0a37d32957716ef33cd344d30",
+    "alac-clock8000-v1-preroll.mp4.f32le": "b2aa477d6d6f0d4b8a1eeb205a2cb75dcaf88ca90bed46999714378547ecd8f0",
+    "alac-clock8000-v1-repeat.mp4": "f47d505ea3e1850872fb22e566ba6aaa1a932e2f87932958f7ff31efb718e861",
+    "alac-clock8000-v1-repeat.mp4.f32le": "77dacd8511c6d964aabd919a1aff2e632bf4cf04cad9afef5e3051354f3c87d8",
+    "alac-clock8000-v1-gap.mp4": "77d464411b32dee368530bae7a4a936fdc4cc9585a380be51df4c34c8ed7cf8a",
+    "alac-clock8000-v1-gap.mp4.f32le": "c06647c7263f85c0bb2ac946ee1a8392863ddef93da1fddbd5494b126ad4f197",
+    "alac-clock8000-v1-silence.mp4": "e19af8296649b4580e1cb74a6963b6687d9cdfe80f72bb0b9fb9f894e76c0b82",
+    "alac-clock8000-v1-silence.mp4.f32le": "9e132485d5107211de325a45e7917cbe3e4b5b9cde3e4ee91d7d2102317759ee",
+    "alac-clock1000-v0-early.mp4": "ae9c66f50d156e9c8108230428b0f0ff3b341c1b57411e8fd109fc64dfa28556",
+    "alac-clock1000-v0-early.mp4.f32le": "25ba3c1471eb64a1ab8ac1d91cad8205e3abbef1cd7bc700249520816f2f6d76",
+    "alac-clock1000-v0-preroll.mp4": "cb30a7876c03b0efa9ce56cc142f9d5f358823eb35c379570bdf1cff77f2e127",
+    "alac-clock1000-v0-preroll.mp4.f32le": "b2aa477d6d6f0d4b8a1eeb205a2cb75dcaf88ca90bed46999714378547ecd8f0",
+    "alac-clock1000-v0-repeat.mp4": "b0fd5b11e0fbd0b2af412354aacd61e352a599a5807a53e59911adf6a7d19d6b",
+    "alac-clock1000-v0-repeat.mp4.f32le": "77dacd8511c6d964aabd919a1aff2e632bf4cf04cad9afef5e3051354f3c87d8",
+    "alac-clock1000-v0-gap.mp4": "1808f92e944f1cb5c113f309e2852bcb4ce3ad38bd516391d1d97e0cc8329a20",
+    "alac-clock1000-v0-gap.mp4.f32le": "c06647c7263f85c0bb2ac946ee1a8392863ddef93da1fddbd5494b126ad4f197",
+    "alac-clock1000-v0-silence.mp4": "3bff799baf291ed2105b2d540aee76bc36f0e9271f747209b839bbb46481a54f",
+    "alac-clock1000-v0-silence.mp4.f32le": "9e132485d5107211de325a45e7917cbe3e4b5b9cde3e4ee91d7d2102317759ee",
+    "alac-clock1000-v1-early.mp4": "5e5e1e9e4dc15029e8fb987f08bc653d5d14cb4d223dce5859dbd3ffeda820bf",
+    "alac-clock1000-v1-early.mp4.f32le": "25ba3c1471eb64a1ab8ac1d91cad8205e3abbef1cd7bc700249520816f2f6d76",
+    "alac-clock1000-v1-preroll.mp4": "36e84b4fca1db56f10980a5b4663491c3e31441cfb271933c9fac46e1ceed888",
+    "alac-clock1000-v1-preroll.mp4.f32le": "b2aa477d6d6f0d4b8a1eeb205a2cb75dcaf88ca90bed46999714378547ecd8f0",
+    "alac-clock1000-v1-repeat.mp4": "957117119b23961d6be2d4f0dddd75d235d5844f776a8da84e3d02f2ef202e6a",
+    "alac-clock1000-v1-repeat.mp4.f32le": "77dacd8511c6d964aabd919a1aff2e632bf4cf04cad9afef5e3051354f3c87d8",
+    "alac-clock1000-v1-gap.mp4": "8f58ef0a33265856d7e018fd0e53ee4554f2f5a16c7b1c679fd51a08fe30e8c9",
+    "alac-clock1000-v1-gap.mp4.f32le": "c06647c7263f85c0bb2ac946ee1a8392863ddef93da1fddbd5494b126ad4f197",
+    "alac-clock1000-v1-silence.mp4": "1e3a756bb7cea168e8af9d07a607ceffa7f1f7a490fa238bdc74b8572114027b",
+    "alac-clock1000-v1-silence.mp4.f32le": "9e132485d5107211de325a45e7917cbe3e4b5b9cde3e4ee91d7d2102317759ee",
+    "alac-clock1001-v0-early.mp4": "17c224a87920ad703558ede4c386c595fb92bd4201ac91f855cbeeb2765ecc14",
+    "alac-clock1001-v0-early.mp4.f32le": "25ba3c1471eb64a1ab8ac1d91cad8205e3abbef1cd7bc700249520816f2f6d76",
+    "alac-clock1001-v0-preroll.mp4": "19275f4a2f573962cc993d88ac554c18a956020f46cfeab7ae7385cd0fb670df",
+    "alac-clock1001-v0-preroll.mp4.f32le": "b2aa477d6d6f0d4b8a1eeb205a2cb75dcaf88ca90bed46999714378547ecd8f0",
+    "alac-clock1001-v0-repeat.mp4": "a8c199cd383c21465541bcba1a1fe202332f1eb30423f61eea4bdfd7ea91eb59",
+    "alac-clock1001-v0-repeat.mp4.f32le": "77dacd8511c6d964aabd919a1aff2e632bf4cf04cad9afef5e3051354f3c87d8",
+    "alac-clock1001-v0-gap.mp4": "5e96b59c2e70d262f7b651434ae2e47d70e6aea5ba46f96b0f98975a97cbc80b",
+    "alac-clock1001-v0-gap.mp4.f32le": "c06647c7263f85c0bb2ac946ee1a8392863ddef93da1fddbd5494b126ad4f197",
+    "alac-clock1001-v0-silence.mp4": "c6f754b8861175588bed8ab82f5aa7be9a7c7da3b823071d0615f1b419833bcc",
+    "alac-clock1001-v0-silence.mp4.f32le": "9e132485d5107211de325a45e7917cbe3e4b5b9cde3e4ee91d7d2102317759ee",
+    "alac-clock1001-v1-early.mp4": "aabf867a9c018005c38a17f9b0521bb644484f5f366b488c4f617176db5ed0c9",
+    "alac-clock1001-v1-early.mp4.f32le": "25ba3c1471eb64a1ab8ac1d91cad8205e3abbef1cd7bc700249520816f2f6d76",
+    "alac-clock1001-v1-preroll.mp4": "d3b113e54f568d8bfa8a6557ed03efc54c76b8264ab3214be3ae8296d607bd12",
+    "alac-clock1001-v1-preroll.mp4.f32le": "b2aa477d6d6f0d4b8a1eeb205a2cb75dcaf88ca90bed46999714378547ecd8f0",
+    "alac-clock1001-v1-repeat.mp4": "d915a5a9cfa1fe9a2a209f46a2d95b2beee6b4fee764a1dddd70acf620c374e5",
+    "alac-clock1001-v1-repeat.mp4.f32le": "77dacd8511c6d964aabd919a1aff2e632bf4cf04cad9afef5e3051354f3c87d8",
+    "alac-clock1001-v1-gap.mp4": "9b06eb49dcbd78dccdc0105e03f03416af82ea975f3e3abb830f3245a98a259e",
+    "alac-clock1001-v1-gap.mp4.f32le": "c06647c7263f85c0bb2ac946ee1a8392863ddef93da1fddbd5494b126ad4f197",
+    "alac-clock1001-v1-silence.mp4": "8de83d320860281d6a908912404d52d7da218787d25679aad7861ffdda0c1638",
+    "alac-clock1001-v1-silence.mp4.f32le": "9e132485d5107211de325a45e7917cbe3e4b5b9cde3e4ee91d7d2102317759ee"
+  }
+}

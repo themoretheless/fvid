@@ -112,7 +112,7 @@ pub(crate) fn descriptor_for_decode(
     let _ = crate::owned_wave_metadata::mp4_source_info(source, options)?;
     if options.max_packet_bytes < crate::owned_mp4::Limits::default().packet_bytes {
         let track = &reader.tracks()[index];
-        let max_samples = crate::owned_mp4_audio::mp4_active_samples(track, interval, options.max_packets);
+        let max_samples = crate::owned_mp4_audio::mp4_active_samples(track, reader.movie_timescale(), interval, options.max_packets);
         let exceeds = match &track.samples {
             crate::owned_mp4::SampleIndex::Expanded(samples) => samples
                 .iter()
@@ -192,7 +192,7 @@ pub(crate) fn geometry_for_decode(
     let index = crate::owned_mp4_audio::mp4_audio_index(&reader, options.streams.first().copied()).map_err(|e|e.to_string())?;
     let track = &reader.tracks()[index];
     let interval = transform.and_then(|t| prefix(t, rate));
-    let active_samples = crate::owned_mp4_audio::mp4_active_samples(track, interval, options.max_packets);
+    let active_samples = crate::owned_mp4_audio::mp4_active_samples(track, reader.movie_timescale(), interval, options.max_packets);
     let all_pcm = (0..active_samples).all(|n| track.description_for_sample(n).is_some_and(|d| matches!(&d.codec,b"raw "|b"sowt"|b"twos"|b"in24"|b"in32"|b"fl32"|b"fl64")));
     if transform.is_some_and(|t| t.interval.is_some()) {
         let mut probe = options.clone();
@@ -256,7 +256,7 @@ pub(crate) fn normalization_target(source:&Path,transform:AudioDecodeTransform,o
     let mut reader=open(source,options)?;
     let index=crate::owned_mp4_audio::mp4_audio_index(&reader,options.streams.first().copied()).map_err(|e|e.to_string())?;
     let interval = prefix(transform, rate);
-    let active_samples = crate::owned_mp4_audio::mp4_active_samples(&reader.tracks()[index], interval, options.max_packets);
+    let active_samples = crate::owned_mp4_audio::mp4_active_samples(&reader.tracks()[index], reader.movie_timescale(), interval, options.max_packets);
     let first_desc = reader.tracks()[index].description_for_sample(0).cloned();
     let changing = (0..active_samples).any(|i| reader.tracks()[index].description_for_sample(i) != first_desc.as_ref());
     if !changing {

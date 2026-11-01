@@ -371,6 +371,7 @@ use crate::container::audio_timeline::AudioTimeline as Mp4AudioSchedule;
 use crate::native_audio_decoder::NativeAudioCheckpoint as Mp4AacCheckpoint;
 use fvid_media::owned_mp4_audio_normalization::coefficients as mp4_normalization_coefficients;
 type Mp4NormalizationTrack = crate::container::mp4::Track;
+type Mp4NormalizationSampleIndex = crate::container::mp4::SampleIndex;
 type Mp4PcmScalar = f32;
 type Mp4OutputResampler = fvid_media::owned_resample::Resampler<Vec<u8>>;
 #[allow(dead_code)] // Export uses only the arithmetic subset of the shared playback clock.
@@ -620,7 +621,7 @@ pub fn aac_source_info_selected_with_options(
         let index = mp4_aac_index(&reader, selected)?;
         if options.max_packet_bytes != fvid_media::CopyOptions::default().max_packet_bytes {
             let track = &reader.tracks()[index];
-            let max_samples = mp4_active_samples(track, interval, options.max_packets);
+            let max_samples = mp4_active_samples(track, reader.movie_timescale(), interval, options.max_packets);
             let exceeds = match &track.samples {
                 crate::container::mp4::SampleIndex::Expanded(samples) => samples
                     .iter()
@@ -1350,7 +1351,7 @@ fn inspect_audio_source_selected(
         }
         if options.max_packet_bytes != fvid_media::CopyOptions::default().max_packet_bytes {
             let track = &reader.tracks()[index];
-            let max_samples = mp4_active_samples(track, interval, options.max_packets);
+            let max_samples = mp4_active_samples(track, reader.movie_timescale(), interval, options.max_packets);
             let exceeds = match &track.samples {
                 crate::container::mp4::SampleIndex::Expanded(samples) => samples
                     .iter()

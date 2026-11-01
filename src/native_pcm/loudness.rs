@@ -383,7 +383,7 @@ pub fn default_weights_with_options(
                 if let Some(track) = reader.tracks().get(info.stream_index) {
                     let max_samples = crate::native_media::mp4_active_samples(
                         track,
-                        None,
+                        reader.movie_timescale(), None,
                         options.max_packets,
                     );
                     let exceeds = match &track.samples {

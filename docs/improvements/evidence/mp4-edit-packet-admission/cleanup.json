@@ -1,0 +1,8 @@
+{
+  "removed_owned_completed_artifacts": [
+    "/private/tmp/fvid-edit-admission-target-20261101"
+  ],
+  "owned_build_target_absent": true,
+  "fixtures_and_evidence_retained": true,
+  "foreign_worktrees_and_stashes_untouched": true
+}

@@ -254,7 +254,7 @@ fn validate_encoded_audio_packet_budget(
             return Err("controlled memory budget exceeded".into());
         }
         if let Some(track) = reader.tracks().get(stream_index) {
-            let max_samples = crate::native_media::mp4_active_samples(track, interval, options.max_packets);
+            let max_samples = crate::native_media::mp4_active_samples(track, reader.movie_timescale(), interval, options.max_packets);
             let exceeds = match &track.samples {
                 crate::container::mp4::SampleIndex::Expanded(samples) => samples
                     .iter()

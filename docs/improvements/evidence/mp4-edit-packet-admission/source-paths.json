@@ -1,0 +1,13 @@
+[
+  "crates/fvid-media/src/owned_aac_export_routing.rs",
+  "crates/fvid-media/src/owned_mp4_audio.rs",
+  "crates/fvid-media/src/owned_mp4_audio_export.rs",
+  "crates/fvid-media/src/owned_mp4_audio_normalized_impl.rs",
+  "crates/fvid-media/src/owned_mp4_audio_timeline_impl.rs",
+  "src/native_audio_mix.rs",
+  "src/native_export/pcm_matroska.rs",
+  "src/native_loudnorm.rs",
+  "src/native_media.rs",
+  "src/native_pcm/loudness.rs",
+  "src/native_plan.rs"
+]

@@ -1,0 +1,17 @@
+{
+  "crates/fvid-media/src/owned_aac_export_routing.rs": "f5e33cd6dfe7f97368138015b218824bd307e0774d950aa12033557be59f516e",
+  "crates/fvid-media/src/owned_mp4_audio.rs": "fcdb329bee68a890a40e6520368dd44b80f25b8ebbd32ed5f3785d624e135ba4",
+  "crates/fvid-media/src/owned_mp4_audio_export.rs": "870ac5c070c2d099357909c29e5760511adc5981ba7d162fac3012b8736ef0fa",
+  "crates/fvid-media/src/owned_mp4_audio_normalized_impl.rs": "73adaec3da2799dc22deed5f3462d4ca4515752e1dd4d514c9e9ea0020ba675d",
+  "crates/fvid-media/src/owned_mp4_audio_timeline_impl.rs": "e6fa48a8786a3ee2f7b8037f497b66cc70246e1df96211e1580ed520b65a3510",
+  "src/native_audio_mix.rs": "eb0b890c9d519707d271c2d88e8564c7b9c28ac816f446c0d875fa0f6cccf0c0",
+  "src/native_export/pcm_matroska.rs": "a744be10ed76b59a1d6ae4c13cd0bf356afe576270783625b1763029615ce444",
+  "src/native_loudnorm.rs": "4b0e4f6c617a2021d431281fdfb09a2780733f2622447f6690adb63a0991438b",
+  "src/native_media.rs": "5273618ba4ce5fe9a908624cc4a5b336d79b4f62ffdc1f72eeb9cc077dd4c61e",
+  "src/native_pcm/loudness.rs": "d5ecc930ccc7ad98793b63329817fb3003bd358378ece21391b6eb611d69dd5d",
+  "src/native_plan.rs": "93aeaf78ee600f0952a5d71e717ac91b56f86f7fb20c94553314c537b7c12525",
+  "tests/mp4_edit_packet_admission.rs": "b8c9b0ad4fa4560e2bd6e00bc6822c673c45521c9dd93db7d76e44087002f2eb",
+  "scripts/generate_mp4_edit_packet_admission.py": "56fb5c2b77b7a5a75f621bd0d478431d0de129af1356ca8b352b99f6ef4e1f56",
+  "crates/fvid-media/src/owned_mp4_audio_schedule_impl.rs": "dbb65ad9e80babd95999e2bd6e6030f49f6e056a1fcf8d284866ec175cb50c76",
+  "crates/fvid-media/src/owned_mp4_edit_clock_impl.rs": "005da95be0581658f771bc01ebe15191329ab4c9132964d55ade45da71cba628"
+}

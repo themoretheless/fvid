@@ -12,11 +12,13 @@ fn mp4_write_tail_silence(output: &mut impl std::io::Write, frames: u64, channel
 }
 pub(crate) fn mp4_active_samples(
     track: &Mp4NormalizationTrack,
+    movie_scale: u32,
     interval: Option<(Duration, Duration)>,
     max_packets: Option<u64>,
 ) -> usize {
+    let edit_prefix = mp4_immediate_edit_prefix(track, movie_scale, interval);
     let media_edits = track.edits.iter().filter(|e| e.media_time >= 0).count();
-    if media_edits > 1 {
+    if media_edits > 1 && edit_prefix.is_none() {
         return track.samples.len();
     }
     let mut active = max_packets
@@ -48,7 +50,58 @@ pub(crate) fn mp4_active_samples(
             active = active.min(interval_samples);
         }
     }
-    active
+    active.min(edit_prefix.unwrap_or(active))
+}
+
+// Immediate, unchanged decoder geometry uses the exact integer presentation
+// schedule below. Keep delayed AAC and normalized clocks conservative: their
+// entropy probing/lookahead can legitimately read beyond an audible endpoint.
+fn mp4_immediate_edit_prefix(
+    track: &Mp4NormalizationTrack,
+    movie_scale: u32,
+    interval: Option<(Duration, Duration)>,
+) -> Option<usize> {
+    if track.edits.is_empty() || track.has_declared_gaps() { return None; }
+    let first = track.sample_descriptions.first()?;
+    if first.sample_rate == 0 || track.timescale % first.sample_rate != 0
+        || !track.sample_descriptions.iter().all(|d| d == first)
+        || !matches!(&first.codec, b"raw " | b"sowt" | b"twos" | b"in24" | b"in32" | b"fl32" | b"fl64" | b"alac" | b"ima4" | b"MAC3" | b"MAC6" | b"ms\x00\x11" | b"ms\x00\x02")
+    { return None; }
+    let rate = first.sample_rate;
+    let clock = track.resolved_edit_clock(movie_scale).ok()?;
+    let schedule = Mp4AudioSchedule::new(clock.edits(), track.duration, track.timescale, clock.timescale, rate).ok()?;
+    let boundary = |t: Duration| -> Option<u64> {
+        u64::try_from(t.as_nanos().checked_mul(u128::from(rate))?.div_ceil(1_000_000_000)).ok()
+    };
+    let (from, to) = match interval {
+        Some((a,b)) => (boundary(a)?, boundary(b)?.min(schedule.sample_frames)),
+        None => (0, schedule.sample_frames),
+    };
+    let mut last = 0u64;
+    for segment in schedule.segments {
+        let begin = from.max(segment.presentation.start);
+        let end = to.min(segment.presentation.end);
+        if begin < end {
+            if let Some(source) = segment.source_start {
+                last = last.max(source.checked_add(end - segment.presentation.start)?);
+            }
+        }
+    }
+    let ticks_per_frame = u64::from(track.timescale / rate);
+    if let Mp4NormalizationSampleIndex::Uniform(index) = &track.samples {
+        if index.duration == 0 || u64::from(index.duration) % ticks_per_frame != 0 { return None; }
+        let ticks = u128::from(last).checked_mul(u128::from(ticks_per_frame))?;
+        return Some(usize::try_from(ticks.div_ceil(u128::from(index.duration))).ok()?.min(index.count));
+    }
+    let mut count = 0;
+    while count < track.samples.len() {
+        let sample = track.samples.get(count)?;
+        let pts = u64::try_from(sample.pts).ok()?;
+        if pts % ticks_per_frame != 0 { return None; }
+        if pts / ticks_per_frame >= last { break; }
+        count += 1;
+    }
+    Some(count)
 }
 
 pub(crate) fn decode_mp4_audio_reader_controlled<R: std::io::Read + std::io::Seek>(
@@ -77,7 +130,7 @@ pub(crate) fn decode_mp4_audio_reader_targeted<R: std::io::Read + std::io::Seek>
     let initial_description = track.samples.get(0).ok_or_else(|| invalid("MP4 audio has no samples"))?.description_index;
     let initial_setup = track.decoder_setup(initial_description)?;
     let max_packets = control.packet_limit();
-    let active_samples = mp4_active_samples(&track, interval, max_packets);
+    let active_samples = mp4_active_samples(&track, reader.movie_timescale(), interval, max_packets);
     let mut ps = vec![false; track.sample_descriptions.len()];
     // Probe each used configuration independently; never feed packets from a
     // different setup into an AAC entropy/history state.
@@ -371,7 +424,7 @@ fn negotiate_mp4_description_ps_with_interval<R: std::io::Read + std::io::Seek>(
     if setup.codec != *b"mp4a" { return Ok(false); }
     let asc = mp4_probe_config(&setup.configuration)?;
     let Ok(mut probe) = InBandPsProbe::new(asc, setup.sample_rate) else { return Ok(false); };
-    let active_samples = mp4_active_samples(&reader.tracks()[index], interval, max_packets);
+    let active_samples = mp4_active_samples(&reader.tracks()[index], reader.movie_timescale(), interval, max_packets);
     let mut packet = Vec::new();
     for sample in 0..active_samples {
         check()?;
@@ -408,7 +461,7 @@ pub(crate) fn mp4_normalized_geometry_controlled_with_interval<R:std::io::Read+s
     let ps=negotiate_mp4_description_ps_with_interval(reader,index,first,interval,max_packets,&mut check)?;
     let decoder=if ps {Mp4TimelineDecoder::with_in_band_ps(&setup)?}else{Mp4TimelineDecoder::new(&setup)?};
     let initial=(decoder.sample_rate(),decoder.channels(),decoder.normalization_mask());
-    let active_samples=mp4_active_samples(&reader.tracks()[index],interval,max_packets);
+    let active_samples=mp4_active_samples(&reader.tracks()[index],reader.movie_timescale(), interval,max_packets);
     for i in 0..reader.tracks()[index].sample_descriptions.len() {
         check()?;
         let track=&reader.tracks()[index];

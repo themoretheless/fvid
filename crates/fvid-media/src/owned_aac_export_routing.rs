@@ -76,7 +76,7 @@ pub(crate) fn router_for_decode(
             return StereoRouter::new(channels,mask).map(Some);
         }
         let track = &reader.tracks()[index];
-        let active_samples = crate::owned_mp4_audio::mp4_active_samples(track, interval, options.max_packets);
+        let active_samples = crate::owned_mp4_audio::mp4_active_samples(track, reader.movie_timescale(), interval, options.max_packets);
         let first = track.samples.get(0).ok_or("MP4 audio has no samples")?;
         let setup = track.decoder_setup(first.description_index).map_err(|e|e.to_string())?;
         if setup.codec != *b"mp4a" { return Ok(None); }

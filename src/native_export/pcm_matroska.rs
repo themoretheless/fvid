@@ -220,7 +220,7 @@ pub(crate) fn extract_source_pcm_metadata_with_interval_packet_and_memory_limit(
         };
         let track = &reader.tracks()[index];
         if let Some(maximum) = max_packet_bytes {
-            let max_samples = crate::native_media::mp4_active_samples(track, interval, max_packets);
+            let max_samples = crate::native_media::mp4_active_samples(track, reader.movie_timescale(), interval, max_packets);
             let exceeds = match &track.samples {
                 crate::container::mp4::SampleIndex::Expanded(samples) => samples
                     .iter()
