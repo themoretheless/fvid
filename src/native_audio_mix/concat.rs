@@ -93,9 +93,24 @@ fn segment_packet_count(source: &Path, options: &fvid_media::CopyOptions) -> Res
         }
         let info = crate::native_media::constant_audio_source_info_selected_with_options(source, None, options)?;
         if let Some(track) = reader.tracks().get(info.stream_index) {
-            if track.edits.iter().filter(|e| e.media_time >= 0).count() <= 1 {
+            if track.edits.is_empty() {
                 return Ok(track.samples.len() as u64);
             }
+            // Indexed sample count is not decode work for an edited source:
+            // edits can stop early, replay media, or retain decoder preroll.
+            // Count through the same bounded decoder as execution, discarding
+            // PCM instead of allocating a spool or publishing progress.
+            drop(reader);
+            let mut count_options = super::strip_output_controls(options);
+            count_options.progress = None;
+            return fvid_media::owned_mp4_audio::decode_mp4_audio_pcm(
+                File::open(source)?,
+                &mut std::io::sink(),
+                None,
+                &count_options,
+            )
+            .map(|stats| stats.decoded_frames)
+            .map_err(|error| invalid(&error.to_string()));
         }
         return Ok(u64::MAX);
     }

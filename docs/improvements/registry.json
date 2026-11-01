@@ -1,8 +1,8 @@
 {
   "target": 1000,
   "counting_rule": "One independently confirmed problem or useful capability; fixture variants and baseline integration repairs are excluded. Only accepted entries count.",
-  "accepted_count": 478,
-  "next_id": "FVID-0479",
+  "accepted_count": 479,
+  "next_id": "FVID-0480",
   "entries": [
     {
       "id": "FVID-0001",
@@ -5398,6 +5398,17 @@
       "result": "Share preferred/enabled header track selection for counting while retaining the legacy exporter codec gate. All three tests pass, including complete PCM publication and VP9 seek/EOF controls.",
       "status": "accepted",
       "validation": "batch-475-validation.json"
+    },
+    {
+      "id": "FVID-0479",
+      "batch": 476,
+      "title": "Count MP4 edited decode work before admitting later concat segments",
+      "source": "src/native_audio_mix/concat.rs",
+      "regression": "tests/mp4_concat_edit_work.rs",
+      "before": "Indexed sample count or u64::MAX falsely exhausted the global concat work budget for edited MP4 sources. Identical final baseline: four controls pass, two acceptances fail across 32 PCM/ALAC/AAC and memory variants; execution correctly refuses reached oversized successors.",
+      "result": "Edited sources count actual work through the admitted bounded MP4 decoder into io::sink, with no progress or spool; unedited sources retain index counting. All six regressions pass, including preroll, checkpoints/repeats, exact exhaustion, complete PCM concat and native video seek/EOF.",
+      "status": "accepted",
+      "validation": "batch-476-validation.json"
     }
   ]
 }

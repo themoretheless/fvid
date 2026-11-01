@@ -1,0 +1,7 @@
+{
+  "src/native_audio_mix/concat.rs": "cdf4c90fcd2326bd2804f80a02c12b49a4155ae2fc9f6455316c4d3be6bb49f3",
+  "src/native_media.rs": "82a673038bbc7288bab00e2c3da310ee5de94cc515d0e5158a7af27908dde592",
+  "crates/fvid-media/src/owned_mp4_audio_timeline_impl.rs": "0523d2d07fbcd8f4c971167820cee18ddba428e28f1c4e7fc5908590aae876f6",
+  "tests/mp4_concat_edit_work.rs": "40f4639e866b64648941fc7976f0174e3fd65915f1c63f16c0b5486802ab2786",
+  "scripts/generate_mp4_concat_edit_work.py": "9265b35b3f1e8fb8cb67ea738b2ccd42679a5bf03307fba334693d7bead55341"
+}
