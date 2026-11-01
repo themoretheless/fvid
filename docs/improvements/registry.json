@@ -4558,10 +4558,11 @@
       "source": "src/playback/video/mp4_dispatch.rs",
       "regression": "tests/mp4_presentation_endpoint.rs",
       "before": "Final expanded baseline: exact parser/media-clock/pixel controls pass; native-duration test fails. Ten authored cases report 60ms although their actual displayed endpoint is 80/100/120/260/280ms. Plain zero-shift controls pass. Actual NativeReader playback/seek/rewind/EOF assertions run before the final aggregate duration failure.",
-      "result": "Use a private lazy index-derived composition endpoint for NativeReader unedited duration, including the final equal-PTS group span. Known track/movie header bounds prevent hidden/non-output timestamp outliers from stretching the estimate, with sub-movie-tick quantization tolerance and zero/unknown markers preserved. Raw media clocks and edit windows remain intact. The follow-up passes 51 software playback/parser/seek/header/fragment checks and a core build; no extra ID is counted. Fully unstated duration remains a nominal index estimate.",
+      "result": "Use a private lazy index-derived composition endpoint for NativeReader unedited duration, including the final equal-PTS group span. Known track/movie header bounds prevent hidden/non-output timestamp outliers from stretching the estimate, with sub-movie-tick quantization tolerance and zero/unknown markers preserved. Raw media clocks and edit windows remain intact. The follow-up passes 51 software playback/parser/seek/header/fragment checks and a core build; no extra ID is counted. Fully unstated duration remains a nominal index estimate. A zero-count signed-CTS follow-up distinguishes indexed decode coverage from genuine declared tails: negative preroll ends at20/40ms instead of a phantom60ms, including unknown headers. Nine authored cases preserve exact signed metadata/YUV, native playback/seek/rewind/EOF, declared tails and appended-fragment duration.65 integration checks,83 MP4 unit executions and both locked/offline builds pass;one old ignore remains.",
       "status": "accepted",
       "validation": "batch-400-validation.json",
-      "follow_up_validation": "batch-401-validation.json"
+      "follow_up_validation": "batch-401-validation.json",
+      "signed_composition_follow_up_validation": "follow-up-0407-negative-composition-validation.json"
     },
     {
       "id": "FVID-0408",

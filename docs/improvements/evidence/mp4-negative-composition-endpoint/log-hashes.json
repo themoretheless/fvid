@@ -1,0 +1,57 @@
+[
+  {
+    "file": "second-related.log",
+    "raw_sha256": "dac8259bcdfafb0c99110a5a22a5be5bfd7a3aa5ef1a2639b26527d788c6db7d",
+    "archived_sha256": "8d667aaabe7929265725bf5edce80502d3496dc1d93777aa49de297aab78877b"
+  },
+  {
+    "file": "after-expanded.log",
+    "raw_sha256": "744da19dd0b55e7f5875f3d9e054e2777f0f8d9b0159d21b0e05deb16a138cd8",
+    "archived_sha256": "2c0d5e8296ede1605d204160674e5ec87de9521c9697623b40d91b8d66ec5392"
+  },
+  {
+    "file": "root-mp4.log",
+    "raw_sha256": "be6a5db4b26036da0e707b0c3a51dfd0f1ca6976b551b2e59fb220726579e33d",
+    "archived_sha256": "5a91fc3e4e6a5a49795f4fa14aeb328ca4369d589dbf4d0b25fd0b6a3b8927db"
+  },
+  {
+    "file": "before-expanded.log",
+    "raw_sha256": "51710ee7e3cf771754308815c00cd53f5a7d01e9a78904721ef6d1c42d2b6789",
+    "archived_sha256": "51710ee7e3cf771754308815c00cd53f5a7d01e9a78904721ef6d1c42d2b6789"
+  },
+  {
+    "file": "integration.log",
+    "raw_sha256": "40b12acb2449ead1212d4505f178500750287af1b0a16957661bedcae9adeb58",
+    "archived_sha256": "48864980365bc32bf563f63c0c84cfc36c29545502ea02a6a0a6461bed4b8b95"
+  },
+  {
+    "file": "core-check.log",
+    "raw_sha256": "352a72c998d0bf6e500c64dd053932d191f9181c6afb8fd5eaad5c09e89bdfd8",
+    "archived_sha256": "352a72c998d0bf6e500c64dd053932d191f9181c6afb8fd5eaad5c09e89bdfd8"
+  },
+  {
+    "file": "player-check.log",
+    "raw_sha256": "5f46537e094f8c4eca7fd696339dddc9a6330b1191c09678f9776778b5d5c38a",
+    "archived_sha256": "5f46537e094f8c4eca7fd696339dddc9a6330b1191c09678f9776778b5d5c38a"
+  },
+  {
+    "file": "initial-four-before.log",
+    "raw_sha256": "badd7006a8a44be60a26939a6b89dc1cc6f3dac7e2b1bfb8a01abc5750498700",
+    "archived_sha256": "badd7006a8a44be60a26939a6b89dc1cc6f3dac7e2b1bfb8a01abc5750498700"
+  },
+  {
+    "file": "before.log",
+    "raw_sha256": "badd7006a8a44be60a26939a6b89dc1cc6f3dac7e2b1bfb8a01abc5750498700",
+    "archived_sha256": "badd7006a8a44be60a26939a6b89dc1cc6f3dac7e2b1bfb8a01abc5750498700"
+  },
+  {
+    "file": "rejected-candidate-integration.log",
+    "raw_sha256": "73b6305011fa8de3a73117fca8f6dc676c5b4f943b98eec38e0ca4f7862c55dc",
+    "archived_sha256": "73b6305011fa8de3a73117fca8f6dc676c5b4f943b98eec38e0ca4f7862c55dc"
+  },
+  {
+    "file": "after-related.log",
+    "raw_sha256": "d9edda8c00f2ba9f72b9ffc3373d600103fe42126a877d2b1cb41c05b80d22d3",
+    "archived_sha256": "624e70ca242b7bc38895ebc6b403e53f9c1cc0e29cf83bd19eb85c4907597ab9"
+  }
+]

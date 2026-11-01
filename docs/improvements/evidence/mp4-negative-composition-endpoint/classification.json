@@ -1,0 +1,18 @@
+{
+  "requalified_id": "FVID-0407",
+  "count_delta": 0,
+  "reason": "Negative CTS endpoint is another variant of the existing native unedited composition-endpoint problem. The finite-header follow-up still retained the decode-duration lower bound; this correction completes that same endpoint policy.",
+  "baseline": {
+    "exit_code": 101,
+    "passed": 1,
+    "failed": 1
+  },
+  "related": {
+    "exit_code": 0,
+    "passed": 18,
+    "failed": 0
+  },
+  "final_cases": 9,
+  "final_baseline_log": "before-expanded.log",
+  "first_candidate_rejected": "rejected-candidate-results.json"
+}

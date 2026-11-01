@@ -1,0 +1,22 @@
+{
+  "exact_offline_regeneration": true,
+  "files": {
+    "frame-0.yuv16": "b4cc94ff03bd17b32107a79a64ba427cd43b6e49d209bb4d29190f3deb737a11",
+    "frame-1.yuv16": "31d05f629132273f660622387ef2865866de6688c0969265e891ad9d4c936237",
+    "frame-2.yuv16": "2f59155bee83baf25a0d39c17290257f055569e5b1d77ca8b866b1a4b2cee6f7",
+    "shift--2-known.mp4": "26b75e5d3c1fd0a4cd073267e76df81c0140e29adc913cfa2efd7475a119da9f",
+    "shift--2-unknown.mp4": "8f05d764e6ce77a0eead3d3a64f79c1495c6a6119093b1ee46afb24a156eafe8",
+    "shift--1-known.mp4": "284857478a9e11fd08276387d8c1c27cde3520ac7842f04b4fe31dab14991f97",
+    "shift--1-unknown.mp4": "2128e87c13833e6715ee5b277438159141b388e410df17b10d857113868225ef",
+    "shift-0-known.mp4": "4b9847ff79d2ddf9572d53d289410f4f22a45836d5752cf79c43173b4d663281",
+    "shift-0-unknown.mp4": "af6aed97a5efa577bfd5ec0d75e6d003f3428f464cae32e30edb590e341b0bf2",
+    "shift-1-known.mp4": "dda7f9584833b8e385b3e50a4973cc8e811f3e5e49abf165d08676a25b292603",
+    "shift-1-unknown.mp4": "9e1d480229622aba191f0b88980c48b9d75d4463f9724fdbe392da21a76ef24e",
+    "shift--1-declared-tail.mp4": "0548870864ba86fb11a80cf855930f304caa871567a8249772b5347d56df895b",
+    "manifest.json": "fd5674f598ad2273ff1a9b8238946655ae5ab396a603d016cf28f6ce56848756"
+  },
+  "ordinary_tests_require_generator": false,
+  "ffmpeg_required": false,
+  "network_required": false,
+  "private_media": false
+}

@@ -1,0 +1,93 @@
+{
+  "integration": {
+    "command": [
+      "cargo",
+      "test",
+      "--locked",
+      "--offline",
+      "--no-default-features",
+      "--features",
+      "player",
+      "--no-fail-fast",
+      "--test",
+      "mp4",
+      "--test",
+      "mp4_time_header_sizes",
+      "--test",
+      "mp4_time_header_flags",
+      "--test",
+      "mp4_open_ended_edit",
+      "--test",
+      "mp4_implicit_fragment_base",
+      "--test",
+      "mp4_layered_seek_coverage",
+      "--test",
+      "mp4_concat_selected_clock",
+      "--test",
+      "mp4_seek_io_regressions",
+      "--test",
+      "mp4_negative_composition_endpoint",
+      "--test",
+      "mp4_presentation_endpoint",
+      "--test",
+      "mp4_nondisplay_endpoint",
+      "--test",
+      "mp4_decode_only_seek",
+      "--test",
+      "mp4_edit_window_eof",
+      "--test",
+      "mp4_wide_decode_clock"
+    ],
+    "exit_code": 0,
+    "passed": 65,
+    "failed": 0,
+    "ignored": 0
+  },
+  "root-mp4": {
+    "command": [
+      "cargo",
+      "test",
+      "--locked",
+      "--offline",
+      "--no-default-features",
+      "--features",
+      "player",
+      "--lib",
+      "mp4",
+      "--",
+      "--test-threads=2"
+    ],
+    "exit_code": 0,
+    "passed": 83,
+    "failed": 0,
+    "ignored": 1
+  },
+  "core-check": {
+    "command": [
+      "cargo",
+      "check",
+      "--locked",
+      "--offline",
+      "--no-default-features"
+    ],
+    "exit_code": 0,
+    "passed": 0,
+    "failed": 0,
+    "ignored": 0
+  },
+  "player-check": {
+    "command": [
+      "cargo",
+      "check",
+      "--locked",
+      "--offline",
+      "--no-default-features",
+      "--features",
+      "player"
+    ],
+    "exit_code": 0,
+    "passed": 0,
+    "failed": 0,
+    "ignored": 0
+  }
+}

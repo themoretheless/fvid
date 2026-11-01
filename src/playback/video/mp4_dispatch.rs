@@ -389,8 +389,10 @@ impl<R: Read + Seek> Mp4VideoReader<R> {
             let track = self.track();
             let mut latest = i64::MIN;
             let mut span = 0i128;
+            let mut decode_end = 0u128;
             for index in 0..track.samples.len() {
                 if let Some(sample) = track.samples.get(index) {
+                    decode_end = decode_end.max(u128::from(sample.dts) + u128::from(sample.duration));
                     match sample.pts.cmp(&latest) {
                         std::cmp::Ordering::Greater => {
                             latest = sample.pts;
@@ -401,7 +403,14 @@ impl<R: Read + Seek> Mp4VideoReader<R> {
                     }
                 }
             }
-            let mut end = i128::from(track.duration).max(i128::from(latest) + span);
+            let nominal_end = i128::from(latest) + span;
+            // An indexed decode endpoint is not a lower bound for composition:
+            // signed CTS can move the displayed range earlier. Keep genuine
+            // declared time beyond indexed decoding, including empty tails.
+            let duration_floor = if u128::from(track.duration) <= decode_end {
+                i128::from(track.duration).min(nominal_end.max(0))
+            } else { i128::from(track.duration) };
+            let mut end = duration_floor.max(nominal_end);
             if let Some((duration, movie_scale)) = self.presentation_bound {
                 let header = i128::from(duration) * i128::from(track.timescale);
                 let scale = i128::from(movie_scale);
@@ -409,7 +418,7 @@ impl<R: Read + Seek> Mp4VideoReader<R> {
                 // PTS without displaying anything there. Honor a finite track
                 // endpoint, allowing only sub-movie-tick header quantization.
                 if end.checked_mul(scale).is_none_or(|ticks| ticks - header >= i128::from(track.timescale)) {
-                    end = i128::from(track.duration).max((header + scale - 1) / scale);
+                    end = duration_floor.max((header + scale - 1) / scale);
                 }
             }
             end

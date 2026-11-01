@@ -1,0 +1,7 @@
+{
+  "removed": [
+    "/private/tmp/fvid-negative-composition-target-20261101"
+  ],
+  "regression_fixtures_and_evidence_preserved": true,
+  "foreign_worktrees_and_stashes_untouched": true
+}
