@@ -1,0 +1,219 @@
+run 1
+
+running 5 tests
+test player::sound_stop_loop_regressions::earlier_stop_survives_delayed_callback_past_loop_b ... ok
+test player::sound_stop_loop_regressions::coincident_stop_survives_delayed_callback_past_loop_b ... ok
+test player::sound_stop_loop_regressions::exact_authored_video_and_actual_pcm_seek_eof_controls ... ok
+test player::sound_stop_loop_regressions::paused_transport_does_not_spend_stop_or_loop ... ok
+test player::sound_stop_loop_regressions::unreached_stop_still_allows_actual_loop_seek ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 1159 filtered out; finished in 0.04s
+
+run 2
+
+running 5 tests
+test player::sound_stop_loop_regressions::earlier_stop_survives_delayed_callback_past_loop_b ... ok
+test player::sound_stop_loop_regressions::coincident_stop_survives_delayed_callback_past_loop_b ... ok
+test player::sound_stop_loop_regressions::paused_transport_does_not_spend_stop_or_loop ... ok
+test player::sound_stop_loop_regressions::exact_authored_video_and_actual_pcm_seek_eof_controls ... ok
+test player::sound_stop_loop_regressions::unreached_stop_still_allows_actual_loop_seek ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 1159 filtered out; finished in 0.04s
+
+run 3
+
+running 5 tests
+test player::sound_stop_loop_regressions::earlier_stop_survives_delayed_callback_past_loop_b ... ok
+test player::sound_stop_loop_regressions::coincident_stop_survives_delayed_callback_past_loop_b ... ok
+test player::sound_stop_loop_regressions::exact_authored_video_and_actual_pcm_seek_eof_controls ... ok
+test player::sound_stop_loop_regressions::paused_transport_does_not_spend_stop_or_loop ... ok
+test player::sound_stop_loop_regressions::unreached_stop_still_allows_actual_loop_seek ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 1159 filtered out; finished in 0.04s
+
+run 4
+
+running 5 tests
+test player::sound_stop_loop_regressions::coincident_stop_survives_delayed_callback_past_loop_b ... ok
+test player::sound_stop_loop_regressions::earlier_stop_survives_delayed_callback_past_loop_b ... ok
+test player::sound_stop_loop_regressions::paused_transport_does_not_spend_stop_or_loop ... ok
+test player::sound_stop_loop_regressions::exact_authored_video_and_actual_pcm_seek_eof_controls ... ok
+test player::sound_stop_loop_regressions::unreached_stop_still_allows_actual_loop_seek ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 1159 filtered out; finished in 0.04s
+
+run 5
+
+running 5 tests
+test player::sound_stop_loop_regressions::coincident_stop_survives_delayed_callback_past_loop_b ... ok
+test player::sound_stop_loop_regressions::earlier_stop_survives_delayed_callback_past_loop_b ... ok
+test player::sound_stop_loop_regressions::exact_authored_video_and_actual_pcm_seek_eof_controls ... ok
+test player::sound_stop_loop_regressions::paused_transport_does_not_spend_stop_or_loop ... ok
+test player::sound_stop_loop_regressions::unreached_stop_still_allows_actual_loop_seek ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 1159 filtered out; finished in 0.04s
+
+run 6
+
+running 5 tests
+test player::sound_stop_loop_regressions::coincident_stop_survives_delayed_callback_past_loop_b ... ok
+test player::sound_stop_loop_regressions::earlier_stop_survives_delayed_callback_past_loop_b ... ok
+test player::sound_stop_loop_regressions::paused_transport_does_not_spend_stop_or_loop ... ok
+test player::sound_stop_loop_regressions::exact_authored_video_and_actual_pcm_seek_eof_controls ... ok
+test player::sound_stop_loop_regressions::unreached_stop_still_allows_actual_loop_seek ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 1159 filtered out; finished in 0.04s
+
+run 7
+
+running 5 tests
+test player::sound_stop_loop_regressions::coincident_stop_survives_delayed_callback_past_loop_b ... ok
+test player::sound_stop_loop_regressions::earlier_stop_survives_delayed_callback_past_loop_b ... ok
+test player::sound_stop_loop_regressions::paused_transport_does_not_spend_stop_or_loop ... ok
+test player::sound_stop_loop_regressions::exact_authored_video_and_actual_pcm_seek_eof_controls ... ok
+test player::sound_stop_loop_regressions::unreached_stop_still_allows_actual_loop_seek ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 1159 filtered out; finished in 0.04s
+
+run 8
+
+running 5 tests
+test player::sound_stop_loop_regressions::coincident_stop_survives_delayed_callback_past_loop_b ... ok
+test player::sound_stop_loop_regressions::earlier_stop_survives_delayed_callback_past_loop_b ... ok
+test player::sound_stop_loop_regressions::paused_transport_does_not_spend_stop_or_loop ... ok
+test player::sound_stop_loop_regressions::exact_authored_video_and_actual_pcm_seek_eof_controls ... ok
+test player::sound_stop_loop_regressions::unreached_stop_still_allows_actual_loop_seek ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 1159 filtered out; finished in 0.04s
+
+run 9
+
+running 5 tests
+test player::sound_stop_loop_regressions::coincident_stop_survives_delayed_callback_past_loop_b ... ok
+test player::sound_stop_loop_regressions::earlier_stop_survives_delayed_callback_past_loop_b ... ok
+test player::sound_stop_loop_regressions::paused_transport_does_not_spend_stop_or_loop ... ok
+test player::sound_stop_loop_regressions::exact_authored_video_and_actual_pcm_seek_eof_controls ... ok
+test player::sound_stop_loop_regressions::unreached_stop_still_allows_actual_loop_seek ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 1159 filtered out; finished in 0.04s
+
+run 10
+
+running 5 tests
+test player::sound_stop_loop_regressions::earlier_stop_survives_delayed_callback_past_loop_b ... ok
+test player::sound_stop_loop_regressions::coincident_stop_survives_delayed_callback_past_loop_b ... ok
+test player::sound_stop_loop_regressions::exact_authored_video_and_actual_pcm_seek_eof_controls ... ok
+test player::sound_stop_loop_regressions::paused_transport_does_not_spend_stop_or_loop ... ok
+test player::sound_stop_loop_regressions::unreached_stop_still_allows_actual_loop_seek ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 1159 filtered out; finished in 0.04s
+
+run 11
+
+running 5 tests
+test player::sound_stop_loop_regressions::coincident_stop_survives_delayed_callback_past_loop_b ... ok
+test player::sound_stop_loop_regressions::earlier_stop_survives_delayed_callback_past_loop_b ... ok
+test player::sound_stop_loop_regressions::exact_authored_video_and_actual_pcm_seek_eof_controls ... ok
+test player::sound_stop_loop_regressions::paused_transport_does_not_spend_stop_or_loop ... ok
+test player::sound_stop_loop_regressions::unreached_stop_still_allows_actual_loop_seek ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 1159 filtered out; finished in 0.04s
+
+run 12
+
+running 5 tests
+test player::sound_stop_loop_regressions::coincident_stop_survives_delayed_callback_past_loop_b ... ok
+test player::sound_stop_loop_regressions::earlier_stop_survives_delayed_callback_past_loop_b ... ok
+test player::sound_stop_loop_regressions::paused_transport_does_not_spend_stop_or_loop ... ok
+test player::sound_stop_loop_regressions::exact_authored_video_and_actual_pcm_seek_eof_controls ... ok
+test player::sound_stop_loop_regressions::unreached_stop_still_allows_actual_loop_seek ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 1159 filtered out; finished in 0.04s
+
+run 13
+
+running 5 tests
+test player::sound_stop_loop_regressions::earlier_stop_survives_delayed_callback_past_loop_b ... ok
+test player::sound_stop_loop_regressions::coincident_stop_survives_delayed_callback_past_loop_b ... ok
+test player::sound_stop_loop_regressions::exact_authored_video_and_actual_pcm_seek_eof_controls ... ok
+test player::sound_stop_loop_regressions::paused_transport_does_not_spend_stop_or_loop ... ok
+test player::sound_stop_loop_regressions::unreached_stop_still_allows_actual_loop_seek ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 1159 filtered out; finished in 0.04s
+
+run 14
+
+running 5 tests
+test player::sound_stop_loop_regressions::earlier_stop_survives_delayed_callback_past_loop_b ... ok
+test player::sound_stop_loop_regressions::coincident_stop_survives_delayed_callback_past_loop_b ... ok
+test player::sound_stop_loop_regressions::paused_transport_does_not_spend_stop_or_loop ... ok
+test player::sound_stop_loop_regressions::exact_authored_video_and_actual_pcm_seek_eof_controls ... ok
+test player::sound_stop_loop_regressions::unreached_stop_still_allows_actual_loop_seek ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 1159 filtered out; finished in 0.04s
+
+run 15
+
+running 5 tests
+test player::sound_stop_loop_regressions::earlier_stop_survives_delayed_callback_past_loop_b ... ok
+test player::sound_stop_loop_regressions::coincident_stop_survives_delayed_callback_past_loop_b ... ok
+test player::sound_stop_loop_regressions::exact_authored_video_and_actual_pcm_seek_eof_controls ... ok
+test player::sound_stop_loop_regressions::paused_transport_does_not_spend_stop_or_loop ... ok
+test player::sound_stop_loop_regressions::unreached_stop_still_allows_actual_loop_seek ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 1159 filtered out; finished in 0.04s
+
+run 16
+
+running 5 tests
+test player::sound_stop_loop_regressions::coincident_stop_survives_delayed_callback_past_loop_b ... ok
+test player::sound_stop_loop_regressions::earlier_stop_survives_delayed_callback_past_loop_b ... ok
+test player::sound_stop_loop_regressions::paused_transport_does_not_spend_stop_or_loop ... ok
+test player::sound_stop_loop_regressions::exact_authored_video_and_actual_pcm_seek_eof_controls ... ok
+test player::sound_stop_loop_regressions::unreached_stop_still_allows_actual_loop_seek ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 1159 filtered out; finished in 0.04s
+
+run 17
+
+running 5 tests
+test player::sound_stop_loop_regressions::earlier_stop_survives_delayed_callback_past_loop_b ... ok
+test player::sound_stop_loop_regressions::coincident_stop_survives_delayed_callback_past_loop_b ... ok
+test player::sound_stop_loop_regressions::exact_authored_video_and_actual_pcm_seek_eof_controls ... ok
+test player::sound_stop_loop_regressions::paused_transport_does_not_spend_stop_or_loop ... ok
+test player::sound_stop_loop_regressions::unreached_stop_still_allows_actual_loop_seek ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 1159 filtered out; finished in 0.04s
+
+run 18
+
+running 5 tests
+test player::sound_stop_loop_regressions::coincident_stop_survives_delayed_callback_past_loop_b ... ok
+test player::sound_stop_loop_regressions::earlier_stop_survives_delayed_callback_past_loop_b ... ok
+test player::sound_stop_loop_regressions::paused_transport_does_not_spend_stop_or_loop ... ok
+test player::sound_stop_loop_regressions::exact_authored_video_and_actual_pcm_seek_eof_controls ... ok
+test player::sound_stop_loop_regressions::unreached_stop_still_allows_actual_loop_seek ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 1159 filtered out; finished in 0.04s
+
+run 19
+
+running 5 tests
+test player::sound_stop_loop_regressions::coincident_stop_survives_delayed_callback_past_loop_b ... ok
+test player::sound_stop_loop_regressions::earlier_stop_survives_delayed_callback_past_loop_b ... ok
+test player::sound_stop_loop_regressions::exact_authored_video_and_actual_pcm_seek_eof_controls ... ok
+test player::sound_stop_loop_regressions::paused_transport_does_not_spend_stop_or_loop ... ok
+test player::sound_stop_loop_regressions::unreached_stop_still_allows_actual_loop_seek ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 1159 filtered out; finished in 0.04s
+
+run 20
+
+running 5 tests
+test player::sound_stop_loop_regressions::earlier_stop_survives_delayed_callback_past_loop_b ... ok
+test player::sound_stop_loop_regressions::coincident_stop_survives_delayed_callback_past_loop_b ... ok
+test player::sound_stop_loop_regressions::exact_authored_video_and_actual_pcm_seek_eof_controls ... ok
+test player::sound_stop_loop_regressions::paused_transport_does_not_spend_stop_or_loop ... ok
+test player::sound_stop_loop_regressions::unreached_stop_still_allows_actual_loop_seek ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 1159 filtered out; finished in 0.04s

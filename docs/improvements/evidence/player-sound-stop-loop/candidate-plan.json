@@ -1,0 +1,8 @@
+{
+  "production_change": "Check explicit stop and return before A-B handling in tick_sound;all other transports unchanged.",
+  "public_api_changed": false,
+  "performance_claim": false,
+  "patch_sha256": "7009b9a9226be4c4ee727b7b94b91da27e68b68787c2ee45d2f63fd00b4a89b7",
+  "focused_test_hash": "c3e427f1f4c20dc53f32ea98a21c309d8265686d14b4243e53af49c35909498c",
+  "patch_context_lines": 0
+}

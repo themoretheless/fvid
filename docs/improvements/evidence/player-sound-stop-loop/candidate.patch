@@ -1,0 +1,16 @@
+diff --git a/src/player.rs b/src/player.rs
+index b43e26d06d..5e0042c772 100644
+--- a/src/player.rs
++++ b/src/player.rs
+@@ -4019,0 +4020,4 @@ impl Player {
++        if self.check_stop() {
++            ctx.request_repaint();
++            return;
++        }
+@@ -4027 +4030,0 @@ impl Player {
+-        self.check_stop();
+@@ -13183,0 +13187,4 @@ mod io_clock_regressions;
++
++#[cfg(test)]
++#[path = "player_sound_stop_loop_tests.rs"]
++mod sound_stop_loop_regressions;

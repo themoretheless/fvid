@@ -1,8 +1,8 @@
 {
   "target": 1000,
   "counting_rule": "One independently confirmed problem or useful capability; fixture variants and baseline integration repairs are excluded. Only accepted entries count.",
-  "accepted_count": 466,
-  "next_id": "FVID-0467",
+  "accepted_count": 467,
+  "next_id": "FVID-0468",
   "entries": [
     {
       "id": "FVID-0001",
@@ -5256,6 +5256,17 @@
       "result": "Hold the genuine buffering phase and anchor signed recovery deadlines from it. Preserve paused rate changes,remaining picture hold,seek,stop and natural EOF while retaining brief-delay and prefetched missed-callback catchup. Seven unchanged tests pass20repetitions,140cases. Nine gates pass1576physical-source-distinct checks;five old ignores unchanged. Genuine-starvation freeze correction amends0463 without another ID. No performance or new full native-window duration claim.",
       "status": "accepted",
       "validation": "batch-466-validation.json"
+    },
+    {
+      "id": "FVID-0467",
+      "batch": 467,
+      "title": "Spend an explicit sound-only stop before issuing an A-B rewind",
+      "source": "src/player.rs",
+      "regression": "src/player_sound_stop_loop_tests.rs",
+      "before": "Identical five-case baseline passes exact video/PCM seek/EOF,unreached-stop looping and paused controls,but both earlier75ms and coincident100ms stop cases send an unwanted seek to A25ms at150ms callback. Real audio worker generation becomes1 instead of0. This sound-only path is byte-identical before0463/0464.",
+      "result": "Check explicit stop before the sound-only loop and return once consumed. Actual producer pauses without a seek,terminal phase parks at the requested bound,and subsequent explicit navigation resumes to natural EOF. Five unchanged regressions pass20repetitions,100case executions. All9gates pass1581physical-source-distinct checks and both builds;five old ignores unchanged. No performance,physical audio or new native-window duration claim.",
+      "status": "accepted",
+      "validation": "batch-467-validation.json"
     }
   ]
 }

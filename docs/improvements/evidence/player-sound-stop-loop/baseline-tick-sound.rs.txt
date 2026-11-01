@@ -1,0 +1,14 @@
+    fn tick_sound(&mut self, ctx: &egui::Context) {
+        if !self.item_open() || self.paused || self.ended {
+            return;
+        }
+        if let Some(target) = loop_rewind(
+            self.timeline().0.unwrap_or_default(),
+            self.loop_a,
+            self.loop_b,
+        ) {
+            self.seek_time(target);
+        }
+        self.check_stop();
+        ctx.request_repaint();
+    }

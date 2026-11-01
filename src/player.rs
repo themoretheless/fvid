@@ -4017,6 +4017,10 @@ impl Player {
         if !self.item_open() || self.paused || self.ended {
             return;
         }
+        if self.check_stop() {
+            ctx.request_repaint();
+            return;
+        }
         if let Some(target) = loop_rewind(
             self.timeline().0.unwrap_or_default(),
             self.loop_a,
@@ -4024,7 +4028,6 @@ impl Player {
         ) {
             self.seek_time(target);
         }
-        self.check_stop();
         ctx.request_repaint();
     }
 
@@ -13181,3 +13184,7 @@ mod audio_failure_clock_regressions;
 #[cfg(test)]
 #[path = "player_io_clock_tests.rs"]
 mod io_clock_regressions;
+
+#[cfg(test)]
+#[path = "player_sound_stop_loop_tests.rs"]
+mod sound_stop_loop_regressions;

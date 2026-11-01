@@ -1,0 +1,103 @@
+{
+  "completed": true,
+  "removed": [
+    {
+      "path": "/private/tmp/fvid-player-sound-stop-loop-after.log",
+      "bytes": 26275,
+      "raw_sha256": "825a160f3b6a2862a74c76f44ba306d9cbea973b5115851a5c111e3c5bd16b23",
+      "archive": "raw-history/after.log",
+      "archive_sha256": "f475350a45c4db0622e144840ad055c3c039bb0adda9a68f14983f56dd23db08"
+    },
+    {
+      "path": "/private/tmp/fvid-player-sound-stop-loop-audio-thread.log",
+      "bytes": 29882,
+      "raw_sha256": "3116e981aae8407b519e230e1596a4e151efbaee605d7ea02540d3af2755725a",
+      "archive": "raw-history/audio-thread.log",
+      "archive_sha256": "9a8cd5517bb09d66f1b6c0b7543e5b5b219a5c2b5bab6aa8b9ffdcaedeb4519f"
+    },
+    {
+      "path": "/private/tmp/fvid-player-sound-stop-loop-before.log",
+      "bytes": 37206,
+      "raw_sha256": "282a90b9fc5e866734b323dfd7da4031f5cff0c99be67035c78982126a559e4a",
+      "archive": "raw-history/before.log",
+      "archive_sha256": "282a90b9fc5e866734b323dfd7da4031f5cff0c99be67035c78982126a559e4a"
+    },
+    {
+      "path": "/private/tmp/fvid-player-sound-stop-loop-collection.log",
+      "bytes": 3797,
+      "raw_sha256": "a283d0b261e5278af181f235fae07e333561d36a9d5802bbae38676527613d6a",
+      "archive": "raw-history/collection.log",
+      "archive_sha256": "a283d0b261e5278af181f235fae07e333561d36a9d5802bbae38676527613d6a"
+    },
+    {
+      "path": "/private/tmp/fvid-player-sound-stop-loop-core-check.log",
+      "bytes": 26898,
+      "raw_sha256": "344bbed9cdcf066ab5075384c610850b39151e5f0db046988576f16c72a7320d",
+      "archive": "raw-history/core-check.log",
+      "archive_sha256": "344bbed9cdcf066ab5075384c610850b39151e5f0db046988576f16c72a7320d"
+    },
+    {
+      "path": "/private/tmp/fvid-player-sound-stop-loop-integration.log",
+      "bytes": 112070,
+      "raw_sha256": "6d313f5b6f86b1f0f04594cf79636e9cc176bfe62adb99b522e95cfcc617de7d",
+      "archive": "raw-history/integration.log",
+      "archive_sha256": "a80b8062b990b7326b66ee8b485b0f6bb47ed5210bd6d0d78994d0a13b3be03c"
+    },
+    {
+      "path": "/private/tmp/fvid-player-sound-stop-loop-media.log",
+      "bytes": 71103,
+      "raw_sha256": "dbc0958e18cfd052ddcb817cd8a7d80e2c7665e98fbd25f995593c64246d7e99",
+      "archive": "raw-history/media.log",
+      "archive_sha256": "53ceedeb2fda66f533434404f9eac31652b4f2db52424b88a57e1adc03991dcf"
+    },
+    {
+      "path": "/private/tmp/fvid-player-sound-stop-loop-player-check.log",
+      "bytes": 32684,
+      "raw_sha256": "685c283a668668a9a5d2da722f63097bf6be2425f9d569b96ae2cf1243c02342",
+      "archive": "raw-history/player-check.log",
+      "archive_sha256": "685c283a668668a9a5d2da722f63097bf6be2425f9d569b96ae2cf1243c02342"
+    },
+    {
+      "path": "/private/tmp/fvid-player-sound-stop-loop-player-units.log",
+      "bytes": 51425,
+      "raw_sha256": "8fd988be0d12bca34e602257536e481d1c038c6a8abd14473d3c1d114a8b80f5",
+      "archive": "raw-history/player-units.log",
+      "archive_sha256": "597d097e1ae64de4bf3cdf5794994cb38b41085648ea08e0d33e2731eb63f9cb"
+    },
+    {
+      "path": "/private/tmp/fvid-player-sound-stop-loop-qualification-driver.log",
+      "bytes": 145,
+      "raw_sha256": "11f13459ab1637a80a38156bca523c0fbe6f62f6c9b3dafc7786404e80a925da",
+      "archive": "raw-history/qualification-driver.log",
+      "archive_sha256": "11f13459ab1637a80a38156bca523c0fbe6f62f6c9b3dafc7786404e80a925da"
+    },
+    {
+      "path": "/private/tmp/fvid-player-sound-stop-loop-root-mp4.log",
+      "bytes": 33319,
+      "raw_sha256": "a42dbebfa635c46eab5c47eb79dacdd5cda1afa40ff4998703ecb00011888107",
+      "archive": "raw-history/root-mp4.log",
+      "archive_sha256": "b240b2c102bcc763ac96e009a1d56fa294c15fcc05ea6bf1865fff45addc29ae"
+    },
+    {
+      "path": "/private/tmp/fvid-player-sound-stop-loop-root-webm.log",
+      "bytes": 31811,
+      "raw_sha256": "143cd9840d4ab6f5e170664d1ed47664f4c57ad9b2e96d35dc2d4746c7281a37",
+      "archive": "raw-history/root-webm.log",
+      "archive_sha256": "331c9a87fbfdcdb3b9bc4eff11fe38d3dfdeb4d5c0c906bfc28ca829f3af73f3"
+    },
+    {
+      "path": "/private/tmp/fvid-player-sound-stop-loop-target-20261101",
+      "kind": "owned completed-run build target"
+    },
+    {
+      "path": "/private/tmp/fvid-player-sound-stop-loop-video-thread.log",
+      "bytes": 26221,
+      "raw_sha256": "8cdc36ef8f30989f0352f44524118a55c4e216a6a8b000b969d67307e440aa65",
+      "archive": "raw-history/video-thread.log",
+      "archive_sha256": "8958d628a00314c2a1f046f1026c76230219e00f862cef092b37f32cdb130b21"
+    }
+  ],
+  "regression_fixtures_and_evidence_preserved": true,
+  "foreign_worktrees_branches_stashes_preserved": true,
+  "earliest_tmp_before_log": "qualified baseline;all final evidence archived"
+}

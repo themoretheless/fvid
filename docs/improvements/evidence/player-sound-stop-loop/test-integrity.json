@@ -1,0 +1,14 @@
+{
+  "baseline_and_candidate_test_sha256": "c3e427f1f4c20dc53f32ea98a21c309d8265686d14b4243e53af49c35909498c",
+  "test_unchanged": true,
+  "existing_tests_modified": false,
+  "baseline": {
+    "passed": 3,
+    "failed": 2
+  },
+  "focused_candidate": {
+    "passed": 5,
+    "failed": 0,
+    "exit_code": 0
+  }
+}

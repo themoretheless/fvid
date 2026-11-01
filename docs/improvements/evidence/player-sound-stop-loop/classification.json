@@ -1,0 +1,9 @@
+{
+  "proposed_id": "FVID-0467",
+  "count_delta": 1,
+  "reason": "Independent unchanged sound-only ordering path;not introduced by video-clock fixes0463/0464.",
+  "baseline_commit": "5897d48693ee041128488d9720a48c875ed2ff12",
+  "older_commit": "9ca4c32089c216f82574c0895da3a0bdbbd76c57",
+  "identical_tick_sound_sha256": "0e1ce2e9fa3ba33e9fc13d2957fde548c0b645e5f9dd0dacd1a26056084b4555",
+  "variants_and_controls_count_delta": 0
+}

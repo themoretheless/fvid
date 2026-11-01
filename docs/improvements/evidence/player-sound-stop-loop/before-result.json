@@ -1,0 +1,6 @@
+{
+  "exit_code": 101,
+  "passed": 3,
+  "failed": 2,
+  "failure": "Reached explicit stop still issues actual A-B seek;generation1 instead of0 at both75ms and100ms."
+}

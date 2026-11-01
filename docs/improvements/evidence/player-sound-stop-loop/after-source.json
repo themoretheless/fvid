@@ -1,0 +1,5 @@
+{
+  "src/player.rs": "5bca5c0b7848771a5ae5e96a116294b2d84d9eca39c3b70695791f0d32202a62",
+  "src/player_sound_stop_loop_tests.rs": "c3e427f1f4c20dc53f32ea98a21c309d8265686d14b4243e53af49c35909498c",
+  "scripts/generate_player_sound_stop_loop.py": "ebc4d94323bac8e8bb689d19143dfd148542d3aba4112ed159c4bad8117c6e74"
+}
