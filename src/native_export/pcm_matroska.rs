@@ -416,7 +416,7 @@ pub(crate) fn extract_source_pcm_metadata_with_interval_packet_and_memory_limit(
         probe_opts.max_packet_bytes = maximum;
     }
     probe_opts.max_packets = max_packets;
-    if let Some(info) = crate::native_probe::try_probe_as_with_options(source, None, &probe_opts)
+    if let Some(info) = crate::native_probe::try_probe_metadata_with_options(source, &probe_opts)
         .map_err(|e| invalid(&e))?
     {
         for (key, value) in info.metadata {

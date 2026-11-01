@@ -115,7 +115,7 @@ def build_mp4_aac_mono_bytes() -> bytes:
     mvhd = _box(
         b"mvhd",
         struct.pack(">IIIIIIHH", 0, 0, 0, 48000, 2048, 0x00010000, 0x0100, 0)
-        + b"\x00" * 10
+        + b"\x00" * 8
         + struct.pack(">9I", 0x00010000, 0, 0, 0, 0x00010000, 0, 0, 0, 0x40000000)
         + b"\x00" * 24
         + struct.pack(">I", 2),

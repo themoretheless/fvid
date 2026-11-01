@@ -1,0 +1,16 @@
+{
+  "provenance": "FVid-authored single40ms AVC PCM picture with independent scalar YUV oracle and three AAC pulse frames with analytic mono48kHz PCM. AAC media clock is exact48000Hz or cumulatively floor-quantized1000/1001Hz. Video and AAC payloads remain identical. No private media,FFmpeg,encoder or network.",
+  "cases": [
+    "exact.mp4",
+    "coarse-1000.mp4",
+    "coarse-1001.mp4"
+  ],
+  "sha256": {
+    "exact.mp4": "e6234dc76f7f690e8ee6ea7a5dead148d0b88542391283d9e90a77832912a3f6",
+    "audio.f32le": "438106d4d4c8dc8e79d84ece0741ebbbafae002633ea16703d8eff842791124a",
+    "video.yuv16": "7e391885527fcc727427f24b2c87f3b4cd80ca60455b4cfedef0469df25f6ee8",
+    "video.packet": "a86554e45e461b52e319147036f7dc236a352e5a282c8cf9083d3f4b51f660b3",
+    "coarse-1000.mp4": "b8cc94de776964f6816204a15bee51b6aec4cab7f92b1e441eed3728092ae545",
+    "coarse-1001.mp4": "8ed8ae67fb8800381e7789397eb83e5c7966e1469fb1c031269be3ca8405af8f"
+  }
+}

@@ -332,12 +332,7 @@ pub fn try_probe_as(source: &Path, format: Option<&str>) -> Result<Option<MediaI
     try_probe_as_with_options(source, format, &fvid_media::CopyOptions::default())
 }
 
-pub(crate) fn try_probe_as_with_options(
-    source: &Path,
-    format: Option<&str>,
-    options: &fvid_media::CopyOptions,
-) -> Result<Option<MediaInfo>> {
-    use std::io::Read;
+fn validate_probe_options(options: &fvid_media::CopyOptions) -> Result<()> {
     if options
         .cancel
         .as_ref()
@@ -355,6 +350,29 @@ pub(crate) fn try_probe_as_with_options(
         return Err("controlled memory limit must be positive".into());
     }
     fvid_media::owned_budget::check_rss_budget(options)?;
+    Ok(())
+}
+
+/// Read metadata independently of an active encoded-packet window. Callers
+/// retain the original limits for codec/interval admission before publication.
+pub(crate) fn try_probe_metadata_with_options(
+    source: &Path,
+    options: &fvid_media::CopyOptions,
+) -> Result<Option<MediaInfo>> {
+    validate_probe_options(options)?;
+    let mut metadata = options.clone();
+    metadata.max_packet_bytes = fvid_media::CopyOptions::default().max_packet_bytes;
+    metadata.max_packets = None;
+    try_probe_as_with_options(source, None, &metadata)
+}
+
+pub(crate) fn try_probe_as_with_options(
+    source: &Path,
+    format: Option<&str>,
+    options: &fvid_media::CopyOptions,
+) -> Result<Option<MediaInfo>> {
+    use std::io::Read;
+    validate_probe_options(options)?;
     match format {
         Some("mov" | "mp4" | "m4a" | "3gp" | "3g2" | "mj2" | "mov,mp4,m4a,3gp,3g2,mj2") => {
             return mp4_with_options(source, options).map(Some);

@@ -1,0 +1,25 @@
+{
+  "exact_offline_regeneration": true,
+  "ordinary_tests_require_generator": false,
+  "network_required": false,
+  "ffmpeg_required": false,
+  "private_media": false,
+  "files": {
+    "tests/fixtures/playback-errors/mp4-concat-unselected-plan/exact.mp4": "e6234dc76f7f690e8ee6ea7a5dead148d0b88542391283d9e90a77832912a3f6",
+    "tests/fixtures/playback-errors/mp4-concat-unselected-plan/audio.f32le": "438106d4d4c8dc8e79d84ece0741ebbbafae002633ea16703d8eff842791124a",
+    "tests/fixtures/playback-errors/mp4-concat-unselected-plan/video.yuv16": "7e391885527fcc727427f24b2c87f3b4cd80ca60455b4cfedef0469df25f6ee8",
+    "tests/fixtures/playback-errors/mp4-concat-unselected-plan/video.packet": "a86554e45e461b52e319147036f7dc236a352e5a282c8cf9083d3f4b51f660b3",
+    "tests/fixtures/playback-errors/mp4-concat-unselected-plan/coarse-1000.mp4": "b8cc94de776964f6816204a15bee51b6aec4cab7f92b1e441eed3728092ae545",
+    "tests/fixtures/playback-errors/mp4-concat-unselected-plan/coarse-1001.mp4": "8ed8ae67fb8800381e7789397eb83e5c7966e1469fb1c031269be3ca8405af8f",
+    "tests/fixtures/playback-errors/mp4-concat-unselected-plan/manifest.json": "7c74bf0aa7e6a206325cb65d192b732edeeca4bd485f3cfb9e913ec2da259661",
+    "tests/fixtures/playback-errors/audio-metadata-selection-window/one.ogg": "c1667dac66a6c3f4db767107ee1363298bbad3791374806734f66774b0241efd",
+    "tests/fixtures/playback-errors/audio-metadata-selection-window/tail.ogg": "6fdca41ef9512a17f02002ea72874575ee5e3733d1b0b2aaad9eff535477937b",
+    "tests/fixtures/playback-errors/audio-metadata-selection-window/vorbis.ogg": "4d76c39b486437ed1340692d313f09488a9609eab781260455a22b6cc8c87614",
+    "tests/fixtures/playback-errors/audio-metadata-selection-window/front.wav": "d6628d7bdaef1444ae4d9ca4b5ed775d458363e114b31d4cb77d8a96bde93b7c",
+    "tests/fixtures/playback-errors/audio-metadata-selection-window/front.s16le": "b92ac98d7cf11ab4543f92d366696f361a9d0ee20af63ffd7b43fe8812937ff2",
+    "tests/fixtures/playback-errors/audio-metadata-selection-window/front.f32le": "b087e4ebf4ca420299f9dfefcdc2a528f8c8510741f7218e2ab568e52978ab50",
+    "tests/fixtures/playback-errors/audio-metadata-selection-window/front-alaw.wav": "c5557953016947cd372f4ab60427a8fb93dcfe672a5ce59b77fd64865a3afc43",
+    "tests/fixtures/playback-errors/audio-metadata-selection-window/front-alaw.f32le": "58707ba5f831bb9c5b6c92342c0aef9a56b5c53fb9457a5365d95e2b3f581107",
+    "tests/fixtures/playback-errors/audio-metadata-selection-window/manifest.json": "b2fa95816acb36dff506abe174891f922fd29988957fc4e211fa85d4fae7888a"
+  }
+}

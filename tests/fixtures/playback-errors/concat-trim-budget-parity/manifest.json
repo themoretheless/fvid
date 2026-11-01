@@ -22,8 +22,8 @@
     },
     {
       "name": "mp4-aac-mono-48khz.m4a",
-      "bytes": 618,
-      "sha256": "724b29dc7762b6790bfcdd6e9dfd2b9873163ff54d49e358ee89ce4261eef97c",
+      "bytes": 616,
+      "sha256": "01aa9452787cfd1f01f61863529d1601f175e0dcdf1ca99e2f4a8c102762521d",
       "purpose": "48 kHz mono AAC-LC MP4 (6-byte encoded packets) for mixed-codec sample-domain concat budget parity"
     }
   ]

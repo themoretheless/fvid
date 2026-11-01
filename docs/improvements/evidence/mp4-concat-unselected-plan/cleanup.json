@@ -1,0 +1,36 @@
+{
+  "completed": true,
+  "removed": [
+    {
+      "path": "/private/var/folders/jx/ps1h62vx3gdgly_ddwly4mqr0000gn/T/fvid-concat-trim-budget-parity-52958-standalone-trim",
+      "kind": "completed synthetic test output;PID absent"
+    },
+    {
+      "path": "/private/var/folders/jx/ps1h62vx3gdgly_ddwly4mqr0000gn/T/fvid-concat-trim-budget-parity-52958-sample-domain-concat",
+      "kind": "completed synthetic test output;PID absent"
+    },
+    {
+      "path": "/private/var/folders/jx/ps1h62vx3gdgly_ddwly4mqr0000gn/T/fvid-concat-trim-budget-parity-53811-standalone-trim",
+      "kind": "completed synthetic test output;PID absent"
+    },
+    {
+      "path": "/private/var/folders/jx/ps1h62vx3gdgly_ddwly4mqr0000gn/T/fvid-concat-trim-budget-parity-54607-sample-domain-concat",
+      "kind": "completed synthetic test output;PID absent"
+    },
+    {
+      "path": "/private/var/folders/jx/ps1h62vx3gdgly_ddwly4mqr0000gn/T/fvid-concat-trim-budget-parity-53811-sample-domain-concat",
+      "kind": "completed synthetic test output;PID absent"
+    },
+    {
+      "path": "/private/var/folders/jx/ps1h62vx3gdgly_ddwly4mqr0000gn/T/fvid-concat-trim-budget-parity-54607-standalone-trim",
+      "kind": "completed synthetic test output;PID absent"
+    },
+    {
+      "path": "/private/tmp/fvid-concat-unselected-plan-target-20261101",
+      "kind": "owned completed qualification target"
+    }
+  ],
+  "retained": [],
+  "regression_fixtures_and_evidence_preserved": true,
+  "foreign_worktrees_stashes_and_branches_untouched": true
+}

@@ -1,0 +1,16 @@
+{
+  "candidate_failed": [
+    "mp4_remux_enforces_packet_budget_and_option_parity_between_plan_and_execution",
+    "sample_domain_and_mp4_matroska_concat_enforce_budgets_in_api_and_cli",
+    "sample_domain_concat_enforces_wave_and_container_packet_budgets_parity_between_plan_and_execution",
+    "standalone_audio_trim_and_plan_trim_preserve_budget_and_stream_errors_instead_of_wave_fallback"
+  ],
+  "published_baseline_failed": [
+    "mp4_remux_enforces_packet_budget_and_option_parity_between_plan_and_execution",
+    "sample_domain_and_mp4_matroska_concat_enforce_budgets_in_api_and_cli",
+    "sample_domain_concat_enforces_wave_and_container_packet_budgets_parity_between_plan_and_execution",
+    "standalone_audio_trim_and_plan_trim_preserve_budget_and_stream_errors_instead_of_wave_fallback"
+  ],
+  "identical": true,
+  "new_failures_in_these_targets": 0
+}

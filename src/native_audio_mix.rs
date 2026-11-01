@@ -107,7 +107,7 @@ fn is_single_stream_fvid_media_audio_with_options(
     options: &fvid_media::CopyOptions,
 ) -> Result<bool> {
     let probe_opts = strip_output_controls(options);
-    let single_audio = match crate::native_probe::try_probe_as_with_options(source, None, &probe_opts) {
+    let single_audio = match crate::native_probe::try_probe_metadata_with_options(source, &probe_opts) {
         Ok(Some(info)) => info.streams.iter().filter(|s| s.media_type == "audio").count() == 1,
         Ok(None) => fvid_media::owned_container_loudness::recognizes_standalone_audio_with_options(
             source,

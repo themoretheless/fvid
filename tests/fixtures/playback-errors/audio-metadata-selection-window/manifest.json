@@ -1,0 +1,33 @@
+{
+  "provenance": "Authored20/40ms mono48kHz Opus silence with oversized metadata and a larger valid second packet,authored short silent Vorbis,and arithmetic20ms PCM front segment. No private media,encoder,FFmpeg or network.",
+  "cases": [
+    {
+      "file": "one.ogg",
+      "cap": 6,
+      "to_us": 10000,
+      "frames": 960
+    },
+    {
+      "file": "tail.ogg",
+      "cap": 6,
+      "to_us": 10000,
+      "frames": 1920
+    },
+    {
+      "file": "vorbis.ogg",
+      "cap": 6,
+      "to_us": 1000,
+      "frames": 411
+    }
+  ],
+  "sha256": {
+    "one.ogg": "c1667dac66a6c3f4db767107ee1363298bbad3791374806734f66774b0241efd",
+    "tail.ogg": "6fdca41ef9512a17f02002ea72874575ee5e3733d1b0b2aaad9eff535477937b",
+    "vorbis.ogg": "4d76c39b486437ed1340692d313f09488a9609eab781260455a22b6cc8c87614",
+    "front.wav": "d6628d7bdaef1444ae4d9ca4b5ed775d458363e114b31d4cb77d8a96bde93b7c",
+    "front.s16le": "b92ac98d7cf11ab4543f92d366696f361a9d0ee20af63ffd7b43fe8812937ff2",
+    "front.f32le": "b087e4ebf4ca420299f9dfefcdc2a528f8c8510741f7218e2ab568e52978ab50",
+    "front-alaw.wav": "c5557953016947cd372f4ab60427a8fb93dcfe672a5ce59b77fd64865a3afc43",
+    "front-alaw.f32le": "58707ba5f831bb9c5b6c92342c0aef9a56b5c53fb9457a5365d95e2b3f581107"
+  }
+}

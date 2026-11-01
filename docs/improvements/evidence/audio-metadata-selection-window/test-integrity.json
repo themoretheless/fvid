@@ -1,0 +1,12 @@
+{
+  "unchanged_regression_sources": [
+    "tests/audio_metadata_selection_window.rs"
+  ],
+  "before": {
+    "tests/audio_metadata_selection_window.rs": "c28e3983cc1c48123cfa2dbcb98d2c03417bfa642b6b074d1546d185dbdd5438"
+  },
+  "after": {
+    "tests/audio_metadata_selection_window.rs": "c28e3983cc1c48123cfa2dbcb98d2c03417bfa642b6b074d1546d185dbdd5438"
+  },
+  "existing_rust_regression_files_modified": false
+}

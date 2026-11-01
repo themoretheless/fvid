@@ -1,0 +1,27 @@
+{
+  "count_delta": 0,
+  "reason": "Two legacy generators wrote102-byte version0 mvhd payloads:the mandatory reserved field after volume/reserved is8bytes,not10. Repair authored fixture headers;all test assertions and byte/work/memory limits remain unchanged.",
+  "files": [
+    {
+      "generator": "scripts/generate_concat_trim_budget_parity_regressions.py",
+      "generator_before_sha256": "a24d4fb11035b757871c92261645ee016e97489b586e2845528a407b1fa18d15",
+      "fixture": "tests/fixtures/playback-errors/concat-trim-budget-parity/mp4-aac-mono-48khz.m4a",
+      "fixture_before_sha256": "724b29dc7762b6790bfcdd6e9dfd2b9873163ff54d49e358ee89ce4261eef97c",
+      "generator_after_sha256": "84f0e686dd1b1e0d919d876ea4a2d6f6012bc9fe867851ec9cf24c34a132f458",
+      "fixture_after_sha256": "01aa9452787cfd1f01f61863529d1601f175e0dcdf1ca99e2f4a8c102762521d"
+    },
+    {
+      "generator": "scripts/generate_remux_concat_policy_parity_regressions.py",
+      "generator_before_sha256": "6f4023b67735e40ee61276d16e1c2daa4b4645d0235f7a930f6fbab1c84c308d",
+      "fixture": "tests/fixtures/playback-errors/remux-concat-policy-parity/mp4-aac-mono-48khz.m4a",
+      "fixture_before_sha256": "724b29dc7762b6790bfcdd6e9dfd2b9873163ff54d49e358ee89ce4261eef97c",
+      "generator_after_sha256": "1f96efd7140ea8bace1f05e0a7b303505e2b54b26dfe9c0317998df45808c8c1",
+      "fixture_after_sha256": "01aa9452787cfd1f01f61863529d1601f175e0dcdf1ca99e2f4a8c102762521d"
+    }
+  ],
+  "unchanged_rust_regression_files": [
+    "tests/concat_trim_budget_parity_regressions.rs",
+    "tests/remux_concat_policy_parity_regressions.rs",
+    "tests/remux_concat_controls_regressions.rs"
+  ]
+}

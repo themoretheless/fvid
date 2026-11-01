@@ -1,0 +1,170 @@
+{
+  "status": "accepted",
+  "accepted_ids": [
+    "FVID-0474",
+    "FVID-0475",
+    "FVID-0476"
+  ],
+  "count_delta": 3,
+  "accepted_count": 476,
+  "next_id": "FVID-0477",
+  "requalified_ids": [
+    "FVID-0257",
+    "FVID-0258"
+  ],
+  "stand_repair_count_delta": 0,
+  "qualification": {
+    "integration": {
+      "command": [
+        "cargo",
+        "test",
+        "--locked",
+        "--offline",
+        "--no-default-features",
+        "--features",
+        "player",
+        "--no-fail-fast",
+        "--test",
+        "mp4_concat_unselected_plan",
+        "--test",
+        "mp4_concat_retained_plans",
+        "--test",
+        "mp4_concat_selected_clock",
+        "--test",
+        "mp4_concat_selected_compatibility",
+        "--test",
+        "mp4_concat_discarded_sync",
+        "--test",
+        "native_mp4_concat",
+        "--test",
+        "native_aac_concat",
+        "--test",
+        "mp4_matroska_encoder_concat_prefix_regression",
+        "--test",
+        "mp4_remux_prefix_budget_regression",
+        "--test",
+        "mp4_audio_metadata_admission",
+        "--test",
+        "remux_concat_controls_regressions",
+        "--test",
+        "remux_concat_policy_parity_regressions",
+        "--test",
+        "concat_trim_budget_parity_regressions",
+        "--test",
+        "audio_metadata_selection_window",
+        "--test",
+        "audio_concat_plan_dispatch",
+        "--test",
+        "wave_ogg_flac_plan_regressions",
+        "--test",
+        "audio_mix_merge_concat_metadata_regressions",
+        "--test",
+        "audio_sample_concat_metadata_preservation_regressions",
+        "--test",
+        "audio_sample_concat_wave_metadata_regressions",
+        "--test",
+        "remux_concat_wave_metadata_regressions",
+        "--test",
+        "adts_wave_remux_concat_parity_regressions"
+      ],
+      "exit_code": 0,
+      "passed": 119,
+      "failed": 0,
+      "ignored": 0,
+      "archive": "integration.log",
+      "archived_sha256": "eaaa7102b13e441ed8b94437f1b7dcaf3e5d2354eb3416752ed6e5c133b59844"
+    },
+    "root-mp4": {
+      "command": [
+        "cargo",
+        "test",
+        "--locked",
+        "--offline",
+        "--no-default-features",
+        "--features",
+        "player",
+        "--lib",
+        "mp4",
+        "--",
+        "--test-threads=2"
+      ],
+      "exit_code": 0,
+      "passed": 83,
+      "failed": 0,
+      "ignored": 1,
+      "archive": "root-mp4.log",
+      "archived_sha256": "38182827e7faad3fa4ba3d2836431bf1d311a16f03cff574f2de011615c58dd1"
+    },
+    "default-focused": {
+      "command": [
+        "cargo",
+        "test",
+        "--locked",
+        "--offline",
+        "--no-default-features",
+        "--test",
+        "mp4_concat_unselected_plan",
+        "--test",
+        "audio_metadata_selection_window",
+        "--test",
+        "audio_concat_plan_dispatch"
+      ],
+      "exit_code": 0,
+      "passed": 12,
+      "failed": 0,
+      "ignored": 0,
+      "archive": "default-focused.log",
+      "archived_sha256": "86bd4353086bf267c3ff8451a33eb7409a0a5f806d0b215c8f6c69d0dfc232ae"
+    },
+    "core-check": {
+      "command": [
+        "cargo",
+        "check",
+        "--locked",
+        "--offline",
+        "--no-default-features"
+      ],
+      "exit_code": 0,
+      "passed": 0,
+      "failed": 0,
+      "ignored": 0,
+      "archive": "core-check.log",
+      "archived_sha256": "898144ac00dbff811f16f78ec21a06949e6e95dbbe56b1fb39224cbbd4cc9c0d"
+    },
+    "player-check": {
+      "command": [
+        "cargo",
+        "check",
+        "--locked",
+        "--offline",
+        "--no-default-features",
+        "--features",
+        "player"
+      ],
+      "exit_code": 0,
+      "passed": 0,
+      "failed": 0,
+      "ignored": 0,
+      "archive": "player-check.log",
+      "archived_sha256": "0332e22ed7ed5fe0e1e4f792c13c2a8a56d142428f28148ec0eaa5a588c63853"
+    }
+  },
+  "integration_passed": 119,
+  "root_mp4_unit_executions_passed": 83,
+  "default_feature_reexecutions_passed": 12,
+  "default_reexecutions_excluded_from_distinct_claims": true,
+  "physical_source_distinct_count_not_claimed": true,
+  "old_root_mp4_ignore_unchanged": true,
+  "source_hashes": "evidence/mp4-concat-unselected-plan/batch-source.json",
+  "fixture_hashes": "evidence/mp4-concat-unselected-plan/fixture-verification.json",
+  "evidence": [
+    "evidence/mp4-concat-unselected-plan/README.md",
+    "evidence/audio-metadata-selection-window/README.md",
+    "evidence/audio-concat-plan-dispatch/README.md"
+  ],
+  "limitations": [
+    "Native software video/codec playback,seek and actual audio export;no physical audio/GPU or new native-window duration qualification.",
+    "No performance claim.",
+    "Successful excluded MP4 plans remain retained and charged;no unused-plan memory optimization is claimed."
+  ]
+}

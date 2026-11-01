@@ -1,0 +1,8 @@
+{
+  "count_delta": 0,
+  "notes": [
+    "Initial numerical-zero assumption was incorrect:the actual silent Opus decoder publishes a tiny finite numerical floor. Final controls retain exact sample counts and bound every float sample to absolute1e-25;old production tests are unchanged.",
+    "The source frontier uses independent normalized float32 PCM because the public concat output is float32 WAVE,not source signed16 storage. Final byte oracle verifies every nonzero front sample.",
+    "The6-byte active encoded limit also permits one float32 output sample,while the later9-byte packet remains excluded only by the selected temporal window."
+  ]
+}

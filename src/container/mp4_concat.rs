@@ -36,6 +36,7 @@ fn compatible(a: &Track, b: &Track) -> bool {
 pub struct Segment<R> {
     pub(crate) reader: Mp4Reader<R>,
     plans: Vec<TrackPlan>,
+    planned_tracks: u128,
     offset: u64,
     duration: u64,
 }
@@ -126,7 +127,22 @@ pub fn open_with_options(
         let mut plans = reader
             .tracks()
             .iter()
-            .map(|t| mp4_matroska::plan(t, reader.movie_timescale(), cancel))
+            .enumerate()
+            .map(|(index, t)| {
+                let result = mp4_matroska::plan(t, reader.movie_timescale(), cancel);
+                if selected_tracks.contains(&index) || result.is_ok() {
+                    result
+                } else {
+                    // Excluded tracks need not support compressed transport.
+                    // Cancellation still governs the entire operation.
+                    check(cancel)?;
+                    Ok(TrackPlan {
+                        options: Default::default(),
+                        packets: Vec::new(),
+                        trimmed_audio_sample_frames: 0,
+                    })
+                }
+            })
             .collect::<Result<Vec<_>>>()?;
         let mut duration = 0;
         // Only output tracks determine the selected segment's end. A longer
@@ -165,9 +181,13 @@ pub fn open_with_options(
             .checked_add(duration)
             .filter(|&n| n <= i64::MAX as u64)
             .ok_or_else(|| invalid("concat timeline overflow"))?;
+        // Eligibility bounds the source to at most126 tracks.
+        let planned_tracks = plans.iter().enumerate().filter(|(_, plan)| !plan.packets.is_empty())
+            .fold(0u128, |mask, (index, _)| mask | (1u128 << index));
         segments.push(Segment {
             reader,
             plans,
+            planned_tracks,
             offset,
             duration,
         });
@@ -216,8 +236,8 @@ pub fn open_with_options(
             plan_bytes = plan_bytes
                 .checked_add(segment.reader.estimated_index_payload_bytes()?)
                 .ok_or_else(|| invalid("MP4 concat packet plan memory overflow"))?;
-            // Plans for unselected tracks are retained too: stream selection
-            // controls output, not ownership of the segment's timing tables.
+            // Successful plans remain retained, including excluded tracks.
+            // Unsupported excluded tracks have empty placeholders instead.
             for plan in &segment.plans {
                 plan_bytes = plan
                     .packets
@@ -321,6 +341,9 @@ pub fn write_limited<R: Read + Seek, W: Write + Seek>(
     write_with_options(segments, output, &options)
 }
 
+/// Output selection must name successfully planned tracks. If a discarded
+/// source cannot be transported, selecting it later requires reopening the
+/// inputs with that selection; refusal precedes output.
 pub fn write_with_options<R: Read + Seek, W: Write + Seek>(
     segments: &mut [Segment<R>],
     output: &mut W,
@@ -344,6 +367,9 @@ pub fn write_with_options<R: Read + Seek, W: Write + Seek>(
         .first()
         .ok_or_else(|| invalid("concat requires input segments"))?;
     let selected = mp4_matroska::selection(first.reader.tracks().len(), &options.streams)?;
+    if segments.iter().any(|segment| selected.iter().any(|&index| segment.planned_tracks & (1u128 << index) == 0)) {
+        return Err(invalid("concat output track was not admitted; reopen with the expanded stream selection"));
+    }
     if options.metadata_set.len() + options.metadata_delete.len() > 64 {
         return Err(invalid("too many metadata mutations"));
     }

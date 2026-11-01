@@ -1,8 +1,8 @@
 {
   "target": 1000,
   "counting_rule": "One independently confirmed problem or useful capability; fixture variants and baseline integration repairs are excluded. Only accepted entries count.",
-  "accepted_count": 473,
-  "next_id": "FVID-0474",
+  "accepted_count": 476,
+  "next_id": "FVID-0477",
   "entries": [
     {
       "id": "FVID-0001",
@@ -2891,7 +2891,10 @@
       "before": "try_concat_mp4_matroska_with_options (`src/native_export.rs`) and `concat_mp4_matroska_with_options` (`src/native_plan.rs`) gate sample-domain audio concat on `concat_eligible_with_options(sources, options)` before validating WAVE sample-frame packet limits or MP4/Matroska/ADTS packet budgets, causing tight `options.max_packet_bytes` or invalid stream selections (`options.streams = vec![1]`) on mixed-precision WAVE or mixed-codec audio inputs to return `Ok(None)` and fall back to `owned_wave_remux::concat_wave` / `plan_concat`, which fail with misleading `\"native PCM trim requires RIFF/WAVE\"` or `\"concat inputs have incompatible PCM sample formats\"` errors; `concat_mp4_matroska_with_options` also calls `fvid_media::plan_decode_audio` on native WAVE and MP4 inputs even when `options.max_controlled_bytes.is_none()`, causing Matroska `.mka` sample-domain concat (`concat(&[w16, wf32], \"out.mka\", &wave_ok)`) to use `65536.min(max_packet_bytes) / frame * frame` while `plan_concat` uses `owned_audio_plan` capacity; and `owned_wave_remux::trim` (`crates/fvid-media/src/owned_wave_remux.rs`), `owned_wave_plan::plan_trim` (`crates/fvid-media/src/owned_wave_plan.rs`), and `media::trim` (`src/media.rs`) gate standalone audio (`Ogg`, `raw FLAC`, `raw MP3`, `G.711 WAVE`) on `owned_audio_plan::supports(..., options)` before falling back to `trim_pcm` (`\"native PCM trim requires RIFF/WAVE\"`) when `max_packet_bytes` or `streams` rejects a recognized standalone audio source.",
       "result": "Probe sample-domain concat eligibility with default budget/stream controls in `try_concat_mp4_matroska_with_options` (`src/native_export.rs`) and `concat_mp4_matroska_with_options` (`src/native_plan.rs`), then explicitly validate output controls, WAVE sample-frame `max_packet_bytes`, MP4/Matroska/ADTS packet budgets, and standalone audio `plan_decode_audio` before execution or plan admission; and route recognized standalone audio directly to `decode_audio_transformed` / `plan_decode_audio` in `owned_wave_remux::trim` (`crates/fvid-media/src/owned_wave_remux.rs`), `owned_wave_plan::plan_trim` (`crates/fvid-media/src/owned_wave_plan.rs`), and `media::trim` (`src/media.rs`) so packet-budget and stream-selection refusals propagate directly without falling back to WAVE trim. Three focused integration tests, 9 related integration tests, and 2 offline fixture unit tests pass.",
       "status": "accepted",
-      "validation": "batch-250-validation.json"
+      "validation": "batch-250-validation.json",
+      "additional_validations": [
+        "batch-474-validation.json"
+      ]
     },
     {
       "id": "FVID-0258",
@@ -2902,7 +2905,10 @@
       "before": "owned_remux::remux (`crates/fvid-media/src/owned_remux.rs`) and `owned_remux_plan::plan_remux` (`crates/fvid-media/src/owned_remux_plan.rs`) fall through to `owned_wave_remux::remux` / `owned_wave_plan::plan_remux` when `owned_matroska_remux::supports`, `owned_mp4_remux::supports`, and `owned_adts_remux::supports` return `false` on non-WAVE inputs, causing Matroska remux requests with unsupported policies (`streams = [1]` or `max_packets = Some(1)`) to fail with `\"owned WAVE remux does not implement requested stream/metadata policies\"` or `\"file is not a RIFF/WAVE stream\"`; `native_plan::remux_with_options` (`src/native_plan.rs`) and `media::remux` (`src/media.rs`) on MP4 fast-start relocation omit checking MP4 sample sizes against `options.max_packet_bytes`, while `validate_mp4_relocate_options` rejects non-default `max_packet_bytes` with `\"native media operation does not yet support stream selection, custom budgets or metadata mutations\"` and `media::plan_remux` only delegates `is_native_mp4_matroska` to `fvid_media::plan_remux` when `options.streams.is_empty()` or another budget/metadata option is set; and `owned_concat::concat` and `owned_concat::plan_concat` (`crates/fvid-media/src/owned_concat.rs`) fall back to `owned_wave_remux::concat` / `owned_wave_plan::plan_concat` on non-WAVE inputs that fail ADTS `supports`, returning `\"owned WAVE remux does not implement requested stream/metadata policies\"` or `\"file is not a RIFF/WAVE stream\"`.",
       "result": "Validate `options.max_packet_bytes > 0` up front and return container-specific refusals (`\"request is not an owned Matroska identity remux\"`, `\"request is not an owned MP4 Matroska remux\"`, `\"request is not an owned ADTS Matroska remux\"`) for non-WAVE inputs in `owned_remux::remux` (`crates/fvid-media/src/owned_remux.rs`) and `owned_remux_plan::plan_remux` (`crates/fvid-media/src/owned_remux_plan.rs`); validate MP4 track sample sizes against `options.max_packet_bytes` in `native_plan::remux_with_options` (`src/native_plan.rs`) and `validate_mp4_packet_budget` (`src/media.rs`), allow positive custom `max_packet_bytes` in `validate_mp4_relocate_options`, and align `media::plan_remux` with `media::remux` on `is_native_mp4_matroska`; and refuse non-WAVE inputs that fail ADTS `supports` with `\"request is not an owned ADTS Matroska concat\"` in `owned_concat::concat` and `owned_concat::plan_concat` (`crates/fvid-media/src/owned_concat.rs`). Three focused integration tests, 3 related integration tests, and 2 offline fixture unit tests pass.",
       "status": "accepted",
-      "validation": "batch-251-validation.json"
+      "validation": "batch-251-validation.json",
+      "additional_validations": [
+        "batch-474-validation.json"
+      ]
     },
     {
       "id": "FVID-0259",
@@ -5337,6 +5343,39 @@
       "result": "Retain the published picture phase and raw source anchor during audio-clock replacement. A shorter endpoint cannot take time backward;real EOF/error hands time to the retained phase. Real catch-up,silent-picture ownership and explicit navigation release the guard. Subsequent track selection preserves the raw intent. Nine unchanged tests verify no fabricated past-end PCM,exact native recovery PCM,paused and silent handoff,775ms stop,backward450ms recovery and natural1500ms video EOF. Twenty repeats pass180cases;all9gates pass1632physical-source-distinct checks and both builds with five old ignores unchanged. No metadata-only EOF shortcut,performance,physical audio or new native-window duration claim.",
       "status": "accepted",
       "validation": "batch-473-validation.json"
+    },
+    {
+      "id": "FVID-0474",
+      "batch": 474,
+      "title": "Do not let excluded MP4 transport clocks reject selected video concat",
+      "source": "src/container/mp4_concat.rs",
+      "regression": "tests/mp4_concat_unselected_plan.rs",
+      "before": "Three valid authored AVC/AAC movies decode correctly. Coarse1000/1001Hz AAC cannot use the compressed AAC transport planner;that excluded plan aborts selected-video concat and public plan/publication. Final five-case baseline:two controls pass,three failures including the new writer guard whose setup is blocked by the same admission failure.",
+      "result": "Preserve successful transport plans and retained-plan memory accounting,ignore unsupported plans only for excluded tracks,and always propagate cancellation. A private mask rejects selecting an unavailable plan before output. Five unchanged tests verify exact source YUV/AAC PCM,selected-AAC refusal,native80ms video playback and exact RGB/seek/rewind/EOF,public publication and one-packet prefix. Existing successful APIs and parser validation remain. No performance claim.",
+      "status": "accepted",
+      "validation": "batch-474-validation.json"
+    },
+    {
+      "id": "FVID-0475",
+      "batch": 474,
+      "title": "Separate audio metadata discovery from active encoded-window quotas",
+      "source": "src/media_probe.rs",
+      "regression": "tests/audio_metadata_selection_window.rs",
+      "before": "Final identical four-case baseline passes source decode/seek and active-budget/cancel/memory refusal controls,but metadata copying blocks Opus/Vorbis trim to MKA under valid6-byte active limits,and an exhausted concat prefix cannot inspect later Ogg headers. Call traces identify metadata-only consumers using whole-source packet caps.",
+      "result": "Validate original cancellation,zero,RSS and memory controls before a private metadata-only probe. Preserve original encoded byte/work caps for codec/interval admission. Use the helper for standalone PCM metadata,audio-source discovery and generic stream selection. Four unchanged tests verify automatic/explicit trim,WAVE/MKA output,exact frames and bounded finite silence,Opus seek,an exact nonzero PCM concat prefix,and active oversized/zero/resource/cancellation refusals without output. Full-source public probe policy remains unchanged.",
+      "status": "accepted",
+      "validation": "batch-474-validation.json"
+    },
+    {
+      "id": "FVID-0476",
+      "batch": 474,
+      "title": "Use configured decoder dispatch when reporting admitted audio concat streams",
+      "source": "src/native_plan.rs",
+      "regression": "tests/audio_concat_plan_dispatch.rs",
+      "before": "After successful concat admission,the legacy AAC/PCM planner parses G.711 RIFF as ADTS. Published-source G.711 controls fail in default and64MiB modes. With the preceding metadata correction staged,all six G.711/Opus/Vorbis plan variants fail as invalid ADTS;two source/resource controls pass.",
+      "result": "Report concat streams through the existing public decoder planner,retaining its codec routing and controls. Three unchanged tests verify G.711 source PCM against an independent scalar oracle,correct codec/disposition,publication of both complete segments across three formats and two memory modes,and invalid-selection/zero/resource refusals. G.711 concatenation retains every exact float sample;Opus/Vorbis retain exact frame counts and bounded finite numerical silence. No new codec or public API signature.",
+      "status": "accepted",
+      "validation": "batch-474-validation.json"
     }
   ]
 }

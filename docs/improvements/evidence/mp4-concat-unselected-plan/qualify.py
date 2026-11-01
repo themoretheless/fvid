@@ -1,0 +1,15 @@
+"""Offline source-frozen qualification of the selected-track concat admission."""
+from pathlib import Path
+import subprocess,json,hashlib,os,re
+q=Path(__file__).resolve().parent
+sources=json.loads((q/'batch-source.json').read_text())
+env=os.environ.copy();env.update(CARGO_TARGET_DIR='/private/tmp/fvid-concat-unselected-plan-target-20261101',CARGO_BUILD_JOBS='2',CARGO_PROFILE_TEST_DEBUG='0',CARGO_PROFILE_DEV_DEBUG='0')
+targets=['mp4_concat_unselected_plan','mp4_concat_retained_plans','mp4_concat_selected_clock','mp4_concat_selected_compatibility','mp4_concat_discarded_sync','native_mp4_concat','native_aac_concat','mp4_matroska_encoder_concat_prefix_regression','mp4_remux_prefix_budget_regression','mp4_audio_metadata_admission','remux_concat_controls_regressions','remux_concat_policy_parity_regressions','concat_trim_budget_parity_regressions','audio_metadata_selection_window','audio_concat_plan_dispatch','wave_ogg_flac_plan_regressions','audio_mix_merge_concat_metadata_regressions','audio_sample_concat_metadata_preservation_regressions','audio_sample_concat_wave_metadata_regressions','remux_concat_wave_metadata_regressions','adts_wave_remux_concat_parity_regressions']
+commands={'integration':['cargo','test','--locked','--offline','--no-default-features','--features','player','--no-fail-fast']+sum((['--test',n]for n in targets),[]),'root-mp4':['cargo','test','--locked','--offline','--no-default-features','--features','player','--lib','mp4','--','--test-threads=2'],'default-focused':['cargo','test','--locked','--offline','--no-default-features','--test','mp4_concat_unselected_plan','--test','audio_metadata_selection_window','--test','audio_concat_plan_dispatch'],'core-check':['cargo','check','--locked','--offline','--no-default-features'],'player-check':['cargo','check','--locked','--offline','--no-default-features','--features','player']}
+results={}
+for k,cmd in commands.items():
+ for n,h in sources.items():assert hashlib.sha256(Path(n).read_bytes()).hexdigest()==h
+ with(q/(k+'.log')).open('wb')as f:r=subprocess.run(cmd,stdout=f,stderr=subprocess.STDOUT,env=env)
+ text=(q/(k+'.log')).read_text();counts=re.findall(r'test result: (?:ok|FAILED)\. (\d+) passed; (\d+) failed; (\d+) ignored;',text)
+ results[k]=dict(command=cmd,exit_code=r.returncode,passed=sum(int(x[0])for x in counts),failed=sum(int(x[1])for x in counts),ignored=sum(int(x[2])for x in counts));(q/'qualification-results.json').write_text(json.dumps(results,indent=2)+'\n');print(k,results[k]['exit_code'],results[k]['passed'],flush=True)
+ assert r.returncode==0

@@ -1017,7 +1017,8 @@ pub(crate) fn audio_stream_index_from_metadata(
         if reader.tracks.len()==1 {return Ok(0);}
         return Err("audio-to-WAVE trim requires an explicit audio stream when other tracks exist".into());
     }
-    let info = crate::native_probe::probe_with_options(source, options)?;
+    let info = crate::native_probe::try_probe_metadata_with_options(source, options)?
+        .ok_or_else(|| "native probe does not yet support this container".to_owned())?;
     if info.streams.len()==1 {Ok(info.streams[0].index)}else{Err("audio-to-WAVE trim requires an explicit audio stream when other tracks exist".into())}
 }
 
@@ -1696,7 +1697,7 @@ pub fn concat_mp4_matroska_with_options(
         let mut inspect = options.clone();
         inspect.metadata_set.clear();inspect.metadata_delete.clear();
         inspect.stream_metadata_set.clear();inspect.stream_metadata_delete.clear();
-        let streams = decode_audio_with_options(&sources[0], &Default::default(), &inspect)?.streams
+        let streams = crate::media::plan_decode_audio(&sources[0], &Default::default(), &inspect)?.streams
             .into_iter().map(|mut stream| {stream.disposition="decode_to_pcm".into();stream}).collect();
         return Ok(Some(MediaPlan {command:"concat".into(),input:sources[0].clone(),inputs:sources.to_vec(),
             streams,graph:None,
