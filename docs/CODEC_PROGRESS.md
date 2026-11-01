@@ -1,3 +1,14 @@
+## Original LD5151 spatial decoder isolation, 2026-11-01
+
+The full original ISO spatial parser and renderer now process the identical
+isolated core PCM and original spatial messages for all2820 AUs. Both modes
+agree with FVid within worst-channel RMS1.789e-8, without fitted gain/delay.
+The original Real renderer reproduces the remaining WAV residual at1.087e-5
+RMS. Independent AAC-LD core/reference-generation comparison remains open;
+the spatial math is not changed to fit that residual. No new production defect
+or whole-profile conformance claim follows from this diagnostic.
+[Evidence](validation/aac-ld-mps-original-spatial-2026-11-01.md).
+
 ## AAC-LD original core/PNS diagnostic, 2026-11-01
 
 New bounded mono core inspector and optional offline audit qualify source

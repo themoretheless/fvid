@@ -1,5 +1,14 @@
 # Audio Implementation Status
 
+Original LD5151 spatial reconstruction is now independently compared on the
+identical isolated core PCM: the complete ISO spatial parser/renderer agrees
+with FVid within worst-channel RMS1.789e-8 across both modes. The original Real
+renderer reproduces the remaining ~1.087e-5 RMS against the original WAV on that
+same core. The open numerical investigation therefore moves to independent
+AAC-LD core decoding/reference generation; this does not establish a core bug
+or certify the complete profile. No production arithmetic changes in this audit.
+See validation/aac-ld-mps-original-spatial-2026-11-01.md.
+
 Shared AAC LD-SBR/MPS single-rate synthesis now uses its own32-band phase2n-31,
 qualified against the original AAC function and eight own short programmes.
 The formerly large24kHz LD-QMF2 discrepancy falls from RMS0.0965 to7.77e-6,
