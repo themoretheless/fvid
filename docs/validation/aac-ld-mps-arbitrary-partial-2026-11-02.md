@@ -97,3 +97,5 @@ default-device drain in all48 phases. This does not certify subjective quality
 or physical multichannel wiring; raw output and executable SHA256 are in the
 device JSON. The device build was awaited to terminal completion; no earlier
 probe binary was substituted for this check.
+
+Subsequent boundary update (2026-11-02): unchanged full-grid split paths now support resolution changes with dormant history retained. See [grid-change qualification](aac-ld-mps-arbitrary-grids-2026-11-02.md). Partial-grid conversion and topology changes remain open.

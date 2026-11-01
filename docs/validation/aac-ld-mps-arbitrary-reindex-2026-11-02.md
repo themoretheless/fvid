@@ -36,3 +36,5 @@ input domains: 48 complete drains for full playback, quarter seek, 60-percent
 seek and rewind. This is device delivery evidence, not subjective listening
 or physical multichannel wiring certification. Commands, log hashes, before-fix
 probe output and executable hashes are in the adjacent JSON receipts.
+
+Subsequent boundary update (2026-11-02): unchanged full-grid split paths now support resolution changes with dormant history retained. See [grid-change qualification](aac-ld-mps-arbitrary-grids-2026-11-02.md). Partial-grid conversion and topology changes remain open.

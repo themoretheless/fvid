@@ -24493,3 +24493,13 @@ exports and navigation. Grouped RS members resolve their individual values
 before requiring group equality. Source-frame concatenation still forbids
 escaped parameters. See [qualification](validation/aac-ep-rs-escaped-2026-11-02.md).
 Earlier progress entries describing escaped RS as open are historical.
+
+### 2026-11-02: full-grid ArbitraryTree resolution changes
+
+Full splits with unchanged source/split paths can now change among all seven
+parameter grids without discarding dormant indexed gain history. Qualification
+covers all 42 ordered pairs and returns, original-C post-shaping components,
+546 own MP4/Matroska programmes, clocks, checkpoints and player navigation.
+Partial-grid conversion, sparse outputs and topology changes remain open.
+See [qualification](validation/aac-ld-mps-arbitrary-grids-2026-11-02.md). Earlier
+full-grid refusal statements are historical.
