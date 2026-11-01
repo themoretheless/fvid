@@ -1,0 +1,509 @@
+{
+  "cases": [
+    {
+      "name": "tree2-b4-m0-initial",
+      "mode": "real",
+      "offset": 0,
+      "bytes": 36864,
+      "default_control_byte_identical": true
+    },
+    {
+      "name": "tree2-b4-m0-initial",
+      "mode": "complex",
+      "offset": 36864,
+      "bytes": 36864,
+      "default_control_byte_identical": true
+    },
+    {
+      "name": "tree2-b4-m0-reset-hold",
+      "mode": "real",
+      "offset": 73728,
+      "bytes": 36864,
+      "default_control_byte_identical": true
+    },
+    {
+      "name": "tree2-b4-m0-reset-hold",
+      "mode": "complex",
+      "offset": 110592,
+      "bytes": 36864,
+      "default_control_byte_identical": true
+    },
+    {
+      "name": "tree2-b4-m1-initial",
+      "mode": "real",
+      "offset": 147456,
+      "bytes": 36864,
+      "default_control_byte_identical": true
+    },
+    {
+      "name": "tree2-b4-m1-initial",
+      "mode": "complex",
+      "offset": 184320,
+      "bytes": 36864,
+      "default_control_byte_identical": true
+    },
+    {
+      "name": "tree2-b4-m1-reset-hold",
+      "mode": "real",
+      "offset": 221184,
+      "bytes": 36864,
+      "default_control_byte_identical": true
+    },
+    {
+      "name": "tree2-b4-m1-reset-hold",
+      "mode": "complex",
+      "offset": 258048,
+      "bytes": 36864,
+      "default_control_byte_identical": true
+    },
+    {
+      "name": "tree2-b9-m0-initial",
+      "mode": "real",
+      "offset": 294912,
+      "bytes": 36864,
+      "default_control_byte_identical": true
+    },
+    {
+      "name": "tree2-b9-m0-initial",
+      "mode": "complex",
+      "offset": 331776,
+      "bytes": 36864,
+      "default_control_byte_identical": true
+    },
+    {
+      "name": "tree2-b9-m0-reset-hold",
+      "mode": "real",
+      "offset": 368640,
+      "bytes": 36864,
+      "default_control_byte_identical": true
+    },
+    {
+      "name": "tree2-b9-m0-reset-hold",
+      "mode": "complex",
+      "offset": 405504,
+      "bytes": 36864,
+      "default_control_byte_identical": true
+    },
+    {
+      "name": "tree2-b9-m1-initial",
+      "mode": "real",
+      "offset": 442368,
+      "bytes": 36864,
+      "default_control_byte_identical": true
+    },
+    {
+      "name": "tree2-b9-m1-initial",
+      "mode": "complex",
+      "offset": 479232,
+      "bytes": 36864,
+      "default_control_byte_identical": true
+    },
+    {
+      "name": "tree2-b9-m1-reset-hold",
+      "mode": "real",
+      "offset": 516096,
+      "bytes": 36864,
+      "default_control_byte_identical": true
+    },
+    {
+      "name": "tree2-b9-m1-reset-hold",
+      "mode": "complex",
+      "offset": 552960,
+      "bytes": 36864,
+      "default_control_byte_identical": true
+    },
+    {
+      "name": "tree2-b23-m0-initial",
+      "mode": "real",
+      "offset": 589824,
+      "bytes": 36864,
+      "default_control_byte_identical": true
+    },
+    {
+      "name": "tree2-b23-m0-initial",
+      "mode": "complex",
+      "offset": 626688,
+      "bytes": 36864,
+      "default_control_byte_identical": true
+    },
+    {
+      "name": "tree2-b23-m0-reset-hold",
+      "mode": "real",
+      "offset": 663552,
+      "bytes": 36864,
+      "default_control_byte_identical": true
+    },
+    {
+      "name": "tree2-b23-m0-reset-hold",
+      "mode": "complex",
+      "offset": 700416,
+      "bytes": 36864,
+      "default_control_byte_identical": true
+    },
+    {
+      "name": "tree2-b23-m1-initial",
+      "mode": "real",
+      "offset": 737280,
+      "bytes": 36864,
+      "default_control_byte_identical": true
+    },
+    {
+      "name": "tree2-b23-m1-initial",
+      "mode": "complex",
+      "offset": 774144,
+      "bytes": 36864,
+      "default_control_byte_identical": true
+    },
+    {
+      "name": "tree2-b23-m1-reset-hold",
+      "mode": "real",
+      "offset": 811008,
+      "bytes": 36864,
+      "default_control_byte_identical": true
+    },
+    {
+      "name": "tree2-b23-m1-reset-hold",
+      "mode": "complex",
+      "offset": 847872,
+      "bytes": 36864,
+      "default_control_byte_identical": true
+    },
+    {
+      "name": "tree3-b4-m0-initial",
+      "mode": "real",
+      "offset": 884736,
+      "bytes": 49152,
+      "default_control_byte_identical": true
+    },
+    {
+      "name": "tree3-b4-m0-initial",
+      "mode": "complex",
+      "offset": 933888,
+      "bytes": 49152,
+      "default_control_byte_identical": true
+    },
+    {
+      "name": "tree3-b4-m0-reset-hold",
+      "mode": "real",
+      "offset": 983040,
+      "bytes": 49152,
+      "default_control_byte_identical": true
+    },
+    {
+      "name": "tree3-b4-m0-reset-hold",
+      "mode": "complex",
+      "offset": 1032192,
+      "bytes": 49152,
+      "default_control_byte_identical": true
+    },
+    {
+      "name": "tree3-b4-m1-initial",
+      "mode": "real",
+      "offset": 1081344,
+      "bytes": 49152,
+      "default_control_byte_identical": true
+    },
+    {
+      "name": "tree3-b4-m1-initial",
+      "mode": "complex",
+      "offset": 1130496,
+      "bytes": 49152,
+      "default_control_byte_identical": true
+    },
+    {
+      "name": "tree3-b4-m1-reset-hold",
+      "mode": "real",
+      "offset": 1179648,
+      "bytes": 49152,
+      "default_control_byte_identical": true
+    },
+    {
+      "name": "tree3-b4-m1-reset-hold",
+      "mode": "complex",
+      "offset": 1228800,
+      "bytes": 49152,
+      "default_control_byte_identical": true
+    },
+    {
+      "name": "tree3-b9-m0-initial",
+      "mode": "real",
+      "offset": 1277952,
+      "bytes": 49152,
+      "default_control_byte_identical": true
+    },
+    {
+      "name": "tree3-b9-m0-initial",
+      "mode": "complex",
+      "offset": 1327104,
+      "bytes": 49152,
+      "default_control_byte_identical": true
+    },
+    {
+      "name": "tree3-b9-m0-reset-hold",
+      "mode": "real",
+      "offset": 1376256,
+      "bytes": 49152,
+      "default_control_byte_identical": true
+    },
+    {
+      "name": "tree3-b9-m0-reset-hold",
+      "mode": "complex",
+      "offset": 1425408,
+      "bytes": 49152,
+      "default_control_byte_identical": true
+    },
+    {
+      "name": "tree3-b9-m1-initial",
+      "mode": "real",
+      "offset": 1474560,
+      "bytes": 49152,
+      "default_control_byte_identical": true
+    },
+    {
+      "name": "tree3-b9-m1-initial",
+      "mode": "complex",
+      "offset": 1523712,
+      "bytes": 49152,
+      "default_control_byte_identical": true
+    },
+    {
+      "name": "tree3-b9-m1-reset-hold",
+      "mode": "real",
+      "offset": 1572864,
+      "bytes": 49152,
+      "default_control_byte_identical": true
+    },
+    {
+      "name": "tree3-b9-m1-reset-hold",
+      "mode": "complex",
+      "offset": 1622016,
+      "bytes": 49152,
+      "default_control_byte_identical": true
+    },
+    {
+      "name": "tree3-b23-m0-initial",
+      "mode": "real",
+      "offset": 1671168,
+      "bytes": 49152,
+      "default_control_byte_identical": true
+    },
+    {
+      "name": "tree3-b23-m0-initial",
+      "mode": "complex",
+      "offset": 1720320,
+      "bytes": 49152,
+      "default_control_byte_identical": true
+    },
+    {
+      "name": "tree3-b23-m0-reset-hold",
+      "mode": "real",
+      "offset": 1769472,
+      "bytes": 49152,
+      "default_control_byte_identical": true
+    },
+    {
+      "name": "tree3-b23-m0-reset-hold",
+      "mode": "complex",
+      "offset": 1818624,
+      "bytes": 49152,
+      "default_control_byte_identical": true
+    },
+    {
+      "name": "tree3-b23-m1-initial",
+      "mode": "real",
+      "offset": 1867776,
+      "bytes": 49152,
+      "default_control_byte_identical": true
+    },
+    {
+      "name": "tree3-b23-m1-initial",
+      "mode": "complex",
+      "offset": 1916928,
+      "bytes": 49152,
+      "default_control_byte_identical": true
+    },
+    {
+      "name": "tree3-b23-m1-reset-hold",
+      "mode": "real",
+      "offset": 1966080,
+      "bytes": 49152,
+      "default_control_byte_identical": true
+    },
+    {
+      "name": "tree3-b23-m1-reset-hold",
+      "mode": "complex",
+      "offset": 2015232,
+      "bytes": 49152,
+      "default_control_byte_identical": true
+    },
+    {
+      "name": "tree4-b4-m0-initial",
+      "mode": "real",
+      "offset": 2064384,
+      "bytes": 49152,
+      "default_control_byte_identical": true
+    },
+    {
+      "name": "tree4-b4-m0-initial",
+      "mode": "complex",
+      "offset": 2113536,
+      "bytes": 49152,
+      "default_control_byte_identical": true
+    },
+    {
+      "name": "tree4-b4-m0-reset-hold",
+      "mode": "real",
+      "offset": 2162688,
+      "bytes": 49152,
+      "default_control_byte_identical": true
+    },
+    {
+      "name": "tree4-b4-m0-reset-hold",
+      "mode": "complex",
+      "offset": 2211840,
+      "bytes": 49152,
+      "default_control_byte_identical": true
+    },
+    {
+      "name": "tree4-b4-m1-initial",
+      "mode": "real",
+      "offset": 2260992,
+      "bytes": 49152,
+      "default_control_byte_identical": true
+    },
+    {
+      "name": "tree4-b4-m1-initial",
+      "mode": "complex",
+      "offset": 2310144,
+      "bytes": 49152,
+      "default_control_byte_identical": true
+    },
+    {
+      "name": "tree4-b4-m1-reset-hold",
+      "mode": "real",
+      "offset": 2359296,
+      "bytes": 49152,
+      "default_control_byte_identical": true
+    },
+    {
+      "name": "tree4-b4-m1-reset-hold",
+      "mode": "complex",
+      "offset": 2408448,
+      "bytes": 49152,
+      "default_control_byte_identical": true
+    },
+    {
+      "name": "tree4-b9-m0-initial",
+      "mode": "real",
+      "offset": 2457600,
+      "bytes": 49152,
+      "default_control_byte_identical": true
+    },
+    {
+      "name": "tree4-b9-m0-initial",
+      "mode": "complex",
+      "offset": 2506752,
+      "bytes": 49152,
+      "default_control_byte_identical": true
+    },
+    {
+      "name": "tree4-b9-m0-reset-hold",
+      "mode": "real",
+      "offset": 2555904,
+      "bytes": 49152,
+      "default_control_byte_identical": true
+    },
+    {
+      "name": "tree4-b9-m0-reset-hold",
+      "mode": "complex",
+      "offset": 2605056,
+      "bytes": 49152,
+      "default_control_byte_identical": true
+    },
+    {
+      "name": "tree4-b9-m1-initial",
+      "mode": "real",
+      "offset": 2654208,
+      "bytes": 49152,
+      "default_control_byte_identical": true
+    },
+    {
+      "name": "tree4-b9-m1-initial",
+      "mode": "complex",
+      "offset": 2703360,
+      "bytes": 49152,
+      "default_control_byte_identical": true
+    },
+    {
+      "name": "tree4-b9-m1-reset-hold",
+      "mode": "real",
+      "offset": 2752512,
+      "bytes": 49152,
+      "default_control_byte_identical": true
+    },
+    {
+      "name": "tree4-b9-m1-reset-hold",
+      "mode": "complex",
+      "offset": 2801664,
+      "bytes": 49152,
+      "default_control_byte_identical": true
+    },
+    {
+      "name": "tree4-b23-m0-initial",
+      "mode": "real",
+      "offset": 2850816,
+      "bytes": 49152,
+      "default_control_byte_identical": true
+    },
+    {
+      "name": "tree4-b23-m0-initial",
+      "mode": "complex",
+      "offset": 2899968,
+      "bytes": 49152,
+      "default_control_byte_identical": true
+    },
+    {
+      "name": "tree4-b23-m0-reset-hold",
+      "mode": "real",
+      "offset": 2949120,
+      "bytes": 49152,
+      "default_control_byte_identical": true
+    },
+    {
+      "name": "tree4-b23-m0-reset-hold",
+      "mode": "complex",
+      "offset": 2998272,
+      "bytes": 49152,
+      "default_control_byte_identical": true
+    },
+    {
+      "name": "tree4-b23-m1-initial",
+      "mode": "real",
+      "offset": 3047424,
+      "bytes": 49152,
+      "default_control_byte_identical": true
+    },
+    {
+      "name": "tree4-b23-m1-initial",
+      "mode": "complex",
+      "offset": 3096576,
+      "bytes": 49152,
+      "default_control_byte_identical": true
+    },
+    {
+      "name": "tree4-b23-m1-reset-hold",
+      "mode": "real",
+      "offset": 3145728,
+      "bytes": 49152,
+      "default_control_byte_identical": true
+    },
+    {
+      "name": "tree4-b23-m1-reset-hold",
+      "mode": "complex",
+      "offset": 3194880,
+      "bytes": 49152,
+      "default_control_byte_identical": true
+    }
+  ],
+  "scope": "Full original spatial decoder on authored core PCM and authored SSC/frames; both decorrelators, default and explicit-unity outputs byte-identical. 7272 outputs explicitly reordered to WAVE mask0x63f. Not an AAC core oracle or complete-profile conformance."
+}

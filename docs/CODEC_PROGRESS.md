@@ -1,3 +1,16 @@
+## Predictive TTT default/hold ICC acceptance, 2026-11-01
+
+Removed an incorrect native default-data prohibition. ICC default index0 maps
+to physical coherence1;physical coherence0 is a different index and remains
+rejected by the predictive matrix.36 own three-AU programmes with explicit-unity
+controls cover three TTT trees,modes0/1,grids4/9/23,initial and reset/hold history,
+MP4/Matroska,checkpoints and playback seek/rewind/ranges. Unmodified original
+spatial decoding produces byte-identical default/control PCM in both modes;
+owned maximum difference is1.15e-9 over811008 scalars.13 focused tests pass and
+three actual-device cases complete full/seek/rewind drain. Wider profile gaps
+remain open.
+[Evidence](validation/aac-ld-mps-ttt-default-2026-11-01.md).
+
 ## LD-MPS zero-alignment profile restriction, 2026-11-01
 
 Corrected the native diagnostic for nonzero `ldsacTimeAlign`: the2014 LD-MPS
@@ -2227,10 +2240,13 @@ All tree/extension histories and the caller position commit only after the
 entire frame succeeds. A failure in the final child cannot leave earlier OTT,
 TTT, downmix or arbitrary-tree states advanced. A clone is a syntax/parameter
 checkpoint, and reset restores all region histories. Independent keep modes,
-invalid/repeated slots, predictive-TTT default ICC, overflowing GES runs and
+invalid/repeated slots, overflowing GES runs and
 truncated extension children are rejected specifically. The residual-coding
 restriction is presence-aware: interpolation is forbidden when the residual
 configuration exists even when all its bands are zero.
+
+The historical predictive-TTT default prohibition is superseded by the
+November1 default/hold acceptance correction documented above.
 
 Zero-width regions still carry data modes. Unit-stride empty PCM and empty
 ordinary default/keep regions now have positive acceptance fixtures; the old

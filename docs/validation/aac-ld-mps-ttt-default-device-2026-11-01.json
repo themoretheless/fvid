@@ -1,0 +1,23 @@
+{
+  "probe_sha256": "baf836ef9372dd0070d3796a19d1accbb7c8649edecdc06af9f75c33ef606793",
+  "cases": [
+    {
+      "name": "tree2-b23-m0-reset-hold",
+      "exit_code": 0,
+      "stdout": "platform_device=started source_channels=6 rate=48000 duration=0.032000\nphase=full generation=0 from=0.000000 position=0.032000 wall=0.057284 device_drain=complete\nphase=seek-quarter generation=1 from=0.008000 position=0.032000 wall=0.044942 device_drain=complete\nphase=seek-60-percent generation=2 from=0.019200 position=0.032000 wall=0.044450 device_drain=complete\nphase=rewind generation=3 from=0.000000 position=0.032000 wall=0.059617 device_drain=complete\n",
+      "stderr": ""
+    },
+    {
+      "name": "tree3-b23-m0-reset-hold",
+      "exit_code": 0,
+      "stdout": "platform_device=started source_channels=8 rate=48000 duration=0.032000\nphase=full generation=0 from=0.000000 position=0.032000 wall=0.053236 device_drain=complete\nphase=seek-quarter generation=1 from=0.008000 position=0.032000 wall=0.048253 device_drain=complete\nphase=seek-60-percent generation=2 from=0.019200 position=0.032000 wall=0.042181 device_drain=complete\nphase=rewind generation=3 from=0.000000 position=0.032000 wall=0.059750 device_drain=complete\n",
+      "stderr": ""
+    },
+    {
+      "name": "tree4-b23-m0-reset-hold",
+      "exit_code": 0,
+      "stdout": "platform_device=started source_channels=8 rate=48000 duration=0.032000\nphase=full generation=0 from=0.000000 position=0.032000 wall=0.051007 device_drain=complete\nphase=seek-quarter generation=1 from=0.008000 position=0.032000 wall=0.051253 device_drain=complete\nphase=seek-60-percent generation=2 from=0.019200 position=0.032000 wall=0.041001 device_drain=complete\nphase=rewind generation=3 from=0.000000 position=0.032000 wall=0.057764 device_drain=complete\n",
+      "stderr": ""
+    }
+  ]
+}

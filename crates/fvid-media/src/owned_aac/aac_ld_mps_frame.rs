@@ -82,23 +82,14 @@ struct Region {
     kind: Kind,
     start: u8,
     state: Parameters,
-    forbid_default: bool,
 }
 impl Region {
-    fn new(
-        id: ParameterId,
-        kind: Kind,
-        start: u8,
-        stop: u8,
-        default: i16,
-        forbid_default: bool,
-    ) -> Result<Self> {
+    fn new(id: ParameterId, kind: Kind, start: u8, stop: u8, default: i16) -> Result<Self> {
         Ok(Self {
             id,
             kind,
             start,
             state: Parameters::new(kind, usize::from(stop - start), default)?,
-            forbid_default,
         })
     }
     fn read(
@@ -117,11 +108,6 @@ impl Region {
             if residual && mode == 2 {
                 return Err(invalid(
                     "LD-MPS residual coding forbids interpolated parameters",
-                ));
-            }
-            if self.forbid_default && mode == 0 {
-                return Err(invalid(
-                    "predictive LD-MPS TTT ICC requires non-default data",
                 ));
             }
         }
@@ -185,7 +171,6 @@ impl Decoder {
                 0,
                 stop,
                 defaults[i],
-                false,
             )?);
         }
         if config.one_icc == Some(true) {
@@ -195,7 +180,6 @@ impl Decoder {
                 0,
                 config.parameter_bands,
                 0,
-                false,
             )?);
         } else {
             for (i, &lfe) in config.tree.ott_lfe.iter().enumerate() {
@@ -206,7 +190,6 @@ impl Decoder {
                         0,
                         config.ott_bands[i],
                         0,
-                        false,
                     )?);
                 }
             }
@@ -247,9 +230,11 @@ impl Decoder {
                             if component == 0 { 15 } else { 0 },
                         )
                     };
-                    regions.push(Region::new(id, kind, start, stop, default, false)?);
+                    regions.push(Region::new(id, kind, start, stop, default)?);
                 }
                 if mode < 2 {
+                    // Default ICC index0 dequantizes to coherence1. It is
+                    // distinct from physical coherence0 (fine index5).
                     regions.push(Region::new(
                         ParameterId::TttIcc {
                             box_index: i as u8,
@@ -259,7 +244,6 @@ impl Decoder {
                         start,
                         stop,
                         0,
-                        true,
                     )?);
                 }
             }
@@ -289,7 +273,6 @@ impl Decoder {
                             0,
                             o.bands,
                             i16::from(o.default_cld),
-                            false,
                         )?);
                     }
                 }
@@ -306,7 +289,6 @@ impl Decoder {
                     0,
                     config.parameter_bands,
                     0,
-                    false,
                 )?);
             }
         }

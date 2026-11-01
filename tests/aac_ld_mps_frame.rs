@@ -146,9 +146,9 @@ fn every_frame_prefix_rolls_back_all_tree_and_extension_histories() {
     assert_eq!(checked, 777_384);
 }
 #[test]
-fn malformed_slots_predictive_defaults_and_short_extension_children_fail_specifically() {
+fn malformed_slots_and_short_extension_children_fail_specifically() {
     let (manifest, configs, packets) = corpus();
-    let mut checks = [0; 3];
+    let mut checks = [0; 2];
     for c in manifest["cases"].as_array().unwrap() {
         let initial = Decoder::new(&config(c, &configs)).unwrap();
         let mut decoder = initial.clone();
@@ -174,19 +174,6 @@ fn malformed_slots_predictive_defaults_and_short_extension_children_fail_specifi
                 assert_error(bytes, "invalid LD-MPS frame parameter slots");
                 checks[0] += 1;
             }
-            for field in f["mode_fields"].as_array().unwrap() {
-                if field["predictive"] == true {
-                    let mut bytes = original.clone();
-                    set(
-                        &mut bytes,
-                        field["position"].as_u64().unwrap() as usize,
-                        2,
-                        0,
-                    );
-                    assert_error(bytes, "TTT ICC requires non-default");
-                    checks[1] += 1;
-                }
-            }
             for field in f["extension_lengths"].as_array().unwrap() {
                 if field["kind"] == 2 && field["length"].as_u64().unwrap() > 0 {
                     let mut bytes = original.clone();
@@ -197,7 +184,7 @@ fn malformed_slots_predictive_defaults_and_short_extension_children_fail_specifi
                         field["length"].as_u64().unwrap() as usize - 1,
                     );
                     assert_error(bytes, "truncated");
-                    checks[2] += 1;
+                    checks[1] += 1;
                 }
             }
             decoder.decode(&mut BitReader::new(&original)).unwrap();

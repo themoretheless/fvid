@@ -1,5 +1,14 @@
 # Audio Implementation Status
 
+Predictive TTT ICC now accepts default coding: index0 means coherence1.
+The previous default prohibition confused entropy coding with physical zero
+correlation.36 authored programmes cover trees525/7271/7272,modes0/1,grids4/9/23,
+initial/default-reset/hold histories,MP4/Matroska and playback navigation.
+Both original ISO renderers produce byte-identical default/coded-unity controls;
+owned PCM differs by at most1.15e-9 over811008 scalars.13 focused tests pass;
+three actual-device runs drain full/seek/rewind. Physical zero coherence remains
+rejected. See validation/aac-ld-mps-ttt-default-2026-11-01.md.
+
 The original AAC-LD core is now independently decoded through the ISO generic
 frontend: all1443840 LD5151 core samples agree with FVid at RMS1.504e-9,
 max2.981e-8. The complete original core+spatial chain also agrees at worst-channel
