@@ -3397,3 +3397,18 @@ Three actual macOS runs complete12 device-drain phases. This adds evidence
 for the existing configuration13 implementation, not new DSP. See
 `validation/aac-22-2-esc-2026-11-01.md` for transport boundaries and remaining
 unqualified combinations. The global codec-gap objective remains open.
+
+### 2026-11-01: LD-MPS local fragment replacement
+
+Native playback now admits incomplete ancillary fragments created and replaced
+inside the current logical AAC extension tail. Completing an inherited block
+also clears its provenance before subsequent local fragments. The parser reports
+inherited replacement explicitly; a later local discard cannot erase it.
+This replaces the blanket cumulative-counter guard without changing PCM math.
+
+120 authored programmes preserve parent messages, PCM, native timestamps,
+checkpoint replay and MP4/Matroska navigation; five inherited-replacement movies
+remain explicit refusal/retry tests.20 related tests pass and four actual macOS
+runs complete16 device-drain phases. See
+`validation/aac-ld-mps-local-replacement-2026-11-01.md` for exact scope.
+Inherited cross-AU source association and the other codec gaps remain open.

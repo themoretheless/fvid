@@ -360,7 +360,8 @@ impl Decoder {
         next.source_clock = Some(stamp.timescale);
         let mut bits = super::bits::BitReader::new(packet);
         bits.skip(used_bits)?;
-        let messages = super::aac_pce::read_eld_spatial_extensions(&mut bits, &mut next.assembler)?;
+        let (messages, replaced_inherited) =
+            super::aac_pce::read_eld_spatial_extensions_scoped(&mut bits, &mut next.assembler)?;
         for message in &messages {
             if message.kind == super::aac_ld_mps_transport::Kind::HeaderAndFrame {
                 let (replacement, _) = super::aac_ld_mps_config::Config::read_in_band(
@@ -369,7 +370,10 @@ impl Decoder {
                 replacement.validate_low_delay_profile()?;
             }
         }
-        if next.assembler.replacements() != self.assembler.replacements() {
+        // Local fragments have not entered the spatial session and own no
+        // older source window. A cumulative replacement count cannot
+        // distinguish them from an inherited unfinished message.
+        if replaced_inherited {
             return Err(unsupported(
                 "AAC LD-MPS replaced-fragment source association is not yet implemented",
             ));

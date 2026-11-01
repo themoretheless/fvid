@@ -466,10 +466,22 @@ pub fn read_eld_spatial_extensions(
     bits: &mut BitReader<'_>,
     assembler: &mut super::aac_ld_mps_transport::Assembler,
 ) -> Result<Vec<super::aac_ld_mps_transport::Message>> {
+    read_eld_spatial_extensions_scoped(bits, assembler).map(|(messages, _)| messages)
+}
+
+/// Whether a replacement discarded a fragment inherited from before this
+/// bounded extension tail. Completed inherited messages clear that provenance;
+/// subsequent fragments are local to this tail and own no older source window.
+pub(crate) fn read_eld_spatial_extensions_scoped(
+    bits: &mut BitReader<'_>,
+    assembler: &mut super::aac_ld_mps_transport::Assembler,
+) -> Result<(Vec<super::aac_ld_mps_transport::Message>, bool)> {
     let mut input = bits.clone();
     let mut spatial = SpatialExtensions {
         assembler: assembler.clone(),
         messages: Vec::new(),
+        inherited_fragment: assembler.has_pending(),
+        replaced_inherited: false,
     };
     let count = input.remaining() / 8;
     read_extension_bytes_dispatch(
@@ -486,11 +498,13 @@ pub fn read_eld_spatial_extensions(
     input.skip(input.remaining())?;
     *bits = input;
     *assembler = spatial.assembler;
-    Ok(spatial.messages)
+    Ok((spatial.messages, spatial.replaced_inherited))
 }
 struct SpatialExtensions {
     assembler: super::aac_ld_mps_transport::Assembler,
     messages: Vec<super::aac_ld_mps_transport::Message>,
+    inherited_fragment: bool,
+    replaced_inherited: bool,
 }
 
 /// Shared DRC syntax; evaluation is optional and default decoding preserves
@@ -633,11 +647,18 @@ fn read_extension_bytes_dispatch(
             }
             9 | 12 if spatial.is_some() => {
                 let owner = spatial.as_deref_mut().unwrap();
+                let replacements = owner.assembler.replacements();
                 let (message, position) = owner.assembler.read_bytes(
                     tag_start.source_bytes(),
                     tag_start.position(),
                     end,
                 )?;
+                if owner.assembler.replacements() != replacements && owner.inherited_fragment {
+                    owner.replaced_inherited = true;
+                }
+                if !owner.assembler.has_pending() {
+                    owner.inherited_fragment = false;
+                }
                 if let Some(message) = message {
                     owner
                         .messages

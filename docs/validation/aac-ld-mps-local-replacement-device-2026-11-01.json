@@ -1,0 +1,31 @@
+{
+  "probe_sha256": "5f9095ec76b45809bd48aa0fb1062bdc2294270c589825a038f495a7ff835ba9",
+  "command": "audio_probe --play-device INPUT.mp4",
+  "scope": "Four authored local-replacement programmes; actual macOS playback, two seeks and rewind through device EOF drain. PCM and shared single/double-rate LD-SBR interfaces; not subjective or sustained-performance qualification.",
+  "cases": [
+    {
+      "name": "plain-tree7-same-local",
+      "exit_code": 0,
+      "stdout": "platform_device=started source_channels=2 rate=48000 duration=0.032000\nphase=full generation=0 from=0.000000 position=0.032000 wall=0.058941 device_drain=complete\nphase=seek-quarter generation=1 from=0.008000 position=0.032000 wall=0.040785 device_drain=complete\nphase=seek-60-percent generation=2 from=0.019200 position=0.032000 wall=0.029865 device_drain=complete\nphase=rewind generation=3 from=0.000000 position=0.032000 wall=0.056710 device_drain=complete\n",
+      "stderr": ""
+    },
+    {
+      "name": "plain-tree2-fragmented-gain-local",
+      "exit_code": 0,
+      "stdout": "platform_device=started source_channels=6 rate=48000 duration=0.032000\nphase=full generation=0 from=0.000000 position=0.032000 wall=0.055998 device_drain=complete\nphase=seek-quarter generation=1 from=0.008000 position=0.032000 wall=0.054206 device_drain=complete\nphase=seek-60-percent generation=2 from=0.019200 position=0.032000 wall=0.041338 device_drain=complete\nphase=rewind generation=3 from=0.000000 position=0.032000 wall=0.047678 device_drain=complete\n",
+      "stderr": ""
+    },
+    {
+      "name": "n480-c1-base-x2-crc1-fragmented-gain-local",
+      "exit_code": 0,
+      "stdout": "platform_device=started source_channels=2 rate=48000 duration=0.060000\nphase=full generation=0 from=0.000000 position=0.060000 wall=0.084334 device_drain=complete\nphase=seek-quarter generation=1 from=0.015000 position=0.060000 wall=0.067230 device_drain=complete\nphase=seek-60-percent generation=2 from=0.036000 position=0.060000 wall=0.047671 device_drain=complete\nphase=rewind generation=3 from=0.000000 position=0.060000 wall=0.088424 device_drain=complete\n",
+      "stderr": ""
+    },
+    {
+      "name": "n512-c1-base-x1-crc1-fragmented-gain-local",
+      "exit_code": 0,
+      "stdout": "platform_device=started source_channels=2 rate=24000 duration=0.064000\nphase=full generation=0 from=0.000000 position=0.064000 wall=0.090931 device_drain=complete\nphase=seek-quarter generation=1 from=0.016000 position=0.064000 wall=0.075219 device_drain=complete\nphase=seek-60-percent generation=2 from=0.038400 position=0.064000 wall=0.054138 device_drain=complete\nphase=rewind generation=3 from=0.000000 position=0.064000 wall=0.090379 device_drain=complete\n",
+      "stderr": ""
+    }
+  ]
+}

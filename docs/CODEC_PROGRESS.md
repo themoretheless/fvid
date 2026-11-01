@@ -24471,3 +24471,15 @@ output-device phases pass. These are qualification of configured layouts
 implemented in5e5f059b99; production DSP is unchanged in this extension.
 See `validation/aac-22-2-esc-2026-11-01.md`. This does not complete the full
 codec/profile objective or qualify combined RVLC+LD-SBR22.2.
+
+### 2026-11-01: native LD-MPS local-fragment admission
+
+The native owner distinguishes replacement of a current-tail fragment from
+replacement of an inherited fragment. Local replacement now plays, including
+after completing an inherited block earlier in that tail. The inherited-discard
+result is sticky and preserves the existing source-association refusal.
+120 authored acceptance programmes, five explicit inherited-refusal movies,
+20 related tests and16 actual macOS device phases qualify the change. PCM and
+completed message data remain byte-identical to parent controls. See
+`validation/aac-ld-mps-local-replacement-2026-11-01.md`.
+This does not close cross-AU replacement, HRTF/EBQ or the full codec-gap goal.
