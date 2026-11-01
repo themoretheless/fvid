@@ -1,0 +1,17 @@
+{
+  "batch": 501,
+  "ids": [
+    "FVID-0500"
+  ],
+  "snapshot": "docs/improvements/snapshots/batch-501-pre-edit",
+  "before_evidence": "docs/improvements/evidence/batch-501-acceptance-before.txt",
+  "after_evidence": "docs/improvements/evidence/batch-501-acceptance-after.txt",
+  "related_evidence": "docs/improvements/evidence/batch-501-related-after.txt",
+  "commands": [
+    "cargo test --test mp4_audio_metadata_admission mp4_concat_open_validates_metadata_mutations_and_charges_video_scratch_and_queue_working_sets -- --exact",
+    "cargo test --test mp4_audio_metadata_admission",
+    "cargo test --lib container::mp4_concat"
+  ],
+  "passed": 73,
+  "failed": 0
+}

@@ -245,7 +245,18 @@ pub fn decode_adts_pcm<R: Read>(
         options
             .max_packet_bytes
             .min(options.max_controlled_bytes.unwrap_or(usize::MAX)),
-    )?;
+    )
+    .map_err(|e| {
+        if e.0.contains("ADTS packet exceeds budget")
+            && options
+                .max_controlled_bytes
+                .is_some_and(|limit| limit < options.max_packet_bytes)
+        {
+            invalid(&format!("controlled memory budget exceeded: {}", e.0))
+        } else {
+            e
+        }
+    })?;
     decode_adts_aac_reader_controlled(reader, output, interval, &mut control)
 }
 /// Read-only clock/layout negotiation for file plans and loudness admission.
@@ -284,7 +295,18 @@ pub(crate) fn adts_prefix_info_for_transform<R: Read>(
         quiet
             .max_packet_bytes
             .min(quiet.max_controlled_bytes.unwrap_or(usize::MAX)),
-    )?;
+    )
+    .map_err(|e| {
+        if e.0.contains("ADTS packet exceeds budget")
+            && quiet
+                .max_controlled_bytes
+                .is_some_and(|limit| limit < quiet.max_packet_bytes)
+        {
+            invalid(&format!("controlled memory budget exceeded: {}", e.0))
+        } else {
+            e
+        }
+    })?;
     check_adts_decode_admission(reader.audio_specific_config(), options)?;
     let negotiated = negotiate_adts_aac_reader(reader, interval, &mut control)?;
     let rate = negotiated.sample_rate();

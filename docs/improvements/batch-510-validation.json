@@ -1,0 +1,16 @@
+{
+  "batch": 510,
+  "ids": [
+    "FVID-0509"
+  ],
+  "snapshot": "docs/improvements/snapshots/batch-510-pre-edit",
+  "before_evidence": "docs/improvements/evidence/batch-510-acceptance-before.txt",
+  "after_evidence": "docs/improvements/evidence/batch-510-acceptance-after.txt",
+  "related_evidence": "docs/improvements/evidence/batch-510-related-after.txt",
+  "commands": [
+    "cargo test --test mp4_audio_metadata_admission wave_loudnorm_and_compressed_audio_export_preflight_stage_two_memory_budgets",
+    "cargo test --test mp4_audio_metadata_admission"
+  ],
+  "passed": 79,
+  "failed": 0
+}

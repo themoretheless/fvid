@@ -25,10 +25,18 @@ impl Presentation {
         track: u64,
         options: Option<&CopyOptions>,
     ) -> Result<Self> {
+        let index_bytes = reader
+            .estimated_index_payload_bytes()
+            .map_err(|e| e.to_string())?;
         if let Some(limit) = options
             .and_then(|o| o.max_controlled_bytes)
             .filter(|&limit| limit > 0)
-            && reader.packets.len().saturating_mul(std::mem::size_of::<i64>()) > limit
+            && index_bytes.saturating_add(
+                reader
+                    .packets
+                    .len()
+                    .saturating_mul(std::mem::size_of::<i64>()),
+            ) > limit
         {
             return Err(
                 "controlled memory budget exceeded: Matroska presentation timestamp table".into(),
@@ -49,6 +57,14 @@ impl Presentation {
         track: u64, default_duration: u64, inferred: Option<&[Option<u64>]>,
         options: Option<&CopyOptions>, pre_read_stop: Option<i128>,
     ) -> Result<Option<Frame>> {
+        let index_bytes = reader
+            .estimated_index_payload_bytes()
+            .map_err(|e| e.to_string())?;
+        let base_bytes = index_bytes
+            .saturating_add(self.future.len().saturating_mul(std::mem::size_of::<i64>()))
+            .saturating_add(inferred.map_or(0, |v| {
+                v.len().saturating_mul(std::mem::size_of::<Option<u64>>())
+            }));
         loop {
             if options.and_then(|o|o.cancel.as_ref()).is_some_and(fvid_control::CancelFlag::is_cancelled) {
                 return Err("media operation cancelled".into());
@@ -83,12 +99,16 @@ impl Presentation {
             }
             self.consumed = self.consumed.checked_add(1).ok_or("FFV1 input packet count overflow")?;
             if let Some(options) = options {
-                if reader
+                let packet_size = reader
                     .packet_payload_size(index)
-                    .map_err(|e| e.to_string())?
-                    > options.max_packet_bytes
-                {
+                    .map_err(|e| e.to_string())?;
+                if packet_size > options.max_packet_bytes {
                     return Err("WebM packet exceeds budget or has empty lace frame".into());
+                }
+                if let Some(limit) = options.max_controlled_bytes.filter(|&limit| limit > 0)
+                    && base_bytes.saturating_add(packet_size) > limit
+                {
+                    return Err("video packet exceeds controlled memory budget".into());
                 }
             }
             let packet = reader.read_packet(index).map_err(|e|e.to_string())?;
@@ -122,7 +142,7 @@ impl Presentation {
                     acc.saturating_add(f.decoded.frame.data.len())
                         .saturating_add(f.decoded.alpha.as_ref().map_or(0, Vec::len))
                 });
-                if queued_bytes > limit {
+                if base_bytes.saturating_add(queued_bytes) > limit {
                     return Err("video frame exceeds controlled memory budget".into());
                 }
             }

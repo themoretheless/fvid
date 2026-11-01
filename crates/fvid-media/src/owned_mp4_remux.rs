@@ -198,15 +198,37 @@ fn validate_selected_prefix_packet_budget<R: std::io::Read + std::io::Seek>(
                     .estimated_index_payload_bytes()
                     .map_err(|e| e.to_string())?,
             );
-        let plan_bytes = plans.iter().try_fold(base_bytes, |sum, p| {
-            // Edits can shorten the initialized plan without releasing its
-            // reserved timing storage. Admit the allocation that remains live.
-            p.packets
-                .capacity()
-                .checked_mul(std::mem::size_of::<crate::owned_mp4_matroska::PacketTime>())
-                .and_then(|n| sum.checked_add(n))
-                .ok_or("MP4 packet plan memory overflow")
-        })?;
+        let plan_bytes = plans
+            .iter()
+            .zip(selected.iter())
+            .try_fold(base_bytes, |sum, (p, &index)| {
+                // Edits can shorten the initialized plan without releasing its
+                // reserved timing storage. Admit the allocation that remains live,
+                // plus video presentation/duration scratch vectors and queue entry.
+                let track = &reader.tracks()[index];
+                let scratch_bytes = if track.handler == *b"vide" {
+                    track
+                        .samples
+                        .len()
+                        .checked_mul(
+                            std::mem::size_of::<(i64, usize)>() + std::mem::size_of::<i128>(),
+                        )
+                        .ok_or("MP4 packet plan memory overflow")?
+                } else {
+                    0
+                };
+                p.packets
+                    .capacity()
+                    .checked_mul(std::mem::size_of::<crate::owned_mp4_matroska::PacketTime>())
+                    .and_then(|n| n.checked_add(scratch_bytes))
+                    .and_then(|n| {
+                        n.checked_add(std::mem::size_of::<
+                            std::cmp::Reverse<(i128, usize, usize, usize)>,
+                        >())
+                    })
+                    .and_then(|n| sum.checked_add(n))
+                    .ok_or("MP4 packet plan memory overflow")
+            })?;
         if plan_bytes > mem_limit {
             return Err("controlled memory budget exceeded".into());
         }

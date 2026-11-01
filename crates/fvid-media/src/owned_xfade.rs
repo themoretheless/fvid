@@ -92,13 +92,15 @@ pub fn plan_xfade(
     }
     crate::owned_budget::check_rss_budget(options)?;
     crate::owned_lossless::metadata(options)?;
+    let meta_working_bytes = crate::owned_lossless::options_matroska_metadata_working_bytes(options)?;
     let frame_len = header.frame_len()?;
     if frame_len > options.max_packet_bytes {
         return Err("Y4M frame byte length exceeds packet byte limit".into());
     }
+    let frame_working_bytes = frame_len.saturating_mul(3).saturating_add(meta_working_bytes);
     if options
         .max_controlled_bytes
-        .is_some_and(|limit| frame_len.saturating_mul(3) > limit)
+        .is_some_and(|limit| frame_working_bytes > limit)
     {
         return Err("cross-fade frame exceeds controlled memory budget".into());
     }
@@ -131,7 +133,7 @@ pub fn plan_xfade(
                 }
                 if options
                     .max_controlled_bytes
-                    .is_some_and(|limit| packet.len() > limit)
+                    .is_some_and(|limit| frame_working_bytes.saturating_add(packet.len()) > limit)
                 {
                     return Err(
                         "encoded cross-fade packet exceeds controlled memory budget".into(),
@@ -614,15 +616,19 @@ fn write_y4m_ffv1_counted<W: std::io::Write + std::io::Seek>(
         track_tags.retain(|name: &String, _| !name.eq_ignore_ascii_case(key));
         crate::owned_ffv1_export::edit_track_description(&mut description, key, "");
     }
+    let meta_working_bytes = crate::owned_lossless::estimate_matroska_metadata_working_bytes(
+        &file_metadata,
+        &text_tags,
+        &track_tags,
+        Some(&description),
+    );
+    let frame_working_bytes = frame_len.saturating_mul(3).saturating_add(meta_working_bytes);
     if let Some(limit) = options.max_controlled_bytes {
-        if crate::owned_lossless::estimate_matroska_metadata_working_bytes(
-            &file_metadata,
-            &text_tags,
-            &track_tags,
-            Some(&description),
-        ) > limit
-        {
+        if meta_working_bytes > limit {
             return Err("Matroska metadata working set exceeds controlled memory budget".into());
+        }
+        if frame_working_bytes > limit {
+            return Err("cross-fade frame exceeds controlled memory budget".into());
         }
     }
     let mut writer = PacketWriter::new_ffv1_with_track_description(
@@ -664,7 +670,7 @@ fn write_y4m_ffv1_counted<W: std::io::Write + std::io::Seek>(
             }
             if options
                 .max_controlled_bytes
-                .is_some_and(|limit| packet.len() > limit)
+                .is_some_and(|limit| frame_working_bytes.saturating_add(packet.len()) > limit)
             {
                 return Err("encoded cross-fade packet exceeds controlled memory budget".into());
             }

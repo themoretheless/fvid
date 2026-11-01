@@ -288,6 +288,19 @@ pub(crate) fn apply(
                 .map_err(|_| "G.711 PCM prefix overflow")
         })
         .transpose()?;
+    let end = until.map_or(input.shape.sample_frames, |n| {
+        n.min(input.shape.sample_frames)
+    });
+    crate::owned_adts_export::check_spool_wave_export_budget(
+        rate,
+        channels,
+        32,
+        end.max(1024),
+        info.len(),
+        false,
+        transform,
+        options,
+    )?;
     let spool = crate::owned_adts_export::spool_decoded(
         rate,
         channels,

@@ -119,6 +119,19 @@ fn try_probe_webm_with_limits(
         if index_bytes > limit {
             return Err("controlled memory budget exceeded: Matroska index payload limit".into());
         }
+        for i in 0..reader.packets.len() {
+            let overhead = reader.packet_read_overhead(i).map_err(|e| e.to_string())?;
+            if overhead == 0 {
+                continue;
+            }
+            let pkt_bytes = reader
+                .packet_payload_size(i)
+                .map_err(|e| e.to_string())?
+                .saturating_add(overhead);
+            if index_bytes.saturating_add(pkt_bytes) > limit {
+                return Err("controlled memory budget exceeded: Matroska index payload limit".into());
+            }
+        }
     }
     let checked = |n: u64| {
         i64::try_from(n).map_err(|_| "Matroska metadata timestamp exceeds API range".to_string())

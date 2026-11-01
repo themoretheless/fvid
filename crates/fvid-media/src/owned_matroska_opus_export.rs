@@ -95,6 +95,16 @@ pub(crate) fn apply(
         prefix(transform, rate),
         options,
     )?;
+    crate::owned_adts_export::check_spool_wave_export_budget(
+        rate,
+        channels,
+        32,
+        1024,
+        info.len(),
+        false,
+        transform,
+        options,
+    )?;
     let spool = crate::owned_adts_export::spool_decoded(
         rate,
         channels,

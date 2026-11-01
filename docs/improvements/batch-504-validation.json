@@ -1,0 +1,16 @@
+{
+  "batch": 504,
+  "ids": [
+    "FVID-0503"
+  ],
+  "snapshot": "docs/improvements/snapshots/batch-504-pre-edit",
+  "before_evidence": "docs/improvements/evidence/batch-504-acceptance-before.txt",
+  "after_evidence": "docs/improvements/evidence/batch-504-acceptance-after.txt",
+  "related_evidence": "docs/improvements/evidence/batch-504-related-after.txt",
+  "commands": [
+    "cargo test --locked --offline --test mp4_audio_metadata_admission multitrack_lossless_plans_and_exports_charge_stage_video_index_and_encoded_packet_working_sets",
+    "cargo test --locked --offline --test mp4_audio_metadata_admission"
+  ],
+  "passed": 73,
+  "failed": 0
+}

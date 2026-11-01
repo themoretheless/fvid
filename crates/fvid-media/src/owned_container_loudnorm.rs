@@ -76,7 +76,20 @@ pub fn apply(
     let decode_options = crate::owned_adts_export::pcm_decode_options(options);
     // Read-only configuration/policy preflight; actual packet failures propagate
     // once execution starts, without retry through the legacy backend.
-    crate::owned_container_loudness::plan_loudness(source, &decode_options)?;
+    let (rate, channels, _, codec) =
+        crate::owned_container_loudness::geometry(source, &decode_options)?;
+    if dual_pass || crate::owned_loudnorm::report_requested(Some(&resolved))? {
+        crate::owned_container_loudness::plan_loudness(source, &decode_options)?;
+    }
+    let precise = codec.starts_with("A_PCM/") || codec.starts_with("pcm_");
+    crate::owned_loudnorm::check_spool_loudnorm_budget(
+        &resolved,
+        dual_pass,
+        rate,
+        channels,
+        precise,
+        options,
+    )?;
     let spool = crate::owned_container_loudness::decode_to_wave(source, &decode_options)?;
     let mut pcm_options = options.clone();
     pcm_options.streams = vec![0];
@@ -122,9 +135,27 @@ pub fn plan_loudnorm(
     }
     let resolved = crate::owned_loudnorm::validate_request(args)?;
     crate::owned_adts_export::check_wave_metadata_budget(options)?;
-    let _ = crate::owned_audio_plan::plan_decode_audio(source, &Default::default(), options)?;
     let decode_options = crate::owned_adts_export::pcm_decode_options(options);
-    let mut plan = crate::owned_container_loudness::plan_loudness(source, &decode_options)?;
+    crate::owned_container_loudness::geometry(source, &decode_options)?;
+    let mut plan = if dual_pass || crate::owned_loudnorm::report_requested(Some(&resolved))? {
+        let _ = crate::owned_audio_plan::plan_decode_audio(source, &Default::default(), options)?;
+        crate::owned_container_loudness::plan_loudness(source, &decode_options)?
+    } else {
+        let mut p = crate::owned_audio_plan::plan_decode_audio(source, &Default::default(), options)?;
+        p.steps.retain(|s| s.action != "write");
+        p.notes.push("private decoded WAVE is removed on success or failure; completion is emitted once after analysis".into());
+        p
+    };
+    let (rate, channels) = crate::owned_audio_plan::source_geometry(source, &decode_options)?;
+    let precise = plan.streams[0].codec.starts_with("A_PCM/") || plan.streams[0].codec.starts_with("pcm_");
+    crate::owned_loudnorm::check_spool_loudnorm_budget(
+        &resolved,
+        dual_pass,
+        rate,
+        channels,
+        precise,
+        options,
+    )?;
     plan.command = "loudnorm".into();
     plan.notes
         .retain(|note| !note.contains("measurement completion"));

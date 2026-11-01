@@ -46,6 +46,9 @@ impl WaveInfo {
     pub fn frame_bytes(&self) -> u16 {
         self.block
     }
+    pub fn data_bytes(&self) -> u32 {
+        self.data_bytes
+    }
     /// Exact half-open sample range, clipped at EOF. Shared by plans and writes.
     pub fn interval(&self, from: i64, to: i64) -> Result<std::ops::Range<u64>> {
         if from < 0 || to <= from {

@@ -1462,6 +1462,38 @@ pub fn loudness_with_options(
         if capacity == 0 {
             return Err("packet byte limit is smaller than one PCM sample frame".into());
         }
+        if let Some(max) = options.max_controlled_bytes {
+            let size = (u128::from(info.data_bytes())).min(
+                options
+                    .max_packets
+                    .map(|n| u128::from(n) * capacity as u128)
+                    .unwrap_or(u128::from(info.data_bytes())),
+            ) as usize;
+            let frames = size / frame;
+            let rate_sz = info.sample_rate as usize;
+            let hop = (rate_sz / 10).max(1);
+            let integrated_blocks = if frames < rate_sz * 2 / 5 {
+                0
+            } else {
+                1 + (frames - rate_sz * 2 / 5) / hop
+            };
+            let short_blocks = if frames < rate_sz * 3 {
+                0
+            } else {
+                1 + (frames - rate_sz * 3) / hop
+            };
+            let estimated = (rate_sz * 3 + rate_sz * 2 / 5) as u128 * 8
+                + capacity as u128
+                + (capacity / frame) as u128 * u128::from(info.channels) * 8
+                + u128::from(info.channels) * 512
+                + (integrated_blocks + short_blocks) as u128 * 512
+                + 16384;
+            if estimated > max as u128 {
+                return Err(format!(
+                    "controlled memory budget exceeded: need {estimated} bytes"
+                ));
+            }
+        }
         (info.sample_rate,info.channels)
     } else if options.max_controlled_bytes.is_none()
         && let Ok(info) = crate::native_media::constant_audio_source_info_selected_with_options(source, selected, options)
@@ -1471,7 +1503,23 @@ pub fn loudness_with_options(
         }
         (info.sample_rate, info.channels)
     } else {
-        fvid_media::owned_audio_plan::source_geometry(source, options)?
+        let (rate, channels) = fvid_media::owned_audio_plan::source_geometry(source, options)?;
+        if let Some(max) = options.max_controlled_bytes {
+            let frame = usize::from(channels.max(1)) * 4;
+            let capacity = 65536 / frame * frame;
+            let rate_sz = rate as usize;
+            let estimated = (rate_sz * 3 + rate_sz * 2 / 5) as u128 * 8
+                + capacity as u128
+                + (capacity / frame) as u128 * u128::from(channels) * 8
+                + u128::from(channels) * 512
+                + 16384;
+            if estimated > max as u128 {
+                return Err(format!(
+                    "controlled memory budget exceeded: need {estimated} bytes"
+                ));
+            }
+        }
+        (rate, channels)
     };
     if weights.len()!=usize::from(channels) {return Err("channel weights must match selected audio stream".into());}
     crate::native_pcm::LoudnessMeter::new(rate,weights)?;
@@ -1548,7 +1596,7 @@ pub fn normalize_loudness_with_options(
     loudness_options.stream_metadata_set.clear();
     loudness_options.stream_metadata_delete.clear();
     let mut plan=loudness_with_options(source,&loudness_options,weights)?;
-    if has_meta && options.max_controlled_bytes.is_some() {
+    if options.max_controlled_bytes.is_some() {
         let (_, channels) =
             fvid_media::owned_audio_plan::source_geometry(source, &loudness_options)?;
         crate::native_export::pcm_matroska::check_output_memory_budget(

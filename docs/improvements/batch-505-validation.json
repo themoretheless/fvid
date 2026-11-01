@@ -1,0 +1,16 @@
+{
+  "batch": 505,
+  "ids": [
+    "FVID-0504"
+  ],
+  "snapshot": "docs/improvements/snapshots/batch-505-pre-edit",
+  "before_evidence": "docs/improvements/evidence/batch-505-acceptance-before.txt",
+  "after_evidence": "docs/improvements/evidence/batch-505-acceptance-after.txt",
+  "related_evidence": "docs/improvements/evidence/batch-505-related-after.txt",
+  "commands": [
+    "cargo test --locked --offline --test mp4_audio_metadata_admission native_y4m_export_trim_and_concat_charge_simultaneous_index_packet_and_frame_working_sets",
+    "cargo test --locked --offline --test mp4_audio_metadata_admission"
+  ],
+  "passed": 74,
+  "failed": 0
+}

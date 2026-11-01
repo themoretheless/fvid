@@ -139,9 +139,9 @@ fn geometry_unqualified(source: &Path, options: &CopyOptions) -> Result<(u32, u1
         };
     Ok((rate, channels, mask, codec))
 }
-fn geometry(source: &Path, options: &CopyOptions) -> Result<(u32, u16, u32, String)> {
+pub(crate) fn geometry(source: &Path, options: &CopyOptions) -> Result<(u32, u16, u32, String)> {
     let (rate, channels, mask, codec) = geometry_unqualified(source, options)?;
-    if mask == 0 || mask & !0x7ff != 0 {
+    if mask == 0 || mask & !0x7ff != 0 || mask.count_ones() != u32::from(channels) {
         return Err("owned loudness speaker positions are not yet qualified".into());
     }
     if !crate::owned_wave_loudness::qualified_rate(rate) {
@@ -275,7 +275,29 @@ fn decode_to_wave_from_geometry(
     crate::owned_ogg_opus_export::append_info(&spool.wave, &info)?;
     Ok(spool)
 }
+fn check_meter_budget(rate: u32, channels: u16, codec: &str, options: &CopyOptions) -> Result<()> {
+    if let Some(limit) = options.max_controlled_bytes {
+        let precise = codec.starts_with("A_PCM/") || codec.starts_with("pcm_");
+        let ch = u128::from(channels.max(1));
+        let rate_u128 = u128::from(rate);
+        let frame = ch * if precise { 8 } else { 4 };
+        let capacity = 4096 * frame;
+        let estimated = (rate_u128 * 3 + rate_u128 * 2 / 5) * 8
+            + capacity
+            + 4096 * ch * 8
+            + ch * 512
+            + 16384;
+        if estimated > limit as u128 {
+            return Err(format!(
+                "controlled memory budget exceeded: need {estimated} bytes"
+            ));
+        }
+    }
+    Ok(())
+}
 pub fn measure_loudness(source: &Path, options: &CopyOptions) -> Result<LoudnessStats> {
+    let (rate, channels, _, codec) = geometry(source, options)?;
+    check_meter_budget(rate, channels, &codec, options)?;
     let spool = decode_to_wave(source, options)?;
     let mut pcm_options = options.clone();
     pcm_options.streams = vec![0];
@@ -306,7 +328,8 @@ pub fn measure_loudness(source: &Path, options: &CopyOptions) -> Result<Loudness
     Ok(stats)
 }
 pub fn plan_loudness(source: &Path, options: &CopyOptions) -> Result<MediaPlan> {
-    geometry(source, options)?;
+    let (rate, channels, _, codec) = geometry(source, options)?;
+    check_meter_budget(rate, channels, &codec, options)?;
     let mut plan =
         crate::owned_audio_plan::plan_decode_audio(source, &Default::default(), options)?;
     plan.command = "loudness".into();

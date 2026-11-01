@@ -65,7 +65,7 @@ pub(crate) fn weights(info: &crate::owned_wave_inspect::WaveInfo) -> Result<Vec<
     } else {
         info.channel_mask
     };
-    if mask & !0x7ff != 0 {
+    if mask & !0x7ff != 0 || mask.count_ones() != u32::from(info.channels) {
         return Err("owned loudness speaker positions are not yet qualified".into());
     }
     Ok((0..11)

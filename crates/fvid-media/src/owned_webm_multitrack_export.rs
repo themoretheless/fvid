@@ -21,6 +21,7 @@ struct Input {
     trimmed_audio_sample_frames: u64,
     pcm_windows: Vec<usize>,
     video_origin: i64,
+    index_and_meta_bytes: usize,
 }
 fn open(path: &Path, options: &CopyOptions) -> Result<Reader> {
     let mut limits = webm::Limits::default();
@@ -81,10 +82,7 @@ fn check_multitrack_matroska_metadata_budget(
     selected: &[usize],
     interval: Option<(i64, i64)>,
     options: &CopyOptions,
-) -> Result<()> {
-    let Some(limit) = options.max_controlled_bytes.filter(|&limit| limit > 0) else {
-        return Ok(());
-    };
+) -> Result<usize> {
     let vtrack = &reader.tracks[video];
     let mut description = mkv::VideoTrackDescription {
         name: vtrack.name.clone(),
@@ -190,16 +188,20 @@ fn check_multitrack_matroska_metadata_budget(
         file.tags.set(key, "");
         text_tags.retain(|name, _| !name.eq_ignore_ascii_case(key));
     }
-    if crate::owned_lossless::estimate_matroska_metadata_working_bytes(
+    let meta_working_bytes = crate::owned_lossless::estimate_matroska_metadata_working_bytes(
         &file,
         &text_tags,
         &combined_track_tags,
         Some(&description),
-    ) > limit
+    );
+    if options
+        .max_controlled_bytes
+        .filter(|&limit| limit > 0)
+        .is_some_and(|limit| meta_working_bytes > limit)
     {
         return Err("Matroska metadata working set exceeds controlled memory budget".into());
     }
-    Ok(())
+    Ok(meta_working_bytes)
 }
 fn qualify(path: &Path, t: &LosslessTransform, o: &CopyOptions) -> Result<Option<Input>> {
     check(o)?;
@@ -344,14 +346,29 @@ fn qualify(path: &Path, t: &LosslessTransform, o: &CopyOptions) -> Result<Option
         .stream_metadata_delete
         .retain(|(i, _)| selected.contains(i));
     crate::owned_lossless::check_options_matroska_metadata_budget(&selected_options)?;
-    check_multitrack_matroska_metadata_budget(&reader, video, &selected, t.interval, o)?;
-    if let Some(limit) = o.max_controlled_bytes.filter(|&limit| limit > 0)
-        && reader
-            .estimated_index_payload_bytes()
-            .map_err(|e| e.to_string())?
-            > limit
-    {
-        return Err("controlled memory budget exceeded: Matroska index and metadata".into());
+    let meta_working_bytes =
+        check_multitrack_matroska_metadata_budget(&reader, video, &selected, t.interval, o)?;
+    let index_bytes = reader
+        .estimated_index_payload_bytes()
+        .map_err(|e| e.to_string())?;
+    let index_and_meta_bytes = index_bytes.saturating_add(meta_working_bytes);
+    if let Some(limit) = o.max_controlled_bytes.filter(|&limit| limit > 0) {
+        if index_and_meta_bytes > limit {
+            return Err("controlled memory budget exceeded: Matroska index and metadata".into());
+        }
+        for &i in &selected {
+            let track_number = reader.tracks[i].number;
+            for (index, p) in reader.packets.iter().enumerate() {
+                if p.track == track_number {
+                    let packet_size = reader
+                        .packet_payload_size(index)
+                        .map_err(|e| e.to_string())?;
+                    if index_and_meta_bytes.saturating_add(packet_size) > limit {
+                        return Err("WebM packet exceeds controlled memory budget".into());
+                    }
+                }
+            }
+        }
     }
     let mut trimmed_audio_sample_frames = 0u64;
     let mut pcm_windows=Vec::new();
@@ -375,6 +392,7 @@ fn qualify(path: &Path, t: &LosslessTransform, o: &CopyOptions) -> Result<Option
         trimmed_audio_sample_frames,
         pcm_windows,
         video_origin,
+        index_and_meta_bytes,
     }))
 }
 pub(crate) fn plan_selection(
@@ -395,13 +413,17 @@ pub(crate) fn plan_selection(
     let enforce_encoded_budget =
         o.max_packet_bytes != CopyOptions::default().max_packet_bytes
             || o.max_controlled_bytes.is_some();
+    let mut max_encoded_video_packet_bytes = 0usize;
     let mut check_encoded =
         |view: crate::owned_video_decode::FrameView<'_>| -> Result<()> {
-            crate::owned_lossless::check_encoded_ffv1_with_controlled(
+            let encoded_len = crate::owned_lossless::encode_ffv1_len_with_controlled(
                 view,
                 o.max_packet_bytes,
                 o.max_controlled_bytes,
-            )
+                input.index_and_meta_bytes,
+            )?;
+            max_encoded_video_packet_bytes = max_encoded_video_packet_bytes.max(encoded_len);
+            Ok(())
         };
     let Some((stats, _)) = crate::owned_video_decode::decode_webm(
         source,
@@ -419,6 +441,74 @@ pub(crate) fn plan_selection(
         return Err("Matroska has no selected frames".into());
     }
     if let Some(limit) = o.max_controlled_bytes {
+        let mut max_packet_bytes = max_encoded_video_packet_bytes;
+        for &i in &input.selected {
+            if i == input.video {
+                continue;
+            }
+            let track_number = input.reader.tracks[i].number;
+            for (index, p) in input.reader.packets.iter().enumerate() {
+                if p.track == track_number {
+                    max_packet_bytes = max_packet_bytes.max(
+                        input
+                            .reader
+                            .packet_payload_size(index)
+                            .map_err(|e| e.to_string())?,
+                    );
+                }
+            }
+        }
+        let memory_packets = (limit / std::mem::size_of::<webm::Packet>())
+            .min(webm::Limits::default().packets);
+        if (stats.video_frames as usize) > memory_packets {
+            return Err("controlled memory budget exceeded: Matroska packet index limit".into());
+        }
+        let mut video_packets_cap = 0usize;
+        while video_packets_cap < stats.video_frames as usize {
+            video_packets_cap = video_packets_cap
+                .saturating_mul(2)
+                .max(4)
+                .min(memory_packets);
+        }
+        let mut video_tag_overhead = 0usize;
+        for (key, value) in &o.metadata_set {
+            if !crate::owned_file_tags::FileTags::supports_key(key) && !value.is_empty() {
+                video_tag_overhead = video_tag_overhead
+                    .saturating_add(4096)
+                    .saturating_add(key.len())
+                    .saturating_add(value.len());
+            } else if !value.is_empty() {
+                video_tag_overhead = video_tag_overhead.saturating_add(value.len());
+            }
+        }
+        let mut has_video_scoped_tag = false;
+        for (index, key, value) in &o.stream_metadata_set {
+            if *index == input.video
+                && !key.eq_ignore_ascii_case("title")
+                && !key.eq_ignore_ascii_case("language")
+                && !key.eq_ignore_ascii_case("default")
+                && !key.eq_ignore_ascii_case("forced")
+                && !key.eq_ignore_ascii_case("hearing_impaired")
+                && !key.eq_ignore_ascii_case("visual_impaired")
+                && !key.eq_ignore_ascii_case("original")
+                && !key.eq_ignore_ascii_case("comment")
+                && !value.is_empty()
+            {
+                has_video_scoped_tag = true;
+                video_tag_overhead = video_tag_overhead
+                    .saturating_add(4096)
+                    .saturating_add(key.len())
+                    .saturating_add(value.len());
+            }
+        }
+        if has_video_scoped_tag {
+            video_tag_overhead = video_tag_overhead.saturating_add(4096);
+        }
+        let video_index_bytes = (3usize * 4096)
+            .saturating_add(4 * std::mem::size_of::<webm::Track>())
+            .saturating_add(video_packets_cap.saturating_mul(std::mem::size_of::<webm::Packet>()))
+            .saturating_add(16)
+            .saturating_add(video_tag_overhead);
         let schedule_len = input
             .reader
             .packets
@@ -428,7 +518,13 @@ pub(crate) fn plan_selection(
         let schedule_bytes = schedule_len
             .checked_mul(std::mem::size_of::<(i128, usize, usize)>())
             .ok_or("packet schedule overflow")?;
-        if schedule_bytes > limit {
+        if input
+            .index_and_meta_bytes
+            .saturating_add(video_index_bytes)
+            .saturating_add(schedule_bytes)
+            .saturating_add(max_packet_bytes)
+            > limit
+        {
             return Err("controlled memory budget exceeded: Matroska packet schedule limit".into());
         }
     }
@@ -492,8 +588,24 @@ pub(crate) fn try_export(
     for (i, _) in &mut stage.stream_metadata_delete {
         *i = 0;
     }
-    let (decoded, _, consumed) =
-        crate::owned_ffv1_export::export(source, &video_path, &request, &stage)?;
+    let stage_base_bytes = if o.max_controlled_bytes.is_some() {
+        crate::owned_lossless::check_source_matroska_metadata_budget(
+            source,
+            request.interval,
+            &stage,
+        )?
+    } else {
+        0
+    };
+    let extra_base_bytes = input.index_and_meta_bytes.saturating_sub(stage_base_bytes);
+    let (decoded, _, consumed) = crate::owned_ffv1_export::export_processed(
+        source,
+        &video_path,
+        &request,
+        &stage,
+        None,
+        extra_base_bytes,
+    )?;
     let mut video = open(&video_path, o)?;
     let mut vt = video.tracks[0].clone();
     if vt.language.is_empty() {
@@ -505,14 +617,32 @@ pub(crate) fn try_export(
             .unwrap_or_else(|| "eng".into());
     }
     let mut pcm_readers=BTreeMap::new();
+    let mut pcm_index_bytes = 0usize;
+    let video_index_bytes = if o.max_controlled_bytes.is_some() {
+        video
+            .estimated_index_payload_bytes()
+            .map_err(|e| e.to_string())?
+    } else {
+        0
+    };
     if let Some(window)=t.interval {
         for &index in &input.pcm_windows {
             let track=input.reader.tracks[index].clone();
             let first=input.reader.packets.iter().find(|p|p.track==track.number).ok_or("audio track has no packets")?.pts_ns;
-            let prepared=pcm_window::prepare(source,index,&track,first,input.video_origin,window,o,&mut private)?;
+            let base_working_bytes = input
+                .index_and_meta_bytes
+                .saturating_add(video_index_bytes)
+                .saturating_add(pcm_index_bytes);
+            let prepared=pcm_window::prepare(source,index,&track,first,input.video_origin,window,o,base_working_bytes,&mut private)?;
             let total=pcm_window::presentation_samples(&mut input.reader,index,prepared.rate,o)?;
             input.trimmed_audio_sample_frames=input.trimmed_audio_sample_frames.checked_add(total.saturating_sub(prepared.sample_frames)).ok_or("trimmed sample count overflow")?;
             let pcm=open(&prepared.path,o)?;
+            if o.max_controlled_bytes.is_some() {
+                pcm_index_bytes = pcm_index_bytes.saturating_add(
+                    pcm.estimated_index_payload_bytes()
+                        .map_err(|e| e.to_string())?,
+                );
+            }
             let mut replacement=pcm.tracks[0].clone();replacement.number=track.number;
             input.reader.tracks[index]=replacement;
             pcm_readers.insert(index,pcm);
@@ -649,7 +779,13 @@ pub(crate) fn try_export(
         let schedule_bytes = schedule_len
             .checked_mul(std::mem::size_of::<(i128, usize, usize)>())
             .ok_or("packet schedule overflow")?;
-        if schedule_bytes > limit {
+        if input
+            .index_and_meta_bytes
+            .saturating_add(video_index_bytes)
+            .saturating_add(pcm_index_bytes)
+            .saturating_add(schedule_bytes)
+            > limit
+        {
             return Err("controlled memory budget exceeded: Matroska packet schedule limit".into());
         }
     }
@@ -735,6 +871,20 @@ pub(crate) fn try_export(
             };
             let packet = reader.packets[index].clone();
             let bytes = reader.read_packet(index).map_err(|e| e.to_string())?;
+            if let Some(limit) = o.max_controlled_bytes.filter(|&limit| limit > 0) {
+                let schedule_bytes =
+                    schedule.len().saturating_mul(std::mem::size_of::<(i128, usize, usize)>());
+                if input
+                    .index_and_meta_bytes
+                    .saturating_add(video_index_bytes)
+                    .saturating_add(pcm_index_bytes)
+                    .saturating_add(schedule_bytes)
+                    .saturating_add(bytes.len())
+                    > limit
+                {
+                    return Err("controlled memory budget exceeded: Matroska packet schedule limit".into());
+                }
+            }
             writer
                 .write_packet_with_options(
                     mapped,

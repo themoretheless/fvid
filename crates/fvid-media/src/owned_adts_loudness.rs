@@ -27,13 +27,16 @@ pub(crate) fn validate_header_configuration(source: &Path, options: &CopyOptions
     if !policies(options) {
         return Err("owned ADTS loudness requires stream 0 and no metadata edits".into());
     }
-    let reader = crate::owned_aac::adts::StreamReader::open_with_packet_limit(
-        BufReader::new(File::open(source).map_err(|e| e.to_string())?),
-        options
-            .max_packet_bytes
-            .min(options.max_controlled_bytes.unwrap_or(usize::MAX)),
-    )
-    .map_err(|e| e.to_string())?;
+    let reader = crate::owned_aac::adts::map_controlled_adts_packet_error(
+        crate::owned_aac::adts::StreamReader::open_with_packet_limit(
+            BufReader::new(File::open(source).map_err(|e| e.to_string())?),
+            options
+                .max_packet_bytes
+                .min(options.max_controlled_bytes.unwrap_or(usize::MAX)),
+        )
+        .map_err(|e| e.to_string()),
+        options,
+    )?;
     let config = reader.configuration();
     crate::owned_aac::stream::check_adts_decode_admission(reader.audio_specific_config(), options)
         .map_err(|e| e.to_string())?;
@@ -58,18 +61,26 @@ fn validate_packet_budget(source: &Path, options: &CopyOptions) -> Result<()> {
     if packet_limit >= CopyOptions::default().max_packet_bytes {
         return Ok(());
     }
-    let mut reader = crate::owned_aac::adts::StreamReader::open_with_packet_limit(
-        BufReader::new(File::open(source).map_err(|e| e.to_string())?),
-        packet_limit,
-    )
-    .map_err(|e| e.to_string())?;
+    let mut reader = crate::owned_aac::adts::map_controlled_adts_packet_error(
+        crate::owned_aac::adts::StreamReader::open_with_packet_limit(
+            BufReader::new(File::open(source).map_err(|e| e.to_string())?),
+            packet_limit,
+        )
+        .map_err(|e| e.to_string()),
+        options,
+    )?;
     let mut packets = 0u64;
     while !options.max_packets.is_some_and(|limit| packets >= limit) {
         if options.cancel.as_ref().is_some_and(|c| c.is_cancelled()) {
             return Err("media operation cancelled".into());
         }
         crate::owned_budget::check_rss_budget(options)?;
-        if reader.next_packet().map_err(|e| e.to_string())?.is_none() {
+        if crate::owned_aac::adts::map_controlled_adts_packet_error(
+            reader.next_packet().map_err(|e| e.to_string()),
+            options,
+        )?
+        .is_none()
+        {
             break;
         }
         packets += 1;
@@ -110,8 +121,35 @@ pub(crate) fn supports(source: &Path, options: &CopyOptions) -> bool {
         Err(error) => error.starts_with("controlled memory budget exceeded:"),
     }
 }
+fn check_meter_budget(source: &Path, rate: u32, options: &CopyOptions) -> Result<()> {
+    if let Some(limit) = options.max_controlled_bytes {
+        let reader = crate::owned_aac::adts::StreamReader::open_with_packet_limit(
+            BufReader::new(File::open(source).map_err(|e| e.to_string())?),
+            options.max_packet_bytes.min(limit),
+        )
+        .map_err(|e| e.to_string())?;
+        let decoder = crate::owned_aac::NativeAacDecoder::new(reader.audio_specific_config())
+            .map_err(|e| e.to_string())?;
+        let channels = u128::from(decoder.channels().max(1));
+        let rate_u128 = u128::from(rate);
+        let frame = channels * 4;
+        let capacity = 4096 * frame;
+        let estimated = (rate_u128 * 3 + rate_u128 * 2 / 5) * 8
+            + capacity
+            + 4096 * channels * 8
+            + channels * 512
+            + 16384;
+        if estimated > limit as u128 {
+            return Err(format!(
+                "controlled memory budget exceeded: need {estimated} bytes"
+            ));
+        }
+    }
+    Ok(())
+}
 pub fn measure_loudness(source: &Path, options: &CopyOptions) -> Result<LoudnessStats> {
-    validate_header_configuration(source, options)?;
+    let header_rate = validate_header_configuration(source, options)?;
+    check_meter_budget(source, header_rate, options)?;
     let spool = crate::owned_adts_export::decode_to_wave(source, None, options)?;
     if !crate::owned_wave_loudness::qualified_rate(spool.stats.sample_rate) {
         return Err(
@@ -136,7 +174,10 @@ pub fn measure_loudness(source: &Path, options: &CopyOptions) -> Result<Loudness
     }
     Ok(stats)
 }
-pub fn plan_loudness(source: &Path, options: &CopyOptions) -> Result<MediaPlan> {
+pub(crate) fn plan_loudness_without_meter_budget(
+    source: &Path,
+    options: &CopyOptions,
+) -> Result<MediaPlan> {
     validate_configuration(source, options)?;
     let mut notes = vec![
         "backend: owned fvid-media; no external demuxer, codec, resampler or muxer".into(),
@@ -186,6 +227,12 @@ pub fn plan_loudness(source: &Path, options: &CopyOptions) -> Result<MediaPlan> 
         graph: None,
         notes,
     })
+}
+
+pub fn plan_loudness(source: &Path, options: &CopyOptions) -> Result<MediaPlan> {
+    let rate = validate_configuration(source, options)?;
+    check_meter_budget(source, rate, options)?;
+    plan_loudness_without_meter_budget(source, options)
 }
 
 #[cfg(test)]

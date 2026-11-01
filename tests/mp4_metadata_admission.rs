@@ -507,15 +507,16 @@ fn matroska_packet_index_budget_is_enforced_in_remux_subtitle_convert_and_audio_
         );
     }
     assert!(!out_mkv.exists());
-    // When max_controlled_bytes is 70 KiB (enough for the 64 KiB + 96 B copy index of 6 packets,
-    // and 70 KiB / 56 = 1280 packets), plan_remux must NOT clamp packet_bytes to 70 KiB if a
-    // legitimate video packet is 100 KiB (< max_packet_bytes), nor fail on valid 6-frame FFV1.
-    let tight_seventy_kib = CopyOptions {
-        max_controlled_bytes: Some(70 << 10),
+    // When max_controlled_bytes is 96 KiB (enough for the 64 KiB + 96 B copy index + 20 KiB
+    // estimated_index_payload_bytes of 6 packets, and 96 KiB / 56 = 1755 packets), plan_remux
+    // must NOT clamp packet_bytes to 96 KiB if a legitimate video packet is 100 KiB (< max_packet_bytes),
+    // nor fail on valid 6-frame FFV1.
+    let tight_ninety_six_kib = CopyOptions {
+        max_controlled_bytes: Some(96 << 10),
         ..Default::default()
     };
-    fvid_media::plan_remux(&mkv, &tight_seventy_kib).unwrap();
-    fvid::native_plan::remux_with_options(&mkv, &tight_seventy_kib)
+    fvid_media::plan_remux(&mkv, &tight_ninety_six_kib).unwrap();
+    fvid::native_plan::remux_with_options(&mkv, &tight_ninety_six_kib)
         .unwrap()
         .unwrap();
     // And in concat_mp4_matroska_with_options, when sample-domain audio concat is planned

@@ -213,7 +213,9 @@ fn loudness_loudnorm_mix_merge_concat_and_spatial_routing_respect_mp4_metadata_c
     assert!(!out_wav.exists());
     assert!(!out_mka.exists());
 
-    // 4. Positive controls: small input under 1 MiB and padded input under 8 MiB succeed
+    // 4. Positive controls: small input under 1 MiB (for loudness/linear/mix/merge/concat/decode)
+    // and padded input under 8 MiB succeed (dynamic loudnorm at 192 kHz needs ~5.9 MB, so it
+    // requires `ample` on both inputs).
     for (pair, single, opts) in [
         (&pair_small, &small, &tight),
         (&pair_padded, &padded, &ample),
@@ -222,7 +224,7 @@ fn loudness_loudnorm_mix_merge_concat_and_spatial_routing_respect_mp4_metadata_c
         fvid::media::measure_loudness(single, opts).unwrap();
         fvid_media::plan_loudness(single, opts).unwrap();
         fvid_media::measure_loudness(single, opts).unwrap();
-        fvid::media::plan_loudnorm(single, None, false, opts).unwrap();
+        fvid::media::plan_loudnorm(single, None, false, &ample).unwrap();
         let linear_args = Some("I=-24:TP=-2:LRA=7:measured_I=-24:measured_TP=-10:measured_LRA=2:measured_thresh=-34:linear=true");
         fvid::media::plan_loudnorm(single, linear_args, false, opts).unwrap();
         fvid::media::apply_loudnorm(single, &out_wav, linear_args, opts).unwrap();
@@ -5439,13 +5441,13 @@ fn pcm_matroska_all_canonical_file_tags_and_mp4_relocate_index_payload_budget_ar
 
     // 1. Canonical FileTags fields beyond the first 8 (`description`, `publisher`, `album_artist`, `disc`, `rating`)
     // must be charged in `pcm_matroska::check_output_memory_budget` and `pcm_matroska::Sink::new_with_source_metadata`.
-    // For stereo (`channels == 2`), `sink_block_bytes = 8192`, `stage_working_bytes = 65536` (in `native_audio_mix::plan_with_controls`),
-    // and without `description` (`tag_bytes = 67`), `mka_meta_bytes = 8 * (67 + 12) = 632`, so `needed = 65536 + 8192 + 632 + 16384 = 90744`.
+    // For stereo (`channels == 2`), `sink_block_bytes = 8192`, `stage_working_bytes = 65536 + 2 * 8192 = 81920` (in `native_audio_mix::plan_with_controls`),
+    // and without `description` (`tag_bytes = 67`), `mka_meta_bytes = 8 * (67 + 12) = 632`, so `needed = 81920 + 8192 + 632 + 16384 = 107128`.
     // With a 900-byte `description` tag, `tag_bytes` increases by `932` (`mka_meta_bytes` increases by `8 * 932 = 7456` to `8088`),
-    // so `needed = 98200`, which exceeds `max_controlled_bytes = Some(92_000)`.
+    // so `needed = 114584`, which exceeds `max_controlled_bytes = Some(108_384)`.
     let mix_opts = fvid::native_audio_mix::MixAudioOptions::default();
     let untagged_mix_opts = CopyOptions {
-        max_controlled_bytes: Some(92_000),
+        max_controlled_bytes: Some(108_384),
         ..Default::default()
     };
     let untagged_mix_plan = fvid::native_audio_mix::plan_with_controls(
@@ -5453,12 +5455,12 @@ fn pcm_matroska_all_canonical_file_tags_and_mp4_relocate_index_payload_budget_ar
         &mix_opts,
         &untagged_mix_opts,
     )
-    .expect("untagged mix plan to .mka should fit in 92_000 bytes");
+    .expect("untagged mix plan to .mka should fit in 108_384 bytes");
     assert_eq!(untagged_mix_plan.command, "mix-audio");
 
     for canonical_key in ["description", "publisher", "album_artist", "disc", "rating"] {
         let mut tagged_opts = CopyOptions {
-            max_controlled_bytes: Some(92_000),
+            max_controlled_bytes: Some(108_384),
             ..Default::default()
         };
         tagged_opts
@@ -5705,13 +5707,14 @@ fn adts_wave_metadata_budget_and_container_loudnorm_admission_preserve_metadata_
         max_controlled_bytes: Some(40_000),
         ..Default::default()
     };
+    let linear_args = Some("I=-24:TP=-2:LRA=7:measured_I=-24:measured_TP=-10:measured_LRA=2:measured_thresh=-34:linear=true");
     fvid_media::owned_container_loudnorm::plan_loudnorm(
         &small_m4a,
-        None,
+        linear_args,
         false,
         &untagged_mp4_opts,
     )
-    .expect("untagged owned_container_loudnorm::plan_loudnorm on small.m4a should fit in 40_000 bytes");
+    .expect("untagged linear owned_container_loudnorm::plan_loudnorm on small.m4a should fit in 40_000 bytes");
 
     let mut tagged_mp4_opts = untagged_mp4_opts.clone();
     tagged_mp4_opts
@@ -5719,7 +5722,7 @@ fn adts_wave_metadata_budget_and_container_loudnorm_admission_preserve_metadata_
         .push(("title".into(), "t".repeat(2000)));
     let mp4_ln_plan_err = fvid_media::owned_container_loudnorm::plan_loudnorm(
         &small_m4a,
-        None,
+        linear_args,
         false,
         &tagged_mp4_opts,
     )
@@ -5732,7 +5735,7 @@ fn adts_wave_metadata_budget_and_container_loudnorm_admission_preserve_metadata_
     let mp4_ln_exec_err = fvid_media::owned_container_loudnorm::apply(
         &small_m4a,
         &out_mp4_ln,
-        None,
+        linear_args,
         false,
         &tagged_mp4_opts,
     )
@@ -6004,4 +6007,4150 @@ fn mp4_and_adts_matroska_remux_and_concat_charge_simultaneous_plan_cue_and_packe
     );
     assert!(!concat_out.exists());
 }
+
+#[test]
+fn mp4_concat_mp4_write_and_native_plan_adts_remux_concat_charge_simultaneous_packet_working_sets() {
+    let dir = TempDir(std::env::temp_dir().join(format!(
+        "fvid-mp4-concat-and-adts-mp4-packet-coexistence-{}",
+        std::process::id()
+    )));
+    let _ = std::fs::remove_dir_all(&dir.0);
+    std::fs::create_dir_all(&dir.0).unwrap();
+
+    // 1. In `container::mp4_concat::open_with_options`, `plan_bytes` (2 * 8192 + 16384 +
+    // metadata + estimated_index_payload_bytes + PacketTime capacities) and the reusable
+    // `payload: Vec<u8>` buffer (`sample.size` bytes) plus 32 bytes per cue point are
+    // live simultaneously during `mp4_concat::write_with_options`.
+    let mp4_a = dir.0.join("seg-a.m4a");
+    let mp4_b = dir.0.join("seg-b.m4a");
+    {
+        fn mp4_box(fourcc: &[u8; 4], body: &[u8]) -> Vec<u8> {
+            let mut out = Vec::with_capacity(8 + body.len());
+            out.extend_from_slice(&((8 + body.len()) as u32).to_be_bytes());
+            out.extend_from_slice(fourcc);
+            out.extend_from_slice(body);
+            out
+        }
+        let aac_pkt = vec![0x21u8; 6_000];
+        let mdat_payload = aac_pkt.clone();
+        let stsd_esds = fvid_media::owned_aac::adts::esds_for(&[0x11, 0x90]).unwrap();
+        let mut mp4a = Vec::new();
+        mp4a.extend_from_slice(&[0u8; 6]);
+        mp4a.extend_from_slice(&1u16.to_be_bytes());
+        mp4a.extend_from_slice(&[0u8; 8]);
+        mp4a.extend_from_slice(&2u16.to_be_bytes());
+        mp4a.extend_from_slice(&16u16.to_be_bytes());
+        mp4a.extend_from_slice(&[0u8; 4]);
+        mp4a.extend_from_slice(&(48000u32 << 16).to_be_bytes());
+        mp4a.extend_from_slice(&mp4_box(b"esds", &stsd_esds));
+        let mut stsd_data = vec![0, 0, 0, 0, 0, 0, 0, 1];
+        stsd_data.extend_from_slice(&mp4_box(b"mp4a", &mp4a));
+        let stsd = mp4_box(b"stsd", &stsd_data);
+        let stts = mp4_box(
+            b"stts",
+            &[
+                0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 4, 0,
+            ],
+        );
+        let stsc = mp4_box(
+            b"stsc",
+            &[
+                0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1,
+            ],
+        );
+        let mut stsz_data = vec![0, 0, 0, 0];
+        stsz_data.extend_from_slice(&(aac_pkt.len() as u32).to_be_bytes());
+        stsz_data.extend_from_slice(&1u32.to_be_bytes());
+        let stsz = mp4_box(b"stsz", &stsz_data);
+        let build_moov = |chunk_offset: u32| {
+            let mut stco_bytes = vec![0, 0, 0, 0, 0, 0, 0, 1];
+            stco_bytes.extend_from_slice(&chunk_offset.to_be_bytes());
+            let stco = mp4_box(b"stco", &stco_bytes);
+            let mut stbl_body = Vec::new();
+            stbl_body.extend_from_slice(&stsd);
+            stbl_body.extend_from_slice(&stts);
+            stbl_body.extend_from_slice(&stsc);
+            stbl_body.extend_from_slice(&stsz);
+            stbl_body.extend_from_slice(&stco);
+            let stbl = mp4_box(b"stbl", &stbl_body);
+            let smhd = mp4_box(b"smhd", &[0; 8]);
+            let dref = mp4_box(
+                b"dref",
+                &[
+                    0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 12, b'u', b'r', b'l', b' ', 0, 0, 0, 1,
+                ],
+            );
+            let dinf = mp4_box(b"dinf", &dref);
+            let mut minf_body = Vec::new();
+            minf_body.extend_from_slice(&smhd);
+            minf_body.extend_from_slice(&dinf);
+            minf_body.extend_from_slice(&stbl);
+            let minf = mp4_box(b"minf", &minf_body);
+            let mut mdhd_data = vec![0; 4];
+            mdhd_data.extend_from_slice(&[0; 8]);
+            mdhd_data.extend_from_slice(&48000u32.to_be_bytes());
+            mdhd_data.extend_from_slice(&1024u32.to_be_bytes());
+            mdhd_data.extend_from_slice(&[0x55, 0xc4, 0, 0]);
+            let mdhd = mp4_box(b"mdhd", &mdhd_data);
+            let hdlr = mp4_box(
+                b"hdlr",
+                &[
+                    0, 0, 0, 0, 0, 0, 0, 0, b's', b'o', b'u', b'n', 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                    0, 0, 0,
+                ],
+            );
+            let mut mdia_body = Vec::new();
+            mdia_body.extend_from_slice(&mdhd);
+            mdia_body.extend_from_slice(&hdlr);
+            mdia_body.extend_from_slice(&minf);
+            let mdia = mp4_box(b"mdia", &mdia_body);
+            let mut tkhd_data = vec![0, 0, 0, 7];
+            tkhd_data.extend_from_slice(&[0; 8]);
+            tkhd_data.extend_from_slice(&1u32.to_be_bytes());
+            tkhd_data.extend_from_slice(&[0; 4]);
+            tkhd_data.extend_from_slice(&1024u32.to_be_bytes());
+            tkhd_data.extend_from_slice(&[0; 8]);
+            tkhd_data.extend_from_slice(&[0; 4]);
+            tkhd_data.extend_from_slice(&0x0100u16.to_be_bytes());
+            tkhd_data.extend_from_slice(&[0; 2]);
+            tkhd_data.extend_from_slice(&[
+                0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                0, 0, 0, 0, 0, 0x40, 0, 0, 0,
+            ]);
+            tkhd_data.extend_from_slice(&[0; 8]);
+            let tkhd = mp4_box(b"tkhd", &tkhd_data);
+            let mut trak_body = Vec::new();
+            trak_body.extend_from_slice(&tkhd);
+            trak_body.extend_from_slice(&mdia);
+            let trak = mp4_box(b"trak", &trak_body);
+            let mut mvhd_data = vec![0; 4];
+            mvhd_data.extend_from_slice(&[0; 8]);
+            mvhd_data.extend_from_slice(&48000u32.to_be_bytes());
+            mvhd_data.extend_from_slice(&1024u32.to_be_bytes());
+            mvhd_data.extend_from_slice(&0x00010000u32.to_be_bytes());
+            mvhd_data.extend_from_slice(&0x0100u16.to_be_bytes());
+            mvhd_data.extend_from_slice(&[0; 10]);
+            mvhd_data.extend_from_slice(&[
+                0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                0, 0, 0, 0, 0, 0x40, 0, 0, 0,
+            ]);
+            mvhd_data.extend_from_slice(&[0; 24]);
+            mvhd_data.extend_from_slice(&2u32.to_be_bytes());
+            let mvhd = mp4_box(b"mvhd", &mvhd_data);
+            let mut moov_body = Vec::new();
+            moov_body.extend_from_slice(&mvhd);
+            moov_body.extend_from_slice(&trak);
+            mp4_box(b"moov", &moov_body)
+        };
+        let ftyp = mp4_box(b"ftyp", b"M4A \x00\x00\x02\x00M4A isommp42");
+        let dummy_moov = build_moov(0);
+        let chunk_offset = (ftyp.len() + dummy_moov.len() + 8) as u32;
+        let moov = build_moov(chunk_offset);
+        let mdat = mp4_box(b"mdat", &mdat_payload);
+        let mut file_bytes = Vec::new();
+        file_bytes.extend_from_slice(&ftyp);
+        file_bytes.extend_from_slice(&moov);
+        file_bytes.extend_from_slice(&mdat);
+        std::fs::write(&mp4_a, &file_bytes).unwrap();
+        std::fs::write(&mp4_b, &file_bytes).unwrap();
+    }
+
+    // With 2 segments in `mp4_concat::open_with_options`:
+    // `plan_bytes` = 2 * 8192 + 16384 + index/plan (~35_400 bytes).
+    // `sample.size` = 6_000 bytes.
+    // With `max_controlled_bytes = Some(38_000)`:
+    // - `plan_bytes` (~35_400) <= 38_000
+    // - `sample.size + 16384` (22_384) <= 38_000 (passed old check!)
+    // - `plan_bytes + sample.size + 32` (~41_432) > 38_000 (must be rejected!)
+    let mp4_concat_opts = CopyOptions {
+        max_controlled_bytes: Some(38_000),
+        ..Default::default()
+    };
+    let mp4_sources = vec![mp4_a.clone(), mp4_b.clone()];
+    let mp4_concat_open_err =
+        fvid::container::mp4_concat::open_with_options(&mp4_sources, &mp4_concat_opts)
+            .err()
+            .expect("mp4_concat::open_with_options must charge plan_bytes + sample.size + cues");
+    assert!(
+        mp4_concat_open_err
+            .to_string()
+            .contains("controlled memory budget exceeded"),
+        "unexpected mp4_concat_open_err: {mp4_concat_open_err}"
+    );
+    let mp4_concat_out = dir.0.join("mp4-concat.mka");
+    let mp4_concat_exec_err = fvid::native_export::try_concat_mp4_matroska_with_options(
+        &mp4_sources,
+        &mp4_concat_out,
+        &mp4_concat_opts,
+    )
+    .err()
+    .expect("try_concat_mp4_matroska_with_options must charge plan_bytes + sample.size + cues");
+    assert!(
+        mp4_concat_exec_err
+            .to_string()
+            .contains("controlled memory budget exceeded"),
+        "unexpected mp4_concat_exec_err: {mp4_concat_exec_err}"
+    );
+    assert!(!mp4_concat_out.exists());
+
+    // 2. Build a 1-frame ADTS file with a 1_000-byte raw AAC payload.
+    let adts_a = dir.0.join("a.aac");
+    let adts_b = dir.0.join("b.aac");
+    {
+        let payload_len = 1_000usize;
+        let frame_len = 7 + payload_len;
+        let mut frame = vec![0u8; frame_len];
+        frame[0] = 0xFF;
+        frame[1] = 0xF1;
+        frame[2] = (1 << 6) | (3 << 2);
+        frame[3] = (2 << 6) | ((frame_len >> 11) as u8 & 0x03);
+        frame[4] = ((frame_len >> 3) & 0xFF) as u8;
+        frame[5] = (((frame_len & 0x07) as u8) << 5) | 0x1F;
+        frame[6] = 0xFC;
+        frame[7] = 0xE0;
+        std::fs::write(&adts_a, &frame).unwrap();
+        std::fs::write(&adts_b, &frame).unwrap();
+    }
+
+    // With `max_controlled_bytes = Some(17_000)`:
+    // `16_384 + 32 = 16_416 <= 17_000`, but `16_384 + 32 + 1_000 = 17_416 > 17_000`.
+    // Verify `native_plan::remux_with_options`, `native_plan::remux_adts_with_options`,
+    // and `native_export::remux_adts_aac_with_options` (into `.m4a`, which uses `mp4_write::write_adts_aac_reader_with_limits`)
+    // reject `max_controlled_bytes = Some(17_000)`!
+    let adts_single_opts = CopyOptions {
+        max_controlled_bytes: Some(17_000),
+        ..Default::default()
+    };
+    let plan_remux_err = fvid::native_plan::remux_with_options(&adts_a, &adts_single_opts)
+        .expect_err("native_plan::remux_with_options on ADTS must charge packet.len()");
+    assert!(
+        plan_remux_err.contains("controlled memory budget exceeded"),
+        "unexpected plan_remux_err: {plan_remux_err}"
+    );
+    let plan_remux_adts_err = fvid::native_plan::remux_adts_with_options(&adts_a, &adts_single_opts)
+        .expect_err("native_plan::remux_adts_with_options must charge packet.len()");
+    assert!(
+        plan_remux_adts_err.contains("controlled memory budget exceeded"),
+        "unexpected plan_remux_adts_err: {plan_remux_adts_err}"
+    );
+    let adts_m4a_out = dir.0.join("adts-remux.m4a");
+    let adts_m4a_err = fvid::native_export::remux_adts_aac_with_options(
+        &adts_a,
+        &adts_m4a_out,
+        &adts_single_opts,
+    )
+    .expect_err("native_export::remux_adts_aac_with_options (.m4a) must charge packet.len()");
+    assert!(
+        adts_m4a_err
+            .to_string()
+            .contains("controlled memory budget exceeded"),
+        "unexpected adts_m4a_err: {adts_m4a_err}"
+    );
+    assert!(!adts_m4a_out.exists());
+
+    // With 2 ADTS inputs and `max_controlled_bytes = Some(33_200)`:
+    // `base_bytes = 2 * 8_192 + 16_384 = 32_768`.
+    // `32_768 + 64 = 32_832 <= 33_200`, but `32_768 + 32 + 1_000 = 33_800 > 33_200`.
+    // Verify both `native_plan::concat_adts_with_options` and `native_export::concat_adts_aac_with_options` (.m4a)
+    // reject `max_controlled_bytes = Some(33_200)`!
+    let adts_concat_opts = CopyOptions {
+        max_controlled_bytes: Some(33_200),
+        ..Default::default()
+    };
+    let adts_sources = vec![adts_a.clone(), adts_b.clone()];
+    let plan_concat_adts_err =
+        fvid::native_plan::concat_adts_with_options(&adts_sources, &adts_concat_opts)
+            .expect_err("native_plan::concat_adts_with_options must charge packet.len()");
+    assert!(
+        plan_concat_adts_err.contains("controlled memory budget exceeded"),
+        "unexpected plan_concat_adts_err: {plan_concat_adts_err}"
+    );
+    let concat_m4a_out = dir.0.join("adts-concat.m4a");
+    let concat_m4a_err = fvid::native_export::concat_adts_aac_with_options(
+        &adts_sources,
+        &concat_m4a_out,
+        &adts_concat_opts,
+    )
+    .expect_err("native_export::concat_adts_aac_with_options (.m4a) must charge base_bytes + sizes + packet.len()");
+    assert!(
+        concat_m4a_err
+            .to_string()
+            .contains("controlled memory budget exceeded"),
+        "unexpected concat_m4a_err: {concat_m4a_err}"
+    );
+    assert!(!concat_m4a_out.exists());
+}
+
+#[test]
+fn subtitle_converters_and_mp4_video_bridge_charge_simultaneous_index_cue_and_frame_working_sets() {
+    let dir = TempDir(std::env::temp_dir().join(format!(
+        "fvid-subtitle-and-mp4-bridge-simultaneous-budget-{}",
+        std::process::id()
+    )));
+    let _ = std::fs::remove_dir_all(&dir.0);
+    std::fs::create_dir_all(&dir.0).unwrap();
+
+    // 1. Matroska subtitle conversion (`try_convert_matroska_inner` for `S_TEXT/ASS` and `S_TEXT/UTF8`):
+    // Create an `.mkv` subtitle source with 1 cue and 2 custom container tags (`CUSTOM_TAG_0`, `CUSTOM_TAG_1`
+    // of 800 bytes each), so `reader_index_bytes = reader.estimated_index_payload_bytes() + 64` is ~8_600 bytes.
+    // Then convert with 2 more custom container tags (`CUSTOM_TAG_2`, `CUSTOM_TAG_3` of 800 bytes each),
+    // so `meta_working_bytes` is ~16_000 bytes.
+    // Under `max_controlled_bytes = Some(36_000)`:
+    // - `reader_index_bytes + 16_384` (~25_000) <= 36_000 (passes initial index check!)
+    // - `meta_working_bytes + 16_384` (~32_400) <= 36_000 (passed old isolated metadata check!)
+    // - `reader_index_bytes + meta_working_bytes + 16_384` (~41_000) > 36_000!
+    let srt_one = dir.0.join("one.srt");
+    std::fs::write(
+        &srt_one,
+        b"1\n00:00:00,000 --> 00:00:01,000\nHello world\n",
+    )
+    .unwrap();
+    let mkv_sub_source = dir.0.join("source-sub.mkv");
+    let sub_opts = fvid::media::SubtitleConvertOptions::default();
+    let mut seed_sub_opts = CopyOptions::default();
+    for i in 0..2 {
+        seed_sub_opts
+            .metadata_set
+            .push((format!("CUSTOM_TAG_{i}"), "T".repeat(800)));
+    }
+    fvid::media::convert_subtitles_with_controls(
+        &srt_one,
+        &mkv_sub_source,
+        &sub_opts,
+        &seed_sub_opts,
+    )
+    .unwrap();
+
+    let mut mkv_sub_convert_opts = CopyOptions {
+        max_controlled_bytes: Some(45_000),
+        ..Default::default()
+    };
+    for i in 2..4 {
+        mkv_sub_convert_opts
+            .metadata_set
+            .push((format!("CUSTOM_TAG_{i}"), "U".repeat(800)));
+    }
+    let mkv_sub_out = dir.0.join("out-mkv-sub.mkv");
+    let mkv_sub_plan_err = fvid::media::plan_convert_subtitles_for_destination(
+        &mkv_sub_source,
+        Some(&mkv_sub_out),
+        &sub_opts,
+        &mkv_sub_convert_opts,
+    )
+    .expect_err("Matroska subtitle plan must charge reader_index_bytes + meta_working_bytes simultaneously")
+    .to_string();
+    assert!(
+        mkv_sub_plan_err.contains("controlled memory budget exceeded"),
+        "unexpected mkv_sub_plan_err: {mkv_sub_plan_err}"
+    );
+    let mkv_sub_exec_err = fvid::media::convert_subtitles_with_controls(
+        &mkv_sub_source,
+        &mkv_sub_out,
+        &sub_opts,
+        &mkv_sub_convert_opts,
+    )
+    .expect_err("Matroska subtitle convert must charge reader_index_bytes + meta_working_bytes simultaneously")
+    .to_string();
+    assert!(
+        mkv_sub_exec_err.contains("controlled memory budget exceeded"),
+        "unexpected mkv_sub_exec_err: {mkv_sub_exec_err}"
+    );
+    assert!(!mkv_sub_out.exists());
+
+    // 2. Standalone SRT (`try_convert_srt_inner`) and ASS (`try_convert_ass_inner`) with many short cues:
+    // 50 short SRT cues (`file_len` ~ 1_650 bytes, so `file_len * 3 + 16_384 = 21_334 <= 22_000`),
+    // while 50 cues allocate `50 * 80 = 4_000` bytes of cue/event vectors + ~1_000 bytes of formatted ASS events +
+    // `HEADER.len()` (263 bytes) + `bytes.len()` (1_650 bytes) + `16_384` > 22_000!
+    let srt_many = dir.0.join("many.srt");
+    let mut srt_text = String::new();
+    for i in 0..50 {
+        let s_min = i / 60;
+        let s_sec = i % 60;
+        let e_min = (i + 1) / 60;
+        let e_sec = (i + 1) % 60;
+        srt_text.push_str(&format!(
+            "{}\n00:{s_min:02}:{s_sec:02},000 --> 00:{e_min:02}:{e_sec:02},000\nX\n\n",
+            i + 1
+        ));
+    }
+    std::fs::write(&srt_many, srt_text.as_bytes()).unwrap();
+    let srt_many_opts = CopyOptions {
+        max_controlled_bytes: Some(22_000),
+        ..Default::default()
+    };
+    let srt_many_out = dir.0.join("out-many-srt.mkv");
+    let srt_many_plan_err = fvid::media::plan_convert_subtitles_for_destination(
+        &srt_many,
+        Some(&srt_many_out),
+        &sub_opts,
+        &srt_many_opts,
+    )
+    .expect_err("SRT subtitle plan must charge per-cue events/cues working set")
+    .to_string();
+    assert!(
+        srt_many_plan_err.contains("controlled memory budget exceeded"),
+        "unexpected srt_many_plan_err: {srt_many_plan_err}"
+    );
+    let srt_many_exec_err = fvid::media::convert_subtitles_with_controls(
+        &srt_many,
+        &srt_many_out,
+        &sub_opts,
+        &srt_many_opts,
+    )
+    .expect_err("SRT subtitle convert must charge per-cue events/cues working set")
+    .to_string();
+    assert!(
+        srt_many_exec_err.contains("controlled memory budget exceeded"),
+        "unexpected srt_many_exec_err: {srt_many_exec_err}"
+    );
+    assert!(!srt_many_out.exists());
+
+    let ass_many = dir.0.join("many.ass");
+    let mut ass_text = String::from(
+        "[Script Info]\nScriptType: v4.00+\n\n[Events]\nFormat: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text\n",
+    );
+    for i in 0..50 {
+        let s = i;
+        let e = s + 1;
+        ass_text.push_str(&format!(
+            "Dialogue: 0,0:00:{s:02}.0,0:00:{e:02}.0,Default,,0,0,0,,X\n"
+        ));
+    }
+    std::fs::write(&ass_many, ass_text.as_bytes()).unwrap();
+    let ass_many_opts = CopyOptions {
+        max_controlled_bytes: Some(25_000),
+        ..Default::default()
+    };
+    let ass_many_out = dir.0.join("out-many-ass.mkv");
+    let ass_many_plan_err = fvid::media::plan_convert_subtitles_for_destination(
+        &ass_many,
+        Some(&ass_many_out),
+        &sub_opts,
+        &ass_many_opts,
+    )
+    .expect_err("ASS subtitle plan must charge per-cue events/cues working set")
+    .to_string();
+    assert!(
+        ass_many_plan_err.contains("controlled memory budget exceeded"),
+        "unexpected ass_many_plan_err: {ass_many_plan_err}"
+    );
+    let ass_many_exec_err = fvid::media::convert_subtitles_with_controls(
+        &ass_many,
+        &ass_many_out,
+        &sub_opts,
+        &ass_many_opts,
+    )
+    .expect_err("ASS subtitle convert must charge per-cue events/cues working set")
+    .to_string();
+    assert!(
+        ass_many_exec_err.contains("controlled memory budget exceeded"),
+        "unexpected ass_many_exec_err: {ass_many_exec_err}"
+    );
+    assert!(!ass_many_out.exists());
+
+    // 3. `owned_mp4_video_bridge::prepare_selected`:
+    // On `avc-rotated-90-anamorphic.mp4` (32x16 -> 16x32 YUV420p, `pixels.len() = 768` bytes):
+    // Under `max_controlled_bytes = Some(1_100)`:
+    // - `reader.estimated_index_payload_bytes()` (804 bytes) + `meta_working_bytes` (48 bytes) = 852 <= 1_100
+    // - `decode_presented` table_bytes (804 + 2 * size_of::<FrameMetadata>()) <= 1_100
+    // - `pixels.len()` (768 bytes) <= 1_100 (so `decode_presented`'s `check_decoded_pixels` and the old isolated
+    //   `pixels.len() > limit` check in `owned_mp4_video_bridge` both passed!)
+    // - Simultaneous `pixels` (768) + `geometry.data` (768) + `meta_working_bytes` (48) = 1_584 > 1_100!
+    let root = std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
+        .join("tests/fixtures/playback-errors/rotated-mp4-decode-export-probe");
+    let avc_mp4 = root.join("avc-rotated-90-anamorphic.mp4");
+    let bridge_opts = CopyOptions {
+        max_controlled_bytes: Some(1_100),
+        ..Default::default()
+    };
+    let out_bridge = dir.0.join("out-bridge.mkv");
+    let bridge_plan_err = fvid_media::plan_transcode_lossless(
+        &avc_mp4,
+        &fvid_media::LosslessTransform::default(),
+        &bridge_opts,
+        None,
+    )
+    .expect_err("MP4 video bridge plan_transcode_lossless must charge meta_working_bytes + frame buffers");
+    assert!(
+        bridge_plan_err.contains("controlled memory budget"),
+        "unexpected bridge_plan_err: {bridge_plan_err}"
+    );
+    let bridge_exec_err = fvid_media::transcode_lossless(
+        &avc_mp4,
+        &out_bridge,
+        fvid_media::LosslessTransform::default(),
+        &bridge_opts,
+    )
+    .expect_err("MP4 video bridge transcode_lossless must charge meta_working_bytes + frame buffers");
+    assert!(
+        bridge_exec_err.contains("controlled memory budget"),
+        "unexpected bridge_exec_err: {bridge_exec_err}"
+    );
+    assert!(!out_bridge.exists());
+}
+
+#[test]
+fn xfade_subtitle_burn_and_lossless_export_charge_simultaneous_metadata_frame_and_packet_working_sets() {
+    let dir = TempDir(std::env::temp_dir().join(format!(
+        "fvid-xfade-burn-lossless-simultaneous-budget-{}",
+        std::process::id()
+    )));
+    let _ = std::fs::remove_dir_all(&dir.0);
+    std::fs::create_dir_all(&dir.0).unwrap();
+
+    // 1. `owned_xfade` (`plan_xfade` and `xfade_video`):
+    // Create two 32x32 Y4M files (`frame_len = 1_536` bytes, `frame_len * 3 = 4_608` bytes).
+    // Add 1 custom tag of 800 bytes (`meta_working_bytes = (6 + 800 + 32 + 6) * 8 = 6_752` bytes).
+    // Under `max_controlled_bytes = Some(10_000)`:
+    // - `meta_working_bytes` (6_752) <= 10_000 (passed old isolated metadata check!)
+    // - `frame_len * 3` (4_608) <= 10_000 (passed old isolated 3-frame check!)
+    // - `frame_len * 3 + meta_working_bytes` (11_360) > 10_000!
+    let y4m_a = dir.0.join("a.y4m");
+    let y4m_b = dir.0.join("b.y4m");
+    {
+        let mut bytes = b"YUV4MPEG2 W32 H32 F25:1 Ip A1:1 C420\nFRAME\n".to_vec();
+        bytes.extend_from_slice(&vec![64u8; 32 * 32 + 2 * 16 * 16]);
+        bytes.extend_from_slice(b"FRAME\n");
+        bytes.extend_from_slice(&vec![128u8; 32 * 32 + 2 * 16 * 16]);
+        std::fs::write(&y4m_a, &bytes).unwrap();
+        std::fs::write(&y4m_b, &bytes).unwrap();
+    }
+    let mut xfade_opts = CopyOptions {
+        max_controlled_bytes: Some(10_000),
+        ..Default::default()
+    };
+    xfade_opts
+        .metadata_set
+        .push(("CUSTOM_TAG".into(), "X".repeat(800)));
+    let out_xfade = dir.0.join("out-xfade.mkv");
+    let xfade_plan_err =
+        fvid_media::plan_xfade(&y4m_a, &y4m_b, "fade", 40_000, 0, &xfade_opts)
+            .expect_err("plan_xfade must charge frame_len * 3 + meta_working_bytes simultaneously");
+    assert!(
+        xfade_plan_err.contains("controlled memory budget"),
+        "unexpected xfade_plan_err: {xfade_plan_err}"
+    );
+    let xfade_exec_err = fvid_media::xfade_video(
+        &y4m_a,
+        &y4m_b,
+        &out_xfade,
+        "fade",
+        40_000,
+        0,
+        &xfade_opts,
+    )
+    .expect_err("xfade_video must charge frame_len * 3 + meta_working_bytes simultaneously");
+    assert!(
+        xfade_exec_err.contains("controlled memory budget"),
+        "unexpected xfade_exec_err: {xfade_exec_err}"
+    );
+    assert!(!out_xfade.exists());
+
+    // 2. `owned_subtitle_burn` (`plan_burn_subtitles` and `burn_subtitles`) on Y4M:
+    // On `y4m_a` (`frame_len = 1_536`, `mask_bytes = 1_024`, so `frame_len + mask_bytes = 2_560` bytes)
+    // and a 100-byte SRT file (`subs_bytes * 3 = 300` bytes) with `meta_working_bytes = 6_752` bytes:
+    // Under `max_controlled_bytes = Some(8_500)`:
+    // - `meta_working_bytes` (6_752) <= 8_500
+    // - `frame_len + mask_bytes` (2_560) <= 8_500
+    // - `subs_bytes * 3` (300) <= 8_500
+    // - `frame_len + mask_bytes + meta_working_bytes` (9_312) > 8_500!
+    let srt_file = dir.0.join("burn.srt");
+    std::fs::write(
+        &srt_file,
+        b"1\n00:00:00,000 --> 00:00:01,000\nHello subtitle burn\n",
+    )
+    .unwrap();
+    let mut burn_opts = CopyOptions {
+        max_controlled_bytes: Some(8_500),
+        ..Default::default()
+    };
+    burn_opts
+        .metadata_set
+        .push(("CUSTOM_TAG".into(), "X".repeat(800)));
+    let out_burn = dir.0.join("out-burn.mkv");
+    let burn_plan_err = fvid_media::plan_burn_subtitles(&y4m_a, &srt_file, &burn_opts)
+        .expect_err("plan_burn_subtitles must charge frame + mask + cues + meta_working_bytes simultaneously");
+    assert!(
+        burn_plan_err.contains("controlled memory budget"),
+        "unexpected burn_plan_err: {burn_plan_err}"
+    );
+    let burn_exec_err = fvid_media::burn_subtitles(&y4m_a, &out_burn, &srt_file, &burn_opts)
+        .expect_err("burn_subtitles must charge frame + mask + cues + meta_working_bytes simultaneously");
+    assert!(
+        burn_exec_err.contains("controlled memory budget"),
+        "unexpected burn_exec_err: {burn_exec_err}"
+    );
+    assert!(!out_burn.exists());
+
+    // 3. `owned_lossless` / `owned_matroska` Y4M export and `owned_ffv1_export` Matroska FFV1 export:
+    // On `y4m_a` (`frame_len = 1_536` bytes) with `meta_working_bytes = 6_752` bytes:
+    // Under `max_controlled_bytes = Some(8_000)`:
+    // - `meta_working_bytes` (6_752) <= 8_000
+    // - `frame_len` (1_536) <= 8_000
+    // - `frame_len + meta_working_bytes` (8_288) > 8_000!
+    let mut lossless_y4m_opts = CopyOptions {
+        max_controlled_bytes: Some(8_000),
+        ..Default::default()
+    };
+    lossless_y4m_opts
+        .metadata_set
+        .push(("CUSTOM_TAG".into(), "X".repeat(800)));
+    let out_lossless_y4m = dir.0.join("out-lossless-y4m.mkv");
+    let lossless_y4m_plan_err = fvid_media::plan_transcode_lossless(
+        &y4m_a,
+        &Default::default(),
+        &lossless_y4m_opts,
+        None,
+    )
+    .expect_err("Y4M plan_transcode_lossless must charge frame working set + meta_working_bytes simultaneously");
+    assert!(
+        lossless_y4m_plan_err.contains("controlled memory budget"),
+        "unexpected lossless_y4m_plan_err: {lossless_y4m_plan_err}"
+    );
+    let lossless_y4m_exec_err = fvid_media::transcode_lossless(
+        &y4m_a,
+        &out_lossless_y4m,
+        Default::default(),
+        &lossless_y4m_opts,
+    )
+    .expect_err("Y4M transcode_lossless must charge frame working set + meta_working_bytes simultaneously");
+    assert!(
+        lossless_y4m_exec_err.contains("controlled memory budget"),
+        "unexpected lossless_y4m_exec_err: {lossless_y4m_exec_err}"
+    );
+    assert!(!out_lossless_y4m.exists());
+
+    // Now create a Matroska FFV1 source from `y4m_a` with 1 custom tag (`CUSTOM_TAG_0` of 800 bytes,
+    // so `input.estimated_index_payload_bytes()` is ~4_300 bytes) and export with `CUSTOM_TAG_1` of 800 bytes
+    // (`meta_working_bytes` ~ 13_500 bytes).
+    // Under `max_controlled_bytes = Some(16_000)`:
+    // - `input.estimated_index_payload_bytes()` (~4_300) <= 16_000
+    // - `meta_working_bytes` (~13_500) <= 16_000
+    // - `input.estimated_index_payload_bytes() + meta_working_bytes` (~17_800) > 16_000!
+    let mkv_ffv1_src = dir.0.join("src-ffv1.mkv");
+    let mut seed_ffv1_opts = CopyOptions::default();
+    seed_ffv1_opts
+        .metadata_set
+        .push(("CUSTOM_TAG_0".into(), "A".repeat(800)));
+    fvid_media::transcode_lossless(&y4m_a, &mkv_ffv1_src, Default::default(), &seed_ffv1_opts)
+        .unwrap();
+
+    let mut mkv_ffv1_opts = CopyOptions {
+        max_controlled_bytes: Some(16_000),
+        ..Default::default()
+    };
+    mkv_ffv1_opts
+        .metadata_set
+        .push(("CUSTOM_TAG_1".into(), "B".repeat(800)));
+    let out_mkv_ffv1 = dir.0.join("out-ffv1.mkv");
+    let mkv_ffv1_plan_err = fvid_media::plan_transcode_lossless(
+        &mkv_ffv1_src,
+        &Default::default(),
+        &mkv_ffv1_opts,
+        None,
+    )
+    .expect_err("Matroska FFV1 plan_transcode_lossless must charge index + meta_working_bytes + frame simultaneously");
+    assert!(
+        mkv_ffv1_plan_err.contains("controlled memory budget"),
+        "unexpected mkv_ffv1_plan_err: {mkv_ffv1_plan_err}"
+    );
+    let mkv_ffv1_exec_err = fvid_media::transcode_lossless(
+        &mkv_ffv1_src,
+        &out_mkv_ffv1,
+        Default::default(),
+        &mkv_ffv1_opts,
+    )
+    .expect_err("Matroska FFV1 transcode_lossless must charge index + meta_working_bytes + frame simultaneously");
+    assert!(
+        mkv_ffv1_exec_err.contains("controlled memory budget"),
+        "unexpected mkv_ffv1_exec_err: {mkv_ffv1_exec_err}"
+    );
+    assert!(!out_mkv_ffv1.exists());
+}
+
+#[test]
+fn multitrack_lossless_exports_and_subtitle_burn_visitors_charge_simultaneous_working_sets() {
+    let dir = TempDir(std::env::temp_dir().join(format!(
+        "fvid-multitrack-and-subtitle-burn-visitor-simultaneous-{}",
+        std::process::id()
+    )));
+    let _ = std::fs::remove_dir_all(&dir.0);
+    std::fs::create_dir_all(&dir.0).unwrap();
+
+    // 1. `owned_webm_multitrack_export`:
+    // Create a multitrack Matroska source (1 FFV1 video track + 1 Opus audio track)
+    // with 1 custom container tag (`CUSTOM_TAG_0` of 800 bytes), so `reader.estimated_index_payload_bytes()`
+    // is ~4_500 bytes.
+    // Then run `plan_transcode_lossless` and `transcode_lossless` with `CUSTOM_TAG_1` of 800 bytes
+    // (`meta_working_bytes` ~ 13_500 bytes) under `max_controlled_bytes = Some(16_000)`:
+    // - `reader.estimated_index_payload_bytes()` (~4_500) <= 16_000 (passed old isolated index check!)
+    // - `meta_working_bytes` (~13_500) <= 16_000 (passed old isolated metadata check!)
+    // - `reader.estimated_index_payload_bytes() + meta_working_bytes` (~18_000) > 16_000!
+    let mkv_multi_src = dir.0.join("src-multi.mkv");
+    {
+        let mut opus_head = Vec::with_capacity(19);
+        opus_head.extend_from_slice(b"OpusHead");
+        opus_head.push(1);
+        opus_head.push(1);
+        opus_head.extend_from_slice(&0u16.to_le_bytes());
+        opus_head.extend_from_slice(&48_000u32.to_le_bytes());
+        opus_head.extend_from_slice(&0i16.to_le_bytes());
+        opus_head.push(0);
+
+        let mut frame = fvid_media::owned_frame::GeometryFrame {
+            width: 32,
+            height: 32,
+            subsampling: Some([2, 2]),
+            data: vec![64u8; 32 * 32 + 2 * 16 * 16],
+        };
+        let ffv1_pkt = fvid_media::owned_ffv1_encoder::encode(&mut frame, 8).unwrap();
+        let opus_pkt = [0xF8u8, 0xFF, 0xFE];
+
+        let specs = [
+            fvid_media::owned_matroska::TrackSpec {
+                encoding: fvid_media::owned_matroska::Encoding::Ffv1V1 {
+                    width: 32,
+                    height: 32,
+                },
+                name: "",
+                language: "und",
+            },
+            fvid_media::owned_matroska::TrackSpec {
+                encoding: fvid_media::owned_matroska::Encoding::Opus {
+                    configuration: &opus_head,
+                },
+                name: "",
+                language: "und",
+            },
+        ];
+        let track_options = [
+            fvid_media::owned_matroska::TrackOptions {
+                default_duration_ns: 40_000_000,
+                ..Default::default()
+            },
+            fvid_media::owned_matroska::TrackOptions {
+                default_duration_ns: 20_000_000,
+                ..Default::default()
+            },
+        ];
+        let mut file_meta = fvid_media::owned_matroska::FileMetadata::default();
+        file_meta.tags.title = "A".repeat(400);
+        let mut file = std::fs::File::create(&mkv_multi_src).unwrap();
+        let mut writer = fvid_media::owned_matroska::PacketWriter::new_with_metadata(
+            &mut file,
+            &specs,
+            &track_options,
+            &file_meta,
+        )
+        .unwrap();
+        for i in 0..40u64 {
+            writer
+                .write_packet(0, i * 40_000_000, 40_000_000, true, &ffv1_pkt)
+                .unwrap();
+            writer
+                .write_packet(1, i * 20_000_000, 20_000_000, true, &opus_pkt)
+                .unwrap();
+        }
+        writer.finish().unwrap();
+    }
+
+    let mut mkv_multi_opts = CopyOptions {
+        max_controlled_bytes: Some(13_000),
+        streams: vec![0, 1],
+        ..Default::default()
+    };
+    mkv_multi_opts
+        .metadata_set
+        .push(("CUSTOM_TAG_1".into(), "B".repeat(500)));
+    let out_mkv_multi = dir.0.join("out-multi.mkv");
+    let mkv_multi_plan_err = fvid_media::plan_transcode_lossless(
+        &mkv_multi_src,
+        &fvid_media::LosslessTransform {
+            vertical_flip: true,
+            ..Default::default()
+        },
+        &mkv_multi_opts,
+        None,
+    )
+    .expect_err("multitrack WebM plan_transcode_lossless must charge index + meta_working_bytes simultaneously");
+    assert!(
+        mkv_multi_plan_err.contains("Matroska index and metadata"),
+        "unexpected mkv_multi_plan_err: {mkv_multi_plan_err}"
+    );
+    let mkv_multi_exec_err = fvid_media::transcode_lossless(
+        &mkv_multi_src,
+        &out_mkv_multi,
+        fvid_media::LosslessTransform {
+            vertical_flip: true,
+            ..Default::default()
+        },
+        &mkv_multi_opts,
+    )
+    .expect_err("multitrack WebM transcode_lossless must charge index + meta_working_bytes simultaneously");
+    assert!(
+        mkv_multi_exec_err.contains("Matroska index and metadata"),
+        "unexpected mkv_multi_exec_err: {mkv_multi_exec_err}"
+    );
+    assert!(!out_mkv_multi.exists());
+
+    // 2. `owned_mp4_multitrack_export`:
+    // On `aac-device-layout/normal-ten.mp4` (`reader.estimated_index_payload_bytes()` ~ 1_232 bytes):
+    // With 8 custom tags (`CUSTOM_TAG_0..8` of 800 bytes each, `meta_working_bytes = 52_640` bytes) under
+    // `max_controlled_bytes = Some(53_500)`:
+    // - `bridge_index_bytes + meta_working_bytes` (~694 + 52_640 = 53_334) <= 53_500 (passed old temporary video bridge check!)
+    // - `reader.estimated_index_payload_bytes()` (~1_232) <= 53_500 (passed old isolated MP4 index check in `qualify`!)
+    // - `meta_working_bytes` (52_640) <= 53_500 (passed old isolated options metadata check in `qualify`!)
+    // - `mp4_index_bytes + meta_working_bytes` (~1_232 + 52_640 = 53_872) > 53_500!
+    let mp4_multi_src = std::path::PathBuf::from(env!("CARGO_MANIFEST_DIR"))
+        .join("tests/fixtures/playback-errors/aac-device-layout/normal-ten.mp4");
+    let mut mp4_multi_opts = CopyOptions {
+        max_controlled_bytes: Some(53_500),
+        streams: vec![0, 1],
+        ..Default::default()
+    };
+    for i in 0..8 {
+        mp4_multi_opts
+            .metadata_set
+            .push((format!("CUSTOM_TAG_{i}"), "X".repeat(800)));
+    }
+    let out_mp4_multi = dir.0.join("out-mp4-multi.mkv");
+    let mp4_multi_plan_err = fvid_media::plan_transcode_lossless(
+        &mp4_multi_src,
+        &fvid_media::LosslessTransform {
+            vertical_flip: true,
+            ..Default::default()
+        },
+        &mp4_multi_opts,
+        None,
+    )
+    .expect_err("multitrack MP4 plan_transcode_lossless must charge MP4 index + meta_working_bytes simultaneously");
+    assert!(
+        mp4_multi_plan_err.contains("MP4 index and metadata"),
+        "unexpected mp4_multi_plan_err: {mp4_multi_plan_err}"
+    );
+    let mp4_multi_exec_err = fvid_media::transcode_lossless(
+        &mp4_multi_src,
+        &out_mp4_multi,
+        fvid_media::LosslessTransform {
+            vertical_flip: true,
+            ..Default::default()
+        },
+        &mp4_multi_opts,
+    )
+    .expect_err("multitrack MP4 transcode_lossless must charge MP4 index + meta_working_bytes simultaneously");
+    assert!(
+        mp4_multi_exec_err.contains("MP4 index and metadata"),
+        "unexpected mp4_multi_exec_err: {mp4_multi_exec_err}"
+    );
+    assert!(!out_mp4_multi.exists());
+
+    // 3. `owned_subtitle_burn` container visitor (`inspect` in `plan_burn_subtitles` and `process` in `burn_subtitles`):
+    // Create a single-track 96x96 FFV1 `.mkv` source (`view.pixels.len() = 13_824` bytes, `mask_bytes = 9_216` bytes,
+    // `index_bytes` ~ 12_800 bytes, `meta_working_bytes = 192` bytes) and an SRT file with 20 short cues
+    // (`subs_bytes` ~ 820 bytes, `cues_and_meta_bytes` ~ 1_032 bytes).
+    // Under `max_controlled_bytes = Some(30_000)`:
+    // - `decode_webm`'s `base_bytes + view.pixels.len()` (~12_800 + 8 + 13_824 = 26_632) <= 30_000 (passes `decode_webm`!)
+    // - `prepare`'s `index_bytes + meta_working_bytes` (~13_000) <= 30_000
+    // - `prepare`'s `mask_bytes * 2 + meta_working_bytes + subs_bytes * 3` (~18_432 + 192 + 2_460 = 21_084) <= 30_000
+    // - `owned_ffv1_export`'s `view.pixels.len() * 2 + meta_working_bytes` (27_840) <= 30_000!
+    // - Old `inspect` / `process` checked `view.pixels.len() + mask_bytes` = 13_824 + 9_216 = 23_040 <= 30_000 (passed old isolated check!)
+    // - Simultaneous `view.pixels.len() * 2 + mask_bytes + cues_working_bytes + meta_working_bytes` = 27_648 + 9_216 + 1_032 = 37_896 > 30_000!
+    let mkv_burn_src = dir.0.join("src-burn.mkv");
+    {
+        let mut frame = fvid_media::owned_frame::GeometryFrame {
+            width: 96,
+            height: 96,
+            subsampling: Some([2, 2]),
+            data: vec![64u8; 96 * 96 + 2 * 48 * 48],
+        };
+        let ffv1_pkt = fvid_media::owned_ffv1_encoder::encode(&mut frame, 8).unwrap();
+        let specs = [fvid_media::owned_matroska::TrackSpec {
+            encoding: fvid_media::owned_matroska::Encoding::Ffv1V1 {
+                width: 96,
+                height: 96,
+            },
+            name: "",
+            language: "und",
+        }];
+        let track_options = [fvid_media::owned_matroska::TrackOptions {
+            default_duration_ns: 40_000_000,
+            ..Default::default()
+        }];
+        let mut file = std::fs::File::create(&mkv_burn_src).unwrap();
+        let mut writer = fvid_media::owned_matroska::PacketWriter::new_with_options(
+            &mut file,
+            &specs,
+            &track_options,
+        )
+        .unwrap();
+        writer
+            .write_packet(0, 0, 40_000_000, true, &ffv1_pkt)
+            .unwrap();
+        writer.finish().unwrap();
+    }
+    let srt_burn = dir.0.join("burn.srt");
+    let mut srt_burn_text = String::new();
+    for i in 0..20 {
+        let s_min = i / 60;
+        let s_sec = i % 60;
+        let e_min = (i + 1) / 60;
+        let e_sec = (i + 1) % 60;
+        srt_burn_text.push_str(&format!(
+            "{}\n00:{s_min:02}:{s_sec:02},000 --> 00:{e_min:02}:{e_sec:02},000\nBurn me\n\n",
+            i + 1
+        ));
+    }
+    std::fs::write(&srt_burn, srt_burn_text.as_bytes()).unwrap();
+    let mkv_burn_opts = CopyOptions {
+        max_controlled_bytes: Some(46_000),
+        ..Default::default()
+    };
+    let out_mkv_burn = dir.0.join("out-mkv-burn.mkv");
+    let mkv_burn_plan_err =
+        fvid_media::plan_burn_subtitles(&mkv_burn_src, &srt_burn, &mkv_burn_opts)
+            .expect_err("container plan_burn_subtitles must charge 2 frame buffers + mask + cues + metadata simultaneously");
+    assert!(
+        mkv_burn_plan_err.contains("subtitle burn frame exceeds controlled memory budget"),
+        "unexpected mkv_burn_plan_err: {mkv_burn_plan_err}"
+    );
+    let mkv_burn_exec_err =
+        fvid_media::burn_subtitles(&mkv_burn_src, &out_mkv_burn, &srt_burn, &mkv_burn_opts)
+            .expect_err("container burn_subtitles must charge 2 frame buffers + mask + cues + metadata simultaneously");
+    assert!(
+        mkv_burn_exec_err.contains("subtitle burn frame exceeds controlled memory budget"),
+        "unexpected mkv_burn_exec_err: {mkv_burn_exec_err}"
+    );
+    assert!(!out_mkv_burn.exists());
+}
+
+#[test]
+fn webm_and_mp4_video_decode_charge_simultaneous_index_table_and_frame_working_sets() {
+    use fvid_control::CopyOptions;
+
+    struct TempDir(std::path::PathBuf);
+    impl Drop for TempDir {
+        fn drop(&mut self) {
+            let _ = std::fs::remove_dir_all(&self.0);
+        }
+    }
+    let dir = TempDir(std::env::temp_dir().join(format!(
+        "fvid-batch396-video-decode-budget-{}",
+        std::process::id()
+    )));
+    std::fs::create_dir_all(&dir.0).unwrap();
+
+    // 1. `decode_webm` (`owned_video_decode::decode_webm`, `Presentation::new`, `Presentation::next`):
+    // Create a single-track 64x64 FFV1 `.mkv` source (`decoded.frame.data.len() = 6_144` bytes,
+    // `reader.estimated_index_payload_bytes()` ~ 16_500 bytes, `future` table = `10 * 8 = 80` bytes).
+    // Under `max_controlled_bytes = Some(19_000)`:
+    // - `reader.estimated_index_payload_bytes()` (~16_500) <= 19_000 (passed old isolated index check!)
+    // - `decoded.frame.data.len()` (6_144) <= 19_000 (passed old isolated frame check in `Presentation::next` and `decode_webm`!)
+    // - Simultaneous `index_bytes + future_bytes + decoded_frame_bytes` (~16_500 + 80 + 6_144 = 22_724) > 19_000!
+    let mkv_src = dir.0.join("src-ffv1-decode.mkv");
+    {
+        let mut frame = fvid_media::owned_frame::GeometryFrame {
+            width: 64,
+            height: 64,
+            subsampling: Some([2, 2]),
+            data: vec![64u8; 64 * 64 + 2 * 32 * 32],
+        };
+        let ffv1_pkt = fvid_media::owned_ffv1_encoder::encode(&mut frame, 8).unwrap();
+        let specs = [fvid_media::owned_matroska::TrackSpec {
+            encoding: fvid_media::owned_matroska::Encoding::Ffv1V1 {
+                width: 64,
+                height: 64,
+            },
+            name: "",
+            language: "und",
+        }];
+        let track_options = [fvid_media::owned_matroska::TrackOptions {
+            default_duration_ns: 40_000_000,
+            ..Default::default()
+        }];
+        let mut file = std::fs::File::create(&mkv_src).unwrap();
+        let mut writer = fvid_media::owned_matroska::PacketWriter::new_with_options(
+            &mut file,
+            &specs,
+            &track_options,
+        )
+        .unwrap();
+        for i in 0..10u64 {
+            writer
+                .write_packet(0, i * 40_000_000, 40_000_000, true, &ffv1_pkt)
+                .unwrap();
+        }
+        writer.finish().unwrap();
+    }
+    let mkv_opts = CopyOptions {
+        max_controlled_bytes: Some(19_000),
+        ..Default::default()
+    };
+    let out_mkv = dir.0.join("out-ffv1.mkv");
+    let mkv_plan_err = fvid_media::plan_transcode_lossless(
+        &mkv_src,
+        &fvid_media::LosslessTransform {
+            vertical_flip: true,
+            ..Default::default()
+        },
+        &mkv_opts,
+        None,
+    )
+    .expect_err("WebM/Matroska plan_transcode_lossless must charge index + presentation table + decoded frame simultaneously");
+    assert!(
+        mkv_plan_err.contains("controlled memory budget"),
+        "unexpected mkv_plan_err: {mkv_plan_err}"
+    );
+    let mkv_exec_err = fvid_media::transcode_lossless(
+        &mkv_src,
+        &out_mkv,
+        fvid_media::LosslessTransform {
+            vertical_flip: true,
+            ..Default::default()
+        },
+        &mkv_opts,
+    )
+    .expect_err("WebM/Matroska transcode_lossless must charge index + presentation table + decoded frame simultaneously");
+    assert!(
+        mkv_exec_err.contains("controlled memory budget"),
+        "unexpected mkv_exec_err: {mkv_exec_err}"
+    );
+    assert!(!out_mkv.exists());
+
+    // 2. `owned_mp4_video_decode::decode_presented`:
+    // Create a single-track MP4 (`avc-field-pcm-8bit-top-first.mp4`) or synthetic MP4 with metadata
+    // so `table_bytes = index_bytes + samples * size_of::<FrameMetadata>()` is ~10_000 bytes, and
+    // `pixels.len()` is also charged simultaneously with `table_bytes + packet.len()`.
+    // Let's use `avc-field-pcm-8bit-top-first.mp4` (`16x16` 4:2:0, `pixels.len() = 384` bytes,
+    // `index_bytes` ~ 500 bytes, `table_bytes` ~ 700 bytes, `meta_working_bytes` ~ 192 bytes).
+    // Under `max_controlled_bytes = Some(950)`:
+    // - `prepare_selected`'s `index_bytes + meta_working_bytes` (~692) <= 950
+    // - `decode_presented`'s `table_bytes` (~700) <= 950 (passed old isolated table check!)
+    // - `decode_presented`'s `pixels.len()` (384) <= 950 (passed old isolated `check_decoded_pixels`!)
+    // - Simultaneous `table_bytes + packet.len() + pixels.len()` (~700 + 250 + 384 = 1_334) > 950!
+    let mp4_src = std::path::PathBuf::from(env!("CARGO_MANIFEST_DIR"))
+        .join("tests/fixtures/playback-errors/avc-field-pcm-8bit-top-first.mp4");
+    let mp4_opts = CopyOptions {
+        max_controlled_bytes: Some(950),
+        ..Default::default()
+    };
+    let out_mp4 = dir.0.join("out-mp4.mkv");
+    let mp4_plan_err = fvid_media::plan_transcode_lossless(
+        &mp4_src,
+        &fvid_media::LosslessTransform {
+            vertical_flip: true,
+            ..Default::default()
+        },
+        &mp4_opts,
+        None,
+    )
+    .expect_err("MP4 video decode must charge table_bytes + packet + decoded pixels simultaneously");
+    assert!(
+        mp4_plan_err.contains("controlled memory budget"),
+        "unexpected mp4_plan_err: {mp4_plan_err}"
+    );
+    let mp4_exec_err = fvid_media::transcode_lossless(
+        &mp4_src,
+        &out_mp4,
+        fvid_media::LosslessTransform {
+            vertical_flip: true,
+            ..Default::default()
+        },
+        &mp4_opts,
+    )
+    .expect_err("MP4 video decode must charge table_bytes + packet + decoded pixels simultaneously");
+    assert!(
+        mp4_exec_err.contains("controlled memory budget"),
+        "unexpected mp4_exec_err: {mp4_exec_err}"
+    );
+    assert!(!out_mp4.exists());
+}
+
+#[test]
+fn y4m_and_ffv1_lossless_export_charge_simultaneous_input_output_and_index_working_sets() {
+    use fvid_control::CopyOptions;
+
+    struct TempDir(std::path::PathBuf);
+    impl Drop for TempDir {
+        fn drop(&mut self) {
+            let _ = std::fs::remove_dir_all(&self.0);
+        }
+    }
+    let dir = TempDir(std::env::temp_dir().join(format!(
+        "fvid-batch397-y4m-ffv1-export-budget-{}",
+        std::process::id()
+    )));
+    std::fs::create_dir_all(&dir.0).unwrap();
+
+    // 1. Y4M lossless export (`owned_lossless::{plan_transcode_lossless, transcode_lossless}`, `owned_matroska::write_y4m_ffv1_policy`):
+    // Create a 64x64 4:2:0 Y4M (`frame_len = 6_144` bytes). With `vertical_flip: true` (`geometry == true`),
+    // `decode_reader_frames` holds both `input: Vec<u8>` (`6_144` bytes) and `output: Vec<u8>` (`6_144` bytes)
+    // simultaneously, and `encode_y4m_counted` / `visit` also clones `data.to_vec()` (`6_144` bytes) to encode FFV1
+    // alongside `meta_working_bytes` (`192` bytes).
+    // Under `max_controlled_bytes = Some(13_000)`:
+    // - `frame_len + meta_working_bytes` (6_144 + 192 = 6_336) <= 13_000 (passed old upfront check!)
+    // - `data.len() + packet.len() + meta_working_bytes` (~6_144 + 100 + 192 = 6_436) <= 13_000 (passed old visitor check!)
+    // - Simultaneous `input.len() + output.len() + frame.data.len() + meta_working_bytes` (6_144 * 3 + 192 = 18_624) > 13_000!
+    let y4m_src = dir.0.join("src-64x64.y4m");
+    {
+        let mut y4m_bytes = b"YUV4MPEG2 W64 H64 F25:1 Ip A1:1 C420\nFRAME\n".to_vec();
+        y4m_bytes.extend(std::iter::repeat_n(64u8, 64 * 64 + 2 * 32 * 32));
+        std::fs::write(&y4m_src, &y4m_bytes).unwrap();
+    }
+    let y4m_opts = CopyOptions {
+        max_controlled_bytes: Some(13_000),
+        ..Default::default()
+    };
+    let out_y4m = dir.0.join("out-y4m.mkv");
+    let y4m_plan_err = fvid_media::plan_transcode_lossless(
+        &y4m_src,
+        &fvid_media::LosslessTransform {
+            vertical_flip: true,
+            ..Default::default()
+        },
+        &y4m_opts,
+        None,
+    )
+    .expect_err("Y4M plan_transcode_lossless with geometry transform must charge input + output + encode frame buffers simultaneously");
+    assert!(
+        y4m_plan_err.contains("controlled memory budget"),
+        "unexpected y4m_plan_err: {y4m_plan_err}"
+    );
+    let y4m_exec_err = fvid_media::transcode_lossless(
+        &y4m_src,
+        &out_y4m,
+        fvid_media::LosslessTransform {
+            vertical_flip: true,
+            ..Default::default()
+        },
+        &y4m_opts,
+    )
+    .expect_err("Y4M transcode_lossless with geometry transform must charge input + output + encode frame buffers simultaneously");
+    assert!(
+        y4m_exec_err.contains("controlled memory budget"),
+        "unexpected y4m_exec_err: {y4m_exec_err}"
+    );
+    assert!(!out_y4m.exists());
+
+    // 2. Matroska FFV1 lossless export (`owned_ffv1_export::export_processed`, `owned_lossless::plan_transcode_lossless`):
+    // Create a single-track 64x64 FFV1 `.mkv` (`view.pixels.len() = 6_144` bytes, `index_bytes` ~ 12_800 bytes,
+    // `meta_working_bytes = 192` bytes). With `vertical_flip: true`:
+    // - `decode_webm` holds `reader` (`12_800`), `decoded.frame.data` (`6_144`), and `transformed` (`6_144`) = `25_096` bytes.
+    // - And inside the visitor (`export_processed` and `check_encoded_ffv1_with_controlled`), `input` (`12_800` in `export_processed`),
+    //   `decode_webm` (`12_800 + 6_144 + 6_144`), `frame.data` (`6_144`), and `meta_working_bytes` (`192`) coexist!
+    // Under `max_controlled_bytes = Some(27_000)`:
+    // - `decode_webm`'s `base_bytes + decoded.frame.data.len() + working` (~12_808 + 6_144 + 6_144 = 25_096) <= 27_000 (passes `decode_webm`!)
+    // - Old `export_processed` checked `view.pixels.len() * 2 + meta_working_bytes` (12_288 + 192 = 12_480) <= 27_000 (passed old isolated visitor check!)
+    // - Simultaneous `index_bytes + view.pixels.len() * 2 + meta_working_bytes` (~12_800 + 12_288 + 192 = 25_280, plus `live_source_bytes = 6_144` = 31_424) > 27_000!
+    let mkv_src = dir.0.join("src-64x64.mkv");
+    {
+        let mut frame = fvid_media::owned_frame::GeometryFrame {
+            width: 64,
+            height: 64,
+            subsampling: Some([2, 2]),
+            data: vec![64u8; 64 * 64 + 2 * 32 * 32],
+        };
+        let ffv1_pkt = fvid_media::owned_ffv1_encoder::encode(&mut frame, 8).unwrap();
+        let specs = [fvid_media::owned_matroska::TrackSpec {
+            encoding: fvid_media::owned_matroska::Encoding::Ffv1V1 {
+                width: 64,
+                height: 64,
+            },
+            name: "",
+            language: "und",
+        }];
+        let track_options = [fvid_media::owned_matroska::TrackOptions {
+            default_duration_ns: 40_000_000,
+            ..Default::default()
+        }];
+        let mut file = std::fs::File::create(&mkv_src).unwrap();
+        let mut writer = fvid_media::owned_matroska::PacketWriter::new_with_options(
+            &mut file,
+            &specs,
+            &track_options,
+        )
+        .unwrap();
+        writer
+            .write_packet(0, 0, 40_000_000, true, &ffv1_pkt)
+            .unwrap();
+        writer.finish().unwrap();
+    }
+    let mkv_opts = CopyOptions {
+        max_controlled_bytes: Some(27_000),
+        ..Default::default()
+    };
+    let out_mkv = dir.0.join("out-mkv.mkv");
+    let mkv_plan_err = fvid_media::plan_transcode_lossless(
+        &mkv_src,
+        &fvid_media::LosslessTransform {
+            vertical_flip: true,
+            ..Default::default()
+        },
+        &mkv_opts,
+        None,
+    )
+    .expect_err("Matroska FFV1 plan_transcode_lossless must charge index + decoded/transformed frames + encoded FFV1 copy simultaneously");
+    assert!(
+        mkv_plan_err.contains("controlled memory budget"),
+        "unexpected mkv_plan_err: {mkv_plan_err}"
+    );
+    let mkv_exec_err = fvid_media::transcode_lossless(
+        &mkv_src,
+        &out_mkv,
+        fvid_media::LosslessTransform {
+            vertical_flip: true,
+            ..Default::default()
+        },
+        &mkv_opts,
+    )
+    .expect_err("Matroska FFV1 transcode_lossless must charge index + decoded/transformed frames + encoded FFV1 copy simultaneously");
+    assert!(
+        mkv_exec_err.contains("controlled memory budget"),
+        "unexpected mkv_exec_err: {mkv_exec_err}"
+    );
+    assert!(!out_mkv.exists());
+}
+
+#[test]
+fn mp4_webm_and_ogg_probes_charge_simultaneous_index_packet_and_setup_working_sets() {
+    let dir = TempDir::new("batch398-mp4-webm-ogg-probe-working-sets");
+    let root = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("tests/fixtures/playback-errors");
+
+    // 1. MP4 probe (`owned_mp4_probe_impl::try_mp4_with_options`, shared by `fvid_media::owned_probe::probe_with_options`
+    // and `fvid::media::probe_with_options`):
+    // Create an MP4 with container metadata so `reader.estimated_index_payload_bytes()` is ~24 KiB,
+    // and a sample of size ~600 bytes. Under `max_controlled_bytes` set to `index_bytes` (so `index_bytes <= limit`
+    // and `sample_size <= limit` individually, while `index_bytes + sample_size > limit`), MP4 probe must
+    // reject with `"controlled memory budget exceeded"`.
+    let mp4_src = root.join("multitrack-lossless-budget-parity/multitrack-avc-aac.mp4");
+    let mp4_reader = fvid_media::owned_mp4::Mp4Reader::open(
+        std::io::BufReader::new(std::fs::File::open(&mp4_src).unwrap()),
+        fvid_media::owned_mp4::Limits::default(),
+    )
+    .unwrap();
+    let mp4_index_bytes = mp4_reader.estimated_index_payload_bytes().unwrap();
+    let mp4_max_sample = mp4_reader
+        .tracks()
+        .iter()
+        .flat_map(|t| (0..t.samples.len()).map(|i| usize::try_from(t.samples.get(i).unwrap().size).unwrap()))
+        .max()
+        .unwrap();
+    assert!(
+        mp4_index_bytes > mp4_max_sample,
+        "expected mp4_index_bytes ({mp4_index_bytes}) > mp4_max_sample ({mp4_max_sample})"
+    );
+    let mp4_tight_opts = CopyOptions {
+        max_controlled_bytes: Some(mp4_index_bytes + mp4_max_sample / 2),
+        ..Default::default()
+    };
+    for mp4_err in [
+        fvid_media::owned_probe::probe_with_options(&mp4_src, &mp4_tight_opts).unwrap_err(),
+        fvid::media::probe_with_options(&mp4_src, &mp4_tight_opts).unwrap_err(),
+        fvid::media::probe_as_with_options(&mp4_src, Some("mp4"), &mp4_tight_opts).unwrap_err(),
+    ] {
+        assert!(
+            mp4_err.contains("controlled memory budget"),
+            "expected MP4 probe to charge index_bytes + sample.size simultaneously, got: {mp4_err}"
+        );
+    }
+
+    // 2. Matroska / WebM probe (`owned_webm_probe::try_probe_webm_with_limits` and `src/media_probe.rs::matroska_with_limits`):
+    // When a Matroska track uses frame-level zlib compression (`matroska-zlib/identical-zlib.mkv`), `scan_all()`
+    // decompresses each frame into `restored: Vec<u8>` (`packet_payload_size(i) + packet_read_overhead(i)`)
+    // while `reader` (`index_bytes`) is retained. Under `max_controlled_bytes = Some(mkv_index_bytes + mkv_max_pkt / 2)`
+    // (where `mkv_index_bytes <= limit` and `mkv_max_pkt <= limit` individually), Matroska probe must
+    // reject with `"controlled memory budget exceeded"`.
+    let mkv_src = root.join("matroska-zlib/identical-zlib.mkv");
+    let mut mkv_reader = fvid_media::owned_webm::WebmReader::open(
+        std::io::BufReader::new(std::fs::File::open(&mkv_src).unwrap()),
+        fvid_media::owned_webm::Limits::default(),
+    )
+    .unwrap();
+    mkv_reader.scan_all().unwrap();
+    let mkv_index_bytes = mkv_reader.estimated_index_payload_bytes().unwrap();
+    let mkv_max_pkt = (0..mkv_reader.packets.len())
+        .map(|i| {
+            mkv_reader.packet_payload_size(i).unwrap()
+                + mkv_reader.packet_read_overhead(i).unwrap()
+        })
+        .max()
+        .unwrap();
+    let mkv_budget = mkv_index_bytes + mkv_max_pkt / 2;
+    assert!(
+        mkv_budget >= mkv_max_pkt && mkv_budget / std::mem::size_of::<fvid_media::owned_webm::Packet>() >= mkv_reader.packets.len(),
+        "expected mkv_budget ({mkv_budget}) to cover index ({mkv_index_bytes}) and packet ({mkv_max_pkt}) individually"
+    );
+    let mkv_tight_opts = CopyOptions {
+        max_controlled_bytes: Some(mkv_budget),
+        ..Default::default()
+    };
+    for mkv_err in [
+        fvid_media::owned_probe::probe_with_options(&mkv_src, &mkv_tight_opts).unwrap_err(),
+        fvid_media::owned_webm_probe::probe_webm_with_options(&mkv_src, &mkv_tight_opts).unwrap_err(),
+        fvid::media::probe_with_options(&mkv_src, &mkv_tight_opts).unwrap_err(),
+        fvid::media::probe_as_with_options(&mkv_src, Some("matroska"), &mkv_tight_opts).unwrap_err(),
+    ] {
+        assert!(
+            mkv_err.contains("controlled memory budget exceeded"),
+            "expected Matroska probe to charge index_bytes + packet_payload_size simultaneously, got: {mkv_err}"
+        );
+    }
+
+    // 3. Ogg Vorbis probe (`owned_probe::probe_ogg_with_options` and `fvid::media::probe_with_options`):
+    // `vorbis-channels-2.ogg` has a small file/index preflight (~300 KiB), while unpacking its Vorbis
+    // setup header (`fvid_codecs::vorbis::Setup::parse`) requires > 2 MiB (`vorbis_admission::inspect(&setup.data).bytes`).
+    // Under `max_controlled_bytes = Some(600 * 1024)` (which passes `preflight`, but is smaller than
+    // `index + vorbis_admission::inspect.bytes`), Ogg probe must reject with `"controlled memory budget exceeded"`.
+    let ogg_vorbis_src = root.join("vorbis-channels-2.ogg");
+    let ogg_tight_opts = CopyOptions {
+        max_controlled_bytes: Some(600 * 1024),
+        ..Default::default()
+    };
+    for ogg_err in [
+        fvid_media::owned_probe::probe_with_options(&ogg_vorbis_src, &ogg_tight_opts).unwrap_err(),
+        fvid_media::owned_probe::probe_ogg_with_options(&ogg_vorbis_src, &ogg_tight_opts).unwrap_err(),
+        fvid::media::probe_with_options(&ogg_vorbis_src, &ogg_tight_opts).unwrap_err(),
+        fvid::media::probe_as_with_options(&ogg_vorbis_src, Some("ogg"), &ogg_tight_opts).unwrap_err(),
+    ] {
+        assert!(
+            ogg_err.contains("controlled memory budget exceeded"),
+            "expected Ogg Vorbis probe to charge index + Vorbis setup admission simultaneously, got: {ogg_err}"
+        );
+    }
+    let _ = dir;
+}
+
+#[test]
+fn matroska_display_geometry_alpha_transform_and_mp4_bridge_charge_simultaneous_working_sets() {
+    let dir = TempDir::new("batch399-matroska-display-alpha-mp4-bridge");
+
+    // 1. Matroska FFV1 with container display geometry (`stored_rotation = 90`):
+    // `owned_display_geometry::apply` allocates a rotated frame (`frame_len`) while the unrotated
+    // `decoded.frame` (`frame_len`) and `base_bytes` (`index_bytes + future_bytes`) remain live.
+    // We also pass `unsharp: Some("luma_msize_x=3:luma_msize_y=3:luma_amount=0.5".into())` so
+    // `process_frame_with_overlay` runs in-place after `owned_display_geometry::apply` and before the visitor.
+    // Specifically, if `unsharp` is invalid after display geometry or if we use a 2-frame file where frame 0
+    // is before `interval` (so `emit == false` on frame 0!), `decode_webm` runs `owned_display_geometry::apply`
+    // on frame 0 without invoking the export visitor!
+    let rotated_mkv = dir.0.join("src-rotated-64x64.mkv");
+    let frame_len = 64 * 64 + 2 * 32 * 32; // 6_144 bytes
+    {
+        let frame = fvid_media::owned_frame::GeometryFrame {
+            width: 64,
+            height: 64,
+            subsampling: Some([2, 2]),
+            data: vec![64u8; frame_len],
+        };
+        let ffv1_pkt = fvid_media::owned_ffv1_encoder::encode(&frame, 8).unwrap();
+        let mut file = std::fs::File::create(&rotated_mkv).unwrap();
+        let mut writer = fvid_media::owned_matroska::PacketWriter::new_ffv1_with_metadata(
+            &mut file,
+            64,
+            64,
+            None,
+            90,
+            40_000_000,
+        )
+        .unwrap();
+        writer
+            .write_packet(0, 0, 40_000_000, true, &ffv1_pkt)
+            .unwrap();
+        writer.finish().unwrap();
+    }
+    let mut rot_reader = fvid_media::owned_webm::WebmReader::open(
+        std::io::BufReader::new(std::fs::File::open(&rotated_mkv).unwrap()),
+        fvid_media::owned_webm::Limits::default(),
+    )
+    .unwrap();
+    rot_reader.scan_all().unwrap();
+    let rot_index_bytes = rot_reader.estimated_index_payload_bytes().unwrap();
+    // Set budget between `rot_index_bytes + frame_len + 512` (passes unrotated decode check)
+    // and `rot_index_bytes + frame_len * 2` (exceeded when rotated frame is allocated simultaneously).
+    // Note: we use `interval: Some((40_000, 80_000))` so frame 0 (`pts = 0`) is NOT emitted to the visitor
+    // (`emit == false`), isolating `decode_webm`'s own `owned_display_geometry::apply` budget check!
+    let rot_opts = CopyOptions {
+        max_controlled_bytes: Some(rot_index_bytes + frame_len + 1_024),
+        ..Default::default()
+    };
+    let out_rot_mkv = dir.0.join("out-rot.mkv");
+    let rot_transform = fvid_media::LosslessTransform {
+        interval: Some((40_000, 80_000)),
+        ..Default::default()
+    };
+    for rot_err in [
+        fvid_media::plan_transcode_lossless(&rotated_mkv, &rot_transform, &rot_opts, None)
+            .unwrap_err(),
+        fvid_media::transcode_lossless(&rotated_mkv, &out_rot_mkv, rot_transform, &rot_opts)
+            .unwrap_err(),
+    ] {
+        assert!(
+            rot_err.contains("controlled memory budget"),
+            "expected Matroska display-geometry rotation to charge source + rotated frames simultaneously, got: {rot_err}"
+        );
+    }
+    assert!(!out_rot_mkv.exists());
+
+    // 2. Matroska FFV1 with alpha plane (`encode_with_alpha`):
+    // `transform_alpha` allocates a 3-channel RGB wrapper (`alpha_len * 3`), a 3-channel RGB output
+    // (`alpha_len * 3`), and a 1-channel output (`alpha_len`) while `base_bytes + decoded.frame.data.len() + alpha_len`
+    // remain live. Using `interval: Some((40_000, 80_000))` isolates `decode_webm`'s `transform_alpha` check
+    // on frame 0 before any visitor runs.
+    let alpha_mkv = dir.0.join("src-alpha-64x64.mkv");
+    let alpha_len = 64 * 64; // 4_096 bytes
+    {
+        let frame = fvid_media::owned_frame::GeometryFrame {
+            width: 64,
+            height: 64,
+            subsampling: Some([2, 2]),
+            data: vec![64u8; frame_len],
+        };
+        let alpha = vec![255u8; alpha_len];
+        let ffv1_pkt =
+            fvid_media::owned_ffv1_encoder::encode_with_alpha(&frame, 8, &alpha).unwrap();
+        let mut file = std::fs::File::create(&alpha_mkv).unwrap();
+        let mut writer = fvid_media::owned_matroska::PacketWriter::new_ffv1_with_metadata(
+            &mut file,
+            64,
+            64,
+            None,
+            0,
+            40_000_000,
+        )
+        .unwrap();
+        writer
+            .write_packet(0, 0, 40_000_000, true, &ffv1_pkt)
+            .unwrap();
+        writer.finish().unwrap();
+    }
+    let mut alpha_reader = fvid_media::owned_webm::WebmReader::open(
+        std::io::BufReader::new(std::fs::File::open(&alpha_mkv).unwrap()),
+        fvid_media::owned_webm::Limits::default(),
+    )
+    .unwrap();
+    alpha_reader.scan_all().unwrap();
+    let alpha_index_bytes = alpha_reader.estimated_index_payload_bytes().unwrap();
+    let alpha_opts = CopyOptions {
+        max_controlled_bytes: Some(alpha_index_bytes + frame_len + alpha_len + 2_048),
+        ..Default::default()
+    };
+    let out_alpha_mkv = dir.0.join("out-alpha.mkv");
+    let alpha_transform = fvid_media::LosslessTransform {
+        interval: Some((40_000, 80_000)),
+        vertical_flip: true,
+        ..Default::default()
+    };
+    for alpha_err in [
+        fvid_media::plan_transcode_lossless(&alpha_mkv, &alpha_transform, &alpha_opts, None)
+            .unwrap_err(),
+        fvid_media::transcode_lossless(&alpha_mkv, &out_alpha_mkv, alpha_transform, &alpha_opts)
+            .unwrap_err(),
+    ] {
+        assert!(
+            alpha_err.contains("controlled memory budget"),
+            "expected Matroska alpha transform to charge simultaneous RGB opacity wrapper and combined buffer, got: {alpha_err}"
+        );
+    }
+    assert!(!out_alpha_mkv.exists());
+
+    // 3. MP4 video presentation bridge (`owned_mp4_video_decode::decode_presented` + `owned_mp4_video_bridge::prepare_selected`):
+    // During the emit phase of `decode_presented`, `reader` (`index_bytes`) and `frames` (`samples * size_of::<FrameMetadata>()`)
+    // remain live (`table_bytes`) while the bridge visitor allocates a second frame copy (`pixels.len() * 2 + meta_working_bytes`)
+    // and encodes an FFV1 packet (`+ packet.len()`).
+    // We append a 32 KiB `udta/©cmt` box to `moov` in `small.mp4` (`mdat` precedes `moov`, so sample offsets are unchanged),
+    // giving `mp4_index_bytes` ~ 100 KiB (`32 KiB * 3` for `tags.comment` + `FileMetadata::from_mp4` + `preview` in Matroska).
+    let base_mp4 = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
+        .join("tests/fixtures/playback-errors/mp4-metadata-admission/small.mp4");
+    let mp4_src = dir.0.join("tagged-small.mp4");
+    {
+        let mut bytes = std::fs::read(&base_mp4).unwrap();
+        let comment = vec![b'x'; 32_768];
+        let cmt_size = u32::try_from(8 + comment.len()).unwrap().to_be_bytes();
+        let mut cmt_box = Vec::with_capacity(8 + comment.len());
+        cmt_box.extend_from_slice(&cmt_size);
+        cmt_box.extend_from_slice(b"\xa9cmt");
+        cmt_box.extend_from_slice(&comment);
+        let udta_size = u32::try_from(8 + cmt_box.len()).unwrap().to_be_bytes();
+        let mut udta_box = Vec::with_capacity(8 + cmt_box.len());
+        udta_box.extend_from_slice(&udta_size);
+        udta_box.extend_from_slice(b"udta");
+        udta_box.extend_from_slice(&cmt_box);
+        // `moov` starts at offset 3149 in `small.mp4`.
+        let moov_offset = 3149usize;
+        assert_eq!(&bytes[moov_offset + 4..moov_offset + 8], b"moov");
+        let old_moov_size =
+            u32::from_be_bytes(bytes[moov_offset..moov_offset + 4].try_into().unwrap()) as usize;
+        let new_moov_size = u32::try_from(old_moov_size + udta_box.len())
+            .unwrap()
+            .to_be_bytes();
+        bytes[moov_offset..moov_offset + 4].copy_from_slice(&new_moov_size);
+        bytes.extend_from_slice(&udta_box);
+        std::fs::write(&mp4_src, &bytes).unwrap();
+    }
+    let mp4_reader = fvid_media::owned_mp4::Mp4Reader::open(
+        std::io::BufReader::new(std::fs::File::open(&mp4_src).unwrap()),
+        fvid_media::owned_mp4::Limits::default(),
+    )
+    .unwrap();
+    let mp4_index_bytes = mp4_reader.estimated_index_payload_bytes().unwrap();
+    // In `tagged-small.mp4`:
+    // - `mp4_index_bytes` is ~33 KiB (`32_768` comment + track/sample tables).
+    // - `meta_working_bytes` (`estimate_matroska_metadata_working_bytes`) is `(32_768 + 32 + 6) * 8 = 262_448` bytes.
+    // - `base_working_bytes = table_bytes + meta_working_bytes` (`mp4_index_bytes + 72 + 262_448 = mp4_index_bytes + 262_520`).
+    // - `pixels.len()` is `3_072` bytes (`32x32` 4:4:4), so `pixels.len() * 2 = 6_144` bytes.
+    // Under `max_controlled_bytes = Some(mp4_index_bytes + 262_520 + 3_072)`:
+    // - `prepare`'s initial `base_working_bytes <= limit` check passes (`mp4_index_bytes + 262_520 <= mp4_index_bytes + 265_592`).
+    // - `AvcDecoder` (needs ~13 KiB) and `decode_presented`'s sample decode check (`table_bytes + packet.len() + 3_072` ~ `mp4_index_bytes + 6_257`) easily pass!
+    // - Without charging `table_bytes` in the bridge visitor, `pixels.len() * 2 + meta_working_bytes` (`6_144 + 262_448 = 268_592`) <= `mp4_index_bytes + 265_592` (~`298_800`) passed!
+    // - With `table_bytes` charged simultaneously in the bridge visitor, `base_working_bytes + 6_144` (`mp4_index_bytes + 268_664`) > `mp4_index_bytes + 265_592`,
+    //   rejecting with `"MP4 video frame exceeds controlled memory budget"`.
+    let mp4_bridge_opts = CopyOptions {
+        max_controlled_bytes: Some(mp4_index_bytes + 265_592),
+        ..Default::default()
+    };
+    let out_mp4_mkv = dir.0.join("out-mp4.mkv");
+    for mp4_err in [
+        fvid_media::plan_transcode_lossless(
+            &mp4_src,
+            &fvid_media::LosslessTransform {
+                vertical_flip: true,
+                ..Default::default()
+            },
+            &mp4_bridge_opts,
+            None,
+        )
+        .unwrap_err(),
+        fvid_media::transcode_lossless(
+            &mp4_src,
+            &out_mp4_mkv,
+            fvid_media::LosslessTransform {
+                vertical_flip: true,
+                ..Default::default()
+            },
+            &mp4_bridge_opts,
+        )
+        .unwrap_err(),
+    ] {
+        assert!(
+            mp4_err.contains("MP4 video frame exceeds controlled memory budget")
+                || mp4_err.contains("encoded FFV1 packet exceeds controlled memory budget"),
+            "expected MP4 video bridge visitor to charge decode_presented table_bytes simultaneously with frame working set, got: {mp4_err}"
+        );
+    }
+    assert!(!out_mp4_mkv.exists());
+}
+
+#[test]
+fn subtitle_burn_charges_simultaneous_y4m_double_buffers_and_container_cues_with_source_index() {
+    let dir = TempDir::new("subtitle-burn-simultaneous");
+    let root = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("tests/fixtures/playback-errors");
+    let y4m_src = root.join("subtitle-burn.y4m");
+    let srt_src = root.join("subtitle-burn.srt");
+
+    // 1. Y4M subtitle burn (`owned_subtitle_burn::{prepare, plan_burn_subtitles, burn_subtitles}`):
+    // `subtitle-burn.y4m` is 96x64 4:2:0 (`frame_len = 96 * 64 + 2 * 48 * 32 = 9_216` bytes,
+    // `mask_bytes = 96 * 64 = 6_144` bytes).
+    // During `visit_reader_transformed_counted`, `input: Vec<u8>` (`frame_len`) is live while the visitor
+    // allocates `frame.data: Vec<u8>` (`frame_len`) and rasterizes `mask` (`mask_bytes`) with `cues` live!
+    // So the simultaneous frame working set is `frame_len * 2 + mask_bytes + cues_and_meta_bytes` (`>= 24_576` bytes),
+    // NOT `frame_len + mask_bytes + cues_and_meta_bytes` (`~15_700` bytes).
+    // With `max_controlled_bytes = Some(20_000)`:
+    // - single-buffer `frame_len + mask_bytes + cues_and_meta_bytes + packet.len()` (~16.5 KiB) erroneously passed!
+    // - double-buffer `frame_len * 2 + mask_bytes` (`18_432 + 6_144 = 24_576 > 20_000`) must reject!
+    let y4m_opts = CopyOptions {
+        max_controlled_bytes: Some(20_000),
+        ..Default::default()
+    };
+    let out_y4m_mkv = dir.0.join("out-y4m-burn.mkv");
+    for y4m_err in [
+        fvid_media::owned_subtitle_burn::plan_burn_subtitles(&y4m_src, &srt_src, &y4m_opts)
+            .unwrap_err(),
+        fvid_media::owned_subtitle_burn::burn_subtitles(
+            &y4m_src,
+            &out_y4m_mkv,
+            &srt_src,
+            &y4m_opts,
+        )
+        .unwrap_err(),
+    ] {
+        assert!(
+            y4m_err.contains("controlled memory budget"),
+            "expected Y4M subtitle burn to charge both reader input and cloned frame buffers simultaneously, got: {y4m_err}"
+        );
+    }
+    assert!(!out_y4m_mkv.exists());
+
+    // 2. Container subtitle burn (`owned_subtitle_burn::{prepare, plan_burn_subtitles, burn_subtitles}`):
+    // When burning a multi-cue SRT into a Matroska FFV1 container, `cues` (`cues_only_bytes`) AND
+    // the Matroska source index/metadata (`source_index_and_meta_bytes`) AND the double-buffered frame
+    // (`frame_len * 2 + mask_bytes`) are all live simultaneously!
+    // Previously `container_base_bytes = cues_and_meta_bytes.max(source_index_and_meta_bytes)` took `.max(...)`
+    // instead of summing `cues_only_bytes + source_index_and_meta_bytes`.
+    let mkv_src = dir.0.join("source-burn.mkv");
+    fvid_media::transcode_lossless(
+        &y4m_src,
+        &mkv_src,
+        Default::default(),
+        &CopyOptions {
+            metadata_set: vec![("COMMENT".into(), "x".repeat(512))],
+            ..Default::default()
+        },
+    )
+    .unwrap();
+    let mut mkv_reader = fvid_media::owned_webm::WebmReader::open(
+        std::io::BufReader::new(std::fs::File::open(&mkv_src).unwrap()),
+        fvid_media::owned_webm::Limits::default(),
+    )
+    .unwrap();
+    mkv_reader.scan_all().unwrap();
+    let mkv_index_bytes = mkv_reader.estimated_index_payload_bytes().unwrap();
+    // `COMMENT` = 512 bytes in `FileMetadata::tags` + default track description (`6` bytes) ->
+    // `estimate_matroska_metadata_working_bytes` = `(512 + 32 + 6) * 8 = 4_400` bytes.
+    let source_index_and_meta_bytes = mkv_index_bytes + 4_400;
+    // Create an SRT with 40 cues (~4 KiB file, so `subs_bytes * 3` is ~12 KiB and `cues_only_bytes` is ~3.2 KiB).
+    let big_srt = dir.0.join("cues.srt");
+    {
+        let mut text = String::new();
+        for idx in 0..40 {
+            let start_ms = idx * 10;
+            let end_ms = start_ms + 5;
+            text.push_str(&format!(
+                "{}\n00:00:00,{:03} --> 00:00:00,{:03}\nSubtitle line number {:02} with extra text payload\n\n",
+                idx + 1,
+                start_ms,
+                end_ms,
+                idx + 1
+            ));
+        }
+        std::fs::write(&big_srt, &text).unwrap();
+    }
+    let frame_working_without_cues = 9_216 * 2 + 6_144 + source_index_and_meta_bytes;
+    // Choose a budget slightly above `frame_working_without_cues + 1_024` (enough for FFV1 packet when `cues_only_bytes`
+    // is omitted via `.max(...)`, since `source_index_and_meta_bytes` > `cues_and_meta_bytes`),
+    // but strictly below `frame_working_without_cues + cues_only_bytes`!
+    let mkv_opts = CopyOptions {
+        max_controlled_bytes: Some(frame_working_without_cues + 1_500),
+        ..Default::default()
+    };
+    let out_mkv_burn = dir.0.join("out-mkv-burn.mkv");
+    for mkv_err in [
+        fvid_media::owned_subtitle_burn::plan_burn_subtitles(&mkv_src, &big_srt, &mkv_opts)
+            .unwrap_err(),
+        fvid_media::owned_subtitle_burn::burn_subtitles(
+            &mkv_src,
+            &out_mkv_burn,
+            &big_srt,
+            &mkv_opts,
+        )
+        .unwrap_err(),
+    ] {
+        assert!(
+            mkv_err.contains("controlled memory budget"),
+            "expected container subtitle burn to sum cues_only_bytes and source_index_and_meta_bytes simultaneously, got: {mkv_err}"
+        );
+    }
+    assert!(!out_mkv_burn.exists());
+}
+
+#[test]
+fn multitrack_lossless_exports_charge_simultaneous_index_metadata_schedule_and_packet_working_sets() {
+    let dir = TempDir::new("multitrack-schedule-packet-simultaneous");
+
+    // 1. `owned_webm_multitrack_export`:
+    // Create a multitrack Matroska source (1 FFV1 16x16 video track + 1 Opus audio track)
+    // with 120 video packets and 120 audio packets (`240` packets total, so `schedule_len = 360`,
+    // `schedule_bytes = 360 * 32 = 11_520` bytes) and a 1_024-byte container title tag
+    // (`meta_working_bytes = (1_024 + 32 + 12) * 8 = 8_544` bytes).
+    // When `plan_transcode_lossless` or `transcode_lossless` runs with `vertical_flip: true`,
+    // `decode_webm` + `check_encoded_ffv1_with_controlled` need `index_and_meta_bytes + 384 * 2 + ~200` (~`index_and_meta_bytes + 968`).
+    // Then `plan_selection` and `try_export` allocate `schedule` (`11_520` bytes, plus `video_index_bytes` in `try_export`)
+    // and read packets while `input` (`index_and_meta_bytes`), `video` (`video_index_bytes`), and `schedule` (`11_520` bytes) are all live!
+    let mkv_multi_src = dir.0.join("src-multi-schedule.mkv");
+    {
+        let mut opus_head = Vec::with_capacity(19);
+        opus_head.extend_from_slice(b"OpusHead");
+        opus_head.push(1);
+        opus_head.push(1);
+        opus_head.extend_from_slice(&0u16.to_le_bytes());
+        opus_head.extend_from_slice(&48_000u32.to_le_bytes());
+        opus_head.extend_from_slice(&0i16.to_le_bytes());
+        opus_head.push(0);
+
+        let mut frame = fvid_media::owned_frame::GeometryFrame {
+            width: 16,
+            height: 16,
+            subsampling: Some([2, 2]),
+            data: vec![64u8; 16 * 16 + 2 * 8 * 8],
+        };
+        let ffv1_pkt = fvid_media::owned_ffv1_encoder::encode(&mut frame, 8).unwrap();
+        let mut opus_pkt = vec![0xF8u8, 0xFF, 0xFE];
+        opus_pkt.resize(400, 0);
+
+        let specs = [
+            fvid_media::owned_matroska::TrackSpec {
+                encoding: fvid_media::owned_matroska::Encoding::Ffv1V1 {
+                    width: 16,
+                    height: 16,
+                },
+                name: "",
+                language: "und",
+            },
+            fvid_media::owned_matroska::TrackSpec {
+                encoding: fvid_media::owned_matroska::Encoding::Opus {
+                    configuration: &opus_head,
+                },
+                name: "",
+                language: "und",
+            },
+        ];
+        let track_options = [
+            fvid_media::owned_matroska::TrackOptions {
+                default_duration_ns: 40_000_000,
+                ..Default::default()
+            },
+            fvid_media::owned_matroska::TrackOptions {
+                default_duration_ns: 20_000_000,
+                ..Default::default()
+            },
+        ];
+        let mut file_meta = fvid_media::owned_matroska::FileMetadata::default();
+        file_meta.tags.title = "T".repeat(1_024);
+        let mut file = std::fs::File::create(&mkv_multi_src).unwrap();
+        let mut writer = fvid_media::owned_matroska::PacketWriter::new_with_metadata(
+            &mut file,
+            &specs,
+            &track_options,
+            &file_meta,
+        )
+        .unwrap();
+        for i in 0..120u64 {
+            writer
+                .write_packet(0, i * 40_000_000, 40_000_000, true, &ffv1_pkt)
+                .unwrap();
+            writer
+                .write_packet(1, i * 20_000_000, 20_000_000, true, &opus_pkt)
+                .unwrap();
+        }
+        writer.finish().unwrap();
+    }
+    let mut mkv_reader = fvid_media::owned_webm::WebmReader::open(
+        std::io::BufReader::new(std::fs::File::open(&mkv_multi_src).unwrap()),
+        fvid_media::owned_webm::Limits::default(),
+    )
+    .unwrap();
+    mkv_reader.scan_all().unwrap();
+    let mkv_index_bytes = mkv_reader.estimated_index_payload_bytes().unwrap();
+    // In `src-multi-schedule.mkv`:
+    // - `mkv_index_bytes` = `56_596` bytes.
+    // - `meta_working_bytes` (`check_multitrack_matroska_metadata_budget`):
+    //   `file.tags.title` = `1_024` bytes (`1_056`), `text_tags["TITLE"]` = `1_024` bytes (`1_061`),
+    //   `description` (`name: "", language: "und", legacy_language: "und"`) = `6` bytes,
+    //   so `meta_working_bytes = (1_056 + 1_061 + 6) * 8 = 16_984` bytes (`input.index_and_meta_bytes = 73_580` bytes).
+    // - `schedule_bytes = (240 + 120) * std::mem::size_of::<(i128, usize, usize)>() = 8_640` bytes (`size_of::<(i128, usize, usize)>() == 24`).
+    // - `max_packet_size = 400` bytes.
+    // With `max_controlled_bytes = Some(mkv_index_bytes + 16_984 + 8_640 + 150)`:
+    // - `mkv_index_and_meta + schedule_bytes` (`82_220`) <= `limit` (`82_370`), so old `plan_selection` passed!
+    // - `mkv_index_and_meta + schedule_bytes + max_packet_size` (`82_620`) > `limit` (`82_370`)!
+    let mkv_meta_working_bytes = (1_056 + 1_061 + 6) * 8; // 16_984 bytes
+    let mkv_index_and_meta = mkv_index_bytes + mkv_meta_working_bytes;
+    let schedule_bytes = (240 + 120) * std::mem::size_of::<(i128, usize, usize)>(); // 8_640 bytes
+    let mkv_opts = CopyOptions {
+        max_controlled_bytes: Some(mkv_index_and_meta + schedule_bytes + 150),
+        streams: vec![0, 1],
+        ..Default::default()
+    };
+    let out_mkv = dir.0.join("out-mkv-schedule.mkv");
+    for err in [
+        fvid_media::plan_transcode_lossless(
+            &mkv_multi_src,
+            &fvid_media::LosslessTransform {
+                vertical_flip: true,
+                ..Default::default()
+            },
+            &mkv_opts,
+            None,
+        )
+        .unwrap_err(),
+        fvid_media::transcode_lossless(
+            &mkv_multi_src,
+            &out_mkv,
+            fvid_media::LosslessTransform {
+                vertical_flip: true,
+                ..Default::default()
+            },
+            &mkv_opts,
+        )
+        .unwrap_err(),
+    ] {
+        assert!(
+            err.contains("controlled memory budget"),
+            "expected multitrack WebM lossless export to charge index + metadata + schedule + packet simultaneously, got: {err}"
+        );
+    }
+    assert!(!out_mkv.exists());
+
+    // 2. `owned_mp4_multitrack_export`:
+    // On `aac-device-layout/normal-ten.mp4` (`mp4_index_bytes = 2_916` bytes, `bridge_index_bytes` ~ `694` bytes,
+    // `64x48` 4:2:0 video -> `pixels.len() * 2 = 9_216`, `ffv1_packet.len()` ~ `4_400`):
+    // With 8 custom tags of 800 bytes each (`meta_working_bytes = 52_640` bytes):
+    // - Inside `owned_mp4_video_bridge::prepare_video_controlled`, `metadata_set` is stripped (`0` tag bytes),
+    //   so the temporary video bridge needs ~`15.7 KiB`.
+    // - In `plan_selection` (`check_encoded_ffv1_with_controlled(&bridge.path)`) and `try_export` (`transcode_lossless(&bridge.path)`):
+    //   `input.reader` (`mp4_index_bytes = 2_916`) is live simultaneously with `bridge_index_bytes + meta_working_bytes + pixels.len() * 2 + ffv1_packet.len()`!
+    //   Previously `plan_selection` and `try_export` omitted `mp4_index_bytes = 2_916` during the bridge FFV1 check / transcode!
+    let mp4_multi_src = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
+        .join("tests/fixtures/playback-errors/aac-device-layout/normal-ten.mp4");
+    let mp4_reader = fvid_media::owned_mp4::Mp4Reader::open(
+        std::io::BufReader::new(std::fs::File::open(&mp4_multi_src).unwrap()),
+        fvid_media::owned_mp4::Limits::default(),
+    )
+    .unwrap();
+    let mp4_index_bytes = mp4_reader.estimated_index_payload_bytes().unwrap();
+    assert_eq!(mp4_index_bytes, 2_980);
+    let mut mp4_opts = CopyOptions {
+        max_controlled_bytes: Some(68_000),
+        streams: vec![0, 1],
+        ..Default::default()
+    };
+    for i in 0..8 {
+        mp4_opts
+            .metadata_set
+            .push((format!("CUSTOM_TAG_{i}"), "X".repeat(800)));
+    }
+    let out_mp4 = dir.0.join("out-mp4-schedule.mkv");
+    for err in [
+        fvid_media::plan_transcode_lossless(
+            &mp4_multi_src,
+            &fvid_media::LosslessTransform {
+                vertical_flip: true,
+                ..Default::default()
+            },
+            &mp4_opts,
+            None,
+        )
+        .unwrap_err(),
+        fvid_media::transcode_lossless(
+            &mp4_multi_src,
+            &out_mp4,
+            fvid_media::LosslessTransform {
+                vertical_flip: true,
+                ..Default::default()
+            },
+            &mp4_opts,
+        )
+        .unwrap_err(),
+    ] {
+        assert!(
+            err.contains("controlled memory budget"),
+            "expected multitrack MP4 lossless export to charge simultaneous MP4 index, bridge video index, schedule, and packet working sets, got: {err}"
+        );
+    }
+    assert!(!out_mp4.exists());
+}
+
+#[test]
+fn matroska_identity_copy_and_mp4_matroska_remux_charge_simultaneous_index_and_packet_working_sets() {
+    let dir = TempDir::new("matroska-copy-mp4-remux-simultaneous");
+
+    // 1. `owned_matroska_copy::inspect_with_packet_and_memory_limits` (`owned_matroska_copy_impl.rs`):
+    // Create a single-track Matroska source with 10 Opus packets of 4_096 bytes each and a 1_024-byte title tag.
+    // `index_bytes = reader.packets.len() * 16 + reader_index_bytes + 65_536`.
+    // Previously `inspect_with_packet_and_memory_limits` checked `index_bytes <= limit` (line 77) and
+    // `packet.size <= limit` (line 85) in isolation, instead of charging `index_bytes + packet.size` simultaneously!
+    let mkv_src = dir.0.join("src-copy.mkv");
+    {
+        let mut opus_head = Vec::with_capacity(19);
+        opus_head.extend_from_slice(b"OpusHead");
+        opus_head.push(1);
+        opus_head.push(1);
+        opus_head.extend_from_slice(&0u16.to_le_bytes());
+        opus_head.extend_from_slice(&48_000u32.to_le_bytes());
+        opus_head.extend_from_slice(&0i16.to_le_bytes());
+        opus_head.push(0);
+
+        let mut opus_pkt = vec![0xF8u8, 0xFF, 0xFE];
+        opus_pkt.resize(4_096, 0);
+
+        let specs = [fvid_media::owned_matroska::TrackSpec {
+            encoding: fvid_media::owned_matroska::Encoding::Opus {
+                configuration: &opus_head,
+            },
+            name: "",
+            language: "und",
+        }];
+        let track_options = [fvid_media::owned_matroska::TrackOptions {
+            default_duration_ns: 20_000_000,
+            ..Default::default()
+        }];
+        let mut file_meta = fvid_media::owned_matroska::FileMetadata::default();
+        file_meta.tags.title = "C".repeat(1_024);
+        let mut file = std::fs::File::create(&mkv_src).unwrap();
+        let mut writer = fvid_media::owned_matroska::PacketWriter::new_with_metadata(
+            &mut file,
+            &specs,
+            &track_options,
+            &file_meta,
+        )
+        .unwrap();
+        for i in 0..10u64 {
+            writer
+                .write_packet(0, i * 20_000_000, 20_000_000, true, &opus_pkt)
+                .unwrap();
+        }
+        writer.finish().unwrap();
+    }
+    let mut mkv_reader = fvid_media::owned_webm::WebmReader::open(
+        std::io::BufReader::new(std::fs::File::open(&mkv_src).unwrap()),
+        fvid_media::owned_webm::Limits::default(),
+    )
+    .unwrap();
+    mkv_reader.scan_all().unwrap();
+    drop(std::mem::take(&mut mkv_reader.track_uids));
+    drop(std::mem::take(&mut mkv_reader.track_dispositions));
+    drop(std::mem::take(&mut mkv_reader.track_languages));
+    drop(std::mem::take(&mut mkv_reader.track_legacy_languages));
+    let reader_index_bytes = mkv_reader.estimated_index_payload_bytes().unwrap();
+    let copy_index_bytes =
+        mkv_reader.packets.len() * std::mem::size_of::<(u64, usize)>() + reader_index_bytes + (64 << 10);
+    // With `max_controlled_bytes = Some(copy_index_bytes + 1_024)`:
+    // - `copy_index_bytes <= limit` passed!
+    // - `packet.size (4_096) <= limit` passed!
+    // - Simultaneous `copy_index_bytes + packet.size` (`copy_index_bytes + 4_096`) > `limit`!
+    let copy_opts = CopyOptions {
+        max_controlled_bytes: Some(copy_index_bytes + 1_024),
+        ..Default::default()
+    };
+    let out_copy_mkv = dir.0.join("out-copy.mkv");
+    for err in [
+        fvid_media::plan_remux(&mkv_src, &copy_opts).unwrap_err(),
+        fvid_media::remux(&mkv_src, &out_copy_mkv, &copy_opts).unwrap_err(),
+    ] {
+        assert!(
+            err.contains("controlled memory budget"),
+            "expected Matroska identity copy to charge copy_index_bytes + packet.size simultaneously, got: {err}"
+        );
+    }
+    assert!(!out_copy_mkv.exists());
+
+    // 2. `owned_mp4_remux::validate_selected_prefix_packet_budget` (`owned_mp4_remux.rs`):
+    // On `aac-device-layout/normal-ten.mp4` (`10` video packets + `20` audio packets),
+    // `owned_mp4_matroska::plan` for the video track allocates `presentation: Vec<(i64, usize)>` (`10 * 16 = 160` bytes)
+    // and `durations: Vec<i128>` (`10 * 16 = 160` bytes) alongside `packets: Vec<PacketTime>` (`10 * 48 = 480` bytes),
+    // and in `write_selected_with_text_metadata_overrides`, `queue: BinaryHeap` holds up to `selected.len()` entries (`2 * 40 = 80` bytes).
+    // Furthermore, if an MP4 video track has 200 samples (`presentation + durations = 200 * 32 = 6_400` bytes),
+    // `plan` allocates `packets` (`200 * 48 = 9_600` bytes) + `presentation` (`3_200` bytes) + `durations` (`3_200` bytes)
+    // while `reader` (`index_bytes`) and `base_bytes` are live!
+    // Let's verify on `normal-ten.mp4`:
+    // `mp4_index_bytes = 2_916`, `base_bytes = 16_384 + 2_916 = 19_300` bytes,
+    // `plan_bytes = 19_300 + 30 * 48 = 20_740` bytes.
+    // On packet 1 (`video` sample 0, `sample.size = 2_397` bytes, or packet `k` where `packets * 32 + sample.size` peaks):
+    // Find the exact peak of `plan_bytes + packets * 32 + sample.size` across `normal-ten.mp4`,
+    // and set `max_controlled_bytes` to `peak + 100` (which passed before charging the video `presentation + durations`
+    // and `queue` working set of `10 * 32 + 2 * 40 = 400` bytes, and now rejects!).
+    let mp4_src = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
+        .join("tests/fixtures/playback-errors/aac-device-layout/normal-ten.mp4");
+    // On `normal-ten.mp4` (`mp4_index_bytes = 2_916`, `base_bytes = 16_384 + 2_916 = 19_300` bytes,
+    // `10` total packets across both tracks -> `10 * 48 = 480` bytes, `plan_bytes = 19_780` bytes,
+    // max `packets * 32 + sample.size` ~ `500` bytes, so old peak was ~`20_280` bytes;
+    // with `5 * 32 = 160` video scratch bytes + `2 * 48 = 96` queue bytes (`+256` bytes),
+    // the simultaneous working set is ~`20_536` bytes).
+    let mp4_remux_opts = CopyOptions {
+        max_controlled_bytes: Some(20_350),
+        ..Default::default()
+    };
+    let out_mp4_remux = dir.0.join("out-mp4-remux.mkv");
+    for err in [
+        fvid_media::owned_mp4_remux::plan_remux(&mp4_src, &mp4_remux_opts).unwrap_err(),
+        fvid_media::owned_mp4_remux::remux(&mp4_src, &out_mp4_remux, &mp4_remux_opts).unwrap_err(),
+    ] {
+        assert!(
+            err.contains("controlled memory budget"),
+            "expected MP4 Matroska remux to charge video presentation/durations and queue working sets alongside plan_bytes, got: {err}"
+        );
+    }
+    assert!(!out_mp4_remux.exists());
+}
+
+#[test]
+fn pcm_matroska_metadata_extraction_and_native_mix_merge_concat_charge_simultaneous_metadata_and_input_bufreader_working_sets() {
+    let dir = TempDir::new("pcm-matroska-and-mix-bufreader-working-set");
+
+    // 1. `extract_source_wave_info` and `native_export::export_pcm_selected` on a RIFF/WAVE file
+    // with a 4_096-byte `LIST INFO` `ICMT` comment must enforce `wave_metadata_working_bytes`
+    // (`8 * (4108 + 12) + 16_384 = 49_344` bytes) BEFORE calling `info_chunks` to allocate the
+    // raw `LIST INFO` payload!
+    let wav_a = dir.0.join("a.wav");
+    fvid_media::owned_wav_file::write_wav_f32le(&wav_a, 48_000, 1, &[0.1; 480]).unwrap();
+    let mut wav_tagged_bytes = std::fs::read(&wav_a).unwrap();
+    let comment = vec![b'C'; 4_096];
+    let list_payload_len = 4 + 8 + comment.len();
+    wav_tagged_bytes.extend_from_slice(b"LIST");
+    wav_tagged_bytes.extend_from_slice(&(list_payload_len as u32).to_le_bytes());
+    wav_tagged_bytes.extend_from_slice(b"INFOICMT");
+    wav_tagged_bytes.extend_from_slice(&(comment.len() as u32).to_le_bytes());
+    wav_tagged_bytes.extend_from_slice(&comment);
+    let riff_size = u32::try_from(wav_tagged_bytes.len() - 8).unwrap();
+    wav_tagged_bytes[4..8].copy_from_slice(&riff_size.to_le_bytes());
+    let wav_tagged = dir.0.join("tagged.wav");
+    std::fs::write(&wav_tagged, &wav_tagged_bytes).unwrap();
+
+    // Under `max_controlled_bytes = Some(30_000)`:
+    // - `edited.len() = 4_108 <= 30_000` passed the post-allocation check in `export_pcm_selected`,
+    //   even though `wave_metadata_working_bytes(4_108, &opts) + 16_384 = 49_344 > 30_000`!
+    let wav_export_opts = CopyOptions {
+        max_controlled_bytes: Some(30_000),
+        ..Default::default()
+    };
+    let out_export_wav = dir.0.join("out-export.wav");
+    let export_err = fvid::native_export::export_audio_pcm_selected_with_controls(
+        &wav_tagged,
+        &out_export_wav,
+        None,
+        &wav_export_opts,
+    )
+    .unwrap_err()
+    .to_string();
+    assert!(
+        export_err.contains("controlled memory budget exceeded"),
+        "expected native_export::export_audio_pcm_selected_with_controls to enforce WAVE metadata working budget before allocating info_chunks, got: {export_err}"
+    );
+    assert!(!out_export_wav.exists());
+
+    // 2. `extract_source_pcm_metadata_with_interval_packet_and_memory_limit` on a Matroska audio
+    // source with a 1024-byte `TITLE` tag (`pcm-f32.mka` produced by `decode_audio`):
+    // `reader_index_bytes` (~`432` bytes) fits inside `max_controlled_bytes = Some(20_000)`,
+    // while `reader_index_bytes + mka_meta_working` (`432 + 8 * (1123 + 12) + 16_384 = 25_896` bytes) exceeds `20_000`!
+    let mka_tagged = dir.0.join("tagged.mka");
+    let mut tag_opts = CopyOptions::default();
+    tag_opts
+        .metadata_set
+        .push(("title".to_string(), "T".repeat(1_024)));
+    fvid::media::decode_audio(&wav_a, &mka_tagged, &tag_opts).unwrap();
+    let mka_meta_opts = CopyOptions {
+        max_controlled_bytes: Some(20_000),
+        ..Default::default()
+    };
+    let out_mka = dir.0.join("out.mka");
+    let mka_err = fvid::native_export::export_audio_pcm_selected_with_controls(
+        &mka_tagged,
+        &out_mka,
+        None,
+        &mka_meta_opts,
+    )
+    .unwrap_err()
+    .to_string();
+    assert!(
+        mka_err.contains("controlled memory budget exceeded"),
+        "expected Matroska PCM metadata extraction to charge simultaneous index + metadata working set, got: {mka_err}"
+    );
+    assert!(!out_mka.exists());
+}
+
+#[test]
+fn owned_audio_mix_and_merge_plan_enforce_float32_wave_qualification_and_64channel_merge_limit_consistently_with_execution() {
+    let dir = TempDir::new("owned-audio-mix-merge-plan-execution-parity");
+
+    // 1. `fvid_media::plan_mix_audio_with_controls` and `fvid_media::plan_merge_audio_with_controls`
+    // must reject integer PCM WAVE (`s16le`) with `"mix-audio requires float PCM inputs (flt); integer formats are not qualified"`,
+    // matching `fvid_media::mix_audio_with_controls` and `fvid_media::merge_audio_with_controls`.
+    let wav_s16 = dir.0.join("int16.wav");
+    fvid_media::owned_wav_file::write_wav_integer_le(&wav_s16, 48_000, 1, 16, &[0u8; 960], 4)
+        .unwrap();
+    let pair_s16 = vec![wav_s16.clone(), wav_s16.clone()];
+    let out_s16 = dir.0.join("out-s16.wav");
+    for err in [
+        fvid_media::plan_mix_audio_with_controls(
+            &pair_s16,
+            &fvid_media::MixAudioOptions::default(),
+            &CopyOptions::default(),
+        )
+        .unwrap_err(),
+        fvid_media::mix_audio_with_controls(
+            &pair_s16,
+            &out_s16,
+            &fvid_media::MixAudioOptions::default(),
+            &CopyOptions::default(),
+        )
+        .unwrap_err(),
+        fvid_media::plan_merge_audio_with_controls(&pair_s16, &CopyOptions::default()).unwrap_err(),
+        fvid_media::merge_audio_with_controls(&pair_s16, &out_s16, &CopyOptions::default())
+            .unwrap_err(),
+    ] {
+        assert!(
+            err.contains("mix-audio requires float PCM inputs (flt); integer formats are not qualified"),
+            "expected float32 PCM qualification error on integer WAVE input, got: {err}"
+        );
+    }
+    assert!(!out_s16.exists());
+
+    // 2. For 32-bit float WAVE inputs (`480` frames = `1_920` bytes each), `mix_audio_with_controls`
+    // and `merge_audio_with_controls` read each WAVE directly (`1_920 + 1_920 = 3_840` input bytes +
+    // `3_840` mix output or `7_680` merge output = `11_520` bytes max) and succeed under
+    // `max_controlled_bytes = Some(12_288)`; `plan_mix_audio_with_controls` and
+    // `plan_merge_audio_with_controls` must also admit `max_controlled_bytes = Some(12_288)` rather than
+    // charging the `16_384`-byte `estimate_float_wave_export_bytes` spool overhead!
+    let wav_f32_a = dir.0.join("f32-a.wav");
+    let wav_f32_b = dir.0.join("f32-b.wav");
+    fvid_media::owned_wav_file::write_wav_f32le(&wav_f32_a, 48_000, 1, &[0.25; 480]).unwrap();
+    fvid_media::owned_wav_file::write_wav_f32le(&wav_f32_b, 48_000, 1, &[0.75; 480]).unwrap();
+    let pair_f32 = vec![wav_f32_a, wav_f32_b];
+    let direct_wave_opts = CopyOptions {
+        max_controlled_bytes: Some(12_288),
+        ..Default::default()
+    };
+    let out_mix_f32 = dir.0.join("out-mix-f32.wav");
+    let out_merge_f32 = dir.0.join("out-merge-f32.wav");
+    fvid_media::plan_mix_audio_with_controls(
+        &pair_f32,
+        &fvid_media::MixAudioOptions::default(),
+        &direct_wave_opts,
+    )
+    .expect("plan_mix_audio_with_controls should admit direct 32-bit float WAVE inputs under 12_288 bytes");
+    let mix_stats = fvid_media::mix_audio_with_controls(
+        &pair_f32,
+        &out_mix_f32,
+        &fvid_media::MixAudioOptions::default(),
+        &direct_wave_opts,
+    )
+    .unwrap();
+    assert_eq!(mix_stats.sample_frames, 480);
+    fvid_media::plan_merge_audio_with_controls(&pair_f32, &direct_wave_opts).expect(
+        "plan_merge_audio_with_controls should admit direct 32-bit float WAVE inputs under 12_288 bytes",
+    );
+    let merge_stats =
+        fvid_media::merge_audio_with_controls(&pair_f32, &out_merge_f32, &direct_wave_opts)
+            .unwrap();
+    assert_eq!((merge_stats.sample_frames, merge_stats.channels), (480, 2));
+
+    // 3. `plan_merge_audio_with_controls` must reject `total_out_channels > 64` (e.g., two 33-channel
+    // float32 WAVE inputs -> 66 channels) with `"merge-audio output exceeds 64 channels"`, matching
+    // `merge_audio_with_controls`.
+    let wav_33ch = dir.0.join("ch33.wav");
+    fvid_media::owned_wav_file::write_wav_f32le(&wav_33ch, 48_000, 33, &[0.1; 33 * 10]).unwrap();
+    let pair_33ch = vec![wav_33ch.clone(), wav_33ch];
+    let out_merge_66 = dir.0.join("out-merge-66.wav");
+    for err in [
+        fvid_media::plan_merge_audio_with_controls(&pair_33ch, &CopyOptions::default())
+            .unwrap_err(),
+        fvid_media::merge_audio_with_controls(&pair_33ch, &out_merge_66, &CopyOptions::default())
+            .unwrap_err(),
+    ] {
+        assert!(
+            err.contains("merge-audio output exceeds 64 channels"),
+            "expected 64-channel ceiling in merge-audio plan and execution, got: {err}"
+        );
+    }
+    assert!(!out_merge_66.exists());
+}
+
+#[test]
+fn wave_and_container_loudness_and_loudnorm_reject_speaker_masks_whose_bit_count_disagrees_with_channels() {
+    let dir = TempDir::new("loudness-speaker-mask-bit-count-match");
+
+    // 1. A 2-channel WAVE file with an explicit 1-bit `dwChannelMask = 4` (`FC`) is accepted
+    // by `owned_wave_inspect::inspect` (`mask.count_ones() <= channels`), but `owned_wave_loudness::weights`
+    // and `owned_loudnorm` must reject it (`mask.count_ones() != channels`) so `supports`, `plan_loudness`,
+    // `measure_loudness`, `plan_loudnorm`, `apply_loudnorm`, and `apply_loudnorm_dual` all refuse
+    // instead of misinterpreting 2-channel interleaved PCM frames as 1-channel frames!
+    let wav_mismatch = dir.0.join("stereo-mask4.wav");
+    fvid_media::owned_wav_file::write_wav_integer_le(
+        &wav_mismatch,
+        48_000,
+        2,
+        16,
+        &[0u8; 480 * 2 * 2],
+        4,
+    )
+    .unwrap();
+    let out_wav = dir.0.join("out-wav.wav");
+    assert!(
+        !fvid_media::owned_loudnorm::supports_request(
+            &wav_mismatch,
+            &out_wav,
+            None,
+            false,
+            &CopyOptions::default(),
+        ),
+        "supports_request must return false when WAVE channel_mask bit count disagrees with channels"
+    );
+    assert!(
+        !fvid_media::owned_loudnorm::supports_request(
+            &wav_mismatch,
+            &out_wav,
+            None,
+            true,
+            &CopyOptions::default(),
+        ),
+        "supports_request (dual_pass) must return false when WAVE channel_mask bit count disagrees with channels"
+    );
+    for err in [
+        fvid_media::plan_loudness(&wav_mismatch, &CopyOptions::default()).unwrap_err(),
+        fvid_media::measure_loudness(&wav_mismatch, &CopyOptions::default()).unwrap_err(),
+    ] {
+        assert!(
+            err.contains("owned loudness speaker positions are not yet qualified"),
+            "expected speaker qualification refusal on mismatched WAVE channel_mask, got: {err}"
+        );
+    }
+    for err in [
+        fvid_media::plan_loudnorm(&wav_mismatch, None, false, &CopyOptions::default()).unwrap_err(),
+        fvid_media::plan_loudnorm(&wav_mismatch, None, true, &CopyOptions::default()).unwrap_err(),
+        fvid_media::apply_loudnorm(&wav_mismatch, &out_wav, None, &CopyOptions::default())
+            .unwrap_err(),
+        fvid_media::apply_loudnorm_dual(&wav_mismatch, &out_wav, None, &CopyOptions::default())
+            .unwrap_err(),
+    ] {
+        assert!(
+            err.contains("speaker") || err.contains("no owned WAVE loudnorm route"),
+            "expected speaker layout refusal on mismatched WAVE channel_mask in loudnorm, got: {err}"
+        );
+    }
+    assert!(!out_wav.exists());
+
+    // 2. A 2-channel G.711 A-law extensible WAVE file with `dwChannelMask = 4` (`FC`, 1 bit set)
+    // is routed through `owned_container_loudness` / `owned_container_loudnorm`; `geometry` must
+    // reject `mask.count_ones() != channels` in `supports`, `supports_plan`, `plan_loudness`,
+    // `measure_loudness`, `plan_loudnorm`, `apply_loudnorm`, and `apply_loudnorm_dual`.
+    let g711_mismatch = dir.0.join("g711-stereo-mask4.wav");
+    fvid_media::owned_wav_file::write_wav_integer_le(
+        &g711_mismatch,
+        48_000,
+        2,
+        8,
+        &[0xd5u8; 480 * 2],
+        4,
+    )
+    .unwrap();
+    let mut g711_bytes = std::fs::read(&g711_mismatch).unwrap();
+    // In extensible 40-byte fmt chunk (starts at offset 20): subformat tag (offset 44..48) = 6 (A-law).
+    g711_bytes[44..48].copy_from_slice(&6u32.to_le_bytes());
+    std::fs::write(&g711_mismatch, &g711_bytes).unwrap();
+    let out_g711 = dir.0.join("out-g711.wav");
+    assert!(
+        !fvid_media::owned_container_loudnorm::supports_plan(
+            &g711_mismatch,
+            None,
+            &CopyOptions::default(),
+        ),
+        "owned_container_loudnorm::supports_plan must reject mismatched channel_mask bit count"
+    );
+    for err in [
+        fvid_media::plan_loudness(&g711_mismatch, &CopyOptions::default()).unwrap_err(),
+        fvid_media::measure_loudness(&g711_mismatch, &CopyOptions::default()).unwrap_err(),
+        fvid_media::plan_loudnorm(&g711_mismatch, None, false, &CopyOptions::default()).unwrap_err(),
+        fvid_media::plan_loudnorm(&g711_mismatch, None, true, &CopyOptions::default()).unwrap_err(),
+        fvid_media::apply_loudnorm(&g711_mismatch, &out_g711, None, &CopyOptions::default())
+            .unwrap_err(),
+        fvid_media::apply_loudnorm_dual(&g711_mismatch, &out_g711, None, &CopyOptions::default())
+            .unwrap_err(),
+    ] {
+        assert!(
+            err.contains("owned loudness speaker positions are not yet qualified"),
+            "expected container loudness speaker qualification refusal on mismatched G.711 channel_mask, got: {err}"
+        );
+    }
+    assert!(!out_g711.exists());
+}
+
+#[test]
+fn wave_loudnorm_validates_metadata_keys_in_supports_and_plan_and_charges_dynamic_working_set_in_dual_pass_plan() {
+    let dir = TempDir::new("wave-loudnorm-metadata-key-and-dual-pass-dynamic-budget");
+    let out_wav = dir.0.join("out.wav");
+
+    // 1. When `dual_pass == true`, `apply_loudnorm_dual` overwrites caller-supplied `measured_*`
+    // arguments with the first-pass measurement and falls back to dynamic normalization when the
+    // measured signal is silent (`threshold == -70`) or exceeds linear range/peak margins.
+    // Therefore `plan_loudnorm` with `dual_pass == true` must charge the dynamic normalization
+    // working set (~612 KiB for 480 mono frames) rather than the single-pass linear estimate
+    // (`3_936` bytes) even when `args` contains `measured_I=-22:measured_TP=-12:measured_LRA=2:measured_thresh=-32:linear=true`!
+    let wav_8k = dir.0.join("silence-8k.wav");
+    fvid_media::owned_wav_file::write_wav_f32le(&wav_8k, 8_000, 1, &[0.0; 8_000]).unwrap();
+    let out_8k = dir.0.join("out-8k.wav");
+    let linear_args = "I=-16:TP=-1.5:LRA=11:measured_I=-22:measured_TP=-12:measured_LRA=2:measured_thresh=-32:linear=true";
+    // On `wav_8k` (`8_000` frames at 8 kHz), first-pass measurement (`owned_wave_loudness::plan_loudness`)
+    // needs `272_896` bytes (`<= 500_000`) and single-pass linear `plan_loudnorm` (`dual_pass == false`)
+    // needs `64_096` bytes (`<= 500_000`), whereas dual-pass `plan_loudnorm` (`dual_pass == true`)
+    // overwrites `measured_*` and falls back to 192 kHz dynamic normalization (`9_848_560` bytes > `500_000`):
+    let budget_opts = CopyOptions {
+        max_controlled_bytes: Some(500_000),
+        ..Default::default()
+    };
+    fvid_media::plan_loudnorm(&wav_8k, Some(linear_args), false, &budget_opts)
+        .expect("single-pass linear loudnorm plan should fit in 500_000 bytes");
+    for err in [
+        fvid_media::plan_loudnorm(&wav_8k, Some(linear_args), true, &budget_opts).unwrap_err(),
+        fvid_media::apply_loudnorm_dual(&wav_8k, &out_wav, Some(linear_args), &budget_opts)
+            .unwrap_err(),
+    ] {
+        assert!(
+            err.contains("controlled memory budget exceeded"),
+            "expected dual-pass loudnorm plan and execution to enforce dynamic fallback memory budget, got: {err}"
+        );
+    }
+    assert!(!out_wav.exists());
+
+    // 2. When `params.print != Print::None` in dynamic mode (`params.gain.is_none()`), `apply_dynamic`
+    // calls `output_report(&output, 192000, &params, measurement, &check)` on the 192 kHz resampled
+    // output (`resampled_frames = (frames * 192000).div_ceil(sample_rate)`).
+    // Without `print_format=json`, dynamic loudnorm on `wav_8k` needs `9_848_560` bytes.
+    // With `print_format=json` at 8 kHz (`629_248` bytes), the old estimate was `10_477_808` bytes,
+    // whereas the actual 192 kHz `output_report` needs `5_997_248` bytes (`15_845_808` bytes total).
+    // Under `max_controlled_bytes = Some(12_000_000)`, both `plan_loudnorm` and `apply_loudnorm`
+    // with `print_format=json` must reject!
+    let report_budget_opts = CopyOptions {
+        max_controlled_bytes: Some(12_000_000),
+        ..Default::default()
+    };
+    fvid_media::plan_loudnorm(&wav_8k, Some("I=-16"), false, &report_budget_opts)
+        .expect("dynamic loudnorm without report on 8 kHz 1-second WAVE should fit in 12_000_000 bytes");
+    for err in [
+        fvid_media::plan_loudnorm(
+            &wav_8k,
+            Some("I=-16:print_format=json"),
+            false,
+            &report_budget_opts,
+        )
+        .unwrap_err(),
+        fvid_media::apply_loudnorm(
+            &wav_8k,
+            &out_8k,
+            Some("I=-16:print_format=json"),
+            &report_budget_opts,
+        )
+        .unwrap_err(),
+    ] {
+        assert!(
+            err.contains("controlled memory budget exceeded"),
+            "expected dynamic loudnorm with print_format=json to charge 192 kHz output_report memory, got: {err}"
+        );
+    }
+    assert!(!out_8k.exists());
+}
+
+#[test]
+fn mp4_concat_open_validates_metadata_mutations_and_charges_video_scratch_and_queue_working_sets() {
+    let dir = TempDir::new("mp4-concat-open-metadata-and-video-scratch-budget");
+    let mp4_src = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
+        .join("tests/fixtures/playback-errors/aac-device-layout/normal-ten.mp4");
+    let pair = vec![mp4_src.clone(), mp4_src];
+
+    // 1. `mp4_concat::open_with_options` must validate container and stream metadata mutations
+    // before returning `Ok(Some(segments))` (and before `try_concat_mp4_matroska_with_options`
+    // creates any temporary output file).
+    let mut bad_stream_opts = CopyOptions::default();
+    bad_stream_opts
+        .stream_metadata_set
+        .push((0, "rotate".into(), "90".into()));
+    assert!(
+        fvid::container::mp4_concat::open_with_options(&pair, &bad_stream_opts)
+            .is_err(),
+        "mp4_concat::open_with_options must reject forbidden stream metadata keys"
+    );
+
+    let mut bad_tag_opts = CopyOptions::default();
+    bad_tag_opts
+        .metadata_set
+        .push(("title\0bad".into(), "ok".into()));
+    assert!(
+        fvid::container::mp4_concat::open_with_options(&pair, &bad_tag_opts)
+            .is_err(),
+        "mp4_concat::open_with_options must reject invalid container metadata keys"
+    );
+
+    // 2. On `normal-ten.mp4` (`5` video packets + `5` audio packets per segment):
+    // - Segment 0 + Segment 1 `estimated_index_payload_bytes` = `2 * 2_916 = 5_832` bytes
+    // - `segments.len() * 8192 + 16384 = 32_768` bytes
+    // - `20` total packets across both segments (`20 * 48 = 960` bytes)
+    // - Old `plan_bytes` was `32_768 + 5_832 + 960 = 39_560` bytes, and peak `packets * 32 + sample.size`
+    //   at packet 20 (`20 * 32 + 371 = 1_011` bytes) gave `40_571` bytes (`<= 40_700`).
+    // - Charging each segment's video `presentation + durations` scratch (`2 * 5 * 32 = 320` bytes)
+    //   and `selected.len()` queue entries (`2 * 40 = 80` bytes) raises `plan_bytes` by `400` bytes
+    //   to `39_960` bytes and peak working set to `40_971` bytes (`> 40_700`).
+    let concat_budget_opts = CopyOptions {
+        max_controlled_bytes: Some(40_700),
+        ..Default::default()
+    };
+    let out_concat = dir.0.join("out-concat.mkv");
+    for err in [
+        fvid::container::mp4_concat::open_with_options(&pair, &concat_budget_opts)
+            .err()
+            .expect("open_with_options must enforce video scratch and queue working sets")
+            .to_string(),
+        fvid::native_plan::concat_mp4_matroska_with_options(&pair, &concat_budget_opts)
+            .unwrap_err(),
+        fvid::media::concat(&pair, &out_concat, &concat_budget_opts)
+            .unwrap_err()
+            .to_string(),
+    ] {
+        assert!(
+            err.contains("controlled memory budget exceeded"),
+            "expected MP4 concat to charge video presentation/durations and queue working sets, got: {err}"
+        );
+    }
+    assert!(!out_concat.exists());
+}
+
+#[test]
+fn container_and_adts_loudness_and_loudnorm_plans_charge_meter_and_dynamic_normalization_working_sets() {
+    let dir = TempDir::new("container-and-adts-loudness-loudnorm-working-set-budget");
+
+    // Create a 48 kHz mono G.711 A-law WAVE file (`480` frames = `480` payload bytes):
+    // - `owned_g711_wave_export::open` needs `1 * 2048 * 9 + 96 + 16_384 + 256 * 1024 = 297_056` bytes (`< 1_000_000`),
+    // - `owned_wave_loudness::measure_loudness` on the 48 kHz spooled WAVE requires
+    //   `(48000 * 3 + 48000 * 2 / 5) * 8 + 4096 * 4 + 4096 * 8 + 512 + 16384 = 1_371_648` bytes (`> 1_000_000`),
+    // - `owned_loudnorm::apply_dynamic` at 192 kHz requires `> 5_900_000` bytes (`> 3_000_000`).
+    let g711_src = dir.0.join("g711-48k.wav");
+    fvid_media::owned_wav_file::write_wav_integer_le(
+        &g711_src,
+        48_000,
+        1,
+        8,
+        &[0xd5u8; 480],
+        4,
+    )
+    .unwrap();
+    let mut g711_bytes = std::fs::read(&g711_src).unwrap();
+    g711_bytes[44..48].copy_from_slice(&6u32.to_le_bytes());
+    std::fs::write(&g711_src, &g711_bytes).unwrap();
+    let out_g711 = dir.0.join("out-g711.wav");
+
+    // 1. Under `max_controlled_bytes = Some(1_000_000)`:
+    // - G.711 decode (`297_056` bytes) fits within `1_000_000` bytes, so `plan_decode_audio` succeeds!
+    // - 48 kHz `owned_wave_loudness` needs `1_371_648` bytes (`> 1_000_000`), so both
+    //   `plan_loudness` and `measure_loudness` must reject with `"controlled memory budget exceeded"`.
+    let loudness_budget = CopyOptions {
+        max_controlled_bytes: Some(1_000_000),
+        ..Default::default()
+    };
+    fvid_media::plan_decode_audio(
+        &g711_src,
+        &fvid_media::AudioDecodeTransform::default(),
+        &loudness_budget,
+    )
+    .expect("G.711 decode should fit in 1_000_000 bytes");
+    for err in [
+        fvid_media::plan_loudness(&g711_src, &loudness_budget).unwrap_err(),
+        fvid_media::measure_loudness(&g711_src, &loudness_budget).unwrap_err(),
+    ] {
+        assert!(
+            err.contains("controlled memory budget exceeded"),
+            "expected container plan_loudness and measure_loudness to charge meter working set, got: {err}"
+        );
+    }
+
+    // 2. Under `max_controlled_bytes = Some(3_000_000)` on `g711_src` (and `Some(11_500_000)` on
+    // `aac-stereo.aac` and `aac-stereo.mka`, where AAC decode + 48 kHz loudness measurement need
+    // `11_255_808` bytes `<= 11_500_000`, while 192 kHz dynamic normalization needs `> 6_000_000`
+    // bytes on `g711_src` and `> 20_000_000` bytes on the 1-second stereo AAC fixtures):
+    // - `plan_loudness` and `measure_loudness` succeed on `g711_src` under `3_000_000` bytes,
+    // - whereas `plan_loudnorm`, `apply_loudnorm`, and `apply_loudnorm_dual` on `g711_src` must
+    //   reject with `"controlled memory budget exceeded"`.
+    let g711_loudnorm_budget = CopyOptions {
+        max_controlled_bytes: Some(3_000_000),
+        ..Default::default()
+    };
+    fvid_media::plan_loudness(&g711_src, &g711_loudnorm_budget)
+        .expect("48 kHz G.711 loudness plan should fit in 3 MB");
+    fvid_media::measure_loudness(&g711_src, &g711_loudnorm_budget)
+        .expect("48 kHz G.711 loudness measurement should fit in 3 MB");
+    for err in [
+        fvid_media::plan_loudnorm(&g711_src, None, false, &g711_loudnorm_budget).unwrap_err(),
+        fvid_media::plan_loudnorm(&g711_src, None, true, &g711_loudnorm_budget).unwrap_err(),
+        fvid_media::apply_loudnorm(&g711_src, &out_g711, None, &g711_loudnorm_budget).unwrap_err(),
+        fvid_media::apply_loudnorm_dual(&g711_src, &out_g711, None, &g711_loudnorm_budget)
+            .unwrap_err(),
+    ] {
+        assert!(
+            err.contains("controlled memory budget exceeded"),
+            "expected container plan_loudnorm and apply_loudnorm to charge 192 kHz dynamic normalization working set, got: {err}"
+        );
+    }
+    assert!(!out_g711.exists());
+
+    // 3. Also verify ADTS (`aac-stereo.aac`) and Matroska AAC (`aac-stereo.mka`):
+    // Choose a Matroska PCM float32 `.mka` (`pcm_mka`, 48 kHz mono 480 frames, decode needs `~98 KiB`),
+    // where under `max_controlled_bytes = Some(1_000_000)` `plan_decode_audio` succeeds while
+    // `plan_loudness` and `measure_loudness` reject (`1_371_648 > 1_000_000`), and under
+    // `max_controlled_bytes = Some(3_000_000)` `plan_loudness` and `measure_loudness` succeed while
+    // `plan_loudnorm`, `apply_loudnorm`, and `apply_loudnorm_dual` reject (`> 5_900_000 > 3_000_000`)!
+    let wav_48k = dir.0.join("src-48k.wav");
+    fvid_media::owned_wav_file::write_wav_f32le(&wav_48k, 48_000, 1, &[0.0; 480]).unwrap();
+    let pcm_mka = dir.0.join("pcm-48k.mka");
+    fvid::media::decode_audio(&wav_48k, &pcm_mka, &CopyOptions::default()).unwrap();
+    let out_mka = dir.0.join("out-mka.wav");
+    fvid_media::plan_decode_audio(
+        &pcm_mka,
+        &fvid_media::AudioDecodeTransform::default(),
+        &loudness_budget,
+    )
+    .expect("Matroska PCM decode should fit in 1 MB");
+    for err in [
+        fvid_media::plan_loudness(&pcm_mka, &loudness_budget).unwrap_err(),
+        fvid_media::measure_loudness(&pcm_mka, &loudness_budget).unwrap_err(),
+    ] {
+        assert!(
+            err.contains("controlled memory budget exceeded"),
+            "expected Matroska PCM plan_loudness and measure_loudness to charge meter working set, got: {err}"
+        );
+    }
+    fvid_media::plan_loudness(&pcm_mka, &g711_loudnorm_budget)
+        .expect("Matroska PCM loudness plan should fit in 3 MB");
+    fvid_media::measure_loudness(&pcm_mka, &g711_loudnorm_budget)
+        .expect("Matroska PCM loudness measurement should fit in 3 MB");
+    for err in [
+        fvid_media::plan_loudnorm(&pcm_mka, None, false, &g711_loudnorm_budget).unwrap_err(),
+        fvid_media::plan_loudnorm(&pcm_mka, None, true, &g711_loudnorm_budget).unwrap_err(),
+        fvid_media::apply_loudnorm(&pcm_mka, &out_mka, None, &g711_loudnorm_budget).unwrap_err(),
+        fvid_media::apply_loudnorm_dual(&pcm_mka, &out_mka, None, &g711_loudnorm_budget)
+            .unwrap_err(),
+    ] {
+        assert!(
+            err.contains("controlled memory budget exceeded"),
+            "expected Matroska PCM plan_loudnorm and apply_loudnorm to charge 192 kHz dynamic normalization working set, got: {err}"
+        );
+    }
+    assert!(!out_mka.exists());
+}
+
+#[test]
+fn native_loudness_and_normalize_loudness_charge_meter_working_set_in_plans_and_compressed_execution() {
+    let dir = TempDir::new("native-loudness-and-normalize-meter-working-set");
+
+    // 1. Construct a 48 kHz mono float32 WAVE file (`19_200` frames = `76_800` bytes = 0.4 s)
+    // and export it to a Matroska PCM `.mka` file (`pcm_mka`).
+    // - Decoding `wav_src` (`76_800` bytes) needs `~263_488` bytes (`< 1_000_000` bytes).
+    // - Decoding `pcm_mka` needs `~98_384` bytes (`< 1_000_000` bytes).
+    // - However, `native_pcm::LoudnessMeter` at 48 kHz requires the 3.4-second sliding window
+    //   (`(48000 * 3 + 48000 * 2 / 5) * 8 + capacity + ... > 1_370_000` bytes `> 1_000_000` bytes)!
+    let wav_src = dir.0.join("tone-48k.wav");
+    fvid_media::owned_wav_file::write_wav_f32le(&wav_src, 48_000, 1, &[0.25; 19_200]).unwrap();
+    let pcm_mka = dir.0.join("tone-48k.mka");
+    fvid::media::decode_audio(&wav_src, &pcm_mka, &CopyOptions::default()).unwrap();
+    let out_norm = dir.0.join("out-norm.wav");
+    let target = fvid::native_pcm::NormalizeTarget {
+        integrated_lufs: -16.0,
+        sample_peak_dbfs: -1.0,
+    };
+
+    let meter_budget = CopyOptions {
+        max_controlled_bytes: Some(1_000_000),
+        ..Default::default()
+    };
+    // Both `wav_src` and `pcm_mka` fit in `1_000_000` bytes for `plan_decode_audio`:
+    fvid::media::plan_decode_audio(
+        &wav_src,
+        &fvid_media::AudioDecodeTransform::default(),
+        &meter_budget,
+    )
+    .expect("WAVE decode should fit in 1 MB");
+    fvid::media::plan_decode_audio(
+        &pcm_mka,
+        &fvid_media::AudioDecodeTransform::default(),
+        &meter_budget,
+    )
+    .expect("Matroska PCM decode should fit in 1 MB");
+
+    // Both planning and execution of `loudness` and `normalize_loudness` must charge the
+    // 3.4-second `LoudnessMeter` working set (`> 1_370_000` bytes) and reject `meter_budget`!
+    for src in [&wav_src, &pcm_mka] {
+        for err in [
+            fvid::media::plan_loudness(src, &meter_budget).unwrap_err(),
+            fvid::media::measure_loudness(src, &meter_budget).unwrap_err(),
+            fvid::media::plan_normalize_loudness(src, &meter_budget, None, target).unwrap_err(),
+            fvid::media::normalize_loudness(src, &out_norm, &meter_budget, None, target)
+                .unwrap_err(),
+        ] {
+            assert!(
+                err.contains("controlled memory budget exceeded"),
+                "expected loudness/normalize_loudness on {} to charge 3.4s meter working set, got: {err}",
+                src.display()
+            );
+        }
+        assert!(!out_norm.exists());
+    }
+
+    // With an ample budget (`3_000_000` bytes), all four operations succeed on both sources:
+    let ample_budget = CopyOptions {
+        max_controlled_bytes: Some(3_000_000),
+        ..Default::default()
+    };
+    for src in [&wav_src, &pcm_mka] {
+        fvid::media::plan_loudness(src, &ample_budget).unwrap();
+        fvid::media::measure_loudness(src, &ample_budget).unwrap();
+        fvid::media::plan_normalize_loudness(src, &ample_budget, None, target).unwrap();
+        fvid::media::normalize_loudness(src, &out_norm, &ample_budget, None, target).unwrap();
+        std::fs::remove_file(&out_norm).unwrap();
+    }
+}
+
+#[test]
+fn multitrack_lossless_plans_and_exports_charge_stage_video_index_and_encoded_packet_working_sets() {
+    let dir = TempDir::new("multitrack-lossless-stage-video-index-and-packet");
+
+    // 1. `owned_webm_multitrack_export`:
+    // Construct a 2-track Matroska file (`V_FFV1` 64x48 + `A_OPUS`, 10 packets each).
+    // - `mkv_index_bytes = 25_076` bytes, `meta_working_bytes = 48` bytes (`input.index_and_meta_bytes = 25_124`).
+    // - `video_index_bytes` (`video.estimated_index_payload_bytes()` of the staged `video.mkv` opened alongside `input.reader` in `try_export`)
+    //   is `12_897` bytes (`3 * 4_096 + 16 * 32 + 101`).
+    // - `schedule_bytes = (20 + 10) * 24 = 720` bytes.
+    // - `max_packet_bytes` (encoded 64x48 FFV1 packet) is `~320` bytes.
+    // With `max_controlled_bytes = Some(mkv_index_and_meta + schedule_bytes + 5_000)` (`~30_844` bytes):
+    // - During `decode_webm` / `check_encoded_ffv1_with_controlled`: `25_124 + 4_608 * 2 + 320 = 34_660` — wait, let's use 16x16 so `pixels.len() * 2 = 768` bytes!
+    let mkv_multi_src = dir.0.join("src-multi-stage-index.mkv");
+    {
+        let mut frame = fvid_media::owned_frame::GeometryFrame {
+            width: 16,
+            height: 16,
+            subsampling: Some([2, 2]),
+            data: vec![0x80; 384],
+        };
+        let ffv1_pkt = fvid_media::owned_ffv1_encoder::encode(&mut frame, 8).unwrap();
+        let mut opus_head = Vec::with_capacity(19);
+        opus_head.extend_from_slice(b"OpusHead");
+        opus_head.push(1);
+        opus_head.push(1);
+        opus_head.extend_from_slice(&0u16.to_le_bytes());
+        opus_head.extend_from_slice(&48_000u32.to_le_bytes());
+        opus_head.extend_from_slice(&0i16.to_le_bytes());
+        opus_head.push(0);
+        let opus_pkt = vec![0xFC, 0x00, 0x00];
+        let specs = [
+            fvid_media::owned_matroska::TrackSpec {
+                encoding: fvid_media::owned_matroska::Encoding::Ffv1V1 {
+                    width: 16,
+                    height: 16,
+                },
+                name: "",
+                language: "und",
+            },
+            fvid_media::owned_matroska::TrackSpec {
+                encoding: fvid_media::owned_matroska::Encoding::Opus {
+                    configuration: &opus_head,
+                },
+                name: "",
+                language: "und",
+            },
+        ];
+        let track_options = [
+            fvid_media::owned_matroska::TrackOptions {
+                default_duration_ns: 40_000_000,
+                ..Default::default()
+            },
+            fvid_media::owned_matroska::TrackOptions {
+                default_duration_ns: 20_000_000,
+                ..Default::default()
+            },
+        ];
+        let file_meta = fvid_media::owned_matroska::FileMetadata::default();
+        let mut file = std::fs::File::create(&mkv_multi_src).unwrap();
+        let mut writer = fvid_media::owned_matroska::PacketWriter::new_with_metadata(
+            &mut file,
+            &specs,
+            &track_options,
+            &file_meta,
+        )
+        .unwrap();
+        for i in 0..10u64 {
+            writer
+                .write_packet(0, i * 40_000_000, 40_000_000, true, &ffv1_pkt)
+                .unwrap();
+            writer
+                .write_packet(1, i * 20_000_000, 20_000_000, true, &opus_pkt)
+                .unwrap();
+        }
+        writer.finish().unwrap();
+    }
+    let mut mkv_reader = fvid_media::owned_webm::WebmReader::open(
+        std::io::BufReader::new(std::fs::File::open(&mkv_multi_src).unwrap()),
+        fvid_media::owned_webm::Limits::default(),
+    )
+    .unwrap();
+    mkv_reader.scan_all().unwrap();
+    let mkv_index_bytes = mkv_reader.estimated_index_payload_bytes().unwrap();
+    // `mkv_index_bytes` (`~25_844` bytes) + `meta_working_bytes` (`48` bytes) = `~25_892` bytes.
+    // During FFV1 check/export of 16x16 4:2:0: `25_892 + 384 * 2 + ~90 = ~26_750` bytes.
+    // During final mux in `try_export`: `input.index_and_meta_bytes` (`~25_892`) + `video_index_bytes` (`~12_897`)
+    // + `schedule_bytes` (`30 * 24 = 720`) + `bytes.len()` (`~90`) = `~39_600` bytes!
+    // Previously `plan_selection` omitted `video_index_bytes` (`~12_897` bytes), so a `32_000`-byte budget
+    // passed `plan_transcode_lossless` and failed `transcode_lossless`!
+    let mkv_opts = CopyOptions {
+        max_controlled_bytes: Some(mkv_index_bytes + 5_000),
+        streams: vec![0, 1],
+        ..Default::default()
+    };
+    let out_mkv = dir.0.join("out-mkv-stage-index.mkv");
+    for err in [
+        fvid_media::plan_transcode_lossless(
+            &mkv_multi_src,
+            &fvid_media::LosslessTransform {
+                vertical_flip: true,
+                ..Default::default()
+            },
+            &mkv_opts,
+            None,
+        )
+        .unwrap_err(),
+        fvid_media::transcode_lossless(
+            &mkv_multi_src,
+            &out_mkv,
+            fvid_media::LosslessTransform {
+                vertical_flip: true,
+                ..Default::default()
+            },
+            &mkv_opts,
+        )
+        .unwrap_err(),
+    ] {
+        assert!(
+            err.contains("controlled memory budget"),
+            "expected multitrack WebM lossless plan and export to charge staged video index alongside input index and schedule, got: {err}"
+        );
+    }
+    assert!(!out_mkv.exists());
+
+    // 2. `owned_mp4_multitrack_export`:
+    // On `aac-device-layout/normal-ten.mp4` (`mp4_index_bytes = 2_916` bytes, `meta_working_bytes = 0` when no tags):
+    // - Bridge FFV1 check/export needs: `bridge_index_bytes` (`12_897`) + `bridge_meta` (`48`) + `mp4_index_bytes` (`2_916`)
+    //   + `pixels.len() * 2` (`9_216`) + `encoded_packet` (`~4_400`) = `~29_477` bytes.
+    // - Final mux in `try_export` holds `input.index_and_meta_bytes` (`2_916`) + `video_index_bytes` (`12_897`)
+    //   + `plan_bytes` (`16 * 32 = 512`) + `schedule` (`20 * 24 = 480`) = `16_805` bytes BEFORE reading any packet,
+    //   and when reading each 64x48 FFV1 packet (`~4_400` bytes) holds `16_805 + ~4_400 = ~21_205` bytes!
+    // What if we scale 64x48 down to 4x4 (`LosslessTransform { scale: Some(ScaleSize { width: 4, height: 4 }), .. }`)?
+    // Or what if we have 2 custom tags of 800 bytes (`meta_working_bytes = 13_440` bytes)?
+    // Let's check: with 1 custom tag of 400 bytes (`meta_working_bytes = (412 + 412) * 8 = 6_592` bytes):
+    // - Bridge FFV1 check/export needs: `12_897 + 48 + 6_592 + 2_916 + 9_216 + 4_400 = ~36_069` bytes (wait: if we scale to 4x4, `pixels.len() * 2 = 48` bytes and `encoded_packet = ~60` bytes, so bridge check needs only `12_897 + 48 + 2_916 + 48 + 60 = 15_969` bytes!).
+    // Let's check with `scale: Some(ScaleSize { width: 16, height: 16 })` and NO custom tags:
+    // - Bridge FFV1 check/export needs: `12_897 (bridge_index) + 48 (bridge_meta) + 2_916 (mp4_index) + 768 (16x16 pixels * 2) + ~250 (encoded 16x16 FFV1) = ~16_879` bytes!
+    // - Final mux in `try_export` needs: `2_916 (mp4_index) + 12_897 (video_index) + 512 (plan_bytes) + 480 (schedule) + ~250 (encoded packet) = ~17_055` bytes!
+    //Wait: what if `scale: Some(ScaleSize { width: 4, height: 4 })`?
+    // - Bridge FFV1 check/export needs: `12_897 + 48 + 2_916 + 48 + ~60 = ~15_969` bytes!
+    // - Final mux in `try_export` needs: `2_916 + 12_897 + 512 + 480 + max(encoded_packet ~60, aac_packet ~380) = 16_805 + ~380 = ~17_185` bytes!
+    // Wait: why did `bridge_index` equal `12_897`? Because inside `prepare_video_controlled`, `owned_mp4_video_decode::decode_mp4` decodes the 64x48 H.264 stream first! And `decode_mp4` on 64x48 H.264 requires the H.264 decoder working set (`~35_000` bytes)!
+    // Aha! What if the MP4 has enough audio samples (or custom tags) that `schedule_bytes + video_index_bytes + max_packet_bytes > H.264 decode working set`?
+    // Wait: in `normal-ten.mp4` with 2 custom tags of 700 bytes (`meta_working_bytes = (712 + 712) * 8 = 11_392` bytes) and `scale: Some(ScaleSize { width: 4, height: 4 })`:
+    // - `prepare_video_controlled` strips `metadata_set`, so H.264 decode does NOT pay `meta_working_bytes`!
+    // - Bridge FFV1 check (`4x4` output) pays `12_897 (bridge_index) + 48 + 11_392 (meta) + 2_916 (mp4_index) + 48 (4x4 pixels * 2) + ~60 (4x4 FFV1) = 27_361` bytes!
+    // - Final mux in `try_export` pays `2_916 (mp4_index) + 11_392 (meta) + 12_897 (video_index) + 512 (plan_bytes) + 480 (schedule) + ~380 (packet) = 28_577` bytes!
+    // Wait: H.264 decode in `prepare_video_controlled` needs ~40 KiB! What if we use 5 custom tags of 800 bytes (`meta_working_bytes = 5 * (812 + 812) * 8 = 65_000` bytes) and `scale: Some(ScaleSize { width: 4, height: 4 })`?
+    // Let's check! With 5 custom tags of 800 bytes (`meta_working_bytes = 65_120` bytes) and `scale: Some(ScaleSize { width: 4, height: 4 })`:
+    // 1) `prepare_video_controlled` strips `metadata_set` (`0` tag bytes), so it only needs `~40 KiB` (`<< 81_500`)!
+    // 2) Bridge FFV1 check (`4x4` output) needs:
+    //    `bridge_index_bytes` (`12_897`) + `bridge_meta` (`48` + `65_120`) + `mp4_index_bytes` (`2_916`) + `4x4 pixels * 2` (`48`) + `4x4 FFV1 packet` (`~60`) = `81_089` bytes!
+    // 3) Final mux (`schedule_bytes + max_packet_bytes`) needs:
+    //    `input.index_and_meta_bytes` (`2_916 + 65_120 = 68_036`) + `video_index_bytes` (`12_897`) + `plan_bytes` (`512`) + `schedule` (`480`) + `max_packet_bytes` (`~380`) = `82_305` bytes!
+    // Look at the gap between (2) `81_089` bytes and (3) `82_305` bytes:
+    // Under `max_controlled_bytes: Some(81_500)`:
+    // - Step (1) (`~40 KiB`) passes!
+    // - Step (2) (`81_089 <= 81_500`) passes!
+    // - Old `plan_selection` checked `schedule_bytes` WITHOUT `video_index_bytes` (`68_036 + 512 + 480 = 69_028 <= 81_500`), so old `plan_transcode_lossless` PASSED!
+    // - While `try_export` checked `schedule_bytes` WITH `video_index_bytes` (`69_028 + 12_897 = 81_925 > 81_500`), so `transcode_lossless` FAILED!
+    let mp4_multi_src = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
+        .join("tests/fixtures/playback-errors/aac-device-layout/normal-ten.mp4");
+    // In `normal-ten.mp4` (`mp4_index_bytes = 2_916` bytes) with `scale: Some(ScaleSize { width: 4, height: 4 })`:
+    // 1. With 4 custom tags of 800 bytes (`meta_working_bytes = 4 * 843 * 8 = 26_976` bytes):
+    //    - `prepare_video_controlled` strips `metadata_set` and needs `~35_000` bytes.
+    //    - Bridge FFV1 check (`4x4`) needs `bridge_index_bytes` (`12_897`) + `bridge_meta` (`48 + 26_976`) + `mp4_index_bytes` (`2_916`) + `4x4 pixels * 2` (`48`) + `4x4 FFV1` (`~60`) = `42_945` bytes.
+    //    - Final mux `schedule_bytes` needs `input.index_and_meta_bytes` (`2_916 + 26_976 = 29_892`) + `video_index_bytes` (`12_897 + 4 * 4_907 = 32_525`) + `plan_bytes` (`512`) + `schedule` (`480`) = `63_409` bytes!
+    //    - Under `max_controlled_bytes: Some(50_000)`:
+    //      * `prepare_video_controlled` (`~35_000 <= 50_000`) passes!
+    //      * Bridge FFV1 check (`42_945 <= 50_000`) passes!
+    //      * Old `plan_selection` omitted `video_index_bytes` (`29_892 + 512 + 480 = 30_884 <= 50_000`) and passed!
+    //      * With `video_index_bytes` charged (`63_409 > 50_000`), both `plan_transcode_lossless` and `transcode_lossless` fail!
+    let mut mp4_opts = CopyOptions {
+        max_controlled_bytes: Some(50_000),
+        streams: vec![0, 1],
+        ..Default::default()
+    };
+    for i in 0..4 {
+        mp4_opts
+            .metadata_set
+            .push((format!("CUSTOM_TAG_{i}"), "X".repeat(800)));
+    }
+    let mp4_transform = fvid_media::LosslessTransform {
+        scale: Some(fvid_media_info::ScaleSize {
+            width: 4,
+            height: 4,
+        }),
+        ..Default::default()
+    };
+    let out_mp4 = dir.0.join("out-mp4-stage-index.mkv");
+    for err in [
+        fvid_media::plan_transcode_lossless(&mp4_multi_src, &mp4_transform, &mp4_opts, None)
+            .unwrap_err(),
+        fvid_media::transcode_lossless(&mp4_multi_src, &out_mp4, mp4_transform.clone(), &mp4_opts)
+            .unwrap_err(),
+    ] {
+        assert!(
+            err.contains("controlled memory budget"),
+            "expected multitrack MP4 lossless plan and export to charge staged video index and packet working set alongside schedule, got: {err}"
+        );
+    }
+    assert!(!out_mp4.exists());
+
+    // 2. And with `max_controlled_bytes: Some(63_500)` (between `schedule_bytes = 63_409` and `schedule_bytes + max_packet_bytes` `63_409 + ~380 = ~63_789`):
+    //    - `schedule_bytes` (`63_409 <= 63_500`) passes the pre-loop check,
+    //    - and reading the packet (`+ ~380 > 63_500`) is rejected in both `plan_transcode_lossless` and `transcode_lossless`!
+    let mut mp4_pkt_opts = mp4_opts.clone();
+    mp4_pkt_opts.max_controlled_bytes = Some(63_500);
+    for err in [
+        fvid_media::plan_transcode_lossless(&mp4_multi_src, &mp4_transform, &mp4_pkt_opts, None)
+            .unwrap_err(),
+        fvid_media::transcode_lossless(&mp4_multi_src, &out_mp4, mp4_transform, &mp4_pkt_opts)
+            .unwrap_err(),
+    ] {
+        assert!(
+            err.contains("controlled memory budget"),
+            "expected multitrack MP4 lossless plan and export to charge packet payload alongside schedule and video index, got: {err}"
+        );
+    }
+    assert!(!out_mp4.exists());
+}
+
+#[test]
+fn native_y4m_export_trim_and_concat_charge_simultaneous_index_packet_and_frame_working_sets() {
+    let dir = TempDir::new("native-y4m-export-trim-concat-simultaneous");
+
+    // 1. Y4M source (`4x4` C420jpeg: `frame_len = 24`, `rgb_len = 48`):
+    // During `inspect_first_y4m_frame_with_filters_and_options` and `export_y4m_sources_with_options`,
+    // `Y4mReader` holds `yuv_len + rgb_len = 72` bytes while `read_frame_raw()` allocates `frame:RawFrame::Planar8` (`24` bytes),
+    // so even without transforms `96` bytes (`24 + 48 + 24`) are live simultaneously!
+    // And when a geometry/pixel transform runs (`horizontal_flip`), `picture: GeometryFrame` (`24` bytes)
+    // is ALSO allocated (`96 + 24 = 120` bytes)!
+    let y4m_src = dir.0.join("src-4x4.y4m");
+    {
+        let mut bytes = b"YUV4MPEG2 W4 H4 F25:1 Ip A1:1 C420jpeg\n".to_vec();
+        for v in [0x40u8, 0x80] {
+            bytes.extend_from_slice(b"FRAME\n");
+            bytes.extend(std::iter::repeat_n(v, 24));
+        }
+        std::fs::write(&y4m_src, bytes).unwrap();
+    }
+    let out_y4m = dir.0.join("out.y4m");
+    // Budget `80` (`>= 72` so `Y4mReader::new` passes, `< 96` so `yuv_len + rgb_len + frame_len` fails):
+    let y4m_raw_budget = CopyOptions {
+        max_controlled_bytes: Some(80),
+        ..Default::default()
+    };
+    for err in [
+        fvid::native_plan::export_y4m_with_options(
+            &y4m_src,
+            None,
+            &fvid::native_geometry::VideoGeometry::default(),
+            &fvid::native_pixels::PixelFilters::default(),
+            &y4m_raw_budget,
+        )
+        .unwrap_err(),
+        fvid::native_export::export_y4m_pipeline_with_options(
+            &y4m_src,
+            &out_y4m,
+            None,
+            &fvid::native_geometry::VideoGeometry::default(),
+            &fvid::native_pixels::PixelFilters::default(),
+            &y4m_raw_budget,
+        )
+        .unwrap_err()
+        .to_string(),
+        fvid::native_plan::trim_y4m_with_options(&y4m_src, 0, 40_000, &y4m_raw_budget).unwrap_err(),
+        fvid::native_export::export_y4m_pipeline_with_options(
+            &y4m_src,
+            &out_y4m,
+            Some((
+                std::time::Duration::from_micros(0),
+                std::time::Duration::from_micros(40_000),
+            )),
+            &fvid::native_geometry::VideoGeometry::default(),
+            &fvid::native_pixels::PixelFilters::default(),
+            &y4m_raw_budget,
+        )
+        .unwrap_err()
+        .to_string(),
+        fvid::native_plan::concat_y4m_with_options(
+            &[y4m_src.clone(), y4m_src.clone()],
+            &y4m_raw_budget,
+        )
+        .unwrap_err(),
+        fvid::native_export::concat_y4m_with_options(
+            &[y4m_src.clone(), y4m_src.clone()],
+            &out_y4m,
+            &y4m_raw_budget,
+        )
+        .unwrap_err()
+        .to_string(),
+    ] {
+        assert!(
+            err.contains("exceeds controlled memory budget")
+                || err.contains("exceeds playback buffer budget"),
+            "expected Y4M export/trim/concat to charge yuv + rgb + raw_frame simultaneously, got: {err}"
+        );
+    }
+    assert!(!out_y4m.exists());
+
+    // Budget `100` (`>= 96` so identity export passes, `< 120` so `horizontal_flip` `96 + 24 = 120` fails):
+    let y4m_geom_budget = CopyOptions {
+        max_controlled_bytes: Some(100),
+        ..Default::default()
+    };
+    let hflip_geom = fvid::native_geometry::VideoGeometry {
+        horizontal_flip: true,
+        ..Default::default()
+    };
+    for err in [
+        fvid::native_plan::export_y4m_with_options(
+            &y4m_src,
+            None,
+            &hflip_geom,
+            &fvid::native_pixels::PixelFilters::default(),
+            &y4m_geom_budget,
+        )
+        .unwrap_err(),
+        fvid::native_export::export_y4m_pipeline_with_options(
+            &y4m_src,
+            &out_y4m,
+            None,
+            &hflip_geom,
+            &fvid::native_pixels::PixelFilters::default(),
+            &y4m_geom_budget,
+        )
+        .unwrap_err()
+        .to_string(),
+    ] {
+        assert!(
+            err.contains("exceeds controlled memory budget"),
+            "expected Y4M export with geometry to charge yuv + rgb + raw_frame + picture simultaneously, got: {err}"
+        );
+    }
+    assert!(!out_y4m.exists());
+
+    // 2. Matroska video source (`src-mkv-y4m.mkv`, `4x4` FFV1 with a 1_024-byte title tag and a 4_000-byte video packet):
+    // `index_bytes` (`~14_000` bytes) + `packet_size` (`4_000` bytes) > `mem_limit` (`index_bytes + 500`)!
+    // Previously `validate_video_packet_budget_with_geometry_filters_interval_and_limit` checked
+    // `index_bytes <= mem_limit` and `packet_size <= mem_limit` in isolation instead of `index_bytes + packet_size <= mem_limit`!
+    let mkv_src = dir.0.join("src-mkv-y4m.mkv");
+    {
+        let mut frame = fvid_media::owned_frame::GeometryFrame {
+            width: 4,
+            height: 4,
+            subsampling: Some([2, 2]),
+            data: vec![0x80; 24],
+        };
+        let mut ffv1_pkt = fvid_media::owned_ffv1_encoder::encode(&mut frame, 8).unwrap();
+        ffv1_pkt.resize(4_000, 0);
+        let specs = [fvid_media::owned_matroska::TrackSpec {
+            encoding: fvid_media::owned_matroska::Encoding::Ffv1V1 {
+                width: 4,
+                height: 4,
+            },
+            name: "",
+            language: "und",
+        }];
+        let track_options = [fvid_media::owned_matroska::TrackOptions {
+            default_duration_ns: 40_000_000,
+            ..Default::default()
+        }];
+        let mut file_meta = fvid_media::owned_matroska::FileMetadata::default();
+        file_meta.tags.title = "T".repeat(1_024);
+        let mut file = std::fs::File::create(&mkv_src).unwrap();
+        let mut writer = fvid_media::owned_matroska::PacketWriter::new_with_metadata(
+            &mut file,
+            &specs,
+            &track_options,
+            &file_meta,
+        )
+        .unwrap();
+        writer
+            .write_packet(0, 0, 40_000_000, true, &ffv1_pkt)
+            .unwrap();
+        writer.finish().unwrap();
+    }
+    let mut mkv_reader = fvid_media::owned_webm::WebmReader::open(
+        std::io::BufReader::new(std::fs::File::open(&mkv_src).unwrap()),
+        fvid_media::owned_webm::Limits::default(),
+    )
+    .unwrap();
+    mkv_reader.scan_all().unwrap();
+    let mkv_index_bytes = mkv_reader.estimated_index_payload_bytes().unwrap();
+    let mkv_pkt_budget = CopyOptions {
+        max_controlled_bytes: Some(mkv_index_bytes + 500),
+        ..Default::default()
+    };
+    for err in [
+        fvid::native_plan::export_y4m_with_options(
+            &mkv_src,
+            None,
+            &fvid::native_geometry::VideoGeometry::default(),
+            &fvid::native_pixels::PixelFilters::default(),
+            &mkv_pkt_budget,
+        )
+        .unwrap_err(),
+        fvid::native_export::export_y4m_pipeline_with_options(
+            &mkv_src,
+            &out_y4m,
+            None,
+            &fvid::native_geometry::VideoGeometry::default(),
+            &fvid::native_pixels::PixelFilters::default(),
+            &mkv_pkt_budget,
+        )
+        .unwrap_err()
+        .to_string(),
+    ] {
+        assert!(
+            err.contains("exceeds budget") || err.contains("controlled memory budget"),
+            "expected Matroska -> Y4M export/plan to charge index_bytes + packet_size simultaneously, got: {err}"
+        );
+    }
+    assert!(!out_y4m.exists());
+
+    // And when a temporal filter (`tmix=frames=80` on a `16x16` FFV1 Matroska video, where `working_bytes = 384 * 80 = 30_720` bytes)
+    // runs while `index_bytes` (`~13_921` bytes) is retained in `WebmVideoReader`:
+    // Under `max_controlled_bytes: Some(36_000)`:
+    // - `index_bytes` (`~13_921`) <= `36_000`
+    // - `filters.working_bytes` (`30_720`) <= `36_000`
+    // - `index_bytes + raw_frame_bytes + filters.working_bytes` (`~13_921 + 384 + 30_720 = ~45_025`) > `36_000`!
+    let mkv_16_src = dir.0.join("src-mkv-16x16.mkv");
+    {
+        let mut frame = fvid_media::owned_frame::GeometryFrame {
+            width: 16,
+            height: 16,
+            subsampling: Some([2, 2]),
+            data: vec![0x80; 384],
+        };
+        let ffv1_pkt = fvid_media::owned_ffv1_encoder::encode(&mut frame, 8).unwrap();
+        let specs = [fvid_media::owned_matroska::TrackSpec {
+            encoding: fvid_media::owned_matroska::Encoding::Ffv1V1 {
+                width: 16,
+                height: 16,
+            },
+            name: "",
+            language: "und",
+        }];
+        let track_options = [fvid_media::owned_matroska::TrackOptions {
+            default_duration_ns: 40_000_000,
+            ..Default::default()
+        }];
+        let file_meta = fvid_media::owned_matroska::FileMetadata::default();
+        let mut file = std::fs::File::create(&mkv_16_src).unwrap();
+        let mut writer = fvid_media::owned_matroska::PacketWriter::new_with_metadata(
+            &mut file,
+            &specs,
+            &track_options,
+            &file_meta,
+        )
+        .unwrap();
+        writer
+            .write_packet(0, 0, 40_000_000, true, &ffv1_pkt)
+            .unwrap();
+        writer.finish().unwrap();
+    }
+    let tmix_filters = fvid::native_pixels::PixelFilters::from_request(&fvid::media_info::DecodeTransform {
+        tmix: Some("frames=80".to_string()),
+        ..Default::default()
+    })
+    .unwrap();
+    let mkv_filter_budget = CopyOptions {
+        max_controlled_bytes: Some(36_000),
+        ..Default::default()
+    };
+    for err in [
+        fvid::native_plan::export_y4m_with_options(
+            &mkv_16_src,
+            None,
+            &fvid::native_geometry::VideoGeometry::default(),
+            &tmix_filters,
+            &mkv_filter_budget,
+        )
+        .unwrap_err(),
+        fvid::native_export::export_y4m_pipeline_with_options(
+            &mkv_16_src,
+            &out_y4m,
+            None,
+            &fvid::native_geometry::VideoGeometry::default(),
+            &tmix_filters,
+            &mkv_filter_budget,
+        )
+        .unwrap_err()
+        .to_string(),
+    ] {
+        assert!(
+            err.contains("exceeds controlled memory budget"),
+            "expected Matroska -> Y4M export/plan with filters to charge index_bytes + raw_frame_bytes + filters.working_bytes simultaneously, got: {err}"
+        );
+    }
+    assert!(!out_y4m.exists());
+}
+
+#[test]
+fn lossless_ffv1_export_and_plan_charge_simultaneous_filter_working_set_encoder_copy_and_stage_metadata() {
+    let dir = TempDir::new("lossless-ffv1-simultaneous-working-sets");
+
+    // 1. Y4M lossless FFV1 export with `tmix=frames=8` (`4x4` C420jpeg: `frame_len = 24`, `out_len = 24`):
+    // During FFV1 encoding inside `visit_reader_transformed_counted`:
+    // - `working` (`24 * 8 = 192` bytes, `output` + `tmix` history) is live
+    // - `input` (`24` bytes) is live (`geometry == true && reverse.is_none()`)
+    // - encoder's `GeometryFrame` copy (`24` bytes) is live
+    // - `meta_working_bytes` (`24` bytes for `"und"`*2) is live
+    // -> `frame_working_bytes = 192 + 24 + 24 + 24 = 264` bytes before `packet.len()`!
+    // Under `max_controlled_bytes: Some(250)`:
+    // - The pre-loop filter check (`192 + 48 + 24 = 264 > 250`) and per-frame check (`264 > 250`)
+    //   reject at `250`, and under `max_controlled_bytes: Some(264)` (where `264 <= 264` passes the pre-encode check),
+    //   encoding the FFV1 packet (`264 + packet.len() > 264`) must be rejected in BOTH `plan_transcode_lossless`
+    //   and `transcode_lossless`!
+    // Previously `visit` only checked `out_len * 3 + packet.len() + meta_working_bytes = 72 + ~50 + 24 = ~146 <= 264`,
+    // allowing both `plan_transcode_lossless` and `transcode_lossless` to succeed under `Some(264)`!
+    let y4m_src = dir.0.join("src-4x4.y4m");
+    {
+        let mut bytes = b"YUV4MPEG2 W4 H4 F25:1 Ip A1:1 C420jpeg\n".to_vec();
+        for v in [0x40u8, 0x80] {
+            bytes.extend_from_slice(b"FRAME\n");
+            bytes.extend(std::iter::repeat_n(v, 24));
+        }
+        std::fs::write(&y4m_src, bytes).unwrap();
+    }
+    let out_mkv = dir.0.join("out.mkv");
+    let tmix_transform = fvid::media_info::LosslessTransform {
+        tmix: Some("frames=8".into()),
+        ..Default::default()
+    };
+    let y4m_budget = CopyOptions {
+        max_controlled_bytes: Some(264),
+        ..Default::default()
+    };
+    for err in [
+        fvid_media::plan_transcode_lossless(&y4m_src, &tmix_transform, &y4m_budget, None)
+            .unwrap_err(),
+        fvid_media::transcode_lossless(&y4m_src, &out_mkv, tmix_transform.clone(), &y4m_budget)
+            .unwrap_err(),
+    ] {
+        assert!(
+            err.contains("exceeds controlled memory budget"),
+            "expected Y4M lossless FFV1 plan and export to charge tmix history + input + output + encoder frame + packet simultaneously, got: {err}"
+        );
+    }
+    assert!(!out_mkv.exists());
+
+    // 2. Single-track Matroska lossless FFV1 re-export with `tmix=frames=8` (`4x4` FFV1: `pixels.len() = 24`):
+    // In `decode_webm`, when `visit` (`check_encoded` / `visitor`) runs:
+    // - `live_source_bytes = 24` (`decoded.frame.data.len()`, because `transformed.is_some()`)
+    // - `working = 192` (`24 * 8` for `tmix` history + `pixels`)
+    // - `base_working_bytes` (`index_bytes + meta_working_bytes`)
+    // So `decode_webm` checks `base_bytes + 24 + 192 <= limit` (where `base_bytes = index_bytes + 8`),
+    // and then inside the visitor, the FFV1 encoder allocates a `GeometryFrame` copy (`+ 24`) and `packet` (`+ packet.len()`),
+    // bringing peak working set to `base_working_bytes + 24 + 192 + 24 + packet.len() = base_working_bytes + 240 + packet.len()`!
+    // Previously `encode_ffv1_len_with_controlled` and `owned_ffv1_export::export_processed` only charged
+    // `base_working_bytes + 48 + packet.len()`, ignoring `live_source_bytes + (working - 24) = 192` bytes!
+    let mkv_single_src = dir.0.join("src-single.mkv");
+    {
+        let mut frame = fvid_media::owned_frame::GeometryFrame {
+            width: 4,
+            height: 4,
+            subsampling: Some([2, 2]),
+            data: vec![0x60; 24],
+        };
+        let ffv1_pkt = fvid_media::owned_ffv1_encoder::encode(&mut frame, 8).unwrap();
+        let specs = [fvid_media::owned_matroska::TrackSpec {
+            encoding: fvid_media::owned_matroska::Encoding::Ffv1V1 {
+                width: 4,
+                height: 4,
+            },
+            name: "",
+            language: "eng",
+        }];
+        let track_options = [fvid_media::owned_matroska::TrackOptions {
+            default_duration_ns: 40_000_000,
+            ..Default::default()
+        }];
+        let file_meta = fvid_media::owned_matroska::FileMetadata::default();
+        let mut file = std::fs::File::create(&mkv_single_src).unwrap();
+        let mut writer = fvid_media::owned_matroska::PacketWriter::new_with_metadata(
+            &mut file,
+            &specs,
+            &track_options,
+            &file_meta,
+        )
+        .unwrap();
+        writer
+            .write_packet(0, 0, 40_000_000, true, &ffv1_pkt)
+            .unwrap();
+        writer.finish().unwrap();
+    }
+    let mut single_reader = fvid_media::owned_webm::WebmReader::open(
+        std::io::BufReader::new(std::fs::File::open(&mkv_single_src).unwrap()),
+        fvid_media::owned_webm::Limits::default(),
+    )
+    .unwrap();
+    single_reader.scan_all().unwrap();
+    // `meta_working_bytes` for one `"eng"` track with no tags is `("eng".len() * 2) * 8 = 48` bytes.
+    let single_base = single_reader.estimated_index_payload_bytes().unwrap() + 48;
+    // `single_base + 220` is `>= base_bytes + 216` (so `decode_webm`'s frame check passes)
+    // and `>= single_base + 48 + packet.len()` (so the old encoder check passed),
+    // but `< single_base + 240` (the simultaneous `single_base + live_source_bytes(24) + working(192) + encoder_copy(24)`)!
+    let mkv_single_budget = CopyOptions {
+        max_controlled_bytes: Some(single_base + 220),
+        ..Default::default()
+    };
+    for err in [
+        fvid_media::plan_transcode_lossless(
+            &mkv_single_src,
+            &tmix_transform,
+            &mkv_single_budget,
+            None,
+        )
+        .unwrap_err(),
+        fvid_media::transcode_lossless(
+            &mkv_single_src,
+            &out_mkv,
+            tmix_transform.clone(),
+            &mkv_single_budget,
+        )
+        .unwrap_err(),
+    ] {
+        assert!(
+            err.contains("exceeds controlled memory budget"),
+            "expected Matroska lossless FFV1 plan and export to charge filter working set + live source frame + encoder copy simultaneously, got: {err}"
+        );
+    }
+    assert!(!out_mkv.exists());
+
+    // 3. Multitrack Matroska lossless FFV1 export with non-video stream metadata (`stream_metadata_set` on audio stream 1):
+    // In `owned_webm_multitrack_export`, `input.index_and_meta_bytes` includes the audio stream's metadata working bytes (`~8_304` bytes for a 1_000-byte tag).
+    // During Stage 1 (`video.mkv` export in `try_export`), `input` stays alive while `owned_ffv1_export::export_processed` runs.
+    // Previously `try_export` stripped non-video `stream_metadata_set` from `stage` without passing `extra_base_bytes`,
+    // so `plan_selection` rejected budgets where `input.index_and_meta_bytes + frame_working + packet > limit`,
+    // whereas `try_export` only charged `index_bytes + video_meta_working_bytes` during Stage 1!
+    let mkv_multi_src = dir.0.join("src-multi.mkv");
+    {
+        let mut frame = fvid_media::owned_frame::GeometryFrame {
+            width: 4,
+            height: 4,
+            subsampling: Some([2, 2]),
+            data: vec![0x60; 24],
+        };
+        let ffv1_pkt = fvid_media::owned_ffv1_encoder::encode(&mut frame, 8).unwrap();
+        let mut opus_head = Vec::with_capacity(19);
+        opus_head.extend_from_slice(b"OpusHead");
+        opus_head.push(1);
+        opus_head.push(1);
+        opus_head.extend_from_slice(&0u16.to_le_bytes());
+        opus_head.extend_from_slice(&48_000u32.to_le_bytes());
+        opus_head.extend_from_slice(&0i16.to_le_bytes());
+        opus_head.push(0);
+        let opus_pkt = vec![0xFC, 0x00, 0x00];
+        let specs = [
+            fvid_media::owned_matroska::TrackSpec {
+                encoding: fvid_media::owned_matroska::Encoding::Ffv1V1 {
+                    width: 4,
+                    height: 4,
+                },
+                name: "",
+                language: "eng",
+            },
+            fvid_media::owned_matroska::TrackSpec {
+                encoding: fvid_media::owned_matroska::Encoding::Opus {
+                    configuration: &opus_head,
+                },
+                name: "",
+                language: "eng",
+            },
+        ];
+        let track_options = [
+            fvid_media::owned_matroska::TrackOptions {
+                default_duration_ns: 40_000_000,
+                ..Default::default()
+            },
+            fvid_media::owned_matroska::TrackOptions {
+                default_duration_ns: 20_000_000,
+                ..Default::default()
+            },
+        ];
+        let file_meta = fvid_media::owned_matroska::FileMetadata::default();
+        let mut file = std::fs::File::create(&mkv_multi_src).unwrap();
+        let mut writer = fvid_media::owned_matroska::PacketWriter::new_with_metadata(
+            &mut file,
+            &specs,
+            &track_options,
+            &file_meta,
+        )
+        .unwrap();
+        writer
+            .write_packet(0, 0, 40_000_000, true, &ffv1_pkt)
+            .unwrap();
+        writer
+            .write_packet(1, 0, 20_000_000, true, &opus_pkt)
+            .unwrap();
+        writer.finish().unwrap();
+    }
+    let mut multi_reader = fvid_media::owned_webm::WebmReader::open(
+        std::io::BufReader::new(std::fs::File::open(&mkv_multi_src).unwrap()),
+        fvid_media::owned_webm::Limits::default(),
+    )
+    .unwrap();
+    multi_reader.scan_all().unwrap();
+    let multi_index_bytes = multi_reader.estimated_index_payload_bytes().unwrap();
+    // With a 1_000-byte tag on stream 1 (`audio`), `meta_working_bytes` is `(6 + "1:COMMENT".len() + 1000 + 32) * 8 = 8_376` bytes,
+    // so `index_and_meta_bytes = multi_index_bytes + 8_376`.
+    // Setting `max_controlled_bytes = Some(multi_index_bytes + 8_376 + 60)`:
+    // - `index_and_meta_bytes + 3 (audio pkt)` <= `limit` (passes `qualify`)
+    // - `decode_webm` check (`multi_index_bytes + 16 + 48 <= limit`) passes
+    // - Stage 1 FFV1 encode check (`index_and_meta_bytes + 48 + packet.len() (~40) = index_and_meta_bytes + ~88 > limit`)
+    //   must reject in BOTH `plan_transcode_lossless` and `transcode_lossless` (before Stage 2 even opens `video.mkv`)!
+    let multi_opts = CopyOptions {
+        stream_metadata_set: vec![(1, "COMMENT".into(), "A".repeat(1_000))],
+        max_controlled_bytes: Some(multi_index_bytes + 8_376 + 60),
+        ..Default::default()
+    };
+    for err in [
+        fvid_media::plan_transcode_lossless(
+            &mkv_multi_src,
+            &fvid::media_info::LosslessTransform::default(),
+            &multi_opts,
+            None,
+        )
+        .unwrap_err(),
+        fvid_media::transcode_lossless(
+            &mkv_multi_src,
+            &out_mkv,
+            fvid::media_info::LosslessTransform::default(),
+            &multi_opts,
+        )
+        .unwrap_err(),
+    ] {
+        assert!(
+            err.contains("encoded FFV1 packet exceeds controlled memory budget"),
+            "expected multitrack Matroska Stage 1 FFV1 encode to charge non-video stream metadata retained in input alongside encoded FFV1 packet, got: {err}"
+        );
+    }
+    assert!(!out_mkv.exists());
+}
+
+#[test]
+fn audio_mix_merge_and_raw_flac_mp3_pcm_charge_simultaneous_working_sets() {
+    let dir = TempDir::new("audio-mix-merge-and-raw-pcm-working-sets");
+
+    // 1. `plan_mix_audio_with_controls` and `plan_merge_audio_with_controls` with container inputs:
+    // Build a synthetic Ogg Opus file (`opus_src`) with 4 pages, each holding 255 packets of
+    // 120-sample TOC=0xFC frames (`4 * 255 * 120 = 122_400` frames -> `122_400 * 2 * 4 = 979_200` bytes
+    // of decoded float32 PCM per input).
+    // Its single-input Ogg Opus preflight/decoder admission is small (`~1.2 MiB`), whereas:
+    // - Merging 2 copies holds `2 * 979_200 + 2 * 2 * 979_200 = 5_875_200` bytes simultaneously;
+    // - Mixing 16 copies holds `16 * 979_200 + 979_200 = 16_646_400` bytes simultaneously.
+    let opus_src = dir.0.join("opus-dense.ogg");
+    {
+        let mut head = Vec::with_capacity(19);
+        head.extend_from_slice(b"OpusHead");
+        head.push(1);
+        head.push(2); // 2 channels
+        head.extend_from_slice(&0u16.to_le_bytes());
+        head.extend_from_slice(&48_000u32.to_le_bytes());
+        head.extend_from_slice(&0i16.to_le_bytes());
+        head.push(0);
+        let mut tags = b"OpusTags".to_vec();
+        tags.extend_from_slice(&4u32.to_le_bytes());
+        tags.extend_from_slice(b"fvid");
+        tags.extend_from_slice(&0u32.to_le_bytes());
+        let write_ogg_page = |out: &mut Vec<u8>, header_type: u8, granule: u64, seq: u32, packets: &[&[u8]]| {
+            let start = out.len();
+            out.extend_from_slice(b"OggS");
+            out.push(0);
+            out.push(header_type);
+            out.extend_from_slice(&granule.to_le_bytes());
+            out.extend_from_slice(&1u32.to_le_bytes());
+            out.extend_from_slice(&seq.to_le_bytes());
+            out.extend_from_slice(&0u32.to_le_bytes());
+            let mut lacing = Vec::new();
+            for pkt in packets {
+                let mut rem = pkt.len();
+                while rem >= 255 {
+                    lacing.push(255u8);
+                    rem -= 255;
+                }
+                lacing.push(rem as u8);
+            }
+            out.push(lacing.len() as u8);
+            out.extend_from_slice(&lacing);
+            for pkt in packets {
+                out.extend_from_slice(pkt);
+            }
+            let mut crc = 0u32;
+            for &b in &out[start..] {
+                crc = (crc << 8) ^ {
+                    let mut r = ((crc >> 24) as u8 ^ b) as u32;
+                    r <<= 24;
+                    for _ in 0..8 {
+                        if r & 0x8000_0000 != 0 {
+                            r = (r << 1) ^ 0x04C1_1DB7;
+                        } else {
+                            r <<= 1;
+                        }
+                    }
+                    r
+                };
+            }
+            out[start + 22..start + 26].copy_from_slice(&crc.to_le_bytes());
+        };
+        let mut ogg_bytes = Vec::new();
+        write_ogg_page(&mut ogg_bytes, 0x02, 0, 0, &[&head]);
+        write_ogg_page(&mut ogg_bytes, 0x00, 0, 1, &[&tags]);
+        // TOC = 0xFB (config 31 = CELT FB 20ms, stereo, code 3 = arbitrary frame count).
+        // Second byte = 0x06 (CBR, 6 frames of 20ms = 120ms = 5760 samples per packet!).
+        // Put 85 packets of 5760 samples on a single EOS page (`85 * 5760 = 489_600` frames
+        // -> `489_600 * 2 * 4 = 3_916_800` bytes of decoded float32 PCM per input!).
+        // Meanwhile the Ogg file itself is only `~400` bytes with `87` packets (`index` estimate `~297 KiB`,
+        // total single-input `open_with_transform` estimate `~789 KiB`)!
+        let mut silence_120ms = vec![0xFBu8, 0x06];
+        for _ in 0..6 {
+            silence_120ms.extend_from_slice(&[0xFF, 0xFE]);
+        }
+        let page_pkts: Vec<&[u8]> = vec![&silence_120ms[..]; 85];
+        write_ogg_page(&mut ogg_bytes, 0x04, 85 * 5760, 2, &page_pkts);
+        std::fs::write(&opus_src, &ogg_bytes).unwrap();
+    }
+    let out_wav = dir.0.join("out.wav");
+    let merge_budget = CopyOptions {
+        max_controlled_bytes: Some(4_500_000),
+        ..Default::default()
+    };
+    if let Err(e) = fvid_media::plan_decode_audio(&opus_src, &Default::default(), &merge_budget) {
+        panic!("expected single Ogg Opus input to fit within 4.5 MB budget, got: {e}");
+    }
+    let merge_sources = vec![opus_src.clone(), opus_src.clone()];
+    for err in [
+        fvid_media::owned_audio_mix::plan_merge_audio_with_controls(&merge_sources, &merge_budget)
+            .unwrap_err(),
+        fvid_media::owned_audio_mix::merge_audio_with_controls(&merge_sources, &out_wav, &merge_budget)
+            .unwrap_err(),
+        fvid_media::owned_audio_mix::plan_mix_audio_with_controls(
+            &merge_sources,
+            &Default::default(),
+            &merge_budget,
+        )
+        .unwrap_err(),
+        fvid_media::owned_audio_mix::mix_audio_with_controls(
+            &merge_sources,
+            &out_wav,
+            &Default::default(),
+            &merge_budget,
+        )
+        .unwrap_err(),
+    ] {
+        assert!(
+            err.contains("controlled memory budget exceeded"),
+            "expected plan_merge/mix_audio_with_controls and merge/mix_audio_with_controls on Ogg inputs to reject when total decoded PCM + output buffers exceed max_controlled_bytes, got: {err}"
+        );
+    }
+    assert!(!out_wav.exists());
+
+    // 2. `decode_raw_flac_pcm` and `plan_decode_audio` simultaneous working-set check:
+    // In `decode_raw_flac_pcm`, `decoded.samples: Vec<i32>` (`4` bytes/sample) and `pcm: Vec<f32>` (`4` bytes/sample)
+    // are both live simultaneously (`8` bytes/sample = `max_frame_samples * channels * 8`).
+    // Use `tests/fixtures/playback-errors/flac-streaminfo/valid_baseline.flac` and test `decode_raw_flac_pcm`
+    // and `plan_decode_audio` at `old_total` (`4` bytes/sample instead of `8` bytes/sample):
+    let flac_fixture = std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
+        .join("tests/fixtures/playback-errors/flac-streaminfo/valid_baseline.flac");
+    let flac_size = std::fs::metadata(&flac_fixture).unwrap().len() as usize;
+    let flac_bytes = std::fs::read(&flac_fixture).unwrap();
+    let parsed = fvid_media::owned_flac::Flac::parse_owned(
+        flac_bytes,
+        &fvid_media::owned_flac::Limits {
+            file_bytes: flac_size,
+            packets: usize::MAX,
+        },
+    )
+    .unwrap();
+    let max_samples = parsed
+        .frames
+        .iter()
+        .map(|f| f.samples as usize)
+        .max()
+        .unwrap()
+        * usize::from(parsed.channels);
+    let index_bytes = parsed.frames.capacity() * std::mem::size_of::<fvid_media::owned_flac::Frame>();
+    // Old check only charged `flac_size + DECODE_ADMISSION_BYTES + index_bytes + max_samples * 4`,
+    // ignoring the simultaneous `decoded.samples: Vec<i32>` (`+ max_samples * 4`)!
+    let old_total = flac_size + (32 * 1024 * 1024) + index_bytes + max_samples * 4;
+    let flac_budget = CopyOptions {
+        max_controlled_bytes: Some(old_total),
+        ..Default::default()
+    };
+    for err in [
+        fvid_media::plan_decode_audio(&flac_fixture, &Default::default(), &flac_budget).unwrap_err(),
+        fvid_media::owned_raw_flac::decode_raw_flac_pcm(
+            &flac_fixture,
+            &mut std::io::sink(),
+            None,
+            &flac_budget,
+        )
+        .unwrap_err(),
+    ] {
+        assert!(
+            err.contains("controlled memory budget exceeded"),
+            "expected raw FLAC plan and decode_raw_flac_pcm to charge both i32 decoded samples and f32 PCM simultaneously, got: {err}"
+        );
+    }
+}
+
+#[test]
+fn native_audio_mix_merge_and_wave_decode_charge_input_bufreaders_and_wave_io_buffers() {
+    let dir = TempDir(std::env::temp_dir().join(format!(
+        "fvid-native-audio-mix-merge-wave-io-budget-{}",
+        std::process::id()
+    )));
+    let _ = std::fs::remove_dir_all(&dir.0);
+    std::fs::create_dir_all(&dir.0).unwrap();
+
+    // 1. Build a small 1-frame mono 48 kHz float32 WAVE file (`data_bytes = 4`).
+    // `estimate_float_wave_export_bytes` for this file is ~16_500 bytes, so `plan_decode_audio`
+    // succeeds under `max_controlled_bytes = Some(72_000)`.
+    let wav_mono = dir.0.join("mono.wav");
+    {
+        let mut bytes = Vec::with_capacity(48);
+        bytes.extend_from_slice(b"RIFF");
+        bytes.extend_from_slice(&40u32.to_le_bytes());
+        bytes.extend_from_slice(b"WAVEfmt ");
+        bytes.extend_from_slice(&16u32.to_le_bytes());
+        bytes.extend_from_slice(&3u16.to_le_bytes());
+        bytes.extend_from_slice(&1u16.to_le_bytes());
+        bytes.extend_from_slice(&48_000u32.to_le_bytes());
+        bytes.extend_from_slice(&192_000u32.to_le_bytes());
+        bytes.extend_from_slice(&4u16.to_le_bytes());
+        bytes.extend_from_slice(&32u16.to_le_bytes());
+        bytes.extend_from_slice(b"data");
+        bytes.extend_from_slice(&4u32.to_le_bytes());
+        bytes.extend_from_slice(&0.25f32.to_le_bytes());
+        std::fs::write(&wav_mono, &bytes).unwrap();
+    }
+
+    // `native_export::export_audio_pcm_selected_with_controls` on a WAVE input allocates:
+    // - `input: BufReader<File>` (8 KiB = 8_192 bytes)
+    // - `output: BufWriter<File>` (8 KiB = 8_192 bytes)
+    // - `decode_reader` stack buffer (65_536 bytes)
+    // = 81_920 bytes (> 72_000 bytes).
+    // Similarly, `media::decode_audio` to `.f32le` publishes the temporary WAVE spool via
+    // `export_audio_pcm_transformed_with_source_metadata`, which previously dropped `max_controlled_bytes`!
+    let out_f32le = dir.0.join("out.f32le");
+    let wave_io_budget = CopyOptions {
+        max_controlled_bytes: Some(72_000),
+        ..Default::default()
+    };
+    let direct_export_err = fvid::native_export::export_audio_pcm_selected_with_controls(
+        &wav_mono,
+        &out_f32le,
+        None,
+        &wave_io_budget,
+    )
+    .expect_err("export_audio_pcm_selected_with_controls on WAVE must charge 64 KiB decode_reader buffer + I/O buffers");
+    assert!(
+        direct_export_err
+            .to_string()
+            .contains("controlled memory budget exceeded"),
+        "unexpected direct_export_err: {direct_export_err}"
+    );
+    assert!(!out_f32le.exists());
+
+    let media_f32le_err = fvid::media::decode_audio(&wav_mono, &out_f32le, &wave_io_budget)
+        .expect_err("media::decode_audio to .f32le must enforce max_controlled_bytes on spool export");
+    assert!(
+        media_f32le_err.contains("controlled memory budget exceeded"),
+        "unexpected media_f32le_err: {media_f32le_err}"
+    );
+    assert!(!out_f32le.exists());
+
+    // 2. `native_audio_mix::plan_with_controls` and `mix_audio_with_controls`:
+    // Mixing 16 mono inputs keeps 16 `BufReader<File>` handles (`16 * 8_192 = 131_072` bytes) live
+    // simultaneously with `encoded` + `mixed` (`32_768` bytes) and `output: BufWriter<File>` + metadata (`16_384` bytes).
+    // Under `max_controlled_bytes = Some(120_000)`:
+    // - Old `stage_working_bytes = 32_768` needed only ~55 KiB (`<= 120_000`).
+    // - True simultaneous working set with 16 `BufReader<File>` handles is > 180 KiB (`> 120_000`).
+    let mix_16_sources = vec![wav_mono.clone(); 16];
+    let mix_16_budget = CopyOptions {
+        max_controlled_bytes: Some(120_000),
+        ..Default::default()
+    };
+    let out_mix_wav = dir.0.join("mix16.wav");
+    for err in [
+        fvid::native_audio_mix::plan_with_controls(
+            &mix_16_sources,
+            &Default::default(),
+            &mix_16_budget,
+        )
+        .unwrap_err()
+        .to_string(),
+        fvid::native_audio_mix::mix_audio_with_controls(
+            &mix_16_sources,
+            &out_mix_wav,
+            &Default::default(),
+            &mix_16_budget,
+        )
+        .unwrap_err()
+        .to_string(),
+    ] {
+        assert!(
+            err.contains("controlled memory budget exceeded"),
+            "expected native_audio_mix plan/mix with 16 inputs to charge 16 * 8 KiB BufReaders, got: {err}"
+        );
+    }
+    assert!(!out_mix_wav.exists());
+}
+
+#[test]
+fn loudness_and_loudnorm_preflight_meter_and_output_budgets_before_spool_decode_or_measurement() {
+    use std::sync::atomic::{AtomicUsize, Ordering};
+    use std::sync::Arc;
+
+    let dir = TempDir(std::env::temp_dir().join(format!(
+        "fvid-loudness-loudnorm-pre-spool-budget-{}",
+        std::process::id()
+    )));
+    let _ = std::fs::remove_dir_all(&dir.0);
+    std::fs::create_dir_all(&dir.0).unwrap();
+
+    // 1. Build a small G.711 mu-law 48 kHz mono WAVE file (`g711.wav`).
+    // Decoding `g711.wav` to a float32 WAVE spool only needs ~297 KiB, so under
+    // `max_controlled_bytes = Some(400_000)` `decode_to_wave` succeeds and emits progress events
+    // unless the 3.4-second `LoudnessMeter` working set (~1.37 MiB at 48 kHz) or the 192 kHz
+    // dynamic loudnorm working set (~6 MiB) is preflighted BEFORE decoding!
+    let g711_wav = dir.0.join("g711.wav");
+    {
+        let samples = 4800usize;
+        let riff_size = (50 + samples) as u32;
+        let mut bytes = Vec::with_capacity(58 + samples);
+        bytes.extend_from_slice(b"RIFF");
+        bytes.extend_from_slice(&riff_size.to_le_bytes());
+        bytes.extend_from_slice(b"WAVEfmt ");
+        bytes.extend_from_slice(&18u32.to_le_bytes());
+        bytes.extend_from_slice(&7u16.to_le_bytes()); // WAVE_FORMAT_MULAW
+        bytes.extend_from_slice(&1u16.to_le_bytes()); // 1 channel
+        bytes.extend_from_slice(&48_000u32.to_le_bytes());
+        bytes.extend_from_slice(&48_000u32.to_le_bytes());
+        bytes.extend_from_slice(&1u16.to_le_bytes());
+        bytes.extend_from_slice(&8u16.to_le_bytes());
+        bytes.extend_from_slice(&0u16.to_le_bytes());
+        bytes.extend_from_slice(b"fact");
+        bytes.extend_from_slice(&4u32.to_le_bytes());
+        bytes.extend_from_slice(&(samples as u32).to_le_bytes());
+        bytes.extend_from_slice(b"data");
+        bytes.extend_from_slice(&(samples as u32).to_le_bytes());
+        bytes.resize(bytes.len() + samples, 0x7f);
+        std::fs::write(&g711_wav, &bytes).unwrap();
+    }
+
+    let make_tracked_options = |limit: usize| {
+        let payload_events = Arc::new(AtomicUsize::new(0));
+        let counter = Arc::clone(&payload_events);
+        let opts = CopyOptions {
+            max_controlled_bytes: Some(limit),
+            progress: Some(fvid::media_control::ProgressHook::new(move |ev| {
+                if ev.payload_bytes > 0 || ev.packets > 0 {
+                    counter.fetch_add(1, Ordering::SeqCst);
+                }
+            })),
+            ..Default::default()
+        };
+        (opts, payload_events)
+    };
+
+    // Under `max_controlled_bytes = Some(400_000)`:
+    // - `fvid_media::measure_loudness(&g711_wav, ...)`
+    // - `fvid::media::measure_loudness(&g711_wav, ...)`
+    // - `fvid_media::apply_loudnorm(&g711_wav, ...)`
+    // - `fvid_media::apply_loudnorm_dual(&g711_wav, ...)`
+    // must all reject with `"controlled memory budget exceeded"` BEFORE decoding a single byte
+    // (`payload_events == 0`).
+    {
+        let (opts, events) = make_tracked_options(400_000);
+        let err = fvid_media::measure_loudness(&g711_wav, &opts).unwrap_err();
+        assert!(
+            err.contains("controlled memory budget exceeded"),
+            "unexpected fvid_media::measure_loudness err: {err}"
+        );
+        assert_eq!(
+            events.load(Ordering::SeqCst),
+            0,
+            "fvid_media::measure_loudness must preflight LoudnessMeter working set before decoding container spool"
+        );
+    }
+    {
+        let (opts, events) = make_tracked_options(400_000);
+        let err = fvid::media::measure_loudness(&g711_wav, &opts).unwrap_err();
+        assert!(
+            err.contains("controlled memory budget exceeded"),
+            "unexpected media::measure_loudness err: {err}"
+        );
+        assert_eq!(
+            events.load(Ordering::SeqCst),
+            0,
+            "media::measure_loudness must preflight LoudnessMeter working set before decoding container spool"
+        );
+    }
+    for dual in [false, true] {
+        let (opts, events) = make_tracked_options(400_000);
+        let out_wav = dir.0.join(format!("g711-loudnorm-{dual}.wav"));
+        let res = if dual {
+            fvid_media::apply_loudnorm_dual(&g711_wav, &out_wav, None, &opts)
+        } else {
+            fvid_media::apply_loudnorm(&g711_wav, &out_wav, None, &opts)
+        };
+        let err = res.unwrap_err();
+        assert!(
+            err.contains("controlled memory budget exceeded"),
+            "unexpected apply_loudnorm({dual}) err: {err}"
+        );
+        assert_eq!(
+            events.load(Ordering::SeqCst),
+            0,
+            "apply_loudnorm({dual}) on container must preflight spool loudnorm budget before decoding"
+        );
+        assert!(!out_wav.exists());
+    }
+
+    // 2. ADTS loudness and loudnorm:
+    // On `aac-stereo.aac` (48 kHz stereo), ADTS decode admission is `11_255_808` bytes,
+    // so under `max_controlled_bytes = Some(11_300_000)` ADTS decode succeeds, whereas
+    // dynamic loudnorm at 192 kHz needs > 1.8 MiB on the spool (`check_spool_loudnorm_budget`)
+    // AND wait: `check_spool_loudnorm_budget` checks against `limit = 11_300_000` (which is > 1.8 MiB),
+    // wait: what if `measure_loudness_with_weights` on `aac-stereo.aac` is called with wrong-length
+    // `weights` (`&[1.0]`) under `max_controlled_bytes = Some(16 * 1024 * 1024)`?
+    // Previously `native_pcm::measure_file_with_options` decoded the entire ADTS file to a WAVE
+    // spool BEFORE checking `weights.len() == channels`!
+    let adts_src =
+        PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("tests/fixtures/audio/aac-stereo.aac");
+    {
+        let (opts, events) = make_tracked_options(16 * 1024 * 1024);
+        let err = fvid::media::measure_loudness_with_weights(&adts_src, &opts, &[1.0]).unwrap_err();
+        assert!(
+            err.contains("channel weights must match selected audio stream"),
+            "unexpected ADTS weight mismatch err: {err}"
+        );
+        assert_eq!(
+            events.load(Ordering::SeqCst),
+            0,
+            "measure_loudness_with_weights on ADTS must validate weights before decoding ADTS spool"
+        );
+    }
+
+    // 3. `normalize_loudness` and `plan_normalize_loudness`:
+    // On an 8 kHz mono float32 WAVE file (`small_8k.wav`), loudness measurement and untagged WAVE
+    // export only need ~420_000 bytes, so `plan_loudness` fits in `max_controlled_bytes = Some(430_000)`.
+    // However:
+    // (a) When normalizing `small_8k.wav` with a 25,000-byte `ICMT` metadata tag (`wave_meta_bytes =
+    //     8 * (25_010 + 12) = 200_176` bytes), `check_output_memory_budget` needs `65536 + 16384 + 200_176
+    //     = 282_096` bytes AND with a second 20,000-byte `IART` tag (`+ 160_080` bytes) needs
+    //     `442_176` bytes (`> 430_000`).
+    //     Previously, `normalize_loudness_controlled` stripped `metadata_set` before running
+    //     `measure_loudness_file_with_options`, so it ran the entire Measure pass (emitting Measure
+    //     progress) before failing in the Export pass!
+    // (b) When `small_8k.wav` also has a 10,000-byte existing `INAM` INFO tag (`info_chunks_bytes = 10_008`),
+    //     `estimate_float_wave_export_bytes` during `plan_decode_audio` / `plan_loudness` needs:
+    //     `16384 + 16000 + 8 * (10008 + 12) + 16384 = 128_928` bytes (`<= 430_000`), and `loudness_with_options`
+    //     needs ~340_000 bytes (`<= 430_000`).
+    //     Wait: with a 42,000-byte `INAM` INFO tag (`8 * (42008 + 12) = 336_160`),
+    //     `estimate_float_wave_export_bytes` in `plan_decode_audio` needs `16384 + 16000 + 336160 + 16384
+    //     = 384_928` bytes (`<= 400_000`), and `loudness_with_options` needs `27200 * 8 + 65536 + 65536 + 512 + 3584 + 16384
+    //     = 369_152` bytes (`<= 400_000`), so `plan_loudness` succeeds at `max_controlled_bytes = Some(400_000)`!
+    //     Meanwhile `check_output_memory_budget` (which uses the 64 KiB `stage_working_bytes` of `export_pcm_selected`)
+    //     needs `65536 + 16384 + 336160 = 418_080` bytes (`> 400_000`)!
+    let large_info_wav = dir.0.join("large-info.wav");
+    {
+        let samples = 4000usize; // 0.5 s at 8 kHz mono
+        let data_bytes = (samples * 4) as u32;
+        let inam_payload = vec![b'A'; 46_000]; // 46 KB INAM tag (even length)
+        let list_payload_bytes = (4 + 8 + inam_payload.len()) as u32;
+        let riff_size = 4 + (8 + 16) + (8 + list_payload_bytes) + (8 + data_bytes);
+        let mut bytes = Vec::with_capacity((8 + riff_size) as usize);
+        bytes.extend_from_slice(b"RIFF");
+        bytes.extend_from_slice(&riff_size.to_le_bytes());
+        bytes.extend_from_slice(b"WAVEfmt ");
+        bytes.extend_from_slice(&16u32.to_le_bytes());
+        bytes.extend_from_slice(&3u16.to_le_bytes()); // IEEE float
+        bytes.extend_from_slice(&1u16.to_le_bytes()); // 1 channel
+        bytes.extend_from_slice(&8_000u32.to_le_bytes());
+        bytes.extend_from_slice(&32_000u32.to_le_bytes());
+        bytes.extend_from_slice(&4u16.to_le_bytes());
+        bytes.extend_from_slice(&32u16.to_le_bytes());
+        bytes.extend_from_slice(b"LIST");
+        bytes.extend_from_slice(&list_payload_bytes.to_le_bytes());
+        bytes.extend_from_slice(b"INFOINAM");
+        bytes.extend_from_slice(&(inam_payload.len() as u32).to_le_bytes());
+        bytes.extend_from_slice(&inam_payload);
+        bytes.extend_from_slice(b"data");
+        bytes.extend_from_slice(&data_bytes.to_le_bytes());
+        for _ in 0..samples {
+            bytes.extend_from_slice(&0.25f32.to_le_bytes());
+        }
+        std::fs::write(&large_info_wav, &bytes).unwrap();
+    }
+
+    let norm_budget = CopyOptions {
+        max_controlled_bytes: Some(449_000),
+        ..Default::default()
+    };
+    // Loudness measurement fits in 449_000 (`estimate_float_wave_export_bytes = 448_640 <= 449_000`
+    // and `LoudnessMeter` estimate `= 432_128 <= 449_000`), whereas `check_output_memory_budget`
+    // for normalization output requires `65_536 + 16_384 + 368_160 = 450_080 > 449_000`:
+    fvid::media::plan_loudness(&large_info_wav, &norm_budget)
+        .expect("plan_loudness on 8 kHz mono WAVE with 46 KB INFO should fit in 449_000 bytes");
+
+    let target = fvid::native_pcm::NormalizeTarget {
+        integrated_lufs: -16.0,
+        sample_peak_dbfs: -1.0,
+    };
+    let plan_norm_err =
+        fvid::media::plan_normalize_loudness(&large_info_wav, &norm_budget, None, target)
+            .expect_err("plan_normalize_loudness must check source metadata output memory budget even without explicit metadata_set");
+    assert!(
+        plan_norm_err.contains("controlled memory budget exceeded"),
+        "unexpected plan_normalize_loudness err: {plan_norm_err}"
+    );
+
+    let mut tagged_norm_budget = norm_budget.clone();
+    tagged_norm_budget
+        .metadata_set
+        .push(("comment".into(), "c".repeat(1000)));
+    for budget in [&norm_budget, &tagged_norm_budget] {
+        let measure_progress_events = Arc::new(AtomicUsize::new(0));
+        let measure_counter = Arc::clone(&measure_progress_events);
+        let norm_hook = fvid::native_pcm::NormalizationProgressHook::new(move |ev| {
+            if ev.phase == fvid::native_pcm::NormalizationPhase::Measure
+                && (ev.payload_bytes > 0 || ev.packets > 0)
+            {
+                measure_counter.fetch_add(1, Ordering::SeqCst);
+            }
+        });
+        let out_norm_wav = dir.0.join("norm-out.wav");
+        let exec_norm_err = fvid::media::normalize_loudness_controlled(
+            &large_info_wav,
+            &out_norm_wav,
+            budget,
+            None,
+            target,
+            Some(&norm_hook),
+        )
+        .expect_err("normalize_loudness_controlled must reject output metadata budget before Measure pass");
+        assert!(
+            exec_norm_err.contains("controlled memory budget exceeded"),
+            "unexpected exec_norm_err: {exec_norm_err}"
+        );
+        assert_eq!(
+            measure_progress_events.load(Ordering::SeqCst),
+            0,
+            "normalize_loudness_controlled must preflight output memory budget before running Measure pass"
+        );
+        assert!(!out_norm_wav.exists());
+    }
+}
+
+#[test]
+fn wave_loudnorm_and_compressed_audio_export_preflight_stage_two_memory_budgets() {
+    use std::sync::{
+        Arc,
+        atomic::{AtomicUsize, Ordering},
+    };
+    let dir = TempDir(
+        std::env::temp_dir().join(format!("fvid-batch-416-{}", std::process::id())),
+    );
+    let _ = std::fs::remove_dir_all(&dir.0);
+    std::fs::create_dir_all(&dir.0).unwrap();
+
+    // 1. WAVE `apply_loudnorm` (with `print_format=json`/`summary`) and `apply_loudnorm_dual`
+    // must check the Pass 2 WAVE normalization + metadata + report memory budget (`plan_loudnorm`)
+    // BEFORE running Pass 1 (`measure_phase`), so no Pass 1 progress events are emitted when
+    // Pass 2 exceeds `max_controlled_bytes`.
+    let wav_8k = dir.0.join("small-8k.wav");
+    {
+        let samples = 4_000usize; // 0.5 s at 8 kHz mono
+        let pcm = vec![0.25f32; samples];
+        fvid_media::owned_wav_file::write_wav_f32le(&wav_8k, 8_000, 1, &pcm).unwrap();
+    }
+    let wav_budget = CopyOptions {
+        max_controlled_bytes: Some(500_000),
+        ..Default::default()
+    };
+    // Pass 1 loudness measurement on `wav_8k` fits comfortably in 500_000 bytes (~340_000 bytes):
+    fvid_media::plan_loudness(&wav_8k, &wav_budget)
+        .expect("plan_loudness on 8 kHz mono WAVE should fit in 500_000 bytes");
+    // Pass 2 dynamic loudnorm at 192 kHz requires ~2,950,000 bytes (> 500_000):
+    let plan_json_err = fvid_media::plan_loudnorm(
+        &wav_8k,
+        Some("I=-16:TP=-1.5:LRA=11:print_format=json"),
+        false,
+        &wav_budget,
+    )
+    .expect_err("plan_loudnorm with print_format=json must reject 500_000 byte budget");
+    assert!(
+        plan_json_err.contains("controlled memory budget exceeded"),
+        "unexpected plan_json_err: {plan_json_err}"
+    );
+    let plan_dual_err = fvid_media::plan_loudnorm(&wav_8k, None, true, &wav_budget)
+        .expect_err("plan_loudnorm dual_pass must reject 500_000 byte budget");
+    assert!(
+        plan_dual_err.contains("controlled memory budget exceeded"),
+        "unexpected plan_dual_err: {plan_dual_err}"
+    );
+
+    for (dual, args) in [
+        (false, Some("I=-16:TP=-1.5:LRA=11:print_format=json")),
+        (false, Some("I=-16:TP=-1.5:LRA=11:print_format=summary")),
+        (true, None),
+        (true, Some("I=-16:TP=-1.5:LRA=11:print_format=json")),
+    ] {
+        let events = Arc::new(AtomicUsize::new(0));
+        let counter = Arc::clone(&events);
+        let mut opts = wav_budget.clone();
+        opts.progress = Some(fvid_control::ProgressHook::new(move |ev| {
+            if ev.payload_bytes > 0 || ev.packets > 0 {
+                counter.fetch_add(1, Ordering::SeqCst);
+            }
+        }));
+        let out_wav = dir.0.join("loudnorm-out.wav");
+        let exec_res = if dual {
+            fvid_media::apply_loudnorm_dual(&wav_8k, &out_wav, args, &opts)
+        } else {
+            fvid_media::apply_loudnorm(&wav_8k, &out_wav, args, &opts)
+        };
+        let err = exec_res.expect_err(
+            "WAVE apply_loudnorm / apply_loudnorm_dual must reject Pass 2 memory budget",
+        );
+        assert!(
+            err.contains("controlled memory budget exceeded"),
+            "unexpected WAVE loudnorm error (dual={dual}, args={args:?}): {err}"
+        );
+        assert_eq!(
+            events.load(Ordering::SeqCst),
+            0,
+            "WAVE apply_loudnorm (dual={dual}, args={args:?}) must preflight Pass 2 budget before Pass 1 measure_phase"
+        );
+        assert!(!out_wav.exists());
+    }
+
+    // Also verify linear Pass 2 with print_format=json + metadata_set where Pass 1 fits in
+    // 820_000 bytes, linear Pass 2 without metadata fits in 820_000 bytes (~805_896 bytes),
+    // and metadata_set pushes Pass 2 over 820_000 bytes:
+    let linear_json_args =
+        "I=-16:TP=-1.5:LRA=11:measured_I=-20:measured_TP=-6:measured_LRA=5:measured_thresh=-30:offset=0:linear=true:print_format=json";
+    let linear_budget = CopyOptions {
+        max_controlled_bytes: Some(820_000),
+        ..Default::default()
+    };
+    fvid_media::plan_loudnorm(&wav_8k, Some(linear_json_args), false, &linear_budget)
+        .expect("linear loudnorm with print_format=json without metadata should fit in 820_000 bytes");
+    let mut linear_meta_opts = linear_budget.clone();
+    linear_meta_opts
+        .metadata_set
+        .push(("comment".into(), "m".repeat(5_000)));
+    let plan_linear_meta_err =
+        fvid_media::plan_loudnorm(&wav_8k, Some(linear_json_args), false, &linear_meta_opts)
+            .expect_err("plan_loudnorm linear with 5 KB metadata + report must exceed 820_000 bytes");
+    assert!(
+        plan_linear_meta_err.contains("controlled memory budget exceeded"),
+        "unexpected plan_linear_meta_err: {plan_linear_meta_err}"
+    );
+    {
+        let events = Arc::new(AtomicUsize::new(0));
+        let counter = Arc::clone(&events);
+        let mut opts = linear_meta_opts.clone();
+        opts.progress = Some(fvid_control::ProgressHook::new(move |ev| {
+            if ev.payload_bytes > 0 || ev.packets > 0 {
+                counter.fetch_add(1, Ordering::SeqCst);
+            }
+        }));
+        let out_wav = dir.0.join("loudnorm-linear-meta-out.wav");
+        let err = fvid_media::apply_loudnorm(&wav_8k, &out_wav, Some(linear_json_args), &opts)
+            .expect_err("apply_loudnorm linear with print_format=json + 5 KB metadata must fail");
+        assert!(
+            err.contains("controlled memory budget exceeded"),
+            "unexpected err: {err}"
+        );
+        assert_eq!(
+            events.load(Ordering::SeqCst),
+            0,
+            "apply_loudnorm with print_format=json must preflight Pass 2 metadata+report budget before Pass 1 measure_phase"
+        );
+        assert!(!out_wav.exists());
+    }
+
+    // 2. Stage 2 WAVE DSP/resampler working set (`estimate_float_wave_export_bytes`) must be
+    // preflighted in `plan_decode_audio` and BEFORE Stage 1 compressed/container spool decoding
+    // across G.711 WAVE, ADTS, raw FLAC, raw MP3, Ogg, MP4, and Matroska.
+    let g711_wav = dir.0.join("g711.wav");
+    {
+        // Minimal 8 kHz mono A-law WAVE with 64 samples:
+        let samples = 64u32;
+        let riff_size = 50 + samples;
+        let mut bytes = Vec::new();
+        bytes.extend_from_slice(b"RIFF");
+        bytes.extend_from_slice(&riff_size.to_le_bytes());
+        bytes.extend_from_slice(b"WAVEfmt ");
+        bytes.extend_from_slice(&18u32.to_le_bytes());
+        bytes.extend_from_slice(&6u16.to_le_bytes()); // A-law
+        bytes.extend_from_slice(&1u16.to_le_bytes()); // mono
+        bytes.extend_from_slice(&8000u32.to_le_bytes()); // 8 kHz
+        bytes.extend_from_slice(&8000u32.to_le_bytes()); // byte rate
+        bytes.extend_from_slice(&1u16.to_le_bytes()); // block align
+        bytes.extend_from_slice(&8u16.to_le_bytes()); // bits per sample
+        bytes.extend_from_slice(&0u16.to_le_bytes()); // cbSize
+        bytes.extend_from_slice(b"fact");
+        bytes.extend_from_slice(&4u32.to_le_bytes());
+        bytes.extend_from_slice(&samples.to_le_bytes());
+        bytes.extend_from_slice(b"data");
+        bytes.extend_from_slice(&samples.to_le_bytes());
+        bytes.extend(std::iter::repeat_n(0xd5u8, samples as usize));
+        std::fs::write(&g711_wav, &bytes).unwrap();
+    }
+    let ogg_path = dir.0.join("opus.ogg");
+    {
+        let mut head = Vec::with_capacity(19);
+        head.extend_from_slice(b"OpusHead");
+        head.push(1);
+        head.push(2);
+        head.extend_from_slice(&0u16.to_le_bytes());
+        head.extend_from_slice(&48_000u32.to_le_bytes());
+        head.extend_from_slice(&0i16.to_le_bytes());
+        head.push(0);
+        let mut tags = b"OpusTags".to_vec();
+        tags.extend_from_slice(&4u32.to_le_bytes());
+        tags.extend_from_slice(b"fvid");
+        tags.extend_from_slice(&0u32.to_le_bytes());
+        let write_ogg_page = |out: &mut Vec<u8>, header_type: u8, granule: u64, seq: u32, packets: &[&[u8]]| {
+            let start = out.len();
+            out.extend_from_slice(b"OggS");
+            out.push(0);
+            out.push(header_type);
+            out.extend_from_slice(&granule.to_le_bytes());
+            out.extend_from_slice(&1u32.to_le_bytes());
+            out.extend_from_slice(&seq.to_le_bytes());
+            out.extend_from_slice(&0u32.to_le_bytes());
+            let mut lacing = Vec::new();
+            for pkt in packets {
+                let mut rem = pkt.len();
+                while rem >= 255 {
+                    lacing.push(255u8);
+                    rem -= 255;
+                }
+                lacing.push(rem as u8);
+            }
+            out.push(lacing.len() as u8);
+            out.extend_from_slice(&lacing);
+            for pkt in packets {
+                out.extend_from_slice(pkt);
+            }
+            let mut crc = 0u32;
+            for &b in &out[start..] {
+                crc = (crc << 8) ^ {
+                    let mut r = ((crc >> 24) as u8 ^ b) as u32;
+                    r <<= 24;
+                    for _ in 0..8 {
+                        if r & 0x8000_0000 != 0 {
+                            r = (r << 1) ^ 0x04C1_1DB7;
+                        } else {
+                            r <<= 1;
+                        }
+                    }
+                    r
+                };
+            }
+            out[start + 22..start + 26].copy_from_slice(&crc.to_le_bytes());
+        };
+        let mut ogg_bytes = Vec::new();
+        write_ogg_page(&mut ogg_bytes, 0x02, 0, 0, &[&head]);
+        write_ogg_page(&mut ogg_bytes, 0x00, 0, 1, &[&tags]);
+        let silence_pkt = [0xFCu8, 0xFF, 0xFE];
+        write_ogg_page(&mut ogg_bytes, 0x04, 960, 2, &[&silence_pkt]);
+        std::fs::write(&ogg_path, &ogg_bytes).unwrap();
+    }
+    let mp3_path = dir.0.join("tiny.mp3");
+    {
+        // Minimal 2-frame MPEG-1 Layer III 128 kbps 44.1 kHz mono stream (`2 * 417 = 834` bytes):
+        let mut frame = vec![0u8; 417];
+        frame[0] = 0xFF;
+        frame[1] = 0xFB;
+        frame[2] = 0x90;
+        frame[3] = 0xC0;
+        let mut mp3_bytes = Vec::with_capacity(834);
+        mp3_bytes.extend_from_slice(&frame);
+        mp3_bytes.extend_from_slice(&frame);
+        std::fs::write(&mp3_path, &mp3_bytes).unwrap();
+    }
+    let root = PathBuf::from(env!("CARGO_MANIFEST_DIR"));
+    let adts_path = root.join("tests/fixtures/audio/aac-mono-44k.aac");
+    let flac_path = root.join("tests/fixtures/playback-errors/flac-streaminfo/valid_baseline.flac");
+    let mp4_path = root.join("tests/fixtures/playback-errors/alac-resample-window.m4a");
+    let mkv_pcm_path = root.join("tests/fixtures/audio/pcm-int.mkv");
+
+    // When Stage 2 adds a metadata tag and/or resamples (`44_100 -> 8_000` or `48_000 -> 384_000`),
+    // Stage 1 decoding fits in the per-format Stage 1 budget, while Stage 2 (`export_spool` ->
+    // `estimate_float_wave_export_bytes`) requires the additional sinc history / output / metadata
+    // working set:
+    let resample_384k = AudioDecodeTransform {
+        sample_rate: Some(384_000),
+        channels: Some(2),
+        ..Default::default()
+    };
+    let resample_8k = AudioDecodeTransform {
+        sample_rate: Some(8_000),
+        channels: Some(2),
+        ..Default::default()
+    };
+    for (label, path, transform, budget_bytes, extra_comment_bytes) in [
+        ("g711-wave", g711_wav.as_path(), resample_384k, 300_000usize, 0usize),
+        ("adts", adts_path.as_path(), resample_8k, 13_600_000usize, 30_000usize),
+        ("raw-flac", flac_path.as_path(), resample_8k, 33_650_000usize, 50_000usize),
+        ("raw-mp3", mp3_path.as_path(), resample_384k, 400_000usize, 0usize),
+        ("ogg-opus", ogg_path.as_path(), resample_8k, 4_400_000usize, 30_000usize),
+        ("mp4-alac", mp4_path.as_path(), resample_384k, 500_000usize, 20_000usize),
+        ("mkv-pcm", mkv_pcm_path.as_path(), resample_384k, 900_000usize, 0usize),
+    ] {
+        let mut stage1_only_opts = CopyOptions {
+            max_controlled_bytes: Some(budget_bytes),
+            ..Default::default()
+        };
+        // Untransformed decode plan fits in `budget_bytes`:
+        fvid_media::plan_decode_audio(path, &AudioDecodeTransform::default(), &stage1_only_opts)
+            .unwrap_or_else(|e| {
+                panic!("{label}: identity plan_decode_audio should fit in {budget_bytes}: {e}")
+            });
+        if extra_comment_bytes > 0 {
+            stage1_only_opts
+                .metadata_set
+                .push(("comment".into(), "c".repeat(extra_comment_bytes)));
+        }
+        // Transformed decode plan MUST reject `budget_bytes` because Stage 2 WAVE DSP exceeds it:
+        let plan_err = fvid_media::plan_decode_audio(path, &transform, &stage1_only_opts)
+            .expect_err(&format!(
+                "{label}: plan_decode_audio must preflight Stage 2 WAVE DSP memory budget"
+            ));
+        assert!(
+            plan_err.contains("controlled memory budget exceeded"),
+            "{label}: unexpected plan_err: {plan_err}"
+        );
+
+        let events = Arc::new(AtomicUsize::new(0));
+        let counter = Arc::clone(&events);
+        let mut exec_opts = stage1_only_opts.clone();
+        exec_opts.progress = Some(fvid_control::ProgressHook::new(move |ev| {
+            if ev.payload_bytes > 0 || ev.packets > 0 {
+                counter.fetch_add(1, Ordering::SeqCst);
+            }
+        }));
+        let out_wav = dir.0.join(format!("{label}-out.wav"));
+        let exec_err = fvid_media::decode_audio_transformed(path, &out_wav, transform, &exec_opts)
+            .expect_err(&format!(
+                "{label}: decode_audio_transformed must reject Stage 2 WAVE DSP budget"
+            ));
+        assert!(
+            exec_err.contains("controlled memory budget exceeded"),
+            "{label}: unexpected exec_err: {exec_err}"
+        );
+        assert_eq!(
+            events.load(Ordering::SeqCst),
+            0,
+            "{label}: decode_audio_transformed must preflight Stage 2 WAVE DSP budget before Stage 1 spool decoding"
+        );
+        assert!(!out_wav.exists());
+    }
+}
+
+
+
+
+
+
+
+
+
 

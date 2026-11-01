@@ -1,0 +1,16 @@
+{
+  "batch": 487,
+  "ids": [
+    "FVID-0486"
+  ],
+  "snapshot": "docs/improvements/snapshots/batch-487-pre-edit",
+  "before_evidence": "docs/improvements/evidence/batch-487-acceptance-before.txt",
+  "after_evidence": "docs/improvements/evidence/batch-487-acceptance-after.txt",
+  "related_evidence": "docs/improvements/evidence/batch-487-related-after.txt",
+  "commands": [
+    "cargo test --test mp4_audio_metadata_admission subtitle_converters_and_mp4_video_bridge_charge_simultaneous_index_cue_and_frame_working_sets -- --exact",
+    "cargo test --test mp4_audio_metadata_admission"
+  ],
+  "passed": 56,
+  "failed": 0
+}

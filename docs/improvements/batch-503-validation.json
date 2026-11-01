@@ -1,0 +1,16 @@
+{
+  "batch": 503,
+  "ids": [
+    "FVID-0502"
+  ],
+  "snapshot": "docs/improvements/snapshots/batch-503-pre-edit",
+  "before_evidence": "docs/improvements/evidence/batch-503-acceptance-before.txt",
+  "after_evidence": "docs/improvements/evidence/batch-503-acceptance-after.txt",
+  "related_evidence": "docs/improvements/evidence/batch-503-related-after.txt",
+  "commands": [
+    "cargo test --test mp4_audio_metadata_admission native_loudness_and_normalize_loudness_charge_meter_working_set_in_plans_and_compressed_execution -- --exact",
+    "cargo test --test mp4_audio_metadata_admission"
+  ],
+  "passed": 72,
+  "failed": 0
+}

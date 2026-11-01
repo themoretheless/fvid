@@ -1,0 +1,16 @@
+{
+  "batch": 497,
+  "ids": [
+    "FVID-0496"
+  ],
+  "snapshot": "docs/improvements/snapshots/batch-497-pre-edit",
+  "before_evidence": "docs/improvements/evidence/batch-497-acceptance-before.txt",
+  "after_evidence": "docs/improvements/evidence/batch-497-acceptance-after.txt",
+  "related_evidence": "docs/improvements/evidence/batch-497-related-after.txt",
+  "commands": [
+    "cargo test --test mp4_audio_metadata_admission pcm_matroska_metadata_extraction_and_native_mix_merge_concat_charge_simultaneous_metadata_and_input_bufreader_working_sets -- --exact",
+    "cargo test --test mp4_audio_metadata_admission"
+  ],
+  "passed": 67,
+  "failed": 0
+}

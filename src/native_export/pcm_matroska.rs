@@ -248,6 +248,24 @@ pub(crate) fn extract_source_pcm_metadata_with_interval_packet_and_memory_limit(
         {
             base.3.insert("ENCODER".into(), reader.encoder().to_owned());
         }
+        if let Some(mem_limit) = max_controlled_bytes {
+            let mut tag_bytes = base.0.len().saturating_add(base.1.len()).saturating_add(64);
+            for (_, val) in base.2.tags.entries() {
+                if !val.is_empty() {
+                    tag_bytes = tag_bytes.saturating_add(val.len().saturating_add(32));
+                }
+            }
+            for (k, v) in &base.3 {
+                tag_bytes = tag_bytes.saturating_add(k.len()).saturating_add(v.len()).saturating_add(32);
+            }
+            let needed = reader
+                .estimated_index_payload_bytes()?
+                .saturating_add(8usize.saturating_mul(tag_bytes.saturating_add(12)))
+                .saturating_add(16 * 1024);
+            if needed > mem_limit {
+                return Err(invalid("controlled memory budget exceeded"));
+            }
+        }
         return Ok(base);
     }
     if prefix.starts_with(&[0x1a, 0x45, 0xdf, 0xa3]) {
@@ -382,6 +400,29 @@ pub(crate) fn extract_source_pcm_metadata_with_interval_packet_and_memory_limit(
         if !track_tags.is_empty() {
             base.4.insert(0, track_tags);
         }
+        if let Some(mem_limit) = max_controlled_bytes {
+            let mut tag_bytes = base.0.len().saturating_add(base.1.len()).saturating_add(64);
+            for (_, val) in base.2.tags.entries() {
+                if !val.is_empty() {
+                    tag_bytes = tag_bytes.saturating_add(val.len().saturating_add(32));
+                }
+            }
+            for (k, v) in &base.3 {
+                tag_bytes = tag_bytes.saturating_add(k.len()).saturating_add(v.len()).saturating_add(32);
+            }
+            for entries in base.4.values() {
+                for (k, v) in entries {
+                    tag_bytes = tag_bytes.saturating_add(k.len()).saturating_add(v.len()).saturating_add(32);
+                }
+            }
+            let needed = reader
+                .estimated_index_payload_bytes()?
+                .saturating_add(8usize.saturating_mul(tag_bytes.saturating_add(12)))
+                .saturating_add(16 * 1024);
+            if needed > mem_limit {
+                return Err(invalid("controlled memory budget exceeded"));
+            }
+        }
         return Ok(base);
     }
     if cancel.is_some_and(|c| c.is_cancelled()) {
@@ -485,6 +526,20 @@ pub(crate) fn extract_source_wave_info(
     if matches!(&prefix[..4], b"RIFF" | b"RF64" | b"RIFX") {
         let mut wave_file = std::fs::File::open(source)?;
         if let Ok(info) = fvid_media::owned_wave_inspect::inspect(&mut wave_file, cancel) {
+            if let Some(mem_limit) = options.max_controlled_bytes {
+                let info_bytes =
+                    fvid_media::owned_wave_inspect::info_chunks_bytes(&mut wave_file, &info, cancel)
+                        .map_err(|e| invalid(&e.to_string()))?;
+                let needed =
+                    fvid_media::owned_wave_metadata::wave_metadata_working_bytes(info_bytes, options)
+                        .map_err(|e| invalid(&e))?
+                        .saturating_add(16 * 1024);
+                if needed > mem_limit {
+                    return Err(invalid(&format!(
+                        "controlled memory budget exceeded: need {needed} bytes, limit {mem_limit}"
+                    )));
+                }
+            }
             return fvid_media::owned_wave_inspect::info_chunks(&mut wave_file, &info, cancel)
                 .map_err(|e| invalid(&e.to_string()));
         }
@@ -554,9 +609,13 @@ pub(crate) fn check_output_memory_budget(
     let check_matroska = matroska != Some(false);
     let mut needed = stage_working_bytes.saturating_add(16 * 1024);
     if check_wave {
-        let source_info_len = extract_source_wave_info(source, options)
-            .map(|b| b.len())
-            .unwrap_or(0);
+        let source_info_len = match extract_source_wave_info(source, options) {
+            Ok(b) => b.len(),
+            Err(e) if e.to_string().contains("budget") || e.to_string().contains("cancelled") => {
+                return Err(e);
+            }
+            Err(_) => 0,
+        };
         let assignments = options
             .metadata_set
             .iter()
@@ -569,7 +628,7 @@ pub(crate) fn check_output_memory_budget(
         );
     }
     if check_matroska {
-        let base = extract_source_pcm_metadata_with_interval_packet_and_memory_limit(
+        let base = match extract_source_pcm_metadata_with_interval_packet_and_memory_limit(
             source,
             options.streams.first().copied(),
             true,
@@ -578,8 +637,13 @@ pub(crate) fn check_output_memory_budget(
             options.max_packets,
             options.max_controlled_bytes,
             options.cancel.as_ref(),
-        )
-        .ok();
+        ) {
+            Ok(b) => Some(b),
+            Err(e) if e.to_string().contains("budget") || e.to_string().contains("cancelled") => {
+                return Err(e);
+            }
+            Err(_) => None,
+        };
         let (name, language, metadata, text, scoped) =
             parse_matroska_pcm_metadata(base, Some(options))?;
         let mut tag_bytes = name.len().saturating_add(language.len()).saturating_add(64);

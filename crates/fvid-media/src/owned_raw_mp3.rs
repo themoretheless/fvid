@@ -160,6 +160,19 @@ fn open_with_interval(
         if total > max {
             return Err("controlled memory budget exceeded: MPEG decoded PCM".into());
         }
+        if let Some((transform, None)) = window {
+            let prefix_frames = last.min(parsed.presentation_samples());
+            crate::owned_adts_export::check_spool_wave_export_budget(
+                parsed.sample_rate,
+                parsed.channels,
+                32,
+                prefix_frames.max(1024),
+                info.len(),
+                false,
+                transform,
+                options,
+            )?;
+        }
     }
     if let Some((transform, None)) = window {
         let last = match until {
@@ -441,6 +454,16 @@ pub(crate) fn apply(
     }
     let (rate, channels) = geometry_with_transform(source, Some(transform), options)?;
     let info = source_info(source, options)?;
+    crate::owned_adts_export::check_spool_wave_export_budget(
+        rate,
+        channels,
+        32,
+        1024,
+        info.len(),
+        false,
+        transform,
+        options,
+    )?;
     let spool = crate::owned_adts_export::spool_decoded(
         rate,
         channels,

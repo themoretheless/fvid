@@ -751,12 +751,12 @@ fn try_convert_matroska_inner(
     .map_err(|e| map_packet_limit(e.into()))?;
     reader.restrict_packet_bytes(effective_packet_bytes);
     reader.scan_all().map_err(|e| map_packet_limit(e.into()))?;
+    let reader_index_bytes = reader
+        .estimated_index_payload_bytes()
+        .map_err(|e| invalid(&e.to_string()))?
+        .saturating_add(reader.packets.len().saturating_mul(64));
     if let Some(limit) = max_controlled_bytes {
-        let index_bytes = reader
-            .estimated_index_payload_bytes()
-            .map_err(|e| invalid(&e.to_string()))?
-            .saturating_add(reader.packets.len().saturating_mul(64))
-            .saturating_add(16384);
+        let index_bytes = reader_index_bytes.saturating_add(16384);
         if index_bytes > limit {
             return Err(invalid("controlled memory budget exceeded"));
         }
@@ -826,7 +826,11 @@ fn try_convert_matroska_inner(
         )?;
         let meta_working_bytes = estimate_subtitle_matroska_metadata_working_bytes(&meta);
         if let Some(limit) = max_controlled_bytes
-            && meta_working_bytes.saturating_add(16384) > limit
+            && reader_index_bytes
+                .saturating_add(meta_working_bytes)
+                .saturating_add(configuration.len())
+                .saturating_add(16384)
+                > limit
         {
             return Err(invalid("controlled memory budget exceeded"));
         }
@@ -861,8 +865,9 @@ fn try_convert_matroska_inner(
                 .filter(|n| *n <= 64 << 20)
                 .ok_or_else(|| invalid("subtitle metadata exceeds 64 MiB"))?;
             if let Some(limit) = max_controlled_bytes {
-                let working = bytes
-                    .saturating_add(events.len().saturating_add(1).saturating_mul(48))
+                let working = reader_index_bytes
+                    .saturating_add(bytes)
+                    .saturating_add(events.len().saturating_add(1).saturating_mul(80))
                     .saturating_add(configuration.len())
                     .saturating_add(meta_working_bytes)
                     .saturating_add(16384);
@@ -914,13 +919,18 @@ fn try_convert_matroska_inner(
     )?;
     let meta_working_bytes = estimate_subtitle_matroska_metadata_working_bytes(&meta);
     if let Some(limit) = max_controlled_bytes
-        && meta_working_bytes.saturating_add(16384) > limit
+        && reader_index_bytes
+            .saturating_add(meta_working_bytes)
+            .saturating_add(HEADER.len())
+            .saturating_add(16384)
+            > limit
     {
         return Err(invalid("controlled memory budget exceeded"));
     }
     let mut cues = Vec::new();
     let mut bytes = 0usize;
     let mut processed_packets = 0u64;
+    let mut event_bytes = 0usize;
     for i in 0..reader.packets.len() {
         check_controls()?;
         let packet = &reader.packets[i];
@@ -951,8 +961,11 @@ fn try_convert_matroska_inner(
             return Err(invalid("subtitle metadata exceeds 64 MiB"));
         }
         if let Some(limit) = max_controlled_bytes {
-            let working = bytes
-                .saturating_add(cues.len().saturating_add(1).saturating_mul(48))
+            let working = reader_index_bytes
+                .saturating_add(bytes)
+                .saturating_add(event_bytes)
+                .saturating_add(cues.len().saturating_add(1).saturating_mul(80))
+                .saturating_add(HEADER.len())
                 .saturating_add(meta_working_bytes)
                 .saturating_add(16384);
             if working > limit {
@@ -968,7 +981,8 @@ fn try_convert_matroska_inner(
         if text.is_empty() {
             return Err(invalid("empty subtitle cue"));
         }
-        if format!("{},0,Default,,0,0,0,,{text}", cues.len()).len() > max_packet_bytes {
+        let formatted_len = format!("{},0,Default,,0,0,0,,{text}", cues.len()).len();
+        if formatted_len > max_packet_bytes {
             return Err(invalid("subtitle packet exceeds packet byte limit"));
         }
         // Validate and charge hidden input before omitting its output.
@@ -978,6 +992,19 @@ fn try_convert_matroska_inner(
         let Some((start, end)) = timing else {
             continue;
         };
+        event_bytes = event_bytes.saturating_add(formatted_len);
+        if let Some(limit) = max_controlled_bytes {
+            let working = reader_index_bytes
+                .saturating_add(bytes)
+                .saturating_add(event_bytes)
+                .saturating_add(cues.len().saturating_add(1).saturating_mul(80))
+                .saturating_add(HEADER.len())
+                .saturating_add(meta_working_bytes)
+                .saturating_add(16384);
+            if working > limit {
+                return Err(invalid("controlled memory budget exceeded"));
+            }
+        }
         cues.push((start, end, text));
     }
     if cues.is_empty() {
@@ -1073,6 +1100,7 @@ fn try_convert_ass_inner(
     }
     let mut configuration = String::new();
     let mut events = Vec::new();
+    let mut event_bytes = 0usize;
     let mut in_events = false;
     let mut format: Option<[usize; 10]> = None;
     let canonical = "layer,start,end,style,name,marginl,marginr,marginv,effect,text";
@@ -1136,6 +1164,20 @@ fn try_convert_ass_inner(
                         format!("{},{layer},{}", events.len(), order[3..].iter().map(|at|fields[*at]).collect::<Vec<_>>().join(",")).into_bytes();
                     if payload.len() > max_packet_bytes {
                         return Err(invalid("subtitle packet exceeds packet byte limit"));
+                    }
+                    event_bytes = event_bytes.saturating_add(payload.len());
+                    if let Some(limit) = max_controlled_bytes {
+                        let working = bytes
+                            .len()
+                            .saturating_add(normalized.len())
+                            .saturating_add(configuration.len())
+                            .saturating_add(event_bytes)
+                            .saturating_add(events.len().saturating_add(1).saturating_mul(80))
+                            .saturating_add(meta_working_bytes)
+                            .saturating_add(16384);
+                        if working > limit {
+                            return Err(invalid("controlled memory budget exceeded"));
+                        }
                     }
                     events.push((start, end, payload));
                     continue;
@@ -1252,6 +1294,7 @@ fn try_convert_srt_inner(
         .collect::<Vec<_>>()
         .join("\n");
     let mut cues = Vec::new();
+    let mut event_bytes = 0usize;
     for block in text.split("\n\n").filter(|b| !b.trim().is_empty()) {
         check_controls()?;
         if max_packets.is_some_and(|limit| cues.len() as u64 >= limit) {
@@ -1284,8 +1327,23 @@ fn try_convert_srt_inner(
         let Some(body) = ass_text(&body) else {
             return Ok(None);
         };
-        if format!("{},0,Default,,0,0,0,,{body}", cues.len()).len() > max_packet_bytes {
+        let formatted_len = format!("{},0,Default,,0,0,0,,{body}", cues.len()).len();
+        if formatted_len > max_packet_bytes {
             return Err(invalid("subtitle packet exceeds packet byte limit"));
+        }
+        event_bytes = event_bytes.saturating_add(formatted_len);
+        if let Some(limit) = max_controlled_bytes {
+            let working = bytes
+                .len()
+                .saturating_add(text.len())
+                .saturating_add(HEADER.len())
+                .saturating_add(event_bytes)
+                .saturating_add(cues.len().saturating_add(1).saturating_mul(80))
+                .saturating_add(meta_working_bytes)
+                .saturating_add(16384);
+            if working > limit {
+                return Err(invalid("controlled memory budget exceeded"));
+            }
         }
         cues.push((start, end, body));
     }

@@ -1,8 +1,8 @@
 {
   "target": 1000,
   "counting_rule": "One independently confirmed problem or useful capability; fixture variants and baseline integration repairs are excluded. Only accepted entries count.",
-  "accepted_count": 485,
-  "next_id": "FVID-0486",
+  "accepted_count": 509,
+  "next_id": "FVID-0510",
   "entries": [
     {
       "id": "FVID-0001",
@@ -470,7 +470,7 @@
       "source": "src/codec/avc_mbaff_picture.rs",
       "regression": "tests/avc_mbaff_pcm_memory.rs",
       "before": "Actual decoder allocation probe for128-square PCM frame reports274 allocations and3_320_590 requested bytes; the same packet needs no neighbor prediction.",
-      "result": "Direct PCM publication preserves validated frame/field footprints and readiness. Six alternating pairs repeat exact allocator savings:128-square frame274→18 allocations and3_320_590→109_326 cumulative bytes; native pixels, clocks, seek, atomicity and41 distinct Rust regressions pass. No release-speed/RSS claim.",
+      "result": "Direct PCM publication preserves validated frame/field footprints and readiness. Six alternating pairs repeat exact allocator savings:128-square frame274\u219218 allocations and3_320_590\u2192109_326 cumulative bytes; native pixels, clocks, seek, atomicity and41 distinct Rust regressions pass. No release-speed/RSS claim.",
       "status": "accepted",
       "validation": "batch-019-validation.json"
     },
@@ -554,11 +554,11 @@
     {
       "id": "FVID-0049",
       "batch": 27,
-      "title": "Preserve effective disabled-track usability through MP4→Matroska copy and filtered video export",
+      "title": "Preserve effective disabled-track usability through MP4\u2192Matroska copy and filtered video export",
       "source": "crates/fvid-media/src/owned_mp4_matroska_impl.rs",
       "regression": "tests/mp4_matroska_usability.rs",
       "before": "Equal-priority/legacy controls match; copying disabled-first dual AVC drops its usability flag and selects a different video, changing decoded pixels.",
-      "result": "MP4→Matroska copy and filtered FFV1/AAC export preserve effective disabled-track status through source/output reorder. Exact packet bytes, decoded video/clocks/seek, AAC silence and atomic refusal pass;23 Rust tests,1 Python integrity check and player build pass. Legacy fallback retained.",
+      "result": "MP4\u2192Matroska copy and filtered FFV1/AAC export preserve effective disabled-track status through source/output reorder. Exact packet bytes, decoded video/clocks/seek, AAC silence and atomic refusal pass;23 Rust tests,1 Python integrity check and player build pass. Legacy fallback retained.",
       "status": "accepted",
       "validation": "batch-027-validation.json"
     },
@@ -590,7 +590,7 @@
       "title": "Preserve MP4 non-AAC media clocks independently of codec sample rate",
       "source": "src/playback/audio/mp4_audio.rs",
       "regression": "tests/mp4_audio_clocks.rs",
-      "before": "Matching8kHz clock control passes. A20ms packet in1000/44100/48000/90000 media clocks is presented as2.5/110.25/120/225ms. Signed-ctts companion independently fails10ms→1.25ms.",
+      "before": "Matching8kHz clock control passes. A20ms packet in1000/44100/48000/90000 media clocks is presented as2.5/110.25/120/225ms. Signed-ctts companion independently fails10ms\u21921.25ms.",
       "result": "MP4 non-AAC decoded audio now retains source media units independently of codec sample rate and clips negative composition preroll exactly. Twelve authored PCM/ALAC clips pass samples, clocks, seek/replay/EOF through actual worker;40 Rust and1 Python test plus player binary build pass.",
       "status": "accepted",
       "validation": "batch-029-validation.json"
@@ -1881,7 +1881,7 @@
       "title": "Convert whole XM tick spans before microsecond rounding",
       "source": "src/container/xm.rs",
       "regression": "tests/xm_tick_span.rs",
-      "before": "Eight authored equal-tempo scores lose10–72us,publish PCM1ms short and shift a microsecond seek boundary. A fixed-window test isolates Kxx/ECx cutting one sample early at44100Hz. Four forced acceptances fail at timing,PCM and actual-worker packet length.",
+      "before": "Eight authored equal-tempo scores lose10\u201372us,publish PCM1ms short and shift a microsecond seek boundary. A fixed-window test isolates Kxx/ECx cutting one sample early at44100Hz. Four forced acceptances fail at timing,PCM and actual-worker packet length.",
       "result": "Row duration and delayed deadlines share a whole-span conversion.40 full PCM pairs,16 fixed-window pairs,20 worker targets,20 integrations,35 player units,18 core units,2 core regressions,fixture checks and player build pass. Public one-tick behavior and packet units remain unchanged.",
       "status": "accepted",
       "validation": "batch-158-validation.json"
@@ -3023,11 +3023,11 @@
     {
       "id": "FVID-0269",
       "batch": 262,
-      "title": "Scope Matroska and MP4 audio packet-byte and controlled-memory admission to the active max_packets prefix and preserve QuickTime/iTunes ©too encoder tags across probe, WAVE INFO, and Matroska PCM exports",
+      "title": "Scope Matroska and MP4 audio packet-byte and controlled-memory admission to the active max_packets prefix and preserve QuickTime/iTunes \u00a9too encoder tags across probe, WAVE INFO, and Matroska PCM exports",
       "source": "crates/fvid-media/src/owned_matroska_audio.rs",
       "regression": "tests/matroska_prefix_budget_mp4_wave_info_regressions.rs",
-      "before": "validate_audio_packet_budget and admit_audio_reader in `crates/fvid-media/src/owned_matroska_audio.rs`, validate_encoded_audio_packet_budget in `src/native_plan.rs`, try_plan in `src/native_loudnorm.rs`, and extract_source_pcm_metadata in `src/native_export/pcm_matroska.rs` scan every packet of the selected audio track across the entire container without bounding by `options.max_packets`, causing `plan_decode_audio`, `decode_audio_transformed`, `plan_trim`, `trim`, `plan_loudnorm`, `apply_loudnorm`, and WAVE/Matroska `mix_audio_with_controls` / `merge_audio_with_controls` to reject prefix-bounded (`max_packets = Some(n)`) Matroska and MP4 audio when an oversized packet lies after the first `n` packets; `Mp4Reader::parse_ilst` (`crates/fvid-media/src/owned_mp4_impl.rs`) ignores QuickTime/iTunes `©too` (`0xa9746f6f`) encoder atoms so `probe`, WAVE `ISFT` (`owned_wave_metadata::mp4_source_info`), and Matroska `ENCODER` tags (`export_pcm_selected`, `extract_source_pcm_metadata_with_packet_limit`) drop MP4 encoder metadata; and `normalize_loudness_controlled` (`src/media.rs`) and CLI `normalize-loudness` (`src/media_cli.rs`) forward output metadata mutations into `loudness_channel_weights_with_options`, failing with `\"owned loudness requires at most one audio stream and no metadata edits\"` before normalization.",
-      "result": "Bound `validate_audio_packet_budget` and `admit_audio_reader` (`crates/fvid-media/src/owned_matroska_audio.rs`), `validate_encoded_audio_packet_budget` (`src/native_plan.rs`), `native_loudnorm::try_plan` (`src/native_loudnorm.rs`), and `extract_source_pcm_metadata_with_packet_limit` (`src/native_export/pcm_matroska.rs`) by `options.max_packets`; parse QuickTime/iTunes `©too` into `Mp4Reader::encoder()` (`crates/fvid-media/src/owned_mp4_impl.rs`) and expose it in `try_mp4` (`crates/fvid-media/src/owned_mp4_probe_impl.rs`), `mp4_source_info` (`crates/fvid-media/src/owned_wave_metadata.rs`), `export_pcm_selected` (`src/native_export.rs`), and `extract_source_pcm_metadata_with_packet_limit`; and clear output metadata edits before `loudness_channel_weights_with_options` in `src/media.rs` and `src/media_cli.rs`. Two focused integration tests, 5 related test suites, and 2 offline fixture unit tests pass.",
+      "before": "validate_audio_packet_budget and admit_audio_reader in `crates/fvid-media/src/owned_matroska_audio.rs`, validate_encoded_audio_packet_budget in `src/native_plan.rs`, try_plan in `src/native_loudnorm.rs`, and extract_source_pcm_metadata in `src/native_export/pcm_matroska.rs` scan every packet of the selected audio track across the entire container without bounding by `options.max_packets`, causing `plan_decode_audio`, `decode_audio_transformed`, `plan_trim`, `trim`, `plan_loudnorm`, `apply_loudnorm`, and WAVE/Matroska `mix_audio_with_controls` / `merge_audio_with_controls` to reject prefix-bounded (`max_packets = Some(n)`) Matroska and MP4 audio when an oversized packet lies after the first `n` packets; `Mp4Reader::parse_ilst` (`crates/fvid-media/src/owned_mp4_impl.rs`) ignores QuickTime/iTunes `\u00a9too` (`0xa9746f6f`) encoder atoms so `probe`, WAVE `ISFT` (`owned_wave_metadata::mp4_source_info`), and Matroska `ENCODER` tags (`export_pcm_selected`, `extract_source_pcm_metadata_with_packet_limit`) drop MP4 encoder metadata; and `normalize_loudness_controlled` (`src/media.rs`) and CLI `normalize-loudness` (`src/media_cli.rs`) forward output metadata mutations into `loudness_channel_weights_with_options`, failing with `\"owned loudness requires at most one audio stream and no metadata edits\"` before normalization.",
+      "result": "Bound `validate_audio_packet_budget` and `admit_audio_reader` (`crates/fvid-media/src/owned_matroska_audio.rs`), `validate_encoded_audio_packet_budget` (`src/native_plan.rs`), `native_loudnorm::try_plan` (`src/native_loudnorm.rs`), and `extract_source_pcm_metadata_with_packet_limit` (`src/native_export/pcm_matroska.rs`) by `options.max_packets`; parse QuickTime/iTunes `\u00a9too` into `Mp4Reader::encoder()` (`crates/fvid-media/src/owned_mp4_impl.rs`) and expose it in `try_mp4` (`crates/fvid-media/src/owned_mp4_probe_impl.rs`), `mp4_source_info` (`crates/fvid-media/src/owned_wave_metadata.rs`), `export_pcm_selected` (`src/native_export.rs`), and `extract_source_pcm_metadata_with_packet_limit`; and clear output metadata edits before `loudness_channel_weights_with_options` in `src/media.rs` and `src/media_cli.rs`. Two focused integration tests, 5 related test suites, and 2 offline fixture unit tests pass.",
       "status": "accepted",
       "validation": "batch-262-validation.json"
     },
@@ -3056,10 +3056,10 @@
     {
       "id": "FVID-0272",
       "batch": 265,
-      "title": "Preserve QuickTime/iTunes ©too encoder metadata in MP4-to-Matroska remux and concat with set/delete override support and scope compressed MP4 concat packet-byte admission to selected streams and the active max_packets prefix",
+      "title": "Preserve QuickTime/iTunes \u00a9too encoder metadata in MP4-to-Matroska remux and concat with set/delete override support and scope compressed MP4 concat packet-byte admission to selected streams and the active max_packets prefix",
       "source": "src/container/mp4_concat.rs",
       "regression": "tests/mp4_matroska_encoder_concat_prefix_regression.rs",
-      "before": "owned_mp4_remux::metadata (`crates/fvid-media/src/owned_mp4_remux.rs`), owned_mp4_matroska_impl::write_selected (`crates/fvid-media/src/owned_mp4_matroska_impl.rs`), matroska_write::write_mp4_aac_metadata (`src/container/matroska_write.rs`), and mp4_concat::write_with_options (`src/container/mp4_concat.rs`) initialize Matroska tags from `FileMetadata::from_mp4` without seeding the file-wide `ENCODER` text tag from `Mp4Reader::encoder()` (`©too`), silently dropping the source MP4 writing-application tag so `probe` on remuxed or concatenated `.mka`/`.mkv` outputs reports `\"FVid\"` instead of the source encoder; and `mp4_concat::open_with_packet_limit` (`src/container/mp4_concat.rs`) called by `concat_mp4_matroska_with_options` (`src/native_plan.rs`) and `try_concat_mp4_matroska_with_options` (`src/native_export.rs`) checks every sample of every track across all segments against `max_packet_bytes` without bounding by `options.streams` or `options.max_packets`, causing `plan_concat` and `concat` on MP4 inputs with `.mka`/`.mkv` output to fail with `\"MP4 packet exceeds budget\"` when an oversized packet lies after the active `max_packets` prefix or in an unselected stream.",
+      "before": "owned_mp4_remux::metadata (`crates/fvid-media/src/owned_mp4_remux.rs`), owned_mp4_matroska_impl::write_selected (`crates/fvid-media/src/owned_mp4_matroska_impl.rs`), matroska_write::write_mp4_aac_metadata (`src/container/matroska_write.rs`), and mp4_concat::write_with_options (`src/container/mp4_concat.rs`) initialize Matroska tags from `FileMetadata::from_mp4` without seeding the file-wide `ENCODER` text tag from `Mp4Reader::encoder()` (`\u00a9too`), silently dropping the source MP4 writing-application tag so `probe` on remuxed or concatenated `.mka`/`.mkv` outputs reports `\"FVid\"` instead of the source encoder; and `mp4_concat::open_with_packet_limit` (`src/container/mp4_concat.rs`) called by `concat_mp4_matroska_with_options` (`src/native_plan.rs`) and `try_concat_mp4_matroska_with_options` (`src/native_export.rs`) checks every sample of every track across all segments against `max_packet_bytes` without bounding by `options.streams` or `options.max_packets`, causing `plan_concat` and `concat` on MP4 inputs with `.mka`/`.mkv` output to fail with `\"MP4 packet exceeds budget\"` when an oversized packet lies after the active `max_packets` prefix or in an unselected stream.",
       "result": "Seed `text` with `(\"ENCODER\", encoder.to_owned())` from `Mp4Reader::encoder()` before applying `options.metadata_set` and `options.metadata_delete` in `owned_mp4_remux::metadata` (`crates/fvid-media/src/owned_mp4_remux.rs`) and `mp4_concat::write_with_options` (`src/container/mp4_concat.rs`), as well as in `owned_mp4_matroska_impl::write_selected` (`crates/fvid-media/src/owned_mp4_matroska_impl.rs`) and `matroska_write::write_mp4_aac_metadata` (`src/container/matroska_write.rs`), while keeping `export_aac_pcm` (`allow_wave == false` in `src/native_export.rs`) free of muxer `WritingApp` injection; and add `mp4_concat::open_with_options` (`src/container/mp4_concat.rs`) wired into `concat_mp4_matroska_with_options` (`src/native_plan.rs`) and `try_concat_mp4_matroska_with_options` (`src/native_export.rs`) to validate `max_packet_bytes` in DTS-interleaved order across `selected` tracks up to `options.max_packets`. Two focused integration tests, 4 related test suites, and 1 offline fixture unit test pass.",
       "status": "accepted",
       "validation": "batch-265-validation.json"
@@ -3866,7 +3866,7 @@
       "title": "Propagate controlled-memory ceilings (max_controlled_bytes) to FFV1, AVC, HEVC, VP9, and AV1 codec decoders in owned_webm_codec::Decoder, owned_video_decode::decode_webm, and owned_mp4_video_decode::decode_presented, and to owned_probe::probe_with_options in plan_transcode_lossless and plan_burn_subtitles",
       "source": "crates/fvid-media/src/owned_webm_codec.rs",
       "regression": "tests/mp4_metadata_admission.rs",
-      "before": "In `crates/fvid-media/src/owned_webm_codec.rs`, `Decoder::new` hardcoded `usize::MAX` as the memory budget when constructing `owned_ffv1_decoder::Decoder`, `avc_decoder::AvcDecoder`, `hevc_decoder::HevcDecoder`, `vp9_decoder::Decoder`, and `av1_decoder::Decoder`, and both `owned_video_decode::decode_webm` (`crates/fvid-media/src/owned_video_decode.rs:211`) and `owned_webm_codec::presentation_durations` (`crates/fvid-media/src/owned_webm_codec.rs:411`) called `Decoder::new` without passing `options.max_controlled_bytes`. Similarly, `owned_mp4_video_decode::decode_presented` (`crates/fvid-media/src/owned_mp4_video_decode.rs:125,236,320,365`) constructed `AvcDecoder`, `Av1Decoder`, `vp9_decoder::Decoder`, and `HevcDecoder` with `usize::MAX`. As a result, a 4 KiB `max_controlled_bytes` budget on `ffv1-six-frames.mkv` or `small.mp4` (whose container metadata, packet indices, and output frame buffers fit in <4 KiB, but whose FFV1 context tables or AVC DPB/reference buffers require ~16–20 KiB) was admitted by `plan_transcode_lossless`, `transcode_lossless`, `plan_burn_subtitles`, and `burn_subtitles`. In addition, `owned_lossless::plan_transcode_lossless` (`crates/fvid-media/src/owned_lossless.rs:898`) and `owned_subtitle_burn::plan_burn_subtitles` (`crates/fvid-media/src/owned_subtitle_burn.rs:351`) called `owned_probe::probe(source)` without `options`.",
+      "before": "In `crates/fvid-media/src/owned_webm_codec.rs`, `Decoder::new` hardcoded `usize::MAX` as the memory budget when constructing `owned_ffv1_decoder::Decoder`, `avc_decoder::AvcDecoder`, `hevc_decoder::HevcDecoder`, `vp9_decoder::Decoder`, and `av1_decoder::Decoder`, and both `owned_video_decode::decode_webm` (`crates/fvid-media/src/owned_video_decode.rs:211`) and `owned_webm_codec::presentation_durations` (`crates/fvid-media/src/owned_webm_codec.rs:411`) called `Decoder::new` without passing `options.max_controlled_bytes`. Similarly, `owned_mp4_video_decode::decode_presented` (`crates/fvid-media/src/owned_mp4_video_decode.rs:125,236,320,365`) constructed `AvcDecoder`, `Av1Decoder`, `vp9_decoder::Decoder`, and `HevcDecoder` with `usize::MAX`. As a result, a 4 KiB `max_controlled_bytes` budget on `ffv1-six-frames.mkv` or `small.mp4` (whose container metadata, packet indices, and output frame buffers fit in <4 KiB, but whose FFV1 context tables or AVC DPB/reference buffers require ~16\u201320 KiB) was admitted by `plan_transcode_lossless`, `transcode_lossless`, `plan_burn_subtitles`, and `burn_subtitles`. In addition, `owned_lossless::plan_transcode_lossless` (`crates/fvid-media/src/owned_lossless.rs:898`) and `owned_subtitle_burn::plan_burn_subtitles` (`crates/fvid-media/src/owned_subtitle_burn.rs:351`) called `owned_probe::probe(source)` without `options`.",
       "result": "Add `Decoder::new_with_budget` in `crates/fvid-media/src/owned_webm_codec.rs` and pass `options.and_then(|o| o.max_controlled_bytes).unwrap_or(usize::MAX)` in `owned_video_decode::decode_webm`, `owned_webm_codec::presentation_durations`, and all four codec branches (`AvcDecoder`, `Av1Decoder`, `vp9_decoder::Decoder`, `HevcDecoder`) of `owned_mp4_video_decode::decode_presented`, and add `owned_probe::probe_with_options` (`crates/fvid-media/src/owned_probe.rs`) used by `plan_transcode_lossless` and `plan_burn_subtitles`. Eleven integration tests in `mp4_metadata_admission` and nine in `mp4_audio_metadata_admission` pass.",
       "status": "accepted",
       "validation": "batch-337-validation.json"
@@ -4975,7 +4975,7 @@
       "source": "src/playback/video/mp4.rs",
       "regression": "tests/mp4_seek_navigation.rs",
       "before": "Published1d2ad76abf scans the complete sample index for every sync search. Seven standalone default-release runs on50000 authored VP9 keyframes:1000 navigation queries median35.57ms and actual software seek+RGB54.09ms; all exact output assertions pass.",
-      "result": "Derive a conservative strict-order flag in the existing suffix-index pass; partition the target and search backward within its sync interval. Reordered/equal-PTS inputs retain full prefix coverage, with no added heap index. Seven interleaved baseline/after pairs meet predeclared criteria: navigation35.94→0.434ms (82.77x),actual seek+RGB54.55→18.49ms (2.95x),all7 pairs win,no opening regression. Scope is this memory-resident16x16 all-keyframe workload,not whole-player throughput. Three new black-box tests and existing fixtures preserve sparse sync bounds,reordered/equal PTS,exact pictures/intervals,rewind/EOF and budget refusal.119 integration suites558 pass;1225 distinct checks plus both builds pass.",
+      "result": "Derive a conservative strict-order flag in the existing suffix-index pass; partition the target and search backward within its sync interval. Reordered/equal-PTS inputs retain full prefix coverage, with no added heap index. Seven interleaved baseline/after pairs meet predeclared criteria: navigation35.94\u21920.434ms (82.77x),actual seek+RGB54.55\u219218.49ms (2.95x),all7 pairs win,no opening regression. Scope is this memory-resident16x16 all-keyframe workload,not whole-player throughput. Three new black-box tests and existing fixtures preserve sparse sync bounds,reordered/equal PTS,exact pictures/intervals,rewind/EOF and budget refusal.119 integration suites558 pass;1225 distinct checks plus both builds pass.",
       "status": "accepted",
       "validation": "batch-442-validation.json"
     },
@@ -4986,7 +4986,7 @@
       "source": "src/playback/video/mp4.rs",
       "regression": "tests/mp4_ordered_index_budget.rs",
       "before": "Publishedcfe3571176 retains an8-byte suffix-minimum entry per video sample even with strict PTS. Qualified150ms/150000-sample witness:4 controls pass,ordered2MiB admission fails specifically on1.2MB index exceeding1MiB reorder half. A smaller512KiB probe was rejected because its same-codec control also hit the legitimate VP9 work limit.",
-      "result": "Use immutable next-sample PTS for strict order without retaining a suffix array; keep the charged array for reordered/equal PTS and refuse zero reorder working budget. Safe private payload/ledger measurements show ordered1200000→0 bytes,general case1200000 unchanged. Actual150000 pictures and seven opens/seeks pass at2MiB; intrinsic VP9 and general reorder refusals remain. Seven default-release CPU pairs meet predeclared<=10% median regression guard: navigation+4.3%,actual seek+RGB effectively unchanged,opening faster.120 integration suites563 pass;1231 distinct checks and both builds pass. Scope is retained index/decoder budget,not total RAM or player throughput.",
+      "result": "Use immutable next-sample PTS for strict order without retaining a suffix array; keep the charged array for reordered/equal PTS and refuse zero reorder working budget. Safe private payload/ledger measurements show ordered1200000\u21920 bytes,general case1200000 unchanged. Actual150000 pictures and seven opens/seeks pass at2MiB; intrinsic VP9 and general reorder refusals remain. Seven default-release CPU pairs meet predeclared<=10% median regression guard: navigation+4.3%,actual seek+RGB effectively unchanged,opening faster.120 integration suites563 pass;1231 distinct checks and both builds pass. Scope is retained index/decoder budget,not total RAM or player throughput.",
       "status": "accepted",
       "validation": "batch-443-validation.json"
     },
@@ -5008,7 +5008,7 @@
       "source": "src/playback/audio/mp4_audio.rs",
       "regression": "tests/mp4_audio_packet_seek.rs",
       "before": "Published29fe6037f8 performs a full expanded-index max-PTS scan for each necessary packet seek. Four controls pass;seven standalone release runs on160000 authored IMA4 blocks show1000 lookups138.21ms and actual seek-to-analytic-PCM139.02ms. This is distinct from the discarded mandatory-preroll lookup removed by0444.",
-      "result": "Lazily certify nondecreasing immutable PTS and partition inclusively,retaining the last equal-PTS sample. Reordered inputs retain original max-PTS search and compact inputs retain existing lookup;no per-sample heap index. Seven paired runs:1000lookups137.178→0.180ms(760.9x),actual software seek-to-PCM137.682→0.908ms(151.6x),all7pairs win. Cold direct/AudioStream seek improve;opening+3.92%passes predeclared10%guard. Five authored120ms clips preserve raw reordered/equal/negative packet landings,ordered analytic PCM,video seek/EOF and actual audio worker behavior.122integration suites570pass;1238distinct checks and both builds pass. Scope is this memory-resident IMA4 workload,not whole-player throughput.",
+      "result": "Lazily certify nondecreasing immutable PTS and partition inclusively,retaining the last equal-PTS sample. Reordered inputs retain original max-PTS search and compact inputs retain existing lookup;no per-sample heap index. Seven paired runs:1000lookups137.178\u21920.180ms(760.9x),actual software seek-to-PCM137.682\u21920.908ms(151.6x),all7pairs win. Cold direct/AudioStream seek improve;opening+3.92%passes predeclared10%guard. Five authored120ms clips preserve raw reordered/equal/negative packet landings,ordered analytic PCM,video seek/EOF and actual audio worker behavior.122integration suites570pass;1238distinct checks and both builds pass. Scope is this memory-resident IMA4 workload,not whole-player throughput.",
       "status": "accepted",
       "validation": "batch-445-validation.json"
     },
@@ -5483,6 +5483,270 @@
       "result": "Query readable run starts for sparse UniformIndex,retaining the reference walk for dense/expanded indexes. Paired medians8.23875ms and2.76375ms:83.94/84.79percent reduction,7/7wins in both sets,all fingerprints equal. Full analytic PCM,actual workers,video,seek/EOF,private coordinate semantics,eight gates and three repeated fifteen-test runs pass. No whole-player or decoder speedup claim.",
       "status": "accepted",
       "validation": "batch-483-validation.json"
+    },
+    {
+      "id": "FVID-0486",
+      "batch": 487,
+      "title": "Charge simultaneous index, cue, and frame working sets in owned_subtitle_impl and owned_mp4_video_bridge",
+      "source": "crates/fvid-media/src/owned_subtitle_impl.rs",
+      "regression": "tests/mp4_audio_metadata_admission.rs",
+      "before": "`owned_subtitle_impl::try_convert_matroska_inner` (`crates/fvid-media/src/owned_subtitle_impl.rs:741`) checked `reader.estimated_index_payload_bytes() + reader.packets.len() * 64 + 16384` in isolation and then omitted `reader_index_bytes` from the `meta_working_bytes` and per-cue working-set checks in both the `S_TEXT/ASS` and `S_TEXT/UTF8` conversion loops while `reader` remained live, and `try_convert_ass_inner` / `try_convert_srt_inner` (`crates/fvid-media/src/owned_subtitle_impl.rs:1085`, `crates/fvid-media/src/owned_subtitle_impl.rs:1223`) only checked `bytes.len() * 3 + meta_working_bytes + 16384` upfront without charging per-cue `events`/`cues` vector + Matroska cue-table growth (`80 * (cues.len() + 1)`) and formatted ASS dialogue bytes during parsing. Meanwhile `owned_mp4_video_bridge::prepare_selected` (`crates/fvid-media/src/owned_mp4_video_bridge.rs:144`) never charged `estimate_matroska_metadata_working_bytes` against `max_controlled_bytes` and checked `pixels.len() > limit` and `packet.len() > limit` in isolation even though `pixels`, `geometry.data` (`pixels.len()`), `packet`, and `meta_working_bytes` are live simultaneously.",
+      "result": "Retain `reader_index_bytes` across `try_convert_matroska_inner` and charge `reader_index_bytes + bytes + event_bytes + (cues.len() + 1) * 80 + configuration/HEADER + meta_working_bytes + 16384`, charge per-cue `bytes.len() + normalized/text.len() + configuration/HEADER.len() + event_bytes + (events.len() + 1) * 80 + meta_working_bytes + 16384` in `try_convert_ass_inner` and `try_convert_srt_inner`, and charge `meta_working_bytes` plus simultaneous frame buffers (`pixels.len() * 2` for YUV/RGB or `pixels.len()` for monochrome) and `packet.len()` in `owned_mp4_video_bridge::prepare_selected`. Fifty-six integration tests in `mp4_audio_metadata_admission` pass.",
+      "status": "accepted",
+      "validation": "batch-487-validation.json"
+    },
+    {
+      "id": "FVID-0487",
+      "batch": 488,
+      "title": "Charge simultaneous Matroska metadata, index, frame, and FFV1 packet working sets in owned_xfade, owned_subtitle_burn, owned_lossless, owned_matroska, and owned_ffv1_export",
+      "source": "crates/fvid-media/src/owned_xfade.rs",
+      "regression": "tests/mp4_audio_metadata_admission.rs",
+      "before": "`owned_xfade::{plan_xfade, write_y4m_ffv1_counted}` (`crates/fvid-media/src/owned_xfade.rs:101`, `crates/fvid-media/src/owned_xfade.rs:618`), `owned_subtitle_burn::prepare` (`crates/fvid-media/src/owned_subtitle_burn.rs:31`), `owned_lossless::{check_source_matroska_metadata_budget, transcode_lossless, plan_transcode_lossless}` (`crates/fvid-media/src/owned_lossless.rs:280`, `crates/fvid-media/src/owned_lossless.rs:646`), `owned_matroska::write_y4m_ffv1_policy` (`crates/fvid-media/src/owned_matroska.rs:377`), and `owned_ffv1_export::export_processed` (`crates/fvid-media/src/owned_ffv1_export.rs:364`) checked Matroska metadata working sets, container index payload bytes, decoded frame buffers, SRT cue tables, and encoded FFV1 packet sizes in isolation against `max_controlled_bytes`, even though they remain live simultaneously.",
+      "result": "Add `owned_lossless::options_matroska_metadata_working_bytes`, charge `index_bytes + meta_working_bytes` in `check_source_matroska_metadata_budget` and `owned_ffv1_export::export_processed`, and charge `meta_working_bytes` together with simultaneous frame buffers, SRT cues/masks, and encoded FFV1 packets across `owned_xfade`, `owned_subtitle_burn`, `owned_lossless`, `owned_matroska`, and `owned_ffv1_export`. Fifty-seven integration tests in `mp4_audio_metadata_admission` pass.",
+      "status": "accepted",
+      "validation": "batch-488-validation.json"
+    },
+    {
+      "id": "FVID-0488",
+      "batch": 489,
+      "title": "Charge simultaneous index, metadata, packet schedule, cue, and frame working sets in owned_webm_multitrack_export, owned_mp4_multitrack_export, and owned_subtitle_burn visitors",
+      "source": "crates/fvid-media/src/owned_webm_multitrack_export.rs",
+      "regression": "tests/mp4_audio_metadata_admission.rs",
+      "before": "`owned_webm_multitrack_export::{qualify, plan_selection, try_export}` (`crates/fvid-media/src/owned_webm_multitrack_export.rs:287`, `crates/fvid-media/src/owned_webm_multitrack_export.rs:347`, `crates/fvid-media/src/owned_webm_multitrack_export.rs:431`, `crates/fvid-media/src/owned_webm_multitrack_export.rs:652`) and `owned_mp4_multitrack_export::{qualify, plan_selection, try_export}` (`crates/fvid-media/src/owned_mp4_multitrack_export.rs:114`, `crates/fvid-media/src/owned_mp4_multitrack_export.rs:247`, `crates/fvid-media/src/owned_mp4_multitrack_export.rs:511`) checked container index payload bytes, Matroska metadata working sets, packet sizes, and multitrack packet schedules in isolation against `max_controlled_bytes`. Meanwhile `owned_subtitle_burn::{plan_burn_subtitles, burn_subtitles}` (`crates/fvid-media/src/owned_subtitle_burn.rs:254`, `crates/fvid-media/src/owned_subtitle_burn.rs:329`, `crates/fvid-media/src/owned_subtitle_burn.rs:508`, `crates/fvid-media/src/owned_subtitle_burn.rs:634`) checked `frame_len + mask_bytes` and `packet.len()` in Y4M visitors without `cues_and_meta_bytes`, and checked `view.pixels.len() + mask_bytes` in container `inspect` / `process` callbacks even though two frame buffers (`view.pixels` and `working.data`), `mask`, `cues`, and `meta_working_bytes` remain live simultaneously.",
+      "result": "Charge `index_bytes + meta_working_bytes` together with packet sizes and multitrack packet schedules (including `video.estimated_index_payload_bytes()`) in `owned_webm_multitrack_export` and `owned_mp4_multitrack_export`, and charge `cues_and_meta_bytes` plus simultaneous frame buffers (`view.pixels.len() * 2 + mask_bytes` in container `inspect`/`process` and `frame_len + mask_bytes` in Y4M visitors) and `packet.len()` in `owned_subtitle_burn`. Fifty-eight integration tests in `mp4_audio_metadata_admission` pass.",
+      "status": "accepted",
+      "validation": "batch-489-validation.json"
+    },
+    {
+      "id": "FVID-0489",
+      "batch": 490,
+      "title": "Charge simultaneous index, presentation table, packet, and frame working sets in owned_video_decode, owned_webm_codec, owned_webm_presentation, and owned_mp4_video_decode",
+      "source": "crates/fvid-media/src/owned_video_decode.rs",
+      "regression": "tests/mp4_audio_metadata_admission.rs",
+      "before": "`owned_video_decode::decode_webm` (`crates/fvid-media/src/owned_video_decode.rs:176`, `crates/fvid-media/src/owned_video_decode.rs:293`, `crates/fvid-media/src/owned_video_decode.rs:437`), `owned_webm_codec::presentation_durations` (`crates/fvid-media/src/owned_webm_codec.rs:392`, `crates/fvid-media/src/owned_webm_codec.rs:433`, `crates/fvid-media/src/owned_webm_codec.rs:480`), and `owned_webm_presentation::Presentation::{new, next}` (`crates/fvid-media/src/owned_webm_presentation.rs:28`, `crates/fvid-media/src/owned_webm_presentation.rs:112`) checked `reader.estimated_index_payload_bytes()`, `durations` / `visible` / `future` presentation tables, packet payload sizes, and decoded / transformed frame buffers in isolation against `max_controlled_bytes`. Meanwhile `owned_mp4_video_decode::decode_presented` (`crates/fvid-media/src/owned_mp4_video_decode.rs:119`, `crates/fvid-media/src/owned_mp4_video_decode.rs:139`) checked `table_bytes` and `pixels.len()` in isolation without charging `table_bytes + packet.len() + pixels.len()` simultaneously.",
+      "result": "Charge `index_bytes + future_bytes (+ inferred_bytes)` together with packet payload sizes and decoded / transformed frame buffers across `owned_webm_presentation`, `owned_webm_codec::presentation_durations`, and `owned_video_decode::decode_webm`, and charge `table_bytes + packet.len() (+ pixels.len())` in `owned_mp4_video_decode::decode_presented`. Fifty-nine integration tests in `mp4_audio_metadata_admission` pass.",
+      "status": "accepted",
+      "validation": "batch-490-validation.json"
+    },
+    {
+      "id": "FVID-0490",
+      "batch": 491,
+      "title": "Charge simultaneous input/output frame buffers and container index working sets in Y4M and Matroska FFV1 lossless export",
+      "source": "crates/fvid-media/src/owned_lossless.rs",
+      "regression": "tests/mp4_audio_metadata_admission.rs",
+      "before": "`owned_lossless::{plan_transcode_lossless, transcode_lossless}` (`crates/fvid-media/src/owned_lossless.rs:648`, `crates/fvid-media/src/owned_lossless.rs:1019`, `crates/fvid-media/src/owned_lossless.rs:1054`) and `owned_matroska::write_y4m_ffv1_policy` (`crates/fvid-media/src/owned_matroska.rs:419`) checked only a single Y4M frame buffer (`frame_len + packet.len() + meta_working_bytes`) even though `decode_reader_frames` holds both `input` (`frame_len`) and `output` (`out_len`) simultaneously when geometry/pixel transforms are active and `encode_y4m_counted` clones `data.to_vec()` (`out_len`). Meanwhile `owned_ffv1_export::export_processed` (`crates/fvid-media/src/owned_ffv1_export.rs:386`) and `owned_lossless::check_encoded_ffv1_with_controlled` (`crates/fvid-media/src/owned_lossless.rs:764`) omitted `index_bytes` (`input.estimated_index_payload_bytes()`) from their per-frame working-set checks (`view.pixels.len() * 2 + meta_working_bytes`) while `input: WebmReader` remained live.",
+      "result": "Expose `owned_y4m_decode::has_geometry_or_pixel_transform`, charge simultaneous `input` + `output` + `encode` frame buffers (`frame_len * 3` when geometry/pixel transforms are active, `frame_len * 2` otherwise) plus `packet.len()` and `meta_working_bytes` in `owned_lossless::{plan_transcode_lossless, transcode_lossless}` and `owned_matroska::write_y4m_ffv1_policy`, and include `index_bytes + meta_working_bytes` in `owned_ffv1_export::export_processed`, `owned_lossless::check_encoded_ffv1_with_controlled`, and `owned_subtitle_burn` container visitors. Sixty integration tests in `mp4_audio_metadata_admission` pass.",
+      "status": "accepted",
+      "validation": "batch-491-validation.json"
+    },
+    {
+      "id": "FVID-0491",
+      "batch": 492,
+      "title": "Charge simultaneous index, packet, and codec setup working sets in owned_mp4_probe_impl, owned_webm_probe, media_probe, and owned_probe::probe_ogg_with_options",
+      "source": "crates/fvid-media/src/owned_probe.rs",
+      "regression": "tests/mp4_audio_metadata_admission.rs",
+      "before": "`owned_mp4_probe_impl::try_mp4_with_options` (`crates/fvid-media/src/owned_mp4_probe_impl.rs:129`, `crates/fvid-media/src/owned_mp4_probe_impl.rs:148`) checked `reader.estimated_index_payload_bytes()` and `sample.size` in isolation against `max_controlled_bytes`. `owned_webm_probe::try_probe_webm_with_limits` (`crates/fvid-media/src/owned_webm_probe.rs:115`) and `media_probe::matroska_with_limits` (`src/media_probe.rs:142`) checked `reader.estimated_index_payload_bytes()` without charging simultaneous zlib decompression working storage (`packet_payload_size + packet_read_overhead`) allocated during `scan_all()`. Meanwhile `owned_probe::probe_ogg_with_options` (`crates/fvid-media/src/owned_probe.rs:459`, `crates/fvid-media/src/owned_probe.rs:492`) discarded `index_estimate` from `preflight` and opened `owned_ogg_audio_program::Program`, `owned_ogg_opus::Program`, and `owned_ogg_vorbis::Program` (unpacking multi-megabyte Vorbis setup codebooks via `fvid_codecs::vorbis::Setup::parse`) without charging `index_estimate` plus the codec setup and packet timeline working set against `max_controlled_bytes`.",
+      "result": "Charge `index_bytes + sample.size` in `owned_mp4_probe_impl::try_mp4_with_options`, charge `index_bytes + packet_payload_size + packet_read_overhead` for zlib-compressed Matroska tracks in `owned_webm_probe::try_probe_webm_with_limits` and `media_probe::matroska_with_limits`, and charge `index_estimate` plus codec setup and packet timeline working sets (`vorbis_admission::inspect`, `OpusDecoder::decode_admission_bytes`, or `owned_ogg_audio_program::decoder_reserve`) in `owned_probe::probe_ogg_with_options`. Sixty-one integration tests in `mp4_audio_metadata_admission` and fifteen in `mp4_metadata_admission` pass.",
+      "status": "accepted",
+      "validation": "batch-492-validation.json"
+    },
+    {
+      "id": "FVID-0492",
+      "batch": 493,
+      "title": "Charge simultaneous display-geometry, alpha-channel transform, and MP4 presentation bridge working sets in owned_video_decode, owned_mp4_video_decode, and owned_mp4_video_bridge",
+      "source": "crates/fvid-media/src/owned_video_decode.rs",
+      "regression": "tests/mp4_audio_metadata_admission.rs",
+      "before": "`owned_video_decode::decode_webm` (`crates/fvid-media/src/owned_video_decode.rs:312`, `crates/fvid-media/src/owned_video_decode.rs:318`, `crates/fvid-media/src/owned_video_decode.rs:455`) allocated rotated/cropped display-geometry frame and alpha buffers in `owned_display_geometry::apply`, 3-channel RGB opacity wrappers (`expected * 3` input and output buffers) in `transform_alpha`, and combined pixel+alpha buffers without charging the simultaneous source + output working set against `max_controlled_bytes`. Meanwhile `owned_mp4_video_decode::rotate_packed` (`crates/fvid-media/src/owned_mp4_video_decode.rs:1167`) rotated and promoted packed MP4 frames without charging `table_bytes + packet.len() + frame.data.len() + rotated.data.len()`, and `owned_mp4_video_bridge::prepare_selected` (`crates/fvid-media/src/owned_mp4_video_bridge.rs:189`) omitted `table_bytes` (`index_bytes + samples * size_of::<FrameMetadata>()`) from its visitor working-set check (`pixels.len() * 2 + meta_working_bytes`) while `decode_presented` remained active.",
+      "result": "Charge simultaneous source and rotated/cropped buffers after `owned_display_geometry::apply`, charge simultaneous RGB opacity wrapper and output buffers in `transform_alpha` and `decode_webm`, charge `table_bytes + packet.len() + frame.data.len() + rotated.data.len()` in `owned_mp4_video_decode::rotate_packed`, and include `table_bytes` in `owned_mp4_video_bridge::prepare_selected`'s `base_working_bytes`. Sixty-two integration tests in `mp4_audio_metadata_admission` and fifteen in `mp4_metadata_admission` pass.",
+      "status": "accepted",
+      "validation": "batch-493-validation.json"
+    },
+    {
+      "id": "FVID-0493",
+      "batch": 494,
+      "title": "Charge simultaneous Y4M double-buffered frames and container SRT cues plus source index and metadata in owned_subtitle_burn and owned_ffv1_export",
+      "source": "crates/fvid-media/src/owned_subtitle_burn.rs",
+      "regression": "tests/mp4_audio_metadata_admission.rs",
+      "before": "`owned_subtitle_burn::{prepare, plan_burn_subtitles, burn_subtitles}` (`crates/fvid-media/src/owned_subtitle_burn.rs:31`, `crates/fvid-media/src/owned_subtitle_burn.rs:261`, `crates/fvid-media/src/owned_subtitle_burn.rs:659`) charged only a single Y4M frame buffer (`frame_len + mask_bytes + cues_and_meta_bytes`) even though `visit_reader_transformed_counted` holds `input: Vec<u8>` (`frame_len`) while the visitor clones `frame.data = bytes.to_vec()` (`frame_len`) and rasterizes `mask` (`mask_bytes`). Meanwhile on container inputs, `prepare` (`crates/fvid-media/src/owned_subtitle_burn.rs:106`) omitted `index_bytes` from `base_working`, `plan_burn_subtitles` and `burn_subtitles` (`crates/fvid-media/src/owned_subtitle_burn.rs:328`, `crates/fvid-media/src/owned_subtitle_burn.rs:524`) computed `container_base_bytes = cues_and_meta_bytes.max(source_index_and_meta_bytes)` instead of summing `cues_only_bytes + source_index_and_meta_bytes`, and `owned_ffv1_export::export_processed` (`crates/fvid-media/src/owned_ffv1_export.rs:372`, `crates/fvid-media/src/owned_ffv1_export.rs:466`) omitted `cues_only_bytes` when checking encoded FFV1 packet working sets during container subtitle burn.",
+      "result": "Charge `frame_len * 2 + mask_bytes` alongside `meta_working_bytes` / `cues_and_meta_bytes` across Y4M `prepare`, `plan_burn_subtitles`, and `burn_subtitles`, include `index_bytes` in container `prepare`'s `base_working`, sum `cues_only_bytes + source_index_and_meta_bytes` for `container_base_bytes`, and pass `cues_only_bytes` into `owned_ffv1_export::export_processed` as `extra_base_bytes`. Sixty-three integration tests in `mp4_audio_metadata_admission` and fifteen in `mp4_metadata_admission` pass.",
+      "status": "accepted",
+      "validation": "batch-494-validation.json"
+    },
+    {
+      "id": "FVID-0494",
+      "batch": 495,
+      "title": "Charge simultaneous source/stage index, metadata, packet schedule, audio window, and packet payload working sets in owned_webm_multitrack_export and owned_mp4_multitrack_export",
+      "source": "crates/fvid-media/src/owned_webm_multitrack_export.rs",
+      "regression": "tests/mp4_audio_metadata_admission.rs",
+      "before": "`owned_webm_multitrack_export::{plan_selection, try_export}` (`crates/fvid-media/src/owned_webm_multitrack_export.rs:450`, `crates/fvid-media/src/owned_webm_multitrack_export.rs:531`, `crates/fvid-media/src/owned_webm_multitrack_export.rs:674`, `crates/fvid-media/src/owned_webm_multitrack_export.rs:764`) checked `input.index_and_meta_bytes + schedule_bytes` without charging simultaneous packet payload reads (`max_packet_bytes` / `bytes.len()`) or staged PCM audio window readers (`pcm_index_bytes`), while `owned_webm_audio_window::apply` (`crates/fvid-media/src/owned_webm_audio_window.rs:56`) and `owned_webm_pcm_window::prepare` (`crates/fvid-media/src/owned_webm_pcm_window.rs:27`, `crates/fvid-media/src/owned_webm_pcm_window.rs:108`) allocated `positions` and PCM stage buffers without charging the live outer Matroska index and metadata working set. Meanwhile `owned_mp4_multitrack_export::{plan_selection, try_export}` (`crates/fvid-media/src/owned_mp4_multitrack_export.rs:191`, `crates/fvid-media/src/owned_mp4_multitrack_export.rs:352`, `crates/fvid-media/src/owned_mp4_multitrack_export.rs:582`) omitted the live outer MP4 `reader` (`mp4_index_bytes`) when checking/transcoding the temporary video bridge and omitted `payload.len()` from the packet schedule mux loop check.",
+      "result": "Charge `max_packet_bytes` / `bytes.len()` and `pcm_index_bytes` alongside `index_and_meta_bytes + video_index_bytes + schedule_bytes` in `owned_webm_multitrack_export`, charge `index_and_meta_bytes + positions_bytes (+ packet.len())` in `owned_webm_audio_window::apply`, deduct `base_working_bytes` and charge `base_working_bytes + data_bytes` in `owned_webm_pcm_window::prepare`, and charge `mp4_index_bytes` during video bridge planning/export plus `payload.len()` during muxing in `owned_mp4_multitrack_export`. Sixty-four integration tests in `mp4_audio_metadata_admission` and fifteen in `mp4_metadata_admission` pass.",
+      "status": "accepted",
+      "validation": "batch-495-validation.json"
+    },
+    {
+      "id": "FVID-0495",
+      "batch": 496,
+      "title": "Charge simultaneous Matroska copy index plus packet sizes and MP4 Matroska remux video presentation/duration scratch plus queue working sets in owned_matroska_copy and owned_mp4_remux",
+      "source": "crates/fvid-media/src/owned_matroska_copy_impl.rs",
+      "regression": "tests/mp4_audio_metadata_admission.rs",
+      "before": "`owned_matroska_copy::inspect_with_packet_and_memory_limits` (`crates/fvid-media/src/owned_matroska_copy_impl.rs:77`, `crates/fvid-media/src/owned_matroska_copy_impl.rs:85`) checked `index_bytes <= limit` and `packet.size <= limit` in isolation instead of charging `index_bytes + packet.size` simultaneously while `reader` and `ends` remained live. Meanwhile `owned_mp4_remux::validate_selected_prefix_packet_budget` (`crates/fvid-media/src/owned_mp4_remux.rs:201`) omitted the video track `presentation: Vec<(i64, usize)>` and `durations: Vec<i128>` scratch tables allocated in `owned_mp4_matroska::plan` (`32` bytes per video sample) and the per-track `BinaryHeap` queue entries (`48` bytes per selected track) from `plan_bytes`.",
+      "result": "Charge `index_bytes + packet.size` against `max_controlled_bytes` in `owned_matroska_copy::inspect_with_packet_and_memory_limits` and include video `presentation` / `durations` scratch storage plus `BinaryHeap` queue entries in `owned_mp4_remux::validate_selected_prefix_packet_budget`. Sixty-five integration tests in `mp4_audio_metadata_admission` and fifteen in `mp4_metadata_admission` pass.",
+      "status": "accepted",
+      "validation": "batch-496-validation.json"
+    },
+    {
+      "id": "FVID-0496",
+      "batch": 497,
+      "title": "Charge simultaneous container index plus metadata working sets and pre-check WAVE LIST INFO metadata budgets in pcm_matroska and native_export",
+      "source": "src/native_export/pcm_matroska.rs",
+      "regression": "tests/mp4_audio_metadata_admission.rs",
+      "before": "`pcm_matroska::extract_source_pcm_metadata_with_interval_packet_and_memory_limit` (`src/native_export/pcm_matroska.rs:193`, `src/native_export/pcm_matroska.rs:278`) checked only `reader.estimated_index_payload_bytes()? > mem_limit` for MP4 and Matroska sources without charging the simultaneous metadata working set (`8 * (tag_bytes + 12) + 16384`), while `pcm_matroska::check_output_memory_budget` (`src/native_export/pcm_matroska.rs:536`, `src/native_export/pcm_matroska.rs:551`) swallowed budget and cancellation errors from `extract_source_wave_info` and `extract_source_pcm_metadata_with_interval_packet_and_memory_limit` with `.unwrap_or(0)` / `.ok()`. Meanwhile `pcm_matroska::extract_source_wave_info` (`src/native_export/pcm_matroska.rs:467`) and `native_export::export_pcm_selected` (`src/native_export.rs:1602`) called `owned_wave_inspect::info_chunks` on RIFF/RF64/RIFX WAVE files before checking `wave_metadata_working_bytes(info_bytes, options) + 16384` against `max_controlled_bytes`.",
+      "result": "Charge `reader.estimated_index_payload_bytes()? + 8 * (tag_bytes + 12) + 16384` against `max_controlled_bytes` for MP4 and Matroska sources in `pcm_matroska::extract_source_pcm_metadata_with_interval_packet_and_memory_limit`, propagate budget and cancellation errors in `pcm_matroska::check_output_memory_budget`, and pre-check `info_chunks_bytes` via `wave_metadata_working_bytes` before allocating `info_chunks` in `pcm_matroska::extract_source_wave_info` and `native_export::export_pcm_selected`. Sixty-six integration tests in `mp4_audio_metadata_admission` pass.",
+      "status": "accepted",
+      "validation": "batch-497-validation.json"
+    },
+    {
+      "id": "FVID-0497",
+      "batch": 498,
+      "title": "Enforce float32 WAVE qualification, direct WAVE memory admission, and the 64-channel merge ceiling in owned_audio_mix::audio_plan_with_controls",
+      "source": "crates/fvid-media/src/owned_audio_mix.rs",
+      "regression": "tests/mp4_audio_metadata_admission.rs",
+      "before": "`owned_audio_mix::audio_plan_with_controls` (`crates/fvid-media/src/owned_audio_mix.rs:126`, `crates/fvid-media/src/owned_audio_mix.rs:137`) called `owned_audio_plan::source_descriptor` on non-G.711 WAVE inputs before the WAVE branch, which admitted integer PCM (`u8`/`s16`/`s24`/`s32`) and 64-bit float (`dbl`) WAVE files that `decode_owned_audio_with_controls` (`crates/fvid-media/src/owned_audio_mix.rs:241`, `crates/fvid-media/src/owned_audio_mix.rs:265`) rejected with `mix-audio requires float PCM inputs (flt); integer formats are not qualified`, while charging `estimate_float_wave_export_bytes` (`4 * size + 16384` bytes) on direct 32-bit float WAVE inputs that `decode_owned_audio_with_controls` reads in-place with `size <= max_controlled_bytes`. Additionally, `audio_plan_with_controls` omitted the `total_out_channels > 64` ceiling enforced by `merge_with_controls_and_decoder` (`crates/fvid-media/src/owned_audio_mix.rs:679`).",
+      "result": "Inspect non-G.711 WAVE inputs directly in `owned_audio_mix::audio_plan_with_controls`, require `wave_info.float && wave_info.bits_per_sample == 32`, enforce `size <= max_controlled_bytes` without charging the unused export spool overhead, and reject `merge && total_out_channels > 64` with `merge-audio output exceeds 64 channels`. Sixty-seven integration tests in `mp4_audio_metadata_admission` pass.",
+      "status": "accepted",
+      "validation": "batch-498-validation.json"
+    },
+    {
+      "id": "FVID-0498",
+      "batch": 499,
+      "title": "Require explicit speaker mask bit counts to match channel counts in owned_wave_loudness::weights and owned_container_loudness::geometry",
+      "source": "crates/fvid-media/src/owned_wave_loudness.rs",
+      "regression": "tests/mp4_audio_metadata_admission.rs",
+      "before": "`owned_wave_loudness::weights` (`crates/fvid-media/src/owned_wave_loudness.rs:68`) and `owned_container_loudness::geometry` (`crates/fvid-media/src/owned_container_loudness.rs:144`) checked only `mask & !0x7ff != 0` (and `mask == 0` in `geometry`) without verifying `mask.count_ones() == u32::from(channels)`. When an extensible WAVE or G.711 WAVE file carried an explicit `dwChannelMask != 0` with fewer bits set than `channels` (accepted by `owned_wave_inspect::format` via `mask.count_ones() <= channels`), `weights` returned a `Vec<f64>` of length `mask.count_ones() != channels`, causing `supports`, `supports_plan`, `plan_loudness`, and `plan_loudnorm` to succeed while `LoudnessMeter::push` and `owned_dynamic_loudnorm::process` silently misframed interleaved channels or failed mid-stream.",
+      "result": "Reject `mask.count_ones() != u32::from(channels)` with `owned loudness speaker positions are not yet qualified` in `owned_wave_loudness::weights` and `owned_container_loudness::geometry`. Sixty-eight integration tests in `mp4_audio_metadata_admission` pass.",
+      "status": "accepted",
+      "validation": "batch-499-validation.json"
+    },
+    {
+      "id": "FVID-0499",
+      "batch": 500,
+      "title": "Charge the 192 kHz dynamic normalization working set in dual-pass plan_loudnorm and the 192 kHz output report meter in dynamic loudnorm memory admission",
+      "source": "crates/fvid-media/src/owned_loudnorm.rs",
+      "regression": "tests/mp4_audio_metadata_admission.rs",
+      "before": "`owned_loudnorm::plan_loudnorm` (`crates/fvid-media/src/owned_loudnorm.rs:259`, `crates/fvid-media/src/owned_loudnorm.rs:266`) branched on `params.gain.is_some()` without checking `!dual_pass`, so calling `plan_loudnorm` with `dual_pass == true` and caller-supplied `measured_I=...:measured_TP=...:measured_LRA=...:measured_thresh=...:linear=true` charged only the single-pass linear buffer (`size + output`) even though `apply_loudnorm_dual` overwrites `measured_*` with the first-pass measurement and falls back to 192 kHz dynamic normalization whenever the measured signal is silent or exceeds linear LRA/TP margins. Additionally, when `params.print != Print::None` in dynamic normalization, both `plan_loudnorm` (`crates/fvid-media/src/owned_loudnorm.rs:260`) and `apply_dynamic` (`crates/fvid-media/src/owned_loudnorm.rs:703`) charged `report_memory(sample_rate, frames, channels)` at the source sample rate instead of `report_memory(192000, resampled_frames, channels)` used by `output_report(&output, 192000, ...)` (`crates/fvid-media/src/owned_loudnorm.rs:841`), undercounting by more than 5 MB on low-rate inputs.",
+      "result": "Require `!dual_pass && params.gain.is_some()` before using the single-pass linear memory estimate in `owned_loudnorm::plan_loudnorm`, and charge `report_memory(192000, resampled_frames, channels)` for `params.print != Print::None` in dynamic and dual-pass `plan_loudnorm` as well as `apply_dynamic`. Sixty-nine integration tests in `mp4_audio_metadata_admission` and thirteen `loudnorm` unit tests pass.",
+      "status": "accepted",
+      "validation": "batch-500-validation.json"
+    },
+    {
+      "id": "FVID-0500",
+      "batch": 501,
+      "title": "Validate container and stream metadata mutations and charge video presentation/duration scratch plus BinaryHeap queue working sets in mp4_concat::open_with_options",
+      "source": "src/container/mp4_concat.rs",
+      "regression": "tests/mp4_audio_metadata_admission.rs",
+      "before": "`mp4_concat::open_with_options` (`src/container/mp4_concat.rs:176`, `src/container/mp4_concat.rs:215`) did not validate `options.metadata_set`, `options.metadata_delete`, `options.stream_metadata_set`, or `options.stream_metadata_delete` (allowing invalid or forbidden keys such as `rotate`/`stereo_mode`/`alpha_mode` or embedded NULs to pass `open_with_options` and reserve a temporary output file in `native_export::try_concat_mp4_matroska_with_options` before `write_with_options` failed), and charged only `plan.packets.capacity() * size_of::<PacketTime>()` per segment without charging the per-video-track `presentation` (`Vec<(i64, usize)>`) and `durations` (`Vec<i128>`) scratch vectors (`track.samples.len() * 32` bytes) allocated by `mp4_matroska::plan` or the `selected.len()` `BinaryHeap` queue entries (`size_of::<Reverse<(i128, usize, usize, usize)>>()`).",
+      "result": "Validate container and stream metadata mutation counts, key/value bounds, NUL bytes, selected stream indices, and forbidden display-transform keys in `mp4_concat::open_with_options`, and charge `track.samples.len() * (size_of::<(i64, usize)>() + size_of::<i128>())` for video tracks plus `selected.len() * size_of::<Reverse<(i128, usize, usize, usize)>>()` in `plan_bytes`. Seventy integration tests in `mp4_audio_metadata_admission` and three `container::mp4_concat` unit tests pass.",
+      "status": "accepted",
+      "validation": "batch-501-validation.json"
+    },
+    {
+      "id": "FVID-0501",
+      "batch": 502,
+      "title": "Charge the 3.4-second loudness meter working set in container and ADTS plan_loudness and the 192 kHz dynamic normalization working set in container and ADTS plan_loudnorm",
+      "source": "crates/fvid-media/src/owned_container_loudnorm.rs",
+      "regression": "tests/mp4_audio_metadata_admission.rs",
+      "before": "`owned_container_loudness::plan_loudness` (`crates/fvid-media/src/owned_container_loudness.rs:249`) and `owned_adts_loudness::plan_loudness` (`crates/fvid-media/src/owned_adts_loudness.rs:139`) validated only the compressed audio decoder working set without charging the ~3.4-second `LoudnessMeter` working set (`(rate * 3 + rate * 2 / 5) * 8 + capacity + 4096 * channels * 8 + channels * 512 + 16384`) enforced by `owned_wave_loudness::measure_loudness` on the decoded WAVE spool. Furthermore, `owned_container_loudnorm::plan_loudnorm` (`crates/fvid-media/src/owned_container_loudnorm.rs:141`) and `owned_adts_loudnorm::plan_loudnorm` (`crates/fvid-media/src/owned_adts_loudnorm.rs:124`) did not charge the 192 kHz dynamic normalization working set (`owned_dynamic_loudnorm::memory_bytes(192000, channels)` plus resampler buffers and optional 192 kHz output report meter) enforced by `owned_loudnorm::apply_loudnorm` / `apply_loudnorm_dual` on the decoded WAVE spool, and `ADTS packet exceeds budget` errors triggered when `max_controlled_bytes < max_packet_bytes` lacked the `controlled memory budget exceeded:` prefix required by `supports` and `supports_plan`.",
+      "result": "Charge the 3.4-second `LoudnessMeter` working set in `owned_container_loudness::plan_loudness` and `owned_adts_loudness::plan_loudness` (and in `plan_loudnorm` when `dual_pass || report_requested`), enforce `owned_loudnorm::check_spool_loudnorm_budget` in `owned_container_loudnorm::plan_loudnorm` and `owned_adts_loudnorm::plan_loudnorm`, and prefix `ADTS packet exceeds budget` with `controlled memory budget exceeded:` when `max_controlled_bytes < max_packet_bytes`. Seventy-one integration tests in `mp4_audio_metadata_admission` and fourteen `loudness` unit tests pass.",
+      "status": "accepted",
+      "validation": "batch-502-validation.json"
+    },
+    {
+      "id": "FVID-0502",
+      "batch": 503,
+      "title": "Charge the 3.4-second LoudnessMeter working set in native_plan::loudness_with_options and propagate max_controlled_bytes to spooled WAVE measurement in native_pcm::measure_file_with_options",
+      "source": "src/native_plan.rs",
+      "regression": "tests/mp4_audio_metadata_admission.rs",
+      "before": "`native_plan::loudness_with_options` (`src/native_plan.rs:1419`) \u2014 also used by `normalize_loudness_with_options`, `media::plan_loudness`, and `media::plan_normalize_loudness` \u2014 delegated only to `fvid_media::plan_decode_audio` without charging the 3.4-second `LoudnessMeter` working set (`(rate * 3 + rate * 2 / 5) * 8 + capacity + ...`) against `options.max_controlled_bytes`, allowing plans to succeed when `measure_loudness` or `normalize_loudness` required > 1.37 MB at 48 kHz. Furthermore, `native_pcm::measure_file_with_options` (`src/native_pcm/loudness.rs:148`, `src/native_pcm/loudness.rs:210`) omitted `pcm_options.max_controlled_bytes = options.max_controlled_bytes` when recursively measuring the decoded float32 WAVE spool for container and ADTS inputs, bypassing the 3.4-second `LoudnessMeter` working-set check during execution on non-WAVE sources.",
+      "result": "Charge the 3.4-second `LoudnessMeter` working set against `options.max_controlled_bytes` in `native_plan::loudness_with_options` for both WAVE and spooled container/ADTS inputs, and propagate `pcm_options.max_controlled_bytes = options.max_controlled_bytes` when measuring the decoded WAVE spool in `native_pcm::measure_file_with_options`. Seventy-two integration tests in `mp4_audio_metadata_admission` pass.",
+      "status": "accepted",
+      "validation": "batch-503-validation.json"
+    },
+    {
+      "id": "FVID-0503",
+      "batch": 504,
+      "title": "Charge the staged video.mkv Matroska index and encoded FFV1 packet working sets in multitrack lossless plan_selection and try_export",
+      "source": "crates/fvid-media/src/owned_mp4_multitrack_export.rs",
+      "regression": "tests/mp4_audio_metadata_admission.rs",
+      "before": "`owned_webm_multitrack_export::plan_selection` (`crates/fvid-media/src/owned_webm_multitrack_export.rs:440`) and `owned_mp4_multitrack_export::plan_selection` (`crates/fvid-media/src/owned_mp4_multitrack_export.rs:240`) omitted `video_index_bytes` \u2014 the retained `WebmReader` index and metadata footprint of the intermediate `video.mkv` held open simultaneously with `input.reader` and the mux schedule in `try_export` (`crates/fvid-media/src/owned_webm_multitrack_export.rs:548`, `crates/fvid-media/src/owned_mp4_multitrack_export.rs:535`) \u2014 and did not track the maximum encoded FFV1 video packet length alongside companion audio packet payloads (`owned_mp4_multitrack_export::plan_selection` also omitted `max_packet_bytes`, and `owned_mp4_multitrack_export::try_export` at line 588 omitted the `schedule_bytes + data.len() > limit` check when reading video packets from `video.mkv`).",
+      "result": "Return the encoded FFV1 packet byte length from `owned_lossless::encode_ffv1_len_with_controlled`, charge `video_index_bytes` and `max_packet_bytes` (across encoded FFV1 video packets and selected audio packets) in `owned_webm_multitrack_export::plan_selection` and `owned_mp4_multitrack_export::plan_selection`, and enforce `schedule_bytes.saturating_add(data.len()) <= limit` when reading staged video packets in `owned_mp4_multitrack_export::try_export`. Seventy-three integration tests in `mp4_audio_metadata_admission` pass.",
+      "status": "accepted",
+      "validation": "batch-504-validation.json"
+    },
+    {
+      "id": "FVID-0504",
+      "batch": 505,
+      "title": "Charge simultaneous Y4mReader YUV/RGB/RawFrame working sets and container index plus packet/filter working sets in native_export Y4M admission",
+      "source": "src/native_export.rs",
+      "regression": "tests/mp4_audio_metadata_admission.rs",
+      "before": "`inspect_first_y4m_frame_with_filters_and_options` (`src/native_export.rs:236`) checked only `filters.working_bytes(bytes, depth) <= mem_limit` without accounting for the simultaneous `Y4mReader` `yuv` (`frame_len` bytes) and `rgb` (`width * height * 3` bytes) buffers plus the `RawFrame` plane buffer (`frame_len` bytes) allocated by `NativeReader::read_frame_raw` (and `filters.working_bytes(bytes, depth)` when geometry or pixel filters are active). Furthermore, `validate_video_packet_budget_with_geometry_filters_interval_and_limit` (`src/native_export.rs:479`) checked `index_bytes <= mem_limit`, `packet_size <= mem_limit`, and `filters.working_bytes(bytes, depth) <= mem_limit` in isolation for MP4 and WebM/Matroska sources instead of charging `index_bytes + packet_size <= mem_limit` and `index_bytes + filters.working_bytes(bytes, depth) <= mem_limit`.",
+      "result": "Charge `frame_len + rgb_len + frame_len` (plus `filters.working_bytes(bytes, depth)` when `!is_passthrough`) in `inspect_first_y4m_frame_with_filters_and_options` and charge `index_bytes + packet_size` as well as `index_bytes + filters.working_bytes(bytes, depth)` in `validate_video_packet_budget_with_geometry_filters_interval_and_limit`. Seventy-four integration tests in `mp4_audio_metadata_admission` pass.",
+      "status": "accepted",
+      "validation": "batch-505-validation.json"
+    },
+    {
+      "id": "FVID-0505",
+      "batch": 506,
+      "title": "Charge simultaneous filter working set, live source frame, encoder frame copy, and retained non-video stream metadata during lossless FFV1 export and planning",
+      "source": "crates/fvid-media/src/owned_lossless.rs",
+      "regression": "tests/mp4_audio_metadata_admission.rs",
+      "before": "`encode_ffv1_len_with_controlled` (`crates/fvid-media/src/owned_lossless.rs:784`) and `owned_ffv1_export::export_processed` (`crates/fvid-media/src/owned_ffv1_export.rs:390`) charged only `view.pixels.len() * 2 + view.alpha + base_working_bytes + packet.len()`, ignoring the simultaneously live source frame (`decoded.frame.data`), alpha buffers, and temporal/overlay filter working set (`working - pixels.len()`) retained by `owned_video_decode::decode_webm` while invoking its frame visitor. Similarly, Y4M lossless FFV1 planning (`owned_lossless::plan_transcode_lossless` at line 1116) and execution (`owned_matroska::write_y4m_ffv1_policy` at line 420) checked only `out_len * live_frames + packet.len() + meta_working_bytes` instead of including `estimate_transform_working_bytes` alongside the encoder frame copy and encoded packet, and `owned_webm_multitrack_export::try_export` (`crates/fvid-media/src/owned_webm_multitrack_export.rs:591`) stripped non-video `stream_metadata_set` entries when exporting Stage 1 `video.mkv` without passing the retained `extra_base_bytes` to `owned_ffv1_export::export_processed`.",
+      "result": "Expose `extra_working_bytes` on `owned_video_decode::FrameView`, include `view.extra_working_bytes` in `encode_ffv1_len_with_controlled` and `owned_ffv1_export::export_processed`, charge `estimate_transform_working_bytes` alongside the encoder frame copy and encoded FFV1 packet in `owned_lossless::plan_transcode_lossless` and `owned_matroska::write_y4m_ffv1_policy`, and pass `extra_base_bytes` from `input.index_and_meta_bytes` into `owned_ffv1_export::export_processed` during Stage 1 of `owned_webm_multitrack_export::try_export`. Seventy-five integration tests in `mp4_audio_metadata_admission` pass.",
+      "status": "accepted",
+      "validation": "batch-506-validation.json"
+    },
+    {
+      "id": "FVID-0506",
+      "batch": 507,
+      "title": "Charge non-WAVE decoded PCM working sets in audio mix/merge planning and simultaneous i32/f32 frame buffers in raw FLAC admission",
+      "source": "crates/fvid-media/src/owned_audio_mix.rs",
+      "regression": "tests/mp4_audio_metadata_admission.rs",
+      "before": "`audio_plan_with_controls` (`crates/fvid-media/src/owned_audio_mix.rs:178`) only updated `total_input_pcm_bytes` and `min_frames` for G.711 and float32 WAVE inputs, leaving `min_frames = None` and `total_input_pcm_bytes = 0` for Ogg, raw FLAC, and raw MP3 inputs so `plan_mix_audio_with_controls` and `plan_merge_audio_with_controls` bypassed the combined `working_bytes <= max_controlled_bytes` check enforced during `mix_audio_with_controls` and `merge_audio_with_controls`. In addition, `owned_raw_flac::open_with_interval` (`crates/fvid-media/src/owned_raw_flac.rs:138`) and `owned_raw_flac::decode_raw_checked` (`crates/fvid-media/src/owned_raw_flac.rs:312`) charged only `std::mem::size_of::<f32>()` (`4` bytes/sample) for the decoded frame buffer even though `decoded.samples: Vec<i32>` (`4` bytes/sample) and `pcm: Vec<f32>` (`4` bytes/sample) are live simultaneously (`8` bytes/sample).",
+      "result": "Estimate decoded sample frames and update `total_input_pcm_bytes` and `min_frames` for Ogg, raw FLAC, and raw MP3 inputs in `owned_audio_mix::audio_plan_with_controls`, and charge `size_of::<i32>() + size_of::<f32>()` per sample in `owned_raw_flac::open_with_interval` and `owned_raw_flac::decode_raw_checked`. Seventy-six integration tests in `mp4_audio_metadata_admission` pass.",
+      "status": "accepted",
+      "validation": "batch-507-validation.json"
+    },
+    {
+      "id": "FVID-0507",
+      "batch": 508,
+      "title": "Charge WAVE decode_reader and BufReader/BufWriter I/O working sets in native_export, media::decode_audio, native_loudnorm, and native_audio_mix",
+      "source": "src/native_export.rs",
+      "regression": "tests/mp4_audio_metadata_admission.rs",
+      "before": "`native_export::export_pcm_selected` (`src/native_export.rs:1845`) did not check `options.max_controlled_bytes` against the WAVE `decode_reader` working set (`64 KiB` chunk buffer + `16 KiB` `BufReader`/`BufWriter` + sink/metadata buffers), `media::decode_fvid_media_audio_to_destination` (`src/media.rs:342`) and `native_loudnorm::try_apply` (`src/native_loudnorm.rs:483`) dropped `max_controlled_bytes` from `publish_options` when exporting the temporary WAVE spool to `.f32le` or `.mka`/`.mkv`, and `native_audio_mix` (`plan_with_controls`, `merge_geometry_with_options`, `validate_concat_segments_with_options`) omitted the simultaneously live per-input `BufReader<File>` (`sources.len() * 8 KiB`) and segment WAVE decode (`64 KiB + 16 KiB`) buffers from `stage_working_bytes`.",
+      "result": "Enforce `capacity.max(frame_bytes) + 16384 + sink_bytes <= limit` for WAVE inputs in `export_pcm_selected`, propagate `max_controlled_bytes` on `publish_options` (and preflight `.f32le` spool export before decoding) in `media::decode_fvid_media_audio_to_destination` and `native_loudnorm::try_apply`, and include `sources.len() * 8192` in `native_audio_mix` mix/merge `stage_working_bytes` and `81920` in `validate_concat_segments_with_options`. Seventy-seven integration tests in `mp4_audio_metadata_admission` pass.",
+      "status": "accepted",
+      "validation": "batch-508-validation.json"
+    },
+    {
+      "id": "FVID-0508",
+      "batch": 509,
+      "title": "Preflight LoudnessMeter, spool loudnorm, and output metadata memory budgets before decoding temporary WAVE spools or running measurement passes",
+      "source": "src/native_pcm/loudness.rs",
+      "regression": "tests/mp4_audio_metadata_admission.rs",
+      "before": "`owned_container_loudness::measure_loudness` (`crates/fvid-media/src/owned_container_loudness.rs:275`), `owned_adts_loudness::measure_loudness` (`crates/fvid-media/src/owned_adts_loudness.rs:124`), and `native_pcm::measure_file_with_options` (`src/native_pcm/loudness.rs:144`, `204`) decoded the entire compressed or ADTS audio stream to a temporary WAVE spool (emitting decode progress events) before checking the 3.4-second `LoudnessMeter` working set against `max_controlled_bytes` (and for ADTS in `measure_file_with_options`, before validating `weights.len() == channels`). Likewise, `owned_container_loudnorm::apply` (`crates/fvid-media/src/owned_container_loudnorm.rs:83`) and `owned_adts_loudnorm::apply` (`crates/fvid-media/src/owned_adts_loudnorm.rs:76`) decoded to the temporary WAVE spool before enforcing `check_spool_loudnorm_budget`, `native_pcm::normalize_file_with_options` (`src/native_pcm/normalize.rs:84`) ran the entire loudness measurement pass before checking `check_output_memory_budget` for the export pass, and `native_plan::normalize_loudness_with_options` (`src/native_plan.rs:1560`) skipped `check_output_memory_budget` when `options` had no explicit metadata mutations even if the source file carried large container/INFO metadata.",
+      "result": "Preflight the 3.4-second `LoudnessMeter` working set (and `weights.len() == channels` for ADTS) before decoding temporary WAVE spools in `owned_container_loudness::measure_loudness`, `owned_adts_loudness::measure_loudness`, and `native_pcm::measure_file_with_options`; preflight `check_spool_loudnorm_budget` before decoding in `owned_container_loudnorm::apply` and `owned_adts_loudnorm::apply`; and enforce `check_output_memory_budget` before the measurement pass in `native_pcm::normalize_file_with_options` and unconditionally under `max_controlled_bytes` in `native_plan::normalize_loudness_with_options`. Seventy-eight integration tests in `mp4_audio_metadata_admission` pass.",
+      "status": "accepted",
+      "validation": "batch-509-validation.json"
+    },
+    {
+      "id": "FVID-0509",
+      "batch": 510,
+      "title": "Preflight Stage 2 WAVE loudnorm and compressed audio export DSP/resampler/metadata memory budgets before Pass 1 measurement or Stage 1 spool decoding",
+      "source": "crates/fvid-media/src/owned_loudnorm.rs",
+      "regression": "tests/mp4_audio_metadata_admission.rs",
+      "before": "`owned_loudnorm::apply_loudnorm` (`crates/fvid-media/src/owned_loudnorm.rs:581`) when `params.print != Print::None` and `owned_loudnorm::apply_loudnorm_dual` (`crates/fvid-media/src/owned_loudnorm.rs:607`) executed `measure_phase` (Pass 1, reading the input WAVE file and emitting progress events) before checking whether Pass 2 normalization + report + WAVE metadata fit within `options.max_controlled_bytes`. In addition, `owned_audio_plan::plan_decode_audio` (`crates/fvid-media/src/owned_audio_plan.rs:345`) and the two-stage compressed/container audio export routes (`owned_adts_export`, `owned_g711_wave_export`, `owned_raw_flac`, `owned_raw_mp3`, `owned_ogg_opus_export`, `owned_ogg_vorbis_export`, `owned_ogg_joint_export`, `owned_mp4_audio_export`, and `owned_matroska_{pcm,aac,opus,flac,mp3,alac}_export`) did not preflight the Stage 2 WAVE DSP/resampler/metadata working set (`estimate_float_wave_export_bytes`) before Stage 1 decoded the entire stream into a temporary WAVE spool and emitted decode progress events.",
+      "result": "Preflight `destination.symlink_metadata().is_ok()` and `plan_loudnorm` before `measure_phase` in `owned_loudnorm::apply_loudnorm` (when `params.print != Print::None`) and `owned_loudnorm::apply_loudnorm_dual`, add `check_spool_wave_export_budget` in `owned_adts_export`, and call it in `owned_audio_plan::plan_decode_audio` and before Stage 1 spool decoding across all compressed/container audio export modules. Seventy-nine integration tests in `mp4_audio_metadata_admission` pass.",
+      "status": "accepted",
+      "validation": "batch-510-validation.json"
     }
   ]
 }

@@ -126,11 +126,11 @@ pub(crate) fn try_mp4_with_options(
     if !reader.refused().is_empty() {
         return Ok(None);
     }
+    let index_bytes = reader
+        .estimated_index_payload_bytes()
+        .map_err(|e| e.to_string())?;
     if let Some(mem_limit) = options.max_controlled_bytes
-        && reader
-            .estimated_index_payload_bytes()
-            .map_err(|e| e.to_string())?
-            > mem_limit
+        && index_bytes > mem_limit
     {
         return Err("controlled memory budget exceeded".into());
     }
@@ -148,11 +148,13 @@ pub(crate) fn try_mp4_with_options(
         if let Some(mem_limit) = options.max_controlled_bytes
             && (0..track.samples.len().min(max_samples)).any(|i| {
                 track.samples.get(i).is_some_and(|sample| {
-                    usize::try_from(sample.size).unwrap_or(usize::MAX) > mem_limit
+                    index_bytes
+                        .saturating_add(usize::try_from(sample.size).unwrap_or(usize::MAX))
+                        > mem_limit
                 })
             })
         {
-            return Err("controlled memory budget exceeded".into());
+            return Err("MP4 index and packet working set exceeds controlled memory budget".into());
         }
     }
     let mut streams = Vec::new();

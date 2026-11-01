@@ -194,7 +194,65 @@ pub fn open_with_options(
         offset = next;
     }
     let selected = mp4_matroska::selection(segments[0].reader.tracks().len(), &options.streams)?;
-    if let Some(mem_limit) = options.max_controlled_bytes {
+    if options.metadata_set.len() + options.metadata_delete.len() > 64 {
+        return Err(invalid("too many metadata mutations"));
+    }
+    if options.stream_metadata_set.len() + options.stream_metadata_delete.len() > 64 {
+        return Err(invalid("too many stream metadata mutations"));
+    }
+    for (key, value) in &options.metadata_set {
+        let key = key.trim();
+        if key.is_empty()
+            || key.len() > 128
+            || value.len() > 1024
+            || key.contains('\0')
+            || value.contains('\0')
+        {
+            return Err(invalid("invalid metadata tag"));
+        }
+    }
+    for key in &options.metadata_delete {
+        let key = key.trim();
+        if key.is_empty() || key.len() > 128 || key.contains('\0') {
+            return Err(invalid("invalid metadata key"));
+        }
+    }
+    for (index, key, value) in &options.stream_metadata_set {
+        if !selected.contains(index) {
+            return Err(invalid("stream metadata index out of range"));
+        }
+        let key = key.trim();
+        if key.is_empty()
+            || key.len() > 128
+            || value.len() > 1024
+            || key.contains('\0')
+            || value.contains('\0')
+            || matches!(
+                key.to_ascii_lowercase().as_str(),
+                "rotate" | "stereo_mode" | "alpha_mode"
+            )
+            || (key.eq_ignore_ascii_case("language") && value.len() > 128)
+        {
+            return Err(invalid("invalid stream metadata tag"));
+        }
+    }
+    for (index, key) in &options.stream_metadata_delete {
+        if !selected.contains(index) {
+            return Err(invalid("stream metadata index out of range"));
+        }
+        let key = key.trim();
+        if key.is_empty()
+            || key.len() > 128
+            || key.contains('\0')
+            || matches!(
+                key.to_ascii_lowercase().as_str(),
+                "rotate" | "stereo_mode" | "alpha_mode"
+            )
+        {
+            return Err(invalid("invalid stream metadata key"));
+        }
+    }
+    let plan_bytes = if let Some(mem_limit) = options.max_controlled_bytes {
         let mut raw_meta_bytes = 0usize;
         let first_tags = segments[0].reader.tags();
         for (_, v) in first_tags.entries() {
@@ -231,18 +289,35 @@ pub fn open_with_options(
             .len()
             .saturating_mul(8192)
             .saturating_add(16384)
-            .saturating_add(raw_meta_bytes.saturating_mul(8));
+            .saturating_add(raw_meta_bytes.saturating_mul(8))
+            .saturating_add(
+                selected
+                    .len()
+                    .saturating_mul(std::mem::size_of::<Reverse<(i128, usize, usize, usize)>>()),
+            );
         for segment in &segments {
             plan_bytes = plan_bytes
                 .checked_add(segment.reader.estimated_index_payload_bytes()?)
                 .ok_or_else(|| invalid("MP4 concat packet plan memory overflow"))?;
             // Successful plans remain retained, including excluded tracks.
             // Unsupported excluded tracks have empty placeholders instead.
-            for plan in &segment.plans {
+            for (track, plan) in segment.reader.tracks().iter().zip(&segment.plans) {
+                let scratch_bytes = if track.handler == *b"vide" && !plan.packets.is_empty() {
+                    track
+                        .samples
+                        .len()
+                        .checked_mul(
+                            std::mem::size_of::<(i64, usize)>() + std::mem::size_of::<i128>(),
+                        )
+                        .ok_or_else(|| invalid("MP4 concat packet plan memory overflow"))?
+                } else {
+                    0
+                };
                 plan_bytes = plan
                     .packets
                     .capacity()
                     .checked_mul(std::mem::size_of::<mp4_matroska::PacketTime>())
+                    .and_then(|n| n.checked_add(scratch_bytes))
                     .and_then(|n| plan_bytes.checked_add(n))
                     .ok_or_else(|| invalid("MP4 concat packet plan memory overflow"))?;
             }
@@ -250,7 +325,10 @@ pub fn open_with_options(
         if plan_bytes > mem_limit {
             return Err(invalid("controlled memory budget exceeded"));
         }
-    }
+        plan_bytes
+    } else {
+        16384usize
+    };
     let mut packets = 0u64;
     'segments: for segment in &segments {
         let mut queue = BinaryHeap::new();
@@ -271,15 +349,17 @@ pub fn open_with_options(
             if (sample.size as usize) > max_packet_bytes {
                 return Err(invalid("MP4 packet exceeds budget"));
             }
-            if options
-                .max_controlled_bytes
-                .is_some_and(|limit| (sample.size as usize).saturating_add(16384) > limit)
-            {
-                return Err(invalid("controlled memory budget exceeded"));
-            }
             packets = packets
                 .checked_add(1)
                 .ok_or_else(|| invalid("concat packet count overflow"))?;
+            if options.max_controlled_bytes.is_some_and(|limit| {
+                plan_bytes
+                    .saturating_add((packets as usize).saturating_mul(32))
+                    .saturating_add(sample.size as usize)
+                    > limit
+            }) {
+                return Err(invalid("controlled memory budget exceeded"));
+            }
             if let Some(packet) = segment.plans[source_track].packets.get(index + 1) {
                 queue.push(Reverse((packet.dts, pos, source_track, index + 1)));
             }

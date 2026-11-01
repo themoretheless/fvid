@@ -317,6 +317,26 @@ pub(crate) fn decode_fvid_media_audio_to_destination(
             Some(true),
         )
         .map_err(|e| e.to_string())?;
+    } else if let Some(limit) = options.max_controlled_bytes {
+        let mut clean_probe = options.clone();
+        clean_probe.metadata_set.clear();
+        clean_probe.metadata_delete.clear();
+        clean_probe.stream_metadata_set.clear();
+        clean_probe.stream_metadata_delete.clear();
+        let (_, src_channels) =
+            fvid_media::owned_audio_plan::source_geometry(source, &clean_probe)?;
+        let out_channels = transform
+            .channels
+            .and_then(|c| u16::try_from(c).ok())
+            .unwrap_or(src_channels);
+        let frame_bytes = usize::from(out_channels.max(1)).saturating_mul(4);
+        let capacity = 65536usize.min(options.max_packet_bytes) / frame_bytes * frame_bytes;
+        let needed = capacity.max(frame_bytes).saturating_add(16 * 1024);
+        if needed > limit {
+            return Err(format!(
+                "controlled memory budget exceeded: need {needed} bytes, limit {limit}"
+            ));
+        }
     }
     if destination.symlink_metadata().is_ok() {
         return Err("output already exists".into());
@@ -342,6 +362,7 @@ pub(crate) fn decode_fvid_media_audio_to_destination(
     let mut publish_options = CopyOptions::default();
     publish_options.cancel = options.cancel.clone();
     publish_options.max_rss_bytes = options.max_rss_bytes;
+    publish_options.max_controlled_bytes = options.max_controlled_bytes;
     publish_options.progress = original_progress;
     if matroska_out {
         publish_options.metadata_set = options.metadata_set.clone();

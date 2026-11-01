@@ -11,9 +11,11 @@ fn prepare(
     y4m::Header,
     Vec<crate::owned_play_controls::SubtitleCue>,
     Option<crate::owned_mp4_video_bridge::Temporary>,
+    usize,
 )> {
     let mut bridge = None;
-    let header = if crate::owned_y4m_decode::supports(source) {
+    let meta_working_bytes = crate::owned_lossless::options_matroska_metadata_working_bytes(options)?;
+    let (header, base_working_bytes) = if crate::owned_y4m_decode::supports(source) {
         let mut reader = BufReader::new(File::open(source).map_err(|e| e.to_string())?);
         let mut line = Vec::new();
         if !y4m::line(&mut reader, &mut line)? {
@@ -26,13 +28,17 @@ fn prepare(
             return Err("Y4M frame byte length exceeds packet byte limit".into());
         }
         let mask_bytes = header.width.saturating_mul(header.height);
+        let base_working = frame_len
+            .saturating_mul(2)
+            .saturating_add(mask_bytes)
+            .saturating_add(meta_working_bytes);
         if options
             .max_controlled_bytes
-            .is_some_and(|limit| frame_len.saturating_add(mask_bytes) > limit)
+            .is_some_and(|limit| base_working > limit)
         {
             return Err("subtitle burn frame exceeds controlled memory budget".into());
         }
-        header
+        (header, base_working)
     } else {
         if crate::owned_mp4_video_bridge::recognizes(source) {
             bridge = crate::owned_mp4_video_bridge::prepare(source, Some(options))?;
@@ -67,11 +73,11 @@ fn prepare(
             limits,
         )
         .map_err(map_packet_limit)?;
+        let index_bytes = reader
+            .estimated_index_payload_bytes()
+            .map_err(|e| e.to_string())?;
         if let Some(limit) = options.max_controlled_bytes.filter(|&limit| limit > 0)
-            && reader
-                .estimated_index_payload_bytes()
-                .map_err(|e| e.to_string())?
-                > limit
+            && index_bytes.saturating_add(meta_working_bytes) > limit
         {
             return Err("controlled memory budget exceeded: Matroska index and metadata".into());
         }
@@ -98,19 +104,25 @@ fn prepare(
             std::mem::swap(&mut width, &mut height);
         }
         let mask_bytes = (width as usize).saturating_mul(height as usize);
+        let base_working = index_bytes
+            .saturating_add(mask_bytes.saturating_mul(2))
+            .saturating_add(meta_working_bytes);
         if options
             .max_controlled_bytes
-            .is_some_and(|limit| mask_bytes.saturating_mul(2) > limit)
+            .is_some_and(|limit| base_working > limit)
         {
             return Err("subtitle burn frame exceeds controlled memory budget".into());
         }
-        y4m::Header::parse(
-            format!(
-                "YUV4MPEG2 W{} H{} F25:1 Ip C420\n",
-                width, height
-            )
-            .as_bytes(),
-        )?
+        (
+            y4m::Header::parse(
+                format!(
+                    "YUV4MPEG2 W{} H{} F25:1 Ip C420\n",
+                    width, height
+                )
+                .as_bytes(),
+            )?,
+            base_working,
+        )
     };
     let subs_len = std::fs::metadata(subs).map_err(|e| e.to_string())?.len();
     if subs_len > 1 << 20 {
@@ -118,7 +130,10 @@ fn prepare(
     }
     let subs_bytes = usize::try_from(subs_len).map_err(|_| "subtitle text exceeds 1 MiB")?;
     if let Some(limit) = options.max_controlled_bytes.filter(|&limit| limit > 0)
-        && subs_bytes.saturating_mul(3) > limit
+        && subs_bytes
+            .saturating_mul(3)
+            .saturating_add(base_working_bytes)
+            > limit
     {
         return Err("controlled memory budget exceeded: subtitle burn SRT working set".into());
     }
@@ -127,20 +142,27 @@ fn prepare(
         return Err("owned burn-in currently requires plain SRT".into());
     }
     let cues = crate::owned_play_controls::parse_subtitle_text(&text)?;
+    let cues_only_bytes = cues
+        .iter()
+        .fold(
+            cues.len()
+                .saturating_mul(std::mem::size_of::<crate::owned_play_controls::SubtitleCue>()),
+            |acc, cue| acc.saturating_add(cue.text.len()),
+        );
     if let Some(limit) = options.max_controlled_bytes.filter(|&limit| limit > 0) {
-        let cues_bytes = cues
-            .iter()
-            .fold(
-                cues.len()
-                    .saturating_mul(std::mem::size_of::<crate::owned_play_controls::SubtitleCue>()),
-                |acc, cue| acc.saturating_add(cue.text.len()),
-            )
-            .saturating_add(text.len());
+        let cues_bytes = cues_only_bytes
+            .saturating_add(text.len())
+            .saturating_add(base_working_bytes);
         if cues_bytes > limit {
             return Err("controlled memory budget exceeded: subtitle burn SRT working set".into());
         }
     }
-    Ok((header, cues, bridge))
+    Ok((
+        header,
+        cues,
+        bridge,
+        cues_only_bytes.saturating_add(meta_working_bytes),
+    ))
 }
 fn policy(options: &CopyOptions) -> Result<()> {
     if options
@@ -212,7 +234,7 @@ pub fn plan_burn_subtitles(
         return Err("media operation cancelled".into());
     }
     policy(options)?;
-    let (header, cues, bridge) = prepare(source, subs, options)?;
+    let (header, cues, bridge, cues_and_meta_bytes) = prepare(source, subs, options)?;
     let font_size = (header.height as f32 / 18.0).clamp(12.0, 64.0);
     // Qualify font coverage in the same renderer that execution uses.
     for cue in &cues {
@@ -237,9 +259,13 @@ pub fn plan_burn_subtitles(
                 return Err("Y4M frame byte length exceeds packet byte limit".into());
             }
             let mask_bytes = h.width.saturating_mul(h.height);
+            let frame_working_bytes = frame_len
+                .saturating_mul(2)
+                .saturating_add(mask_bytes)
+                .saturating_add(cues_and_meta_bytes);
             if options
                 .max_controlled_bytes
-                .is_some_and(|limit| frame_len.saturating_add(mask_bytes) > limit)
+                .is_some_and(|limit| frame_working_bytes > limit)
             {
                 return Err("subtitle burn frame exceeds controlled memory budget".into());
             }
@@ -277,7 +303,7 @@ pub fn plan_burn_subtitles(
                 }
                 if options
                     .max_controlled_bytes
-                    .is_some_and(|limit| packet.len() > limit)
+                    .is_some_and(|limit| frame_working_bytes.saturating_add(packet.len()) > limit)
                 {
                     return Err("subtitle burn packet exceeds controlled memory budget".into());
                 }
@@ -295,11 +321,16 @@ pub fn plan_burn_subtitles(
         }
     } else {
         let container_source = bridge.as_ref().map_or(source, |t| t.path.as_path());
-        crate::owned_lossless::check_source_matroska_metadata_budget(
-            container_source,
-            None,
-            options,
-        )?;
+        let options_meta_bytes =
+            crate::owned_lossless::options_matroska_metadata_working_bytes(options)?;
+        let cues_only_bytes = cues_and_meta_bytes.saturating_sub(options_meta_bytes);
+        let source_index_and_meta_bytes =
+            crate::owned_lossless::check_source_matroska_metadata_budget(
+                container_source,
+                None,
+                options,
+            )?;
+        let container_base_bytes = cues_only_bytes.saturating_add(source_index_and_meta_bytes);
         let mut stage = options.clone();
         stage.streams.clear();
         stage.stream_metadata_set.clear();
@@ -312,9 +343,15 @@ pub fn plan_burn_subtitles(
             selected_frames += 1;
             crate::owned_budget::check_rss_budget(options)?;
             let mask_bytes = (view.width as usize).saturating_mul(view.height as usize);
+            let frame_working_bytes = view
+                .pixels
+                .len()
+                .saturating_mul(2)
+                .saturating_add(mask_bytes)
+                .saturating_add(container_base_bytes);
             if options
                 .max_controlled_bytes
-                .is_some_and(|limit| view.pixels.len().saturating_add(mask_bytes) > limit)
+                .is_some_and(|limit| frame_working_bytes > limit)
             {
                 return Err("subtitle burn frame exceeds controlled memory budget".into());
             }
@@ -378,7 +415,7 @@ pub fn plan_burn_subtitles(
             }
             if options
                 .max_controlled_bytes
-                .is_some_and(|limit| packet.len() > limit)
+                .is_some_and(|limit| frame_working_bytes.saturating_add(packet.len()) > limit)
             {
                 return Err("subtitle burn packet exceeds controlled memory budget".into());
             }
@@ -479,22 +516,32 @@ pub fn burn_subtitles(
     {
         return Err("owned FFV1 export requires .mkv".into());
     }
-    let (header, cues, bridge) = prepare(source, subs, options)?;
+    let (header, cues, bridge, cues_and_meta_bytes) = prepare(source, subs, options)?;
     let font_size = (header.height as f32 / 18.0).clamp(12.0, 64.0);
     if !crate::owned_y4m_decode::supports(source) {
         let container_source = bridge.as_ref().map_or(source, |t| t.path.as_path());
-        crate::owned_lossless::check_source_matroska_metadata_budget(
-            container_source,
-            None,
-            options,
-        )?;
+        let options_meta_bytes =
+            crate::owned_lossless::options_matroska_metadata_working_bytes(options)?;
+        let cues_only_bytes = cues_and_meta_bytes.saturating_sub(options_meta_bytes);
+        let source_index_and_meta_bytes =
+            crate::owned_lossless::check_source_matroska_metadata_budget(
+                container_source,
+                None,
+                options,
+            )?;
+        let container_base_bytes = cues_only_bytes.saturating_add(source_index_and_meta_bytes);
         let mut process =
             |frame: &mut crate::owned_frame::GeometryFrame, depth, pts, full_range| -> Result<()> {
                 let mask_bytes = frame.width.saturating_mul(frame.height);
-                if options
-                    .max_controlled_bytes
-                    .is_some_and(|limit| frame.data.len().saturating_add(mask_bytes) > limit)
-                {
+                if options.max_controlled_bytes.is_some_and(|limit| {
+                    frame
+                        .data
+                        .len()
+                        .saturating_mul(2)
+                        .saturating_add(mask_bytes)
+                        .saturating_add(container_base_bytes)
+                        > limit
+                }) {
                     return Err("subtitle burn frame exceeds controlled memory budget".into());
                 }
                 let text = active_text(&cues, pts);
@@ -515,6 +562,7 @@ pub fn burn_subtitles(
             &Default::default(),
             options,
             Some(&mut process),
+            cues_only_bytes,
         )?;
         return Ok(fvid_media_info::LosslessStats {
             backend: "owned SRT burn-in FFV1 export",
@@ -617,9 +665,13 @@ pub fn burn_subtitles(
                         return Err("Y4M frame byte length exceeds packet byte limit".into());
                     }
                     let mask_bytes = h.width.saturating_mul(h.height);
+                    let frame_working_bytes = frame_len
+                        .saturating_mul(2)
+                        .saturating_add(mask_bytes)
+                        .saturating_add(cues_and_meta_bytes);
                     if options
                         .max_controlled_bytes
-                        .is_some_and(|limit| frame_len.saturating_add(mask_bytes) > limit)
+                        .is_some_and(|limit| frame_working_bytes > limit)
                     {
                         return Err("subtitle burn frame exceeds controlled memory budget".into());
                     }
@@ -655,10 +707,9 @@ pub fn burn_subtitles(
                     if packet.len() > options.max_packet_bytes {
                         return Err("subtitle burn packet exceeds byte limit".into());
                     }
-                    if options
-                        .max_controlled_bytes
-                        .is_some_and(|limit| packet.len() > limit)
-                    {
+                    if options.max_controlled_bytes.is_some_and(|limit| {
+                        frame_working_bytes.saturating_add(packet.len()) > limit
+                    }) {
                         return Err(
                             "subtitle burn packet exceeds controlled memory budget".into(),
                         );

@@ -208,7 +208,7 @@ pub fn write_adts_aac_reader_with_limits<R: std::io::Read, W: Write + std::io::S
 ) -> Result<fvid_control::ProgressEvent> {
     let config = reader.configuration();
     let asc = reader.audio_specific_config().to_vec();
-    write_aac_packets(config, &asc, || reader.next_packet(), output, cancel, progress, max_packets, max_controlled_bytes)
+    write_aac_packets(config, &asc, || reader.next_packet(), output, cancel, progress, max_packets, max_controlled_bytes, 16384)
 }
 
 /// Concatenate independently framed ADTS streams; a truncated input cannot
@@ -235,9 +235,10 @@ pub fn concat_adts_readers_with_limits<R: std::io::Read, W: Write + std::io::See
     max_packets: Option<u64>,
     max_controlled_bytes: Option<usize>,
 ) -> Result<fvid_control::ProgressEvent> {
+    let base_bytes = readers.len().saturating_mul(8192).saturating_add(16384);
     let mut sequence=super::adts::SequenceReader::new(readers)?;
     let asc = sequence.audio_specific_config().to_vec();
-    write_aac_packets(sequence.configuration(), &asc, || sequence.next_packet(), output, cancel, progress, max_packets, max_controlled_bytes)
+    write_aac_packets(sequence.configuration(), &asc, || sequence.next_packet(), output, cancel, progress, max_packets, max_controlled_bytes, base_bytes)
 }
 
 #[allow(clippy::too_many_arguments)]
@@ -248,6 +249,7 @@ fn write_aac_packets<W: Write + std::io::Seek>(
     cancel: Option<&fvid_control::CancelFlag>, progress: Option<&fvid_control::ProgressHook>,
     max_packets: Option<u64>,
     max_controlled_bytes: Option<usize>,
+    base_bytes: usize,
 ) -> Result<fvid_control::ProgressEvent> {
     let check = || -> Result<()> {
         if cancel.is_some_and(|flag| flag.is_cancelled()) {
@@ -294,7 +296,11 @@ fn write_aac_packets<W: Write + std::io::Seek>(
         }
         let next_packets = sizes.len().saturating_add(1);
         if max_controlled_bytes.is_some_and(|limit| {
-            next_packets.saturating_mul(32).saturating_add(16384).saturating_add(packet.len()) > limit
+            next_packets
+                .saturating_mul(32)
+                .saturating_add(base_bytes)
+                .saturating_add(packet.len())
+                > limit
         }) {
             return Err(invalid("controlled memory budget exceeded"));
         }

@@ -1,0 +1,16 @@
+{
+  "batch": 498,
+  "ids": [
+    "FVID-0497"
+  ],
+  "snapshot": "docs/improvements/snapshots/batch-498-pre-edit",
+  "before_evidence": "docs/improvements/evidence/batch-498-acceptance-before.txt",
+  "after_evidence": "docs/improvements/evidence/batch-498-acceptance-after.txt",
+  "related_evidence": "docs/improvements/evidence/batch-498-related-after.txt",
+  "commands": [
+    "cargo test --test mp4_audio_metadata_admission owned_audio_mix_and_merge_plan_enforce_float32_wave_qualification_and_64channel_merge_limit_consistently_with_execution -- --exact",
+    "cargo test --test mp4_audio_metadata_admission"
+  ],
+  "passed": 68,
+  "failed": 0
+}

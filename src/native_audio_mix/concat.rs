@@ -272,7 +272,7 @@ pub fn validate_concat_segments_with_options(
         crate::native_export::pcm_matroska::check_output_memory_budget(
             &sources[0],
             channels,
-            16384,
+            81920,
             options,
             None,
         )?;

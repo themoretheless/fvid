@@ -156,6 +156,29 @@ fn prepare_selected(
         },
         disposition: i32::from(crate::owned_mp4_matroska::effective_track_default(&reader, index)),
     };
+    let meta_working_bytes = crate::owned_lossless::estimate_matroska_metadata_working_bytes(
+        &file_metadata,
+        &Default::default(),
+        &Default::default(),
+        Some(&description),
+    );
+    let index_bytes = reader
+        .estimated_index_payload_bytes()
+        .map_err(|e| e.to_string())?;
+    let table_bytes = track
+        .samples
+        .len()
+        .checked_mul(std::mem::size_of::<decode::FrameMetadata>())
+        .and_then(|n| n.checked_add(index_bytes))
+        .ok_or("MP4 presentation metadata memory overflow")?;
+    let base_working_bytes = table_bytes.saturating_add(meta_working_bytes);
+    if let Some(limit) = options
+        .and_then(|o| o.max_controlled_bytes)
+        .filter(|&limit| limit > 0)
+        && base_working_bytes > limit
+    {
+        return Err("controlled memory budget exceeded: MP4 index and metadata".into());
+    }
     drop(reader);
     let mut temporary = Temporary::new()?;
     let mut output = Some(temporary.file.as_mut().unwrap());
@@ -169,11 +192,19 @@ fn prepare_selected(
             {
                 return Err("media operation cancelled".into());
             }
+            let frame_working_bytes = if frame.mono {
+                pixels.len().saturating_add(base_working_bytes)
+            } else {
+                pixels
+                    .len()
+                    .saturating_mul(2)
+                    .saturating_add(base_working_bytes)
+            };
             if let Some(options) = options {
                 crate::owned_budget::check_rss_budget(options)?;
                 if options
                     .max_controlled_bytes
-                    .is_some_and(|limit| pixels.len() > limit)
+                    .is_some_and(|limit| frame_working_bytes > limit)
                 {
                     return Err("MP4 video frame exceeds controlled memory budget".into());
                 }
@@ -241,7 +272,7 @@ fn prepare_selected(
             }
             if options
                 .and_then(|o| o.max_controlled_bytes)
-                .is_some_and(|limit| packet.len() > limit)
+                .is_some_and(|limit| frame_working_bytes.saturating_add(packet.len()) > limit)
             {
                 return Err("encoded FFV1 packet exceeds controlled memory budget".into());
             }

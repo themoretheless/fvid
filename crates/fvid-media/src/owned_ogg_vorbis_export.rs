@@ -342,6 +342,16 @@ pub(crate) fn apply(
                 .map_err(|_| "Vorbis prefix overflow")
         })
         .transpose()?;
+    crate::owned_adts_export::check_spool_wave_export_budget(
+        rate,
+        channels,
+        32,
+        1024,
+        info.len(),
+        false,
+        transform,
+        options,
+    )?;
     let spool = crate::owned_adts_export::spool_decoded(
         rate,
         channels,

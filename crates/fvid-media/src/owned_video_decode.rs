@@ -47,6 +47,9 @@ pub(crate) struct FrameView<'a> {
     pub origin_ns: i64,
     pub pts_ns: i64,
     pub duration_ns: Option<u64>,
+    /// Additional working-set bytes live in `decode_webm` while this view is visited
+    /// (`live_source_bytes + live_alpha_bytes + (working - data.len())`).
+    pub extra_working_bytes: usize,
 }
 type Visitor<'a> = dyn FnMut(FrameView<'_>) -> Result<()> + 'a;
 pub(crate) fn decode_ffv1(
@@ -171,23 +174,23 @@ pub(crate) fn decode_webm(
         }
     }
     reader.scan_all().map_err(map_packet_limit)?;
+    let index_bytes = reader
+        .estimated_index_payload_bytes()
+        .map_err(|e| e.to_string())?;
     if let Some(options) = options {
         reader.restrict_packet_bytes(options.max_packet_bytes);
         if let Some(limit) = options.max_controlled_bytes {
-            if reader
-                .estimated_index_payload_bytes()
-                .map_err(|e| e.to_string())?
-                > limit
-            {
+            if index_bytes > limit {
                 return Err(
                     "controlled memory budget exceeded: Matroska index and metadata".into(),
                 );
             }
             for index in 0..reader.packets.len() {
-                if reader
-                    .packet_payload_size(index)
-                    .map_err(|e| e.to_string())?
-                    > limit
+                if index_bytes.saturating_add(
+                    reader
+                        .packet_payload_size(index)
+                        .map_err(|e| e.to_string())?,
+                ) > limit
                 {
                     return Err("video packet exceeds controlled memory budget".into());
                 }
@@ -207,7 +210,7 @@ pub(crate) fn decode_webm(
                     }
                     if options
                         .max_controlled_bytes
-                        .is_some_and(|limit| ov_len > limit)
+                        .is_some_and(|limit| index_bytes.saturating_add(ov_len) > limit)
                     {
                         return Err("Y4M frame byte length exceeds controlled memory budget".into());
                     }
@@ -219,6 +222,16 @@ pub(crate) fn decode_webm(
         let Some(durations)=crate::owned_webm_codec::presentation_durations(&mut reader,options)? else {return Ok(None);};
         Some(durations)
     } else {None};
+    let base_bytes = index_bytes
+        .saturating_add(
+            reader
+                .packets
+                .len()
+                .saturating_mul(std::mem::size_of::<i64>()),
+        )
+        .saturating_add(inferred.as_ref().map_or(0, |v| {
+            v.len().saturating_mul(std::mem::size_of::<Option<u64>>())
+        }));
     let Some(track) = crate::owned_webm_codec::video_track(&reader) else {
         return if reader.tracks.iter().any(|t|t.kind==1 && reader.track_enabled(t.number)) {Ok(None)}
             else {Err("input has no video stream".into())};
@@ -291,10 +304,8 @@ pub(crate) fn decode_webm(
         let (frame_mono, frame_colour, frame_hdr) = (frame.mono, frame.colour, frame.hdr);
         let mut decoded = frame.decoded;
         if options.and_then(|o| o.max_controlled_bytes).is_some_and(|limit| {
-            decoded
-                .frame
-                .data
-                .len()
+            base_bytes
+                .saturating_add(decoded.frame.data.len())
                 .saturating_add(decoded.alpha.as_ref().map_or(0, Vec::len))
                 > limit
         }) {
@@ -303,11 +314,30 @@ pub(crate) fn decode_webm(
         let visible = true;
         if crate::owned_display_geometry::needs(&decoded.frame,stored_crop,stored_rotation) {
             let (frame,alpha)=crate::owned_display_geometry::apply(&decoded.frame,decoded.alpha.as_deref(),decoded.depth,stored_crop,stored_rotation)?;
+            if options.and_then(|o| o.max_controlled_bytes).is_some_and(|limit| {
+                base_bytes
+                    .saturating_add(decoded.frame.data.len())
+                    .saturating_add(decoded.alpha.as_ref().map_or(0, Vec::len))
+                    .saturating_add(frame.data.len())
+                    .saturating_add(alpha.as_ref().map_or(0, Vec::len))
+                    > limit
+            }) {
+                return Err("video frame exceeds controlled memory budget".into());
+            }
             decoded.frame=frame;decoded.alpha=alpha;
         }
 
         let alpha = if let Some(alpha) = decoded.alpha.as_deref() {
-            let Some(alpha) = transform_alpha(&decoded.frame, alpha, decoded.depth, &frame_transform)? else {
+            let Some(alpha) = transform_alpha(
+                &decoded.frame,
+                alpha,
+                decoded.depth,
+                &frame_transform,
+                base_bytes
+                    .saturating_add(decoded.frame.data.len())
+                    .saturating_add(alpha.len()),
+                options.and_then(|o| o.max_controlled_bytes),
+            )? else {
                 return Ok(None);
             };
             if transform.overlay.is_some() { return Ok(None); }
@@ -361,10 +391,8 @@ pub(crate) fn decode_webm(
             };
         } else if (visible && selected && !past_end) || stats.pixel_format.is_empty() {
             if let Some(limit) = options.and_then(|o| o.max_controlled_bytes)
-                && decoded
-                    .frame
-                    .data
-                    .len()
+                && base_bytes
+                    .saturating_add(decoded.frame.data.len())
                     .saturating_add(overlay_frame_len)
                     > limit
             {
@@ -434,17 +462,35 @@ pub(crate) fn decode_webm(
                 Ok(data)
             }).transpose()?;
             let pixels = combined.as_deref().unwrap_or(pixels);
+            let working = crate::owned_lossless::estimate_transform_working_bytes(
+                transform,
+                pixels.len(),
+                decoded.depth,
+                overlay_frame_len,
+            )?;
+            let live_source_bytes = if transformed.is_some() {
+                decoded.frame.data.len()
+            } else {
+                0
+            };
+            let live_alpha_bytes = decoded
+                .alpha
+                .as_ref()
+                .map_or(0, Vec::len)
+                .saturating_add(alpha.as_ref().map_or(0, Vec::len));
             if let Some(limit) = options.and_then(|o| o.max_controlled_bytes) {
-                let working = crate::owned_lossless::estimate_transform_working_bytes(
-                    transform,
-                    pixels.len(),
-                    decoded.depth,
-                    overlay_frame_len,
-                )?;
-                if working > limit {
+                if base_bytes
+                    .saturating_add(live_source_bytes)
+                    .saturating_add(live_alpha_bytes)
+                    .saturating_add(working)
+                    > limit
+                {
                     return Err("video frame exceeds controlled memory budget".into());
                 }
             }
+            let extra_working_bytes = live_source_bytes
+                .saturating_add(live_alpha_bytes)
+                .saturating_add(working.saturating_sub(pixels.len()));
             let retain = visit.is_some();
             let mut sink = |data: &[u8], pts: u64, duration: u64| -> Result<()> {
                 if let Some(reverse) = reverse.as_mut() {
@@ -466,6 +512,7 @@ pub(crate) fn decode_webm(
                         hdr: metadata.10,
                         pts_ns: pts as i64,
                         duration_ns: (duration != 0).then_some(duration),
+                        extra_working_bytes,
                     })?;
                 }
                 Ok(())
@@ -522,6 +569,7 @@ pub(crate) fn decode_webm(
                     hdr: metadata.10,
                     pts_ns: pts as i64,
                     duration_ns: (duration != 0).then_some(duration),
+                    extra_working_bytes: 0,
                 })?;
             }
             Ok(())
@@ -555,6 +603,8 @@ fn transform_alpha(
     alpha: &[u8],
     depth: u8,
     request: &DecodeTransform,
+    live_bytes: usize,
+    max_controlled_bytes: Option<usize>,
 ) -> Result<Option<Vec<u8>>> {
     let mut remaining = request.clone();
     remaining.crop = None;
@@ -586,14 +636,32 @@ fn transform_alpha(
     let expected = frame.width.checked_mul(frame.height).and_then(|n| n.checked_mul(bytes))
         .ok_or("alpha geometry size overflow")?;
     if alpha.len() != expected { return Err("invalid alpha geometry storage".into()); }
-    let mut data = crate::owned_frame::buffer(expected.checked_mul(3).ok_or("alpha geometry size overflow")?)?;
+    let rgb_len = expected.checked_mul(3).ok_or("alpha geometry size overflow")?;
+    if max_controlled_bytes.is_some_and(|limit| {
+        live_bytes
+            .saturating_add(rgb_len.saturating_mul(2))
+            > limit
+    }) {
+        return Err("video frame exceeds controlled memory budget".into());
+    }
+    let mut data = crate::owned_frame::buffer(rgb_len)?;
     for (sample, pixel) in alpha.chunks_exact(bytes).zip(data.chunks_exact_mut(3*bytes)) {
         for channel in pixel.chunks_exact_mut(bytes) {channel.copy_from_slice(sample);}
     }
     let input = crate::owned_frame::GeometryFrame {width: frame.width, height: frame.height, subsampling: None, data};
     let output = crate::owned_rgb_transform::process_opacity(&input, depth, &geometry, frame.subsampling.is_some())?
         .ok_or("alpha geometry was not admitted")?;
-    let mut alpha = crate::owned_frame::buffer(output.data.len()/3)?;
+    let out_alpha_len = output.data.len() / 3;
+    if max_controlled_bytes.is_some_and(|limit| {
+        live_bytes
+            .saturating_add(input.data.len())
+            .saturating_add(output.data.len())
+            .saturating_add(out_alpha_len)
+            > limit
+    }) {
+        return Err("video frame exceeds controlled memory budget".into());
+    }
+    let mut alpha = crate::owned_frame::buffer(out_alpha_len)?;
     for (pixel, sample) in output.data.chunks_exact(3*bytes).zip(alpha.chunks_exact_mut(bytes)) {
         sample.copy_from_slice(&pixel[..bytes]);
     }
