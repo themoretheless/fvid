@@ -1,8 +1,8 @@
 {
   "target": 1000,
   "counting_rule": "One independently confirmed problem or useful capability; fixture variants and baseline integration repairs are excluded. Only accepted entries count.",
-  "accepted_count": 484,
-  "next_id": "FVID-0485",
+  "accepted_count": 485,
+  "next_id": "FVID-0486",
   "entries": [
     {
       "id": "FVID-0001",
@@ -5468,6 +5468,17 @@
       "follow_up_note": "Zero-count extension: identical-header AAC split edits now retain arbitrary Duration floors and native packet phase, including explicit initial silence. Four authored video controls and actual workers prove full PCM, exact suffixes/PTS, EOF and raw-navigation recovery. All seven qualification gates and three repeated ten-test runs pass; configuration-changing paths retain prior behavior.",
       "source_gap_follow_up_validation": "batch-482-validation.json",
       "source_gap_follow_up_note": "Zero-count exact AAC source-gap anchor extension: derive the backend flush clock from the same native silence lattice as emitted PCM and clamp to the edited endpoint. Identical baseline passes independent nonzero PCM/gap/video controls but fails both direct and actual-worker clock regressions. Seven gates and three repeated thirteen-test runs pass; recovered-clock and raw-navigation behavior unchanged."
+    },
+    {
+      "id": "FVID-0485",
+      "batch": 483,
+      "title": "Avoid per-virtual-sample unused-description scans in compact MP4 playback clock setup",
+      "source": "src/playback/audio/mp4_clock_recovery.rs",
+      "regression": "tests/mp4_clock_description_scan.rs",
+      "before": "Playback clock setup scans all virtual PCM samples for every unused description despite a sparse chunk index. Original release correctness controls pass;paired set1 median51.291ms and set2 median18.172958ms for262144 frames with32 unused headers.",
+      "result": "Query readable run starts for sparse UniformIndex,retaining the reference walk for dense/expanded indexes. Paired medians8.23875ms and2.76375ms:83.94/84.79percent reduction,7/7wins in both sets,all fingerprints equal. Full analytic PCM,actual workers,video,seek/EOF,private coordinate semantics,eight gates and three repeated fifteen-test runs pass. No whole-player or decoder speedup claim.",
+      "status": "accepted",
+      "validation": "batch-483-validation.json"
     }
   ]
 }

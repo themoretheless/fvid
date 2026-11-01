@@ -1,0 +1,10 @@
+{
+  "base_commit": "dc67ec6cc095509e7b4fb8288ab3f3274dffff51",
+  "sha256": {
+    "src/playback/audio/mp4_clock_recovery.rs": "22dc76dd820a65a5e623bd15a50c38d218c7835b1c67e9dfa714b692bd5fd90e",
+    "tests/mp4_clock_description_scan.rs": "dc1822e9cdcf725b041d2d129d439328e5b3cc131e9fa99a3d885ef16cdac138",
+    "examples/bench_mp4_clock_description_scan.rs": "1211cc59b298a4e2d2e15d93e127eb451b5d10e6f45064d80848ea6a28bd19b5",
+    "scripts/generate_mp4_clock_description_scan.py": "e922a5c3fc5c68f5957bab732f39e8c12cafda1c13502cd0804b6c40066342de"
+  },
+  "baseline_binary_sha256": "993ebf10dad74ec7391e253a528f95b52518322619046ceb4b2c716e71e3ec58"
+}

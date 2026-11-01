@@ -1,0 +1,5 @@
+{
+  "required_before_acceptance": true,
+  "criteria": "same predeclared measurement-plan.json criteria must pass in a second complete seven-pair set after qualification",
+  "selection": "both sets must pass; retain all observations; do not choose the faster set"
+}

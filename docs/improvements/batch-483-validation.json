@@ -1,0 +1,301 @@
+{
+  "status": "accepted",
+  "accepted_ids": [
+    "FVID-0485"
+  ],
+  "count_delta": 1,
+  "accepted_count": 485,
+  "next_id": "FVID-0486",
+  "category": "measured performance",
+  "qualification": {
+    "release-correctness": {
+      "command": [
+        "cargo",
+        "test",
+        "--release",
+        "--locked",
+        "--offline",
+        "--no-default-features",
+        "--features",
+        "player",
+        "--test",
+        "mp4_clock_description_scan"
+      ],
+      "exit_code": 0,
+      "totals": {
+        "passed": 2,
+        "failed": 0,
+        "ignored": 0
+      },
+      "log": "docs/improvements/evidence/mp4-clock-description-scan/release-correctness.log"
+    },
+    "integration": {
+      "command": [
+        "cargo",
+        "test",
+        "--locked",
+        "--offline",
+        "--no-default-features",
+        "--features",
+        "player",
+        "--no-fail-fast",
+        "--test",
+        "mp4_aac_subtick_seek",
+        "--test",
+        "mp4_audio_eof_seek_clock",
+        "--test",
+        "mp4_audio_packet_seek",
+        "--test",
+        "mp4_audio_wide_time",
+        "--test",
+        "mp4_quantized_audio_clock",
+        "--test",
+        "mp4_aac_edit_phase",
+        "--test",
+        "mp4_aac_fractional_origin",
+        "--test",
+        "mp4_open_ended_edit_audio",
+        "--test",
+        "mp4_audio_clocks",
+        "--test",
+        "mp4_variable_rate_edits",
+        "--test",
+        "mp4_edit_loop",
+        "--test",
+        "mp4_audio_reconfiguration",
+        "--test",
+        "mp4_aac_transitions",
+        "--test",
+        "mp4_unedited_audio_tail",
+        "--test",
+        "mp4_audio_presentation_end",
+        "--test",
+        "mp4_audio_composition_order",
+        "--test",
+        "mp4_unused_audio_descriptions",
+        "--test",
+        "mp4_audio_selection",
+        "--test",
+        "mp4_audio_preroll_navigation",
+        "--test",
+        "mp4_audio_partial_window",
+        "--test",
+        "mp4_audio_zero_window",
+        "--test",
+        "mp4_aac_split_subtick_seek",
+        "--test",
+        "mp4_audio_middle_gap",
+        "--test",
+        "mp4_audio_composition_gap",
+        "--test",
+        "mp4_fixed_audio_edits",
+        "--test",
+        "mp4_aac_gap_subtick_seek",
+        "--test",
+        "mp4_clock_description_scan"
+      ],
+      "exit_code": 0,
+      "totals": {
+        "passed": 124,
+        "failed": 0,
+        "ignored": 0
+      },
+      "log": "docs/improvements/evidence/mp4-clock-description-scan/integration.log"
+    },
+    "root-mp4": {
+      "command": [
+        "cargo",
+        "test",
+        "--locked",
+        "--offline",
+        "--no-default-features",
+        "--features",
+        "player",
+        "--lib",
+        "mp4",
+        "--",
+        "--test-threads=2"
+      ],
+      "exit_code": 0,
+      "totals": {
+        "passed": 84,
+        "failed": 0,
+        "ignored": 1
+      },
+      "log": "docs/improvements/evidence/mp4-clock-description-scan/root-mp4.log"
+    },
+    "root-webm": {
+      "command": [
+        "cargo",
+        "test",
+        "--locked",
+        "--offline",
+        "--no-default-features",
+        "--features",
+        "player",
+        "--lib",
+        "webm",
+        "--",
+        "--test-threads=2"
+      ],
+      "exit_code": 0,
+      "totals": {
+        "passed": 67,
+        "failed": 0,
+        "ignored": 0
+      },
+      "log": "docs/improvements/evidence/mp4-clock-description-scan/root-webm.log"
+    },
+    "audio-worker": {
+      "command": [
+        "cargo",
+        "test",
+        "--locked",
+        "--offline",
+        "--no-default-features",
+        "--features",
+        "player",
+        "--lib",
+        "audio_thread",
+        "--",
+        "--test-threads=2"
+      ],
+      "exit_code": 0,
+      "totals": {
+        "passed": 39,
+        "failed": 0,
+        "ignored": 0
+      },
+      "log": "docs/improvements/evidence/mp4-clock-description-scan/audio-worker.log"
+    },
+    "media-units": {
+      "command": [
+        "cargo",
+        "test",
+        "-p",
+        "fvid-media",
+        "--locked",
+        "--offline",
+        "--no-default-features",
+        "--features",
+        "player",
+        "--lib",
+        "--",
+        "--test-threads=2"
+      ],
+      "exit_code": 0,
+      "totals": {
+        "passed": 548,
+        "failed": 0,
+        "ignored": 1
+      },
+      "log": "docs/improvements/evidence/mp4-clock-description-scan/media-units.log"
+    },
+    "core-check": {
+      "command": [
+        "cargo",
+        "check",
+        "--locked",
+        "--offline",
+        "--no-default-features"
+      ],
+      "exit_code": 0,
+      "totals": {
+        "passed": 0,
+        "failed": 0,
+        "ignored": 0
+      },
+      "log": "docs/improvements/evidence/mp4-clock-description-scan/core-check.log"
+    },
+    "player-check": {
+      "command": [
+        "cargo",
+        "check",
+        "--locked",
+        "--offline",
+        "--no-default-features",
+        "--features",
+        "player"
+      ],
+      "exit_code": 0,
+      "totals": {
+        "passed": 0,
+        "failed": 0,
+        "ignored": 0
+      },
+      "log": "docs/improvements/evidence/mp4-clock-description-scan/player-check.log"
+    }
+  },
+  "measurement_sets": [
+    {
+      "primary": {
+        "before_ns": 51291000,
+        "after_ns": 8238750,
+        "reduction_percent": 83.9372404515412,
+        "wins": 7,
+        "identical_fingerprints": true
+      },
+      "control": {
+        "before_ns": 6334,
+        "after_ns": 4750,
+        "reduction_percent": 25.00789390590464,
+        "wins": 6,
+        "identical_fingerprints": true
+      },
+      "criteria_passed": true,
+      "aggregation": "median of seven per-process medians; nine measured opens per process after two warmups",
+      "production_sha256": "22925104abf31242eaf6cb3e6540970f3102ed7ff349d218d64b0d35ff53b47f",
+      "binary_sha256": {
+        "baseline": "993ebf10dad74ec7391e253a528f95b52518322619046ceb4b2c716e71e3ec58",
+        "candidate": "4fa58c1f505ea6c5849fa12aa04edb4de07cc7a4ffd8ea811e02019ba2780c4a"
+      }
+    },
+    {
+      "primary": {
+        "before_ns": 18172958,
+        "after_ns": 2763750,
+        "reduction_percent": 84.79196397196317,
+        "wins": 7,
+        "identical_fingerprints": true
+      },
+      "control": {
+        "before_ns": 2959,
+        "after_ns": 2458,
+        "reduction_percent": 16.931395741804664,
+        "wins": 6,
+        "identical_fingerprints": true
+      },
+      "criteria_passed": true,
+      "aggregation": "median of seven per-process medians; nine measured opens per process after two warmups",
+      "production_sha256": "22925104abf31242eaf6cb3e6540970f3102ed7ff349d218d64b0d35ff53b47f",
+      "binary_sha256": {
+        "baseline": "993ebf10dad74ec7391e253a528f95b52518322619046ceb4b2c716e71e3ec58",
+        "candidate": "4fa58c1f505ea6c5849fa12aa04edb4de07cc7a4ffd8ea811e02019ba2780c4a"
+      }
+    }
+  ],
+  "predeclared_criteria": "evidence/mp4-clock-description-scan/measurement-plan.json",
+  "replication_required": true,
+  "repeat_runs": 3,
+  "repeat_passed_each": 15,
+  "source_frozen": {
+    "src/playback/audio/mp4_clock_recovery.rs": "22925104abf31242eaf6cb3e6540970f3102ed7ff349d218d64b0d35ff53b47f",
+    "src/playback/audio/mp4_audio.rs": "80a27b6ddc108a792483a0313caec843c475b922b8e9e07277da06acab5494d4",
+    "Cargo.toml": "bae90b5389e5a524732021bc4deb59515c58f7b8ddb8e6b52f986dcfa967cb74",
+    "tests/mp4_clock_description_scan.rs": "dc1822e9cdcf725b041d2d129d439328e5b3cc131e9fa99a3d885ef16cdac138",
+    "examples/bench_mp4_clock_description_scan.rs": "1211cc59b298a4e2d2e15d93e127eb451b5d10e6f45064d80848ea6a28bd19b5",
+    "scripts/generate_mp4_clock_description_scan.py": "e922a5c3fc5c68f5957bab732f39e8c12cafda1c13502cd0804b6c40066342de"
+  },
+  "existing_tests_unchanged": true,
+  "old_ignores": 2,
+  "baseline_correctness": {
+    "passed": 2,
+    "failed": 0,
+    "log": "docs/improvements/evidence/mp4-clock-description-scan/before-correctness.log"
+  },
+  "limitations": [
+    "Resident-byte Mp4AudioReader::open for sparse compact PCM catalogs; no file I/O,decode,whole-player,UI,RSS or GPU speedup claim.",
+    "Absolute timings vary with host load,which is preserved per round;both independent paired sets passed.",
+    "Initial benchmark macro-expression compile repair is not an improvement."
+  ]
+}

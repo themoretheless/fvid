@@ -1,0 +1,16 @@
+{
+  "exact_regeneration": true,
+  "files": 10,
+  "sha256": {
+    "frames64-unused0.mp4": "ea90d98d8a1d90dfd17582ac56965b362fad1ea07ebdfad033ce49b4f51413fb",
+    "frames64-unused1.mp4": "a9f61766bc17d7328010a375d1fcf1da769dc3c04910b696aa0d2caec2dfa587",
+    "frames64-unused32.mp4": "2f2c188c4e3f54c5d053e5681d9789fffd8bd5d0ad8db1c0303213619da19c5b",
+    "frames262144-unused0.mp4": "def067a680ac1aba8031a4d69d938ceaeb86895e040d65e7be30c12138250951",
+    "frames262144-unused1.mp4": "5412bd9f0c0743276a71761836f5643a4da26b389c7b28612b047edeaa52e973",
+    "frames262144-unused32.mp4": "84890bf64c4ccd272be72cd68efc7b7b182295d944892821a8222032be608244",
+    "control-alias.mp4": "c1a1fd9a6eb5d6aa46b54f88ffc14a9020e1e70460309810daddf588dfa4048d",
+    "control-unused.mp4": "5b83786792be1f7246cdae7b1d639fadc1a51cd1bc4f61d58c0f1d56afa1e2e9",
+    "control-endian.mp4": "f19ba536aa68abd41e1af509d5180e1a3159359b763842872ff7110dea73cadd",
+    "manifest.json": "cbe1c0f5dfdcdaff979d491365a5ce2098368b5513ced3dd40f79f12a7b5dcd0"
+  }
+}

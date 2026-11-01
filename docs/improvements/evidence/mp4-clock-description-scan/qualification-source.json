@@ -1,0 +1,8 @@
+{
+  "src/playback/audio/mp4_clock_recovery.rs": "22925104abf31242eaf6cb3e6540970f3102ed7ff349d218d64b0d35ff53b47f",
+  "src/playback/audio/mp4_audio.rs": "80a27b6ddc108a792483a0313caec843c475b922b8e9e07277da06acab5494d4",
+  "Cargo.toml": "bae90b5389e5a524732021bc4deb59515c58f7b8ddb8e6b52f986dcfa967cb74",
+  "tests/mp4_clock_description_scan.rs": "dc1822e9cdcf725b041d2d129d439328e5b3cc131e9fa99a3d885ef16cdac138",
+  "examples/bench_mp4_clock_description_scan.rs": "1211cc59b298a4e2d2e15d93e127eb451b5d10e6f45064d80848ea6a28bd19b5",
+  "scripts/generate_mp4_clock_description_scan.py": "e922a5c3fc5c68f5957bab732f39e8c12cafda1c13502cd0804b6c40066342de"
+}

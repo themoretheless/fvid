@@ -35,6 +35,20 @@ fn mp4_coded_packet_frames_for_programme(programme:u8,codec:&[u8;4], configurati
     Ok(frames)
 }
 include!("../../../crates/fvid-media/src/owned_mp4_audio_clock_runs_impl.rs");
+// Compact PCM indexes already identify the selected description per chunk.
+// Consult a readable sample at each run start so virtual coordinate failures
+// keep the same semantics as the reference sample walk. Dense/general indexes
+// retain that walk rather than adding one binary lookup per short run.
+fn clock_description_used(samples:&crate::container::mp4::SampleIndex,description:usize)->bool {
+    match samples {
+        crate::container::mp4::SampleIndex::Uniform(index)
+            if index.runs.len().saturating_mul(2)<index.count => {
+                index.runs.iter().any(|run|run.frames>0 && run.first<index.count
+                    && samples.get(run.first).is_some_and(|s|s.description_index as usize==description))
+            }
+        _ => (0..samples.len()).any(|n|samples.get(n).is_some_and(|s|s.description_index as usize==description)),
+    }
+}
 pub(super) struct PlaybackClock {
     runs: Vec<Mp4PacketClockRun>,
     count: usize,
@@ -52,7 +66,7 @@ impl PlaybackClock {
         for i in 0..descriptions {
             let track=&reader.tracks()[index];
             let codec=track.sample_descriptions[i].codec;
-            if !(0..track.samples.len()).any(|n|track.samples.get(n).is_some_and(|s|s.description_index as usize==i+1)){continue;}
+            if !clock_description_used(&track.samples,i+1){continue;}
             if codec==*b"ec-3" {
                 if programme>7{return Err(invalid("E-AC-3 programme ID exceeds 7"));}
                 let count=track.samples.len();
@@ -125,4 +139,22 @@ impl PlaybackClock {
         Ok(a.saturating_sub(1))
     }
     pub(super) fn same_run(&self,a:usize,b:usize)->bool {self.run(a).ok().zip(self.run(b).ok()).is_some_and(|(a,b)|a.first==b.first)}
+}
+
+#[cfg(test)]
+mod description_usage_tests {
+    use super::clock_description_used;
+    use crate::container::mp4::{SampleIndex,UniformIndex,FrameRun,Sample};
+    #[test]
+    fn mp4_compact_description_usage_preserves_virtual_lookup_semantics() {
+        let run=|id,first,frames,offset|FrameRun{description_index:id,first,frames,offset};
+        let compact=|runs|SampleIndex::Uniform(UniformIndex{bytes_per_frame:2,duration:1,count:8,runs});
+        let mut cases=vec![compact(vec![run(1,0,8,0)]),compact(vec![run(1,0,4,0),run(2,4,4,8)]),compact(vec![run(1,0,8,u64::MAX)]),compact(vec![run(1,0,0,0)]),compact(vec![run(1,9,4,0)]),compact(vec![run(1,0,8,0),run(2,0,2,0)]),compact(vec![])];
+        cases.push(compact((0..8).map(|n|run((n%2+1)as u32,n,1,n as u64*2)).collect()));
+        cases.push(SampleIndex::Expanded([1,3,2].into_iter().map(|description_index|Sample{description_index,offset:0,size:2,dts:0,pts:0,duration:1,sync:true}).collect()));
+        for samples in cases {for id in [0,1,2,3,usize::MAX] {
+            let reference=(0..samples.len()).any(|n|samples.get(n).is_some_and(|s|s.description_index as usize==id));
+            assert_eq!(clock_description_used(&samples,id),reference,"{samples:?}:description{id}");
+        }}
+    }
 }

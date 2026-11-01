@@ -1,0 +1,23 @@
+{
+  "primary": {
+    "before_ns": 18172958,
+    "after_ns": 2763750,
+    "reduction_percent": 84.79196397196317,
+    "wins": 7,
+    "identical_fingerprints": true
+  },
+  "control": {
+    "before_ns": 2959,
+    "after_ns": 2458,
+    "reduction_percent": 16.931395741804664,
+    "wins": 6,
+    "identical_fingerprints": true
+  },
+  "criteria_passed": true,
+  "aggregation": "median of seven per-process medians; nine measured opens per process after two warmups",
+  "production_sha256": "22925104abf31242eaf6cb3e6540970f3102ed7ff349d218d64b0d35ff53b47f",
+  "binary_sha256": {
+    "baseline": "993ebf10dad74ec7391e253a528f95b52518322619046ceb4b2c716e71e3ec58",
+    "candidate": "4fa58c1f505ea6c5849fa12aa04edb4de07cc7a4ffd8ea811e02019ba2780c4a"
+  }
+}

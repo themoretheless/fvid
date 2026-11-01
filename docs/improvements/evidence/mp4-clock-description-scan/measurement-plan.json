@@ -1,0 +1,17 @@
+{
+  "status": "predeclared before production edits",
+  "primary": "frames262144-unused32.mp4",
+  "control": "frames262144-unused0.mp4",
+  "rounds": 7,
+  "iterations_per_process": 9,
+  "warmups_per_process": 2,
+  "order": "alternate baseline/candidate order each round",
+  "acceptance": {
+    "primary_median_reduction_at_least_percent": 10,
+    "primary_paired_wins_at_least": 6,
+    "fingerprints_all_equal": true,
+    "control_median_regression_limit_percent": 10,
+    "control_absolute_noise_allowance_ns": 100000
+  },
+  "scope": "Release default profile Mp4AudioReader::open on already resident identical bytes. No file I/O,decode,player,UI,RSS or GPU speedup claim. All ordinary correctness regressions must pass."
+}
