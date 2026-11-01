@@ -119,7 +119,7 @@ fn reference<const B: usize>(c: &Value, mode: Mode) -> Vec<u8> {
                 }
             }
         }
-        for band in 0..23 {
+        for band in 0..c["extra_cld"][frame].as_array().unwrap().len() {
             let ratio = 10.0f64.powf(c["extra_cld"][frame][band].as_f64().unwrap() / 10.0);
             previous[0][band] = (ratio / (1.0 + ratio)).sqrt();
             previous[1][band] = (1.0 / (1.0 + ratio)).sqrt();
@@ -168,7 +168,7 @@ fn near(a: &[u8], b: &[u8], name: &Value) -> f32 {
 #[test]
 fn all_trees_domains_and_fixed_gains_match_analytical_split_composition() {
     let m = manifest();
-    assert_eq!(m["cases"].as_array().unwrap().len(), 48);
+    assert_eq!(m["cases"].as_array().unwrap().len(), PROGRAMMES);
     for c in m["cases"].as_array().unwrap() {
         let want = expected(c, Mode::Complex);
         for mkv in [false, true] {

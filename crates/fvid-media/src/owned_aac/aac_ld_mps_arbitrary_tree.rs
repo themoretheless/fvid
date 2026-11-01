@@ -1,5 +1,5 @@
-//! Post-shaping arbitrary-tree gain routing. Native PCM currently qualifies
-//! full-band splits and dense output permutations; sparse layouts remain explicit refusals.
+//! Post-shaping arbitrary-tree routing. Coded splits must cover every band
+//! addressed by the QMF domain; sparse layouts remain explicit refusals.
 use super::{aac_ld_mps_matrix_apply::Samples, aac_sbr_qmf::Complex, invalid, unsupported, Result};
 #[derive(Clone, Debug, PartialEq)]
 struct Leaf {
@@ -12,6 +12,7 @@ pub struct Decoder {
     bands: usize,
     inputs: usize,
     boxes: usize,
+    cutoffs: Vec<u8>,
     leaves: Vec<Leaf>,
     previous: Vec<Vec<f64>>,
 }
@@ -32,8 +33,30 @@ fn dense_positions(positions: &[u8]) -> Result<()> {
 }
 impl Decoder {
     /// Preorder split/leaf flags per base-tree output. Positions must be a
-    /// permutation of dense output indices. Every split spans the full grid.
+    /// permutation of dense output indices. Without a QMF domain, every split
+    /// must span the full grid.
     pub fn new(nodes: &[Vec<bool>], cutoffs: &[u8], positions: &[u8], bands: u8) -> Result<Self> {
+        Self::new_domain(nodes, cutoffs, positions, bands, None)
+    }
+    /// A partial coded grid is sufficient only when every actual QMF bin maps
+    /// below every split cutoff. No missing coefficient is fabricated.
+    pub fn new_for_qmf(
+        nodes: &[Vec<bool>],
+        cutoffs: &[u8],
+        positions: &[u8],
+        bands: u8,
+        qmf_bands: usize,
+    ) -> Result<Self> {
+        let map = super::aac_ld_mps_prepare::qmf_map(bands, qmf_bands)?;
+        Self::new_domain(nodes, cutoffs, positions, bands, Some(&map))
+    }
+    fn new_domain(
+        nodes: &[Vec<bool>],
+        cutoffs: &[u8],
+        positions: &[u8],
+        bands: u8,
+        map: Option<&[u8]>,
+    ) -> Result<Self> {
         if !matches!(bands, 4 | 5 | 7 | 9 | 12 | 15 | 23)
             || nodes.is_empty()
             || nodes.len() > 8
@@ -42,7 +65,13 @@ impl Decoder {
         {
             return Err(invalid("invalid LD-MPS arbitrary-tree geometry"));
         }
-        if cutoffs.iter().any(|&b| b != bands) {
+        if cutoffs.iter().any(|&b| b > bands) {
+            return Err(invalid("arbitrary-tree cutoff exceeds parameter grid"));
+        }
+        if cutoffs
+            .iter()
+            .any(|&b| b != bands && map.is_none_or(|m| m.iter().any(|&band| band >= b)))
+        {
             return Err(unsupported(
                 "partial-band arbitrary-tree splits require qualification",
             ));
@@ -93,6 +122,7 @@ impl Decoder {
             bands: usize::from(bands),
             inputs: nodes.len(),
             boxes,
+            cutoffs: cutoffs.to_vec(),
             leaves,
             previous,
         })
@@ -147,12 +177,22 @@ impl Decoder {
             })
             || cld.iter().any(|s| {
                 s.len() != self.boxes
-                    || s.iter().any(|b| {
-                        b.len() != self.bands || b.iter().any(|v| !v.is_finite() || v.abs() > 150.0)
+                    || s.iter().enumerate().any(|(index, b)| {
+                        b.len() != usize::from(self.cutoffs[index])
+                            || b.iter().any(|v| !v.is_finite() || v.abs() > 150.0)
                     })
             })
         {
             return Err(invalid("invalid arbitrary-tree frame geometry/values"));
+        }
+        if self
+            .cutoffs
+            .iter()
+            .any(|&cutoff| map.iter().any(|&band| band >= cutoff))
+        {
+            return Err(unsupported(
+                "partial-band arbitrary-tree splits require qualification",
+            ));
         }
         let mut previous = self.previous.clone();
         let mut out = vec![vec![vec![Complex::default(); map.len()]; self.leaves.len()]; slots];
@@ -161,8 +201,17 @@ impl Decoder {
             let stop = usize::from(end) + 1;
             for (i, leaf) in self.leaves.iter().enumerate() {
                 let mut target = vec![1.0; self.bands];
+                let available = leaf
+                    .path
+                    .iter()
+                    .map(|&(node, _)| usize::from(self.cutoffs[node]))
+                    .min()
+                    .unwrap_or(self.bands);
                 for &(node, left) in &leaf.path {
                     for (band, gain) in target.iter_mut().enumerate() {
+                        if band >= available {
+                            continue;
+                        }
                         let ratio = 10.0f64.powf(parameters[node][band] / 10.0);
                         *gain *= if left {
                             (ratio / (1.0 + ratio)).sqrt()
@@ -222,11 +271,18 @@ impl Stage {
                 if nodes.len() != usize::from(config.tree.output_channels) {
                     return Err(invalid("arbitrary-tree base output count mismatch"));
                 }
-                let decoder = Decoder::new(
+                let decoder = Decoder::new_for_qmf(
                     nodes,
                     &ott.iter().map(|o| o.bands).collect::<Vec<_>>(),
                     positions,
                     config.parameter_bands,
+                    if config.sample_rate < 27713 {
+                        32
+                    } else if config.sample_rate >= 55426 {
+                        128
+                    } else {
+                        64
+                    },
                 )?;
                 let mut fixed = vec![1.0; nodes.len()];
                 let surround = *super::aac_ld_mps_prepare_facts::SURROUND
@@ -322,6 +378,7 @@ impl Stage {
         f: &mut super::memory::Footprint,
     ) -> std::result::Result<(), String> {
         f.vector(&self.fixed)?;
+        f.vector(&self.decoder.cutoffs)?;
         f.vector(&self.decoder.leaves)?;
         for leaf in &self.decoder.leaves {
             f.vector(&leaf.path)?;

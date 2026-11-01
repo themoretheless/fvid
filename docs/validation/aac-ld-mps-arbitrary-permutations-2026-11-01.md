@@ -72,3 +72,5 @@ re-enveloping without duplicating existing spatial data.
 Partial-band/LFE trees, sparse positions, topology/grid changes, nonzero EBQ
 with active arbitrary trees, active unequal-grid HRTF and inherited-fragment
 prefix loss remain open. This does not complete LD-MPS or the codec-gap goal.
+
+Current boundary update (2026-11-02): covered partial grids are now accepted when every actual QMF bin has a coded coefficient. See [covered partial qualification](aac-ld-mps-arbitrary-partial-2026-11-02.md). Earlier refusal statements in this historical report describe its original snapshot.

@@ -51,7 +51,7 @@ def reference(archive):
  for c in m['cases']+m['permutations']:
   boxes=len(c['cutoffs']);wire.extend(struct.pack('<7I',c['tree'],c['bank'],c['inputs'],c['outputs'],c['bands'],boxes,len(c['blocks'])))
   for row in c['nodes']:wire.extend(struct.pack('<I',len(row))+struct.pack('<'+'I'*len(row),*row))
-  wire.extend(struct.pack('<'+'I'*c['outputs'],*c['positions']));wire.extend(struct.pack('<'+'I'*c['bank'],*c['map']));wire.extend(struct.pack('<2f',c['surround'],c['lfe']));blocks=[]
+  wire.extend(struct.pack('<'+'I'*c['outputs'],*c['positions']));wire.extend(struct.pack('<'+'I'*boxes,*c['cutoffs']));wire.extend(struct.pack('<'+'I'*c['bank'],*c['map']));wire.extend(struct.pack('<2f',c['surround'],c['lfe']));blocks=[]
   for b in c['blocks']:
    wire.extend(struct.pack('<'+'I'*c['outputs'],*b.get('positions',c['positions'])));wire.extend(struct.pack('<2I',b['slots'],len(b['endpoints']))+struct.pack('<'+'I'*len(b['endpoints']),*b['endpoints']));vals=[v for s in b['cld']for row in s for v in row];wire.extend(struct.pack('<'+'f'*len(vals),*vals));n=b['slots']*c['inputs']*c['bank']*8;wire.extend(samples[b['offset']:b['offset']+n]);blocks.append(dict(offset=expected_offset));expected_offset+=b['slots']*c['outputs']*c['bank']*8
   cases.append(dict(blocks=blocks))

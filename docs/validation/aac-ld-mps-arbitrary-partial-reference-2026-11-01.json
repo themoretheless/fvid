@@ -1,0 +1,559 @@
+{
+  "compiler": "Apple clang version 21.0.0 (clang-2100.3.34.2)\nTarget: arm64-apple-darwin25.6.0\nThread model: posix\nInstalledDir: /Library/Developer/CommandLineTools/usr/bin",
+  "scope": "Reference qualification audit, not intended active-uncovered playback. Unmodified ISO algorithm, fully initialized caller state; only automatic-storage initialization differs.",
+  "archive_sha256": "b6b27e2f9af6ee8f950af8d7074afc467e66d93372328c0ec55282fff71d1f83",
+  "algorithm_sha256": "9b73935063f3b188a010b0a8da69f114648f4c3a7b6769878071b641e107f2e7",
+  "driver_sha256": "e140ce3678729b1671db8cb9661f0ff271054279210d4f00277274b67f723ebf",
+  "generator_sha256": "a1d3e015b77e36838a2d5b33c3f8333d7fdd5e3cdd0087c53cee3a5cd36d7b0b",
+  "input_sha256": "cbf243e0cabd57b1c5fc8e2b9a7f64604cfe98f104d851d4303b8c351978c891",
+  "flags": [
+    "-ftrivial-auto-var-init=zero",
+    "-ftrivial-auto-var-init=pattern"
+  ],
+  "covered_cases": 20,
+  "full_controls": 12,
+  "uncovered_cases": 12,
+  "below_cutoff_comparisons": 254976,
+  "above_cutoff_differences": 2880,
+  "outputs": {
+    "zero": {
+      "path": "/Users/themoretheless/.cache/fvid-reference/ld-sbr/arbitrary-partial-zero-output.bin",
+      "sha256": "526317928a39fe602c86135bdd155731e2121df905cef65ed7efd6b4b911dd71"
+    },
+    "pattern": {
+      "path": "/Users/themoretheless/.cache/fvid-reference/ld-sbr/arbitrary-partial-pattern-output.bin",
+      "sha256": "45d51d48c822ff33eb1402841b45a40bc4720b97c7f11d23febcb81a77e37151"
+    }
+  },
+  "expected_sha256": "aef2ff4a5d3dc7bd5dac52ba1c9fed7905d93615dff047f36169bdf61d0d356c",
+  "cases": [
+    {
+      "name": "bands12-cutoff11-shape0",
+      "cutoffs": [
+        11
+      ],
+      "covered": true,
+      "different_scalars": 0,
+      "nonfinite_scalars": 0,
+      "below_cutoff_differences": 0,
+      "scalars": 4608
+    },
+    {
+      "name": "bands12-cutoff11-shape1",
+      "cutoffs": [
+        11,
+        12
+      ],
+      "covered": true,
+      "different_scalars": 0,
+      "nonfinite_scalars": 0,
+      "below_cutoff_differences": 0,
+      "scalars": 6144
+    },
+    {
+      "name": "bands12-cutoff11-shape2",
+      "cutoffs": [
+        11,
+        11
+      ],
+      "covered": true,
+      "different_scalars": 0,
+      "nonfinite_scalars": 0,
+      "below_cutoff_differences": 0,
+      "scalars": 6144
+    },
+    {
+      "name": "bands12-cutoff11-shape3",
+      "cutoffs": [
+        11,
+        12,
+        12
+      ],
+      "covered": true,
+      "different_scalars": 0,
+      "nonfinite_scalars": 0,
+      "below_cutoff_differences": 0,
+      "scalars": 7680
+    },
+    {
+      "name": "bands15-cutoff14-shape0",
+      "cutoffs": [
+        14
+      ],
+      "covered": true,
+      "different_scalars": 0,
+      "nonfinite_scalars": 0,
+      "below_cutoff_differences": 0,
+      "scalars": 4608
+    },
+    {
+      "name": "bands15-cutoff14-shape1",
+      "cutoffs": [
+        14,
+        15
+      ],
+      "covered": true,
+      "different_scalars": 0,
+      "nonfinite_scalars": 0,
+      "below_cutoff_differences": 0,
+      "scalars": 6144
+    },
+    {
+      "name": "bands15-cutoff14-shape2",
+      "cutoffs": [
+        14,
+        14
+      ],
+      "covered": true,
+      "different_scalars": 0,
+      "nonfinite_scalars": 0,
+      "below_cutoff_differences": 0,
+      "scalars": 6144
+    },
+    {
+      "name": "bands15-cutoff14-shape3",
+      "cutoffs": [
+        14,
+        15,
+        15
+      ],
+      "covered": true,
+      "different_scalars": 0,
+      "nonfinite_scalars": 0,
+      "below_cutoff_differences": 0,
+      "scalars": 7680
+    },
+    {
+      "name": "bands23-cutoff20-shape0",
+      "cutoffs": [
+        20
+      ],
+      "covered": true,
+      "different_scalars": 0,
+      "nonfinite_scalars": 0,
+      "below_cutoff_differences": 0,
+      "scalars": 4608
+    },
+    {
+      "name": "bands23-cutoff20-shape1",
+      "cutoffs": [
+        20,
+        23
+      ],
+      "covered": true,
+      "different_scalars": 0,
+      "nonfinite_scalars": 0,
+      "below_cutoff_differences": 0,
+      "scalars": 6144
+    },
+    {
+      "name": "bands23-cutoff20-shape2",
+      "cutoffs": [
+        20,
+        20
+      ],
+      "covered": true,
+      "different_scalars": 0,
+      "nonfinite_scalars": 0,
+      "below_cutoff_differences": 0,
+      "scalars": 6144
+    },
+    {
+      "name": "bands23-cutoff20-shape3",
+      "cutoffs": [
+        20,
+        23,
+        23
+      ],
+      "covered": true,
+      "different_scalars": 0,
+      "nonfinite_scalars": 0,
+      "below_cutoff_differences": 0,
+      "scalars": 7680
+    },
+    {
+      "name": "bands23-cutoff21-shape0",
+      "cutoffs": [
+        21
+      ],
+      "covered": true,
+      "different_scalars": 0,
+      "nonfinite_scalars": 0,
+      "below_cutoff_differences": 0,
+      "scalars": 4608
+    },
+    {
+      "name": "bands23-cutoff21-shape1",
+      "cutoffs": [
+        21,
+        23
+      ],
+      "covered": true,
+      "different_scalars": 0,
+      "nonfinite_scalars": 0,
+      "below_cutoff_differences": 0,
+      "scalars": 6144
+    },
+    {
+      "name": "bands23-cutoff21-shape2",
+      "cutoffs": [
+        21,
+        21
+      ],
+      "covered": true,
+      "different_scalars": 0,
+      "nonfinite_scalars": 0,
+      "below_cutoff_differences": 0,
+      "scalars": 6144
+    },
+    {
+      "name": "bands23-cutoff21-shape3",
+      "cutoffs": [
+        21,
+        23,
+        23
+      ],
+      "covered": true,
+      "different_scalars": 0,
+      "nonfinite_scalars": 0,
+      "below_cutoff_differences": 0,
+      "scalars": 7680
+    },
+    {
+      "name": "bands23-cutoff22-shape0",
+      "cutoffs": [
+        22
+      ],
+      "covered": true,
+      "different_scalars": 0,
+      "nonfinite_scalars": 0,
+      "below_cutoff_differences": 0,
+      "scalars": 4608
+    },
+    {
+      "name": "bands23-cutoff22-shape1",
+      "cutoffs": [
+        22,
+        23
+      ],
+      "covered": true,
+      "different_scalars": 0,
+      "nonfinite_scalars": 0,
+      "below_cutoff_differences": 0,
+      "scalars": 6144
+    },
+    {
+      "name": "bands23-cutoff22-shape2",
+      "cutoffs": [
+        22,
+        22
+      ],
+      "covered": true,
+      "different_scalars": 0,
+      "nonfinite_scalars": 0,
+      "below_cutoff_differences": 0,
+      "scalars": 6144
+    },
+    {
+      "name": "bands23-cutoff22-shape3",
+      "cutoffs": [
+        22,
+        23,
+        23
+      ],
+      "covered": true,
+      "different_scalars": 0,
+      "nonfinite_scalars": 0,
+      "below_cutoff_differences": 0,
+      "scalars": 7680
+    },
+    {
+      "name": "bands12-cutoff12-shape0",
+      "cutoffs": [
+        12
+      ],
+      "covered": true,
+      "different_scalars": 0,
+      "nonfinite_scalars": 0,
+      "below_cutoff_differences": 0,
+      "scalars": 4608
+    },
+    {
+      "name": "bands12-cutoff12-shape1",
+      "cutoffs": [
+        12,
+        12
+      ],
+      "covered": true,
+      "different_scalars": 0,
+      "nonfinite_scalars": 0,
+      "below_cutoff_differences": 0,
+      "scalars": 6144
+    },
+    {
+      "name": "bands12-cutoff12-shape2",
+      "cutoffs": [
+        12,
+        12
+      ],
+      "covered": true,
+      "different_scalars": 0,
+      "nonfinite_scalars": 0,
+      "below_cutoff_differences": 0,
+      "scalars": 6144
+    },
+    {
+      "name": "bands12-cutoff12-shape3",
+      "cutoffs": [
+        12,
+        12,
+        12
+      ],
+      "covered": true,
+      "different_scalars": 0,
+      "nonfinite_scalars": 0,
+      "below_cutoff_differences": 0,
+      "scalars": 7680
+    },
+    {
+      "name": "bands15-cutoff15-shape0",
+      "cutoffs": [
+        15
+      ],
+      "covered": true,
+      "different_scalars": 0,
+      "nonfinite_scalars": 0,
+      "below_cutoff_differences": 0,
+      "scalars": 4608
+    },
+    {
+      "name": "bands15-cutoff15-shape1",
+      "cutoffs": [
+        15,
+        15
+      ],
+      "covered": true,
+      "different_scalars": 0,
+      "nonfinite_scalars": 0,
+      "below_cutoff_differences": 0,
+      "scalars": 6144
+    },
+    {
+      "name": "bands15-cutoff15-shape2",
+      "cutoffs": [
+        15,
+        15
+      ],
+      "covered": true,
+      "different_scalars": 0,
+      "nonfinite_scalars": 0,
+      "below_cutoff_differences": 0,
+      "scalars": 6144
+    },
+    {
+      "name": "bands15-cutoff15-shape3",
+      "cutoffs": [
+        15,
+        15,
+        15
+      ],
+      "covered": true,
+      "different_scalars": 0,
+      "nonfinite_scalars": 0,
+      "below_cutoff_differences": 0,
+      "scalars": 7680
+    },
+    {
+      "name": "bands23-cutoff23-shape0",
+      "cutoffs": [
+        23
+      ],
+      "covered": true,
+      "different_scalars": 0,
+      "nonfinite_scalars": 0,
+      "below_cutoff_differences": 0,
+      "scalars": 4608
+    },
+    {
+      "name": "bands23-cutoff23-shape1",
+      "cutoffs": [
+        23,
+        23
+      ],
+      "covered": true,
+      "different_scalars": 0,
+      "nonfinite_scalars": 0,
+      "below_cutoff_differences": 0,
+      "scalars": 6144
+    },
+    {
+      "name": "bands23-cutoff23-shape2",
+      "cutoffs": [
+        23,
+        23
+      ],
+      "covered": true,
+      "different_scalars": 0,
+      "nonfinite_scalars": 0,
+      "below_cutoff_differences": 0,
+      "scalars": 6144
+    },
+    {
+      "name": "bands23-cutoff23-shape3",
+      "cutoffs": [
+        23,
+        23,
+        23
+      ],
+      "covered": true,
+      "different_scalars": 0,
+      "nonfinite_scalars": 0,
+      "below_cutoff_differences": 0,
+      "scalars": 7680
+    },
+    {
+      "name": "bands12-cutoff10-shape0",
+      "cutoffs": [
+        10
+      ],
+      "covered": false,
+      "different_scalars": 0,
+      "nonfinite_scalars": 0,
+      "below_cutoff_differences": 0,
+      "scalars": 4608
+    },
+    {
+      "name": "bands12-cutoff10-shape1",
+      "cutoffs": [
+        10,
+        12
+      ],
+      "covered": false,
+      "different_scalars": 432,
+      "nonfinite_scalars": 432,
+      "below_cutoff_differences": 0,
+      "scalars": 6144
+    },
+    {
+      "name": "bands12-cutoff10-shape2",
+      "cutoffs": [
+        10,
+        10
+      ],
+      "covered": false,
+      "different_scalars": 0,
+      "nonfinite_scalars": 0,
+      "below_cutoff_differences": 0,
+      "scalars": 6144
+    },
+    {
+      "name": "bands12-cutoff10-shape3",
+      "cutoffs": [
+        10,
+        12,
+        12
+      ],
+      "covered": false,
+      "different_scalars": 864,
+      "nonfinite_scalars": 864,
+      "below_cutoff_differences": 0,
+      "scalars": 7680
+    },
+    {
+      "name": "bands15-cutoff13-shape0",
+      "cutoffs": [
+        13
+      ],
+      "covered": false,
+      "different_scalars": 0,
+      "nonfinite_scalars": 0,
+      "below_cutoff_differences": 0,
+      "scalars": 4608
+    },
+    {
+      "name": "bands15-cutoff13-shape1",
+      "cutoffs": [
+        13,
+        15
+      ],
+      "covered": false,
+      "different_scalars": 432,
+      "nonfinite_scalars": 432,
+      "below_cutoff_differences": 0,
+      "scalars": 6144
+    },
+    {
+      "name": "bands15-cutoff13-shape2",
+      "cutoffs": [
+        13,
+        13
+      ],
+      "covered": false,
+      "different_scalars": 0,
+      "nonfinite_scalars": 0,
+      "below_cutoff_differences": 0,
+      "scalars": 6144
+    },
+    {
+      "name": "bands15-cutoff13-shape3",
+      "cutoffs": [
+        13,
+        15,
+        15
+      ],
+      "covered": false,
+      "different_scalars": 864,
+      "nonfinite_scalars": 864,
+      "below_cutoff_differences": 0,
+      "scalars": 7680
+    },
+    {
+      "name": "bands23-cutoff19-shape0",
+      "cutoffs": [
+        19
+      ],
+      "covered": false,
+      "different_scalars": 0,
+      "nonfinite_scalars": 0,
+      "below_cutoff_differences": 0,
+      "scalars": 4608
+    },
+    {
+      "name": "bands23-cutoff19-shape1",
+      "cutoffs": [
+        19,
+        23
+      ],
+      "covered": false,
+      "different_scalars": 96,
+      "nonfinite_scalars": 96,
+      "below_cutoff_differences": 0,
+      "scalars": 6144
+    },
+    {
+      "name": "bands23-cutoff19-shape2",
+      "cutoffs": [
+        19,
+        19
+      ],
+      "covered": false,
+      "different_scalars": 0,
+      "nonfinite_scalars": 0,
+      "below_cutoff_differences": 0,
+      "scalars": 6144
+    },
+    {
+      "name": "bands23-cutoff19-shape3",
+      "cutoffs": [
+        19,
+        23,
+        23
+      ],
+      "covered": false,
+      "different_scalars": 192,
+      "nonfinite_scalars": 192,
+      "below_cutoff_differences": 0,
+      "scalars": 7680
+    }
+  ]
+}

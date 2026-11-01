@@ -14,7 +14,7 @@ int main(int argc,char**argv){
   s->bsConfig.arbitraryTree=1;s->bsConfig.numOttBoxesAT=boxes;
   for(int c=0;c<s->numOutputChannels;c++){int n=word(in);for(int i=0;i<n;i++)s->bsConfig.bsOttBoxPresentAT[c][i]=word(in);}
   for(int c=0;c<s->numOutputChannelsAT;c++)s->bsConfig.bsOutputChannelPosAT[c]=word(in);
-  for(int b=0;b<boxes;b++)s->bsConfig.bsOttBandsAT[b]=s->numParameterBands;
+  for(int b=0;b<boxes;b++)s->bsConfig.bsOttBandsAT[b]=word(in);
   for(int q=0;q<s->hybridBands;q++)s->kernels[q][0]=word(in);
   s->surroundGain=sample(in);s->lfeGain=sample(in);
   for(int c=0;c<MAX_OUTPUT_CHANNELS_AT;c++)for(int b=0;b<MAX_PARAMETER_BANDS;b++)s->prevGainAT[c][b]=1.0f;

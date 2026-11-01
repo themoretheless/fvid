@@ -1,0 +1,90 @@
+{
+  "probe_sha256": "905e808beeee570284f27795437d17f192f31dbdec520a451757552520e29038",
+  "scope": "Covered partial grids on actual default macOS output; PCM and direct shared LD-SBR32 representatives,3/7/9 source channels. Full/two seeks/rewind drains, not listening or physical multichannel certification.",
+  "cases": [
+    {
+      "name": "tree7-bands12-covered11",
+      "container": "mp4",
+      "exit_code": 0,
+      "stdout": "platform_device=started source_channels=3 rate=24000 duration=0.032000\nphase=full generation=0 from=0.000000 position=0.032000 wall=0.060151 device_drain=complete\nphase=seek-quarter generation=1 from=0.008000 position=0.032000 wall=0.046469 device_drain=complete\nphase=seek-60-percent generation=2 from=0.019200 position=0.032000 wall=0.037013 device_drain=complete\nphase=rewind generation=3 from=0.000000 position=0.032000 wall=0.061689 device_drain=complete\n",
+      "stderr": ""
+    },
+    {
+      "name": "tree7-bands12-covered11",
+      "container": "mkv",
+      "exit_code": 0,
+      "stdout": "platform_device=started source_channels=3 rate=24000 duration=0.032000\nphase=full generation=0 from=0.000000 position=0.032000 wall=0.049528 device_drain=complete\nphase=seek-quarter generation=1 from=0.008000 position=0.032000 wall=0.044347 device_drain=complete\nphase=seek-60-percent generation=2 from=0.019200 position=0.031992 wall=0.035913 device_drain=complete\nphase=rewind generation=3 from=0.000000 position=0.032000 wall=0.048829 device_drain=complete\n",
+      "stderr": ""
+    },
+    {
+      "name": "tree0-bands15-covered14",
+      "container": "mp4",
+      "exit_code": 0,
+      "stdout": "platform_device=started source_channels=7 rate=24000 duration=0.032000\nphase=full generation=0 from=0.000000 position=0.032000 wall=0.056797 device_drain=complete\nphase=seek-quarter generation=1 from=0.008000 position=0.032000 wall=0.046715 device_drain=complete\nphase=seek-60-percent generation=2 from=0.019200 position=0.032000 wall=0.062082 device_drain=complete\nphase=rewind generation=3 from=0.000000 position=0.032000 wall=0.052748 device_drain=complete\n",
+      "stderr": ""
+    },
+    {
+      "name": "tree0-bands15-covered14",
+      "container": "mkv",
+      "exit_code": 0,
+      "stdout": "platform_device=started source_channels=7 rate=24000 duration=0.032000\nphase=full generation=0 from=0.000000 position=0.032000 wall=0.062657 device_drain=complete\nphase=seek-quarter generation=1 from=0.008000 position=0.032000 wall=0.052675 device_drain=complete\nphase=seek-60-percent generation=2 from=0.019200 position=0.031992 wall=0.043527 device_drain=complete\nphase=rewind generation=3 from=0.000000 position=0.032000 wall=0.058503 device_drain=complete\n",
+      "stderr": ""
+    },
+    {
+      "name": "tree5-bands23-covered20",
+      "container": "mp4",
+      "exit_code": 0,
+      "stdout": "platform_device=started source_channels=9 rate=24000 duration=0.032000\nphase=full generation=0 from=0.000000 position=0.032000 wall=0.056315 device_drain=complete\nphase=seek-quarter generation=1 from=0.008000 position=0.032000 wall=0.067049 device_drain=complete\nphase=seek-60-percent generation=2 from=0.019200 position=0.032000 wall=0.047671 device_drain=complete\nphase=rewind generation=3 from=0.000000 position=0.032000 wall=0.056178 device_drain=complete\n",
+      "stderr": ""
+    },
+    {
+      "name": "tree5-bands23-covered20",
+      "container": "mkv",
+      "exit_code": 0,
+      "stdout": "platform_device=started source_channels=9 rate=24000 duration=0.032000\nphase=full generation=0 from=0.000000 position=0.032000 wall=0.053449 device_drain=complete\nphase=seek-quarter generation=1 from=0.008000 position=0.032000 wall=0.047490 device_drain=complete\nphase=seek-60-percent generation=2 from=0.019200 position=0.031992 wall=0.040358 device_drain=complete\nphase=rewind generation=3 from=0.000000 position=0.032000 wall=0.053863 device_drain=complete\n",
+      "stderr": ""
+    },
+    {
+      "name": "shared32-tree6-bands23-covered21",
+      "container": "mp4",
+      "exit_code": 0,
+      "stdout": "platform_device=started source_channels=9 rate=24000 duration=0.064000\nphase=full generation=0 from=0.000000 position=0.064000 wall=0.093386 device_drain=complete\nphase=seek-quarter generation=1 from=0.016000 position=0.064000 wall=0.080806 device_drain=complete\nphase=seek-60-percent generation=2 from=0.038400 position=0.064000 wall=0.055874 device_drain=complete\nphase=rewind generation=3 from=0.000000 position=0.064000 wall=0.085161 device_drain=complete\n",
+      "stderr": ""
+    },
+    {
+      "name": "shared32-tree6-bands23-covered21",
+      "container": "mkv",
+      "exit_code": 0,
+      "stdout": "platform_device=started source_channels=9 rate=24000 duration=0.064000\nphase=full generation=0 from=0.000000 position=0.064000 wall=0.094794 device_drain=complete\nphase=seek-quarter generation=1 from=0.016000 position=0.064000 wall=0.076498 device_drain=complete\nphase=seek-60-percent generation=2 from=0.038400 position=0.063983 wall=0.054745 device_drain=complete\nphase=rewind generation=3 from=0.000000 position=0.064000 wall=0.089736 device_drain=complete\n",
+      "stderr": ""
+    },
+    {
+      "name": "shared32-tree3-bands23-covered22",
+      "container": "mp4",
+      "exit_code": 0,
+      "stdout": "platform_device=started source_channels=9 rate=24000 duration=0.064000\nphase=full generation=0 from=0.000000 position=0.064000 wall=0.096615 device_drain=complete\nphase=seek-quarter generation=1 from=0.016000 position=0.064000 wall=0.076596 device_drain=complete\nphase=seek-60-percent generation=2 from=0.038400 position=0.064000 wall=0.052837 device_drain=complete\nphase=rewind generation=3 from=0.000000 position=0.064000 wall=0.093665 device_drain=complete\n",
+      "stderr": ""
+    },
+    {
+      "name": "shared32-tree3-bands23-covered22",
+      "container": "mkv",
+      "exit_code": 0,
+      "stdout": "platform_device=started source_channels=9 rate=24000 duration=0.064000\nphase=full generation=0 from=0.000000 position=0.064000 wall=0.131520 device_drain=complete\nphase=seek-quarter generation=1 from=0.016000 position=0.064000 wall=0.080864 device_drain=complete\nphase=seek-60-percent generation=2 from=0.038400 position=0.063983 wall=0.055199 device_drain=complete\nphase=rewind generation=3 from=0.000000 position=0.064000 wall=0.096764 device_drain=complete\n",
+      "stderr": ""
+    },
+    {
+      "name": "shared32-tree2-bands12-covered11",
+      "container": "mp4",
+      "exit_code": 0,
+      "stdout": "platform_device=started source_channels=7 rate=24000 duration=0.064000\nphase=full generation=0 from=0.000000 position=0.064000 wall=0.083617 device_drain=complete\nphase=seek-quarter generation=1 from=0.016000 position=0.064000 wall=0.075911 device_drain=complete\nphase=seek-60-percent generation=2 from=0.038400 position=0.064000 wall=0.055973 device_drain=complete\nphase=rewind generation=3 from=0.000000 position=0.064000 wall=0.084007 device_drain=complete\n",
+      "stderr": ""
+    },
+    {
+      "name": "shared32-tree2-bands12-covered11",
+      "container": "mkv",
+      "exit_code": 0,
+      "stdout": "platform_device=started source_channels=7 rate=24000 duration=0.064000\nphase=full generation=0 from=0.000000 position=0.064000 wall=0.089217 device_drain=complete\nphase=seek-quarter generation=1 from=0.016000 position=0.064000 wall=0.080843 device_drain=complete\nphase=seek-60-percent generation=2 from=0.038400 position=0.063983 wall=0.046727 device_drain=complete\nphase=rewind generation=3 from=0.000000 position=0.064000 wall=0.081861 device_drain=complete\n",
+      "stderr": ""
+    }
+  ]
+}
