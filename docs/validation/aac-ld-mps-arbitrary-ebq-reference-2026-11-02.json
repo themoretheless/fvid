@@ -1,0 +1,37 @@
+{
+  "scope": "Source API audit, not normative EBQ semantics or intended playback acceptance",
+  "archive_sha256": "b6b27e2f9af6ee8f950af8d7074afc467e66d93372328c0ec55282fff71d1f83",
+  "original_sac_bitdec_sha256": "d9a8655b4e5efa1329d629f88bde962b640efe9d1a5c22f24f84df56eadfa64e",
+  "source_changes": [],
+  "harness_sha256": "b0c9d21cfcdc220007d578f3093857f0f71db62c07a4d36afb7129f75d48e3d4",
+  "compiler": "Apple clang version 21.0.0 (clang-2100.3.34.2)\nTarget: arm64-apple-darwin25.6.0\nThread model: posix\nInstalledDir: /Library/Developer/CommandLineTools/usr/bin\n",
+  "flags": [
+    "-O1",
+    "-DLD_MPS",
+    "-UNDEBUG",
+    "-ffunction-sections",
+    "-fdata-sections",
+    "-Wl,-dead_strip"
+  ],
+  "cases": [
+    {
+      "mode": 0,
+      "exit_code": 0,
+      "stdout": "quant=0 default_cld=150\n",
+      "stderr": ""
+    },
+    {
+      "mode": 1,
+      "exit_code": -6,
+      "stdout": "",
+      "stderr": "Assertion failed: (ottVsTotDbIn), function mapIndexData, file arbitrary-ebq-source.c, line 1850.\n"
+    },
+    {
+      "mode": 2,
+      "exit_code": -6,
+      "stdout": "",
+      "stderr": "Assertion failed: (ottVsTotDbIn), function mapIndexData, file arbitrary-ebq-source.c, line 1850.\n"
+    }
+  ],
+  "conclusion": "The unchanged original arbitrary-tree caller passes NULL energy arrays to nonzero-quant CLD mapping; assertions fail before output. Quant-zero control returns. No normative replacement energy propagation is inferred."
+}
