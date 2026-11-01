@@ -214,13 +214,19 @@ impl Decoder {
         let frames = frame::Decoder::new(config)?;
         // The reference qualifies EBQ on the two 1->5.1 trees. The 2->5.1
         // predictive TTT path does not apply EBQ to OTTs; other nonzero-quant
-        // combinations need their normative semantics before renderer use.
+        // combinations need their normative semantics before renderer use. Empty
+        // TTT regions select no parameters and must not restrict active modes.
         let qualified_tree = config.tree.code <= 1
             || config.tree.code == 2
-                && config
-                    .ttt
-                    .iter()
-                    .all(|t| t.low_mode < 2 && t.high.is_none_or(|(m, _)| m < 2));
+                && config.ttt.iter().all(|t| {
+                    (0..config.parameter_bands).all(|band| {
+                        let mode = match t.high {
+                            Some((mode, split)) if band >= split => mode,
+                            _ => t.low_mode,
+                        };
+                        mode < 2
+                    })
+                });
         let active_arbitrary = config.extensions.iter().any(|e| matches!(&e.value, ExtensionValue::ArbitraryTree { ott, .. } if ott.iter().any(|o| o.bands != 0)));
         if config.quantization_mode != 0 && (!qualified_tree || active_arbitrary) {
             return Err(unsupported(
