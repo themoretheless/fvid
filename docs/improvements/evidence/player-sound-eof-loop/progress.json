@@ -1,9 +1,11 @@
 {
-  "status": "qualified;pending delivery",
+  "status": "delivered",
   "accepted_count": 468,
   "next_id": "FVID-0469",
   "accepted_ids": [
     "FVID-0468"
   ],
-  "active_session": null
+  "active_session": null,
+  "source_commit": "e5957a6787c39b7e4159ba23c3a308fdf1baa77e",
+  "temporary_artifacts_removed": true
 }
