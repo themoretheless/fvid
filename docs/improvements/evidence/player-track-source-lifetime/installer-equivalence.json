@@ -1,0 +1,7 @@
+{
+  "status": "metadata and worker installation body unchanged",
+  "body_sha256": "7edebc375bca629ea73b0e67952b4622e73050de8ed55cc5689afa95b3458aee",
+  "private_extraction_count_delta": 0,
+  "public_api_changed": false,
+  "ordering": "Admit reader first;capture latest transport phase;stop/join old device;install selected metadata and create new output."
+}

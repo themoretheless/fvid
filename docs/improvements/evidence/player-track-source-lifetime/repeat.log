@@ -1,0 +1,279 @@
+run 1
+
+running 8 tests
+test player::track_source_lifetime_regressions::missing_source_without_live_descriptor_refuses_without_creating_device ... ok
+test player::track_source_lifetime_regressions::moved_audio_only_source_switches_backward_without_losing_sound ... ok
+test player::track_source_lifetime_regressions::moved_audio_only_source_switches_forward_without_losing_sound ... ok
+test player::track_source_lifetime_regressions::exact_mp4_video_and_both_audio_versions_native_controls ... ok
+test player::track_source_lifetime_regressions::moved_paused_source_remains_paused_and_resumes_the_selected_track ... ok
+test player::track_source_lifetime_regressions::refused_readmission_preserves_a_valid_memory_backed_native_worker ... ok
+test player::track_source_lifetime_regressions::normal_switch_stops_the_old_device_before_constructing_the_new_one_control ... ok
+test player::track_source_lifetime_regressions::replaced_path_does_not_silently_switch_to_another_media_inode ... ok
+
+test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 1198 filtered out; finished in 0.09s
+
+run 2
+
+running 8 tests
+test player::track_source_lifetime_regressions::missing_source_without_live_descriptor_refuses_without_creating_device ... ok
+test player::track_source_lifetime_regressions::moved_audio_only_source_switches_backward_without_losing_sound ... ok
+test player::track_source_lifetime_regressions::moved_audio_only_source_switches_forward_without_losing_sound ... ok
+test player::track_source_lifetime_regressions::moved_paused_source_remains_paused_and_resumes_the_selected_track ... ok
+test player::track_source_lifetime_regressions::exact_mp4_video_and_both_audio_versions_native_controls ... ok
+test player::track_source_lifetime_regressions::normal_switch_stops_the_old_device_before_constructing_the_new_one_control ... ok
+test player::track_source_lifetime_regressions::refused_readmission_preserves_a_valid_memory_backed_native_worker ... ok
+test player::track_source_lifetime_regressions::replaced_path_does_not_silently_switch_to_another_media_inode ... ok
+
+test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 1198 filtered out; finished in 0.06s
+
+run 3
+
+running 8 tests
+test player::track_source_lifetime_regressions::missing_source_without_live_descriptor_refuses_without_creating_device ... ok
+test player::track_source_lifetime_regressions::moved_audio_only_source_switches_backward_without_losing_sound ... ok
+test player::track_source_lifetime_regressions::moved_audio_only_source_switches_forward_without_losing_sound ... ok
+test player::track_source_lifetime_regressions::moved_paused_source_remains_paused_and_resumes_the_selected_track ... ok
+test player::track_source_lifetime_regressions::exact_mp4_video_and_both_audio_versions_native_controls ... ok
+test player::track_source_lifetime_regressions::normal_switch_stops_the_old_device_before_constructing_the_new_one_control ... ok
+test player::track_source_lifetime_regressions::refused_readmission_preserves_a_valid_memory_backed_native_worker ... ok
+test player::track_source_lifetime_regressions::replaced_path_does_not_silently_switch_to_another_media_inode ... ok
+
+test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 1198 filtered out; finished in 0.06s
+
+run 4
+
+running 8 tests
+test player::track_source_lifetime_regressions::missing_source_without_live_descriptor_refuses_without_creating_device ... ok
+test player::track_source_lifetime_regressions::moved_audio_only_source_switches_backward_without_losing_sound ... ok
+test player::track_source_lifetime_regressions::moved_audio_only_source_switches_forward_without_losing_sound ... ok
+test player::track_source_lifetime_regressions::moved_paused_source_remains_paused_and_resumes_the_selected_track ... ok
+test player::track_source_lifetime_regressions::exact_mp4_video_and_both_audio_versions_native_controls ... ok
+test player::track_source_lifetime_regressions::normal_switch_stops_the_old_device_before_constructing_the_new_one_control ... ok
+test player::track_source_lifetime_regressions::refused_readmission_preserves_a_valid_memory_backed_native_worker ... ok
+test player::track_source_lifetime_regressions::replaced_path_does_not_silently_switch_to_another_media_inode ... ok
+
+test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 1198 filtered out; finished in 0.06s
+
+run 5
+
+running 8 tests
+test player::track_source_lifetime_regressions::missing_source_without_live_descriptor_refuses_without_creating_device ... ok
+test player::track_source_lifetime_regressions::moved_audio_only_source_switches_backward_without_losing_sound ... ok
+test player::track_source_lifetime_regressions::moved_audio_only_source_switches_forward_without_losing_sound ... ok
+test player::track_source_lifetime_regressions::moved_paused_source_remains_paused_and_resumes_the_selected_track ... ok
+test player::track_source_lifetime_regressions::exact_mp4_video_and_both_audio_versions_native_controls ... ok
+test player::track_source_lifetime_regressions::normal_switch_stops_the_old_device_before_constructing_the_new_one_control ... ok
+test player::track_source_lifetime_regressions::refused_readmission_preserves_a_valid_memory_backed_native_worker ... ok
+test player::track_source_lifetime_regressions::replaced_path_does_not_silently_switch_to_another_media_inode ... ok
+
+test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 1198 filtered out; finished in 0.06s
+
+run 6
+
+running 8 tests
+test player::track_source_lifetime_regressions::missing_source_without_live_descriptor_refuses_without_creating_device ... ok
+test player::track_source_lifetime_regressions::moved_audio_only_source_switches_backward_without_losing_sound ... ok
+test player::track_source_lifetime_regressions::moved_audio_only_source_switches_forward_without_losing_sound ... ok
+test player::track_source_lifetime_regressions::moved_paused_source_remains_paused_and_resumes_the_selected_track ... ok
+test player::track_source_lifetime_regressions::exact_mp4_video_and_both_audio_versions_native_controls ... ok
+test player::track_source_lifetime_regressions::normal_switch_stops_the_old_device_before_constructing_the_new_one_control ... ok
+test player::track_source_lifetime_regressions::refused_readmission_preserves_a_valid_memory_backed_native_worker ... ok
+test player::track_source_lifetime_regressions::replaced_path_does_not_silently_switch_to_another_media_inode ... ok
+
+test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 1198 filtered out; finished in 0.06s
+
+run 7
+
+running 8 tests
+test player::track_source_lifetime_regressions::missing_source_without_live_descriptor_refuses_without_creating_device ... ok
+test player::track_source_lifetime_regressions::moved_audio_only_source_switches_backward_without_losing_sound ... ok
+test player::track_source_lifetime_regressions::moved_audio_only_source_switches_forward_without_losing_sound ... ok
+test player::track_source_lifetime_regressions::moved_paused_source_remains_paused_and_resumes_the_selected_track ... ok
+test player::track_source_lifetime_regressions::exact_mp4_video_and_both_audio_versions_native_controls ... ok
+test player::track_source_lifetime_regressions::normal_switch_stops_the_old_device_before_constructing_the_new_one_control ... ok
+test player::track_source_lifetime_regressions::refused_readmission_preserves_a_valid_memory_backed_native_worker ... ok
+test player::track_source_lifetime_regressions::replaced_path_does_not_silently_switch_to_another_media_inode ... ok
+
+test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 1198 filtered out; finished in 0.06s
+
+run 8
+
+running 8 tests
+test player::track_source_lifetime_regressions::missing_source_without_live_descriptor_refuses_without_creating_device ... ok
+test player::track_source_lifetime_regressions::moved_audio_only_source_switches_backward_without_losing_sound ... ok
+test player::track_source_lifetime_regressions::moved_audio_only_source_switches_forward_without_losing_sound ... ok
+test player::track_source_lifetime_regressions::moved_paused_source_remains_paused_and_resumes_the_selected_track ... ok
+test player::track_source_lifetime_regressions::exact_mp4_video_and_both_audio_versions_native_controls ... ok
+test player::track_source_lifetime_regressions::refused_readmission_preserves_a_valid_memory_backed_native_worker ... ok
+test player::track_source_lifetime_regressions::normal_switch_stops_the_old_device_before_constructing_the_new_one_control ... ok
+test player::track_source_lifetime_regressions::replaced_path_does_not_silently_switch_to_another_media_inode ... ok
+
+test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 1198 filtered out; finished in 0.06s
+
+run 9
+
+running 8 tests
+test player::track_source_lifetime_regressions::missing_source_without_live_descriptor_refuses_without_creating_device ... ok
+test player::track_source_lifetime_regressions::moved_audio_only_source_switches_backward_without_losing_sound ... ok
+test player::track_source_lifetime_regressions::moved_audio_only_source_switches_forward_without_losing_sound ... ok
+test player::track_source_lifetime_regressions::moved_paused_source_remains_paused_and_resumes_the_selected_track ... ok
+test player::track_source_lifetime_regressions::exact_mp4_video_and_both_audio_versions_native_controls ... ok
+test player::track_source_lifetime_regressions::normal_switch_stops_the_old_device_before_constructing_the_new_one_control ... ok
+test player::track_source_lifetime_regressions::refused_readmission_preserves_a_valid_memory_backed_native_worker ... ok
+test player::track_source_lifetime_regressions::replaced_path_does_not_silently_switch_to_another_media_inode ... ok
+
+test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 1198 filtered out; finished in 0.06s
+
+run 10
+
+running 8 tests
+test player::track_source_lifetime_regressions::missing_source_without_live_descriptor_refuses_without_creating_device ... ok
+test player::track_source_lifetime_regressions::moved_audio_only_source_switches_backward_without_losing_sound ... ok
+test player::track_source_lifetime_regressions::moved_audio_only_source_switches_forward_without_losing_sound ... ok
+test player::track_source_lifetime_regressions::moved_paused_source_remains_paused_and_resumes_the_selected_track ... ok
+test player::track_source_lifetime_regressions::exact_mp4_video_and_both_audio_versions_native_controls ... ok
+test player::track_source_lifetime_regressions::normal_switch_stops_the_old_device_before_constructing_the_new_one_control ... ok
+test player::track_source_lifetime_regressions::refused_readmission_preserves_a_valid_memory_backed_native_worker ... ok
+test player::track_source_lifetime_regressions::replaced_path_does_not_silently_switch_to_another_media_inode ... ok
+
+test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 1198 filtered out; finished in 0.06s
+
+run 11
+
+running 8 tests
+test player::track_source_lifetime_regressions::missing_source_without_live_descriptor_refuses_without_creating_device ... ok
+test player::track_source_lifetime_regressions::moved_audio_only_source_switches_backward_without_losing_sound ... ok
+test player::track_source_lifetime_regressions::moved_audio_only_source_switches_forward_without_losing_sound ... ok
+test player::track_source_lifetime_regressions::moved_paused_source_remains_paused_and_resumes_the_selected_track ... ok
+test player::track_source_lifetime_regressions::exact_mp4_video_and_both_audio_versions_native_controls ... ok
+test player::track_source_lifetime_regressions::normal_switch_stops_the_old_device_before_constructing_the_new_one_control ... ok
+test player::track_source_lifetime_regressions::refused_readmission_preserves_a_valid_memory_backed_native_worker ... ok
+test player::track_source_lifetime_regressions::replaced_path_does_not_silently_switch_to_another_media_inode ... ok
+
+test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 1198 filtered out; finished in 0.06s
+
+run 12
+
+running 8 tests
+test player::track_source_lifetime_regressions::missing_source_without_live_descriptor_refuses_without_creating_device ... ok
+test player::track_source_lifetime_regressions::moved_audio_only_source_switches_backward_without_losing_sound ... ok
+test player::track_source_lifetime_regressions::moved_audio_only_source_switches_forward_without_losing_sound ... ok
+test player::track_source_lifetime_regressions::moved_paused_source_remains_paused_and_resumes_the_selected_track ... ok
+test player::track_source_lifetime_regressions::exact_mp4_video_and_both_audio_versions_native_controls ... ok
+test player::track_source_lifetime_regressions::refused_readmission_preserves_a_valid_memory_backed_native_worker ... ok
+test player::track_source_lifetime_regressions::normal_switch_stops_the_old_device_before_constructing_the_new_one_control ... ok
+test player::track_source_lifetime_regressions::replaced_path_does_not_silently_switch_to_another_media_inode ... ok
+
+test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 1198 filtered out; finished in 0.06s
+
+run 13
+
+running 8 tests
+test player::track_source_lifetime_regressions::missing_source_without_live_descriptor_refuses_without_creating_device ... ok
+test player::track_source_lifetime_regressions::moved_audio_only_source_switches_backward_without_losing_sound ... ok
+test player::track_source_lifetime_regressions::moved_audio_only_source_switches_forward_without_losing_sound ... ok
+test player::track_source_lifetime_regressions::moved_paused_source_remains_paused_and_resumes_the_selected_track ... ok
+test player::track_source_lifetime_regressions::exact_mp4_video_and_both_audio_versions_native_controls ... ok
+test player::track_source_lifetime_regressions::normal_switch_stops_the_old_device_before_constructing_the_new_one_control ... ok
+test player::track_source_lifetime_regressions::refused_readmission_preserves_a_valid_memory_backed_native_worker ... ok
+test player::track_source_lifetime_regressions::replaced_path_does_not_silently_switch_to_another_media_inode ... ok
+
+test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 1198 filtered out; finished in 0.06s
+
+run 14
+
+running 8 tests
+test player::track_source_lifetime_regressions::missing_source_without_live_descriptor_refuses_without_creating_device ... ok
+test player::track_source_lifetime_regressions::moved_audio_only_source_switches_backward_without_losing_sound ... ok
+test player::track_source_lifetime_regressions::moved_audio_only_source_switches_forward_without_losing_sound ... ok
+test player::track_source_lifetime_regressions::moved_paused_source_remains_paused_and_resumes_the_selected_track ... ok
+test player::track_source_lifetime_regressions::exact_mp4_video_and_both_audio_versions_native_controls ... ok
+test player::track_source_lifetime_regressions::refused_readmission_preserves_a_valid_memory_backed_native_worker ... ok
+test player::track_source_lifetime_regressions::normal_switch_stops_the_old_device_before_constructing_the_new_one_control ... ok
+test player::track_source_lifetime_regressions::replaced_path_does_not_silently_switch_to_another_media_inode ... ok
+
+test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 1198 filtered out; finished in 0.06s
+
+run 15
+
+running 8 tests
+test player::track_source_lifetime_regressions::missing_source_without_live_descriptor_refuses_without_creating_device ... ok
+test player::track_source_lifetime_regressions::moved_audio_only_source_switches_backward_without_losing_sound ... ok
+test player::track_source_lifetime_regressions::moved_audio_only_source_switches_forward_without_losing_sound ... ok
+test player::track_source_lifetime_regressions::moved_paused_source_remains_paused_and_resumes_the_selected_track ... ok
+test player::track_source_lifetime_regressions::exact_mp4_video_and_both_audio_versions_native_controls ... ok
+test player::track_source_lifetime_regressions::normal_switch_stops_the_old_device_before_constructing_the_new_one_control ... ok
+test player::track_source_lifetime_regressions::refused_readmission_preserves_a_valid_memory_backed_native_worker ... ok
+test player::track_source_lifetime_regressions::replaced_path_does_not_silently_switch_to_another_media_inode ... ok
+
+test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 1198 filtered out; finished in 0.06s
+
+run 16
+
+running 8 tests
+test player::track_source_lifetime_regressions::missing_source_without_live_descriptor_refuses_without_creating_device ... ok
+test player::track_source_lifetime_regressions::moved_audio_only_source_switches_backward_without_losing_sound ... ok
+test player::track_source_lifetime_regressions::moved_audio_only_source_switches_forward_without_losing_sound ... ok
+test player::track_source_lifetime_regressions::moved_paused_source_remains_paused_and_resumes_the_selected_track ... ok
+test player::track_source_lifetime_regressions::exact_mp4_video_and_both_audio_versions_native_controls ... ok
+test player::track_source_lifetime_regressions::normal_switch_stops_the_old_device_before_constructing_the_new_one_control ... ok
+test player::track_source_lifetime_regressions::refused_readmission_preserves_a_valid_memory_backed_native_worker ... ok
+test player::track_source_lifetime_regressions::replaced_path_does_not_silently_switch_to_another_media_inode ... ok
+
+test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 1198 filtered out; finished in 0.06s
+
+run 17
+
+running 8 tests
+test player::track_source_lifetime_regressions::missing_source_without_live_descriptor_refuses_without_creating_device ... ok
+test player::track_source_lifetime_regressions::moved_audio_only_source_switches_backward_without_losing_sound ... ok
+test player::track_source_lifetime_regressions::moved_audio_only_source_switches_forward_without_losing_sound ... ok
+test player::track_source_lifetime_regressions::moved_paused_source_remains_paused_and_resumes_the_selected_track ... ok
+test player::track_source_lifetime_regressions::exact_mp4_video_and_both_audio_versions_native_controls ... ok
+test player::track_source_lifetime_regressions::normal_switch_stops_the_old_device_before_constructing_the_new_one_control ... ok
+test player::track_source_lifetime_regressions::refused_readmission_preserves_a_valid_memory_backed_native_worker ... ok
+test player::track_source_lifetime_regressions::replaced_path_does_not_silently_switch_to_another_media_inode ... ok
+
+test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 1198 filtered out; finished in 0.06s
+
+run 18
+
+running 8 tests
+test player::track_source_lifetime_regressions::missing_source_without_live_descriptor_refuses_without_creating_device ... ok
+test player::track_source_lifetime_regressions::moved_audio_only_source_switches_backward_without_losing_sound ... ok
+test player::track_source_lifetime_regressions::moved_audio_only_source_switches_forward_without_losing_sound ... ok
+test player::track_source_lifetime_regressions::moved_paused_source_remains_paused_and_resumes_the_selected_track ... ok
+test player::track_source_lifetime_regressions::exact_mp4_video_and_both_audio_versions_native_controls ... ok
+test player::track_source_lifetime_regressions::normal_switch_stops_the_old_device_before_constructing_the_new_one_control ... ok
+test player::track_source_lifetime_regressions::refused_readmission_preserves_a_valid_memory_backed_native_worker ... ok
+test player::track_source_lifetime_regressions::replaced_path_does_not_silently_switch_to_another_media_inode ... ok
+
+test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 1198 filtered out; finished in 0.06s
+
+run 19
+
+running 8 tests
+test player::track_source_lifetime_regressions::missing_source_without_live_descriptor_refuses_without_creating_device ... ok
+test player::track_source_lifetime_regressions::moved_audio_only_source_switches_backward_without_losing_sound ... ok
+test player::track_source_lifetime_regressions::moved_audio_only_source_switches_forward_without_losing_sound ... ok
+test player::track_source_lifetime_regressions::moved_paused_source_remains_paused_and_resumes_the_selected_track ... ok
+test player::track_source_lifetime_regressions::exact_mp4_video_and_both_audio_versions_native_controls ... ok
+test player::track_source_lifetime_regressions::normal_switch_stops_the_old_device_before_constructing_the_new_one_control ... ok
+test player::track_source_lifetime_regressions::refused_readmission_preserves_a_valid_memory_backed_native_worker ... ok
+test player::track_source_lifetime_regressions::replaced_path_does_not_silently_switch_to_another_media_inode ... ok
+
+test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 1198 filtered out; finished in 0.06s
+
+run 20
+
+running 8 tests
+test player::track_source_lifetime_regressions::missing_source_without_live_descriptor_refuses_without_creating_device ... ok
+test player::track_source_lifetime_regressions::moved_audio_only_source_switches_backward_without_losing_sound ... ok
+test player::track_source_lifetime_regressions::moved_audio_only_source_switches_forward_without_losing_sound ... ok
+test player::track_source_lifetime_regressions::exact_mp4_video_and_both_audio_versions_native_controls ... ok
+test player::track_source_lifetime_regressions::moved_paused_source_remains_paused_and_resumes_the_selected_track ... ok
+test player::track_source_lifetime_regressions::normal_switch_stops_the_old_device_before_constructing_the_new_one_control ... ok
+test player::track_source_lifetime_regressions::refused_readmission_preserves_a_valid_memory_backed_native_worker ... ok
+test player::track_source_lifetime_regressions::replaced_path_does_not_silently_switch_to_another_media_inode ... ok
+
+test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 1198 filtered out; finished in 0.07s

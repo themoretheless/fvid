@@ -1,0 +1,5 @@
+{
+  "src/player.rs": "7113fc3cf38ec0ac0071f10afab88658e7b5ec1443ce9e2c8b1db3b4cd5e2145",
+  "src/player_track_source_lifetime_tests.rs": "328928d7bad805e92bd788b44004db2c2c34bdeb4129e8f5c0740270741c9303",
+  "scripts/generate_player_track_source_lifetime.py": "3b7b255782aff428a5da55335cefe45e3683bdc00da64f38482ac0b36a5b4c96"
+}

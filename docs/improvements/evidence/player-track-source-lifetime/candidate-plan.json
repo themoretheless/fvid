@@ -1,0 +1,7 @@
+{
+  "production_change": "Acquire a native reader before dropping the current source owner;capture latest phase after admission;stop old output before constructing new output.",
+  "public_interfaces_changed": false,
+  "performance_claim": false,
+  "installer_body_equivalence": "installer-equivalence.json",
+  "patch_sha256": "b712fba9929ac2320f896a18406a62e45c96b30b798446694c5fd54e0cfb73ee"
+}

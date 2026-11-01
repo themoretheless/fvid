@@ -2529,6 +2529,12 @@ impl Player {
         let Some(stream) = stream else {
             return false;
         };
+        self.start_audio_stream_with_backend(stream, selected, backend);
+        true
+    }
+
+    fn start_audio_stream_with_backend<F>(&mut self, stream: Box<dyn crate::audio::AudioStream>, selected: Option<usize>, backend: F)
+    where F: FnOnce() -> Box<dyn crate::audio::AudioBackend> + Send + 'static {
         // The container lists every track it can hand to a decoder, so the track
         // key knows how far to walk without opening the file again.
         self.audio_tracks = stream.audio_tracks();
@@ -2538,7 +2544,6 @@ impl Player {
         self.sound_codec = sound_codec(stream.codec());
         self.audio_track = selected.unwrap_or_else(||stream.audio_track_index());
         self.audio = Some(crate::audio_thread::AudioPlayback::start_with_dolby_policy(stream, self.dolby_policy, backend));
-        true
     }
 
     /// Start the sound of the item being opened, at the track the command line
@@ -2592,6 +2597,13 @@ impl Player {
             return;
         };
         let nth = track_step(self.audio_track, len, forward);
+        // Acquire the source while its current descriptor/decoder is alive.
+        // Failure leaves the playing item intact; successful admission pins
+        // the same live file even if its pathname moved or was replaced.
+        let Some(stream) = AUDIO_READERS.iter().find_map(|attempt| attempt.open(&path, Some(nth))) else {
+            self.show_osd("Audio track unavailable");
+            return;
+        };
         // Preserve pending/terminal transport intent first. Otherwise keep an
         // active source audio clock unchanged; applying its A/V shift twice
         // would skip or repeat sound. A picture-owned phase needs the inverse
@@ -2607,10 +2619,7 @@ impl Player {
         let playing = !self.paused && !self.ended && !self.buffering && !self.seek_preview;
         // Dropping the old handle stops its thread before the new one starts.
         self.audio = None;
-        if !self.try_start_audio_choice_with_backend(&path, Some(nth), backend) {
-            self.show_osd("Audio track unavailable");
-            return;
-        }
+        self.start_audio_stream_with_backend(stream, Some(nth), backend);
         self.audio_ended = false;
         if let (Some(at), Some(audio)) = (at, &mut self.audio) {
             audio.seek(at);
@@ -13238,3 +13247,7 @@ mod track_clock_regressions;
 #[cfg(test)]
 #[path = "player_track_preroll_tests.rs"]
 mod track_preroll_regressions;
+
+#[cfg(test)]
+#[path = "player_track_source_lifetime_tests.rs"]
+mod track_source_lifetime_regressions;

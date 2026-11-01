@@ -1,0 +1,141 @@
+//! Admit the replacement source before releasing the live file/decoder.
+use super::*;
+use std::{
+    io::Cursor,
+    sync::{
+        Arc, Mutex,
+        atomic::{AtomicBool, AtomicU64, Ordering},
+    },
+};
+fn root() -> PathBuf {
+    PathBuf::from(env!("CARGO_MANIFEST_DIR"))
+        .join("tests/fixtures/playback-errors/player-track-source-lifetime")
+}
+fn bytes(n: &str) -> Vec<u8> {
+    std::fs::read(root().join(n)).unwrap()
+}
+fn tick(p: &mut Player, ctx: &egui::Context) {
+    let mut out = ctx.run_ui(Default::default(), |ui| p.present(ui.ctx()));
+    out.textures_delta.clear();
+}
+#[derive(Default)]
+struct Trace {
+    pcm: Vec<u8>,
+    flushes: Vec<Duration>,
+    pauses: usize,
+    resumes: usize,
+    drops: usize,
+}
+struct Device {
+    clock: Arc<AtomicU64>,
+    trace: Arc<Mutex<Trace>>,
+    fail: Arc<AtomicBool>,
+    running: bool,
+    anchor: Duration,
+    frontier: Duration,
+}
+impl crate::audio::AudioBackend for Device {
+    fn start(&mut self, s: crate::audio::AudioSpec) -> Result<(), crate::audio::AudioError> {
+        assert_eq!((s.sample_rate, s.channels), (8000, 1));
+        Ok(())
+    }
+    fn position(&self) -> Duration {
+        if self.running {
+            Duration::from_nanos(self.clock.load(Ordering::SeqCst))
+        } else {
+            self.anchor
+        }
+    }
+    fn push(&mut self, p: crate::audio::AudioPacket) -> Result<(), crate::audio::AudioError> {
+        self.frontier =
+            p.presentation_time() + Duration::from_nanos(p.data.len() as u64 / 4 * 125000);
+        self.trace.lock().unwrap().pcm.extend(p.data);
+        Ok(())
+    }
+    fn flush(&mut self, t: Duration) -> Result<(), crate::audio::AudioError> {
+        self.trace.lock().unwrap().flushes.push(t);
+        self.anchor = t;
+        self.frontier = t; // Flush discards the previous queued output.
+        self.clock.store(t.as_nanos() as u64, Ordering::SeqCst);
+        Ok(())
+    }
+    fn pause(&mut self) -> Result<(), crate::audio::AudioError> {
+        self.anchor = self.position();
+        self.running = false;
+        self.trace.lock().unwrap().pauses += 1;
+        Ok(())
+    }
+    fn resume(&mut self) -> Result<(), crate::audio::AudioError> {
+        self.running = true;
+        self.trace.lock().unwrap().resumes += 1;
+        Ok(())
+    }
+    fn stop(&mut self) -> Result<(), crate::audio::AudioError> {
+        self.running = false;
+        Ok(())
+    }
+    fn drain_status(&self) -> Result<bool, crate::audio::AudioError> {
+        if self.fail.load(Ordering::SeqCst) {
+            Err(crate::audio::AudioError::PlaybackError(
+                "synthetic output drain failure".into(),
+            ))
+        } else {
+            Ok(self.position() >= self.frontier)
+        }
+    }
+}
+
+fn until(mut ready:impl FnMut()->bool){let end=Instant::now()+Duration::from_secs(5);while !ready(){assert!(Instant::now()<end,"native track clock timed out");std::thread::sleep(Duration::from_millis(1));}}
+fn factory(clock:Arc<AtomicU64>,trace:Arc<Mutex<Trace>>)->impl FnOnce()->Box<dyn crate::audio::AudioBackend>+Send+'static{move||Box::new(Device{clock,trace,fail:Arc::new(AtomicBool::new(false)),running:false,anchor:Duration::ZERO,frontier:Duration::ZERO})}
+
+impl Drop for Device{fn drop(&mut self){self.trace.lock().unwrap().drops+=1;}}
+static TEMP_SEQUENCE:AtomicU64=AtomicU64::new(0);
+struct Temp(PathBuf);
+impl Temp{
+    fn new()->Self{let path=std::env::temp_dir().join(format!("fvid-track-source-lifetime-{}-{}",std::process::id(),TEMP_SEQUENCE.fetch_add(1,Ordering::SeqCst)));std::fs::create_dir(&path).unwrap();Self(path)}
+    fn media(&self)->PathBuf{self.0.join("live.mp4")}
+    fn moved(&self)->PathBuf{self.0.join("renamed.mp4")}
+    fn seed(&self){std::fs::write(self.media(),bytes("audio-only.mp4")).unwrap();}
+    fn move_away(&self){std::fs::rename(self.media(),self.moved()).unwrap();assert!(!self.media().exists());}
+}
+impl Drop for Temp{fn drop(&mut self){std::fs::remove_dir_all(&self.0).unwrap();}}
+fn open(temp:&Temp,nth:usize,memory:bool)->(Player,Arc<AtomicU64>,Arc<Mutex<Trace>>){
+    let clock=Arc::new(AtomicU64::new(75_000_000));let trace=Arc::new(Mutex::new(Trace::default()));let mut p=Player{queue:vec![temp.media()],opened:Some(temp.media()),duration:Some(Duration::from_millis(600)),seekable:true,paused:false,..Default::default()};
+    if memory{
+        let source=crate::playback_mp4_audio::Mp4AudioReader::open_at(Cursor::new(bytes("audio-only.mp4")),Default::default(),nth).unwrap();
+        p.audio_tracks=crate::audio::AudioStream::audio_tracks(&source);p.audio_track=nth;p.sound_codec=sound_codec(crate::audio::AudioStream::codec(&source));
+        p.audio=Some(crate::audio_thread::AudioPlayback::start(Box::new(source),factory(clock.clone(),trace.clone())));
+    }else{assert!(p.try_start_audio_choice_with_backend(&temp.media(),Some(nth),factory(clock.clone(),trace.clone())));}
+    p.audio.as_ref().unwrap().play();until(||p.audio.as_ref().unwrap().position()==Duration::from_millis(75));assert_eq!(p.audio_tracks.len(),2);(p,clock,trace)
+}
+fn finish(p:&mut Player,ctx:&egui::Context,clock:&AtomicU64){clock.store(600_000_000,Ordering::SeqCst);until(||{tick(p,ctx);p.ended});assert!(p.audio_ended);assert!(p.error.is_none());}
+fn check_new_pcm(p:&mut Player,ctx:&egui::Context,clock:&AtomicU64,trace:&Mutex<Trace>,nth:usize){until(||p.audio.as_ref().unwrap().position()==Duration::from_millis(75));until(||!trace.lock().unwrap().pcm.is_empty());let actual=trace.lock().unwrap().pcm.clone();let oracle=bytes(&format!("track-{nth}.f32le"));assert_eq!(actual,&oracle[2400..2400+actual.len()]);finish(p,ctx,clock);assert_eq!(trace.lock().unwrap().pcm,&oracle[2400..]);}
+#[test]
+fn exact_mp4_video_and_both_audio_versions_native_controls(){
+    let mut r=crate::playback_mp4::Mp4VideoReader::open_software(Cursor::new(bytes("movie.mp4")),Default::default(),32<<20).unwrap();for i in 0..5{let f=r.read_frame().unwrap().unwrap();assert_eq!((f.sample_index,f.presentation_time.ticks,f.duration.ticks),(i,i as i64*300,300));let yuv:Vec<_>=f.picture.y.iter().chain(&f.picture.cb).chain(&f.picture.cr).flat_map(|v|v.to_le_bytes()).collect();assert_eq!(yuv,bytes(&format!("frame-{}.yuv16",i%3)));}assert!(r.read_frame().unwrap().is_none());
+    for alternate in [false,true]{for nth in 0..2{let source=crate::playback_mp4_audio::Mp4AudioReader::open_at(Cursor::new(bytes(if alternate{"alternate-audio-only.mp4"}else{"audio-only.mp4"})),Default::default(),nth).unwrap();let trace=Arc::new(Mutex::new(Trace::default()));let a=crate::audio_thread::AudioPlayback::start(Box::new(source),factory(Arc::new(AtomicU64::new(600_000_000)),trace.clone()));a.play();until(||matches!(a.poll(),Some(crate::audio_thread::AudioEvent::Ended(_))));assert_eq!(trace.lock().unwrap().pcm,bytes(&format!("{}track-{nth}.f32le",if alternate{"alternate-"}else{""})));assert_eq!(a.duration(),Some(Duration::from_millis(600)));}}
+}
+fn moved(from:usize,forward:bool,paused:bool){
+    let temp=Temp::new();temp.seed();let(mut p,_old_clock,old)=open(&temp,from,false);let ctx=egui::Context::default();if paused{p.toggle_pause();until(||old.lock().unwrap().pauses==1);}temp.move_away();
+    let clock=Arc::new(AtomicU64::new(0));let trace=Arc::new(Mutex::new(Trace::default()));p.cycle_audio_track_with_backend(forward,factory(clock.clone(),trace.clone()));assert!(p.audio.is_some(),"track switch closed the last shared descriptor before opening the moved source");assert_eq!(p.audio_track,1-from);assert_eq!(p.paused,paused);let drops=old.lock().unwrap().drops;assert_eq!(drops,1);
+    until(||p.audio.as_ref().unwrap().position()==Duration::from_millis(75));if paused{assert_eq!(trace.lock().unwrap().resumes,0);assert!(trace.lock().unwrap().pcm.is_empty());p.toggle_pause();}check_new_pcm(&mut p,&ctx,&clock,&trace,1-from);
+}
+#[test]fn moved_audio_only_source_switches_forward_without_losing_sound(){moved(0,true,false);}
+#[test]fn moved_audio_only_source_switches_backward_without_losing_sound(){moved(1,false,false);}
+#[test]fn moved_paused_source_remains_paused_and_resumes_the_selected_track(){moved(0,true,true);}
+#[test]
+fn replaced_path_does_not_silently_switch_to_another_media_inode(){
+    let temp=Temp::new();temp.seed();let(mut p,_old_clock,_old)=open(&temp,0,false);temp.move_away();std::fs::write(temp.media(),bytes("alternate-audio-only.mp4")).unwrap();let ctx=egui::Context::default();let clock=Arc::new(AtomicU64::new(0));let trace=Arc::new(Mutex::new(Trace::default()));p.cycle_audio_track_with_backend(true,factory(clock.clone(),trace.clone()));assert!(p.audio.is_some());assert_eq!(p.audio_track,1);check_new_pcm(&mut p,&ctx,&clock,&trace,1);
+}
+#[test]
+fn missing_source_without_live_descriptor_refuses_without_creating_device(){
+    let temp=Temp::new();let mut p=Player::default();assert!(!p.try_start_audio_choice_with_backend(&temp.media(),Some(1),||panic!("missing source created a device")));assert!(p.audio.is_none());
+}
+#[test]
+fn normal_switch_stops_the_old_device_before_constructing_the_new_one_control(){
+    let temp=Temp::new();temp.seed();let(mut p,_old_clock,old)=open(&temp,0,false);let ctx=egui::Context::default();let clock=Arc::new(AtomicU64::new(0));let trace=Arc::new(Mutex::new(Trace::default()));let expected=old.clone();let(c,t)=(clock.clone(),trace.clone());p.cycle_audio_track_with_backend(true,move||{let drops=expected.lock().unwrap().drops;assert_eq!(drops,1,"new device overlapped a live old device");factory(c,t)()});assert_eq!(p.audio_track,1);check_new_pcm(&mut p,&ctx,&clock,&trace,1);
+}
+#[test]
+fn refused_readmission_preserves_a_valid_memory_backed_native_worker(){
+    let temp=Temp::new();temp.seed();let(mut p,clock,old)=open(&temp,0,true);temp.move_away();p.cycle_audio_track_with_backend(true,||panic!("unavailable source constructed an output"));let drops=old.lock().unwrap().drops;assert!(p.audio.is_some(),"failed source admission discarded a working decoder");assert_eq!(drops,0);assert_eq!(p.audio_track,0);assert_eq!(p.audio.as_ref().unwrap().generation(),0);assert_eq!(p.presentation_clock(),Some(Duration::from_millis(75)));assert_eq!(p.osd.as_ref().unwrap().0,"Audio track unavailable");let ctx=egui::Context::default();finish(&mut p,&ctx,&clock);assert_eq!(old.lock().unwrap().pcm,bytes("track-0.f32le"));
+}

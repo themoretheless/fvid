@@ -1,0 +1,10 @@
+{
+  "initial": {
+    "passed": 2,
+    "failed": 6
+  },
+  "confirmed": "Three moved-path failures and one discarded memory-backed worker.",
+  "excluded": "Two startup timeouts used Default video buffering in an audio-only stand.",
+  "correction": "Set buffering=false,matching open_sound_only;no assertion removed or relaxed.",
+  "count_delta": 0
+}

@@ -1,0 +1,32 @@
+diff --git a/src/player.rs b/src/player.rs
+index 41a4c89426..9783a23a81 100644
+--- a/src/player.rs
++++ b/src/player.rs
+@@ -2531,0 +2532,6 @@ impl Player {
++        self.start_audio_stream_with_backend(stream, selected, backend);
++        true
++    }
++
++    fn start_audio_stream_with_backend<F>(&mut self, stream: Box<dyn crate::audio::AudioStream>, selected: Option<usize>, backend: F)
++    where F: FnOnce() -> Box<dyn crate::audio::AudioBackend> + Send + 'static {
+@@ -2541 +2546,0 @@ impl Player {
+-        true
+@@ -2594,0 +2600,7 @@ impl Player {
++        // Acquire the source while its current descriptor/decoder is alive.
++        // Failure leaves the playing item intact; successful admission pins
++        // the same live file even if its pathname moved or was replaced.
++        let Some(stream) = AUDIO_READERS.iter().find_map(|attempt| attempt.open(&path, Some(nth))) else {
++            self.show_osd("Audio track unavailable");
++            return;
++        };
+@@ -2610,4 +2622 @@ impl Player {
+-        if !self.try_start_audio_choice_with_backend(&path, Some(nth), backend) {
+-            self.show_osd("Audio track unavailable");
+-            return;
+-        }
++        self.start_audio_stream_with_backend(stream, Some(nth), backend);
+@@ -13240,0 +13250,4 @@ mod track_preroll_regressions;
++
++#[cfg(test)]
++#[path = "player_track_source_lifetime_tests.rs"]
++mod track_source_lifetime_regressions;

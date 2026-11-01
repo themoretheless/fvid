@@ -1,0 +1,10 @@
+{
+  "proposed_id": "FVID-0472",
+  "count_delta": 1,
+  "baseline_commit": "ef8dd37db6afafb5e615db7a6ec8f368f02a4958",
+  "older_commit": "9ca4c32089c216f82574c0895da3a0bdbbd76c57",
+  "independent_problem": "Old audio owns live source identity and must survive until replacement reader admission. Existing code closes it before trying to open the selected track.",
+  "historical_order_checked_inside_cycle": true,
+  "independent_of": "FVID-0470 media phase and0471video hold;neither changes source-admission lifetime.",
+  "variants_refusal_controls_and_private_extraction_count_delta": 0
+}

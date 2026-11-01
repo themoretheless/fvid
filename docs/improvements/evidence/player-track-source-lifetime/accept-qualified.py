@@ -1,0 +1,25 @@
+"""Accept only the unchanged fully qualified native audio source lifetime fix."""
+from pathlib import Path
+import hashlib,json,sys
+q=Path(__file__).resolve().parent
+checks=json.loads((q/'qualification-results.json').read_text())
+assert len(checks)==9 and all(v['exit_code']==0 and v['failed']==0 for v in checks.values())
+for v in checks.values():assert hashlib.sha256((q/v['archive']).read_bytes()).hexdigest()==v['archived_sha256']
+for n,h in json.loads((q/'after-source.json').read_text()).items():assert hashlib.sha256(Path(n).read_bytes()).hexdigest()==h,n
+rep=json.loads((q/'repeat.json').read_text());assert len(rep['runs'])==20 and rep['total_case_executions']==160
+assert all(r['exit_code']==0 and r['passed']==8 for r in rep['runs'])
+d=json.loads((q/'deduplication.json').read_text());assert d['distinct_passed']==1623
+assert d['ignored_by_gate']==json.loads((q.parent/'player-track-preroll/deduplication.json').read_text())['ignored_by_gate']
+sys.dont_write_bytecode=True;sys.path.insert(0,'scripts');from generate_player_track_source_lifetime import generate
+for n,b in generate().items():assert (Path('tests/fixtures/playback-errors/player-track-source-lifetime')/n).read_bytes()==b
+before=json.loads((q/'before-source.json').read_text());after=json.loads((q/'after-source.json').read_text())
+t='src/player_track_source_lifetime_tests.rs';assert before[t]==after[t]
+reg=Path('docs/improvements/registry.json');j=json.loads(reg.read_text());assert j['accepted_count']==471 and j['next_id']=='FVID-0472'
+j['entries'].append(dict(id='FVID-0472',batch=472,title='Admit selected audio source before releasing the current live descriptor',source='src/player.rs',regression=t,before='Identical eight-case baseline passes exact native video/both PCM versions,missing-source refusal and exclusive device-order controls,but fails five handoffs. Three moved audio-only paths lose their last live descriptor;failed admission disposes a valid memory-backed decoder;atomic path replacement silently selects alternate-file PCM.',result='Open the selected native reader while current source ownership is alive. Admission failure leaves the working handle intact. After successful admission,capture current transport phase,stop/join old output,and install the pinned reader. Metadata/worker installer body is byte-identical after private extraction. Eight unchanged tests verify moved-source forward/backward/paused playback,original-inode exact PCM despite namespace replacement,old-stream continuation on refusal,exclusive device order and native EOF. Twenty repeats pass160cases;all9gates pass1623physical-source-distinct checks and both builds with five old ignores unchanged. Source transaction does not claim rollback after later asynchronous decoder/device initialization failure. No performance,physical audio or new native-window duration claim.',status='accepted',validation='batch-472-validation.json'))
+j['accepted_count']=472;j['next_id']='FVID-0473';reg.write_text(json.dumps(j,indent=2)+'\n')
+b=dict(status='accepted',accepted_ids=['FVID-0472'],count_delta=1,accepted_count=472,before_commit=(q/'base.txt').read_text().strip(),baseline=dict(passed=3,failed=5,evidence='evidence/player-track-source-lifetime/before.log'),focused_after=dict(passed=8,failed=0,evidence='evidence/player-track-source-lifetime/after-focused.log'),repetition=dict(runs=20,case_executions=160,failed=0,excluded_from_distinct_and_improvement_counts=True),checks=checks,physical_source_distinct_passed=1623,ignored_tests_unchanged=True,test_integrity='evidence/player-track-source-lifetime/test-integrity.json',evidence='evidence/player-track-source-lifetime/README.md',limitations=['Real native decoding/audio worker and headless egui controller with controlled output clock;no physical audio.','No new native-window duration qualification;pre-existing viewport-close-request limitation remains at evidence/player-ab-clock/native-smoke/finding.json.','No performance or hardware-codec claim.'])
+Path('docs/improvements/batch-472-validation.json').write_text(json.dumps(b,indent=2)+'\n')
+p=q/'README.md';s=p.read_text().replace('Unaccepted audit. Proposed FVID-0472 is','Accepted FVID-0472 after all nine gates and twenty repetitions passed. FVID-0472 is');s+='\nFinal identical eight-case baseline:3pass5fail,candidate:8pass0fail. Twenty repetitions pass160case executions. All9gates pass1623physical-source-distinct checks and both builds;five old ignores unchanged. The one initial stand correction is preserved in stand-admission.json and is not a media defect or separate improvement. Original open_shared weak-registry semantics and exclusive output ordering remain intact.\n';p.write_text(s)
+i=json.loads((q/'test-integrity.json').read_text());i['focused_candidate']=dict(passed=8,failed=0,exit_code=0);(q/'test-integrity.json').write_text(json.dumps(i,indent=2)+'\n')
+(q/'progress.json').write_text(json.dumps(dict(status='qualified;pending delivery',accepted_count=472,next_id='FVID-0473',accepted_ids=['FVID-0472'],active_session=None),indent=2)+'\n')
+print('Accepted FVID-0472,472/1000;all gates,source and fixtures verified')

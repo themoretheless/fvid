@@ -1,8 +1,8 @@
 {
   "target": 1000,
   "counting_rule": "One independently confirmed problem or useful capability; fixture variants and baseline integration repairs are excluded. Only accepted entries count.",
-  "accepted_count": 471,
-  "next_id": "FVID-0472",
+  "accepted_count": 472,
+  "next_id": "FVID-0473",
   "entries": [
     {
       "id": "FVID-0001",
@@ -5314,6 +5314,17 @@
       "result": "Include buffering and seek-preview permission when deciding whether to play the new audio handle. Existing presentation readiness releases it once the current-generation picture is ready. Seven unchanged regressions verify acknowledged silence before input release,one resume afterward,native selected PCM prefixes,actual displayed RGB/current generation,final-picture seek and EOF. Twenty repeats pass140cases;all9gates pass1615physical-source-distinct checks and both builds with five old ignores unchanged. Distinct double-marker acknowledgments prevent deferred-Play observation races. Stand guard/pixel/resume observation repairs add0IDs and relax no existing assertions. No performance,physical audio or new native-window duration claim.",
       "status": "accepted",
       "validation": "batch-471-validation.json"
+    },
+    {
+      "id": "FVID-0472",
+      "batch": 472,
+      "title": "Admit selected audio source before releasing the current live descriptor",
+      "source": "src/player.rs",
+      "regression": "src/player_track_source_lifetime_tests.rs",
+      "before": "Identical eight-case baseline passes exact native video/both PCM versions,missing-source refusal and exclusive device-order controls,but fails five handoffs. Three moved audio-only paths lose their last live descriptor;failed admission disposes a valid memory-backed decoder;atomic path replacement silently selects alternate-file PCM.",
+      "result": "Open the selected native reader while current source ownership is alive. Admission failure leaves the working handle intact. After successful admission,capture current transport phase,stop/join old output,and install the pinned reader. Metadata/worker installer body is byte-identical after private extraction. Eight unchanged tests verify moved-source forward/backward/paused playback,original-inode exact PCM despite namespace replacement,old-stream continuation on refusal,exclusive device order and native EOF. Twenty repeats pass160cases;all9gates pass1623physical-source-distinct checks and both builds with five old ignores unchanged. Source transaction does not claim rollback after later asynchronous decoder/device initialization failure. No performance,physical audio or new native-window duration claim.",
+      "status": "accepted",
+      "validation": "batch-472-validation.json"
     }
   ]
 }

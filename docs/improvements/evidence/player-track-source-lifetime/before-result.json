@@ -1,0 +1,6 @@
+{
+  "exit_code": 101,
+  "passed": 3,
+  "failed": 5,
+  "failure": "Three moved-path handoffs lose audio;failed source admission discards a healthy memory-backed decoder;atomic pathname replacement selects unrelated alternate PCM instead of the live inode."
+}
