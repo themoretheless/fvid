@@ -59,3 +59,5 @@ the initial generic-bank build. The rebuilt default-device probe completed
 12 MP4/Matroska runs across all six input domains and 48 drains (full playback,
 two seeks, rewind). This proves delivery to the device, not subjective listening
 or physical multichannel wiring.
+
+Subsequent boundary update (2026-11-02): covered partial splits with uniform cutoffs now support resolution changes and return. See [uniform partial-grid qualification](aac-ld-mps-arbitrary-partial-grids-2026-11-02.md). Mixed-cutoff grid conversion remains open.

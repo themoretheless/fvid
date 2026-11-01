@@ -99,3 +99,5 @@ device JSON. The device build was awaited to terminal completion; no earlier
 probe binary was substituted for this check.
 
 Subsequent boundary update (2026-11-02): unchanged full-grid split paths now support resolution changes with dormant history retained. See [grid-change qualification](aac-ld-mps-arbitrary-grids-2026-11-02.md). Partial-grid conversion and topology changes remain open.
+
+Subsequent boundary update (2026-11-02): covered partial splits with uniform cutoffs now support resolution changes and return. See [uniform partial-grid qualification](aac-ld-mps-arbitrary-partial-grids-2026-11-02.md). Mixed-cutoff grid conversion remains open.

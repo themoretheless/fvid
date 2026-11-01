@@ -24503,3 +24503,11 @@ covers all 42 ordered pairs and returns, original-C post-shaping components,
 Partial-grid conversion, sparse outputs and topology changes remain open.
 See [qualification](validation/aac-ld-mps-arbitrary-grids-2026-11-02.md). Earlier
 full-grid refusal statements are historical.
+
+### 2026-11-02: covered uniform-cutoff ArbitraryTree grid changes
+
+Covered partial splits can now change parameter grids while preserving dormant
+gain history, provided all extra splits within each header share one cutoff.
+Qualification includes218 own playback programmes,148 original-C component
+scenarios, precise mixed-cutoff refusal/retry videos and both container readers.
+Mixed-cutoff grid conversion remains open. See [qualification](validation/aac-ld-mps-arbitrary-partial-grids-2026-11-02.md).

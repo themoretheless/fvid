@@ -140,12 +140,12 @@ impl Decoder {
         Ok(())
     }
     /// Retain indexed gain history across headers with unchanged split paths.
-    /// Full grids may change resolution; dormant values retain their indices.
-    /// Partial-grid conversion and changed topology remain explicit refusals.
+    /// Uniform coded cutoffs may change resolution; dormant values retain indices.
+    /// Mixed-cutoff grid conversion and changed topology remain explicit refusals.
     pub fn inherit_history(&mut self, old: &Self) -> Result<()> {
         if (self.bands != old.bands
-            && (self.cutoffs.iter().any(|&b| usize::from(b) != self.bands)
-                || old.cutoffs.iter().any(|&b| usize::from(b) != old.bands)))
+            && (self.cutoffs.windows(2).any(|b| b[0] != b[1])
+                || old.cutoffs.windows(2).any(|b| b[0] != b[1])))
             || self.leaves.len() != old.leaves.len()
             || self.leaves.iter().zip(&old.leaves).any(|(a, b)| a.source != b.source || a.path != b.path)
         {
