@@ -1,0 +1,66 @@
+diff --git a/crates/fvid-media/src/owned_adts_export.rs b/crates/fvid-media/src/owned_adts_export.rs
+index 3b38ea4422..d77503c1d0 100644
+--- a/crates/fvid-media/src/owned_adts_export.rs
++++ b/crates/fvid-media/src/owned_adts_export.rs
+@@ -168,10 +168,7 @@ pub(crate) fn supports(
+-        let reader = crate::owned_aac::adts::map_controlled_adts_packet_error(
+-            crate::owned_aac::adts::StreamReader::open_with_packet_limit(
+-                BufReader::new(File::open(source).map_err(|e| e.to_string())?),
+-                options
+-                    .max_packet_bytes
+-                    .min(options.max_controlled_bytes.unwrap_or(usize::MAX)),
+-            )
+-            .map_err(|e| e.to_string()),
+-            options,
+-        )?;
++        let reader = crate::owned_aac::adts::StreamReader::open_with_packet_limit(
++            BufReader::new(File::open(source).map_err(|e| e.to_string())?),
++            options
++                .max_packet_bytes
++                .min(options.max_controlled_bytes.unwrap_or(usize::MAX)),
++        )
++        .map_err(|e| e.to_string())?;
+diff --git a/crates/fvid-media/src/owned_adts_loudness.rs b/crates/fvid-media/src/owned_adts_loudness.rs
+index 735f0884cf..43ba7f09ad 100644
+--- a/crates/fvid-media/src/owned_adts_loudness.rs
++++ b/crates/fvid-media/src/owned_adts_loudness.rs
+@@ -30,10 +30,7 @@ pub(crate) fn validate_header_configuration(source: &Path, options: &CopyOptions
+-    let reader = crate::owned_aac::adts::map_controlled_adts_packet_error(
+-        crate::owned_aac::adts::StreamReader::open_with_packet_limit(
+-            BufReader::new(File::open(source).map_err(|e| e.to_string())?),
+-            options
+-                .max_packet_bytes
+-                .min(options.max_controlled_bytes.unwrap_or(usize::MAX)),
+-        )
+-        .map_err(|e| e.to_string()),
+-        options,
+-    )?;
++    let reader = crate::owned_aac::adts::StreamReader::open_with_packet_limit(
++        BufReader::new(File::open(source).map_err(|e| e.to_string())?),
++        options
++            .max_packet_bytes
++            .min(options.max_controlled_bytes.unwrap_or(usize::MAX)),
++    )
++    .map_err(|e| e.to_string())?;
+diff --git a/crates/fvid-media/src/owned_audio_plan.rs b/crates/fvid-media/src/owned_audio_plan.rs
+index a4af8b8a76..01a13ec923 100644
+--- a/crates/fvid-media/src/owned_audio_plan.rs
++++ b/crates/fvid-media/src/owned_audio_plan.rs
+@@ -241,10 +241,7 @@ fn source_descriptor_for_decode(source: &Path, options: &CopyOptions,
+-        let reader = crate::owned_aac::adts::map_controlled_adts_packet_error(
+-            crate::owned_aac::adts::StreamReader::open_with_packet_limit(
+-                BufReader::new(File::open(source).map_err(|e| e.to_string())?),
+-                options
+-                    .max_packet_bytes
+-                    .min(options.max_controlled_bytes.unwrap_or(usize::MAX)),
+-            )
+-            .map_err(|e| e.to_string()),
+-            options,
+-        )?;
++        let reader = crate::owned_aac::adts::StreamReader::open_with_packet_limit(
++            BufReader::new(File::open(source).map_err(|e| e.to_string())?),
++            options
++                .max_packet_bytes
++                .min(options.max_controlled_bytes.unwrap_or(usize::MAX)),
++        )
++        .map_err(|e| e.to_string())?;

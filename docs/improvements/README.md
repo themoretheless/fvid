@@ -1,6 +1,6 @@
 # Verified improvements
 
-Accepted: **509 / 1000 independent, useful changes**. Only entries marked `accepted` in
+Accepted: **510 / 1000 independent, useful changes**. Only entries marked `accepted` in
 [`registry.json`](registry.json) count. Fixture variants, test cases, documentation
 and baseline integration repairs do not inflate the count.
 
@@ -3487,3 +3487,7 @@ FVID-0508 preflights the 3.4-second `LoudnessMeter` working set (and `weights.le
 ## Batch 510 — Preflight Stage 2 WAVE loudnorm and compressed audio export DSP/resampler/metadata memory budgets before Pass 1 measurement or Stage 1 spool decoding
 
 FVID-0509 preflights `destination.symlink_metadata().is_ok()` and `plan_loudnorm` before `measure_phase` in `owned_loudnorm::apply_loudnorm` (when `params.print != Print::None`) and `owned_loudnorm::apply_loudnorm_dual` (`crates/fvid-media/src/owned_loudnorm.rs`), adds `check_spool_wave_export_budget` in `owned_adts_export` (`crates/fvid-media/src/owned_adts_export.rs`), and calls it in `owned_audio_plan::plan_decode_audio` (`crates/fvid-media/src/owned_audio_plan.rs`) and before Stage 1 spool decoding across `owned_g711_wave_export`, `owned_raw_flac`, `owned_raw_mp3`, `owned_ogg_opus_export`, `owned_ogg_vorbis_export`, `owned_ogg_joint_export`, `owned_mp4_audio_export`, and `owned_matroska_{pcm,aac,opus,flac,mp3,alac}_export`. Seventy-nine integration tests in `mp4_audio_metadata_admission` pass. See `batch-510-validation.json`.
+
+## Batch 511 — Preserve native seek anchors across occupied edit boundaries
+
+FVID-0510 reapplies each selected edit segment minimum occupied-sample start after native-sample rounding crosses a segment boundary. Three authored AAC+VP9 movies reproduce correct PCM with an early clock anchor before the fix;direct navigation and actual AudioWorker flush anchors now match the first available native sample. Seven merged-state gates pass975 test executions,with two prior ignored tests,and three repeated33-test runs pass. The ADTS initial transport-admission integration repair restores two unchanged unit tests and adds zero IDs. Parallel entries through FVID-0509 are preserved. See `batch-511-validation.json` and `evidence/mp4-edit-frontier-seek`.

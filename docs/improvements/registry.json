@@ -1,7 +1,7 @@
 {
   "target": 1000,
   "counting_rule": "One independently confirmed problem or useful capability; fixture variants and baseline integration repairs are excluded. Only accepted entries count.",
-  "accepted_count": 509,
+  "accepted_count": 510,
   "next_id": "FVID-0511",
   "entries": [
     {
@@ -5757,8 +5757,8 @@
       "source": "src/playback/audio/mp4_audio.rs",
       "regression": "tests/mp4_edit_frontier_seek.rs",
       "before": "Three authored LC48k/Main32k movies pass full independent PCM/video and raw tick controls,but exact seek at1000001ns or1000009ns crosses the first edit and anchors at1000010ns rather than the first available sample1031260ns. Both direct and actual-worker regressions fail despite correct suffix PCM.",
-      "result": "Apply the newly selected segment minimum occupied-sample start on every alignment-loop traversal before deriving its native anchor. Original Duration fractions are already preserved;this fixes a distinct missed frontier after segment crossing. Seven gates pass880 executions,two prior ignores;three repeats pass33 tests each.",
-      "status": "pending",
+      "result": "Apply the newly selected segment minimum occupied-sample start on every alignment-loop traversal before deriving its native anchor. Original Duration fractions are already preserved;this fixes a distinct missed frontier after segment crossing. Seven gates pass975 executions,two prior ignores;three repeats pass33 tests each.",
+      "status": "accepted",
       "validation": "batch-511-validation.json"
     }
   ]

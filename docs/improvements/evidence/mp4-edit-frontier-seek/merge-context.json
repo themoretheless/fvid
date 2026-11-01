@@ -1,0 +1,153 @@
+{
+  "parallel_main": "5e8814e76cc0760a90e8f2874cc8e3cccbc7554f",
+  "merge_commit": "8f109d82d408f6d7d441953d437aedaf02c9780e",
+  "original_parser_source_unchanged_in_parallel_main": true,
+  "parallel_evidence_audit": [
+    {
+      "id": "FVID-0486",
+      "validation": "batch-487-validation.json",
+      "before_failed": true,
+      "after_passed": 56
+    },
+    {
+      "id": "FVID-0487",
+      "validation": "batch-488-validation.json",
+      "before_failed": true,
+      "after_passed": 57
+    },
+    {
+      "id": "FVID-0488",
+      "validation": "batch-489-validation.json",
+      "before_failed": true,
+      "after_passed": 58
+    },
+    {
+      "id": "FVID-0489",
+      "validation": "batch-490-validation.json",
+      "before_failed": true,
+      "after_passed": 59
+    },
+    {
+      "id": "FVID-0490",
+      "validation": "batch-491-validation.json",
+      "before_failed": true,
+      "after_passed": 60
+    },
+    {
+      "id": "FVID-0491",
+      "validation": "batch-492-validation.json",
+      "before_failed": true,
+      "after_passed": 76
+    },
+    {
+      "id": "FVID-0492",
+      "validation": "batch-493-validation.json",
+      "before_failed": true,
+      "after_passed": 77
+    },
+    {
+      "id": "FVID-0493",
+      "validation": "batch-494-validation.json",
+      "before_failed": true,
+      "after_passed": 78
+    },
+    {
+      "id": "FVID-0494",
+      "validation": "batch-495-validation.json",
+      "before_failed": true,
+      "after_passed": 79
+    },
+    {
+      "id": "FVID-0495",
+      "validation": "batch-496-validation.json",
+      "before_failed": true,
+      "after_passed": 80
+    },
+    {
+      "id": "FVID-0496",
+      "validation": "batch-497-validation.json",
+      "before_failed": true,
+      "after_passed": 67
+    },
+    {
+      "id": "FVID-0497",
+      "validation": "batch-498-validation.json",
+      "before_failed": true,
+      "after_passed": 68
+    },
+    {
+      "id": "FVID-0498",
+      "validation": "batch-499-validation.json",
+      "before_failed": true,
+      "after_passed": 69
+    },
+    {
+      "id": "FVID-0499",
+      "validation": "batch-500-validation.json",
+      "before_failed": true,
+      "after_passed": 82
+    },
+    {
+      "id": "FVID-0500",
+      "validation": "batch-501-validation.json",
+      "before_failed": true,
+      "after_passed": 73
+    },
+    {
+      "id": "FVID-0501",
+      "validation": "batch-502-validation.json",
+      "before_failed": true,
+      "after_passed": 85
+    },
+    {
+      "id": "FVID-0502",
+      "validation": "batch-503-validation.json",
+      "before_failed": true,
+      "after_passed": 72
+    },
+    {
+      "id": "FVID-0503",
+      "validation": "batch-504-validation.json",
+      "before_failed": true,
+      "after_passed": 73
+    },
+    {
+      "id": "FVID-0504",
+      "validation": "batch-505-validation.json",
+      "before_failed": true,
+      "after_passed": 74
+    },
+    {
+      "id": "FVID-0505",
+      "validation": "batch-506-validation.json",
+      "before_failed": true,
+      "after_passed": 75
+    },
+    {
+      "id": "FVID-0506",
+      "validation": "batch-507-validation.json",
+      "before_failed": true,
+      "after_passed": 77
+    },
+    {
+      "id": "FVID-0507",
+      "validation": "batch-508-validation.json",
+      "before_failed": true,
+      "after_passed": 78
+    },
+    {
+      "id": "FVID-0508",
+      "validation": "batch-509-validation.json",
+      "before_failed": true,
+      "after_passed": 79
+    },
+    {
+      "id": "FVID-0509",
+      "validation": "batch-510-validation.json",
+      "before_failed": true,
+      "after_passed": 79
+    }
+  ],
+  "local_pending_id": "FVID-0510",
+  "qualification_scope": "Prior seven gates plus both changed metadata admission integration targets; all changed non-snapshot Rust source frozen."
+}

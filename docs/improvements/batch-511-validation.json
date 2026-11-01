@@ -1,8 +1,10 @@
 {
-  "status": "pending",
-  "accepted_ids": [],
-  "count_delta": 0,
-  "accepted_count": 509,
+  "status": "accepted",
+  "accepted_ids": [
+    "FVID-0510"
+  ],
+  "count_delta": 1,
+  "accepted_count": 510,
   "next_id": "FVID-0511",
   "qualification": {
     "integration": {
@@ -80,11 +82,15 @@
         "--test",
         "mp4_aac_native_grid_missing_extent_seek",
         "--test",
-        "mp4_edit_frontier_seek"
+        "mp4_edit_frontier_seek",
+        "--test",
+        "mp4_audio_metadata_admission",
+        "--test",
+        "mp4_metadata_admission"
       ],
       "exit_code": 0,
       "totals": {
-        "passed": 142,
+        "passed": 237,
         "failed": 0,
         "ignored": 0
       },
@@ -220,7 +226,67 @@
     "src/playback/audio/mp4_audio.rs": "6e83e690e18a299c936f0315606ecb71ca83bd8fb623806135b386d961e72481",
     "src/playback/audio/mp4_clock_recovery.rs": "4bd9dc0452bc30e79dad6985e57085cff81da2f522426c037930c3f27e3abad6",
     "tests/mp4_edit_frontier_seek.rs": "8dea5cbde61b0234db884a4af2d9ef20e81afb4a6a3aef0d314438e67502f324",
-    "scripts/generate_mp4_edit_frontier_seek.py": "9dc74aec55c8a28700b0a53e05fe741b2093067c365853fe804ea568bec86048"
+    "scripts/generate_mp4_edit_frontier_seek.py": "9dc74aec55c8a28700b0a53e05fe741b2093067c365853fe804ea568bec86048",
+    "crates/fvid-media/src/owned_aac/adts_impl.rs": "7637df53d32490fab10ac2f41cfb5e3c84c811aee190414379ce92daff01385a",
+    "crates/fvid-media/src/owned_aac/stream.rs": "a19041088668ece8ef235507315f3a9b1245f44c4d99a30fb5342b1e82220e65",
+    "crates/fvid-media/src/owned_adts_export.rs": "e62bc8b950b8047ab32085b4fb6c0d4126fe488dddef615043080687081e0168",
+    "crates/fvid-media/src/owned_adts_loudness.rs": "2e0e40b313d21615c5d013e3f84841b406f433ecb565530b20a59f341d2da6dc",
+    "crates/fvid-media/src/owned_adts_loudnorm.rs": "4984d3ec4586a7545c79a4922b9f55c212d2bbe67e82c595b1395c0c4fb26b47",
+    "crates/fvid-media/src/owned_audio_mix.rs": "8161c1bb5f8934acc4544aa6b01fe8e8a990610d20bef05e47e854f323fd20f2",
+    "crates/fvid-media/src/owned_audio_plan.rs": "2293904be77b22cef977380835b270b80de1e67d53f22d0d344dc7531af445d0",
+    "crates/fvid-media/src/owned_container_loudness.rs": "40636df7463a6a3a2e9506280fd78571e9a79cf3ff77474b5d1ec6e313b1aa71",
+    "crates/fvid-media/src/owned_container_loudnorm.rs": "28b976dea0b6583602524cc51c1f5dcfcced4f37b04924578b05c038c29d1548",
+    "crates/fvid-media/src/owned_ffv1_export.rs": "04eea37eac0674c077b3f84add07f973cb224d8a4200bcf6e4b30ac924401017",
+    "crates/fvid-media/src/owned_g711_wave_export.rs": "3c77cafc48aff359430d49388cc0fe0cdde0df2f3b045b4c2ad45935c92ea255",
+    "crates/fvid-media/src/owned_lossless.rs": "f28b6d3a08a15825732f2c8727e229f6f2e824ce5b3507c02b4fc558a7ab3633",
+    "crates/fvid-media/src/owned_loudnorm.rs": "d1ff9b397b9c4a72bd7595b841f42e9be1cdb531c7218bb43f92d8c52a8bd893",
+    "crates/fvid-media/src/owned_matroska.rs": "31485c511b8d22a6fc67087892b436569950a7dcc1587ee0c872a717ecd33375",
+    "crates/fvid-media/src/owned_matroska_aac_export.rs": "0ab0b2fb9ce540e3a4555f1e88702b5759ee93486f827e807773ed53791f1172",
+    "crates/fvid-media/src/owned_matroska_alac_export.rs": "f32795d9e3ef04cf1ff732993e108b7da6bb49f9677ecd8bab243a1f1b24a173",
+    "crates/fvid-media/src/owned_matroska_copy_impl.rs": "c85991c910f47ec2754819829017677cc69c49a8b81aeb1840345eca3ef36e64",
+    "crates/fvid-media/src/owned_matroska_flac_export.rs": "a2dba38f9bc5fd54b1e98f18de1d5759bf5e3664e2093c82169393ba7b30ba9e",
+    "crates/fvid-media/src/owned_matroska_mp3_export.rs": "48896a71964c8497ae2bdc893823d1760f8b8317ed0b34dfc42a2823eeabae9f",
+    "crates/fvid-media/src/owned_matroska_opus_export.rs": "5b442c1aeaf4fdada151d0b304c3dc92cb8df80673dd8366c4589efc914c8618",
+    "crates/fvid-media/src/owned_matroska_pcm_export.rs": "a623916c0a6f7ef4f211191a3fa39f2ac1ccfafad1cc01ee52db02673a177e92",
+    "crates/fvid-media/src/owned_mp4_audio_export.rs": "8efa938205f5883b744c4fa6d78acbb45c3c42db97dbacda0c1f9c02142b3123",
+    "crates/fvid-media/src/owned_mp4_multitrack_export.rs": "cd7536ff181fba404e3adb0a155c8ba256f5ccb7f28138ac206d6511a8adb702",
+    "crates/fvid-media/src/owned_mp4_probe_impl.rs": "d8353a0e15630ce76077e8d9f5095531786425f1ffac15f7dd5f6eaaaf09703b",
+    "crates/fvid-media/src/owned_mp4_remux.rs": "bd0da705af375220c08fb7169137246da770def78abba49f03bc99d58bef05ef",
+    "crates/fvid-media/src/owned_mp4_video_bridge.rs": "387569592ed3f3527e176276ea7a26bb8ca33522475b3ef22dad79fc109d519b",
+    "crates/fvid-media/src/owned_mp4_video_decode.rs": "cf0b2f05d4323a87ddec5a51642710925c12a76725743e8a557a0627d0755833",
+    "crates/fvid-media/src/owned_ogg_joint_export.rs": "bfe9a06ba56601c2bd2c080bb1e356cfa5a54a7345bfe87be905059fec235da7",
+    "crates/fvid-media/src/owned_ogg_opus_export.rs": "d81acb890f9f6309dc777f6918860fd6c9626f96e2c4fa82641fa2eb90acb430",
+    "crates/fvid-media/src/owned_ogg_vorbis_export.rs": "dbfb1888ed49c865f2566b29e1cd12245424b6ee96084704a82a869b646c170d",
+    "crates/fvid-media/src/owned_probe.rs": "b76ea97204fab856a1805e9a64d814a77b059f4a8e923ad08e253b09b269cfba",
+    "crates/fvid-media/src/owned_raw_flac.rs": "b9ac19f862a47ce1eb1aaced2d638879cf7cd26227a69ff1521afb5444bae3e5",
+    "crates/fvid-media/src/owned_raw_mp3.rs": "fc36a3e48d5e1d5ae1af48f808b162b5b3bfa083e7a9a76e0db69ae3e3fa3dc4",
+    "crates/fvid-media/src/owned_subtitle_burn.rs": "2b096f307b27e9ae120f3ebc1c18bbee99769c2b302c71333fe6a2613e4cad20",
+    "crates/fvid-media/src/owned_subtitle_impl.rs": "dea3ce4f83fb81ed627596b9781161531cb399026c9f0debb0cc05be8d6edc90",
+    "crates/fvid-media/src/owned_video_decode.rs": "a680f67d92a2c294148f28115f90fbc3b458b75ab1ad28c24ad9bff311b93d93",
+    "crates/fvid-media/src/owned_wave_loudness.rs": "2cfbe232e7ca5eab89a3448b6d520cec01b1c9fb1b4b4a88dd9ca54473170cd5",
+    "crates/fvid-media/src/owned_webm_audio_window.rs": "24d05869fcbf5b1d545e7bbdf1b427cb9bb556f7e783faf0e5149ba826180bb2",
+    "crates/fvid-media/src/owned_webm_codec.rs": "4c1c1e0e0142624d51f3d66dec6f9faa4152033793c4b3c1d573354e6de51700",
+    "crates/fvid-media/src/owned_webm_multitrack_export.rs": "2c0020ffc93a050f1676448cc68c25a1aa9d099137606baa910a8c75461a96e8",
+    "crates/fvid-media/src/owned_webm_pcm_window.rs": "da130c56d97d4b2b08cabaae6fcb873bbde1cc07c8a59fd26dcaccb2679f5f8d",
+    "crates/fvid-media/src/owned_webm_presentation.rs": "9827a235f584b34e7bad11a134b8806a2c52537a4a8041d7b99de4e8e2ec64d7",
+    "crates/fvid-media/src/owned_webm_probe.rs": "c036e18ad92048af10d31b5f0861844f25863f84c5864de6e62f2b2109559828",
+    "crates/fvid-media/src/owned_xfade.rs": "78dc25bdd54b6a7f91bbb9b91eb2b6f1120f15dc23ffce30c3ba5ffb4449b1b3",
+    "crates/fvid-media/src/owned_y4m_decode.rs": "ca67fac18eb0be2f626ce98ec268730f4236c491801ea03f9e9328917dbfb084",
+    "src/container/mp4_concat.rs": "b834db6298d34981b22e64732a48eb84469ce0be57078efb131756ec8b9a9602",
+    "src/container/mp4_write.rs": "d6b3ced284ddf39878d3cbe67fe1ffc62176cf73cc47e6655fb0cf0572327072",
+    "src/media.rs": "ec5e89091e2d2820196b9063fb328ea7ded19178e8262545ae67b5b0e94a3a0f",
+    "src/media_probe.rs": "da7a6acf4926801b18b1b7731fe690ce1c839fe83d6c7cbe89eec4ea6e8d2500",
+    "src/native_audio_mix.rs": "7719ecfa382d3181d00326ef67a11d8625f3de20728611f952e5d90d2d2e9722",
+    "src/native_audio_mix/concat.rs": "b8c08bc443a73a0a19711be7234a8347385eb6498931d40ffbb5c8f8ca429492",
+    "src/native_export.rs": "ae4b9d8afeee21a8f24a65beda1b7a86906dd708d0d6dd547ef304ddf3653e02",
+    "src/native_export/pcm_matroska.rs": "2112775f292b91bd19cad96ffefe3088e15ff903db67248fd39724e4656daf40",
+    "src/native_loudnorm.rs": "e9c0b2d8b61eeb35840b37fe44b22478018a49d9c4e6586ff8cfd4ea2694b3e6",
+    "src/native_pcm.rs": "a0ebbad304a816fda4a9fd8c43856b66a2b4ef534dedf75cb86abe10b63781a4",
+    "src/native_pcm/loudness.rs": "fc7e7e873554483e03ff46754ebb11dd556f7df8ff1777617e58f3105ac78eb6",
+    "src/native_pcm/normalize.rs": "06020f97f21a3dc493d062e773b0555e2668b1fc37c59ade08d8b1b94e5df18e",
+    "src/native_plan.rs": "5c7335d576358f2e2a2e19456a2fb73515f6553acdc3a0cad0daeff5fc75636f",
+    "tests/mp4_audio_metadata_admission.rs": "708aac6583ff6cf9f0f482a71d1c0179b0190a8eb888759019684870b9f084e2",
+    "tests/mp4_metadata_admission.rs": "8245ee5f4a7724411c2e4ce08c8a0e2592578029da53b22bb9a3671dbb8611b4"
   },
   "before": {
     "exit_code": 101,
@@ -234,8 +300,13 @@
     "No performance or physical audio-device claim.",
     "This is not certification of every MP4 timing or mixed codec-family path."
   ],
-  "pending_ids": [
-    "FVID-0510"
-  ],
-  "note": "Standalone source qualified before parallel main advanced. Combined-state qualification required."
+  "merge_integration_repair": {
+    "count_delta": 0,
+    "before_log": "/Users/themoretheless/.codex/worktrees/fvid-push-20261029/fvid/docs/improvements/evidence/mp4-edit-frontier-seek/merge-initial-qualification/media-units.log",
+    "before_passed": 546,
+    "before_failed": 2,
+    "focused_passed": 22,
+    "tests_unchanged": true,
+    "patch": "/Users/themoretheless/.codex/worktrees/fvid-push-20261029/fvid/docs/improvements/evidence/mp4-edit-frontier-seek/merge-repair.patch"
+  }
 }

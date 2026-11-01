@@ -1,7 +1,11 @@
 {
-  "status": "merge-qualification-required",
-  "accepted_count": 509,
-  "pending_id": "FVID-0510",
+  "status": "accepted",
+  "count_delta": 1,
+  "accepted_ids": [
+    "FVID-0510"
+  ],
+  "accepted_count": 510,
   "next_id": "FVID-0511",
-  "preserved_parallel_main": "5e8814e76cc0760a90e8f2874cc8e3cccbc7554f"
+  "qualification_test_executions": 975,
+  "repeat_passed_each": 33
 }
