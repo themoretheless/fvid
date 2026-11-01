@@ -66,18 +66,22 @@ See validation/aac-ld-nearest-rate-2026-10-31.md.
 Native AAC construction now exposes both owned spatial decorrelators through
 `AacDecodeOptions`,alongside an optional output clock. The default stays Complex.
 Mode selection survives reset and is checked before restoring checkpoints.
-ISO's default Real renderer explains most LD tree5151 WAV differences;
-ELD timing and shared32-bin LD-QMF phase/window qualification remain open.
-The24-kHz ISO WAV mismatch also occurs in independently built FDK. Owned/FDK
-window coefficients agree to their table-rounding precision,so this is still
-a reference-coupling/timing investigation rather than an isolated FVid defect.
+The current original-reference re-audit closes the former ELD5151 timing
+mismatch: Real-renderer full PCM16 comparison has maximum-channel RMS8.17e-6,
+max error1.5451e-5,without alignment or gain fitting. The frozen pre-origin
+probe has RMS0.0536 on the same input. The48-kHz LD-QMF input also matches at
+approximately the PCM16 quantization scale. AAC-LD tree5151 numerical residual
+and24-kHz LD-QMF phase/coupling qualification remain open. The24-kHz ISO WAV
+mismatch also occurs in independently built FDK;this is not proof of a native
+math defect. See validation/aac-ld-mps-original-pcm-2026-11-01.md.
 
 AAC-LD/ELD terminal byte alignment now accepts arbitrary padding values.
 33 authored programmes (132 variants in MP4/Matroska) preserve exact PCM,
 playback and navigation, including coupled LD-SBR and adapted PCM ingress.
-Four public ISO LD-MPS streams decode fully after this fix. Their unaligned
-PCM comparisons are observations, not full conformance qualification; reference
-timing and remaining waveform differences still require investigation.
+Four public ISO LD-MPS streams decode fully after this fix. Their raw
+PCM comparisons are observations,not full conformance qualification. The fresh
+November1 audit resolves the ELD5151 timing discrepancy;the24-kHz LD-QMF
+reference convention and remaining numerical differences still require work.
 
 Native LD/ELD supports explicitly adapted short-core PCM clocks into LD-MPS.
 Downscaled LD-SBR additionally uses owned CLDFB PCM synthesis followed by the

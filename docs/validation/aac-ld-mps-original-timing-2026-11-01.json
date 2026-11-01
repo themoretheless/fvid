@@ -1,0 +1,116 @@
+{
+  "before": {
+    "before_probe_sha256": "31a4adc02fa53ece13f9885ce65ffcc29d432503670cf6f9a0e78c621447bc9b",
+    "before_output": "mode=Real packets=1410 rate=48000 channels=6 scalars=8663040\n",
+    "comparison": {
+      "conformance_verdict": null,
+      "reference_sha256": "f53c0a9af713864f991ea3e231c8893a7533b984fc49772d6fd8520cacf6d028",
+      "actual_sha256": "1639854251754b5fbd33daf98993cf6a538b0458f2168cde145b871164a68104",
+      "rate": 48000,
+      "reference_bits": 16,
+      "channels": 6,
+      "input_frames": 1443840,
+      "compared_frames": 1443840,
+      "explicit_lag": 0,
+      "per_channel": [
+        {
+          "channel": 0,
+          "rmse": 0.053617784372869015,
+          "max_abs_error": 0.43104346096515656,
+          "snr_db": -4.015674891370429
+        },
+        {
+          "channel": 1,
+          "rmse": 0.04179919380818355,
+          "max_abs_error": 0.3324561268091202,
+          "snr_db": -4.181475436479717
+        },
+        {
+          "channel": 2,
+          "rmse": 0.029304369326287646,
+          "max_abs_error": 0.2980998307466507,
+          "snr_db": -3.7625854546339217
+        },
+        {
+          "channel": 3,
+          "rmse": 0.03994255574399421,
+          "max_abs_error": 0.31657202541828156,
+          "snr_db": -5.968980096739557
+        },
+        {
+          "channel": 4,
+          "rmse": 0.03305781661273276,
+          "max_abs_error": 0.3117626905441284,
+          "snr_db": -3.4085075240489515
+        },
+        {
+          "channel": 5,
+          "rmse": 0.04355498276458613,
+          "max_abs_error": 0.3592687249183655,
+          "snr_db": -3.480975953626657
+        }
+      ]
+    }
+  },
+  "after": {
+    "name": "er_eld_ldmps_tree_5151",
+    "mode": "real",
+    "native_output": "mode=Real packets=1410 rate=48000 channels=6 scalars=8663040\n",
+    "native_stderr": "",
+    "comparison": {
+      "conformance_verdict": null,
+      "reference_sha256": "f53c0a9af713864f991ea3e231c8893a7533b984fc49772d6fd8520cacf6d028",
+      "actual_sha256": "843adf0b9d35cce215d166e991de89ebce41764cb9e92c12bb7d5f4a3fb9d32a",
+      "rate": 48000,
+      "reference_bits": 16,
+      "channels": 6,
+      "input_frames": 1443840,
+      "compared_frames": 1443840,
+      "explicit_lag": 0,
+      "per_channel": [
+        {
+          "channel": 0,
+          "rmse": 8.042010709474413e-06,
+          "max_abs_error": 1.5344470739364624e-05,
+          "snr_db": 72.46320944302977
+        },
+        {
+          "channel": 1,
+          "rmse": 8.037462618045283e-06,
+          "max_abs_error": 1.5437602996826172e-05,
+          "snr_db": 70.13950335267238
+        },
+        {
+          "channel": 2,
+          "rmse": 8.170271756491333e-06,
+          "max_abs_error": 1.5450988030352164e-05,
+          "snr_db": 67.33133208620555
+        },
+        {
+          "channel": 3,
+          "rmse": 1.6614221146112497e-06,
+          "max_abs_error": 1.5273690223693848e-05,
+          "snr_db": 81.65013716443227
+        },
+        {
+          "channel": 4,
+          "rmse": 8.04283955871662e-06,
+          "max_abs_error": 1.5385448932647705e-05,
+          "snr_db": 68.86878769129737
+        },
+        {
+          "channel": 5,
+          "rmse": 8.029783103610865e-06,
+          "max_abs_error": 1.5361234545707703e-05,
+          "snr_db": 71.20570468079448
+        }
+      ]
+    }
+  },
+  "after_probe_sha256": "f694c2c6658aa8eb4c22edc8f3ee153773d1e58335196975529d31d7e10c5477",
+  "explicit_lag": 0,
+  "delay_search": false,
+  "gain_fit": false,
+  "scope": "Whole original ISO ELD5151 comparison before/after causal ELD origin. Shared LD-SBR/LD-MPS renderer Real. No media/codec parameter sets copied to fixtures;own causality regressions accompany the existing production fix b908c5eaec.",
+  "same_reference_and_geometry": true
+}

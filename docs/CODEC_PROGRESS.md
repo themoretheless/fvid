@@ -1,3 +1,15 @@
+## Original LD-MPS timing re-audit, 2026-11-01
+
+Fresh zero-lag/no-fit comparisons confirm the causal ELD-origin correction also
+resolves original ELD5151 timing: maximum-channel RMS0.0536 before vs8.17e-6
+now,max absolute error1.5451e-5.48-kHz LD-QMF also matches at approximately
+PCM16 quantization scale. AAC-LD5151 numerical residual and24-kHz LD-QMF
+remain open;the latter differs from ISO WAVs in both owned and external FDK
+outputs. New optional offline validator verifies all8 original MP4/WAV pins,
+both renderer modes,full geometry and unchanged source media. No production
+math/defaults or synthetic media change in this audit.
+[Evidence](validation/aac-ld-mps-original-pcm-2026-11-01.md).
+
 ## Coupled SBR noise orientation, 2026-11-01
 
 Corrected a reversed noise balance in coupled stereo. All26 ordinary LD-SBR

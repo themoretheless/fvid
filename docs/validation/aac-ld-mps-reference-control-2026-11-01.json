@@ -1,0 +1,42 @@
+{
+  "complete": true,
+  "conformance_verdict": null,
+  "explicit_lag": 0,
+  "gain_fit": false,
+  "qmf_requested": "complex",
+  "external_source_commit": "ee76460efbdb147e26d804c798949c23f174460b",
+  "external_source_tree": "c3900d70bbdf4129d37f8cd5ab4a6589a34eb95b",
+  "cases": [
+    {
+      "name": "er_eld_ldmps_ldqmf_1",
+      "output": "rate=48000 channels=2 frame=1024 outputDelay=256 pcm_bits=16 qmf_requested=complex\npackets=47 scalars=96256\n",
+      "reference_vs_iso": {
+        "rmse": 0.002360491175171454,
+        "max_error": 0.12176513671875
+      },
+      "native_vs_reference": {
+        "rmse": 0.00236048196465282,
+        "max_error": 0.12175530195236206
+      },
+      "native_probe_sha256": "f694c2c6658aa8eb4c22edc8f3ee153773d1e58335196975529d31d7e10c5477",
+      "fdk_probe_sha256": "811f39fb89134b65cc220eb5d7b0c85c79ac27a9ef2873e528e2f57ad35eee80",
+      "records_sha256": "43eb7980494c220246ca262a93490e1668f8267675e2371e59061b5ddfd94ae0"
+    },
+    {
+      "name": "er_eld_ldmps_ldqmf_2",
+      "output": "rate=24000 channels=2 frame=512 outputDelay=256 pcm_bits=16 qmf_requested=complex\npackets=47 scalars=48128\n",
+      "reference_vs_iso": {
+        "rmse": 0.0965753891509868,
+        "max_error": 0.298004150390625
+      },
+      "native_vs_reference": {
+        "rmse": 0.0017703247610208557,
+        "max_error": 0.07146186381578445
+      },
+      "native_probe_sha256": "f694c2c6658aa8eb4c22edc8f3ee153773d1e58335196975529d31d7e10c5477",
+      "fdk_probe_sha256": "811f39fb89134b65cc220eb5d7b0c85c79ac27a9ef2873e528e2f57ad35eee80",
+      "records_sha256": "38dc4559ad2e026f8cc784afa0d00f58b5f547991c82c916ee29a6c77724f244"
+    }
+  ],
+  "scope": "External reference observation,not a production backend or complete-codec oracle. Unmodified current raw ASC/AUs exported from the original two ISO LD-QMF inputs. Full startup errors retained;reported FDK outputDelay does not authorize shifting FVid PCM."
+}
