@@ -1529,19 +1529,17 @@ impl<R: Read + Seek + Send> crate::audio::AudioStream for Mp4AudioReader<R> {
         let exact_aac_edits=self.variable_edits.is_some() && self.track().sample_descriptions.iter().enumerate().all(|(i,header)|
             header.codec==*b"mp4a"
                 || !clock_recovery::clock_description_used(&self.track().samples,i+1));
-        let exact_pcm_edits=self.variable_edits.is_some() && self.track().sample_descriptions.iter().enumerate().all(|(i,header)|
-            matches!(&header.codec,b"sowt"|b"twos"|b"raw "|b"in24"|b"in32"|b"fl32"|b"fl64")
-                || !clock_recovery::clock_description_used(&self.track().samples,i+1));
         let exact_alac_edits=self.variable_edits.is_some() && self.track().sample_descriptions.iter().enumerate().all(|(i,header)|
             header.codec==*b"alac" || !clock_recovery::clock_description_used(&self.track().samples,i+1));
-        let exact_adpcm=self.track().sample_descriptions.iter().enumerate().all(|(i,header)|
-            matches!(&header.codec,b"ima4"|b"ms\0\x11"|b"ms\0\x02")
-                || !clock_recovery::clock_description_used(&self.track().samples,i+1));
-        let exact_mace=self.track().sample_descriptions.iter().enumerate().all(|(i,header)|
-            matches!(&header.codec,b"MAC3"|b"MAC6")
-                || !clock_recovery::clock_description_used(&self.track().samples,i+1));
-        if self.clock.is_some() || exact_aac_edits || exact_pcm_edits || exact_alac_edits
-            || (self.variable_edits.is_some() && (exact_adpcm || exact_mace)) {
+        let native_codec=|codec:&[u8;4]| matches!(codec,
+            b"sowt"|b"twos"|b"raw "|b"in24"|b"in32"|b"fl32"|b"fl64"
+                |b"ima4"|b"ms\0\x11"|b"ms\0\x02"|b"MAC3"|b"MAC6");
+        // Mixed descriptions share the same per-packet native frame counter.
+        // Unselected metadata must not narrow the precise seek route.
+        let exact_native=self.track().sample_descriptions.iter().enumerate().all(|(i,header)|
+            native_codec(&header.codec) || !clock_recovery::clock_description_used(&self.track().samples,i+1));
+        if self.clock.is_some() || exact_aac_edits || exact_alac_edits
+            || (self.variable_edits.is_some() && exact_native) {
             let time=EditTime::new(target.as_nanos() as i128,1_000_000_000).and_then(|t|self.seek_exact(t,true));
             return match time {Ok(at)=>at,Err(error)=>{self.navigation_error=Some(error);0}};
         }
@@ -1564,14 +1562,9 @@ impl<R: Read + Seek + Send> crate::audio::AudioStream for Mp4AudioReader<R> {
         if scale>0 && scale<1_000_000_000 && (ticks+1)*1_000_000_000/scale==target.as_nanos(){ticks+=1;}
         let landed=self.seek_to(i64::try_from(ticks).unwrap_or(i64::MAX));
         if self.navigation_error.is_none() && self.variable_edits.is_none() && self.timeline.is_none()
-            && ((matches!(&self.track().codec,b"sowt"|b"twos"|b"raw "|b"in24"|b"in32"|b"fl32"|b"fl64")
-                && self.track().sample_descriptions.iter().enumerate().all(|(i,header)|
-                    matches!(&header.codec,b"sowt"|b"twos"|b"raw "|b"in24"|b"in32"|b"fl32"|b"fl64")
-                        || !clock_recovery::clock_description_used(&self.track().samples,i+1)))
+            && ((native_codec(&self.track().codec) && exact_native)
                 || (self.track().codec==*b"alac" && self.track().sample_descriptions.iter().enumerate().all(|(i,header)|
-                    header.codec==*b"alac" || !clock_recovery::clock_description_used(&self.track().samples,i+1)))
-                || (matches!(&self.track().codec,b"ima4"|b"ms\0\x11"|b"ms\0\x02") && exact_adpcm)
-                || (matches!(&self.track().codec,b"MAC3"|b"MAC6") && exact_mace)) {
+                    header.codec==*b"alac" || !clock_recovery::clock_description_used(&self.track().samples,i+1)))) {
             let precise=(||->Result<i64> {
                 let end=EditTime::new(i128::try_from(self.presentation_end_ticks().unwrap_or(0))
                     .map_err(|_|invalid("MP4 PCM presentation endpoint overflow"))?,scale)?;

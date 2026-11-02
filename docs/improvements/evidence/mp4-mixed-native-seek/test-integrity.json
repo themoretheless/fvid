@@ -1,0 +1,13 @@
+{
+  "baseline_head": "2ee721ab4b65c8156ba644291c317dac0dc76ad5",
+  "baseline_production_matches_commit": true,
+  "new_tests_and_generator_identical_before_after": true,
+  "existing_tests_and_capture_unchanged": [
+    "tests/mp4_mace_transitions.rs",
+    "tests/mp4_adpcm_transitions.rs",
+    "tests/mp4_audio_reconfiguration.rs",
+    "tests/mp4_variable_rate_edits.rs",
+    "tests/mp4_geometry_normalization.rs",
+    "tests/support/audio_transitions.rs"
+  ]
+}

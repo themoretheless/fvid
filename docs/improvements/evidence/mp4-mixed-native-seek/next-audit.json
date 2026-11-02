@@ -1,0 +1,14 @@
+{
+  "status": "source-inspection-only",
+  "accepted_ids": [],
+  "count_delta": 0,
+  "scope": "Mixed AAC/PCM and ALAC/PCM precise seek",
+  "observation": "The new native-family predicate intentionally covers PCM/MACE/ADPCM. AAC still has a pure-used-description edit guard;its duration-derived count requires exact native alignment. ALAC coded counts require mutable bounded header reads and packet-specific dispatch before mixed-family routing can be qualified.",
+  "not_a_confirmed_defect": true,
+  "required_before_fix": [
+    "Authored mixed-family valid movies with complete PCM/video controls",
+    "Unchanged before/after native-suffix and actual-worker regressions",
+    "Exact phase-aware timestamps for non-integer-nanosecond sample rates",
+    "Decoder history,raw seek,EOF and packet-admission controls"
+  ]
+}
