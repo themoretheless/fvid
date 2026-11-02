@@ -1,0 +1,15 @@
+{
+  "source_commit": "732447c86e51ce8e950ffa83138927832f779cb8",
+  "published_refs": [
+    "refs/heads/main",
+    "refs/heads/codex/deliver-fvid-20261029"
+  ],
+  "verified_remote_commit": "732447c86e51ce8e950ffa83138927832f779cb8",
+  "source_files_verified": 2399,
+  "qualification": "qualification-results.json",
+  "accepted_id": "FVID-0513",
+  "accepted_total": 513,
+  "test_target_removed": true,
+  "branch_inventory_status": "Historical and active branches preserved; patch-equivalence audit ongoing. This receipt covers batch 524 publication only.",
+  "verified_at": "2026-11-02T15:15:02.661901+00:00"
+}
