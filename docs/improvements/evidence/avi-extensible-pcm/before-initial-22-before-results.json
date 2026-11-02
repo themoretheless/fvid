@@ -1,0 +1,8 @@
+{
+  "command": "cargo test --locked --offline --no-default-features --features player --test avi_extensible_pcm -- --test-threads=2",
+  "exit_code": 101,
+  "passed": 1,
+  "failed": 3,
+  "source_stable": true,
+  "avi_adapter_matches_head": true
+}

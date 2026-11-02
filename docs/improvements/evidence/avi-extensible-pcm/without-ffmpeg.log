@@ -1,0 +1,9 @@
+
+running 4 tests
+test container_geometry_wave_pcm_and_neutral_video_are_valid_before_avi_dispatch ... ok
+test extensible_avi_decodes_exact_pcm_native_clocks_speakers_and_bounded_windows ... ok
+test malformed_extensible_avi_is_a_refusal_separate_from_successful_pcm ... ok
+test actual_avi_workers_fold_extensible_speakers_after_seek_and_at_eof ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.52s
+

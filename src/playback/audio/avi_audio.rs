@@ -67,6 +67,7 @@ fn refused(tag: u16, bits: u16) -> Error {
 #[derive(Clone, Debug)]
 struct Program {
     codec: &'static str,
+    speaker_mask: Option<u32>,
     sample_rate: u32,
     channels: u16,
     bits: u16,
@@ -121,10 +122,28 @@ impl AviAudioReader {
         let avi = Avi::parse(&bytes, &limits)?;
         let mut programs = Vec::new();
         for (index, stream) in avi.audio().iter().enumerate() {
-            let Some(codec) = coding(stream.format.tag, stream.format.bits) else {
-                continue;
+            let (codec, speaker_mask) = if stream.format.tag == 0xfffe {
+                // AVI strf carries the same extended WAVEFORMATEX as RIFF/WAVE.
+                // Share its GUID, precision, geometry and speaker admission.
+                let wave_limits = crate::playback_wav::Limits {
+                    channels: limits.channels,
+                    ..Default::default()
+                };
+                match crate::playback_wav::parse_fmt(&stream.setup, &wave_limits) {
+                    Ok((pcm, mask)) if matches!(pcm.coding, crate::playback_wav::Coding::Pcm(_)) =>
+                        (pcm.codec(), mask),
+                    Ok(_) | Err(Error::Unsupported(_)) => continue,
+                    Err(error) => return Err(error),
+                }
+            } else {
+                let Some(codec) = coding(stream.format.tag, stream.format.bits) else {
+                    continue;
+                };
+                (codec, None)
             };
-            programs.push(laid_out(codec, index, stream, &limits)?);
+            let mut program = laid_out(codec, index, stream, &limits)?;
+            program.speaker_mask = speaker_mask;
+            programs.push(program);
         }
         if programs.is_empty() {
             return Err(match avi.audio().first() {
@@ -169,7 +188,7 @@ impl AviAudioReader {
 /// another; none of them fills in a number the file left out.
 fn laid_out(codec: &'static str, index: usize, stream: &Audio, limits: &Limits) -> Result<Program> {
     if matches!(codec,"pcm_alaw"|"pcm_mulaw") {return laid_out_g711(codec,index,stream);}
-    if matches!(stream.format.tag, 0x0001 | 0x0003) {
+    if matches!(codec, "A_PCM/INT/LIT" | "A_PCM/FLOAT/IEEE") {
         return laid_out_pcm(codec, index, stream);
     }
     let format = stream.format;
@@ -265,6 +284,7 @@ fn laid_out(codec: &'static str, index: usize, stream: &Audio, limits: &Limits) 
         None
     };
     Ok(Program {
+        speaker_mask: None,
         codec,
         sample_rate: format.sample_rate,
         channels: format.channels,
@@ -316,6 +336,7 @@ fn laid_out_pcm(codec: &'static str, index: usize, stream: &Audio) -> Result<Pro
         return Err(invalid("AVI PCM declared frame count disagrees with records"));
     }
     Ok(Program {
+        speaker_mask: None,
         codec, sample_rate: f.sample_rate, channels: f.channels, bits: f.bits,
         frames: 1, setup: stream.setup.clone(), stream: index, records: samples.len(),
         input_frame_bytes: stride, packet_frames: Some(SAMPLE_PACKET_FRAMES),
@@ -334,12 +355,16 @@ fn laid_out_g711(codec: &'static str,index:usize,stream:&Audio)->Result<Program>
         cursor=cursor.checked_add(frames).ok_or_else(||invalid("AVI G.711 clock overflow"))?;
     }
     if samples.is_empty() || cursor-u64::from(stream.start)!=u64::from(stream.declared){return Err(invalid("AVI G.711 declared frame count disagrees with records"));}
-    Ok(Program{codec,sample_rate:f.sample_rate,channels:f.channels,bits:8,frames:1,setup:stream.setup.clone(),stream:index,records:samples.len(),input_frame_bytes:usize::from(f.channels),packet_frames:Some(SAMPLE_PACKET_FRAMES),block_records:None,samples:Some(samples)})
+    Ok(Program{speaker_mask:None,codec,sample_rate:f.sample_rate,channels:f.channels,bits:8,frames:1,setup:stream.setup.clone(),stream:index,records:samples.len(),input_frame_bytes:usize::from(f.channels),packet_frames:Some(SAMPLE_PACKET_FRAMES),block_records:None,samples:Some(samples)})
 }
 
 /// Packets are timestamped in samples of the stream's own rate, which is the unit
 /// the block's duration and the decoder's output are both counted in.
 impl AudioStream for AviAudioReader {
+    fn speaker_mask(&self) -> Result<Option<u32>> {
+        Ok(self.program().speaker_mask)
+    }
+
     fn codec(&self) -> &str {
         self.program().codec
     }

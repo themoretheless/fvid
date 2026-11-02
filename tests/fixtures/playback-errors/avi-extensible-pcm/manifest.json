@@ -1,0 +1,352 @@
+{
+  "provenance": "Authored RIFF/AVI and WAVE extensible headers,dyadic PCM,neutral authored VP9. No private source media,encoder or network.",
+  "cases": [
+    {
+      "name": "p0-1-8-v8-c1",
+      "tag": 1,
+      "bits": 8,
+      "valid": 8,
+      "channels": 1,
+      "mask": 4,
+      "frames": 4099,
+      "parts": [
+        3,
+        2048,
+        2048
+      ],
+      "start": 0
+    },
+    {
+      "name": "p1-1-8-v8-c2",
+      "tag": 1,
+      "bits": 8,
+      "valid": 8,
+      "channels": 2,
+      "mask": 48,
+      "frames": 4099,
+      "parts": [
+        3,
+        2048,
+        2048
+      ],
+      "start": 0
+    },
+    {
+      "name": "p2-1-8-v8-c6",
+      "tag": 1,
+      "bits": 8,
+      "valid": 8,
+      "channels": 6,
+      "mask": 63,
+      "frames": 4099,
+      "parts": [
+        3,
+        2048,
+        2048
+      ],
+      "start": 0
+    },
+    {
+      "name": "p3-1-16-v16-c1",
+      "tag": 1,
+      "bits": 16,
+      "valid": 16,
+      "channels": 1,
+      "mask": 4,
+      "frames": 4099,
+      "parts": [
+        3,
+        2048,
+        2048
+      ],
+      "start": 0
+    },
+    {
+      "name": "p4-1-16-v16-c2",
+      "tag": 1,
+      "bits": 16,
+      "valid": 16,
+      "channels": 2,
+      "mask": 48,
+      "frames": 4099,
+      "parts": [
+        3,
+        2048,
+        2048
+      ],
+      "start": 0
+    },
+    {
+      "name": "p4-1-16-v16-c2-after-unsupported",
+      "tag": 1,
+      "bits": 16,
+      "valid": 16,
+      "channels": 2,
+      "mask": 48,
+      "frames": 4099,
+      "parts": [
+        3,
+        2048,
+        2048
+      ],
+      "start": 0,
+      "unsupported_first": true
+    },
+    {
+      "name": "p5-1-16-v16-c6",
+      "tag": 1,
+      "bits": 16,
+      "valid": 16,
+      "channels": 6,
+      "mask": 63,
+      "frames": 4099,
+      "parts": [
+        3,
+        2048,
+        2048
+      ],
+      "start": 0
+    },
+    {
+      "name": "p6-1-24-v24-c1",
+      "tag": 1,
+      "bits": 24,
+      "valid": 24,
+      "channels": 1,
+      "mask": 4,
+      "frames": 4099,
+      "parts": [
+        3,
+        2048,
+        2048
+      ],
+      "start": 0
+    },
+    {
+      "name": "p7-1-24-v24-c2",
+      "tag": 1,
+      "bits": 24,
+      "valid": 24,
+      "channels": 2,
+      "mask": 48,
+      "frames": 4099,
+      "parts": [
+        3,
+        2048,
+        2048
+      ],
+      "start": 0
+    },
+    {
+      "name": "p8-1-24-v24-c6",
+      "tag": 1,
+      "bits": 24,
+      "valid": 24,
+      "channels": 6,
+      "mask": 63,
+      "frames": 4099,
+      "parts": [
+        3,
+        2048,
+        2048
+      ],
+      "start": 0
+    },
+    {
+      "name": "p9-1-32-v32-c1",
+      "tag": 1,
+      "bits": 32,
+      "valid": 32,
+      "channels": 1,
+      "mask": 4,
+      "frames": 4099,
+      "parts": [
+        3,
+        2048,
+        2048
+      ],
+      "start": 0
+    },
+    {
+      "name": "p10-1-32-v32-c2",
+      "tag": 1,
+      "bits": 32,
+      "valid": 32,
+      "channels": 2,
+      "mask": 48,
+      "frames": 4099,
+      "parts": [
+        3,
+        2048,
+        2048
+      ],
+      "start": 0
+    },
+    {
+      "name": "p11-1-32-v32-c6",
+      "tag": 1,
+      "bits": 32,
+      "valid": 32,
+      "channels": 6,
+      "mask": 63,
+      "frames": 4099,
+      "parts": [
+        3,
+        2048,
+        2048
+      ],
+      "start": 0
+    },
+    {
+      "name": "p12-3-32-v32-c1",
+      "tag": 3,
+      "bits": 32,
+      "valid": 32,
+      "channels": 1,
+      "mask": 4,
+      "frames": 4099,
+      "parts": [
+        3,
+        2048,
+        2048
+      ],
+      "start": 0
+    },
+    {
+      "name": "p13-3-32-v32-c2",
+      "tag": 3,
+      "bits": 32,
+      "valid": 32,
+      "channels": 2,
+      "mask": 48,
+      "frames": 4099,
+      "parts": [
+        3,
+        2048,
+        2048
+      ],
+      "start": 0
+    },
+    {
+      "name": "p14-3-32-v32-c6",
+      "tag": 3,
+      "bits": 32,
+      "valid": 32,
+      "channels": 6,
+      "mask": 63,
+      "frames": 4099,
+      "parts": [
+        3,
+        2048,
+        2048
+      ],
+      "start": 0
+    },
+    {
+      "name": "p15-3-64-v64-c1",
+      "tag": 3,
+      "bits": 64,
+      "valid": 64,
+      "channels": 1,
+      "mask": 4,
+      "frames": 4099,
+      "parts": [
+        3,
+        2048,
+        2048
+      ],
+      "start": 0
+    },
+    {
+      "name": "p16-3-64-v64-c2",
+      "tag": 3,
+      "bits": 64,
+      "valid": 64,
+      "channels": 2,
+      "mask": 48,
+      "frames": 4099,
+      "parts": [
+        3,
+        2048,
+        2048
+      ],
+      "start": 0
+    },
+    {
+      "name": "p17-3-64-v64-c6",
+      "tag": 3,
+      "bits": 64,
+      "valid": 64,
+      "channels": 6,
+      "mask": 63,
+      "frames": 4099,
+      "parts": [
+        3,
+        2048,
+        2048
+      ],
+      "start": 0
+    },
+    {
+      "name": "p18-1-24-v20-c2",
+      "tag": 1,
+      "bits": 24,
+      "valid": 20,
+      "channels": 2,
+      "mask": 3,
+      "frames": 4099,
+      "parts": [
+        4099
+      ],
+      "start": 0
+    },
+    {
+      "name": "p19-1-32-v24-c6",
+      "tag": 1,
+      "bits": 32,
+      "valid": 24,
+      "channels": 6,
+      "mask": 63,
+      "frames": 4099,
+      "parts": [
+        7,
+        4092
+      ],
+      "start": 73
+    },
+    {
+      "name": "p20-3-32-v32-c9",
+      "tag": 3,
+      "bits": 32,
+      "valid": 32,
+      "channels": 9,
+      "mask": 0,
+      "frames": 4099,
+      "parts": [
+        4099
+      ],
+      "start": 0
+    }
+  ],
+  "malformed": [
+    {
+      "file": "bad-cbsize.avi",
+      "kind": "invalid",
+      "needle": "extensible fmt"
+    },
+    {
+      "file": "bad-valid.avi",
+      "kind": "invalid",
+      "needle": "valid-bit"
+    },
+    {
+      "file": "bad-mask.avi",
+      "kind": "invalid",
+      "needle": "channel mask"
+    },
+    {
+      "file": "unsupported-guid.avi",
+      "kind": "unsupported"
+    }
+  ]
+}

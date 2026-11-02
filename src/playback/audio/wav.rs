@@ -440,7 +440,7 @@ impl Wav {
     }
 }
 
-fn parse_fmt(body: &[u8], limits: &Limits) -> Result<(Pcm, Option<u32>)> {
+pub(crate) fn parse_fmt(body: &[u8], limits: &Limits) -> Result<(Pcm, Option<u32>)> {
     if body.len() < 16 {
         return Err(invalid("fmt chunk is shorter than its seven fields"));
     }

@@ -1,0 +1,245 @@
+{
+  "status": "accepted",
+  "accepted_ids": [
+    "FVID-0525"
+  ],
+  "follow_up_ids": [],
+  "count_delta": 1,
+  "accepted_count": 525,
+  "next_id": "FVID-0526",
+  "qualification": {
+    "integration": {
+      "command": [
+        "cargo",
+        "test",
+        "--locked",
+        "--offline",
+        "--no-default-features",
+        "--features",
+        "player",
+        "--test",
+        "avi_extensible_pcm",
+        "--test",
+        "avi_pcm",
+        "--test",
+        "avi_seek_index",
+        "--test",
+        "avi_g711_windows",
+        "--test",
+        "avi_audio_eof",
+        "--test",
+        "avi_adpcm_grouped",
+        "--test",
+        "avi_headers_seek",
+        "--test",
+        "avi_chunk_extent",
+        "--test",
+        "avi_index_origin",
+        "--test",
+        "avi_riff_boundary",
+        "--test",
+        "avi_duration_grid",
+        "--test",
+        "wav_valid_bits",
+        "--test",
+        "wav_unsigned8",
+        "--test",
+        "wav_aiff_au_regressions",
+        "--test",
+        "wave_speaker_playback",
+        "--test",
+        "audio_reader_eof",
+        "--test",
+        "block_audio_eof",
+        "--",
+        "--test-threads=2"
+      ],
+      "exit_code": 0,
+      "seconds": 29.985228061676025,
+      "source_stable": true,
+      "passed": 56,
+      "failed": 0,
+      "ignored": 0
+    },
+    "root-avi": {
+      "command": [
+        "cargo",
+        "test",
+        "--locked",
+        "--offline",
+        "--no-default-features",
+        "--features",
+        "player",
+        "--lib",
+        "playback_avi_audio",
+        "--",
+        "--test-threads=2"
+      ],
+      "exit_code": 0,
+      "seconds": 15.884523153305054,
+      "source_stable": true,
+      "passed": 13,
+      "failed": 0,
+      "ignored": 0
+    },
+    "container-avi": {
+      "command": [
+        "cargo",
+        "test",
+        "--locked",
+        "--offline",
+        "--no-default-features",
+        "--features",
+        "player",
+        "--lib",
+        "container::avi",
+        "--",
+        "--test-threads=2"
+      ],
+      "exit_code": 0,
+      "seconds": 0.23463201522827148,
+      "source_stable": true,
+      "passed": 17,
+      "failed": 0,
+      "ignored": 0
+    },
+    "root-wave": {
+      "command": [
+        "cargo",
+        "test",
+        "--locked",
+        "--offline",
+        "--no-default-features",
+        "--features",
+        "player",
+        "--lib",
+        "playback_wav",
+        "--",
+        "--test-threads=2"
+      ],
+      "exit_code": 0,
+      "seconds": 0.21946024894714355,
+      "source_stable": true,
+      "passed": 33,
+      "failed": 0,
+      "ignored": 0
+    },
+    "audio-worker": {
+      "command": [
+        "cargo",
+        "test",
+        "--locked",
+        "--offline",
+        "--no-default-features",
+        "--features",
+        "player",
+        "--lib",
+        "audio_thread",
+        "--",
+        "--test-threads=2"
+      ],
+      "exit_code": 0,
+      "seconds": 5.720124244689941,
+      "source_stable": true,
+      "passed": 39,
+      "failed": 0,
+      "ignored": 0
+    },
+    "root-cpal": {
+      "command": [
+        "cargo",
+        "test",
+        "--locked",
+        "--offline",
+        "--no-default-features",
+        "--features",
+        "player",
+        "--lib",
+        "audio::cpal_backend",
+        "--",
+        "--test-threads=2"
+      ],
+      "exit_code": 0,
+      "seconds": 2.5703842639923096,
+      "source_stable": true,
+      "passed": 43,
+      "failed": 0,
+      "ignored": 2
+    },
+    "owned-router": {
+      "command": [
+        "cargo",
+        "test",
+        "-p",
+        "fvid-media",
+        "--locked",
+        "--offline",
+        "--no-default-features",
+        "--features",
+        "player",
+        "--lib",
+        "owned_stereo_router",
+        "--",
+        "--test-threads=2"
+      ],
+      "exit_code": 0,
+      "seconds": 30.807815074920654,
+      "source_stable": true,
+      "passed": 3,
+      "failed": 0,
+      "ignored": 0
+    },
+    "core-check": {
+      "command": [
+        "cargo",
+        "check",
+        "--locked",
+        "--offline",
+        "--no-default-features"
+      ],
+      "exit_code": 0,
+      "seconds": 34.159812211990356,
+      "source_stable": true,
+      "passed": 0,
+      "failed": 0,
+      "ignored": 0
+    },
+    "player-check": {
+      "command": [
+        "cargo",
+        "check",
+        "--locked",
+        "--offline",
+        "--no-default-features",
+        "--features",
+        "player"
+      ],
+      "exit_code": 0,
+      "seconds": 28.702516794204712,
+      "source_stable": true,
+      "passed": 0,
+      "failed": 0,
+      "ignored": 0
+    }
+  },
+  "rust_test_executions": 204,
+  "preexisting_ignored": 2,
+  "repeats": {
+    "runs": 3,
+    "passed_per_run": 4,
+    "failed": 0
+  },
+  "without_ffmpeg_extra_executions": 4,
+  "source_frozen_count": 3025,
+  "source_frozen_manifest": "evidence/avi-extensible-pcm/candidate-source.json",
+  "fixture_files_regenerated_identically": 75,
+  "notes": [
+    "One extensible PCM format capability,not one ID per width,precision,layout or malformed counterexample.",
+    "The shared WAVE header validator becomes crate-private callable;external signatures and classic AVI PCM/G711/ADPCM behavior are preserved.",
+    "Unknown GUID subformats remain Unsupported and can precede supported audio;malformed admitted headers are Invalid.",
+    "Actual audio workers are qualified;physical audio devices and AVI video presentation are not. Two existing physical-device ignores are unchanged."
+  ],
+  "evidence_directories": [
+    "evidence/avi-extensible-pcm"
+  ]
+}

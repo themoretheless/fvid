@@ -1,8 +1,8 @@
 {
   "target": 1000,
   "counting_rule": "One independently confirmed problem or useful capability; fixture variants and baseline integration repairs are excluded. Only accepted entries count.",
-  "accepted_count": 524,
-  "next_id": "FVID-0525",
+  "accepted_count": 525,
+  "next_id": "FVID-0526",
   "entries": [
     {
       "id": "FVID-0001",
@@ -5948,6 +5948,17 @@
       "result": "Override seek_time in WAVE,AIFF and AU with integer ceiling to native sample coordinates,clamped to available frame extent before narrowing. Reuse existing exact PCM/G711 offsets and predictive history/presentation-floor machinery;raw seek_to coordinates and rewind remain unchanged. Sixteen WAVE controls,three independently authored AIFF/AU PCM16/float32 controls and12 existing synthetic MACE/GSM/TrueSpeech/G722/G726/Creative sources verify cold/warm exact native suffixes,rational clocks,EOF/MAX,raw follow-up,rewind and143 total actual-worker sessions across the six-test suite. The precise-only variant passes4/fails2,leaving speaker-mask failures;each fix is independently required. All three window adapters count as one capability. Duration behavior migration is documented in the evidence README;call seek_to with explicit native ticks for coordinate navigation. Nine frozen-source gates pass178 Rust executions,two existing physical-device ignores,core/player checks;three6-test repeats and6 executions without FFmpeg pass. All42 new fixture files regenerate byte-identically and2948 source/fixture hashes stay stable. Physical audio hardware and performance are not qualified.",
       "status": "accepted",
       "validation": "batch-534-validation.json"
+    },
+    {
+      "id": "FVID-0525",
+      "batch": 535,
+      "title": "Play WAVE_FORMAT_EXTENSIBLE PCM and float audio from AVI with validated speaker layouts",
+      "source": "src/playback/audio/avi_audio.rs",
+      "regression": "tests/avi_extensible_pcm.rs",
+      "before": "Original7af096b004 parses the authored AVI headers/records and decodes identical WAVE PCM controls,but its audio dispatch skips WAVE_FORMAT_EXTENSIBLE0xfffe. The unchanged final four-test stand passes independent container/WAVE/video/resource controls and fails native AVI playback,actual-worker playback and specific malformed-header classification. The valid files are refused as Unsupported(0xfffe),not misidentified as a decoder waveform failure.",
+      "result": "Resolve extensible PCM/IEEE-float subformats through the same crate-private WAVE format validator,retaining GUID,cbSize,valid-bit/storage-width,speaker and geometry checks. Feed validated codecs into existing AVI PCM record/sample windows and preserve explicit masks for stereo device negotiation. Unsupported subformats remain skippable so a valid later track still plays;malformed recognized headers refuse as Invalid. Twenty-two authored AVI/WAVE pairs cover unsigned8,signed16/24/32,float32/64,mono/rear-stereo/surround/discrete9,20-in24 and24-in32 precision,grouped4099-frame records,delayed start73 and valid audio following an unsupported GUID. Independent literal PCM,exact native clocks/masks,2048-frame windows,raw seek/EOF/i64MAX,rewind,file/channel/record budgets and88 actual-worker stereo sessions pass. Nine frozen gates pass204 Rust executions,two existing physical-device ignores,core/player checks;three4-test repeats and4 binary executions without FFmpeg pass. All75 fixture files regenerate byte-identically and3025 source/fixture hashes stay stable. One format capability across widths/layouts/refusals;no decoder algorithm,external public signature,performance,physical-output or AVI video-playback claim.",
+      "status": "accepted",
+      "validation": "batch-535-validation.json"
     }
   ]
 }
