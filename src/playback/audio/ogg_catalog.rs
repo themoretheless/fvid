@@ -82,6 +82,9 @@ impl AudioStream for Reader {
     fn duration(&self) -> Option<Duration> {
         self.inner.duration()
     }
+    fn stereo_router(&self) -> Result<Option<fvid_media::owned_stereo_router::StereoRouter>> {
+        self.inner.stereo_router()
+    }
     fn extra_data(&self) -> &[u8] {
         self.inner.extra_data()
     }
@@ -153,6 +156,12 @@ impl AudioStream for Joint {
         Some(crate::audio::sample_duration(
             u64::try_from(self.program.end_samples()).ok()?, self.sample_rate(),
         ))
+    }
+    fn stereo_router(&self) -> Result<Option<fvid_media::owned_stereo_router::StereoRouter>> {
+        // The linked program already routes all codecs into its WAVE union.
+        fvid_media::owned_stereo_router::StereoRouter::new(
+            self.channels(), self.program.output_channel_mask(),
+        ).map(Some).map_err(|error| crate::invalid(&error))
     }
     fn extra_data(&self) -> &[u8] {
         &[]

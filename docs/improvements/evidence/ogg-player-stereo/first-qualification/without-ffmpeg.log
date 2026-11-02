@@ -1,0 +1,8 @@
+
+running 3 tests
+test native_and_catalogue_readers_supply_exact_stereo_coefficients ... ok
+test native_tones_have_the_declared_speaker_order_before_device_routing ... ok
+test real_ogg_workers_play_exact_stereo_pcm_after_seek_and_at_eof ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 6.31s
+

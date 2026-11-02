@@ -1,0 +1,36 @@
+{
+  "before": {
+    "command": [
+      "cargo",
+      "test",
+      "--locked",
+      "--offline",
+      "--no-default-features",
+      "--features",
+      "player",
+      "--test",
+      "ogg_player_stereo",
+      "--",
+      "--test-threads=2"
+    ],
+    "exit_code": 101,
+    "source_stable": true
+  },
+  "cpal-before": {
+    "command": [
+      "cargo",
+      "test",
+      "--locked",
+      "--offline",
+      "--no-default-features",
+      "--features",
+      "player",
+      "--lib",
+      "native_ogg_speakers_reach_actual_cpal",
+      "--",
+      "--test-threads=2"
+    ],
+    "exit_code": 101,
+    "source_stable": true
+  }
+}

@@ -1,0 +1,13 @@
+# FVID-0522 — native Ogg stereo-device negotiation
+
+Original 1a41654991 omits stereo routing in native Vorbis/Opus and catalogue adapters. Native PCM controls pass, but the unchanged acceptance tests fail for missing speaker coefficients and actual-worker startup on a stereo-only sink rejecting six channels; the actual CPAL ring test also fails before routing.
+
+Supply the existing speaker-aware stereo plan, permuting Vorbis coefficients into emitted native order and forwarding catalogue routes. Preserve native PCM geometry, clocks and decoder behavior. Twenty-three authored reader cases cover mono through eight speaker channels, discrete nine-channel Opus, multiplex selection and same/mixed-codec six-to-seven-channel chains. Forty-four direct/catalogue routes and176 actual-worker sessions verify exact stereo PCM, native timestamps,seek0/30/150ms and EOF/MAX; actual CPAL ring/callback output matches an independent speaker oracle. Seven frozen-source gates pass168 Rust executions with two pre-existing physical-device ignores,core/player checks,three3-test repeats and four tests without FFmpeg. All27 fixture files regenerate identically and2890 source/fixture hashes remain stable. One device-negotiation defect across adapters; no physical-device,performance or new public-signature claim.
+
+Vorbis native channel order follows the [Xiph Vorbis I specification](https://xiph.org/vorbis/doc/Vorbis_I_spec.html), section4.3.9. Speaker weights must follow emitted PCM order; no native PCM reordering is introduced. Discrete channels use the existing role-free averaging policy.
+
+`before-source.json` and `before-results.json` capture original adapters and the failing acceptance tests; `before.log` retains the passing native control. `candidate-source.json` freezes the final source. Commands and terminal status are in `qualification-results.json`; logs preserve individual checks. Repeats and tests with nonexistent PATH/FFMPEG/FFPROBE are recorded separately. `fixture-reproducibility.json` contains byte-identical regeneration hashes.
+
+Generator: `scripts/generate_ogg_player_stereo.py`, using full FFmpeg with libvorbis only during generation. Ordinary tests read checked-in synthetic media and require neither FFmpeg nor network. The neutral synthetic VP9 video has independently checked planes.
+
+Initial authoring logs and independent decoder references are retained: five/seven-channel Opus encoder-input permutation was repaired before qualification, without changing expected role assertions. This was not an FVid decoder defect. `first-qualification/` preserves the earlier successful three-target run. Final tests add fresh150ms seek into the second Ogg link; no tests are weakened or newly ignored.

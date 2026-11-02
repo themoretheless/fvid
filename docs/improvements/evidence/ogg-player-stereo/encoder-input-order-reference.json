@@ -1,0 +1,58 @@
+[
+  {
+    "file": "opus-5.ogg",
+    "reference": "FFmpeg/libopus",
+    "intended_hz": [
+      200,
+      300,
+      400,
+      500,
+      600
+    ],
+    "observed_hz": [
+      200,
+      300,
+      500,
+      600,
+      400
+    ],
+    "input_permutation": [
+      0,
+      1,
+      4,
+      2,
+      3
+    ]
+  },
+  {
+    "file": "opus-7.ogg",
+    "reference": "FFmpeg/libopus",
+    "intended_hz": [
+      200,
+      300,
+      400,
+      80,
+      600,
+      700,
+      800
+    ],
+    "observed_hz": [
+      200,
+      300,
+      700,
+      80,
+      400,
+      600,
+      800
+    ],
+    "input_permutation": [
+      0,
+      1,
+      4,
+      3,
+      5,
+      2,
+      6
+    ]
+  }
+]

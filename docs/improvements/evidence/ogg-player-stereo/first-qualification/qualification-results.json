@@ -1,0 +1,150 @@
+{
+  "integration": {
+    "command": [
+      "cargo",
+      "test",
+      "--locked",
+      "--offline",
+      "--no-default-features",
+      "--features",
+      "player",
+      "--test",
+      "ogg_player_stereo",
+      "--test",
+      "ogg_codec_chains",
+      "--test",
+      "opus_playback",
+      "--test",
+      "ogg_framing_track",
+      "--test",
+      "ogg_duration_grid",
+      "--test",
+      "ogg_stream_identity",
+      "--test",
+      "ogg_page_sequence",
+      "--test",
+      "ogg_continuation_boundary",
+      "--test",
+      "vorbis_timestamps",
+      "--test",
+      "vorbis_large_setup",
+      "--test",
+      "vorbis_lace_clock",
+      "--test",
+      "opus_lace_default",
+      "--test",
+      "audio_reader_eof",
+      "--test",
+      "block_audio_eof",
+      "--",
+      "--test-threads=2"
+    ],
+    "exit_code": 0,
+    "seconds": 50.09754705429077,
+    "source_stable": true
+  },
+  "root-ogg": {
+    "command": [
+      "cargo",
+      "test",
+      "--locked",
+      "--offline",
+      "--no-default-features",
+      "--features",
+      "player",
+      "--lib",
+      "playback_ogg",
+      "--",
+      "--test-threads=2"
+    ],
+    "exit_code": 0,
+    "seconds": 23.72042679786682,
+    "source_stable": true
+  },
+  "root-cpal": {
+    "command": [
+      "cargo",
+      "test",
+      "--locked",
+      "--offline",
+      "--no-default-features",
+      "--features",
+      "player",
+      "--lib",
+      "audio::cpal_backend",
+      "--",
+      "--test-threads=2"
+    ],
+    "exit_code": 0,
+    "seconds": 3.1978859901428223,
+    "source_stable": true
+  },
+  "audio-worker": {
+    "command": [
+      "cargo",
+      "test",
+      "--locked",
+      "--offline",
+      "--no-default-features",
+      "--features",
+      "player",
+      "--lib",
+      "audio_thread",
+      "--",
+      "--test-threads=2"
+    ],
+    "exit_code": 0,
+    "seconds": 7.858557939529419,
+    "source_stable": true
+  },
+  "library-programmes": {
+    "command": [
+      "cargo",
+      "test",
+      "-p",
+      "fvid-media",
+      "--locked",
+      "--offline",
+      "--no-default-features",
+      "--features",
+      "player",
+      "--test",
+      "vorbis_program",
+      "--test",
+      "ogg_audio_catalog",
+      "--test",
+      "ogg_codec_chains",
+      "--",
+      "--test-threads=2"
+    ],
+    "exit_code": 0,
+    "seconds": 75.17474818229675,
+    "source_stable": true
+  },
+  "core-check": {
+    "command": [
+      "cargo",
+      "check",
+      "--locked",
+      "--offline",
+      "--no-default-features"
+    ],
+    "exit_code": 0,
+    "seconds": 41.358891010284424,
+    "source_stable": true
+  },
+  "player-check": {
+    "command": [
+      "cargo",
+      "check",
+      "--locked",
+      "--offline",
+      "--no-default-features",
+      "--features",
+      "player"
+    ],
+    "exit_code": 0,
+    "seconds": 26.786022901535034,
+    "source_stable": true
+  }
+}

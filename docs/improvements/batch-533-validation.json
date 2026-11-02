@@ -1,0 +1,179 @@
+{
+  "status": "accepted",
+  "accepted_ids": [
+    "FVID-0522"
+  ],
+  "follow_up_ids": [],
+  "count_delta": 1,
+  "accepted_count": 522,
+  "next_id": "FVID-0523",
+  "qualification": {
+    "integration": {
+      "command": [
+        "cargo",
+        "test",
+        "--locked",
+        "--offline",
+        "--no-default-features",
+        "--features",
+        "player",
+        "--test",
+        "ogg_player_stereo",
+        "--test",
+        "ogg_codec_chains",
+        "--test",
+        "opus_playback",
+        "--test",
+        "ogg_framing_track",
+        "--test",
+        "ogg_duration_grid",
+        "--test",
+        "ogg_stream_identity",
+        "--test",
+        "ogg_page_sequence",
+        "--test",
+        "ogg_continuation_boundary",
+        "--test",
+        "vorbis_timestamps",
+        "--test",
+        "vorbis_large_setup",
+        "--test",
+        "vorbis_lace_clock",
+        "--test",
+        "opus_lace_default",
+        "--test",
+        "audio_reader_eof",
+        "--test",
+        "block_audio_eof",
+        "--",
+        "--test-threads=2"
+      ],
+      "exit_code": 0,
+      "seconds": 43.70303225517273,
+      "source_stable": true
+    },
+    "root-ogg": {
+      "command": [
+        "cargo",
+        "test",
+        "--locked",
+        "--offline",
+        "--no-default-features",
+        "--features",
+        "player",
+        "--lib",
+        "playback_ogg",
+        "--",
+        "--test-threads=2"
+      ],
+      "exit_code": 0,
+      "seconds": 18.13170623779297,
+      "source_stable": true
+    },
+    "root-cpal": {
+      "command": [
+        "cargo",
+        "test",
+        "--locked",
+        "--offline",
+        "--no-default-features",
+        "--features",
+        "player",
+        "--lib",
+        "audio::cpal_backend",
+        "--",
+        "--test-threads=2"
+      ],
+      "exit_code": 0,
+      "seconds": 2.851745843887329,
+      "source_stable": true
+    },
+    "audio-worker": {
+      "command": [
+        "cargo",
+        "test",
+        "--locked",
+        "--offline",
+        "--no-default-features",
+        "--features",
+        "player",
+        "--lib",
+        "audio_thread",
+        "--",
+        "--test-threads=2"
+      ],
+      "exit_code": 0,
+      "seconds": 5.924443006515503,
+      "source_stable": true
+    },
+    "library-programmes": {
+      "command": [
+        "cargo",
+        "test",
+        "-p",
+        "fvid-media",
+        "--locked",
+        "--offline",
+        "--no-default-features",
+        "--features",
+        "player",
+        "--test",
+        "vorbis_program",
+        "--test",
+        "ogg_audio_catalog",
+        "--test",
+        "ogg_codec_chains",
+        "--",
+        "--test-threads=2"
+      ],
+      "exit_code": 0,
+      "seconds": 15.971035957336426,
+      "source_stable": true
+    },
+    "core-check": {
+      "command": [
+        "cargo",
+        "check",
+        "--locked",
+        "--offline",
+        "--no-default-features"
+      ],
+      "exit_code": 0,
+      "seconds": 0.16649985313415527,
+      "source_stable": true
+    },
+    "player-check": {
+      "command": [
+        "cargo",
+        "check",
+        "--locked",
+        "--offline",
+        "--no-default-features",
+        "--features",
+        "player"
+      ],
+      "exit_code": 0,
+      "seconds": 5.130881071090698,
+      "source_stable": true
+    }
+  },
+  "rust_test_executions": 168,
+  "preexisting_ignored": 2,
+  "repeats": {
+    "runs": 3,
+    "passed_per_run": 3,
+    "failed": 0
+  },
+  "without_ffmpeg_extra_executions": 4,
+  "source_frozen_count": 2890,
+  "source_frozen_manifest": "evidence/ogg-player-stereo/candidate-source.json",
+  "fixture_files_regenerated_identically": 27,
+  "notes": [
+    "Physical audio hardware is not qualified; two existing physical-device smoke tests remain ignored.",
+    "Encoder input permutations for authored five/seven-channel tones were corrected against independent FFmpeg/libopus decode; expected speaker roles were unchanged. Fixture-authoring repair adds zero IDs.",
+    "first-qualification preserves the prior three-target run; final qualification includes150ms seek into the second link and is not counted twice."
+  ],
+  "evidence_directories": [
+    "evidence/ogg-player-stereo"
+  ]
+}

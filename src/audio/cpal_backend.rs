@@ -2567,3 +2567,100 @@ mod ac3_codec_stereo_device_path {
         }
     }
 }
+
+#[cfg(test)]
+mod ogg_speaker_device_path {
+    use super::*;
+    use crate::audio::{AudioStep, AudioStream, DecodedAudio};
+    fn source(root: &std::path::Path, case: &serde_json::Value, catalogue: bool) -> Box<dyn AudioStream> {
+        let path = root.join(case["file"].as_str().unwrap());
+        if catalogue || case["kind"] == "mixed" {
+            Box::new(crate::playback_ogg_catalog::Reader::open(&path, case.get("index").and_then(|v|v.as_u64()).unwrap_or(0)as usize).unwrap())
+        } else {
+            let bytes = std::fs::read(path).unwrap();
+            if case["kind"] == "vorbis" {
+                Box::new(crate::playback_ogg_audio::OggAudioReader::open(bytes.as_slice(), Default::default()).unwrap())
+            } else {
+                Box::new(crate::playback_ogg_opus::OggOpusAudioReader::open(bytes.as_slice(), Default::default()).unwrap())
+            }
+        }
+    }
+    fn present(source: &dyn AudioStream, frame: DecodedAudio, packets: &mut Vec<AudioPacket>) {
+        if let Some(packet) = source.present_decoded(frame.packet, frame.source_pts).unwrap() {
+            packets.push(packet);
+        }
+    }
+    fn packets(source: &mut dyn AudioStream) -> Vec<AudioPacket> {
+        let mut decoder = source.make_decoder().unwrap();
+        let mut packets = Vec::new();
+        loop {
+            match source.next_step().unwrap() {
+                Some(AudioStep::Encoded(packet)) => {
+                    if let Some(frame) = decoder.decode_packet(&packet.data, source.decoder_stamp(&packet), packet.duration as u64).unwrap() {
+                        present(source, frame, &mut packets);
+                    }
+                }
+                Some(AudioStep::ResetDecoder) => source.reset_decoder(&mut decoder).unwrap(),
+                Some(AudioStep::Pcm(packet)) => packets.push(packet),
+                Some(AudioStep::ReconfigureDecoder) => panic!("Ogg output union must remain stable"),
+                None => {
+                    if source.drain_decoded_at_eof() {
+                        while let Some(frame) = decoder.finish_packet().unwrap() {
+                            present(source, frame, &mut packets);
+                        }
+                    }
+                    break;
+                }
+            }
+        }
+        source.validate_eof().unwrap();
+        packets
+    }
+    #[test]
+    fn native_ogg_speakers_reach_actual_cpal_ring_and_callbacks_in_stereo_order() {
+        let root = std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
+            .join("tests/fixtures/playback-errors/ogg-player-stereo");
+        let manifest: serde_json::Value = serde_json::from_slice(&std::fs::read(root.join("manifest.json")).unwrap()).unwrap();
+        let k = std::f32::consts::FRAC_1_SQRT_2;
+        for case in manifest["cases"].as_array().unwrap() {
+            for catalogue in [false, true] {
+                if case["kind"] == "mixed" && !catalogue { continue; }
+                let mut source = source(&root, case, catalogue);
+                let channels = source.channels() as usize;
+                let weights: Vec<[f32; 2]> = case["roles"].as_array().unwrap().iter().map(|role| match role.as_str().unwrap() {
+                    "FL" => [1., 0.], "FR" => [0., 1.],
+                    "FC" if channels == 1 => [1., 1.], "FC" | "BC" => [k, k],
+                    "BL" | "SL" => [k, 0.], "BR" | "SR" => [0., k],
+                    "LFE" => [0., 0.], _ => [1. / channels as f32; 2],
+                }).collect();
+                let router = source.stereo_router().unwrap().expect("Ogg source must negotiate stereo speakers");
+                let mut backend = CpalBackend::new();
+                backend.channels = 2;
+                backend.sample_rate = source.sample_rate();
+                backend.stereo_router = Some(router);
+                *backend.shared.ring.lock().unwrap() = Ring::new(2);
+                let mut expected = Vec::new();
+                for packet in packets(&mut *source) {
+                    for frame in packet.data.chunks_exact(channels * 4) {
+                        let mut stereo = [0f32; 2];
+                        for (bytes, weights) in frame.chunks_exact(4).zip(&weights) {
+                            let sample = f32::from_le_bytes(bytes.try_into().unwrap());
+                            stereo[0] += sample * weights[0]; stereo[1] += sample * weights[1];
+                        }
+                        expected.extend(stereo);
+                    }
+                    backend.push(packet).unwrap();
+                }
+                assert_eq!(backend.shared.ring.lock().unwrap().write_pos as usize * 2, expected.len());
+                backend.begin_drain().unwrap();
+                let mut actual = vec![0.; expected.len()];
+                for chunk in actual.chunks_mut(254) {
+                    backend.shared.fill_timed(chunk, source.sample_rate(), Duration::ZERO);
+                }
+                assert_eq!(actual, expected, "{} catalogue{catalogue}", case["file"]);
+                let ring = backend.shared.ring.lock().unwrap();
+                assert_eq!(ring.read_pos.load(Ordering::Relaxed), ring.write_pos);
+            }
+        }
+    }
+}

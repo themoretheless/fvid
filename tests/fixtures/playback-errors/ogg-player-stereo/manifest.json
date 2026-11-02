@@ -1,0 +1,481 @@
+{
+  "provenance": "Invented5760-frame48kHz per-channel sine float32;amplitude.012*(channel+1),LFE80Hz,other frequency200+100*WAVE-index. Encoded with FFmpeg/libvorbis and libopus as separate generation only. Explicit five/seven-channel Opus encoder input permutation verified by independent libopus reference;expected encoded-speaker tones remain unchanged. Own deterministic serials/CRC;own linked streams and explicit discrete duplicate/silent Opus map. Neutral3-frame16x16 VP9. No private source media/parameters;ordinary tests require neither FFmpeg nor network.",
+  "encoder": "ffmpeg version 9.0.2 Copyright (c) 2000-2026 the FFmpeg developers",
+  "vorbis_channel_order_reference": "https://xiph.org/vorbis/doc/Vorbis_I_spec.html#x1-800004.3.9",
+  "cases": [
+    {
+      "file": "vorbis-1.ogg",
+      "kind": "vorbis",
+      "channels": 1,
+      "roles": [
+        "FC"
+      ],
+      "mask": 4,
+      "frequencies": {
+        "FC": 200
+      }
+    },
+    {
+      "file": "vorbis-2.ogg",
+      "kind": "vorbis",
+      "channels": 2,
+      "roles": [
+        "FL",
+        "FR"
+      ],
+      "mask": 3,
+      "frequencies": {
+        "FL": 200,
+        "FR": 300
+      }
+    },
+    {
+      "file": "vorbis-3.ogg",
+      "kind": "vorbis",
+      "channels": 3,
+      "roles": [
+        "FL",
+        "FC",
+        "FR"
+      ],
+      "mask": 7,
+      "frequencies": {
+        "FL": 200,
+        "FR": 300,
+        "FC": 400
+      }
+    },
+    {
+      "file": "vorbis-4.ogg",
+      "kind": "vorbis",
+      "channels": 4,
+      "roles": [
+        "FL",
+        "FR",
+        "BL",
+        "BR"
+      ],
+      "mask": 51,
+      "frequencies": {
+        "FL": 200,
+        "FR": 300,
+        "BL": 400,
+        "BR": 500
+      }
+    },
+    {
+      "file": "vorbis-5.ogg",
+      "kind": "vorbis",
+      "channels": 5,
+      "roles": [
+        "FL",
+        "FC",
+        "FR",
+        "BL",
+        "BR"
+      ],
+      "mask": 55,
+      "frequencies": {
+        "FL": 200,
+        "FR": 300,
+        "FC": 400,
+        "BL": 500,
+        "BR": 600
+      }
+    },
+    {
+      "file": "vorbis-6.ogg",
+      "kind": "vorbis",
+      "channels": 6,
+      "roles": [
+        "FL",
+        "FC",
+        "FR",
+        "BL",
+        "BR",
+        "LFE"
+      ],
+      "mask": 63,
+      "frequencies": {
+        "FL": 200,
+        "FR": 300,
+        "FC": 400,
+        "LFE": 80,
+        "BL": 600,
+        "BR": 700
+      }
+    },
+    {
+      "file": "vorbis-7.ogg",
+      "kind": "vorbis",
+      "channels": 7,
+      "roles": [
+        "FL",
+        "FC",
+        "FR",
+        "SL",
+        "SR",
+        "BC",
+        "LFE"
+      ],
+      "mask": 1807,
+      "frequencies": {
+        "FL": 200,
+        "FR": 300,
+        "FC": 400,
+        "LFE": 80,
+        "BC": 600,
+        "SL": 700,
+        "SR": 800
+      }
+    },
+    {
+      "file": "vorbis-8.ogg",
+      "kind": "vorbis",
+      "channels": 8,
+      "roles": [
+        "FL",
+        "FC",
+        "FR",
+        "SL",
+        "SR",
+        "BL",
+        "BR",
+        "LFE"
+      ],
+      "mask": 1599,
+      "frequencies": {
+        "FL": 200,
+        "FR": 300,
+        "FC": 400,
+        "LFE": 80,
+        "BL": 600,
+        "BR": 700,
+        "SL": 800,
+        "SR": 900
+      }
+    },
+    {
+      "file": "opus-1.ogg",
+      "kind": "opus",
+      "channels": 1,
+      "roles": [
+        "FC"
+      ],
+      "mask": 4,
+      "frequencies": {
+        "FC": 200
+      }
+    },
+    {
+      "file": "opus-2.ogg",
+      "kind": "opus",
+      "channels": 2,
+      "roles": [
+        "FL",
+        "FR"
+      ],
+      "mask": 3,
+      "frequencies": {
+        "FL": 200,
+        "FR": 300
+      }
+    },
+    {
+      "file": "opus-3.ogg",
+      "kind": "opus",
+      "channels": 3,
+      "roles": [
+        "FL",
+        "FR",
+        "FC"
+      ],
+      "mask": 7,
+      "frequencies": {
+        "FL": 200,
+        "FR": 300,
+        "FC": 400
+      }
+    },
+    {
+      "file": "opus-4.ogg",
+      "kind": "opus",
+      "channels": 4,
+      "roles": [
+        "FL",
+        "FR",
+        "BL",
+        "BR"
+      ],
+      "mask": 51,
+      "frequencies": {
+        "FL": 200,
+        "FR": 300,
+        "BL": 400,
+        "BR": 500
+      }
+    },
+    {
+      "file": "opus-5.ogg",
+      "kind": "opus",
+      "channels": 5,
+      "roles": [
+        "FL",
+        "FR",
+        "FC",
+        "BL",
+        "BR"
+      ],
+      "mask": 55,
+      "frequencies": {
+        "FL": 200,
+        "FR": 300,
+        "FC": 400,
+        "BL": 500,
+        "BR": 600
+      }
+    },
+    {
+      "file": "opus-6.ogg",
+      "kind": "opus",
+      "channels": 6,
+      "roles": [
+        "FL",
+        "FR",
+        "FC",
+        "LFE",
+        "BL",
+        "BR"
+      ],
+      "mask": 63,
+      "frequencies": {
+        "FL": 200,
+        "FR": 300,
+        "FC": 400,
+        "LFE": 80,
+        "BL": 600,
+        "BR": 700
+      }
+    },
+    {
+      "file": "opus-7.ogg",
+      "kind": "opus",
+      "channels": 7,
+      "roles": [
+        "FL",
+        "FR",
+        "FC",
+        "LFE",
+        "BC",
+        "SL",
+        "SR"
+      ],
+      "mask": 1807,
+      "frequencies": {
+        "FL": 200,
+        "FR": 300,
+        "FC": 400,
+        "LFE": 80,
+        "BC": 600,
+        "SL": 700,
+        "SR": 800
+      }
+    },
+    {
+      "file": "opus-8.ogg",
+      "kind": "opus",
+      "channels": 8,
+      "roles": [
+        "FL",
+        "FR",
+        "FC",
+        "LFE",
+        "BL",
+        "BR",
+        "SL",
+        "SR"
+      ],
+      "mask": 1599,
+      "frequencies": {
+        "FL": 200,
+        "FR": 300,
+        "FC": 400,
+        "LFE": 80,
+        "BL": 600,
+        "BR": 700,
+        "SL": 800,
+        "SR": 900
+      }
+    },
+    {
+      "file": "chain-vorbis-6-vorbis-7.ogg",
+      "kind": "vorbis",
+      "channels": 9,
+      "roles": [
+        "FL",
+        "FR",
+        "FC",
+        "LFE",
+        "BL",
+        "BR",
+        "BC",
+        "SL",
+        "SR"
+      ],
+      "mask": 1855,
+      "links": [
+        "vorbis-6.ogg",
+        "vorbis-7.ogg"
+      ]
+    },
+    {
+      "file": "chain-opus-6-opus-7.ogg",
+      "kind": "opus",
+      "channels": 9,
+      "roles": [
+        "FL",
+        "FR",
+        "FC",
+        "LFE",
+        "BL",
+        "BR",
+        "BC",
+        "SL",
+        "SR"
+      ],
+      "mask": 1855,
+      "links": [
+        "opus-6.ogg",
+        "opus-7.ogg"
+      ]
+    },
+    {
+      "file": "chain-vorbis-6-opus-7.ogg",
+      "kind": "mixed",
+      "channels": 9,
+      "roles": [
+        "FL",
+        "FR",
+        "FC",
+        "LFE",
+        "BL",
+        "BR",
+        "BC",
+        "SL",
+        "SR"
+      ],
+      "mask": 1855,
+      "links": [
+        "vorbis-6.ogg",
+        "opus-7.ogg"
+      ]
+    },
+    {
+      "file": "chain-opus-7-vorbis-6.ogg",
+      "kind": "mixed",
+      "channels": 9,
+      "roles": [
+        "FL",
+        "FR",
+        "FC",
+        "LFE",
+        "BL",
+        "BR",
+        "BC",
+        "SL",
+        "SR"
+      ],
+      "mask": 1855,
+      "links": [
+        "opus-7.ogg",
+        "vorbis-6.ogg"
+      ]
+    },
+    {
+      "file": "multiplex.ogg",
+      "kind": "vorbis",
+      "channels": 6,
+      "roles": [
+        "FL",
+        "FC",
+        "FR",
+        "BL",
+        "BR",
+        "LFE"
+      ],
+      "mask": 63,
+      "frequencies": {
+        "FL": 200,
+        "FR": 300,
+        "FC": 400,
+        "LFE": 80,
+        "BL": 600,
+        "BR": 700
+      },
+      "index": 0
+    },
+    {
+      "file": "multiplex.ogg",
+      "kind": "opus",
+      "channels": 3,
+      "roles": [
+        "FL",
+        "FR",
+        "FC"
+      ],
+      "mask": 7,
+      "frequencies": {
+        "FL": 200,
+        "FR": 300,
+        "FC": 400
+      },
+      "index": 1
+    },
+    {
+      "file": "opus-discrete-9.ogg",
+      "kind": "opus",
+      "channels": 9,
+      "roles": [
+        "D0",
+        "D1",
+        "D2",
+        "D3",
+        "D4",
+        "D5",
+        "D6",
+        "D7",
+        "D8"
+      ],
+      "mask": 0,
+      "discrete": true
+    }
+  ],
+  "sha256": {
+    "neutral-video.mp4": "c624dff4c7a50651dbb167409a79d3b7cdf9a57e43599a49596d10e7df135471",
+    "frame-0.yuv16": "b4cc94ff03bd17b32107a79a64ba427cd43b6e49d209bb4d29190f3deb737a11",
+    "frame-1.yuv16": "31d05f629132273f660622387ef2865866de6688c0969265e891ad9d4c936237",
+    "frame-2.yuv16": "2f59155bee83baf25a0d39c17290257f055569e5b1d77ca8b866b1a4b2cee6f7",
+    "vorbis-1.ogg": "9f41b4c5e347ec9e6d4713fa4cceb64c9570eb47107664592e5293cfd7dc439e",
+    "vorbis-2.ogg": "36771e97c7dc8c14341a460f104686c63a8db23a8dac3b52432032c088db8510",
+    "vorbis-3.ogg": "2b3f56ae1e662c58ce30d5bb37bae79fd6342b67f2bd60400001531bb8f42f0f",
+    "vorbis-4.ogg": "c96b2175c4681130d8861db421ac16a5f14731b415c80a12a9deb3aa42b62638",
+    "vorbis-5.ogg": "8b4becfe16b989904104598b8860047f05ecc54347ac384dd5c688f429508296",
+    "vorbis-6.ogg": "86edc8df91bf70b64a96a8db539cc7324cac612e71d4aad98197a4408b894332",
+    "vorbis-7.ogg": "157f3a556a89baf3704bc9bbad485ba0adbac703bbd484b9456018c8983290b7",
+    "vorbis-8.ogg": "a6a7ef8554675ac63a01f62f5c8e3a3f5eaae1cec0168b876f2c25ae2d0527c6",
+    "opus-1.ogg": "eed413d1c2b1ed67ff8720016f98433d48d8bf84638c0daa5dfaa0a306ff13ca",
+    "opus-2.ogg": "81d8c5233060ecbea9effd96cc6348d4a2230e70d14030918faa330a0541fcf1",
+    "opus-3.ogg": "5b72b84f18ad3303d9b3c0d99296b3bf4aeafd1b99b183bb072debab79081d47",
+    "opus-4.ogg": "2b76ed9f8bbcf2d93e069be000fb44c618f6bf3f8b86c127be5f8b65fcb71fc6",
+    "opus-5.ogg": "866e4b57fb410ac17a13dd4660f29e6733c726b25c3a978aa1a6b680fbca8f37",
+    "opus-6.ogg": "350e88341545d93456af62c1a7a0a8b92d6f2b87f9ee07f8e68632b0370f6617",
+    "opus-7.ogg": "a02b5920369bc1f3f2b1389ef1085f55b98611b1507856357fb67ccdb4a19e9f",
+    "opus-8.ogg": "e32a89896887cbd14e20cc63d9095f8ebe0313f47cfef52d9e07be2444f548ec",
+    "chain-vorbis-6-vorbis-7.ogg": "7318e78542239bee62171b9c3610173f74530090cd2ee7833e1709baccac9e68",
+    "chain-opus-6-opus-7.ogg": "c912c74078ffc6bc570c437f17f2c3c26f1f416b9947bc69046bf3e0a83c018c",
+    "chain-vorbis-6-opus-7.ogg": "78237f9072f5e95e4b12ec9a512ba8fb33385e66f794e3f83c76f55e61669cc3",
+    "chain-opus-7-vorbis-6.ogg": "65616db48568b86a392fd15fdab74e167d1d160846f8134e3d3cecc31799b501",
+    "multiplex.ogg": "80d1fb52e932e724b8f5baa8089665a86a1e0247ade44188c7e033b20b1aa0dc",
+    "opus-discrete-9.ogg": "b50ecc56234de5170d9a973e557a8181fe30b6d01362b740d831f6430d98b5a4"
+  }
+}

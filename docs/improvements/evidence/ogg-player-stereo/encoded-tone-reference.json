@@ -1,0 +1,48 @@
+[
+  {
+    "file": "opus-5.ogg",
+    "file_sha256": "866e4b57fb410ac17a13dd4660f29e6733c726b25c3a978aa1a6b680fbca8f37",
+    "reference_decoder": "FFmpeg/libopus",
+    "frames": 5760,
+    "intended_hz": [
+      200,
+      300,
+      400,
+      500,
+      600
+    ],
+    "observed_hz": [
+      200,
+      300,
+      400,
+      500,
+      600
+    ],
+    "roles_match": true
+  },
+  {
+    "file": "opus-7.ogg",
+    "file_sha256": "a02b5920369bc1f3f2b1389ef1085f55b98611b1507856357fb67ccdb4a19e9f",
+    "reference_decoder": "FFmpeg/libopus",
+    "frames": 5760,
+    "intended_hz": [
+      200,
+      300,
+      400,
+      80,
+      600,
+      700,
+      800
+    ],
+    "observed_hz": [
+      200,
+      300,
+      400,
+      80,
+      600,
+      700,
+      800
+    ],
+    "roles_match": true
+  }
+]

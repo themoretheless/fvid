@@ -44,6 +44,12 @@ impl AudioStream for OggOpusAudioReader {
     fn channels(&self) -> u16 {
         self.program.channels()
     }
+    fn stereo_router(&self) -> Result<Option<fvid_media::owned_stereo_router::StereoRouter>> {
+        // Program PCM is in ascending WAVE order, or explicitly discrete.
+        fvid_media::owned_stereo_router::StereoRouter::new(
+            self.channels(), self.program.output_channel_mask().unwrap_or(0),
+        ).map(Some).map_err(|error| crate::invalid(&error))
+    }
     fn extra_data(&self) -> &[u8] {
         self.program.extra_data()
     }

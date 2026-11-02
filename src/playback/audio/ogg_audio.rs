@@ -47,6 +47,25 @@ impl AudioStream for OggAudioReader {
     fn channels(&self) -> u16 {
         self.program.channels()
     }
+    fn stereo_router(&self) -> Result<Option<fvid_media::owned_stereo_router::StereoRouter>> {
+        use fvid_media::owned_stereo_router::StereoRouter;
+        let canonical = StereoRouter::new(self.channels(), self.program.output_channel_mask())
+            .map_err(|error| crate::invalid(&error))?;
+        let order = self.program.wave_channel_order();
+        if order.iter().enumerate().all(|(wave, &native)| wave == native) {
+            return Ok(Some(canonical));
+        }
+        // Program PCM retains Vorbis order for a defined Vorbis speaker union.
+        // Move WAVE-ordered weights into that actual emitted channel order.
+        let mut weights = canonical.coefficients().to_vec();
+        for (wave, &native) in order.iter().enumerate() {
+            *weights.get_mut(native)
+                .ok_or_else(|| crate::invalid("invalid Vorbis speaker permutation"))? =
+                canonical.coefficients()[wave];
+        }
+        StereoRouter::from_coefficients(&weights)
+            .map(Some).map_err(|error| crate::invalid(&error))
+    }
     fn duration(&self) -> Option<Duration> {
         self.program.duration()
     }

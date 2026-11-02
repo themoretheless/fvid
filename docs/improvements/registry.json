@@ -1,8 +1,8 @@
 {
   "target": 1000,
   "counting_rule": "One independently confirmed problem or useful capability; fixture variants and baseline integration repairs are excluded. Only accepted entries count.",
-  "accepted_count": 521,
-  "next_id": "FVID-0522",
+  "accepted_count": 522,
+  "next_id": "FVID-0523",
   "entries": [
     {
       "id": "FVID-0001",
@@ -5912,6 +5912,20 @@
       "result": "Select the first exclusive record end after the clamped target with partition_point over the existing checked,nonempty,ordered sample table. Preserve within-record skip,packet windows,all coded/decoded data,clocks,EOF/MAX,rewind,budgets and the ADPCM path;no additional index/cache/allocation or public signature change. Two independent five-pair comparisons per file alternate the same preserved old/new executables. In the recorded default dev profile,all30 dense65536-record paired comparisons improve at least243.71x and all30 irregular16384-record comparisons at least94.72x;1024-record cases improve at least8.31x. Public-method CPU only,excluding parsing,I/O,decoding and whole-player time.16-record controls have7.13..13.70ns median extra lookup cost;no universal short-index or release-build gain claim.15 authored VP9/PCM16/A-law/mu-law AVI programs and independent float oracles verify complete PCM/native clocks,exact dense/irregular record landings,raw/wall-time boundaries,negative/EOF/MAX,rewind and actual-worker native tails/anchors. Five frozen gates pass109 Rust executions,zero ignores,core/player checks;three3-test repeats and3 no-FFmpeg executions pass. All32 fixture files regenerate byte-identically and2860 hashes remain stable. All profiles represent one seek-selection opportunity,independent of FVID-0520 packet-buffer bounds.",
       "status": "accepted",
       "validation": "batch-532-validation.json"
+    },
+    {
+      "id": "FVID-0522",
+      "batch": 533,
+      "title": "Route native Ogg speaker layouts through stereo playback devices",
+      "source": "src/playback/audio/ogg_audio.rs",
+      "regression": "tests/ogg_player_stereo.rs",
+      "before": "Original 1a41654991 omits stereo routing in native Vorbis/Opus and catalogue adapters. Native PCM controls pass, but the unchanged acceptance tests fail for missing speaker coefficients and actual-worker startup on a stereo-only sink rejecting six channels; the actual CPAL ring test also fails before routing.",
+      "result": "Supply the existing speaker-aware stereo plan, permuting Vorbis coefficients into emitted native order and forwarding catalogue routes. Preserve native PCM geometry, clocks and decoder behavior. Twenty-three authored reader cases cover mono through eight speaker channels, discrete nine-channel Opus, multiplex selection and same/mixed-codec six-to-seven-channel chains. Forty-four direct/catalogue routes and176 actual-worker sessions verify exact stereo PCM, native timestamps,seek0/30/150ms and EOF/MAX; actual CPAL ring/callback output matches an independent speaker oracle. Seven frozen-source gates pass168 Rust executions with two pre-existing physical-device ignores,core/player checks,three3-test repeats and four tests without FFmpeg. All27 fixture files regenerate identically and2890 source/fixture hashes remain stable. One device-negotiation defect across adapters; no physical-device,performance or new public-signature claim.",
+      "status": "accepted",
+      "validation": "batch-533-validation.json",
+      "additional_regressions": [
+        "src/audio/cpal_backend.rs"
+      ]
     }
   ]
 }
