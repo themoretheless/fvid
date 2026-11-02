@@ -1,0 +1,274 @@
+{
+  "status": "accepted",
+  "accepted_ids": [
+    "FVID-0518"
+  ],
+  "follow_up_ids": [],
+  "count_delta": 1,
+  "accepted_count": 518,
+  "next_id": "FVID-0519",
+  "qualification": {
+    "integration": {
+      "command": [
+        "cargo",
+        "test",
+        "--locked",
+        "--offline",
+        "--no-default-features",
+        "--features",
+        "player",
+        "--test",
+        "raw_dolby_window_lookup",
+        "--test",
+        "coded_audio_index_eof",
+        "--test",
+        "ac3_presentation_delay",
+        "--test",
+        "ac3_player_stereo",
+        "--test",
+        "ac3_reduced_compatibility",
+        "--test",
+        "eac3_programme_reader",
+        "--test",
+        "eac3_programme_selection",
+        "--test",
+        "eac3_playback",
+        "--test",
+        "eac3_changing_roles",
+        "--test",
+        "eac3_stereo_downmix",
+        "--test",
+        "eac3_expanded_stereo",
+        "--",
+        "--test-threads=2"
+      ],
+      "exit_code": 0,
+      "seconds": 58.89671206474304,
+      "source_stable": true
+    },
+    "root-dolby": {
+      "command": [
+        "cargo",
+        "test",
+        "--locked",
+        "--offline",
+        "--no-default-features",
+        "--features",
+        "player",
+        "--lib",
+        "playback_ac3",
+        "--",
+        "--test-threads=2"
+      ],
+      "exit_code": 0,
+      "seconds": 16.99916386604309,
+      "source_stable": true
+    },
+    "audio-worker": {
+      "command": [
+        "cargo",
+        "test",
+        "--locked",
+        "--offline",
+        "--no-default-features",
+        "--features",
+        "player",
+        "--lib",
+        "audio_thread",
+        "--",
+        "--test-threads=2"
+      ],
+      "exit_code": 0,
+      "seconds": 5.872064828872681,
+      "source_stable": true
+    },
+    "core-check": {
+      "command": [
+        "cargo",
+        "check",
+        "--locked",
+        "--offline",
+        "--no-default-features"
+      ],
+      "exit_code": 0,
+      "seconds": 44.35527300834656,
+      "source_stable": true
+    },
+    "player-check": {
+      "command": [
+        "cargo",
+        "check",
+        "--locked",
+        "--offline",
+        "--no-default-features",
+        "--features",
+        "player"
+      ],
+      "exit_code": 0,
+      "seconds": 34.30218696594238,
+      "source_stable": true
+    }
+  },
+  "rust_test_executions": 87,
+  "preexisting_ignored": 0,
+  "repeats": {
+    "runs": 3,
+    "passed_per_run": 10,
+    "failed": 0
+  },
+  "source_frozen_count": 2752,
+  "source_frozen_manifest": "evidence/ac3-window-lookup/candidate-source.json",
+  "measurement": {
+    "scope": "Actual private window helper only;not end-to-end player throughput",
+    "compile_command": [
+      "rustc",
+      "--edition=2024",
+      "-O",
+      "docs/improvements/evidence/ac3-window-lookup/bench.rs",
+      "-o",
+      "/private/tmp/fvid-ac3-window-bench-20261102"
+    ],
+    "compile_exit_code": 0,
+    "run_exit_code": 0,
+    "source_stable": true,
+    "frame_bytes": 40,
+    "frame_declaration_matches_production": true,
+    "checksums_equal": true,
+    "alternating_pair_order": true,
+    "summary": {
+      "1": {
+        "queries": 8192,
+        "pairs": 5,
+        "baseline_ns_per_query_median": 0.7171630859375,
+        "candidate_ns_per_query_median": 0.8392333984375,
+        "ratio_min": 0.8181818181818182,
+        "ratio_median": 0.8528935355617729,
+        "ratio_max": 0.8651155941687527
+      },
+      "4": {
+        "queries": 8192,
+        "pairs": 5,
+        "baseline_ns_per_query_median": 1.068115234375,
+        "candidate_ns_per_query_median": 1.739501953125,
+        "ratio_min": 0.5391304347826087,
+        "ratio_median": 0.617632526293499,
+        "ratio_max": 0.6264558480976918
+      },
+      "16": {
+        "queries": 8192,
+        "pairs": 5,
+        "baseline_ns_per_query_median": 3.0721435546875,
+        "candidate_ns_per_query_median": 3.173828125,
+        "ratio_min": 0.9582787579936821,
+        "ratio_median": 0.9679615384615384,
+        "ratio_max": 1.0447417858375188
+      },
+      "128": {
+        "queries": 8192,
+        "pairs": 5,
+        "baseline_ns_per_query_median": 23.13232421875,
+        "candidate_ns_per_query_median": 5.9559326171875,
+        "ratio_min": 3.8154874562074657,
+        "ratio_median": 3.857616368286445,
+        "ratio_max": 3.914490432783116
+      },
+      "1024": {
+        "queries": 8192,
+        "pairs": 5,
+        "baseline_ns_per_query_median": 155.924560546875,
+        "candidate_ns_per_query_median": 9.2264404296875,
+        "ratio_min": 16.87272727272727,
+        "ratio_median": 16.982447368421052,
+        "ratio_max": 17.470103348149777
+      },
+      "8192": {
+        "queries": 8192,
+        "pairs": 5,
+        "baseline_ns_per_query_median": 1358.891845703125,
+        "candidate_ns_per_query_median": 13.4176025390625,
+        "ratio_min": 93.07253441295546,
+        "ratio_median": 101.27679976709699,
+        "ratio_max": 102.80355029585799
+      },
+      "65536": {
+        "queries": 8192,
+        "pairs": 5,
+        "baseline_ns_per_query_median": 21465.78466796875,
+        "candidate_ns_per_query_median": 64.015625,
+        "ratio_min": 267.1114319687447,
+        "ratio_median": 444.46036162130827,
+        "ratio_max": 903.7156791703284
+      }
+    },
+    "compiler": "rustc 1.98.1 (48a229cea 2026-09-01)\nbinary: rustc\ncommit-hash: 48a229ceaefd4985c50990b14116b6d856af0985\ncommit-date: 2026-09-01\nhost: aarch64-apple-darwin\nrelease: 1.98.1\nLLVM version: 22.1.8\n",
+    "source_hashes": {
+      "docs/improvements/evidence/ac3-window-lookup/bench.rs": "55144f23e32da873783939bdcd944e4de0175a8369ce2826990998fe0a21aeb3",
+      "docs/improvements/evidence/ac3-window-lookup/before.rs": "82535d8ea5a5b42a1a7534be8aad41e0538a33605ef8a1bce18b786537bc18b5",
+      "src/playback/audio/ac3_window.rs": "61d217582e66896e6967c2cf148826cabca21e3478d2a08c0c705d8a4c92f58a",
+      "src/playback/audio/ac3.rs": "eae6b1a7821891a0435e31aca178dbf1a7af6d806636edb1136c123ce75e39e9"
+    },
+    "binary_sha256": "58d2097d1da8e22b3cdb49853bea28a7381a4e402a9936f3de913e4141909b0f",
+    "tradeoff": "At1..16 frames a sub-nanosecond lookup overhead may occur;no universal short-stream speedup or whole-player throughput claim. No extra heap index is allocated."
+  },
+  "independent_recheck": {
+    "1": {
+      "pairs": 5,
+      "ratio_min": 0.8250825082508251,
+      "ratio_median": 0.8418654109068814,
+      "baseline_ns_per_query_median": 0.676513671875,
+      "candidate_ns_per_query_median": 0.8035888671875
+    },
+    "4": {
+      "pairs": 5,
+      "ratio_min": 0.3224617652478349,
+      "ratio_median": 0.5449841908594424,
+      "baseline_ns_per_query_median": 0.92578125,
+      "candidate_ns_per_query_median": 1.68359375
+    },
+    "16": {
+      "pairs": 5,
+      "ratio_min": 0.9603960396039604,
+      "ratio_median": 0.9669165774128288,
+      "baseline_ns_per_query_median": 2.9754638671875,
+      "candidate_ns_per_query_median": 3.082275390625
+    },
+    "128": {
+      "pairs": 5,
+      "ratio_min": 3.8448997716315656,
+      "ratio_median": 3.9317446808510637,
+      "baseline_ns_per_query_median": 22.5576171875,
+      "candidate_ns_per_query_median": 5.7373046875
+    },
+    "1024": {
+      "pairs": 5,
+      "ratio_min": 16.726795096322242,
+      "ratio_median": 16.890228462101177,
+      "baseline_ns_per_query_median": 146.5606689453125,
+      "candidate_ns_per_query_median": 8.636474609375
+    },
+    "8192": {
+      "pairs": 5,
+      "ratio_min": 98.51756851059014,
+      "ratio_median": 99.17003416393008,
+      "baseline_ns_per_query_median": 1275.3194580078125,
+      "candidate_ns_per_query_median": 12.8734130859375
+    },
+    "65536": {
+      "pairs": 5,
+      "ratio_min": 332.7221881040024,
+      "ratio_median": 462.5934406596435,
+      "baseline_ns_per_query_median": 10780.044555664062,
+      "candidate_ns_per_query_median": 23.03564453125
+    }
+  },
+  "notes": [
+    "One measured lookup opportunity;all sizes and Dolby variants are one ID.",
+    "Existing authored short fixtures reused;no newly discovered functional media failure.",
+    "No heap index allocation,no public API change,no whole-player or physical-device speedup claim.",
+    "Small indexes have subnanosecond median lookup overhead;timing is evidence,not a flaky ordinary test assertion.",
+    "No existing tests or refusal expectations weakened."
+  ],
+  "evidence_directories": [
+    "evidence/ac3-window-lookup"
+  ]
+}

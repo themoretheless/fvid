@@ -1,8 +1,8 @@
 {
   "target": 1000,
   "counting_rule": "One independently confirmed problem or useful capability; fixture variants and baseline integration repairs are excluded. Only accepted entries count.",
-  "accepted_count": 517,
-  "next_id": "FVID-0518",
+  "accepted_count": 518,
+  "next_id": "FVID-0519",
   "entries": [
     {
       "id": "FVID-0001",
@@ -5868,6 +5868,17 @@
       "result": "Compute the first native sample at/after Duration using integer ceiling and clamp to stream extent before narrowing. Decode the containing FLAC frame,then trim decoded PCM before that native floor and publish exact1/rate timestamps. Preserve raw seek_to frame-coordinate/data behavior and clear precise floors on raw seek/rewind. Six authored mono/stereo8/44.1/48kHz files have4099 independently generated PCM16 frames,lossless seekable encoding and a separate neutral VP9 control. Fractional/native/frame boundaries,EOF/MAX,mode changes,rewind,full PCM/native stamps and actual worker flush anchors pass. Five frozen-source gates pass94 Rust executions,zero ignores,core/player checks;three13-test repeats pass. The new4-test suite also passes with FFmpeg absent from PATH. All14 fixture files regenerate identically and2750 source/fixture hashes stay stable. No parser/decoder algorithm,public signature,raw seek contract,performance or physical-device claim.",
       "status": "accepted",
       "validation": "batch-528-validation.json"
+    },
+    {
+      "id": "FVID-0518",
+      "batch": 529,
+      "title": "Use ordered raw Dolby decoded-window lookup without an extra heap index",
+      "source": "src/playback/audio/ac3.rs",
+      "regression": "tests/raw_dolby_window_lookup.rs",
+      "before": "Baseline c43c453bfe uses a full linear frame-index scan for every raw Dolby decoded packet, producing quadratic index walking across sequential presentation. The preserved original expression and actual replacement helper are compared using matching40-byte production Frame layout,8192 queries,size1..65536 and five alternating pairs per independent execution. Original audio correctness is not claimed defective.",
+      "result": "Lower-bound lookup reduces the per-packet lookup to logarithmic index comparisons while retaining the first equal key,missing-key1536 fallback,signed coordinate bit-pattern equivalence and no extra heap index/cache. Checked cumulative addition supports the sorted nonwrapping clock invariant and is not a separately counted overflow fix. Two final executions each contain five paired samples per size with equal result checksums:at65536 records all ten pairs improve at least267.11x;median ratios444.46x/462.59x. At128 records both medians exceed3.85x. Tiny1..16 indexes have subnanosecond median overhead;no universal short-stream or whole-player speedup claim. Offline new AC3/EAC3 controls and related real-worker/Dolby suites pass87 executions,zero ignores,core/player checks and three10-test repeats;2752 source/fixture hashes remain stable. Existing authored short tones are reused;no new parsing/decoding failure or public API change.",
+      "status": "accepted",
+      "validation": "batch-529-validation.json"
     }
   ]
 }

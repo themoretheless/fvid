@@ -1,0 +1,102 @@
+{
+  "integration": {
+    "command": [
+      "cargo",
+      "test",
+      "--locked",
+      "--offline",
+      "--no-default-features",
+      "--features",
+      "player",
+      "--test",
+      "raw_dolby_window_lookup",
+      "--test",
+      "coded_audio_index_eof",
+      "--test",
+      "ac3_presentation_delay",
+      "--test",
+      "ac3_player_stereo",
+      "--test",
+      "ac3_reduced_compatibility",
+      "--test",
+      "eac3_programme_reader",
+      "--test",
+      "eac3_programme_selection",
+      "--test",
+      "eac3_playback",
+      "--test",
+      "eac3_changing_roles",
+      "--test",
+      "eac3_stereo_downmix",
+      "--test",
+      "eac3_expanded_stereo",
+      "--",
+      "--test-threads=2"
+    ],
+    "exit_code": 0,
+    "seconds": 58.89671206474304,
+    "source_stable": true
+  },
+  "root-dolby": {
+    "command": [
+      "cargo",
+      "test",
+      "--locked",
+      "--offline",
+      "--no-default-features",
+      "--features",
+      "player",
+      "--lib",
+      "playback_ac3",
+      "--",
+      "--test-threads=2"
+    ],
+    "exit_code": 0,
+    "seconds": 16.99916386604309,
+    "source_stable": true
+  },
+  "audio-worker": {
+    "command": [
+      "cargo",
+      "test",
+      "--locked",
+      "--offline",
+      "--no-default-features",
+      "--features",
+      "player",
+      "--lib",
+      "audio_thread",
+      "--",
+      "--test-threads=2"
+    ],
+    "exit_code": 0,
+    "seconds": 5.872064828872681,
+    "source_stable": true
+  },
+  "core-check": {
+    "command": [
+      "cargo",
+      "check",
+      "--locked",
+      "--offline",
+      "--no-default-features"
+    ],
+    "exit_code": 0,
+    "seconds": 44.35527300834656,
+    "source_stable": true
+  },
+  "player-check": {
+    "command": [
+      "cargo",
+      "check",
+      "--locked",
+      "--offline",
+      "--no-default-features",
+      "--features",
+      "player"
+    ],
+    "exit_code": 0,
+    "seconds": 34.30218696594238,
+    "source_stable": true
+  }
+}

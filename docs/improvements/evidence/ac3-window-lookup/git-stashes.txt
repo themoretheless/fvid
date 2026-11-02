@@ -1,0 +1,4 @@
+stash@{0}: On main: Preserve local Finder metadata before final consolidation
+stash@{1}: On main: Runtime SQLite sidecars preserved before branch consolidation 2026-10-04
+stash@{2}: On main: reader table cleanup
+stash@{3}: On main: save reader table

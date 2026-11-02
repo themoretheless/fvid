@@ -1,0 +1,16 @@
+{"frame_bytes":40,"scope":"actual window helper only;not playback throughput"}
+{"frames":1024,"queries":1024,"round":0,"baseline_ns":153542,"candidate_ns":150083,"checksum":786432}
+{"frames":1024,"queries":1024,"round":1,"baseline_ns":151042,"candidate_ns":152417,"checksum":786432}
+{"frames":1024,"queries":1024,"round":2,"baseline_ns":151834,"candidate_ns":151750,"checksum":786432}
+{"frames":1024,"queries":1024,"round":3,"baseline_ns":149750,"candidate_ns":150541,"checksum":786432}
+{"frames":1024,"queries":1024,"round":4,"baseline_ns":151000,"candidate_ns":532459,"checksum":786432}
+{"frames":8192,"queries":8192,"round":0,"baseline_ns":10246750,"candidate_ns":10459500,"checksum":6291456}
+{"frames":8192,"queries":8192,"round":1,"baseline_ns":10201667,"candidate_ns":10387584,"checksum":6291456}
+{"frames":8192,"queries":8192,"round":2,"baseline_ns":10127709,"candidate_ns":10402250,"checksum":6291456}
+{"frames":8192,"queries":8192,"round":3,"baseline_ns":10365833,"candidate_ns":10288625,"checksum":6291456}
+{"frames":8192,"queries":8192,"round":4,"baseline_ns":10092250,"candidate_ns":9966750,"checksum":6291456}
+{"frames":65536,"queries":8192,"round":0,"baseline_ns":86149666,"candidate_ns":85935917,"checksum":6291456}
+{"frames":65536,"queries":8192,"round":1,"baseline_ns":85547375,"candidate_ns":86337042,"checksum":6291456}
+{"frames":65536,"queries":8192,"round":2,"baseline_ns":85445833,"candidate_ns":86145792,"checksum":6291456}
+{"frames":65536,"queries":8192,"round":3,"baseline_ns":86013667,"candidate_ns":86226959,"checksum":6291456}
+{"frames":65536,"queries":8192,"round":4,"baseline_ns":85384875,"candidate_ns":85585209,"checksum":6291456}

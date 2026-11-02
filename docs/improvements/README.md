@@ -3561,3 +3561,7 @@ Eight public payload adapters now return empty beyond their declared packet coun
 ## Batch 528 — FVID-0517: bare FLAC precise time seek
 
 Duration navigation now presents the first native FLAC sample at/after the request while preserving raw packet seek behavior. Six independent rate/channel files verify PCM,clocks,fractional/frame boundaries,EOF/MAX,mode changes and actual workers. Five gates pass94 executions,two build checks and three13-test repeats;the new suite passes without FFmpeg. Evidence:`evidence/flac-sample-seek/README.md`. Accepted total517/1000.
+
+## Batch 529 — FVID-0518: ordered raw Dolby window lookup
+
+Linear per-packet frame-index scanning becomes logarithmic without an extra heap index. Two five-pair benchmark runs preserve result checksums and improve65536-record lookup at least267x;this is a helper measurement,not player throughput. Tiny indexes have subnanosecond median overhead.87 test executions,zero ignores,two build checks and three10-test repeats pass with2752 frozen hashes. Existing authored Dolby fixtures and actual-worker controls remain intact. Evidence:`evidence/ac3-window-lookup/README.md`. Accepted total518/1000.

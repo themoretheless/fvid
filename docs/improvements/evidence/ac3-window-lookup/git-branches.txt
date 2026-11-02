@@ -1,0 +1,264 @@
++ codex/aac-eld-ld-sbr-20261026                                             ff68df1f36 (/private/tmp/fvid-export-20261025-freeze) Implement owned AAC-ELD LD-SBR playback and seek
+  codex/aac-eld-owned-20261025                                              ea29556998 fix(aac): retain SSR packet clocks through variable and quantized playback
++ codex/aac-ep-srcpc-20261028                                               acd57fa2c6 (/Users/themoretheless/.codex/worktrees/aac-eld-extension-gaps/fvid) [origin/codex/aac-ep-srcpc-20261028: ahead 154] test(media): isolate exposure from external RGB conversion
+  codex/ac3-alternate-bsi-downmix-20261025                                  b12c5408d8 feat(ac3): expose alternate BSI and apply selected LoRo mix levels
+  codex/ac3-player-stereo-20261025                                          ff4f5086b6 feat(ac3): negotiate explicit stereo geometry and player BSI downmix
+  codex/ac3-reduced-rate-compatibility-20261025                             c69d713048 feat(ac3): decode reduced-rate BSID 9 and 10 compatibility streams
+  codex/ac3-stereo-downmix-policy-20261025                                  8b774c18ae feat(ac3): add stereo downmix selection and session headroom policy
+* codex/deliver-fvid-20261029                                               c43c453bfe docs: record batch 528 publication verification
+  codex/dolby-little-endian-20261025                                        c1ab8d70dd fix(codecs): support Dolby little-endian words in native readers
+  codex/dolby-reduced-rate-allocation-20261025                              6c1422275f fix(eac3): apply reduced-rate bit allocation to native PCM decoding
+  codex/eac3-dec3-height-union-20261025                                     24166a6dbc fix(mp4): merge EAC3 declared roles with full selected-description header maps
+  codex/eac3-expanded-stereo-20261025                                       7cf101a6f5 fix(eac3): accept expanded inputs through their signalled stereo downmix
+  codex/eac3-independent-native-20261025                                    4ffbc8b676 fix(eac3): retain incomplete implicit programmes after EOF refusal
+  codex/eac3-matroska-auto-layout-20261025                                  f57e06a525 fix(matroska): negotiate EAC3 speaker unions from selected audio headers
+  codex/eac3-mp4-auto-layout-20261025                                       5ab5a01c30 fix(mp4): retain dec3 and negotiate EAC3 programme speaker layouts
+  codex/eac3-native-replacement-20261025                                    85af8db99d fix(eac3): assemble native replacement programmes within one to six channels
+  codex/eac3-optional-dependent-reader-20261025                             13b6a51329 fix(eac3): admit optional dependent programmes through native readers
+  codex/eac3-output-layout-query-20261025                                   7b5876d379 feat(eac3): expose selected PCM speaker roles through sources and decoders
+  codex/eac3-player-stereo-20261025                                         38d4832a2b feat(player): negotiate codec-aware EAC3 stereo output across real readers
+  codex/eac3-raw-auto-layout-20261025                                       e266d192e3 fix(eac3): negotiate raw programme speaker unions during indexing
+  codex/eac3-short-word-order-20261025                                      a293b8e5f2 fix(eac3): normalize short frame headers before programme setup bounds
+  codex/eac3-stable-speaker-layout-20261025                                 6b2fbfb16f feat(eac3): negotiate stable native speaker output across changing maps
+  codex/eac3-stereo-downmix-policy-20261025                                 bb0ecc8913 feat(eac3): expose container stereo decoding without raw priming
+  codex/hevc-additional-layer-sets-20261025                                 1faefd5651 feat(hevc): extract and decode additional layer sets with selected seek priming
+  codex/hevc-automatic-ols-epochs-20261025                                  5087d06510 fix(hevc): reselect automatic output layer sets across VPS epochs
+  codex/hevc-idr-output-epochs-20261025                                     c823ebfd6b fix(hevc): preserve sub-DPB output across repeated target IDR epochs
+  codex/hevc-independent-layer-rewrite-20261025                             c3308ded00 feat(hevc): rewrite independent layers and decode VPS-less streams with CLVS HDR
+  codex/hevc-matroska-layered-20261025                                      ef7d2e47de feat(hevc): decode layered Matroska through owned output scheduling
+  codex/hevc-matroska-vps-epochs-20261025                                   ce9996e025 fix(hevc): select Matroska temporal substreams per VPS epoch
+  codex/hevc-mp4-description-epochs-20261025                                149b340c66 feat(hevc): decode MP4 description epochs and preserve deferred HDR
+  codex/hevc-topology-transitions-20261025                                  89474345c5 fix(hevc): retain owned decoding across base and multilayer sequences
+  codex/hevc-vpsless-layered-epochs-20261025                                bbd4269180 feat(hevc): hand VPS-less prefixes to actual layered epochs in native readers
+  codex/integrate-preserved-branches-20261022                               d135d17fd1 chore: exclude unqualified historic experiments and temporary probes
+  codex/mixed-layered-hevc-descriptions-20261025                            7fd7054eb0 feat(mp4): route mixed HEVC description windows through owned layered pipeline
+  codex/mp4-audio-export-transitions-20261025                               2d1c25e3d9 feat(audio): export MP4 across decoder configuration changes
+  codex/mp4-audio-geometry-20261025                                         f7c9a39965 fix(aac): initialize cold PS synthesis tables without large stack temporaries
+  codex/mp4-dolby-sample-clock-20261025                                     15b353bdc3 fix(player): recover AC-3 sample clocks and intra-tick MP4 seek
+  codex/mp4-eac3-programme-clock-20261025                                   d185a1fd83 fix(player): recover selected E-AC-3 programme clocks in MP4
+  codex/mp4-quantized-audio-clock-20261025                                  a77614b9c2 fix(audio): recover MP4 sample clocks beneath quantized container ticks
+  codex/mp4-quantized-audio-playback-20261025                               d3710a25a2 fix(audio): verify exact MP4 seek commands and native playback regressions
+  codex/mp4-used-description-dispatch-20261025                              b33b794e42 fix(mp4): retain unused video descriptions and dispatch from referenced entries
+  codex/native-mp4-audio-transitions-20261025                               451ae6fe1b fix(audio): accept dynamic MP4 descriptions in native file APIs
+  codex/preserve-active-drafts-20261008-aac-pulse                           4590f3f195 WIP: preserve unfinished active drafts before AAC pulse delivery
+  codex/preserve-active-drafts-20261008-adts                                4c53566b95 WIP: preserve unfinished AV1 qualification before AAC discovery delivery
+  codex/preserve-active-drafts-20261008-chroma                              27b3395594 WIP: preserve unfinished codec player and verification drafts before chroma delivery
+  codex/preserve-active-drafts-20261008-grain                               f36c02696b WIP: preserve active drafts and unfinished full-chroma grain qualification
+  codex/preserve-active-drafts-20261008-he-aac                              7a983d30c3 WIP: preserve unfinished AV1 qualification before HE-AAC delivery
+  codex/preserve-active-drafts-20261008-intrabc                             bc6465a895 WIP: preserve unfinished codec player and verification drafts before intrabc delivery
+  codex/preserve-active-drafts-20261008-operating-points                    66513254b7 WIP: preserve unfinished codec player and verification drafts before operating point delivery
+  codex/preserve-active-drafts-20261008-ps-mapping                          4735d03bd8 WIP: preserve active PS mapping and AV1 qualification drafts
+  codex/preserve-active-drafts-20261008-quant-matrix                        cc446e9576 WIP: preserve active drafts and verification state after quant matrix qualification
+  codex/preserve-active-drafts-20261008-restoration                         4bdb138555 WIP: preserve active drafts and AV1 restoration qualification before delivery
+  codex/preserve-active-drafts-20261008-reverse-motion                      8daaf27548 WIP: preserve unfinished active drafts before reverse-motion delivery
+  codex/preserve-active-drafts-20261008-sbr                                 6671dda862 WIP: preserve unfinished active drafts before SBR frequency delivery
+  codex/preserve-active-drafts-20261008-sbr-assembly                        f0b91638ac WIP: preserve unfinished AV1 qualification before SBR assembly delivery
+  codex/preserve-active-drafts-20261008-sbr-history                         03853a851a WIP: preserve active AV1 qualification before SBR history delivery
+  codex/preserve-active-drafts-20261008-sbr-qmf                             177cb28b9d WIP: preserve unfinished active drafts before SBR QMF delivery
+  codex/preserve-active-drafts-20261008-scaled                              e1cc39dd37 WIP: preserve active player HEVC and optimization drafts before AV1 delivery
+  codex/preserve-active-drafts-20261008-superres                            99a2e212a8 WIP: preserve active drafts and unfinished segmentation qualification before superres delivery
+  codex/preserve-active-drafts-20261008-temporal                            9b153597d2 WIP: preserve unfinished codec player and verification drafts before temporal motion delivery
+  codex/preserve-active-drafts-20261008-tile-list                           07bad65ac1 WIP: preserve active codec player and verification drafts before tile-list delivery
+  codex/preserve-active-drafts-20261009-ps-absence                          cf14432df6 WIP: preserve unfinished PS absence acceptance and active AV1 qualification
+  codex/preserve-active-lossy-palette-20261008                              40639894e5 WIP: preserve active drafts and unfinished lossy AV1 palette qualification
+  codex/preserve-active-media-20261025-geometry-cutoff                      bf819a373f wip: preserve concurrent media budget and regression work at delivery cutoff
+  codex/preserve-active-player-20261008                                     842f3bf3ad WIP: preserve active player VideoToolbox and optimization drafts
++ codex/preserve-av1-active-20261009-final                                  fcf429296d (/Users/themoretheless/.codex/worktrees/verify-av1-alt-lf/fvid) WIP: preserve active AV1 qualification before final delivery
+  codex/preserve-av1-active-20261009-ps-coupling                            768eb0ecf8 WIP: preserve active AV1 qualification before PS coupling delivery
+  codex/preserve-av1-active-20261009-sbr-delivery                           4394aafefb WIP: preserve active AV1 qualification before SBR delivery
+  codex/preserve-av1-verification-20261007                                  f1e6592e8c WIP: preserve AV1 palette verification and unfinished lossy filter coverage
+  codex/preserve-av1-verification-20261008-aac-pulse                        2f88964e35 WIP: preserve unfinished active drafts before AAC pulse delivery
+  codex/preserve-av1-verification-20261008-chroma                           be87ed64fe WIP: preserve unfinished codec player and verification drafts before chroma delivery
+  codex/preserve-av1-verification-20261008-grain                            d3bce14439 WIP: preserve active drafts and unfinished full-chroma grain qualification
+  codex/preserve-av1-verification-20261008-intrabc                          7a1d8f1f59 WIP: preserve unfinished codec player and verification drafts before intrabc delivery
+  codex/preserve-av1-verification-20261008-operating-points                 6eeb92186c WIP: preserve unfinished codec player and verification drafts before operating point delivery
+  codex/preserve-av1-verification-20261008-ps-mapping                       630a0e0db0 WIP: preserve active PS mapping and AV1 qualification drafts
+  codex/preserve-av1-verification-20261008-quant-matrix                     40882d86f8 WIP: preserve active drafts and verification state after quant matrix qualification
+  codex/preserve-av1-verification-20261008-restoration                      f83c0e3cf8 WIP: preserve active drafts and AV1 restoration qualification before delivery
+  codex/preserve-av1-verification-20261008-reverse-motion                   cdb52e1a8a WIP: preserve unfinished active drafts before reverse-motion delivery
+  codex/preserve-av1-verification-20261008-sbr                              40d33099a0 WIP: preserve unfinished active drafts before SBR frequency delivery
+  codex/preserve-av1-verification-20261008-superres                         a47d5eb21c WIP: preserve active drafts and unfinished segmentation qualification before superres delivery
+  codex/preserve-av1-verification-20261008-temporal                         272f2fdf30 WIP: preserve unfinished codec player and verification drafts before temporal motion delivery
+  codex/preserve-av1-verification-20261008-tile-list                        be4173d9f4 WIP: preserve active codec player and verification drafts before tile-list delivery
+  codex/preserve-av1-verification-20261009-ps-absence                       83aab28162 WIP: preserve unfinished PS absence acceptance and active AV1 qualification
+  codex/preserve-codec-player-wip-20261006                                  4990d64b28 WIP: preserve codec POC gap fixtures and player work
+  codex/preserve-concurrent-av1-fixtures-20261009                           57c1755f93 feat(test): add AV1 delta-lf and restoration-depth regression fixtures
+  codex/preserve-concurrent-memory-draft-1792621241                         a044b3623d wip: preserve remaining live pool source and session evidence
+  codex/preserve-dependent-sbr-draft-20261009                               7fa7ec731b WIP: preserve dependent AAC SBR generator and acceptance draft
+  codex/preserve-dolby-programmes-seek-20261024                             e493eadd0b fix(player): present ready seek frames without waiting for spool lead
+  codex/preserve-field-longterm-progress-20261006                           29519207b1 WIP: preserve unqualified mixed-parity long-term fixtures and player progress
+  codex/preserve-fvid-session-20261021-203652                               19d74b05e6 wip(fvid): preserve verified improvements and active codec drafts
+  codex/preserve-hevc-colour-plane-draft-20261009                           012782f74b WIP: preserve separate colour plane fixture metadata helper
+  codex/preserve-hevc-context-wip-20261007                                  0fb5780bdd WIP: preserve unfinished HEVC context and neighbor cache drafts
+  codex/preserve-hevc-motion-identity-20261012                              14ea88f13e WIP: preserve unfinished HEVC layer-aware motion identity
+  codex/preserve-live-gpu-draft-20261022                                    4f94c30e48 wip: preserve live GPU work and session evidence at delivery cutoff
+  codex/preserve-media-budget-native-api-20261025                           f5ffd91965 wip: preserve media budget work and native API compatibility at verified cutoff
+  codex/preserve-media-budget-quantized-clock-20261025                      1d7af07940 wip: preserve concurrent media budgets with quantized clock integration
+  codex/preserve-media-budgets-ac3-bsid-20261025                            d1f12e2269 wip: preserve active media budgets alongside AC3 BSID compatibility
+  codex/preserve-media-budgets-ac3-clock-20261025                           3cc91ce888 wip: preserve media budgets alongside verified AC-3 playback clock
+  codex/preserve-media-budgets-ac3-player-stereo-20261025                   f0b8e90602 wip: preserve active media budgets alongside AC3 player stereo routing
+  codex/preserve-media-budgets-ac3-stereo-20261025                          90bf6daf4c wip: preserve active media budgets alongside AC3 stereo policy
+  codex/preserve-media-budgets-alternate-bsi-20261025                       6b3cb7638e wip: preserve active media budgets alongside alternate AC3 BSI support
+  codex/preserve-media-budgets-dolby-word-order-20261025                    156505f4cf wip: preserve media budgets alongside verified native Dolby word order
+  codex/preserve-media-budgets-eac3-clock-20261025                          601bad127a wip: preserve media budgets alongside verified E-AC-3 programme clocks
+  codex/preserve-media-budgets-eac3-expanded-stereo-20261025                5d1ecd10f5 wip: preserve active media budgets alongside expanded EAC3 stereo acceptance
+  codex/preserve-media-budgets-eac3-output-layout-20261025                  36ca9c233c wip: preserve active media budgets alongside EAC3 stable output layouts
+  codex/preserve-media-budgets-eac3-player-stereo-20261025                  53be3f7628 wip: preserve active media budgets alongside EAC3 player stereo routing
+  codex/preserve-media-budgets-eac3-stereo-20261025                         019562864b wip: preserve active media budgets alongside EAC3 stereo policy
+  codex/preserve-media-budgets-playback-clock-20261025                      62b7cd8b4b wip: preserve media budget campaign alongside verified MP4 playback clocks
+  codex/preserve-media-budgets-push-20261025                                888d928afe wip: preserve media budget campaign before session publication
+  codex/preserve-media-budgets-reduced-allocation-20261025                  729ffa54b4 wip: preserve media budget campaign alongside reduced-rate decoding
+  codex/preserve-motion-tonemap-wip-20261007                                b56a2e5f9e WIP: preserve frame-to-field motion adapter and tonemap cache draft
+  codex/preserve-player-progress-20261006                                   d06d70a40f WIP: preserve updated player buffer progress rendering
+  codex/preserve-post-validation-work-20261022                              397d48d55d wip: preserve concurrent post-validation work at publication cutoff
+  codex/preserve-push-or-clear-20261025-055421-0                            c65e5949ea wip: preserve active worktree 0 before push-or-clear 20261025-055421
+  codex/preserve-push-or-clear-20261025-055421-1                            584f49f4c6 wip: preserve active worktree 1 before push-or-clear 20261025-055421
+  codex/preserve-push-or-clear-20261025-100215-0                            fbb5c6c034 wip: preserve active worktree 0 at push cutoff 20261025-100215
+  codex/preserve-push-or-clear-20261025-100215-1                            d9f8321781 wip: preserve active worktree 1 at push cutoff 20261025-100215
+  codex/preserve-push-or-clear-20261025-121704-0                            d3ea761513 wip: preserve active worktree 0 at push cutoff 20261025-121704
+  codex/preserve-push-or-clear-20261025-181749-0                            72199946e2 wip: preserve media budget regression drafts before push-or-clear
+  codex/preserve-push-or-clear-20261025-181749-1                            12358a48ff wip: preserve HEVC independent layer rewrite draft before push-or-clear
+  codex/preserve-push-or-clear-20261025-201714-0                            703c0624b4 wip: preserve active worktree 0 at push-or-clear cutoff 20261025-201714
+  codex/preserve-push-or-clear-20261025-201714-1                            ae1ecfe800 wip: preserve active worktree 1 at push-or-clear cutoff 20261025-201714
+  codex/preserve-push-or-clear-20261029-0                                   35739ac236 wip: preserve worktree 0 at push-or-clear cutoff 2026-10-29
+  codex/preserve-push-or-clear-20261029-1                                   8ba7c70e95 wip: preserve worktree 1 at push-or-clear cutoff 2026-10-29
+  codex/preserve-rgb-lut-wip-20261006                                       b2eb8f063f [origin/codex/preserve-rgb-lut-wip-20261006] WIP: preserve unfinished RGB matrix lookup draft
+  codex/preserve-session-20261024-afdd8e16                                  afdd8e16e3 wip: preserve current media regressions, player and optimization work
+  codex/preserve-session-push-20261025                                      b8a7fd5293 wip: preserve active media budget changes at push cutoff
+  codex/preserve-ssr-ps-preparation-20261009                                4970771713 [origin/codex/preserve-ssr-ps-preparation-20261009] WIP: preserve SSR PS syntax preparation and synthetic gap reproduction
+  codex/verify-b-field-gaps-20261006                                        f88fd6dc01 WIP: isolate owned field gap qualification for verification
++ main                                                                      5e8814e76c (/Users/themoretheless/Documents/Sources/fvid) [origin/main: behind 94] Merge remote-tracking branch 'origin/main'
+  remotes/origin/HEAD                                                       -> origin/main
+  remotes/origin/codex/aac-eld-ld-sbr-20261026                              ff68df1f36 Implement owned AAC-ELD LD-SBR playback and seek
+  remotes/origin/codex/aac-eld-owned-20261025                               ea29556998 fix(aac): retain SSR packet clocks through variable and quantized playback
+  remotes/origin/codex/aac-ep-srcpc-20261028                                476bf2c367 Decode owned EP2 protected AAC-ELD access units and playback
+  remotes/origin/codex/ac3-alternate-bsi-downmix-20261025                   b12c5408d8 feat(ac3): expose alternate BSI and apply selected LoRo mix levels
+  remotes/origin/codex/ac3-player-stereo-20261025                           ff4f5086b6 feat(ac3): negotiate explicit stereo geometry and player BSI downmix
+  remotes/origin/codex/ac3-reduced-rate-compatibility-20261025              c69d713048 feat(ac3): decode reduced-rate BSID 9 and 10 compatibility streams
+  remotes/origin/codex/ac3-stereo-downmix-policy-20261025                   8b774c18ae feat(ac3): add stereo downmix selection and session headroom policy
+  remotes/origin/codex/deliver-fvid-20261029                                c43c453bfe docs: record batch 528 publication verification
+  remotes/origin/codex/dolby-little-endian-20261025                         c1ab8d70dd fix(codecs): support Dolby little-endian words in native readers
+  remotes/origin/codex/dolby-reduced-rate-allocation-20261025               6c1422275f fix(eac3): apply reduced-rate bit allocation to native PCM decoding
+  remotes/origin/codex/eac3-dec3-height-union-20261025                      24166a6dbc fix(mp4): merge EAC3 declared roles with full selected-description header maps
+  remotes/origin/codex/eac3-expanded-stereo-20261025                        7cf101a6f5 fix(eac3): accept expanded inputs through their signalled stereo downmix
+  remotes/origin/codex/eac3-independent-native-20261025                     4ffbc8b676 fix(eac3): retain incomplete implicit programmes after EOF refusal
+  remotes/origin/codex/eac3-matroska-auto-layout-20261025                   f57e06a525 fix(matroska): negotiate EAC3 speaker unions from selected audio headers
+  remotes/origin/codex/eac3-mp4-auto-layout-20261025                        5ab5a01c30 fix(mp4): retain dec3 and negotiate EAC3 programme speaker layouts
+  remotes/origin/codex/eac3-native-replacement-20261025                     85af8db99d fix(eac3): assemble native replacement programmes within one to six channels
+  remotes/origin/codex/eac3-optional-dependent-reader-20261025              13b6a51329 fix(eac3): admit optional dependent programmes through native readers
+  remotes/origin/codex/eac3-output-layout-query-20261025                    7b5876d379 feat(eac3): expose selected PCM speaker roles through sources and decoders
+  remotes/origin/codex/eac3-player-stereo-20261025                          38d4832a2b feat(player): negotiate codec-aware EAC3 stereo output across real readers
+  remotes/origin/codex/eac3-raw-auto-layout-20261025                        e266d192e3 fix(eac3): negotiate raw programme speaker unions during indexing
+  remotes/origin/codex/eac3-short-word-order-20261025                       a293b8e5f2 fix(eac3): normalize short frame headers before programme setup bounds
+  remotes/origin/codex/eac3-stable-speaker-layout-20261025                  6b2fbfb16f feat(eac3): negotiate stable native speaker output across changing maps
+  remotes/origin/codex/eac3-stereo-downmix-policy-20261025                  bb0ecc8913 feat(eac3): expose container stereo decoding without raw priming
+  remotes/origin/codex/hevc-additional-layer-sets-20261025                  1faefd5651 feat(hevc): extract and decode additional layer sets with selected seek priming
+  remotes/origin/codex/hevc-automatic-ols-epochs-20261025                   5087d06510 fix(hevc): reselect automatic output layer sets across VPS epochs
+  remotes/origin/codex/hevc-idr-output-epochs-20261025                      c823ebfd6b fix(hevc): preserve sub-DPB output across repeated target IDR epochs
+  remotes/origin/codex/hevc-independent-layer-rewrite-20261025              c3308ded00 feat(hevc): rewrite independent layers and decode VPS-less streams with CLVS HDR
+  remotes/origin/codex/hevc-matroska-layered-20261025                       ef7d2e47de feat(hevc): decode layered Matroska through owned output scheduling
+  remotes/origin/codex/hevc-matroska-vps-epochs-20261025                    ce9996e025 fix(hevc): select Matroska temporal substreams per VPS epoch
+  remotes/origin/codex/hevc-mp4-description-epochs-20261025                 149b340c66 feat(hevc): decode MP4 description epochs and preserve deferred HDR
+  remotes/origin/codex/hevc-topology-transitions-20261025                   89474345c5 fix(hevc): retain owned decoding across base and multilayer sequences
+  remotes/origin/codex/hevc-vpsless-layered-epochs-20261025                 bbd4269180 feat(hevc): hand VPS-less prefixes to actual layered epochs in native readers
+  remotes/origin/codex/integrate-preserved-branches-20261022                d135d17fd1 chore: exclude unqualified historic experiments and temporary probes
+  remotes/origin/codex/mixed-layered-hevc-descriptions-20261025             7fd7054eb0 feat(mp4): route mixed HEVC description windows through owned layered pipeline
+  remotes/origin/codex/mp4-audio-export-transitions-20261025                2d1c25e3d9 feat(audio): export MP4 across decoder configuration changes
+  remotes/origin/codex/mp4-audio-geometry-20261025                          f7c9a39965 fix(aac): initialize cold PS synthesis tables without large stack temporaries
+  remotes/origin/codex/mp4-dolby-sample-clock-20261025                      15b353bdc3 fix(player): recover AC-3 sample clocks and intra-tick MP4 seek
+  remotes/origin/codex/mp4-eac3-programme-clock-20261025                    d185a1fd83 fix(player): recover selected E-AC-3 programme clocks in MP4
+  remotes/origin/codex/mp4-quantized-audio-clock-20261025                   a77614b9c2 fix(audio): recover MP4 sample clocks beneath quantized container ticks
+  remotes/origin/codex/mp4-quantized-audio-playback-20261025                d3710a25a2 fix(audio): verify exact MP4 seek commands and native playback regressions
+  remotes/origin/codex/mp4-used-description-dispatch-20261025               b33b794e42 fix(mp4): retain unused video descriptions and dispatch from referenced entries
+  remotes/origin/codex/native-mp4-audio-transitions-20261025                451ae6fe1b fix(audio): accept dynamic MP4 descriptions in native file APIs
+  remotes/origin/codex/preserve-active-drafts-20261008-aac-pulse            4590f3f195 WIP: preserve unfinished active drafts before AAC pulse delivery
+  remotes/origin/codex/preserve-active-drafts-20261008-adts                 4c53566b95 WIP: preserve unfinished AV1 qualification before AAC discovery delivery
+  remotes/origin/codex/preserve-active-drafts-20261008-chroma               27b3395594 WIP: preserve unfinished codec player and verification drafts before chroma delivery
+  remotes/origin/codex/preserve-active-drafts-20261008-grain                f36c02696b WIP: preserve active drafts and unfinished full-chroma grain qualification
+  remotes/origin/codex/preserve-active-drafts-20261008-he-aac               7a983d30c3 WIP: preserve unfinished AV1 qualification before HE-AAC delivery
+  remotes/origin/codex/preserve-active-drafts-20261008-intrabc              bc6465a895 WIP: preserve unfinished codec player and verification drafts before intrabc delivery
+  remotes/origin/codex/preserve-active-drafts-20261008-operating-points     66513254b7 WIP: preserve unfinished codec player and verification drafts before operating point delivery
+  remotes/origin/codex/preserve-active-drafts-20261008-ps-mapping           4735d03bd8 WIP: preserve active PS mapping and AV1 qualification drafts
+  remotes/origin/codex/preserve-active-drafts-20261008-quant-matrix         cc446e9576 WIP: preserve active drafts and verification state after quant matrix qualification
+  remotes/origin/codex/preserve-active-drafts-20261008-restoration          4bdb138555 WIP: preserve active drafts and AV1 restoration qualification before delivery
+  remotes/origin/codex/preserve-active-drafts-20261008-reverse-motion       8daaf27548 WIP: preserve unfinished active drafts before reverse-motion delivery
+  remotes/origin/codex/preserve-active-drafts-20261008-sbr                  6671dda862 WIP: preserve unfinished active drafts before SBR frequency delivery
+  remotes/origin/codex/preserve-active-drafts-20261008-sbr-assembly         f0b91638ac WIP: preserve unfinished AV1 qualification before SBR assembly delivery
+  remotes/origin/codex/preserve-active-drafts-20261008-sbr-history          03853a851a WIP: preserve active AV1 qualification before SBR history delivery
+  remotes/origin/codex/preserve-active-drafts-20261008-sbr-qmf              177cb28b9d WIP: preserve unfinished active drafts before SBR QMF delivery
+  remotes/origin/codex/preserve-active-drafts-20261008-scaled               e1cc39dd37 WIP: preserve active player HEVC and optimization drafts before AV1 delivery
+  remotes/origin/codex/preserve-active-drafts-20261008-superres             99a2e212a8 WIP: preserve active drafts and unfinished segmentation qualification before superres delivery
+  remotes/origin/codex/preserve-active-drafts-20261008-temporal             9b153597d2 WIP: preserve unfinished codec player and verification drafts before temporal motion delivery
+  remotes/origin/codex/preserve-active-drafts-20261008-tile-list            07bad65ac1 WIP: preserve active codec player and verification drafts before tile-list delivery
+  remotes/origin/codex/preserve-active-drafts-20261009-ps-absence           cf14432df6 WIP: preserve unfinished PS absence acceptance and active AV1 qualification
+  remotes/origin/codex/preserve-active-lossy-palette-20261008               40639894e5 WIP: preserve active drafts and unfinished lossy AV1 palette qualification
+  remotes/origin/codex/preserve-active-media-20261025-geometry-cutoff       bf819a373f wip: preserve concurrent media budget and regression work at delivery cutoff
+  remotes/origin/codex/preserve-active-player-20261008                      842f3bf3ad WIP: preserve active player VideoToolbox and optimization drafts
+  remotes/origin/codex/preserve-active-work-20261001                        2be0ba9eb5 WIP: preserve active player GPU codec and normalization work
+  remotes/origin/codex/preserve-av1-active-20261009-final                   fcf429296d WIP: preserve active AV1 qualification before final delivery
+  remotes/origin/codex/preserve-av1-active-20261009-ps-coupling             768eb0ecf8 WIP: preserve active AV1 qualification before PS coupling delivery
+  remotes/origin/codex/preserve-av1-active-20261009-sbr-delivery            4394aafefb WIP: preserve active AV1 qualification before SBR delivery
+  remotes/origin/codex/preserve-av1-verification-20261007                   f1e6592e8c WIP: preserve AV1 palette verification and unfinished lossy filter coverage
+  remotes/origin/codex/preserve-av1-verification-20261008-aac-pulse         2f88964e35 WIP: preserve unfinished active drafts before AAC pulse delivery
+  remotes/origin/codex/preserve-av1-verification-20261008-chroma            be87ed64fe WIP: preserve unfinished codec player and verification drafts before chroma delivery
+  remotes/origin/codex/preserve-av1-verification-20261008-grain             d3bce14439 WIP: preserve active drafts and unfinished full-chroma grain qualification
+  remotes/origin/codex/preserve-av1-verification-20261008-intrabc           7a1d8f1f59 WIP: preserve unfinished codec player and verification drafts before intrabc delivery
+  remotes/origin/codex/preserve-av1-verification-20261008-operating-points  6eeb92186c WIP: preserve unfinished codec player and verification drafts before operating point delivery
+  remotes/origin/codex/preserve-av1-verification-20261008-ps-mapping        630a0e0db0 WIP: preserve active PS mapping and AV1 qualification drafts
+  remotes/origin/codex/preserve-av1-verification-20261008-quant-matrix      40882d86f8 WIP: preserve active drafts and verification state after quant matrix qualification
+  remotes/origin/codex/preserve-av1-verification-20261008-restoration       f83c0e3cf8 WIP: preserve active drafts and AV1 restoration qualification before delivery
+  remotes/origin/codex/preserve-av1-verification-20261008-reverse-motion    cdb52e1a8a WIP: preserve unfinished active drafts before reverse-motion delivery
+  remotes/origin/codex/preserve-av1-verification-20261008-sbr               40d33099a0 WIP: preserve unfinished active drafts before SBR frequency delivery
+  remotes/origin/codex/preserve-av1-verification-20261008-superres          a47d5eb21c WIP: preserve active drafts and unfinished segmentation qualification before superres delivery
+  remotes/origin/codex/preserve-av1-verification-20261008-temporal          272f2fdf30 WIP: preserve unfinished codec player and verification drafts before temporal motion delivery
+  remotes/origin/codex/preserve-av1-verification-20261008-tile-list         be4173d9f4 WIP: preserve active codec player and verification drafts before tile-list delivery
+  remotes/origin/codex/preserve-av1-verification-20261009-ps-absence        83aab28162 WIP: preserve unfinished PS absence acceptance and active AV1 qualification
+  remotes/origin/codex/preserve-codec-player-wip-20261006                   4990d64b28 WIP: preserve codec POC gap fixtures and player work
+  remotes/origin/codex/preserve-concurrent-av1-fixtures-20261009            57c1755f93 feat(test): add AV1 delta-lf and restoration-depth regression fixtures
+  remotes/origin/codex/preserve-concurrent-memory-draft-1792621241          a044b3623d wip: preserve remaining live pool source and session evidence
+  remotes/origin/codex/preserve-dependent-sbr-draft-20261009                7fa7ec731b WIP: preserve dependent AAC SBR generator and acceptance draft
+  remotes/origin/codex/preserve-dolby-programmes-seek-20261024              e493eadd0b fix(player): present ready seek frames without waiting for spool lead
+  remotes/origin/codex/preserve-field-longterm-progress-20261006            29519207b1 WIP: preserve unqualified mixed-parity long-term fixtures and player progress
+  remotes/origin/codex/preserve-fvid-session-20261021-203652                19d74b05e6 wip(fvid): preserve verified improvements and active codec drafts
+  remotes/origin/codex/preserve-hevc-colour-plane-draft-20261009            012782f74b WIP: preserve separate colour plane fixture metadata helper
+  remotes/origin/codex/preserve-hevc-context-wip-20261007                   0fb5780bdd WIP: preserve unfinished HEVC context and neighbor cache drafts
+  remotes/origin/codex/preserve-hevc-motion-identity-20261012               14ea88f13e WIP: preserve unfinished HEVC layer-aware motion identity
+  remotes/origin/codex/preserve-live-gpu-draft-20261022                     4f94c30e48 wip: preserve live GPU work and session evidence at delivery cutoff
+  remotes/origin/codex/preserve-media-budget-native-api-20261025            f5ffd91965 wip: preserve media budget work and native API compatibility at verified cutoff
+  remotes/origin/codex/preserve-media-budget-quantized-clock-20261025       1d7af07940 wip: preserve concurrent media budgets with quantized clock integration
+  remotes/origin/codex/preserve-media-budgets-ac3-bsid-20261025             d1f12e2269 wip: preserve active media budgets alongside AC3 BSID compatibility
+  remotes/origin/codex/preserve-media-budgets-ac3-clock-20261025            3cc91ce888 wip: preserve media budgets alongside verified AC-3 playback clock
+  remotes/origin/codex/preserve-media-budgets-ac3-player-stereo-20261025    f0b8e90602 wip: preserve active media budgets alongside AC3 player stereo routing
+  remotes/origin/codex/preserve-media-budgets-ac3-stereo-20261025           90bf6daf4c wip: preserve active media budgets alongside AC3 stereo policy
+  remotes/origin/codex/preserve-media-budgets-alternate-bsi-20261025        6b3cb7638e wip: preserve active media budgets alongside alternate AC3 BSI support
+  remotes/origin/codex/preserve-media-budgets-dolby-word-order-20261025     156505f4cf wip: preserve media budgets alongside verified native Dolby word order
+  remotes/origin/codex/preserve-media-budgets-eac3-clock-20261025           601bad127a wip: preserve media budgets alongside verified E-AC-3 programme clocks
+  remotes/origin/codex/preserve-media-budgets-eac3-expanded-stereo-20261025 5d1ecd10f5 wip: preserve active media budgets alongside expanded EAC3 stereo acceptance
+  remotes/origin/codex/preserve-media-budgets-eac3-output-layout-20261025   36ca9c233c wip: preserve active media budgets alongside EAC3 stable output layouts
+  remotes/origin/codex/preserve-media-budgets-eac3-player-stereo-20261025   53be3f7628 wip: preserve active media budgets alongside EAC3 player stereo routing
+  remotes/origin/codex/preserve-media-budgets-eac3-stereo-20261025          019562864b wip: preserve active media budgets alongside EAC3 stereo policy
+  remotes/origin/codex/preserve-media-budgets-playback-clock-20261025       62b7cd8b4b wip: preserve media budget campaign alongside verified MP4 playback clocks
+  remotes/origin/codex/preserve-media-budgets-push-20261025                 888d928afe wip: preserve media budget campaign before session publication
+  remotes/origin/codex/preserve-media-budgets-reduced-allocation-20261025   729ffa54b4 wip: preserve media budget campaign alongside reduced-rate decoding
+  remotes/origin/codex/preserve-motion-tonemap-wip-20261007                 b56a2e5f9e WIP: preserve frame-to-field motion adapter and tonemap cache draft
+  remotes/origin/codex/preserve-player-progress-20261006                    d06d70a40f WIP: preserve updated player buffer progress rendering
+  remotes/origin/codex/preserve-post-validation-work-20261022               397d48d55d wip: preserve concurrent post-validation work at publication cutoff
+  remotes/origin/codex/preserve-push-or-clear-20261025-055421-0             c65e5949ea wip: preserve active worktree 0 before push-or-clear 20261025-055421
+  remotes/origin/codex/preserve-push-or-clear-20261025-055421-1             584f49f4c6 wip: preserve active worktree 1 before push-or-clear 20261025-055421
+  remotes/origin/codex/preserve-push-or-clear-20261025-100215-0             fbb5c6c034 wip: preserve active worktree 0 at push cutoff 20261025-100215
+  remotes/origin/codex/preserve-push-or-clear-20261025-100215-1             d9f8321781 wip: preserve active worktree 1 at push cutoff 20261025-100215
+  remotes/origin/codex/preserve-push-or-clear-20261025-121704-0             d3ea761513 wip: preserve active worktree 0 at push cutoff 20261025-121704
+  remotes/origin/codex/preserve-push-or-clear-20261025-181749-0             72199946e2 wip: preserve media budget regression drafts before push-or-clear
+  remotes/origin/codex/preserve-push-or-clear-20261025-181749-1             12358a48ff wip: preserve HEVC independent layer rewrite draft before push-or-clear
+  remotes/origin/codex/preserve-push-or-clear-20261025-201714-0             703c0624b4 wip: preserve active worktree 0 at push-or-clear cutoff 20261025-201714
+  remotes/origin/codex/preserve-push-or-clear-20261025-201714-1             ae1ecfe800 wip: preserve active worktree 1 at push-or-clear cutoff 20261025-201714
+  remotes/origin/codex/preserve-push-or-clear-20261029-0                    35739ac236 wip: preserve worktree 0 at push-or-clear cutoff 2026-10-29
+  remotes/origin/codex/preserve-push-or-clear-20261029-1                    8ba7c70e95 wip: preserve worktree 1 at push-or-clear cutoff 2026-10-29
+  remotes/origin/codex/preserve-rgb-lut-wip-20261006                        b2eb8f063f WIP: preserve unfinished RGB matrix lookup draft
+  remotes/origin/codex/preserve-session-20261024-afdd8e16                   afdd8e16e3 wip: preserve current media regressions, player and optimization work
+  remotes/origin/codex/preserve-session-push-20261025                       b8a7fd5293 wip: preserve active media budget changes at push cutoff
+  remotes/origin/codex/preserve-ssr-ps-preparation-20261009                 4970771713 WIP: preserve SSR PS syntax preparation and synthetic gap reproduction
+  remotes/origin/codex/preserve-webm-diagnostics-20261001                   430216436d Preserve WebM source IO and first picture diagnostic examples
+  remotes/origin/codex/verify-b-field-gaps-20261006                         f88fd6dc01 WIP: isolate owned field gap qualification for verification
+  remotes/origin/main                                                       c43c453bfe docs: record batch 528 publication verification
+  remotes/origin/release                                                    358cf24501 Measure complete owned AAC decode path across containers and layouts

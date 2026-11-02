@@ -1,0 +1,18 @@
+* c43c453bfe docs: record batch 528 publication verification
+* c5440807c0 fix(audio): seek bare FLAC at precise native sample boundaries
+* 7a56ea2bf5 docs: record batch 527 publication and cleanup verification
+* 3b63ce62fd fix(audio): stop indexed packet access at EOF
+* f87769a3c2 docs: record batch 526 publication and artifact cleanup
+* 63a70bfdd4 feat(audio): support all valid AIFF integer precisions
+* 0aef5cfaaa docs: record batch 525 publication verification
+* 150d9b65e8 fix(audio): exclude aligned AIFF storage padding from playback
+* 32badf386d docs: verify completed branch integration and preserved worktrees
+*   52401fe2fb Merge already-integrated codex/native-mp4-audio-transitions-20261025; retain qualified source tree
+|\
+| * 451ae6fe1b fix(audio): accept dynamic MP4 descriptions in native file APIs
+* |   1c09ca1adf Merge already-integrated codex/mp4-quantized-audio-clock-20261025; retain qualified source tree
+|\ \
+| * | a77614b9c2 fix(audio): recover MP4 sample clocks beneath quantized container ticks
+* | |   a96340c89e Merge already-integrated codex/mp4-audio-geometry-20261025; retain qualified source tree
+|\ \ \
+| * | | f7c9a39965 fix(aac): initialize cold PS synthesis tables without large stack temporaries

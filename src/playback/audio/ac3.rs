@@ -28,6 +28,8 @@ use std::io::Read;
 use std::cell::Cell;
 use std::time::Duration;
 
+include!("ac3_window.rs");
+
 /// What a limit guards: how much the reader may take in, and how many frames it
 /// may agree to list.
 #[derive(Clone, Copy, Debug)]
@@ -311,7 +313,8 @@ impl Ac3 {
                 channels: frame_channels,
                 samples: at.samples,
             });
-            pts += u64::from(at.samples);
+            pts = pts.checked_add(u64::from(at.samples))
+                .ok_or_else(|| invalid("raw Dolby sample clock overflow"))?;
         }
         // Indexing already visits every selected programme. Negotiate a stable
         // canonical union without decoding twice or mixing unselected tracks.
@@ -496,13 +499,7 @@ impl AudioStream for Ac3AudioReader {
             return Err(invalid("invalid raw AC-3 decoded geometry"));
         }
         let frames = packet.data.len() / stride;
-        let window = self
-            .ac3
-            .frames
-            .iter()
-            .find(|at| at.pts as i64 == source_pts)
-            .map(|at| at.samples as usize)
-            .unwrap_or(SAMPLES_PER_FRAME as usize);
+        let window = raw_frame_window(&self.ac3.frames, source_pts);
         if frames > window {
             return Err(invalid("raw AC-3 packet exceeds its frame window"));
         }

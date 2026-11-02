@@ -1,0 +1,51 @@
+{
+  "1": {
+    "pairs": 5,
+    "ratio_min": 0.8250825082508251,
+    "ratio_median": 0.8418654109068814,
+    "baseline_ns_per_query_median": 0.676513671875,
+    "candidate_ns_per_query_median": 0.8035888671875
+  },
+  "4": {
+    "pairs": 5,
+    "ratio_min": 0.3224617652478349,
+    "ratio_median": 0.5449841908594424,
+    "baseline_ns_per_query_median": 0.92578125,
+    "candidate_ns_per_query_median": 1.68359375
+  },
+  "16": {
+    "pairs": 5,
+    "ratio_min": 0.9603960396039604,
+    "ratio_median": 0.9669165774128288,
+    "baseline_ns_per_query_median": 2.9754638671875,
+    "candidate_ns_per_query_median": 3.082275390625
+  },
+  "128": {
+    "pairs": 5,
+    "ratio_min": 3.8448997716315656,
+    "ratio_median": 3.9317446808510637,
+    "baseline_ns_per_query_median": 22.5576171875,
+    "candidate_ns_per_query_median": 5.7373046875
+  },
+  "1024": {
+    "pairs": 5,
+    "ratio_min": 16.726795096322242,
+    "ratio_median": 16.890228462101177,
+    "baseline_ns_per_query_median": 146.5606689453125,
+    "candidate_ns_per_query_median": 8.636474609375
+  },
+  "8192": {
+    "pairs": 5,
+    "ratio_min": 98.51756851059014,
+    "ratio_median": 99.17003416393008,
+    "baseline_ns_per_query_median": 1275.3194580078125,
+    "candidate_ns_per_query_median": 12.8734130859375
+  },
+  "65536": {
+    "pairs": 5,
+    "ratio_min": 332.7221881040024,
+    "ratio_median": 462.5934406596435,
+    "baseline_ns_per_query_median": 10780.044555664062,
+    "candidate_ns_per_query_median": 23.03564453125
+  }
+}
