@@ -122,7 +122,7 @@ impl AviAudioReader {
         let avi = Avi::parse(&bytes, &limits)?;
         let mut programs = Vec::new();
         for (index, stream) in avi.audio().iter().enumerate() {
-            let (codec, speaker_mask) = if stream.format.tag == 0xfffe {
+            let (codec, speaker_mask, padding_bits) = if stream.format.tag == 0xfffe {
                 // AVI strf carries the same extended WAVEFORMATEX as RIFF/WAVE.
                 // Share its GUID, precision, geometry and speaker admission.
                 let wave_limits = crate::playback_wav::Limits {
@@ -130,8 +130,8 @@ impl AviAudioReader {
                     ..Default::default()
                 };
                 match crate::playback_wav::parse_fmt(&stream.setup, &wave_limits) {
-                    Ok((pcm, mask)) if matches!(pcm.coding, crate::playback_wav::Coding::Pcm(_)) =>
-                        (pcm.codec(), mask),
+                    Ok((pcm, mask, padding)) if matches!(pcm.coding, crate::playback_wav::Coding::Pcm(_)) =>
+                        (pcm.codec(), mask, padding),
                     Ok(_) | Err(Error::Unsupported(_)) => continue,
                     Err(error) => return Err(error),
                 }
@@ -139,9 +139,18 @@ impl AviAudioReader {
                 let Some(codec) = coding(stream.format.tag, stream.format.bits) else {
                     continue;
                 };
-                (codec, None)
+                (codec, None, 0)
             };
             let mut program = laid_out(codec, index, stream, &limits)?;
+            if padding_bits != 0 {
+                for at in 0..stream.records.len() {
+                    let data = stream.record(&bytes, at)
+                        .ok_or_else(|| invalid("AVI PCM record exceeds the file"))?;
+                    crate::playback_wav::validate_pcm_padding(
+                        data, stream.format.bits, padding_bits,
+                    )?;
+                }
+            }
             program.speaker_mask = speaker_mask;
             programs.push(program);
         }

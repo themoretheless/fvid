@@ -358,7 +358,7 @@ impl Wav {
                 }
             }
         }
-        let (pcm, speaker_mask) = fmt.ok_or_else(|| invalid("a Wave file with no fmt chunk"))?;
+        let (pcm, speaker_mask, padding_bits) = fmt.ok_or_else(|| invalid("a Wave file with no fmt chunk"))?;
         let (start, end, declared_bytes) =
             data.ok_or_else(|| invalid("a Wave file with no data chunk"))?;
         let samples = &bytes[start..end];
@@ -376,6 +376,7 @@ impl Wav {
         {
             return Err(invalid("Wave PCM sample run ends in an incomplete channel frame"));
         }
+        validate_pcm_padding(samples, pcm.bits_per_sample, padding_bits)?;
         let blocks = samples.len() / pcm.block_align();
         let frames = blocks * pcm.frames_per_block();
         // Where the byte rate states nothing, the `fact` chunk is the run's remaining
@@ -440,7 +441,31 @@ impl Wav {
     }
 }
 
-pub(crate) fn parse_fmt(body: &[u8], limits: &Limits) -> Result<(Pcm, Option<u32>)> {
+/// Validate unused low bits before publishing any PCM from an admitted file.
+/// Full-width integers, floats and other codings have no padding to inspect.
+pub(crate) fn validate_pcm_padding(data: &[u8], storage: u16, padding: u8) -> Result<()> {
+    if padding == 0 {
+        return Ok(());
+    }
+    if !matches!(storage, 8 | 16 | 24 | 32) || u16::from(padding) >= storage {
+        return Err(invalid("invalid PCM padding geometry"));
+    }
+    let width = usize::from(storage / 8);
+    if !data.len().is_multiple_of(width) {
+        return Err(invalid("incomplete PCM sample during padding validation"));
+    }
+    let mask = (1u32 << padding) - 1;
+    for sample in data.chunks_exact(width) {
+        let mut bytes = [0u8; 4];
+        bytes[..width].copy_from_slice(sample);
+        if u32::from_le_bytes(bytes) & mask != 0 {
+            return Err(invalid("nonzero PCM padding bits"));
+        }
+    }
+    Ok(())
+}
+
+pub(crate) fn parse_fmt(body: &[u8], limits: &Limits) -> Result<(Pcm, Option<u32>, u8)> {
     if body.len() < 16 {
         return Err(invalid("fmt chunk is shorter than its seven fields"));
     }
@@ -453,6 +478,7 @@ pub(crate) fn parse_fmt(body: &[u8], limits: &Limits) -> Result<(Pcm, Option<u32
     let block_align = u16_at(12);
     let mut bits = u16_at(14);
     let mut speaker_mask = None;
+    let mut padding_bits = 0;
     if format == EXTENSIBLE {
         // WAVE_FORMAT_EXTENSIBLE repeats the geometry above and adds a GUID saying
         // what the samples actually are; the low half of the GUID's first word is
@@ -496,6 +522,7 @@ pub(crate) fn parse_fmt(body: &[u8], limits: &Limits) -> Result<(Pcm, Option<u32
                 if valid_bits == 0 || valid_bits > bits {
                     return Err(invalid("extensible PCM has invalid valid-bit precision"));
                 }
+                padding_bits = (bits - valid_bits) as u8;
                 // Precision is left-aligned within the stored sample. Reading
                 // its full width preserves normalized amplitude and frame stride.
             }
@@ -664,7 +691,7 @@ pub(crate) fn parse_fmt(body: &[u8], limits: &Limits) -> Result<(Pcm, Option<u32
             return Err(invalid("byte rate does not match the geometry"));
         }
     }
-    Ok((pcm, speaker_mask))
+    Ok((pcm, speaker_mask, padding_bits))
 }
 
 /// A Wave file read as an audio track.

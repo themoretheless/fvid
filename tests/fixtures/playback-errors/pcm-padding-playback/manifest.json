@@ -1,0 +1,217 @@
+{
+  "provenance": "Analytic PCM at signed/unsigned limits;unused bits explicitly authored at first,window-boundary,last samples. Full-width same-low-bit controls. Handcrafted RIFF/AVI and authored neutral VP9. No private media,encoder or network.",
+  "good": [
+    {
+      "name": "s8-v7-c1-valid",
+      "bits": 8,
+      "valid": 7,
+      "channels": 1,
+      "frames": 4099
+    },
+    {
+      "name": "s8-v7-c1-full-width",
+      "bits": 8,
+      "valid": 8,
+      "channels": 1,
+      "frames": 4099
+    },
+    {
+      "name": "s16-v12-c2-valid",
+      "bits": 16,
+      "valid": 12,
+      "channels": 2,
+      "frames": 4099
+    },
+    {
+      "name": "s16-v12-c2-full-width",
+      "bits": 16,
+      "valid": 16,
+      "channels": 2,
+      "frames": 4099
+    },
+    {
+      "name": "s24-v20-c1-valid",
+      "bits": 24,
+      "valid": 20,
+      "channels": 1,
+      "frames": 4099
+    },
+    {
+      "name": "s24-v20-c1-full-width",
+      "bits": 24,
+      "valid": 24,
+      "channels": 1,
+      "frames": 4099
+    },
+    {
+      "name": "s32-v24-c2-valid",
+      "bits": 32,
+      "valid": 24,
+      "channels": 2,
+      "frames": 4099
+    },
+    {
+      "name": "s32-v24-c2-full-width",
+      "bits": 32,
+      "valid": 32,
+      "channels": 2,
+      "frames": 4099
+    },
+    {
+      "name": "s16-v1-c1-valid",
+      "bits": 16,
+      "valid": 1,
+      "channels": 1,
+      "frames": 4099
+    },
+    {
+      "name": "s16-v1-c1-full-width",
+      "bits": 16,
+      "valid": 16,
+      "channels": 1,
+      "frames": 4099
+    },
+    {
+      "name": "s32-v1-c2-valid",
+      "bits": 32,
+      "valid": 1,
+      "channels": 2,
+      "frames": 4099
+    },
+    {
+      "name": "s32-v1-c2-full-width",
+      "bits": 32,
+      "valid": 32,
+      "channels": 2,
+      "frames": 4099
+    }
+  ],
+  "bad": [
+    {
+      "name": "s8-v7-c1-padding-at0",
+      "bits": 8,
+      "valid": 7,
+      "channels": 1,
+      "frame": 0
+    },
+    {
+      "name": "s8-v7-c1-padding-at2048",
+      "bits": 8,
+      "valid": 7,
+      "channels": 1,
+      "frame": 2048
+    },
+    {
+      "name": "s8-v7-c1-padding-at4098",
+      "bits": 8,
+      "valid": 7,
+      "channels": 1,
+      "frame": 4098
+    },
+    {
+      "name": "s16-v12-c2-padding-at0",
+      "bits": 16,
+      "valid": 12,
+      "channels": 2,
+      "frame": 0
+    },
+    {
+      "name": "s16-v12-c2-padding-at2048",
+      "bits": 16,
+      "valid": 12,
+      "channels": 2,
+      "frame": 2048
+    },
+    {
+      "name": "s16-v12-c2-padding-at4098",
+      "bits": 16,
+      "valid": 12,
+      "channels": 2,
+      "frame": 4098
+    },
+    {
+      "name": "s24-v20-c1-padding-at0",
+      "bits": 24,
+      "valid": 20,
+      "channels": 1,
+      "frame": 0
+    },
+    {
+      "name": "s24-v20-c1-padding-at2048",
+      "bits": 24,
+      "valid": 20,
+      "channels": 1,
+      "frame": 2048
+    },
+    {
+      "name": "s24-v20-c1-padding-at4098",
+      "bits": 24,
+      "valid": 20,
+      "channels": 1,
+      "frame": 4098
+    },
+    {
+      "name": "s32-v24-c2-padding-at0",
+      "bits": 32,
+      "valid": 24,
+      "channels": 2,
+      "frame": 0
+    },
+    {
+      "name": "s32-v24-c2-padding-at2048",
+      "bits": 32,
+      "valid": 24,
+      "channels": 2,
+      "frame": 2048
+    },
+    {
+      "name": "s32-v24-c2-padding-at4098",
+      "bits": 32,
+      "valid": 24,
+      "channels": 2,
+      "frame": 4098
+    },
+    {
+      "name": "s16-v1-c1-padding-at0",
+      "bits": 16,
+      "valid": 1,
+      "channels": 1,
+      "frame": 0
+    },
+    {
+      "name": "s16-v1-c1-padding-at2048",
+      "bits": 16,
+      "valid": 1,
+      "channels": 1,
+      "frame": 2048
+    },
+    {
+      "name": "s16-v1-c1-padding-at4098",
+      "bits": 16,
+      "valid": 1,
+      "channels": 1,
+      "frame": 4098
+    },
+    {
+      "name": "s32-v1-c2-padding-at0",
+      "bits": 32,
+      "valid": 1,
+      "channels": 2,
+      "frame": 0
+    },
+    {
+      "name": "s32-v1-c2-padding-at2048",
+      "bits": 32,
+      "valid": 1,
+      "channels": 2,
+      "frame": 2048
+    },
+    {
+      "name": "s32-v1-c2-padding-at4098",
+      "bits": 32,
+      "valid": 1,
+      "channels": 2,
+      "frame": 4098
+    }
+  ]
+}

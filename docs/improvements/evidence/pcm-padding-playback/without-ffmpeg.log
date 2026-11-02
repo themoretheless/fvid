@@ -1,0 +1,8 @@
+
+running 3 tests
+test unused_nonzero_bits_are_rejected_before_wave_or_avi_can_emit_pcm ... ok
+test zero_padding_and_full_precision_low_bits_have_exact_pcm_clocks_and_video ... ok
+test valid_precisions_and_full_width_controls_preserve_actual_worker_seek_and_eof ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.13s
+

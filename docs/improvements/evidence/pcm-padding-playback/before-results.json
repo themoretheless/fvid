@@ -1,0 +1,8 @@
+{
+  "command": "cargo test --locked --offline --no-default-features --features player --test pcm_padding_playback -- --test-threads=2",
+  "exit_code": 101,
+  "passed": 2,
+  "failed": 1,
+  "accepted_invalid_files": 36,
+  "source_stable": true
+}
