@@ -1,0 +1,29 @@
+{
+  "source_commit": "4f3919f5891df01be3fe07d376f7456100fc1327",
+  "verified_remote_refs": {
+    "refs/heads/codex/deliver-fvid-20261029": "4f3919f5891df01be3fe07d376f7456100fc1327",
+    "refs/heads/main": "4f3919f5891df01be3fe07d376f7456100fc1327"
+  },
+  "accepted_ids": [],
+  "follow_up_ids": [
+    "FVID-0484"
+  ],
+  "count_delta": 0,
+  "accepted_count": 511,
+  "next_id": "FVID-0512",
+  "goal_complete": false,
+  "worktree_clean_before_receipt": true,
+  "qualified_source_and_9_fixture_hashes_verified": true,
+  "owned_build_target_and_source_backup_absent": true,
+  "main_qualification_test_executions": 1047,
+  "strict_stamp_test_passed": 1,
+  "strict_stamp_repeats": 3,
+  "repeat_runs": 3,
+  "repeat_passed_each": 105,
+  "six_adpcm_ac3_failure_cases_verified_before_after": true,
+  "two_eac3_passing_controls_not_counted": true,
+  "existing_tests_unchanged": true,
+  "first_candidate_failure_preserved": true,
+  "raw_log_trailing_blank_lines_retained": true,
+  "parallel_worktrees_preserved": true
+}
