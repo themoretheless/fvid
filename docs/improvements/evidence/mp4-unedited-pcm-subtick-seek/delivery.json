@@ -1,0 +1,24 @@
+{
+  "source_commit": "689eb3d9fba787fdff26f7245a507007079cd05b",
+  "verified_remote_refs": {
+    "refs/heads/codex/deliver-fvid-20261029": "689eb3d9fba787fdff26f7245a507007079cd05b",
+    "refs/heads/main": "689eb3d9fba787fdff26f7245a507007079cd05b"
+  },
+  "accepted_ids": [],
+  "follow_up_ids": [
+    "FVID-0484"
+  ],
+  "count_delta": 0,
+  "accepted_count": 511,
+  "next_id": "FVID-0512",
+  "goal_complete": false,
+  "worktree_clean_before_receipt": true,
+  "all_qualified_source_and_twenty_fixture_hashes_verified": true,
+  "owned_build_target_and_safety_copy_absent": true,
+  "qualification_test_executions": 985,
+  "repeat_runs": 3,
+  "repeat_passed_each": 43,
+  "player_native_ceil_expectation_original_failed": true,
+  "player_actual_pcm_and_clock_tests_passed": 7,
+  "timeouts_and_tolerances_unchanged": true
+}
