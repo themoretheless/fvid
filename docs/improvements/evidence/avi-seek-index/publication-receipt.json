@@ -1,0 +1,21 @@
+{
+  "source_commit": "6b611de8d02cb6736ddd9c6ef0d2a8520fb01bea",
+  "verified_remote_commit": "6b611de8d02cb6736ddd9c6ef0d2a8520fb01bea",
+  "published_refs": [
+    "refs/heads/main",
+    "refs/heads/codex/deliver-fvid-20261029"
+  ],
+  "accepted_id": "FVID-0521",
+  "accepted_total": 521,
+  "qualification_source_hashes_verified": 2860,
+  "owned_outputs_removed": [
+    "/private/tmp/fvid-avi-seek-index-target-20261102",
+    "/private/tmp/fvid-avi-seek-index-before-20261102",
+    "/private/tmp/fvid-avi-seek-index-after-20261102",
+    "/private/tmp/fvid-avi-seek-index-before-20261102.py",
+    "/private/tmp/fvid-avi-seek-index-compare-20261102.py",
+    "/private/tmp/fvid-avi-seek-index-qualification-20261102.py"
+  ],
+  "working_tree_clean_before_receipt": true,
+  "verified_at": "2026-11-02T19:11:59.785845+00:00"
+}
