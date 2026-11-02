@@ -1,0 +1,368 @@
+{
+  "scope": "Observed capacities of simultaneously live encoded and decoded packet Vecs only;not whole-reader memory,RSS or throughput",
+  "baseline_identical_runs": 3,
+  "candidate_identical_runs": 4,
+  "comparisons": [
+    {
+      "file": "alaw-1ch-single.avi",
+      "before": {
+        "channels": 1,
+        "file": "alaw-1ch-single.avi",
+        "packets": 1,
+        "peak_encoded_capacity": 8193,
+        "peak_live_packet_capacity": 40965
+      },
+      "after": {
+        "channels": 1,
+        "file": "alaw-1ch-single.avi",
+        "packets": 5,
+        "peak_encoded_capacity": 2048,
+        "peak_live_packet_capacity": 10240
+      },
+      "live_capacity_ratio": 4.00048828125
+    },
+    {
+      "file": "alaw-1ch-single-delayed.avi",
+      "before": {
+        "channels": 1,
+        "file": "alaw-1ch-single-delayed.avi",
+        "packets": 1,
+        "peak_encoded_capacity": 8193,
+        "peak_live_packet_capacity": 40965
+      },
+      "after": {
+        "channels": 1,
+        "file": "alaw-1ch-single-delayed.avi",
+        "packets": 5,
+        "peak_encoded_capacity": 2048,
+        "peak_live_packet_capacity": 10240
+      },
+      "live_capacity_ratio": 4.00048828125
+    },
+    {
+      "file": "alaw-1ch-grouped.avi",
+      "before": {
+        "channels": 1,
+        "file": "alaw-1ch-grouped.avi",
+        "packets": 3,
+        "peak_encoded_capacity": 8193,
+        "peak_live_packet_capacity": 40965
+      },
+      "after": {
+        "channels": 1,
+        "file": "alaw-1ch-grouped.avi",
+        "packets": 7,
+        "peak_encoded_capacity": 2048,
+        "peak_live_packet_capacity": 10240
+      },
+      "live_capacity_ratio": 4.00048828125
+    },
+    {
+      "file": "alaw-1ch-grouped-delayed.avi",
+      "before": {
+        "channels": 1,
+        "file": "alaw-1ch-grouped-delayed.avi",
+        "packets": 3,
+        "peak_encoded_capacity": 8193,
+        "peak_live_packet_capacity": 40965
+      },
+      "after": {
+        "channels": 1,
+        "file": "alaw-1ch-grouped-delayed.avi",
+        "packets": 7,
+        "peak_encoded_capacity": 2048,
+        "peak_live_packet_capacity": 10240
+      },
+      "live_capacity_ratio": 4.00048828125
+    },
+    {
+      "file": "alaw-1ch-small.avi",
+      "before": {
+        "channels": 1,
+        "file": "alaw-1ch-small.avi",
+        "packets": 3,
+        "peak_encoded_capacity": 2047,
+        "peak_live_packet_capacity": 10235
+      },
+      "after": {
+        "channels": 1,
+        "file": "alaw-1ch-small.avi",
+        "packets": 3,
+        "peak_encoded_capacity": 2047,
+        "peak_live_packet_capacity": 10235
+      },
+      "live_capacity_ratio": 1.0
+    },
+    {
+      "file": "alaw-2ch-single.avi",
+      "before": {
+        "channels": 2,
+        "file": "alaw-2ch-single.avi",
+        "packets": 1,
+        "peak_encoded_capacity": 16386,
+        "peak_live_packet_capacity": 81930
+      },
+      "after": {
+        "channels": 2,
+        "file": "alaw-2ch-single.avi",
+        "packets": 5,
+        "peak_encoded_capacity": 4096,
+        "peak_live_packet_capacity": 20480
+      },
+      "live_capacity_ratio": 4.00048828125
+    },
+    {
+      "file": "alaw-2ch-single-delayed.avi",
+      "before": {
+        "channels": 2,
+        "file": "alaw-2ch-single-delayed.avi",
+        "packets": 1,
+        "peak_encoded_capacity": 16386,
+        "peak_live_packet_capacity": 81930
+      },
+      "after": {
+        "channels": 2,
+        "file": "alaw-2ch-single-delayed.avi",
+        "packets": 5,
+        "peak_encoded_capacity": 4096,
+        "peak_live_packet_capacity": 20480
+      },
+      "live_capacity_ratio": 4.00048828125
+    },
+    {
+      "file": "alaw-2ch-grouped.avi",
+      "before": {
+        "channels": 2,
+        "file": "alaw-2ch-grouped.avi",
+        "packets": 3,
+        "peak_encoded_capacity": 16386,
+        "peak_live_packet_capacity": 81930
+      },
+      "after": {
+        "channels": 2,
+        "file": "alaw-2ch-grouped.avi",
+        "packets": 7,
+        "peak_encoded_capacity": 4096,
+        "peak_live_packet_capacity": 20480
+      },
+      "live_capacity_ratio": 4.00048828125
+    },
+    {
+      "file": "alaw-2ch-grouped-delayed.avi",
+      "before": {
+        "channels": 2,
+        "file": "alaw-2ch-grouped-delayed.avi",
+        "packets": 3,
+        "peak_encoded_capacity": 16386,
+        "peak_live_packet_capacity": 81930
+      },
+      "after": {
+        "channels": 2,
+        "file": "alaw-2ch-grouped-delayed.avi",
+        "packets": 7,
+        "peak_encoded_capacity": 4096,
+        "peak_live_packet_capacity": 20480
+      },
+      "live_capacity_ratio": 4.00048828125
+    },
+    {
+      "file": "alaw-2ch-small.avi",
+      "before": {
+        "channels": 2,
+        "file": "alaw-2ch-small.avi",
+        "packets": 3,
+        "peak_encoded_capacity": 4094,
+        "peak_live_packet_capacity": 20470
+      },
+      "after": {
+        "channels": 2,
+        "file": "alaw-2ch-small.avi",
+        "packets": 3,
+        "peak_encoded_capacity": 4094,
+        "peak_live_packet_capacity": 20470
+      },
+      "live_capacity_ratio": 1.0
+    },
+    {
+      "file": "mulaw-1ch-single.avi",
+      "before": {
+        "channels": 1,
+        "file": "mulaw-1ch-single.avi",
+        "packets": 1,
+        "peak_encoded_capacity": 8193,
+        "peak_live_packet_capacity": 40965
+      },
+      "after": {
+        "channels": 1,
+        "file": "mulaw-1ch-single.avi",
+        "packets": 5,
+        "peak_encoded_capacity": 2048,
+        "peak_live_packet_capacity": 10240
+      },
+      "live_capacity_ratio": 4.00048828125
+    },
+    {
+      "file": "mulaw-1ch-single-delayed.avi",
+      "before": {
+        "channels": 1,
+        "file": "mulaw-1ch-single-delayed.avi",
+        "packets": 1,
+        "peak_encoded_capacity": 8193,
+        "peak_live_packet_capacity": 40965
+      },
+      "after": {
+        "channels": 1,
+        "file": "mulaw-1ch-single-delayed.avi",
+        "packets": 5,
+        "peak_encoded_capacity": 2048,
+        "peak_live_packet_capacity": 10240
+      },
+      "live_capacity_ratio": 4.00048828125
+    },
+    {
+      "file": "mulaw-1ch-grouped.avi",
+      "before": {
+        "channels": 1,
+        "file": "mulaw-1ch-grouped.avi",
+        "packets": 3,
+        "peak_encoded_capacity": 8193,
+        "peak_live_packet_capacity": 40965
+      },
+      "after": {
+        "channels": 1,
+        "file": "mulaw-1ch-grouped.avi",
+        "packets": 7,
+        "peak_encoded_capacity": 2048,
+        "peak_live_packet_capacity": 10240
+      },
+      "live_capacity_ratio": 4.00048828125
+    },
+    {
+      "file": "mulaw-1ch-grouped-delayed.avi",
+      "before": {
+        "channels": 1,
+        "file": "mulaw-1ch-grouped-delayed.avi",
+        "packets": 3,
+        "peak_encoded_capacity": 8193,
+        "peak_live_packet_capacity": 40965
+      },
+      "after": {
+        "channels": 1,
+        "file": "mulaw-1ch-grouped-delayed.avi",
+        "packets": 7,
+        "peak_encoded_capacity": 2048,
+        "peak_live_packet_capacity": 10240
+      },
+      "live_capacity_ratio": 4.00048828125
+    },
+    {
+      "file": "mulaw-1ch-small.avi",
+      "before": {
+        "channels": 1,
+        "file": "mulaw-1ch-small.avi",
+        "packets": 3,
+        "peak_encoded_capacity": 2047,
+        "peak_live_packet_capacity": 10235
+      },
+      "after": {
+        "channels": 1,
+        "file": "mulaw-1ch-small.avi",
+        "packets": 3,
+        "peak_encoded_capacity": 2047,
+        "peak_live_packet_capacity": 10235
+      },
+      "live_capacity_ratio": 1.0
+    },
+    {
+      "file": "mulaw-2ch-single.avi",
+      "before": {
+        "channels": 2,
+        "file": "mulaw-2ch-single.avi",
+        "packets": 1,
+        "peak_encoded_capacity": 16386,
+        "peak_live_packet_capacity": 81930
+      },
+      "after": {
+        "channels": 2,
+        "file": "mulaw-2ch-single.avi",
+        "packets": 5,
+        "peak_encoded_capacity": 4096,
+        "peak_live_packet_capacity": 20480
+      },
+      "live_capacity_ratio": 4.00048828125
+    },
+    {
+      "file": "mulaw-2ch-single-delayed.avi",
+      "before": {
+        "channels": 2,
+        "file": "mulaw-2ch-single-delayed.avi",
+        "packets": 1,
+        "peak_encoded_capacity": 16386,
+        "peak_live_packet_capacity": 81930
+      },
+      "after": {
+        "channels": 2,
+        "file": "mulaw-2ch-single-delayed.avi",
+        "packets": 5,
+        "peak_encoded_capacity": 4096,
+        "peak_live_packet_capacity": 20480
+      },
+      "live_capacity_ratio": 4.00048828125
+    },
+    {
+      "file": "mulaw-2ch-grouped.avi",
+      "before": {
+        "channels": 2,
+        "file": "mulaw-2ch-grouped.avi",
+        "packets": 3,
+        "peak_encoded_capacity": 16386,
+        "peak_live_packet_capacity": 81930
+      },
+      "after": {
+        "channels": 2,
+        "file": "mulaw-2ch-grouped.avi",
+        "packets": 7,
+        "peak_encoded_capacity": 4096,
+        "peak_live_packet_capacity": 20480
+      },
+      "live_capacity_ratio": 4.00048828125
+    },
+    {
+      "file": "mulaw-2ch-grouped-delayed.avi",
+      "before": {
+        "channels": 2,
+        "file": "mulaw-2ch-grouped-delayed.avi",
+        "packets": 3,
+        "peak_encoded_capacity": 16386,
+        "peak_live_packet_capacity": 81930
+      },
+      "after": {
+        "channels": 2,
+        "file": "mulaw-2ch-grouped-delayed.avi",
+        "packets": 7,
+        "peak_encoded_capacity": 4096,
+        "peak_live_packet_capacity": 20480
+      },
+      "live_capacity_ratio": 4.00048828125
+    },
+    {
+      "file": "mulaw-2ch-small.avi",
+      "before": {
+        "channels": 2,
+        "file": "mulaw-2ch-small.avi",
+        "packets": 3,
+        "peak_encoded_capacity": 4094,
+        "peak_live_packet_capacity": 20470
+      },
+      "after": {
+        "channels": 2,
+        "file": "mulaw-2ch-small.avi",
+        "packets": 3,
+        "peak_encoded_capacity": 4094,
+        "peak_live_packet_capacity": 20470
+      },
+      "live_capacity_ratio": 1.0
+    }
+  ],
+  "tradeoff": "Larger chunks produce more scheduling/decoder calls;all original file bytes and the index remain retained/charged. No timing improvement claimed."
+}

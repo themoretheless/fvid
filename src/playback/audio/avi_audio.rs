@@ -35,8 +35,8 @@ use std::time::Duration;
 const ADPCM_MS: u16 = 0x0002;
 const ADPCM_IMA_WAV: u16 = 0x0011;
 
-/// Bound linear PCM packets independently of the source chunk size.
-const PCM_PACKET_FRAMES: usize = 2_048;
+/// Bound PCM and G.711 packets independently of the source chunk size.
+const SAMPLE_PACKET_FRAMES: usize = 2_048;
 
 /// Native decoder for one supported Wave format and sample width.
 fn coding(tag: u16, bits: u16) -> Option<&'static str> {
@@ -82,7 +82,7 @@ struct Program {
     records: usize,
     /// Encoded bytes per frame for PCM/G.711 record spans;unused for ADPCM.
     input_frame_bytes: usize,
-    /// PCM spans are streamed in bounded windows;G.711 keeps its record grain.
+    /// PCM and G.711 spans are streamed in bounded sample windows.
     packet_frames: Option<usize>,
     // Only grouped ADPCM chunks need a separate logical-block view.
     block_records: Option<Vec<Record>>,
@@ -318,7 +318,7 @@ fn laid_out_pcm(codec: &'static str, index: usize, stream: &Audio) -> Result<Pro
     Ok(Program {
         codec, sample_rate: f.sample_rate, channels: f.channels, bits: f.bits,
         frames: 1, setup: stream.setup.clone(), stream: index, records: samples.len(),
-        input_frame_bytes: stride, packet_frames: Some(PCM_PACKET_FRAMES),
+        input_frame_bytes: stride, packet_frames: Some(SAMPLE_PACKET_FRAMES),
         block_records: None, samples: Some(samples),
     })
 }
@@ -334,7 +334,7 @@ fn laid_out_g711(codec: &'static str,index:usize,stream:&Audio)->Result<Program>
         cursor=cursor.checked_add(frames).ok_or_else(||invalid("AVI G.711 clock overflow"))?;
     }
     if samples.is_empty() || cursor-u64::from(stream.start)!=u64::from(stream.declared){return Err(invalid("AVI G.711 declared frame count disagrees with records"));}
-    Ok(Program{codec,sample_rate:f.sample_rate,channels:f.channels,bits:8,frames:1,setup:stream.setup.clone(),stream:index,records:samples.len(),input_frame_bytes:usize::from(f.channels),packet_frames:None,block_records:None,samples:Some(samples)})
+    Ok(Program{codec,sample_rate:f.sample_rate,channels:f.channels,bits:8,frames:1,setup:stream.setup.clone(),stream:index,records:samples.len(),input_frame_bytes:usize::from(f.channels),packet_frames:Some(SAMPLE_PACKET_FRAMES),block_records:None,samples:Some(samples)})
 }
 
 /// Packets are timestamped in samples of the stream's own rate, which is the unit

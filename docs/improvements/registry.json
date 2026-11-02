@@ -1,8 +1,8 @@
 {
   "target": 1000,
   "counting_rule": "One independently confirmed problem or useful capability; fixture variants and baseline integration repairs are excluded. Only accepted entries count.",
-  "accepted_count": 519,
-  "next_id": "FVID-0520",
+  "accepted_count": 520,
+  "next_id": "FVID-0521",
   "entries": [
     {
       "id": "FVID-0001",
@@ -5890,6 +5890,17 @@
       "result": "Resolve an unspecified successor/fallback end once on signed i128 source ticks,then clip/map both endpoints. Preserve explicit durations,positive behavior,edit mapping,rounding,limits and public signatures.16 authored short16x16 VP9/visible-tx3g movies at50/1001Hz cover negative successors,negative final starts,wholly pre-origin fallbacks,positive controls and identity edits. Exact signed packets,all independently known video pictures,EOF/restart,nanosecond cues,repeated extraction and active text after real native-video seek pass. Six frozen gates pass83 Rust executions representing76 distinct checks after excluding7 overlapping root checks,zero ignores,core/player builds;three4-test repeats and4 executions without FFmpeg pass. All20 fixture files regenerate byte-identically and2778 source/fixture hashes stay stable. One unspecified-duration inference defect,distinct from FVID-0422 stated-duration endpoints which explicitly preserved this behavior;no per-variant IDs,performance or visual-rendering claim.",
       "status": "accepted",
       "validation": "batch-530-validation.json"
+    },
+    {
+      "id": "FVID-0520",
+      "batch": 531,
+      "title": "Bound AVI G.711 encoded and decoded packet working buffers independently of chunk size",
+      "source": "src/playback/audio/avi_audio.rs",
+      "regression": "tests/avi_g711_windows.rs",
+      "before": "Original b872bf4801 keeps PCM packets bounded but copies/decodes each entire G.711 AVI record. Three identical observed-capacity runs over20 authored files show8193-frame chunks retain40965 mono/81930 stereo bytes in simultaneously live encoded and decoded packet Vecs. Original PCM,seek,actual-worker and full-file refusal controls pass3 tests;only the new resource-bound check fails. No original valid waveform or timestamp defect is claimed.",
+      "result": "Use the existing2048-frame sample-window mechanism for both G.711 laws. Preserve all coded bytes,exact independently generated PCM/native stamps,delayed starts,raw and wall-time seek,EOF/MAX,rewind and full AVI file admission. Four identical final candidate observations reduce large-chunk live packet capacities to10240 mono/20480 stereo bytes(over4x smaller,about75% reduction);small chunks retain the same capacities. The measure is the sum of actual simultaneously live packet Vec capacities,not whole-reader memory,RSS or throughput. The complete file/index stay retained and more packet calls are explicit tradeoffs.20 authored VP9/G.711 AVI programs and independent float oracles cover8k mono/48k stereo,all256 codes,single/grouped8193-frame chunks,delayed start73 and small controls. Five final gates pass106 Rust executions,zero ignores,core/player checks;three4-test repeats and4 no-FFmpeg executions pass. All42 fixture files regenerate byte-identically with2825 frozen hashes. Incidental helper formatting is proven formatter-only,restored and all gates rerun;no existing test expectation is changed. Packet-boundary compatibility is documented;one resource opportunity,not one ID per law/channel/profile.",
+      "status": "accepted",
+      "validation": "batch-531-validation.json"
     }
   ]
 }

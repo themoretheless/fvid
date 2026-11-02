@@ -1,0 +1,9 @@
+{
+  "file": "tests/support/rational_audio_seek.rs",
+  "restored_from": "HEAD",
+  "formatting_only_proven_by_rustfmt": true,
+  "original_sha256": "22fa68ebcf86a6b8a4e8cf606d412cc76d46cb6e8eda9c50ee2322d955cae478",
+  "formatted_sha256": "9a8bb8bd665c261607a5ff395d2874e86336e19a00d769ca8200d9db3c984097",
+  "count_delta": 0,
+  "all_qualification_repeated_after_restoration": true
+}

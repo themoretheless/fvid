@@ -1,0 +1,35 @@
+
+running 1 test
+MEMORY {"channels":1,"file":"alaw-1ch-single.avi","packets":1,"peak_encoded_capacity":8193,"peak_live_packet_capacity":40965}
+MEMORY {"channels":1,"file":"alaw-1ch-single-delayed.avi","packets":1,"peak_encoded_capacity":8193,"peak_live_packet_capacity":40965}
+MEMORY {"channels":1,"file":"alaw-1ch-grouped.avi","packets":3,"peak_encoded_capacity":8193,"peak_live_packet_capacity":40965}
+MEMORY {"channels":1,"file":"alaw-1ch-grouped-delayed.avi","packets":3,"peak_encoded_capacity":8193,"peak_live_packet_capacity":40965}
+MEMORY {"channels":1,"file":"alaw-1ch-small.avi","packets":3,"peak_encoded_capacity":2047,"peak_live_packet_capacity":10235}
+MEMORY {"channels":2,"file":"alaw-2ch-single.avi","packets":1,"peak_encoded_capacity":16386,"peak_live_packet_capacity":81930}
+MEMORY {"channels":2,"file":"alaw-2ch-single-delayed.avi","packets":1,"peak_encoded_capacity":16386,"peak_live_packet_capacity":81930}
+MEMORY {"channels":2,"file":"alaw-2ch-grouped.avi","packets":3,"peak_encoded_capacity":16386,"peak_live_packet_capacity":81930}
+MEMORY {"channels":2,"file":"alaw-2ch-grouped-delayed.avi","packets":3,"peak_encoded_capacity":16386,"peak_live_packet_capacity":81930}
+MEMORY {"channels":2,"file":"alaw-2ch-small.avi","packets":3,"peak_encoded_capacity":4094,"peak_live_packet_capacity":20470}
+MEMORY {"channels":1,"file":"mulaw-1ch-single.avi","packets":1,"peak_encoded_capacity":8193,"peak_live_packet_capacity":40965}
+MEMORY {"channels":1,"file":"mulaw-1ch-single-delayed.avi","packets":1,"peak_encoded_capacity":8193,"peak_live_packet_capacity":40965}
+MEMORY {"channels":1,"file":"mulaw-1ch-grouped.avi","packets":3,"peak_encoded_capacity":8193,"peak_live_packet_capacity":40965}
+MEMORY {"channels":1,"file":"mulaw-1ch-grouped-delayed.avi","packets":3,"peak_encoded_capacity":8193,"peak_live_packet_capacity":40965}
+MEMORY {"channels":1,"file":"mulaw-1ch-small.avi","packets":3,"peak_encoded_capacity":2047,"peak_live_packet_capacity":10235}
+MEMORY {"channels":2,"file":"mulaw-2ch-single.avi","packets":1,"peak_encoded_capacity":16386,"peak_live_packet_capacity":81930}
+MEMORY {"channels":2,"file":"mulaw-2ch-single-delayed.avi","packets":1,"peak_encoded_capacity":16386,"peak_live_packet_capacity":81930}
+MEMORY {"channels":2,"file":"mulaw-2ch-grouped.avi","packets":3,"peak_encoded_capacity":16386,"peak_live_packet_capacity":81930}
+MEMORY {"channels":2,"file":"mulaw-2ch-grouped-delayed.avi","packets":3,"peak_encoded_capacity":16386,"peak_live_packet_capacity":81930}
+MEMORY {"channels":2,"file":"mulaw-2ch-small.avi","packets":3,"peak_encoded_capacity":4094,"peak_live_packet_capacity":20470}
+
+thread 'encoded_and_decoded_live_packet_buffers_are_bounded' (15175886) panicked at tests/avi_g711_windows.rs:122:5:
+unbounded G711 record copies: ["\"alaw-1ch-single.avi\": 8193 frames", "\"alaw-1ch-single-delayed.avi\": 8193 frames", "\"alaw-1ch-grouped.avi\": 8193 frames", "\"alaw-1ch-grouped-delayed.avi\": 8193 frames", "\"alaw-2ch-single.avi\": 8193 frames", "\"alaw-2ch-single-delayed.avi\": 8193 frames", "\"alaw-2ch-grouped.avi\": 8193 frames", "\"alaw-2ch-grouped-delayed.avi\": 8193 frames", "\"mulaw-1ch-single.avi\": 8193 frames", "\"mulaw-1ch-single-delayed.avi\": 8193 frames", "\"mulaw-1ch-grouped.avi\": 8193 frames", "\"mulaw-1ch-grouped-delayed.avi\": 8193 frames", "\"mulaw-2ch-single.avi\": 8193 frames", "\"mulaw-2ch-single-delayed.avi\": 8193 frames", "\"mulaw-2ch-grouped.avi\": 8193 frames", "\"mulaw-2ch-grouped-delayed.avi\": 8193 frames"]
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+test encoded_and_decoded_live_packet_buffers_are_bounded ... FAILED
+
+failures:
+
+failures:
+    encoded_and_decoded_live_packet_buffers_are_bounded
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 3 filtered out; finished in 0.02s
+

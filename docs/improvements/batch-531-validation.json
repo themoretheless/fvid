@@ -1,0 +1,144 @@
+{
+  "status": "accepted",
+  "accepted_ids": [
+    "FVID-0520"
+  ],
+  "follow_up_ids": [],
+  "count_delta": 1,
+  "accepted_count": 520,
+  "next_id": "FVID-0521",
+  "qualification": {
+    "integration": {
+      "command": [
+        "cargo",
+        "test",
+        "--locked",
+        "--offline",
+        "--no-default-features",
+        "--features",
+        "player",
+        "--test",
+        "avi_g711_windows",
+        "--test",
+        "avi_pcm",
+        "--test",
+        "avi_headers_seek",
+        "--test",
+        "g711_native",
+        "--test",
+        "avi_audio_eof",
+        "--test",
+        "avi_adpcm_grouped",
+        "--test",
+        "avi_chunk_extent",
+        "--test",
+        "avi_duration_grid",
+        "--test",
+        "avi_index_origin",
+        "--test",
+        "avi_main_header_bounds",
+        "--test",
+        "avi_riff_boundary",
+        "--test",
+        "aifc_g711_original_width",
+        "--test",
+        "mp4_g711_seek",
+        "--test",
+        "audio_reader_eof",
+        "--test",
+        "block_audio_eof",
+        "--",
+        "--test-threads=2",
+        "--nocapture"
+      ],
+      "exit_code": 0,
+      "seconds": 9.165820360183716,
+      "source_stable": true
+    },
+    "root-avi": {
+      "command": [
+        "cargo",
+        "test",
+        "--locked",
+        "--offline",
+        "--no-default-features",
+        "--features",
+        "player",
+        "--lib",
+        "playback_avi_audio",
+        "--",
+        "--test-threads=2"
+      ],
+      "exit_code": 0,
+      "seconds": 0.589738130569458,
+      "source_stable": true
+    },
+    "audio-worker": {
+      "command": [
+        "cargo",
+        "test",
+        "--locked",
+        "--offline",
+        "--no-default-features",
+        "--features",
+        "player",
+        "--lib",
+        "audio_thread",
+        "--",
+        "--test-threads=2"
+      ],
+      "exit_code": 0,
+      "seconds": 9.956507921218872,
+      "source_stable": true
+    },
+    "core-check": {
+      "command": [
+        "cargo",
+        "check",
+        "--locked",
+        "--offline",
+        "--no-default-features"
+      ],
+      "exit_code": 0,
+      "seconds": 0.38049888610839844,
+      "source_stable": true
+    },
+    "player-check": {
+      "command": [
+        "cargo",
+        "check",
+        "--locked",
+        "--offline",
+        "--no-default-features",
+        "--features",
+        "player"
+      ],
+      "exit_code": 0,
+      "seconds": 0.4847569465637207,
+      "source_stable": true
+    }
+  },
+  "rust_test_executions": 106,
+  "preexisting_ignored": 0,
+  "repeats": {
+    "runs": 3,
+    "passed_per_run": 4,
+    "failed": 0
+  },
+  "without_ffmpeg_extra_executions": 4,
+  "source_frozen_count": 2825,
+  "source_frozen_manifest": "evidence/avi-g711-windows/candidate-source.json",
+  "fixture_files_regenerated_identically": 42,
+  "measurement_scope": "Observed capacities of simultaneously live encoded and decoded packet Vecs only;not whole-reader memory,RSS or throughput",
+  "measurement": "evidence/avi-g711-windows/measurement.json",
+  "notes": [
+    "One measured resource opportunity across all20 profiles. Original valid audio correctness already passed.",
+    "No whole-reader/RSS/throughput gain claimed. Complete file and index remain charged;more packet calls are a documented tradeoff.",
+    "Public method signatures and coded-byte/PCM/time semantics remain stable;new internal packet boundaries are explicitly documented.",
+    "Incidental rustfmt-only helper edit restored and all five gates/repeats/no-FFmpeg checks repeated on final hashes.",
+    "No existing tests or refusal expectations weakened."
+  ],
+  "evidence_directories": [
+    "evidence/avi-g711-windows"
+  ]
+}

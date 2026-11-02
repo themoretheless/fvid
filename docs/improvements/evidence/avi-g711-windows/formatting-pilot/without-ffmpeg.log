@@ -1,0 +1,9 @@
+
+running 4 tests
+test encoded_and_decoded_live_packet_buffers_are_bounded ... ok
+test full_file_resource_admission_remains_strict ... ok
+test actual_workers_preserve_pcm_and_native_seek_anchors ... ok
+test whole_chunk_pcm_native_clock_seek_and_eof_controls ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.80s
+
