@@ -6,6 +6,11 @@
   ],
   "preserved_dirs": [],
   "execution_wrappers_removed": true,
-  "source_backup": "Retained until source commit;then remove after committed hash comparison.",
+  "source_backup": {
+    "path": "/private/tmp/fvid-index-eof-baseline-source-20261102",
+    "removed": true,
+    "source_commit": "3b63ce62fdc49dadf428fda799c0b7d6a24c590b",
+    "committed_hashes_verified": 8
+  },
   "fixtures_and_evidence_retained": true
 }
