@@ -49,6 +49,8 @@ impl PcmDecoder {
             return Err(invalid("PCM requires an audio track with 1..64 channels"));
         }
         let format = match &track.codec {
+            b"alaw" => PcmFormat::ALaw,
+            b"ulaw" => PcmFormat::MuLaw,
             b"raw " if track.bit_depth == 8 => PcmFormat::Unsigned8,
             b"fl32" => PcmFormat::Float { bits: 32 },
             b"fl64" => PcmFormat::Float { bits: 64 },

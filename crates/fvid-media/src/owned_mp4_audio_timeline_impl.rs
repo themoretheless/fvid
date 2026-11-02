@@ -65,7 +65,7 @@ fn mp4_immediate_edit_prefix(
     let first = track.sample_descriptions.first()?;
     if first.sample_rate == 0 || track.timescale % first.sample_rate != 0
         || !track.sample_descriptions.iter().all(|d| d == first)
-        || !matches!(&first.codec, b"raw " | b"sowt" | b"twos" | b"in24" | b"in32" | b"fl32" | b"fl64" | b"alac" | b"ima4" | b"MAC3" | b"MAC6" | b"ms\x00\x11" | b"ms\x00\x02")
+        || !matches!(&first.codec, b"alaw" | b"ulaw" | b"raw " | b"sowt" | b"twos" | b"in24" | b"in32" | b"fl32" | b"fl64" | b"alac" | b"ima4" | b"MAC3" | b"MAC6" | b"ms\x00\x11" | b"ms\x00\x02")
     { return None; }
     let rate = first.sample_rate;
     let clock = track.resolved_edit_clock(movie_scale).ok()?;

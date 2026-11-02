@@ -1,0 +1,673 @@
+{
+  "provenance": "Own all-code G711 and independent segment-level PCM oracle. AIFC is audio-only:the short neutral VP9 companion is an independent video control;the AIFC files reproduce the specific audio parser failure. No private media/parameters,FFmpeg or network.",
+  "specification": "https://www.mmsp.ece.mcgill.ca/Documents/AudioFormats/AIFF/Docs/AIFF-C.9.26.91.pdf",
+  "section": "4.0 Common Chunk,PDF page14",
+  "video": "neutral-video.mp4",
+  "cases": [
+    {
+      "file": "alaw-1ch-16bit.aifc",
+      "law": "alaw",
+      "channels": 1,
+      "original_bits": 16,
+      "rate": 8000,
+      "frames": 256,
+      "oracle": "alaw-1ch.f32le"
+    },
+    {
+      "file": "alaw-1ch-1bit.aifc",
+      "law": "alaw",
+      "channels": 1,
+      "original_bits": 1,
+      "rate": 8000,
+      "frames": 256,
+      "oracle": "alaw-1ch.f32le"
+    },
+    {
+      "file": "alaw-1ch-8bit.aifc",
+      "law": "alaw",
+      "channels": 1,
+      "original_bits": 8,
+      "rate": 8000,
+      "frames": 256,
+      "oracle": "alaw-1ch.f32le"
+    },
+    {
+      "file": "alaw-1ch-12bit.aifc",
+      "law": "alaw",
+      "channels": 1,
+      "original_bits": 12,
+      "rate": 8000,
+      "frames": 256,
+      "oracle": "alaw-1ch.f32le"
+    },
+    {
+      "file": "alaw-1ch-13bit.aifc",
+      "law": "alaw",
+      "channels": 1,
+      "original_bits": 13,
+      "rate": 8000,
+      "frames": 256,
+      "oracle": "alaw-1ch.f32le"
+    },
+    {
+      "file": "alaw-1ch-14bit.aifc",
+      "law": "alaw",
+      "channels": 1,
+      "original_bits": 14,
+      "rate": 8000,
+      "frames": 256,
+      "oracle": "alaw-1ch.f32le"
+    },
+    {
+      "file": "alaw-1ch-24bit.aifc",
+      "law": "alaw",
+      "channels": 1,
+      "original_bits": 24,
+      "rate": 8000,
+      "frames": 256,
+      "oracle": "alaw-1ch.f32le"
+    },
+    {
+      "file": "alaw-1ch-32bit.aifc",
+      "law": "alaw",
+      "channels": 1,
+      "original_bits": 32,
+      "rate": 8000,
+      "frames": 256,
+      "oracle": "alaw-1ch.f32le"
+    },
+    {
+      "file": "alaw-1ch-16bit-upper.aifc",
+      "law": "alaw",
+      "channels": 1,
+      "original_bits": 16,
+      "rate": 8000,
+      "frames": 256,
+      "oracle": "alaw-1ch.f32le"
+    },
+    {
+      "file": "alaw-1ch-1bit-upper.aifc",
+      "law": "alaw",
+      "channels": 1,
+      "original_bits": 1,
+      "rate": 8000,
+      "frames": 256,
+      "oracle": "alaw-1ch.f32le"
+    },
+    {
+      "file": "alaw-1ch-8bit-upper.aifc",
+      "law": "alaw",
+      "channels": 1,
+      "original_bits": 8,
+      "rate": 8000,
+      "frames": 256,
+      "oracle": "alaw-1ch.f32le"
+    },
+    {
+      "file": "alaw-1ch-12bit-upper.aifc",
+      "law": "alaw",
+      "channels": 1,
+      "original_bits": 12,
+      "rate": 8000,
+      "frames": 256,
+      "oracle": "alaw-1ch.f32le"
+    },
+    {
+      "file": "alaw-1ch-13bit-upper.aifc",
+      "law": "alaw",
+      "channels": 1,
+      "original_bits": 13,
+      "rate": 8000,
+      "frames": 256,
+      "oracle": "alaw-1ch.f32le"
+    },
+    {
+      "file": "alaw-1ch-14bit-upper.aifc",
+      "law": "alaw",
+      "channels": 1,
+      "original_bits": 14,
+      "rate": 8000,
+      "frames": 256,
+      "oracle": "alaw-1ch.f32le"
+    },
+    {
+      "file": "alaw-1ch-24bit-upper.aifc",
+      "law": "alaw",
+      "channels": 1,
+      "original_bits": 24,
+      "rate": 8000,
+      "frames": 256,
+      "oracle": "alaw-1ch.f32le"
+    },
+    {
+      "file": "alaw-1ch-32bit-upper.aifc",
+      "law": "alaw",
+      "channels": 1,
+      "original_bits": 32,
+      "rate": 8000,
+      "frames": 256,
+      "oracle": "alaw-1ch.f32le"
+    },
+    {
+      "file": "alaw-2ch-16bit.aifc",
+      "law": "alaw",
+      "channels": 2,
+      "original_bits": 16,
+      "rate": 8000,
+      "frames": 256,
+      "oracle": "alaw-2ch.f32le"
+    },
+    {
+      "file": "alaw-2ch-1bit.aifc",
+      "law": "alaw",
+      "channels": 2,
+      "original_bits": 1,
+      "rate": 8000,
+      "frames": 256,
+      "oracle": "alaw-2ch.f32le"
+    },
+    {
+      "file": "alaw-2ch-8bit.aifc",
+      "law": "alaw",
+      "channels": 2,
+      "original_bits": 8,
+      "rate": 8000,
+      "frames": 256,
+      "oracle": "alaw-2ch.f32le"
+    },
+    {
+      "file": "alaw-2ch-12bit.aifc",
+      "law": "alaw",
+      "channels": 2,
+      "original_bits": 12,
+      "rate": 8000,
+      "frames": 256,
+      "oracle": "alaw-2ch.f32le"
+    },
+    {
+      "file": "alaw-2ch-13bit.aifc",
+      "law": "alaw",
+      "channels": 2,
+      "original_bits": 13,
+      "rate": 8000,
+      "frames": 256,
+      "oracle": "alaw-2ch.f32le"
+    },
+    {
+      "file": "alaw-2ch-14bit.aifc",
+      "law": "alaw",
+      "channels": 2,
+      "original_bits": 14,
+      "rate": 8000,
+      "frames": 256,
+      "oracle": "alaw-2ch.f32le"
+    },
+    {
+      "file": "alaw-2ch-24bit.aifc",
+      "law": "alaw",
+      "channels": 2,
+      "original_bits": 24,
+      "rate": 8000,
+      "frames": 256,
+      "oracle": "alaw-2ch.f32le"
+    },
+    {
+      "file": "alaw-2ch-32bit.aifc",
+      "law": "alaw",
+      "channels": 2,
+      "original_bits": 32,
+      "rate": 8000,
+      "frames": 256,
+      "oracle": "alaw-2ch.f32le"
+    },
+    {
+      "file": "alaw-2ch-16bit-upper.aifc",
+      "law": "alaw",
+      "channels": 2,
+      "original_bits": 16,
+      "rate": 8000,
+      "frames": 256,
+      "oracle": "alaw-2ch.f32le"
+    },
+    {
+      "file": "alaw-2ch-1bit-upper.aifc",
+      "law": "alaw",
+      "channels": 2,
+      "original_bits": 1,
+      "rate": 8000,
+      "frames": 256,
+      "oracle": "alaw-2ch.f32le"
+    },
+    {
+      "file": "alaw-2ch-8bit-upper.aifc",
+      "law": "alaw",
+      "channels": 2,
+      "original_bits": 8,
+      "rate": 8000,
+      "frames": 256,
+      "oracle": "alaw-2ch.f32le"
+    },
+    {
+      "file": "alaw-2ch-12bit-upper.aifc",
+      "law": "alaw",
+      "channels": 2,
+      "original_bits": 12,
+      "rate": 8000,
+      "frames": 256,
+      "oracle": "alaw-2ch.f32le"
+    },
+    {
+      "file": "alaw-2ch-13bit-upper.aifc",
+      "law": "alaw",
+      "channels": 2,
+      "original_bits": 13,
+      "rate": 8000,
+      "frames": 256,
+      "oracle": "alaw-2ch.f32le"
+    },
+    {
+      "file": "alaw-2ch-14bit-upper.aifc",
+      "law": "alaw",
+      "channels": 2,
+      "original_bits": 14,
+      "rate": 8000,
+      "frames": 256,
+      "oracle": "alaw-2ch.f32le"
+    },
+    {
+      "file": "alaw-2ch-24bit-upper.aifc",
+      "law": "alaw",
+      "channels": 2,
+      "original_bits": 24,
+      "rate": 8000,
+      "frames": 256,
+      "oracle": "alaw-2ch.f32le"
+    },
+    {
+      "file": "alaw-2ch-32bit-upper.aifc",
+      "law": "alaw",
+      "channels": 2,
+      "original_bits": 32,
+      "rate": 8000,
+      "frames": 256,
+      "oracle": "alaw-2ch.f32le"
+    },
+    {
+      "file": "mulaw-1ch-16bit.aifc",
+      "law": "mulaw",
+      "channels": 1,
+      "original_bits": 16,
+      "rate": 8000,
+      "frames": 256,
+      "oracle": "mulaw-1ch.f32le"
+    },
+    {
+      "file": "mulaw-1ch-1bit.aifc",
+      "law": "mulaw",
+      "channels": 1,
+      "original_bits": 1,
+      "rate": 8000,
+      "frames": 256,
+      "oracle": "mulaw-1ch.f32le"
+    },
+    {
+      "file": "mulaw-1ch-8bit.aifc",
+      "law": "mulaw",
+      "channels": 1,
+      "original_bits": 8,
+      "rate": 8000,
+      "frames": 256,
+      "oracle": "mulaw-1ch.f32le"
+    },
+    {
+      "file": "mulaw-1ch-12bit.aifc",
+      "law": "mulaw",
+      "channels": 1,
+      "original_bits": 12,
+      "rate": 8000,
+      "frames": 256,
+      "oracle": "mulaw-1ch.f32le"
+    },
+    {
+      "file": "mulaw-1ch-13bit.aifc",
+      "law": "mulaw",
+      "channels": 1,
+      "original_bits": 13,
+      "rate": 8000,
+      "frames": 256,
+      "oracle": "mulaw-1ch.f32le"
+    },
+    {
+      "file": "mulaw-1ch-14bit.aifc",
+      "law": "mulaw",
+      "channels": 1,
+      "original_bits": 14,
+      "rate": 8000,
+      "frames": 256,
+      "oracle": "mulaw-1ch.f32le"
+    },
+    {
+      "file": "mulaw-1ch-24bit.aifc",
+      "law": "mulaw",
+      "channels": 1,
+      "original_bits": 24,
+      "rate": 8000,
+      "frames": 256,
+      "oracle": "mulaw-1ch.f32le"
+    },
+    {
+      "file": "mulaw-1ch-32bit.aifc",
+      "law": "mulaw",
+      "channels": 1,
+      "original_bits": 32,
+      "rate": 8000,
+      "frames": 256,
+      "oracle": "mulaw-1ch.f32le"
+    },
+    {
+      "file": "mulaw-1ch-16bit-upper.aifc",
+      "law": "mulaw",
+      "channels": 1,
+      "original_bits": 16,
+      "rate": 8000,
+      "frames": 256,
+      "oracle": "mulaw-1ch.f32le"
+    },
+    {
+      "file": "mulaw-1ch-1bit-upper.aifc",
+      "law": "mulaw",
+      "channels": 1,
+      "original_bits": 1,
+      "rate": 8000,
+      "frames": 256,
+      "oracle": "mulaw-1ch.f32le"
+    },
+    {
+      "file": "mulaw-1ch-8bit-upper.aifc",
+      "law": "mulaw",
+      "channels": 1,
+      "original_bits": 8,
+      "rate": 8000,
+      "frames": 256,
+      "oracle": "mulaw-1ch.f32le"
+    },
+    {
+      "file": "mulaw-1ch-12bit-upper.aifc",
+      "law": "mulaw",
+      "channels": 1,
+      "original_bits": 12,
+      "rate": 8000,
+      "frames": 256,
+      "oracle": "mulaw-1ch.f32le"
+    },
+    {
+      "file": "mulaw-1ch-13bit-upper.aifc",
+      "law": "mulaw",
+      "channels": 1,
+      "original_bits": 13,
+      "rate": 8000,
+      "frames": 256,
+      "oracle": "mulaw-1ch.f32le"
+    },
+    {
+      "file": "mulaw-1ch-14bit-upper.aifc",
+      "law": "mulaw",
+      "channels": 1,
+      "original_bits": 14,
+      "rate": 8000,
+      "frames": 256,
+      "oracle": "mulaw-1ch.f32le"
+    },
+    {
+      "file": "mulaw-1ch-24bit-upper.aifc",
+      "law": "mulaw",
+      "channels": 1,
+      "original_bits": 24,
+      "rate": 8000,
+      "frames": 256,
+      "oracle": "mulaw-1ch.f32le"
+    },
+    {
+      "file": "mulaw-1ch-32bit-upper.aifc",
+      "law": "mulaw",
+      "channels": 1,
+      "original_bits": 32,
+      "rate": 8000,
+      "frames": 256,
+      "oracle": "mulaw-1ch.f32le"
+    },
+    {
+      "file": "mulaw-2ch-16bit.aifc",
+      "law": "mulaw",
+      "channels": 2,
+      "original_bits": 16,
+      "rate": 8000,
+      "frames": 256,
+      "oracle": "mulaw-2ch.f32le"
+    },
+    {
+      "file": "mulaw-2ch-1bit.aifc",
+      "law": "mulaw",
+      "channels": 2,
+      "original_bits": 1,
+      "rate": 8000,
+      "frames": 256,
+      "oracle": "mulaw-2ch.f32le"
+    },
+    {
+      "file": "mulaw-2ch-8bit.aifc",
+      "law": "mulaw",
+      "channels": 2,
+      "original_bits": 8,
+      "rate": 8000,
+      "frames": 256,
+      "oracle": "mulaw-2ch.f32le"
+    },
+    {
+      "file": "mulaw-2ch-12bit.aifc",
+      "law": "mulaw",
+      "channels": 2,
+      "original_bits": 12,
+      "rate": 8000,
+      "frames": 256,
+      "oracle": "mulaw-2ch.f32le"
+    },
+    {
+      "file": "mulaw-2ch-13bit.aifc",
+      "law": "mulaw",
+      "channels": 2,
+      "original_bits": 13,
+      "rate": 8000,
+      "frames": 256,
+      "oracle": "mulaw-2ch.f32le"
+    },
+    {
+      "file": "mulaw-2ch-14bit.aifc",
+      "law": "mulaw",
+      "channels": 2,
+      "original_bits": 14,
+      "rate": 8000,
+      "frames": 256,
+      "oracle": "mulaw-2ch.f32le"
+    },
+    {
+      "file": "mulaw-2ch-24bit.aifc",
+      "law": "mulaw",
+      "channels": 2,
+      "original_bits": 24,
+      "rate": 8000,
+      "frames": 256,
+      "oracle": "mulaw-2ch.f32le"
+    },
+    {
+      "file": "mulaw-2ch-32bit.aifc",
+      "law": "mulaw",
+      "channels": 2,
+      "original_bits": 32,
+      "rate": 8000,
+      "frames": 256,
+      "oracle": "mulaw-2ch.f32le"
+    },
+    {
+      "file": "mulaw-2ch-16bit-upper.aifc",
+      "law": "mulaw",
+      "channels": 2,
+      "original_bits": 16,
+      "rate": 8000,
+      "frames": 256,
+      "oracle": "mulaw-2ch.f32le"
+    },
+    {
+      "file": "mulaw-2ch-1bit-upper.aifc",
+      "law": "mulaw",
+      "channels": 2,
+      "original_bits": 1,
+      "rate": 8000,
+      "frames": 256,
+      "oracle": "mulaw-2ch.f32le"
+    },
+    {
+      "file": "mulaw-2ch-8bit-upper.aifc",
+      "law": "mulaw",
+      "channels": 2,
+      "original_bits": 8,
+      "rate": 8000,
+      "frames": 256,
+      "oracle": "mulaw-2ch.f32le"
+    },
+    {
+      "file": "mulaw-2ch-12bit-upper.aifc",
+      "law": "mulaw",
+      "channels": 2,
+      "original_bits": 12,
+      "rate": 8000,
+      "frames": 256,
+      "oracle": "mulaw-2ch.f32le"
+    },
+    {
+      "file": "mulaw-2ch-13bit-upper.aifc",
+      "law": "mulaw",
+      "channels": 2,
+      "original_bits": 13,
+      "rate": 8000,
+      "frames": 256,
+      "oracle": "mulaw-2ch.f32le"
+    },
+    {
+      "file": "mulaw-2ch-14bit-upper.aifc",
+      "law": "mulaw",
+      "channels": 2,
+      "original_bits": 14,
+      "rate": 8000,
+      "frames": 256,
+      "oracle": "mulaw-2ch.f32le"
+    },
+    {
+      "file": "mulaw-2ch-24bit-upper.aifc",
+      "law": "mulaw",
+      "channels": 2,
+      "original_bits": 24,
+      "rate": 8000,
+      "frames": 256,
+      "oracle": "mulaw-2ch.f32le"
+    },
+    {
+      "file": "mulaw-2ch-32bit-upper.aifc",
+      "law": "mulaw",
+      "channels": 2,
+      "original_bits": 32,
+      "rate": 8000,
+      "frames": 256,
+      "oracle": "mulaw-2ch.f32le"
+    }
+  ],
+  "invalid_original_sizes": [
+    "alaw-0bit-invalid.aifc",
+    "alaw-33bit-invalid.aifc",
+    "alaw-65535bit-invalid.aifc",
+    "mulaw-0bit-invalid.aifc",
+    "mulaw-33bit-invalid.aifc",
+    "mulaw-65535bit-invalid.aifc"
+  ],
+  "sha256": {
+    "neutral-video.mp4": "94344c6e9a7d6e44345541fc0e3e5120db912e79483033d7452fd39ee4865fe5",
+    "alaw-table.f32le": "d4f2bd1be9bad67461eab90762a5ddd77cb74e988c585d4a3a51a7204bdd09ec",
+    "alaw-1ch.f32le": "d4f2bd1be9bad67461eab90762a5ddd77cb74e988c585d4a3a51a7204bdd09ec",
+    "alaw-1ch-16bit.aifc": "2f600f1d26f8d3e06c3eed2d37b3f5151078afbf4fa55536e75fdc6783927a24",
+    "alaw-1ch-1bit.aifc": "443f4bb7c24e2cea73419a01cddff7dfb732f91f9b273830ad35d7ecc93d1f8b",
+    "alaw-1ch-8bit.aifc": "e356460eebf8e201c254b262667d05a197ead34e03805bc1c093f6cc06a997cb",
+    "alaw-1ch-12bit.aifc": "61a0b94be7e8c2d33761085936f056d45ad167977cc0024b7aa53f5c7622554b",
+    "alaw-1ch-13bit.aifc": "b69b506df21a395f655dc2887447ad39d6fc5c61a32044a139c1f24b15b15ffc",
+    "alaw-1ch-14bit.aifc": "6e754a8979fa4d2ab66e0367a130e89dc2624e855f1d75b2bab49a4450d1c136",
+    "alaw-1ch-24bit.aifc": "bad342feed9f9d0fa0624f14d1976e6f1615017ff9800673fa22e0ed51dd933e",
+    "alaw-1ch-32bit.aifc": "7ed5d58527cf14caee919e05073b55522a4127e2295e00d38237dfdfbb66afce",
+    "alaw-1ch-16bit-upper.aifc": "4c0ee3a38c5e422312fbe3c13ffce0cec942755b296ae811dfd6050942eac00f",
+    "alaw-1ch-1bit-upper.aifc": "faf6d481cb8cc3ce538062f22e26e49d90d949bf693d663f32e8ba9cb8da0216",
+    "alaw-1ch-8bit-upper.aifc": "997d0e770158c182910277091bf26eb2f82f3aaf88c066a0a55c508323d31144",
+    "alaw-1ch-12bit-upper.aifc": "290dfc9ce6fb94638a589f09ad876484494fcf6a324e6aa99f136f5c3982b587",
+    "alaw-1ch-13bit-upper.aifc": "64c3c8cac729d272d295997acea443e5cf2cd505890d43193a8b1cec382a818a",
+    "alaw-1ch-14bit-upper.aifc": "be14a837445fc10964b24d009d33aa0140640f20d4a3012c45ad9797ae706606",
+    "alaw-1ch-24bit-upper.aifc": "755433685224c19bac66516330b1ed4e3971f2b03a38be2f18cbce640217e278",
+    "alaw-1ch-32bit-upper.aifc": "25742f34a4c8de4734fe5e6417713b997647d82097ea97e7cd03c0d016feb139",
+    "alaw-2ch.f32le": "3db4424327dba9aeae51f3d41f733704fa303d945e36520c4a386bfbf80dcb02",
+    "alaw-2ch-16bit.aifc": "52e3f7ecd876be52e6a1822e4f244ab87c93a93daaf3cbf29622b7cfafc79174",
+    "alaw-2ch-1bit.aifc": "11a060f6f021a0ebe21b5e1e9f7ef44fa8119cbe51c9ad5b8ffb9878b15b5412",
+    "alaw-2ch-8bit.aifc": "29d9afd4d0602ee66f882812fdfd06c555f400b1881c76708429a0b96ae42be5",
+    "alaw-2ch-12bit.aifc": "0f6fb8a09bb8e8d4cd7c399145a409ec86feb0a4045e46542ce46c321283c637",
+    "alaw-2ch-13bit.aifc": "82cde3cff9ed998859e83386e023b83984db9441b35003f4ca6f9867c852f91c",
+    "alaw-2ch-14bit.aifc": "cd5345e2091760e5a69d58d977e714f775ebce3fcbe6386349e82cd76e60fe65",
+    "alaw-2ch-24bit.aifc": "9e6dfbbe16b23989112d6346a42d3205223763d2da9b93e0d701694e13843cd0",
+    "alaw-2ch-32bit.aifc": "d4897650defac20579bd65212f6a5826a5e92bb369c755c00283783392b4beb5",
+    "alaw-2ch-16bit-upper.aifc": "7ed0e52f02acec16e2a8c2d32a3714d3a27c4a33f846586abbcdee8e0e23731f",
+    "alaw-2ch-1bit-upper.aifc": "13942adab6f0354ebcab192154b0c29279c9c53c802acbb97acc4fb8af01db3e",
+    "alaw-2ch-8bit-upper.aifc": "fc9c9447227e3f0e4b9c2dff215d5e4d04906a932fdeaa0169520c750131ee22",
+    "alaw-2ch-12bit-upper.aifc": "60d94db9cc212a8d53ae5db7fc90dedc185401a819b9e0ac756ecbf9ab6c68c0",
+    "alaw-2ch-13bit-upper.aifc": "4d13cefe2459b627fc668c1a65ef5741a185628b5bc3836f11045caf59f1217f",
+    "alaw-2ch-14bit-upper.aifc": "021314ca3b59e644534c13aaca5c48ca4ba496f9ec9b366cbcd055b9e01319b6",
+    "alaw-2ch-24bit-upper.aifc": "ee406ec95aa024363bfd14ba6d28b27144c8d9ed29db6f3d2efef6a731fc5c5b",
+    "alaw-2ch-32bit-upper.aifc": "62c8b3f59f210adb2f6fd4af963c2bdc49279e065a721fd5d7319bc49c10f274",
+    "alaw-0bit-invalid.aifc": "2469395ee840dc3491bde0e96cac107b6b1ed2acebf5281edc93a6014a6a42d1",
+    "alaw-33bit-invalid.aifc": "ae3b643ab0787786830651c69a93a367bb0f82fcdbdf798b826797a17deefdc1",
+    "alaw-65535bit-invalid.aifc": "a0d9dd827b4d5bb7f792aacd4778c60ca90e4d52ed97b4cdcc6cb113d02cb6f0",
+    "mulaw-table.f32le": "34371823a5daca165d7cae3c7afa7ea7683ab9176cc8423deaa23c97199adc7f",
+    "mulaw-1ch.f32le": "34371823a5daca165d7cae3c7afa7ea7683ab9176cc8423deaa23c97199adc7f",
+    "mulaw-1ch-16bit.aifc": "f5eeae8e8e18f456262893de1c28f00c06d0eb3c146b48a4a46ec7876320f6e2",
+    "mulaw-1ch-1bit.aifc": "a6db83c1514d2d98fff244572f91fd758704fe9c967a812cdf72e24e8ca2751e",
+    "mulaw-1ch-8bit.aifc": "db1d456cf2ff4c6a10be338024be18f60aa072c893606082f0dd02f080d26595",
+    "mulaw-1ch-12bit.aifc": "17de741981746df08a2a7bdbaba68bceec0f5937ad312cc77d0095b0880c8ee6",
+    "mulaw-1ch-13bit.aifc": "588886b03bc01cfe3319cbaa503976ca2d0879d853eb4923e8d1099e1fac36e3",
+    "mulaw-1ch-14bit.aifc": "134cc26b1cbf94f7b24d30326af04958ce9120a023d06959985fd4016a10afad",
+    "mulaw-1ch-24bit.aifc": "534b1aae524b41567e89402d52a0dca14230eb28b3770e8d9316220d2c6277fb",
+    "mulaw-1ch-32bit.aifc": "ca1b755370e0d45d4bd1fddee91c35d2ba322c676ff7066dbb0d358aa73a559f",
+    "mulaw-1ch-16bit-upper.aifc": "cc06790180c0c5eda7d6f64e9f00307f260440a353733c14fea42118e3dd6bd3",
+    "mulaw-1ch-1bit-upper.aifc": "3823ddd581cd801eb540cc14d707e1b4ff52e6332b8fae92cd446245494e691a",
+    "mulaw-1ch-8bit-upper.aifc": "0965e8317394c3b8ee883364fa567676575a3e47f4d0ef26c289266780fb6962",
+    "mulaw-1ch-12bit-upper.aifc": "cf4ca5b4048bffce411de5ed8aee922f59d6d621c2fdc0a81214ad1ae1746706",
+    "mulaw-1ch-13bit-upper.aifc": "8e71c202f828437b2134ed52c12c21a684b46271d6bb21665c91791c474d9728",
+    "mulaw-1ch-14bit-upper.aifc": "54c6a2ce7b029d1beb0d9dff1f1c7bc638cb35b2e554b1716a0a647db7b03761",
+    "mulaw-1ch-24bit-upper.aifc": "500a2c021189c0d739b4e4fb66036ee63ea94970f63391a27466926d02c34c23",
+    "mulaw-1ch-32bit-upper.aifc": "7953dce90f3163e9ee009635072675acfeaa64a4fbe72a12b605fd51cdf3efee",
+    "mulaw-2ch.f32le": "ff7c35fc57dcc0929defeea7f3f2fcdc27bd69fbe12c27e476ec6b2a9f68be5e",
+    "mulaw-2ch-16bit.aifc": "6d08e559e6af1e3d79a7db43a45e482b9af82511ca4c46aad3fd256392b0e1bf",
+    "mulaw-2ch-1bit.aifc": "60cc56f019275e215a3a794cdcf5df10552dee0107479213d8954f9dc99f4893",
+    "mulaw-2ch-8bit.aifc": "475fb63409cdab9968e9114aa3266d3e2f2c54d7e31abd54a9519c7d67f45a8d",
+    "mulaw-2ch-12bit.aifc": "349401f83d8268b151e3a53763f15336cb509b5c769798ec12918895eac5bcda",
+    "mulaw-2ch-13bit.aifc": "f821a0bf6a136518c78b3e59a89edebbc4cea774262008e00e831e4535fe8815",
+    "mulaw-2ch-14bit.aifc": "4ac126181f72f94028f884c20a99b0e79b545440dda680886e81d5cb3f140365",
+    "mulaw-2ch-24bit.aifc": "a5858c6f061ab1405c26cd474fa040e07d2ce33e3e9dee0326e92f13308b02af",
+    "mulaw-2ch-32bit.aifc": "adc458945048031e97c85e41fea7569c527f448061eb7c620867950d2d21050d",
+    "mulaw-2ch-16bit-upper.aifc": "a87fde2deff26fba322eee4c50e8f480e6f67d1771924c8c115f3c2bb64a78d8",
+    "mulaw-2ch-1bit-upper.aifc": "661ef9652756e1f9b31828c423e1681e49c03ecdeb4771fc089d586506ef23ca",
+    "mulaw-2ch-8bit-upper.aifc": "7ecfb8e482f96fa299b077b01fae7971a3b0248931f0d2dcf71119d948bd5b58",
+    "mulaw-2ch-12bit-upper.aifc": "b5412ef2230a7c54916631a290edd6f4fb75e3c66cf7db9a0a56861622a5bbf4",
+    "mulaw-2ch-13bit-upper.aifc": "65b5727bf1667f1aad90f59cb2fa3df49549b16f3366eb07704bcd97b1e28fa7",
+    "mulaw-2ch-14bit-upper.aifc": "a729d677b566247c3c21ed4f7b8726bfa621fa7e246cd74308c06a4b42847e75",
+    "mulaw-2ch-24bit-upper.aifc": "35104e51dc8cb72863ee7561e9d72273d526ba7452681a8eeb3bbe87ebd5f5cb",
+    "mulaw-2ch-32bit-upper.aifc": "895c40c157ac1acdf477c94ee7cb78c152e94b4b065935f7cd61b4ca8ee8dbb3",
+    "mulaw-0bit-invalid.aifc": "7451a6c04d2fb95d9422ecdd5206416ca8cdb2946d4a6cd95eaf260b5375ec73",
+    "mulaw-33bit-invalid.aifc": "c80594a91534246ddc1274e7403dadbad882b1f490298359b623764f05d50bc1",
+    "mulaw-65535bit-invalid.aifc": "04151ea971e400eb52e0e67ac8650bbc80dffee592271e9ffc8498bfdb7cec67",
+    "orphan-channel.aifc": "8f55a3c5604d21418b6d2518ac9c50847cfde7e92cdebeeb7a19549a34d33fc7",
+    "truncated-declared-tail.aifc": "873c886d2b8195a52156fb1e04489561dd8938561251c72310f8a26283de7e5d"
+  }
+}

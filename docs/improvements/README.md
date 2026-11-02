@@ -1020,6 +1020,8 @@ refuse as `Error::Invalid`. 3 focused integrations, 56 WAV/AIFF/AU units,
 359 core checks, fixture unittest and binary build pass. See
 `batch-186-validation.json`.
 
+Correction in batch524:the AIFC8-only interpretation above is withdrawn. COMM sampleSize describes the original1..32-bit precision,not coded bytes. The16/24-bit controls are valid;WAV/AU safeguards remain unchanged. See `batch-524-validation.json`.
+
 ## Batch 187 — FLAC `STREAMINFO` ordering, exact length, block/frame bounds, reserved metadata rejection, and speaker-mask channel bounds
 
 FVID-0194 enforces RFC 9639 §8.1/§8.2 metadata and geometry invariants across
@@ -3539,3 +3541,7 @@ Zero-count FVID-0484 extension for aligned-clock mixed PCM/AC3/EAC3. Per-packet 
 ## Batch 523 — First seek into concealed Dolby packets,zero new IDs
 
 Zero-count correction of batch522/FVID-0484. A first seek into a CRC-bad middle EAC3 packet previously rejected a stream whose complete playback and warm seek correctly concealed that packet. Native-rate selection now shares checked description setup/cache with ordinary configuration without activating the future decoder. Six authored classic/fragmented/hybrid movies at48k programme0 and44.1k programme1 with48k metadata hint compare independent controls,zero-concealed middle samples,nonzero neighbors,exact rational timestamps/PCM,warm/raw/fresh seeks and actual-worker anchors. Baseline two controls pass,two fresh seek tests fail specifically on native-rate probing;all four unchanged tests and ten older mixed Dolby tests pass after. Seven gates pass1082 test executions,two old ignores;three four-test repeats pass with stable source. No new ID,performance,physical-device or visual-player claim. Counter512,next FVID-0513. See `batch-523-validation.json`.
+
+## Batch 524 — QuickTime G.711 native playback and export
+
+One compatibility capability:existing Rust G711 companders now decode QuickTime alaw/ulaw through parsed sample tables,player/native descriptors,precise native-clock seek,owned float32/float64 intervals and public float64 WAVE export. Forty-eight authored v1/compressionID-2 movies cover8k mono,48/44.1k stereo,dense/uniform/fragmented/hybrid tables,silence/repeated edits,all256 codes and neutral VP9. Native counts use one coded byte per channel rather than uncompressed sampleSize16. Independent PCM/WAVE controls,exact rational timestamps/PCM,EOF/MAX/raw reset,actual workers,compact record budgets,orphan-channel refusal and full packet admission pass. Primary QuickTime references and initial before failures are preserved. A separate zero-count FVID-0193 correction restores standards-valid AIFC original-width metadata;the unchanged old G711 test failed identically on original source before that correction. Nine gates pass1114 Rust executions,four Python units,two old ignores;three15-test repeats pass with2399 stable source/fixture hashes. No speedup,physical-device or visual-player claim. Counter513,next FVID-0514. See `batch-524-validation.json`.

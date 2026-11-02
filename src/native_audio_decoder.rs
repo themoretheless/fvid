@@ -77,6 +77,13 @@ impl PacketPcmDecoder {
                     track.channels,
                 )?))
             }
+            b"alaw" | b"ulaw" => {
+                if !(1..=64).contains(&track.channels) {return Err(invalid("G.711 channels must be 1..64"));}
+                Ok(Self::Pcm(crate::codec::pcm_decoder::PcmDecoder::new(
+                    if track.codec==*b"alaw" {crate::codec::pcm_decoder::PcmFormat::ALaw}else{crate::codec::pcm_decoder::PcmFormat::MuLaw},
+                    track.sample_rate,track.channels,
+                )?))
+            }
             b"MAC3" | b"MAC6" => Ok(Self::Mace(MaceDecoder::new(
                 if track.codec == *b"MAC3" { MaceCoding::ThreeToOne } else { MaceCoding::SixToOne },
                 track.sample_rate, track.channels,

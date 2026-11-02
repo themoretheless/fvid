@@ -87,7 +87,7 @@ impl Mp4TimelineDecoder {
                     track.channels,
                 )?))
             }
-            b"raw " | b"sowt" | b"twos" | b"in24" | b"in32" | b"fl32" | b"fl64" => Ok(Self::Pcm(
+            b"alaw" | b"ulaw" | b"raw " | b"sowt" | b"twos" | b"in24" | b"in32" | b"fl32" | b"fl64" => Ok(Self::Pcm(
                 crate::owned_pcm_decoder::PcmDecoder::from_mp4(track)
                     .map_err(|e| invalid(&e.to_string()))?,
             )),
@@ -219,7 +219,7 @@ fn mp4_decoder_admission(track: &crate::owned_mp4::Track) -> Result<usize> {
             track.channels,
         )
         .map_err(|e| invalid(&e.to_string()))?,
-        b"raw " | b"sowt" | b"twos" | b"in24" | b"in32" | b"fl32" | b"fl64" => {
+        b"alaw" | b"ulaw" | b"raw " | b"sowt" | b"twos" | b"in24" | b"in32" | b"fl32" | b"fl64" => {
             crate::owned_pcm_decoder::PcmDecoder::from_mp4(track)
                 .map_err(|e| invalid(&e.to_string()))?;
             16 * 1024
@@ -411,7 +411,7 @@ pub(crate) fn admit_audio_reader_with_interval<R: Read + Seek>(
     // The reusable packet Vec may grow geometrically while reading larger packets.
     let expansion = track.sample_descriptions.iter().map(|d| match &d.codec {
         b"MAC3" | b"MAC6" => 64,
-        b"raw " | b"sowt" | b"twos" | b"in24" | b"in32" | b"fl32" | b"fl64" | b"ima4" | b"ms\x00\x11" | b"ms\x00\x02" => 10,
+        b"alaw" | b"ulaw" | b"raw " | b"sowt" | b"twos" | b"in24" | b"in32" | b"fl32" | b"fl64" | b"ima4" | b"ms\x00\x11" | b"ms\x00\x02" => 10,
         _ => 2,
     }).max().unwrap_or(2);
     add(largest_packet.checked_mul(expansion).ok_or_else(overflow)?)?;

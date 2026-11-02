@@ -134,6 +134,14 @@ def build_fixtures() -> dict[str, bytes]:
             ),
             pcm16_mono_samples,
         ),
+        # Historical names retained byte-for-byte;original16/24-bit G711
+        # precision is valid per AIFF-C section4.0,not the encoded width.
+        "aifc_alaw_0bit_invalid.aifc": make_form_aifc(
+            channels=1,frames=4,bits_per_sample=0,compression=b"alaw",samples=g711_alaw_samples,
+        ),
+        "aifc_ulaw_33bit_invalid.aifc": make_form_aifc(
+            channels=1,frames=4,bits_per_sample=33,compression=b"ulaw",samples=g711_alaw_samples,
+        ),
         "aifc_alaw_16bit_invalid.aifc": make_form_aifc(
             channels=1,
             frames=4,
@@ -175,6 +183,12 @@ def write_fixtures(out_dir: Path = FIXTURES_DIR) -> dict[str, str]:
     manifest = {
         "suite": "wav-aiff-au",
         "improvement_id": "FVID-0193",
+        "classification_correction": {
+            "aifc_alaw_16bit_invalid.aifc": "legacy misnamed valid original-width control",
+            "aifc_ulaw_24bit_invalid.aifc": "legacy misnamed valid original-width control",
+            "aifc_alaw_0bit_invalid.aifc": "invalid original sampleSize below1",
+            "aifc_ulaw_33bit_invalid.aifc": "invalid original sampleSize above32",
+        },
         "fixtures": manifest_entries,
     }
     (out_dir / "manifest.json").write_text(json.dumps(manifest, indent=2) + "\n")

@@ -47,6 +47,7 @@ pub fn frames(
                 .ok_or("MP4 PCM stride overflow")?,
             1,
         ),
+        b"alaw" | b"ulaw" => blocks(ch, 1),
         b"MAC3" => blocks(ch * 2, 6),
         b"MAC6" => blocks(ch, 6),
         b"ima4" => blocks(ch * 34, 64),

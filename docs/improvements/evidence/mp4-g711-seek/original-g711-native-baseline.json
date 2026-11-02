@@ -1,0 +1,29 @@
+{
+  "source_commit": "7c9462c78ca2e2cfb395a209e44955a9af4ff5f3",
+  "exit_code": 101,
+  "same_aifc_16bit_refusal": true,
+  "candidate_restored": true,
+  "source_original": {
+    "crates/fvid-media/src/owned_mp4_audio.rs": "51a33e84ef84d6e23342ce0aa269e32b908d703bf5230f5ae0842fae0dd450fe",
+    "crates/fvid-media/src/owned_mp4_audio_export.rs": "8efa938205f5883b744c4fa6d78acbb45c3c42db97dbacda0c1f9c02142b3123",
+    "crates/fvid-media/src/owned_mp4_audio_packet_frames.rs": "62d96a5b1389e4bfb6fc7f72c7f305ec2b8a74c2702756db5882725044ddfb99",
+    "crates/fvid-media/src/owned_mp4_audio_timeline_impl.rs": "e6fa48a8786a3ee2f7b8037f497b66cc70246e1df96211e1580ed520b65a3510",
+    "crates/fvid-media/src/owned_mp4_impl.rs": "022abe826ee3abf6aad2efabdaf81afe5554bd79795c13d70a6587cab6769907",
+    "crates/fvid-media/src/owned_pcm_decoder.rs": "bd5389b2204546acbe88a56bdd0bbdeecc2b4746bc0f7385bc73cdf569da1150",
+    "src/native_audio_decoder.rs": "44928d8c514c0ce9e00d43882aa5337eb590f318056fc8e3c9c58b9990bbb448",
+    "src/native_media.rs": "5273618ba4ce5fe9a908624cc4a5b336d79b4f62ffdc1f72eeb9cc077dd4c61e",
+    "src/playback/audio/mp4_audio.rs": "c28788cf712edf1d8c67748b5785e65fcc95d88befcb47647942a194a8d1f772"
+  },
+  "source_candidate": {
+    "crates/fvid-media/src/owned_mp4_audio.rs": "94ad5026b57485f834f651aa185fc1802713d7f99c80724c5d4f01aebebf8ba7",
+    "crates/fvid-media/src/owned_mp4_audio_export.rs": "1134d142f894989708ea75eaffad66780f3bb1f96440f59860cb29ffad19e72a",
+    "crates/fvid-media/src/owned_mp4_audio_packet_frames.rs": "730ba5fa13922d3270dbba8b1724f848a676d454eed78b7ed40bce5da82bda3f",
+    "crates/fvid-media/src/owned_mp4_audio_timeline_impl.rs": "4f66b6e00784f00752440f5ab816ddd5cbadab36e36a208fdc43ecb0c655092c",
+    "crates/fvid-media/src/owned_mp4_impl.rs": "d38378723fb79b13bb18d4d4eb333f0215a3bfe5d485df2d1b90b2df34889490",
+    "crates/fvid-media/src/owned_pcm_decoder.rs": "6ea4a751203ba8727a78c2de92a5d5d281e521c7f7893d1450f66cec37f28423",
+    "src/native_audio_decoder.rs": "332ddf319ea547ca925da36a314cea8bb6c07f7fa8d246c855658761d887b94a",
+    "src/native_media.rs": "03f4fff8dfd843bcf15fcb1164a5b7a0d6017724961f70c29b6c597f8511f04f",
+    "src/playback/audio/mp4_audio.rs": "855b04e191e68ca69576f7d6f83a1e35498c769af206e193bc267c436866ebfc"
+  },
+  "unchanged_aifc_source_sha256": "f57ffc89ca11a06c4058250ab4817027187381e5ab7aaa1d1e3b9cf27efc1952"
+}

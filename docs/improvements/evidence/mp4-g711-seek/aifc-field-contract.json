@@ -1,0 +1,16 @@
+{
+  "status": "primary_source_contract_verified",
+  "source": "https://www.mmsp.ece.mcgill.ca/Documents/AudioFormats/AIFF/Docs/AIFF-C.9.26.91.pdf",
+  "author": "Apple Computer, Inc.",
+  "section": "4.0 Common Chunk",
+  "pdf_page_one_based": 14,
+  "quote": "For compressed sound data, sampleSize indicates the number of bits in the original sound data before compression.",
+  "original_sample_size_range": [
+    1,
+    32
+  ],
+  "g711_coded_bytes_per_channel_sample": 1,
+  "incorrect_old_constraint": "src/playback/audio/aiff.rs required COMM sampleSize==8 for G711;this confuses original sample width with coded byte width",
+  "regression_entry": "FVID-0193",
+  "planned_accounting": "Correction of an introduced AIFC regression adds zero IDs;MOV compatibility remains a separate pending single capability."
+}

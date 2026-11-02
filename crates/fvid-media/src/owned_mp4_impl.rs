@@ -1390,8 +1390,8 @@ fn read_encoder(udta: Option<&[u8]>) -> String {
         .unwrap_or_default()
 }
 
-fn is_pcm(codec: &[u8; 4]) -> bool {
-    matches!(codec, b"sowt" | b"twos" | b"fl32" | b"fl64" | b"in24" | b"in32" | b"raw ")
+fn is_sample_audio(codec: &[u8; 4]) -> bool {
+    matches!(codec, b"sowt" | b"twos" | b"fl32" | b"fl64" | b"in24" | b"in32" | b"raw " | b"alaw" | b"ulaw")
 }
 
 /// The ADPCM tags QuickTime writes, each spelling its coding in the entry's own
@@ -1825,11 +1825,13 @@ fn parse_sample_entry(entry: Atom<'_>, mut result: Track, refused: &mut Vec<Skip
                 _ => return Ok(None),
             }
         }
-        // Uncompressed PCM, as QuickTime writes it for a screen recording: the
+        // Sample-addressable linear or G.711 PCM. Companded samples occupy one
+        // coded byte per channel; stsz states coded bytes, not sampleSize bits.
+        // Linear PCM, as QuickTime writes it for a screen recording: the
         // Integer tags sowt/twos state byte order directly. Float and in24/in32
         // entries use enda, usually nested in wave; absent enda defaults to big
         // endian. Preserve its normalized flag for both export and playback.
-        (b"soun", codec) if is_pcm(codec) => {
+        (b"soun", codec) if is_sample_audio(codec) => {
             if !audio_entry(entry.data, &mut result)? {
                 return Ok(None);
             }
@@ -2119,7 +2121,7 @@ fn sample_index(
     // Preserve the existing chunk-sized uniform index and its sample budget
     // without materializing one size/index record for every PCM frame.
     let mut uniform_size = fixed_size;
-    if compact.is_some() && !fragmented && is_pcm(codec) && count != 0 {
+    if compact.is_some() && !fragmented && is_sample_audio(codec) && count != 0 {
         let candidate = size_at(0)?;
         let mut constant = candidate != 0;
         for index in 1..count {
@@ -2129,7 +2131,7 @@ fn sample_index(
     }
     let unit = if fragmented {
         None
-    } else if is_pcm(codec) && uniform_size != 0 {
+    } else if is_sample_audio(codec) && uniform_size != 0 {
         Some((1, usize::try_from(uniform_size).unwrap_or(usize::MAX)))
     } else {
         mace_block(codec, channels)
@@ -2352,7 +2354,7 @@ fn expanded_index(
         // track out costs only the sound a reader without PCM support would not
         // have played anyway; refusing the file would cost the picture beside
         // it. The uniform form is what most such tracks use now.
-        if is_pcm(codec) {
+        if is_sample_audio(codec) {
             return Ok(None);
         }
         return Err(invalid("MP4 sample count exceeds budget"));

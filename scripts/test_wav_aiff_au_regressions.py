@@ -38,19 +38,21 @@ class WavAiffAuRegressionFixtureTests(unittest.TestCase):
     def test_aifc_g711_sample_width_isolation(self) -> None:
         fixtures = gen.build_fixtures()
         valid = fixtures["aifc_alaw_8bit_valid.aifc"]
-        bad16 = fixtures["aifc_alaw_16bit_invalid.aifc"]
-        bad24 = fixtures["aifc_ulaw_24bit_invalid.aifc"]
+        original16 = fixtures["aifc_alaw_16bit_invalid.aifc"]
+        original24 = fixtures["aifc_ulaw_24bit_invalid.aifc"]
 
         # COMM body begins at offset 32 (12 FORM + 12 FVER + 8 COMM header)
         # sampleSize is at COMM[6..8] -> file[38..40]
         self.assertEqual(struct.unpack_from(">h", valid, 38)[0], 8)
-        self.assertEqual(struct.unpack_from(">h", bad16, 38)[0], 16)
-        self.assertEqual(struct.unpack_from(">h", bad24, 38)[0], 24)
+        self.assertEqual(struct.unpack_from(">h", original16, 38)[0], 16)
+        self.assertEqual(struct.unpack_from(">h", original24, 38)[0], 24)
+        self.assertEqual(struct.unpack_from(">h", fixtures["aifc_alaw_0bit_invalid.aifc"], 38)[0], 0)
+        self.assertEqual(struct.unpack_from(">h", fixtures["aifc_ulaw_33bit_invalid.aifc"], 38)[0], 33)
 
     def test_write_fixtures_roundtrip(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             written = gen.write_fixtures(Path(tmp))
-            self.assertEqual(len(written), 7)
+            self.assertEqual(len(written), 9)
             self.assertTrue((Path(tmp) / "manifest.json").is_file())
 
 

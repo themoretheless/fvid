@@ -70,8 +70,10 @@ pub struct Mp4AudioReader<R> {
 }
 
 /// Audio fourccs decoded by the player, including the owned PCM endian mapping.
-const CODECS: [[u8; 4]; 16] = [
+const CODECS: [[u8; 4]; 18] = [
     *b"mp4a",
+    *b"alaw",
+    *b"ulaw",
     *b"raw ",
     *b"in24",
     *b"in32",
@@ -96,6 +98,8 @@ const CODECS: [[u8; 4]; 16] = [
 /// dispatch matches on.
 fn codec_name(codec: &[u8; 4]) -> Option<&'static str> {
     Some(match codec {
+        b"alaw" => "pcm_alaw",
+        b"ulaw" => "pcm_mulaw",
         b"ima4" => "adpcm_ima_qt",
         b"ms\x00\x02" => "adpcm_ms",
         b"ms\x00\x11" => "adpcm_ima_wav",
@@ -181,10 +185,10 @@ impl<R: Read + Seek> Mp4AudioReader<R> {
         // The first table entry can be unused. Eligibility follows the setup
         // selected by the initial packet, just as explicit playback does.
         let Some(setup) = track.description_for_sample(0) else { return false; };
-        if !matches!(&setup.codec, b"raw " | b"sowt" | b"twos" | b"in24" | b"in32" | b"fl32" | b"fl64") {
+        if !matches!(&setup.codec, b"alaw" | b"ulaw" | b"raw " | b"sowt" | b"twos" | b"in24" | b"in32" | b"fl32" | b"fl64") {
             return true;
         }
-        crate::codec::make_audio_decoder(std::str::from_utf8(&setup.codec).unwrap_or(""),
+        crate::codec::make_audio_decoder(codec_name(&setup.codec).unwrap_or_else(||std::str::from_utf8(&setup.codec).unwrap_or("")),
             &setup.configuration, setup.sample_rate, setup.channels, setup.bit_depth).is_ok()
     }
 
@@ -297,7 +301,7 @@ impl<R: Read + Seek> Mp4AudioReader<R> {
         };
         if clock.is_some() || finite_aac_tail || middle_gaps || unedited_tail || demuxer.tracks().get(index).is_some_and(|t|t.ensure_constant_description().is_err() || t.has_open_edit()
             || (t.codec == *b"mp4a" && (t.edits.len() > 1 || t.edits.first().is_some_and(|e|e.media_time < 0)))
-            || (!t.edits.is_empty() && matches!(&t.codec,b"alac"|b"raw "|b"sowt"|b"twos"|b"in24"|b"in32"|b"fl32"|b"fl64"))) {
+            || (!t.edits.is_empty() && matches!(&t.codec,b"alac"|b"alaw"|b"ulaw"|b"raw "|b"sowt"|b"twos"|b"in24"|b"in32"|b"fl32"|b"fl64"))) {
             return Self::from_changing(demuxer,index,programme,clock);
         }
         let selected_geometry=if let Some(programme)=programme {
@@ -470,7 +474,7 @@ impl<R: Read + Seek> Mp4AudioReader<R> {
                 let frames=u128::from(sample.duration)*u128::from(rate);let scale=u128::from(self.track().timescale);
                 if scale==0 || frames%scale!=0 {return Err(invalid("MP4 AAC packet duration is not sample aligned"));}
                 i128::try_from(frames/scale).map_err(|_|invalid("MP4 seek frame count overflow"))?
-            }else if matches!(&setup.codec,b"ima4"|b"ms\0\x11"|b"ms\0\x02"|b"MAC3"|b"MAC6") {
+            }else if matches!(&setup.codec,b"alaw"|b"ulaw"|b"ima4"|b"ms\0\x11"|b"ms\0\x02"|b"MAC3"|b"MAC6") {
                 let coded=fvid_media::owned_mp4_audio_packet_frames::frames(
                     &setup.codec,&setup.configuration,rate,setup.channels,setup.bit_depth,
                     sample.size as usize,None).map_err(|error|invalid(&error))?;
@@ -1537,7 +1541,7 @@ impl<R: Read + Seek + Send> crate::audio::AudioStream for Mp4AudioReader<R> {
             header.codec==*b"alac" || !clock_recovery::clock_description_used(&self.track().samples,i+1));
         let native_codec=|codec:&[u8;4]| matches!(codec,
             b"sowt"|b"twos"|b"raw "|b"in24"|b"in32"|b"fl32"|b"fl64"
-                |b"ima4"|b"ms\0\x11"|b"ms\0\x02"|b"MAC3"|b"MAC6"|b"mp4a"|b"alac"|b"ac-3"|b"ec-3");
+                |b"ima4"|b"ms\0\x11"|b"ms\0\x02"|b"MAC3"|b"MAC6"|b"mp4a"|b"alac"|b"ac-3"|b"ec-3"|b"alaw"|b"ulaw");
         // Mixed descriptions share the same per-packet native frame counter.
         // Unselected metadata must not narrow the precise seek route.
         let exact_native=self.track().sample_descriptions.iter().enumerate().all(|(i,header)|

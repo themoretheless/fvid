@@ -1,0 +1,18 @@
+{
+  "all_preexisting_media_bytes_unchanged": true,
+  "media_sha256": {
+    "tests/fixtures/playback-errors/wav-aiff-au/wav_extensible_channel_mask_overflow.wav": "2abb348305eb8086f917a21ef43488b3ea347c1d03347a56e033aec1cc6d91f6",
+    "tests/fixtures/playback-errors/wav-aiff-au/wav_extensible_valid.wav": "9ed9dbac6f5dc8b8468e9ce721ede94a45c959ec6bb7439ad4f2783b8e3e2933",
+    "tests/fixtures/playback-errors/wav-aiff-au/aifc_alaw_8bit_valid.aifc": "1b453b460f95541e0b6b8f758136b614a2ba54d259cd35ca5e731779ef816cb6",
+    "tests/fixtures/playback-errors/wav-aiff-au/aifc_ulaw_24bit_invalid.aifc": "ccb651cccd979973b771d0be3462a0a760d0e03bbb79a9fd548fe79605e9c23b",
+    "tests/fixtures/playback-errors/wav-aiff-au/aifc_alaw_16bit_invalid.aifc": "900f90def77789c204c5dae9913231915841804964bc141918efceaab43329f8",
+    "tests/fixtures/playback-errors/wav-aiff-au/wav_extensible_cbsize_overflow.wav": "ee350457e157d88fcedde6ecf604d202c5fad1aef6d00f88e72990c50f896947",
+    "tests/fixtures/playback-errors/wav-aiff-au/au_pcm16_valid.au": "344f3b179c3c0bca32fcc1ae294ae43d8749c58e053e2fe334d1bcff80e033f7"
+  },
+  "unrelated_wav_au_test_bodies_unchanged": {
+    "wav_extensible_rejects_channel_mask_popcount_exceeding_channels_and_oversized_cbsize": "8bc8c745b100a80e0fa91be94f4151caa22de638d05c03d59c39e5ca0f366786",
+    "au_audio_reader_present_decoded_validates_geometry_stamps_timeline_and_trims_floor": "b14feeadcfff188204bf32236c1c574cd4461aa6891a4ace7c40d9a509679b15"
+  },
+  "g711_native_test_unchanged": true,
+  "classification_only": "Existing16/24 invalid-named AIFC controls are now positive per primary format contract;new0/33 original-size controls retain strict refusal."
+}

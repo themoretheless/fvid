@@ -1,8 +1,8 @@
 {
   "target": 1000,
   "counting_rule": "One independently confirmed problem or useful capability; fixture variants and baseline integration repairs are excluded. Only accepted entries count.",
-  "accepted_count": 512,
-  "next_id": "FVID-0513",
+  "accepted_count": 513,
+  "next_id": "FVID-0514",
   "entries": [
     {
       "id": "FVID-0001",
@@ -2177,13 +2177,15 @@
     {
       "id": "FVID-0193",
       "batch": 186,
-      "title": "Enforce WAV extensible cbSize/channel-mask bounds, AIFC G.711 8-bit sample width, and AuAudioReader::present_decoded parity",
+      "title": "Enforce WAV extensible bounds and AuAudioReader decoded presentation parity",
       "source": "src/playback/audio/wav.rs",
       "regression": "tests/wav_aiff_au_regressions.rs",
-      "before": "WAV parse_fmt accepts WAVE_FORMAT_EXTENSIBLE headers whose cbSize exceeds body.len() - 18 or whose dwChannelMask names more speaker positions than channels; AIFC parse_comm accepts alaw/ulaw compression with 16/24/32-bit sampleSize; AuAudioReader omits present_decoded and presentation_floor, accepting negative source_pts and unaligned decoded payloads without stamping timebase or trimming pre-seek frames.",
-      "result": "Validate usize::from(cbSize) <= body.len() - 18 and channel_mask.count_ones() <= channels in WAV parse_fmt, require bits == 8 for AIFC G.711 in parse_comm, and implement present_decoded + presentation_floor on AuAudioReader matching WavAudioReader and AiffAudioReader. Three healthy WAV/AIFC/AU controls and four malformed inputs pass; 3 focused integrations, 56 WAV/AIFF/AU units, 359 core checks, fixture unittest and binary build pass.",
+      "before": "WAV parse_fmt accepts WAVE_FORMAT_EXTENSIBLE headers whose cbSize exceeds body.len()-18 or whose dwChannelMask names more speaker positions than channels;AuAudioReader omits present_decoded and presentation_floor,accepting negative source_pts and unaligned decoded payloads without stamping timebase or trimming pre-seek frames.",
+      "result": "Validate extensible cbSize/channel-mask bounds and implement decoded AU geometry,timebase and seek-floor presentation parity with WAV/AIFF. Original WAV/AU assertions remain unchanged. The former AIFC8-only claim was incorrect and is withdrawn;its introduced regression is corrected without a new ID in batch524.",
       "status": "accepted",
-      "validation": "batch-186-validation.json"
+      "validation": "batch-186-validation.json",
+      "aifc_original_width_correction_validation": "batch-524-validation.json",
+      "aifc_original_width_correction_note": "AIFF-C section4 defines sampleSize before compression in1..32 bits,not the one-byte G711 code width. Original8-bit compatibility remains;64 authored original-width/case/channel variants pass native PCM/raw seek/worker tests. Bounds0/33/65535,orphan channel,short declared tail and data budgets remain strict. All seven legacy media files and unrelated WAV/AU test bodies are unchanged. The two historical invalid-named16/24-bit files are preserved as positive controls;new0/33-bit files supply correct refusal controls. Original g711_native test remains unchanged and passes. Correction adds zero IDs."
     },
     {
       "id": "FVID-0194",
@@ -5804,6 +5806,17 @@
       "result": "Use integer nanoseconds only when the native fraction is exactly integral and fits u64;otherwise use the existing reduced packet-stamp helper. Preserve PCM bytes,raw tick/packet landing contracts,integer-nanosecond formatting when exact and the old unrepresentable-width fallback. Seven frozen-source gates pass1068 test executions,two prior ignores;three repeats pass126 tests each. Independent-cause evidence and the complete measured stamp-only source are retained.",
       "status": "accepted",
       "validation": "batch-521-validation.json"
+    },
+    {
+      "id": "FVID-0513",
+      "batch": 524,
+      "title": "Decode QuickTime G.711 with exact native presentation and PCM export",
+      "source": "src/playback/audio/mp4_audio.rs",
+      "regression": "tests/mp4_g711_seek.rs",
+      "before": "Original7c9462c78c passes independent G711 WAVE and neutral-video controls but refuses authored MOV alaw/ulaw as unsupported;owned export cannot select an audio stream. Initial18- and expanded48-movie acceptances each produce one passing control and three failing playback/worker/export tests.",
+      "result": "One compatibility capability:existing Rust G711 companders now decode QuickTime alaw/ulaw through parsed sample tables,player/native descriptors,precise native-clock seek,owned float32/float64 intervals and public float64 WAVE export. Forty-eight authored v1/compressionID-2 movies cover8k mono,48/44.1k stereo,dense/uniform/fragmented/hybrid tables,silence/repeated edits,all256 codes and neutral VP9. Native counts use one coded byte per channel rather than uncompressed sampleSize16. Independent PCM/WAVE controls,exact rational timestamps/PCM,EOF/MAX/raw reset,actual workers,compact record budgets,orphan-channel refusal and full packet admission pass. Primary QuickTime references and initial before failures are preserved. A separate zero-count FVID-0193 correction restores standards-valid AIFC original-width metadata;the unchanged old G711 test failed identically on original source before that correction. Nine gates pass1114 Rust executions,four Python units,two old ignores;three15-test repeats pass with2399 stable source/fixture hashes. No speedup,physical-device or visual-player claim.",
+      "status": "accepted",
+      "validation": "batch-524-validation.json"
     }
   ]
 }

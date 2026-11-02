@@ -66,6 +66,8 @@ pub(crate) fn recognizes(source: &Path, options: &CopyOptions) -> Result<bool> {
                 &t.codec,
                 b"mp4a"
                     | b"alac"
+                    | b"alaw"
+                    | b"ulaw"
                     | b"raw "
                     | b"sowt"
                     | b"twos"
@@ -166,6 +168,8 @@ pub(crate) fn descriptor_for_decode(
             b"ima4" => "adpcm_ima_qt",
             b"ms\x00\x11" => "adpcm_ima_wav",
             b"ms\x00\x02" => "adpcm_ms",
+            b"alaw" => "pcm_alaw",
+            b"ulaw" => "pcm_mulaw",
             b"raw " => "pcm_u8",
             b"sowt" => "pcm_sle",
             b"twos" => "pcm_sbe",
@@ -193,7 +197,7 @@ pub(crate) fn geometry_for_decode(
     let track = &reader.tracks()[index];
     let interval = transform.and_then(|t| prefix(t, rate));
     let active_samples = crate::owned_mp4_audio::mp4_active_samples(track, reader.movie_timescale(), interval, options.max_packets);
-    let all_pcm = (0..active_samples).all(|n| track.description_for_sample(n).is_some_and(|d| matches!(&d.codec,b"raw "|b"sowt"|b"twos"|b"in24"|b"in32"|b"fl32"|b"fl64")));
+    let all_pcm = (0..active_samples).all(|n| track.description_for_sample(n).is_some_and(|d| matches!(&d.codec,b"alaw"|b"ulaw"|b"raw "|b"sowt"|b"twos"|b"in24"|b"in32"|b"fl32"|b"fl64")));
     if transform.is_some_and(|t| t.interval.is_some()) {
         let mut probe = options.clone();
         probe.progress = None;

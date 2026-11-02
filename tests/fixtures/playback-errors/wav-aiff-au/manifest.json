@@ -1,7 +1,17 @@
 {
   "suite": "wav-aiff-au",
   "improvement_id": "FVID-0193",
+  "classification_correction": {
+    "aifc_alaw_16bit_invalid.aifc": "legacy misnamed valid original-width control",
+    "aifc_ulaw_24bit_invalid.aifc": "legacy misnamed valid original-width control",
+    "aifc_alaw_0bit_invalid.aifc": "invalid original sampleSize below1",
+    "aifc_ulaw_33bit_invalid.aifc": "invalid original sampleSize above32"
+  },
   "fixtures": [
+    {
+      "file": "aifc_alaw_0bit_invalid.aifc",
+      "bytes": 76
+    },
     {
       "file": "aifc_alaw_16bit_invalid.aifc",
       "bytes": 76
@@ -12,6 +22,10 @@
     },
     {
       "file": "aifc_ulaw_24bit_invalid.aifc",
+      "bytes": 76
+    },
+    {
+      "file": "aifc_ulaw_33bit_invalid.aifc",
       "bytes": 76
     },
     {

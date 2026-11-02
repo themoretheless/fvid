@@ -48,30 +48,33 @@ fn wav_extensible_rejects_channel_mask_popcount_exceeding_channels_and_oversized
 }
 
 #[test]
-fn aifc_g711_rejects_non_8bit_sample_width_and_accepts_8bit() {
-    for name in [
-        "aifc_alaw_16bit_invalid.aifc",
-        "aifc_ulaw_24bit_invalid.aifc",
-    ] {
-        let bytes = fixture_bytes(name);
-        let err = Aiff::parse(&bytes, &AiffLimits::default())
-            .expect_err("AIFC G.711 with non-8-bit sample width must be rejected");
-        assert!(
-            err.to_string().contains("G.711"),
-            "{name}: unexpected error: {err}"
-        );
+fn aifc_g711_validates_original_width_without_confusing_coded_stride() {
+    for name in ["aifc_alaw_0bit_invalid.aifc","aifc_ulaw_33bit_invalid.aifc"] {
+        let bytes=fixture_bytes(name);
+        let err=Aiff::parse(&bytes,&AiffLimits::default()).expect_err("out-of-range original width must refuse");
+        assert!(err.to_string().contains("G.711 original sample size must be 1..32"),"{name}:{err}");
     }
-
-    let valid = fixture_bytes("aifc_alaw_8bit_valid.aifc");
-    let mut reader = AiffAudioReader::open(&valid[..], AiffLimits::default())
-        .expect("valid 8-bit AIFC alaw should open");
-    assert_eq!(reader.codec(), "pcm_alaw");
-    assert_eq!(reader.bits_per_sample(), 8);
-    let pkt = reader
-        .next_packet()
-        .expect("read packet")
-        .expect("one packet");
-    assert_eq!((pkt.pts, pkt.duration, pkt.data.len()), (0, 4, 4));
+    // Retain the historical misnamed16/24-bit files as acceptance controls.
+    // AIFF-C section4.0 defines sampleSize before compression,not coded bytes.
+    for (name,bits,codec,table) in [
+        ("aifc_alaw_8bit_valid.aifc",8,"pcm_alaw","alaw-table.f32le"),
+        ("aifc_alaw_16bit_invalid.aifc",16,"pcm_alaw","alaw-table.f32le"),
+        ("aifc_ulaw_24bit_invalid.aifc",24,"pcm_mulaw","mulaw-table.f32le"),
+    ] {
+        let valid=fixture_bytes(name);
+        let mut reader=AiffAudioReader::open(&valid[..],AiffLimits::default()).expect("valid original G711 width should open");
+        assert_eq!(reader.codec(),codec);assert_eq!(reader.bits_per_sample(),bits);
+        let mut decoder=reader.make_decoder().unwrap();
+        let pkt=reader.next_packet().unwrap().unwrap();
+        assert_eq!((pkt.pts,pkt.duration,pkt.data.len()),(0,4,4));
+        let pcm=decoder.decode_packet(&pkt.data,pkt.pts,pkt.duration as u64).unwrap().unwrap().packet;
+        let levels=std::fs::read(PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("tests/fixtures/playback-errors/aifc-g711-original-width").join(table)).unwrap();
+        let expected:Vec<_>=pkt.data.iter().flat_map(|&code|levels[usize::from(code)*4..usize::from(code)*4+4].iter().copied()).collect();
+        assert_eq!(pcm.data,expected,"{name}:independent PCM");
+        assert!(reader.next_packet().unwrap().is_none());reader.validate_eof().unwrap();
+        assert_eq!(reader.seek_to(2),2);let pkt=reader.next_packet().unwrap().unwrap();
+        assert_eq!((pkt.pts,pkt.duration,pkt.data.len()),(2,2,2));
+    }
 }
 
 #[test]
