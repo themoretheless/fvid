@@ -1,0 +1,1064 @@
+   Compiling proc-macro2 v1.0.107
+   Compiling unicode-ident v1.0.24
+   Compiling quote v1.0.47
+   Compiling libc v0.2.189
+   Compiling syn v3.0.5
+   Compiling syn v2.0.119
+   Compiling bitflags v2.13.2
+   Compiling cfg-if v1.0.4
+   Compiling autocfg v1.5.1
+   Compiling libm v0.2.16
+   Compiling num-traits v0.2.19
+   Compiling smallvec v1.16.1
+   Compiling objc2-encode v4.1.0
+   Compiling bytemuck_derive v1.12.1
+   Compiling once_cell v1.21.4
+   Compiling objc2 v0.6.4
+   Compiling bytemuck v1.25.2
+   Compiling cfg_aliases v0.2.2
+   Compiling log v0.4.34
+   Compiling foldhash v0.2.0
+   Compiling synstructure v0.13.2
+   Compiling block2 v0.6.2
+   Compiling objc2-core-foundation v0.3.2
+   Compiling zerocopy v0.8.57
+   Compiling thiserror v2.0.20
+   Compiling zerofrom-derive v0.1.7
+   Compiling zerocopy-derive v0.8.57
+   Compiling thiserror-impl v2.0.20
+   Compiling zerofrom v0.1.8
+   Compiling objc2-foundation v0.3.2
+   Compiling yoke-derive v0.8.2
+   Compiling arrayvec v0.7.8
+   Compiling stable_deref_trait v1.2.1
+   Compiling yoke v0.8.3
+   Compiling hashbrown v0.17.1
+   Compiling zerovec-derive v0.11.6
+   Compiling pin-project-lite v0.2.17
+   Compiling objc2-core-graphics v0.3.2
+   Compiling zerovec v0.11.8
+   Compiling libloading v0.8.9
+   Compiling displaydoc v0.2.7
+   Compiling half v2.7.1
+   Compiling parking_lot_core v0.9.12
+   Compiling raw-window-handle v0.6.2
+   Compiling equivalent v1.0.2
+   Compiling scopeguard v1.2.0
+   Compiling lock_api v0.4.14
+   Compiling indexmap v2.14.2
+   Compiling tinystr v0.8.4
+   Compiling dispatch2 v0.3.1
+   Compiling objc-sys v0.3.5
+   Compiling rustc-hash v1.1.0
+   Compiling writeable v0.6.4
+   Compiling litemap v0.8.3
+   Compiling icu_locale_core v2.3.0
+   Compiling naga-types v30.0.1
+   Compiling parking_lot v0.12.5
+   Compiling potential_utf v0.1.6
+   Compiling zerotrie v0.2.5
+   Compiling naga v30.0.1
+   Compiling profiling v1.0.18
+   Compiling bit-vec v0.9.1
+   Compiling itoa v1.0.18
+   Compiling icu_properties_data v2.3.0
+   Compiling icu_normalizer_data v2.3.0
+   Compiling unicode-width v0.2.2
+   Compiling bytes v1.12.1
+   Compiling utf8_iter v1.0.4
+   Compiling icu_collections v2.3.0
+   Compiling codespan-reporting v0.13.1
+   Compiling bit-set v0.10.0
+   Compiling icu_provider v2.3.1
+   Compiling objc2-metal v0.3.2
+   Compiling spirv v0.4.0+sdk-1.4.341.0
+   Compiling core-foundation-sys v0.8.7
+   Compiling find-msvc-tools v0.1.12
+   Compiling percent-encoding v2.3.2
+   Compiling glob v0.3.4
+   Compiling futures-core v0.3.34
+   Compiling simd-adler32 v0.3.10
+   Compiling static_assertions v1.1.0
+   Compiling shlex v2.0.1
+   Compiling cc v1.4.6
+   Compiling wgpu-types v30.0.1
+   Compiling objc2-quartz-core v0.3.2
+   Compiling clang-sys v1.9.1
+   Compiling objc2 v0.5.2
+   Compiling polycool v0.4.0
+   Compiling wgpu-hal v30.0.1
+   Compiling tracing-core v0.1.36
+   Compiling adler2 v2.0.1
+   Compiling crc32fast v1.5.2
+   Compiling bitflags v1.3.2
+   Compiling rustc-hash v2.1.3
+   Compiling tracing v0.1.44
+   Compiling kurbo v0.13.1
+   Compiling icu_normalizer v2.3.0
+   Compiling icu_properties v2.3.0
+   Compiling wgpu-naga-bridge v30.0.1
+   Compiling block2 v0.5.1
+   Compiling raw-window-metal v1.1.0
+   Compiling ring v0.17.14
+   Compiling font-types v0.12.5
+   Compiling color v0.3.3
+   Compiling euclid v0.22.14
+   Compiling mio v1.2.3
+   Compiling socket2 v0.6.5
+   Compiling futures-sink v0.3.34
+   Compiling dispatch v0.2.0
+   Compiling uuid v1.26.1
+   Compiling linebender_resource_handle v0.1.1
+   Compiling memchr v2.8.3
+   Compiling minimal-lexical v0.2.1
+   Compiling regex-syntax v0.8.11
+   Compiling version_check v0.9.5
+   Compiling serde_core v1.0.229
+   Compiling regex-automata v0.4.18
+   Compiling ahash v0.8.12
+   Compiling nom v7.1.3
+   Compiling accesskit v0.24.1
+   Compiling peniko v0.6.1
+   Compiling objc2-foundation v0.2.2
+   Compiling tokio v1.53.1
+   Compiling guillotiere v0.7.0
+   Compiling read-fonts v0.41.0
+   Compiling idna_adapter v1.2.2
+   Compiling miniz_oxide v0.9.1
+   Compiling form_urlencoded v1.2.2
+   Compiling core-foundation v0.9.4
+   Compiling http v1.5.0
+   Compiling wgpu-core v30.0.1
+   Compiling foreign-types-macros v0.2.4
+   Compiling foreign-types-shared v0.3.1
+   Compiling either v1.18.0
+   Compiling bindgen v0.72.1
+   Compiling fearless_simd v0.4.1
+   Compiling zeroize v1.9.0
+   Compiling litrs v1.0.0
+   Compiling unicode-general-category v1.1.0
+   Compiling vello_common v0.1.0
+   Compiling document-features v0.2.12
+   Compiling rustls-pki-types v1.15.1
+   Compiling foreign-types v0.5.0
+   Compiling itertools v0.13.0
+   Compiling http-body v1.1.0
+   Compiling core-graphics-types v0.1.3
+   Compiling flate2 v1.1.10
+   Compiling idna v1.1.0
+   Compiling wgpu-core-deps-apple v30.0.1
+   Compiling objc2-app-kit v0.2.2
+   Compiling cexpr v0.6.0
+   Compiling regex v1.13.1
+   Compiling wgpu v30.0.1
+   Compiling winit v0.30.13
+   Compiling emath v0.36.2
+   Compiling num-integer v0.1.47
+   Compiling getrandom v0.2.17
+   Compiling futures-task v0.3.34
+   Compiling futures-io v0.3.34
+   Compiling slab v0.4.12
+   Compiling shlex v1.3.0
+   Compiling zune-core v0.5.3
+   Compiling untrusted v0.9.0
+   Compiling serde v1.0.229
+   Compiling httparse v1.10.1
+   Compiling zune-jpeg v0.5.15
+   Compiling futures-util v0.3.34
+   Compiling ecolor v0.36.2
+   Compiling url v2.5.8
+   Compiling core-graphics v0.23.2
+   Compiling vello_cpu v0.1.0
+   Compiling skrifa v0.44.0
+   Compiling harfrust v0.12.0
+   Compiling miniz_oxide v0.8.9
+   Compiling fdeflate v0.3.7
+   Compiling objc2-app-kit v0.3.2
+   Compiling hashbrown v0.16.1
+   Compiling serde_derive v1.0.229
+   Compiling smol_str v0.2.2
+   Compiling epaint_default_fonts v0.36.2
+   Compiling nohash-hasher v0.2.0
+   Compiling tower-service v0.3.3
+   Compiling fax v0.2.7
+   Compiling weezl v0.1.12
+   Compiling strength_reduce v0.2.4
+   Compiling dpi v0.1.2
+   Compiling self_cell v1.3.0
+   Compiling pxfm v0.1.30
+   Compiling quick-error v2.0.1
+   Compiling cursor-icon v1.2.0
+   Compiling try-lock v0.2.5
+   Compiling unicode-segmentation v1.13.3
+   Compiling rustls v0.23.44
+   Compiling moxcms v0.8.1
+   Compiling epaint v0.36.2
+   Compiling want v0.3.1
+   Compiling tiff v0.11.3
+   Compiling itertools v0.15.0
+   Compiling transpose v0.2.3
+   Compiling accesskit_consumer v0.38.0
+   Compiling png v0.18.1
+   Compiling coreaudio-sys v0.2.18
+   Compiling rustls-webpki v0.103.15
+   Compiling primal-check v0.3.4
+   Compiling futures-channel v0.3.34
+   Compiling num-complex v0.4.6
+   Compiling zmij v1.0.23
+   Compiling byteorder-lite v0.1.0
+   Compiling subtle v2.6.1
+   Compiling atomic-waker v1.1.2
+   Compiling hyper v1.11.1
+   Compiling image v0.25.10
+   Compiling rustfft v6.4.1
+   Compiling egui v0.36.2
+   Compiling accesskit_macos v0.26.3
+   Compiling sync_wrapper v1.0.2
+   Compiling tower-layer v0.3.3
+   Compiling lazy_static v1.5.0
+   Compiling base64 v0.22.1
+   Compiling serde_json v1.0.151
+   Compiling web-time v1.1.0
+   Compiling ipnet v2.12.2
+   Compiling hyper-util v0.1.20
+   Compiling symphonia-core v0.6.1
+   Compiling tower v0.5.3
+   Compiling accesskit_winit v0.32.2
+   Compiling arboard v3.6.1
+   Compiling tokio-rustls v0.26.5
+   Compiling webbrowser v1.2.4
+   Compiling webpki-roots v1.0.9
+   Compiling type-map v0.5.1
+   Compiling ttf-parser v0.25.1
+   Compiling cpal v0.15.3
+   Compiling gpu-shader v0.1.0 (https://github.com/themoretheless/forma.git?rev=82ff6067546bdc11bc8d415b97dd1cf10c5fc5a9#82ff6067)
+   Compiling ryu v1.0.23
+   Compiling rfd v0.17.2
+   Compiling typenum v1.20.1
+   Compiling hybrid-array v0.4.15
+   Compiling serde_urlencoded v0.7.1
+   Compiling gpu-runtime v0.1.0 (https://github.com/themoretheless/forma.git?rev=82ff6067546bdc11bc8d415b97dd1cf10c5fc5a9#82ff6067)
+   Compiling owned_ttf_parser v0.25.1
+   Compiling egui-wgpu v0.36.2
+   Compiling hyper-rustls v0.27.9
+   Compiling egui-winit v0.36.2
+   Compiling coreaudio-rs v0.11.3
+   Compiling tower-http v0.6.11
+   Compiling http-body-util v0.1.5
+   Compiling fvid-platform v0.1.0 (/Users/themoretheless/.codex/worktrees/fvid-push-20261029/fvid/crates/fvid-platform)
+   Compiling mach2 v0.4.3
+   Compiling fvid-media v0.1.0 (/Users/themoretheless/.codex/worktrees/fvid-push-20261029/fvid/crates/fvid-media)
+   Compiling fvid-control v0.1.0 (/Users/themoretheless/.codex/worktrees/fvid-push-20261029/fvid/crates/fvid-control)
+   Compiling ab_glyph_rasterizer v0.1.10
+   Compiling regex-lite v0.1.9
+   Compiling dasp_sample v0.11.0
+   Compiling fvid-cpu v0.1.0 (/Users/themoretheless/.codex/worktrees/fvid-push-20261029/fvid/crates/fvid-cpu)
+   Compiling pollster v1.0.1
+   Compiling eframe v0.36.2
+   Compiling fvid-codecs v0.1.0 (/Users/themoretheless/.codex/worktrees/fvid-push-20261029/fvid/crates/fvid-codecs)
+   Compiling symphonia-metadata v0.6.1
+   Compiling ab_glyph v0.2.32
+   Compiling reqwest v0.12.28
+   Compiling gpu-compute v0.1.0 (https://github.com/themoretheless/forma.git?rev=82ff6067546bdc11bc8d415b97dd1cf10c5fc5a9#82ff6067)
+warning: unreachable pattern
+   --> crates/fvid-codecs/src/../../../src/codec/hevc_motion.rs:492:25
+    |
+492 |                         _=>return Err(invalid("unexpected HEVC depth IV merge selection")),
+    |                         ^ no value can reach this
+    |
+note: multiple earlier patterns match some of the same values
+   --> crates/fvid-codecs/src/../../../src/codec/hevc_motion.rs:492:25
+    |
+482 | ...   merge_order::Selection::Initial(i)=>{
+    |       ---------------------------------- matches some of the same values
+...
+486 | ...   merge_order::Selection::ViewSynthesis=>return Ok(Resolved::ViewSynthesis),
+    |       ------------------------------------- matches some of the same values
+487 | ...   merge_order::Selection::Texture=>return Ok(Resolved::Texture),
+    |       ------------------------------- matches some of the same values
+488 | ...   merge_order::Selection::InterView=>{selected_iv=1;(special.inter_view.copied().ok_or_else(||invalid("missing selected HEVC IV...
+    |       --------------------------------- matches some of the same values
+...
+492 | ...   _=>return Err(invalid("unexpected HEVC depth IV merge selection")),
+    |       ^ ...and 3 other patterns collectively make this unreachable
+    = note: `#[warn(unreachable_patterns)]` (part of `#[warn(unused)]`) on by default
+
+   Compiling symphonia-bundle-mp3 v0.6.1
+   Compiling fvid-media-info v0.1.0 (/Users/themoretheless/.codex/worktrees/fvid-push-20261029/fvid/crates/fvid-media-info)
+warning: function `intra_plane` is never used
+   --> crates/fvid-codecs/src/../../../src/codec/avc_deblock.rs:184:15
+    |
+184 | pub(super) fn intra_plane(
+    |               ^^^^^^^^^^^
+    |
+    = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+warning: function `read_inter_coefficients_422` is never used
+  --> crates/fvid-codecs/src/../../../src/codec/avc_inter_coefficients.rs:34:15
+   |
+34 | pub(super) fn read_inter_coefficients_422(bits:&mut BitReader<'_>,pattern:u8,transform8:bool,neighbours:CoefficientNeighbours,chroma...
+   |               ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `candidates` is never used
+  --> crates/fvid-codecs/src/../../../src/codec/avc_mv.rs:78:4
+   |
+78 | fn candidates(n: Neighbours) -> Result<[Neighbour; 3]> {
+   |    ^^^^^^^^^^
+
+warning: function `inverse2` is never used
+   --> crates/fvid-codecs/src/../../../src/codec/hevc_transform.rs:190:4
+    |
+190 | fn inverse2(input: &[i32], output: &mut [i32]) {
+    |    ^^^^^^^^
+
+warning: function `inverse4` is never used
+   --> crates/fvid-codecs/src/../../../src/codec/hevc_transform.rs:218:15
+    |
+218 | inverse_size!(inverse4, inverse2, 4);
+    |               ^^^^^^^^
+    |
+    = note: this warning originates in the macro `inverse_size` (in Nightly builds, run with -Z macro-backtrace for more info)
+
+warning: function `inverse8` is never used
+   --> crates/fvid-codecs/src/../../../src/codec/hevc_transform.rs:219:15
+    |
+219 | inverse_size!(inverse8, inverse4, 8);
+    |               ^^^^^^^^
+    |
+    = note: this warning originates in the macro `inverse_size` (in Nightly builds, run with -Z macro-backtrace for more info)
+
+warning: function `inverse16` is never used
+   --> crates/fvid-codecs/src/../../../src/codec/hevc_transform.rs:220:15
+    |
+220 | inverse_size!(inverse16, inverse8, 16);
+    |               ^^^^^^^^^
+    |
+    = note: this warning originates in the macro `inverse_size` (in Nightly builds, run with -Z macro-backtrace for more info)
+
+warning: function `inverse32` is never used
+   --> crates/fvid-codecs/src/../../../src/codec/hevc_transform.rs:221:15
+    |
+221 | inverse_size!(inverse32, inverse16, 32);
+    |               ^^^^^^^^^
+    |
+    = note: this warning originates in the macro `inverse_size` (in Nightly builds, run with -Z macro-backtrace for more info)
+
+warning: enum `RunKind` is never used
+   --> crates/fvid-codecs/src/../../../src/codec/hevc_palette.rs:420:17
+    |
+420 | pub(crate) enum RunKind {
+    |                 ^^^^^^^
+
+warning: struct `Run` is never constructed
+   --> crates/fvid-codecs/src/../../../src/codec/hevc_palette.rs:425:19
+    |
+425 | pub(crate) struct Run {
+    |                   ^^^
+
+warning: function `expand_runs` is never used
+   --> crates/fvid-codecs/src/../../../src/codec/hevc_palette.rs:431:15
+    |
+431 | pub(crate) fn expand_runs(size: usize, maximum_index: u8, runs: &[Run]) -> Result<Vec<u8>> {
+    |               ^^^^^^^^^^^
+
+   Compiling fvid v0.1.0 (/Users/themoretheless/.codex/worktrees/fvid-push-20261029/fvid)
+   Compiling fvid-opus v0.1.0 (/Users/themoretheless/.codex/worktrees/fvid-push-20261029/fvid/crates/fvid-opus)
+   Compiling symphonia v0.6.1
+   Compiling fvid-vt v0.1.0 (/Users/themoretheless/.codex/worktrees/fvid-push-20261029/fvid/crates/fvid-vt)
+warning: unused variable: `aspect`
+    --> crates/fvid-media/src/owned_y4m_decode.rs:1128:9
+     |
+1128 |     let aspect = presented_header.pixel_aspect()?;
+     |         ^^^^^^ help: if this is intentional, prefix it with an underscore: `_aspect`
+     |
+     = note: `#[warn(unused_variables)]` (part of `#[warn(unused)]`) on by default
+
+warning: variable does not need to be mutable
+   --> crates/fvid-media/src/owned_xfade.rs:464:5
+    |
+464 |     mut visit: impl FnMut(&GeometryFrame, u64, u64) -> Result<(), String>,
+    |     ----^^^^^
+    |     |
+    |     help: remove this `mut`
+    |
+    = note: `#[warn(unused_mut)]` (part of `#[warn(unused)]`) on by default
+
+warning: variable `pages` is assigned to, but never used
+  --> crates/fvid-media/src/owned_ogg_opus_export.rs:56:9
+   |
+56 |     let mut pages = 0usize;
+   |         ^^^^^^^^^
+   |
+   = note: consider using `_pages` instead
+
+warning: value assigned to `pages` is never read
+  --> crates/fvid-media/src/owned_ogg_opus_export.rs:80:9
+   |
+80 |         pages += 1;
+   |         ^^^^^^^^^^
+   |
+   = help: maybe it is overwritten before being read?
+   = note: `#[warn(unused_assignments)]` (part of `#[warn(unused)]`) on by default
+
+warning: method `encode` is never used
+   --> crates/fvid-media/src/owned_y4m_impl.rs:212:8
+    |
+ 31 | impl Header {
+    | ----------- method in this implementation
+...
+212 |     fn encode(&self, width: usize, height: usize) -> String {
+    |        ^^^^^^
+    |
+    = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+warning: function `apply_pixel_filters` is never used
+   --> crates/fvid-media/src/owned_y4m_decode.rs:631:15
+    |
+631 | pub(crate) fn apply_pixel_filters(
+    |               ^^^^^^^^^^^^^^^^^^^
+
+warning: function `apply_pixel_filters_cached` is never used
+   --> crates/fvid-media/src/owned_y4m_decode.rs:638:15
+    |
+638 | pub(crate) fn apply_pixel_filters_cached(
+    |               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `apply_pixel_filters_cached_at` is never used
+   --> crates/fvid-media/src/owned_y4m_decode.rs:647:15
+    |
+647 | pub(crate) fn apply_pixel_filters_cached_at(
+    |               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `esds_for_mp4` is never used
+   --> crates/fvid-media/src/owned_aac/adts_impl.rs:334:15
+    |
+334 | pub(crate) fn esds_for_mp4(asc: &[u8]) -> Option<Vec<u8>> {
+    |               ^^^^^^^^^^^^
+
+warning: method `read_short` is never used
+  --> crates/fvid-media/src/owned_aac/bits_impl.rs:45:19
+   |
+ 7 | impl<'a> BitReader<'a> {
+   | ---------------------- method in this implementation
+...
+45 |     pub(crate) fn read_short(&mut self, count: u8) -> Result<u16> {
+   |                   ^^^^^^^^^^
+
+warning: associated function `identifiers` is never used
+   --> crates/fvid-media/src/owned_avc_impl.rs:509:19
+    |
+495 | impl Pps {
+    | -------- associated function in this implementation
+...
+509 |     pub(crate) fn identifiers(nal: &[u8]) -> Result<(u32, u32)> {
+    |                   ^^^^^^^^^^^
+
+warning: function `try_mp4_as` is never used
+   --> crates/fvid-media/src/owned_probe.rs:106:15
+    |
+106 | pub(crate) fn try_mp4_as(path: &Path, format: Option<&str>) -> Result<Option<MediaInfo>, String> {
+    |               ^^^^^^^^^^
+
+warning: function `try_webm_as` is never used
+   --> crates/fvid-media/src/owned_probe.rs:127:15
+    |
+127 | pub(crate) fn try_webm_as(path: &Path, format: Option<&str>) -> Result<Option<MediaInfo>, String> {
+    |               ^^^^^^^^^^^
+
+warning: function `try_adts_as` is never used
+   --> crates/fvid-media/src/owned_probe.rs:147:15
+    |
+147 | pub(crate) fn try_adts_as(path: &Path, format: Option<&str>) -> Result<Option<MediaInfo>, String> {
+    |               ^^^^^^^^^^^
+
+warning: type alias `Decoder` is never used
+ --> crates/fvid-media/src/owned_audio_mix.rs:8:6
+  |
+8 | type Decoder = fn(&Path) -> Result<(AudioDecodeStats, Vec<u8>)>;
+  |      ^^^^^^^
+
+warning: function `decode_owned_audio` is never used
+   --> crates/fvid-media/src/owned_audio_mix.rs:283:15
+    |
+283 | pub(crate) fn decode_owned_audio(source: &Path) -> Result<(AudioDecodeStats, Vec<u8>)> {
+    |               ^^^^^^^^^^^^^^^^^^
+
+warning: function `decode_float_wave` is never used
+   --> crates/fvid-media/src/owned_audio_mix.rs:340:15
+    |
+340 | pub(crate) fn decode_float_wave(source: &Path) -> Result<(AudioDecodeStats, Vec<u8>)> {
+    |               ^^^^^^^^^^^^^^^^^
+
+warning: function `decode_float_wave_controlled` is never used
+   --> crates/fvid-media/src/owned_audio_mix.rs:344:15
+    |
+344 | pub(crate) fn decode_float_wave_controlled<F: FnMut(usize) -> Result<()>>(
+    |               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `read_float_wave_controlled` is never used
+   --> crates/fvid-media/src/owned_audio_mix.rs:351:15
+    |
+351 | pub(crate) fn read_float_wave_controlled<F: FnMut(usize) -> Result<()>>(
+    |               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `read_float_wave_with_limits` is never used
+   --> crates/fvid-media/src/owned_audio_mix.rs:359:15
+    |
+359 | pub(crate) fn read_float_wave_with_limits<F: FnMut(usize) -> Result<()>>(
+    |               ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `mix_with_decoder` is never used
+   --> crates/fvid-media/src/owned_audio_mix.rs:512:15
+    |
+512 | pub(crate) fn mix_with_decoder(
+    |               ^^^^^^^^^^^^^^^^
+
+warning: function `merge_with_decoder` is never used
+   --> crates/fvid-media/src/owned_audio_mix.rs:672:15
+    |
+672 | pub(crate) fn merge_with_decoder(
+    |               ^^^^^^^^^^^^^^^^^^
+
+warning: function `supports` is never used
+ --> crates/fvid-media/src/owned_audio_export.rs:8:15
+  |
+8 | pub(crate) fn supports(
+  |               ^^^^^^^^
+
+warning: function `supports` is never used
+  --> crates/fvid-media/src/owned_audio_plan.rs:94:15
+   |
+94 | pub(crate) fn supports(
+   |               ^^^^^^^^
+
+warning: function `supports` is never used
+   --> crates/fvid-media/src/owned_adts_export.rs:149:15
+    |
+149 | pub(crate) fn supports(
+    |               ^^^^^^^^
+
+warning: function `router` is never used
+  --> crates/fvid-media/src/owned_aac_export_routing.rs:11:15
+   |
+11 | pub(crate) fn router(
+   |               ^^^^^^
+
+warning: function `supports_concat` is never used
+   --> crates/fvid-media/src/owned_wave_remux.rs:122:15
+    |
+122 | pub(crate) fn supports_concat(
+    |               ^^^^^^^^^^^^^^^
+
+warning: function `supports` is never used
+   --> crates/fvid-media/src/owned_adts_loudness.rs:115:15
+    |
+115 | pub(crate) fn supports(source: &Path, options: &CopyOptions) -> bool {
+    |               ^^^^^^^^
+
+warning: function `supports` is never used
+  --> crates/fvid-media/src/owned_adts_loudnorm.rs:30:15
+   |
+30 | pub(crate) fn supports(
+   |               ^^^^^^^^
+
+warning: method `nul_name` is never used
+  --> crates/fvid-media/src/owned_pixel_format.rs:9:27
+   |
+ 6 |           impl PixelFormat {
+   |           ---------------- method in this implementation
+...
+ 9 |               pub(crate) fn nul_name(self) -> &'static [u8] { match self { $( Self::$variant => concat!($name, "\0").as_bytes(), )* } }
+   |                             ^^^^^^^^
+...
+16 | / formats! {
+17 | |     Yuv420p, "yuv420p", Some((1, 1)), 1;
+18 | |     Yuv422p, "yuv422p", Some((1, 0)), 1;
+19 | |     Yuv444p, "yuv444p", Some((0, 0)), 1;
+...  |
+58 | |     Gray16Be, "gray16be", None, 2;
+59 | | }
+   | |_- in this macro invocation
+   |
+   = note: this warning originates in the macro `formats` (in Nightly builds, run with -Z macro-backtrace for more info)
+
+warning: function `aac_packet_plan` is never used
+  --> crates/fvid-media/src/owned_mp4_aac_plan_impl.rs:35:15
+   |
+35 | pub(crate) fn aac_packet_plan(
+   |               ^^^^^^^^^^^^^^^
+
+warning: function `check_encoded_ffv1` is never used
+   --> crates/fvid-media/src/owned_lossless.rs:767:15
+    |
+767 | pub(crate) fn check_encoded_ffv1(
+    |               ^^^^^^^^^^^^^^^^^^
+
+warning: function `supports` is never used
+   --> crates/fvid-media/src/owned_ogg_opus_export.rs:200:15
+    |
+200 | pub(crate) fn supports(
+    |               ^^^^^^^^
+
+warning: function `supports` is never used
+  --> crates/fvid-media/src/owned_matroska_opus_export.rs:34:15
+   |
+34 | pub(crate) fn supports(
+   |               ^^^^^^^^
+
+warning: function `inspect` is never used
+ --> crates/fvid-media/src/owned_matroska_copy_impl.rs:8:15
+  |
+8 | pub(crate) fn inspect<R: Read + Seek>(
+  |               ^^^^^^^
+
+warning: function `inspect_with_packet_limit` is never used
+  --> crates/fvid-media/src/owned_matroska_copy_impl.rs:15:15
+   |
+15 | pub(crate) fn inspect_with_packet_limit<R: Read + Seek>(
+   |               ^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `geometry` is never used
+   --> crates/fvid-media/src/owned_raw_flac.rs:217:15
+    |
+217 | pub(crate) fn geometry(source: &Path, options: &CopyOptions) -> Result<(u32, u16)> {
+    |               ^^^^^^^^
+
+warning: function `supports` is never used
+   --> crates/fvid-media/src/owned_raw_flac.rs:224:15
+    |
+224 | pub(crate) fn supports(
+    |               ^^^^^^^^
+
+warning: function `supports` is never used
+  --> crates/fvid-media/src/owned_matroska_flac_export.rs:46:15
+   |
+46 | pub(crate) fn supports(
+   |               ^^^^^^^^
+
+warning: function `geometry` is never used
+   --> crates/fvid-media/src/owned_matroska_flac_export.rs:144:15
+    |
+144 | pub(crate) fn geometry(source: &Path, options: &CopyOptions) -> Result<(u32, u16)> {
+    |               ^^^^^^^^
+
+warning: function `supports` is never used
+   --> crates/fvid-media/src/owned_raw_mp3.rs:278:15
+    |
+278 | pub(crate) fn supports(
+    |               ^^^^^^^^
+
+warning: function `supports` is never used
+  --> crates/fvid-media/src/owned_matroska_mp3_export.rs:46:15
+   |
+46 | pub(crate) fn supports(
+   |               ^^^^^^^^
+
+warning: function `geometry` is never used
+   --> crates/fvid-media/src/owned_matroska_mp3_export.rs:136:15
+    |
+136 | pub(crate) fn geometry(source: &Path, options: &CopyOptions) -> Result<(u32, u16)> {
+    |               ^^^^^^^^
+
+warning: function `supports` is never used
+  --> crates/fvid-media/src/owned_matroska_alac_export.rs:38:15
+   |
+38 | pub(crate) fn supports(
+   |               ^^^^^^^^
+
+warning: function `geometry` is never used
+   --> crates/fvid-media/src/owned_matroska_alac_export.rs:131:15
+    |
+131 | pub(crate) fn geometry(source:&Path,options:&CopyOptions)->Result<(u32,u16)>{let (rate,channels,_)=geometry_with_mask(source,option...
+    |               ^^^^^^^^
+
+warning: function `geometry_with_mask` is never used
+   --> crates/fvid-media/src/owned_matroska_alac_export.rs:132:15
+    |
+132 | pub(crate) fn geometry_with_mask(source: &Path, options: &CopyOptions) -> Result<(u32, u16,u32)> {
+    |               ^^^^^^^^^^^^^^^^^^
+
+warning: function `validate_audio_packet_budget` is never used
+   --> crates/fvid-media/src/owned_matroska_audio.rs:347:15
+    |
+347 | pub(crate) fn validate_audio_packet_budget<R: Read + Seek>(
+    |               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `admit_audio_reader` is never used
+   --> crates/fvid-media/src/owned_matroska_audio.rs:409:15
+    |
+409 | pub(crate) fn admit_audio_reader<R: Read + Seek>(
+    |               ^^^^^^^^^^^^^^^^^^
+
+warning: function `negotiate_matroska_ps` is never used
+   --> crates/fvid-media/src/owned_matroska_audio_timeline_impl.rs:293:15
+    |
+293 | pub(crate) fn negotiate_matroska_ps<R: std::io::Read + std::io::Seek>(
+    |               ^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `supports` is never used
+  --> crates/fvid-media/src/owned_matroska_aac_export.rs:38:15
+   |
+38 | pub(crate) fn supports(
+   |               ^^^^^^^^
+
+warning: method `convert` is never used
+   --> crates/fvid-media/src/owned_pcm_decoder_impl.rs:139:8
+    |
+ 79 | impl PcmDecoder {
+    | --------------- method in this implementation
+...
+139 |     fn convert(&self, data: &[u8]) -> Result<Vec<u8>> {
+    |        ^^^^^^^
+
+warning: function `supports` is never used
+  --> crates/fvid-media/src/owned_matroska_pcm_export.rs:42:15
+   |
+42 | pub(crate) fn supports(
+   |               ^^^^^^^^
+
+warning: function `geometry` is never used
+   --> crates/fvid-media/src/owned_matroska_pcm_export.rs:136:15
+    |
+136 | pub(crate) fn geometry(source: &Path, options: &CopyOptions) -> Result<(u32, u16)> {
+    |               ^^^^^^^^
+
+warning: function `decode_mp4_audio_reader_controlled` is never used
+   --> crates/fvid-media/src/owned_mp4_audio_timeline_impl.rs:107:15
+    |
+107 | pub(crate) fn decode_mp4_audio_reader_controlled<R: std::io::Read + std::io::Seek>(
+    |               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `supports` is never used
+   --> crates/fvid-media/src/owned_mp4_audio_export.rs:284:15
+    |
+284 | pub(crate) fn supports(
+    |               ^^^^^^^^
+
+warning: function `recognizes` is never used
+  --> crates/fvid-media/src/owned_container_loudness.rs:46:15
+   |
+46 | pub(crate) fn recognizes(source: &Path) -> Result<bool> {
+   |               ^^^^^^^^^^
+
+warning: function `supports` is never used
+   --> crates/fvid-media/src/owned_container_loudness.rs:161:15
+    |
+161 | pub(crate) fn supports(source: &Path, options: &CopyOptions) -> bool {
+    |               ^^^^^^^^
+
+warning: function `supports` is never used
+  --> crates/fvid-media/src/owned_container_loudnorm.rs:30:15
+   |
+30 | pub(crate) fn supports(
+   |               ^^^^^^^^
+
+warning: function `input` is never used
+ --> crates/fvid-media/src/owned_ffv1_export.rs:7:4
+  |
+7 | fn input(source: &Path) -> Result<crate::owned_webm::WebmReader<BufReader<File>>> {
+  |    ^^^^^
+
+warning: function `supports` is never used
+  --> crates/fvid-media/src/owned_ffv1_export.rs:49:15
+   |
+49 | pub(crate) fn supports(source: &Path, transform: &DecodeTransform) -> bool {
+   |               ^^^^^^^^
+
+warning: function `pack_bgra` is never used
+    --> crates/fvid-media/src/owned_play_controls_impl.rs:8786:15
+     |
+8786 | pub(crate) fn pack_bgra(
+     |               ^^^^^^^^^
+
+warning: function `take_aligned` is never used
+    --> crates/fvid-media/src/owned_play_controls_impl.rs:9498:15
+     |
+9498 | pub(crate) fn take_aligned(
+     |               ^^^^^^^^^^^^
+
+warning: associated function `new` is never used
+  --> crates/fvid-media/src/owned_webm_codec.rs:42:12
+   |
+41 | impl Decoder {
+   | ------------ associated function in this implementation
+42 |     pub fn new(codec: &str, private: &[u8], width: usize, height: usize) -> Result<Option<Self>> {
+   |            ^^^
+
+warning: function `supports` is never used
+   --> crates/fvid-media/src/owned_ogg_vorbis_export.rs:134:15
+    |
+134 | pub(crate) fn supports(
+    |               ^^^^^^^^
+
+warning: function `supports` is never used
+  --> crates/fvid-media/src/owned_ogg_joint_export.rs:98:15
+   |
+98 | pub(crate) fn supports(
+   |               ^^^^^^^^
+
+warning: function `supports` is never used
+   --> crates/fvid-media/src/owned_g711_wave_export.rs:189:15
+    |
+189 | pub(crate) fn supports(
+    |               ^^^^^^^^
+
+warning: `fvid-media` (lib) generated 66 warnings (run `cargo fix --lib -p fvid-media` to apply 2 suggestions)
+   Compiling crypto-common v0.2.2
+   Compiling block-buffer v0.12.1
+   Compiling const-oid v0.10.2
+   Compiling pollster v0.4.0
+warning: method `iter` is never used
+  --> src/codec/../../crates/fvid-media/src/owned_aac/aac_ssr_metadata_impl.rs:17:19
+   |
+16 | impl<T> PacketQueue<T> {
+   | ---------------------- method in this implementation
+17 |     pub(crate) fn iter(&self) -> impl Iterator<Item = &T> {
+   |                   ^^^^
+   |
+   = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+warning: function `map_controlled_adts_packet_error` is never used
+   --> src/container/../../crates/fvid-media/src/owned_aac/adts_impl.rs:371:15
+    |
+371 | pub(crate) fn map_controlled_adts_packet_error<T>(
+    |               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: method `description_changes_before` is never used
+   --> src/container/../../crates/fvid-media/src/owned_mp4_impl.rs:352:19
+    |
+256 | impl Track {
+    | ---------- method in this implementation
+...
+352 |     pub(crate) fn description_changes_before(&self, limit: usize) -> bool {
+    |                   ^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: field `trimmed_audio_sample_frames` is never read
+  --> src/container/../../crates/fvid-media/src/owned_mp4_matroska_impl.rs:43:16
+   |
+40 | pub(crate) struct TrackPlan {
+   |                   --------- field in this struct
+...
+43 |     pub(crate) trimmed_audio_sample_frames: u64,
+   |                ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `inspect` is never used
+ --> src/container/../../crates/fvid-media/src/owned_matroska_copy_impl.rs:8:15
+  |
+8 | pub(crate) fn inspect<R: Read + Seek>(
+  |               ^^^^^^^
+
+warning: function `inspect_with_packet_limit` is never used
+  --> src/container/../../crates/fvid-media/src/owned_matroska_copy_impl.rs:15:15
+   |
+15 | pub(crate) fn inspect_with_packet_limit<R: Read + Seek>(
+   |               ^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: field `length_size` is never read
+   --> src/playback/video/mp4_layered.rs:264:5
+    |
+248 | pub(super) struct LayeredPipeline {
+    |                   --------------- field in this struct
+...
+264 |     length_size: u8,
+    |     ^^^^^^^^^^^
+
+warning: function `adjust_luma` is never used
+    --> src/player.rs:1649:4
+     |
+1649 | fn adjust_luma(y: f32, s: &[f32; 5]) -> f32 {
+     |    ^^^^^^^^^^^
+
+warning: function `adjust_rgb` is never used
+    --> src/player.rs:1660:15
+     |
+1660 | pub(crate) fn adjust_rgb(source: &[u8], out: &mut Vec<u8>, s: &[f32; 5]) {
+     |               ^^^^^^^^^^
+
+warning: function `covered_span` is never used
+    --> src/player.rs:4787:4
+     |
+4787 | fn covered_span(covered: (u64, u64), total: u64) -> [f32; 2] {
+     |    ^^^^^^^^^^^^
+
+warning: function `inspect_first_y4m_frame` is never used
+   --> src/native_export.rs:173:15
+    |
+173 | pub(crate) fn inspect_first_y4m_frame(
+    |               ^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `inspect_first_y4m_frame_with_filters` is never used
+   --> src/native_export.rs:184:15
+    |
+184 | pub(crate) fn inspect_first_y4m_frame_with_filters(
+    |               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `validate_y4m_concat_compatibility` is never used
+   --> src/native_export.rs:360:15
+    |
+360 | pub(crate) fn validate_y4m_concat_compatibility(sources: &[PathBuf]) -> Result<()> {
+    |               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `validate_video_selection` is never used
+   --> src/native_export.rs:395:15
+    |
+395 | pub(crate) fn validate_video_selection(source: &Path, selected: Option<usize>) -> Result<()> {
+    |               ^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `validate_video_packet_budget` is never used
+   --> src/native_export.rs:420:15
+    |
+420 | pub(crate) fn validate_video_packet_budget(
+    |               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `validate_video_packet_budget_with_geometry` is never used
+   --> src/native_export.rs:432:15
+    |
+432 | pub(crate) fn validate_video_packet_budget_with_geometry(
+    |               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `y4m_segment_frame_upper_bound` is never used
+   --> src/native_export.rs:781:15
+    |
+781 | pub(crate) fn y4m_segment_frame_upper_bound(
+    |               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `export_y4m_sources` is never used
+   --> src/native_export.rs:897:4
+    |
+897 | fn export_y4m_sources(sources: &[PathBuf], destination: &Path,
+    |    ^^^^^^^^^^^^^^^^^^
+
+warning: associated function `validate_pair_with_geometry` is never used
+   --> src/native_export/overlay.rs:176:19
+    |
+117 | impl TimedOverlay {
+    | ----------------- associated function in this implementation
+...
+176 |     pub(crate) fn validate_pair_with_geometry(
+    |                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `mp4` is never used
+  --> src/../crates/fvid-media/src/owned_mp4_probe_impl.rs:49:15
+   |
+49 | pub(crate) fn mp4(path: &Path) -> Result<MediaInfo> {
+   |               ^^^
+
+warning: function `mp4_with_metadata_limit` is never used
+  --> src/../crates/fvid-media/src/owned_mp4_probe_impl.rs:53:15
+   |
+53 | pub(crate) fn mp4_with_metadata_limit(
+   |               ^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `try_mp4` is never used
+  --> src/../crates/fvid-media/src/owned_mp4_probe_impl.rs:73:15
+   |
+73 | pub(crate) fn try_mp4(path: &Path) -> Result<Option<MediaInfo>> {
+   |               ^^^^^^^
+
+warning: function `try_mp4_with_metadata_limit` is never used
+  --> src/../crates/fvid-media/src/owned_mp4_probe_impl.rs:77:15
+   |
+77 | pub(crate) fn try_mp4_with_metadata_limit(
+   |               ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `matroska` is never used
+  --> src/media_probe.rs:50:15
+   |
+50 | pub(crate) fn matroska(path: &Path) -> Result<MediaInfo> {
+   |               ^^^^^^^^
+
+warning: function `matroska_with_packet_limit` is never used
+  --> src/media_probe.rs:54:15
+   |
+54 | pub(crate) fn matroska_with_packet_limit(path: &Path, packet_bytes: usize) -> Result<MediaInfo> {
+   |               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `matroska_with_packet_and_memory_limit` is never used
+  --> src/media_probe.rs:58:15
+   |
+58 | pub(crate) fn matroska_with_packet_and_memory_limit(
+   |               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: `fvid` (lib) generated 26 warnings
+   Compiling digest v0.11.3
+   Compiling cpufeatures v0.3.1
+   Compiling sha2 v0.11.0
+   Compiling airbug-bench-macros v0.8.0 (https://github.com/themoretheless/airbug?branch=release#06b74ea5)
+   Compiling airbug-bench v0.8.0 (https://github.com/themoretheless/airbug?branch=release#06b74ea5)
+   Compiling airbug v0.6.2 (https://github.com/themoretheless/airbug?branch=release#06b74ea5)
+warning: `fvid-codecs` (lib) generated 12 warnings
+warning: function `compare` is never used
+  --> tests/support/audio_transitions.rs:13:8
+   |
+13 | pub fn compare(actual: &Frames, expected: &Frames) {
+   |        ^^^^^^^
+   |
+   = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+warning: function `collect` is never used
+  --> tests/support/audio_transitions.rs:25:8
+   |
+25 | pub fn collect(stream: &mut dyn AudioStream) -> Frames {
+   |        ^^^^^^^
+
+warning: function `collect_with_decoder` is never used
+  --> tests/support/audio_transitions.rs:29:8
+   |
+29 | pub fn collect_with_decoder(
+   |        ^^^^^^^^^^^^^^^^^^^^
+
+warning: function `ended` is never used
+   --> tests/support/audio_transitions.rs:230:8
+    |
+230 | pub fn ended(audio: &AudioPlayback, generation: u64) {
+    |        ^^^^^
+
+warning: `fvid` (test "mp4_adpcm_predictor_seek") generated 4 warnings
+warning: unused import: `fvid::audio::AudioBackend`
+   --> tests/mp4_adpcm_subtick_seek.rs:131:5
+    |
+131 | use fvid::audio::AudioBackend as _;
+    |     ^^^^^^^^^^^^^^^^^^^^^^^^^
+    |
+    = note: `#[warn(unused_imports)]` (part of `#[warn(unused)]`) on by default
+
+warning: `fvid` (test "mp4_adpcm_subtick_seek") generated 2 warnings (1 duplicate)
+    Finished `test` profile [unoptimized] target(s) in 2m 35s
+     Running tests/mp4_adpcm_predictor_seek.rs (/private/tmp/fvid-adpcm-subtick-target-20261102/debug/deps/mp4_adpcm_predictor_seek-3d2cf550255cc54d)
+
+running 1 test
+test active_seek_refuses_the_invalid_ms_adpcm_predictor ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+     Running tests/mp4_adpcm_subtick_seek.rs (/private/tmp/fvid-adpcm-subtick-target-20261102/debug/deps/mp4_adpcm_subtick_seek-3d429630754432a4)
+
+running 4 tests
+test raw_tick_reseek_discards_the_precise_seek_floor_and_anchor ... ok
+test independent_lossless_pcm_and_native_video_controls ... ok
+test adpcm_duration_seek_preserves_exact_native_floor ... FAILED
+test actual_worker_adpcm_flushes_at_the_native_sample ... FAILED
+
+failures:
+
+---- adpcm_duration_seek_preserves_exact_native_floor stdout ----
+
+thread 'adpcm_duration_seek_preserves_exact_native_floor' (6537338) panicked at tests/mp4_adpcm_subtick_seek.rs:128:5:
+["regular-2000.mp4:1ns:4928bytes expected4924", "regular-2000.mp4:125.001µs:4928bytes expected4920", "regular-2000.mp4:3.999999ms:4816bytes expected4800", "regular-2000.mp4:4.000001ms:4800bytes expected4796", "regular-2000.mp4:7.999999ms:4688bytes expected4672", "regular-2000.mp4:8.000001ms:4672bytes expected4668", "regular-2000.mp4:15.999999ms:4432bytes expected4416", "regular-2000.mp4:16.000001ms:4416bytes expected4412", "regular-2000.mp4:23.999999ms:4176bytes expected4160", "regular-2000.mp4:24.000001ms:4160bytes expected4156", "regular-2000.mp4:27.999999ms:4048bytes expected4032", "regular-2000.mp4:28.000001ms:4032bytes expected4028", "regular-2000.mp4:31.999999ms:3920bytes expected3904", "regular-2000.mp4:32.000001ms:3904bytes expected3896", "regular-2000.mp4:34.249999ms:3648bytes expected3616", "regular-2000.mp4:34.25ms:3648bytes expected3616", "regular-2000.mp4:34.250001ms:3648bytes expected3608", "regular-2000.mp4:36.499999ms:3392bytes expected3328", "regular-2000.mp4:36.500001ms:3328bytes expected3320", "regular-2000.mp4:40.999999ms:2816bytes expected2752", "regular-2000.mp4:41.000001ms:2752bytes expected2744", "regular-2000.mp4:45.499999ms:2240bytes expected2176", "regular-2000.mp4:45.500001ms:2176bytes expected2168", "regular-2000.mp4:47.749999ms:1920bytes expected1888", "regular-2000.mp4:47.75ms:1920bytes expected1888", "regular-2000.mp4:47.750001ms:1920bytes expected1880", "regular-2000.mp4:49.999999ms:1664bytes expected1600", "regular-2000.mp4:50.000001ms:1600bytes expected1596", "regular-2000.mp4:52.249999ms:1536bytes expected1528", "regular-2000.mp4:52.25ms:1536bytes expected1528", "regular-2000.mp4:52.250001ms:1536bytes expected1524", "regular-2000.mp4:54.499999ms:1472bytes expected1456", "regular-2000.mp4:54.500001ms:1456bytes expected1452", "regular-2000.mp4:58.999999ms:1328bytes expected1312", "regular-2000.mp4:59.000001ms:1312bytes expected1308", "regular-2000.mp4:63.499999ms:1184bytes expected1168", "regular-2000.mp4:63.500001ms:1168bytes expected1164", "regular-2000.mp4:65.749999ms:1104bytes expected1096", "regular-2000.mp4:65.75ms:1104bytes expected1096", "regular-2000.mp4:65.750001ms:1104bytes expected1092", "regular-2000.mp4:67.999999ms:1040bytes expected1024", "regular-2000.mp4:68.000001ms:1024bytes expected1020", "regular-2000.mp4:71.999999ms:912bytes expected896", "regular-2000.mp4:72.000001ms:896bytes expected892", "regular-2000.mp4:75.999999ms:784bytes expected768", "regular-2000.mp4:76.000001ms:768bytes expected764", "regular-2000.mp4:83.999999ms:528bytes expected512", "regular-2000.mp4:84.000001ms:512bytes expected508", "regular-2000.mp4:91.999999ms:272bytes expected256", "regular-2000.mp4:92.000001ms:256bytes expected252", "regular-2000.mp4:95.999999ms:144bytes expected128", "regular-2000.mp4:96.000001ms:128bytes expected124", "regular-2000.mp4:99.999999ms:16bytes expected0", "regular-48000.mp4:1ns:4928bytes expected4924", "regular-48000.mp4:125.001µs:4924bytes expected4920", "regular-48000.mp4:3.999999ms:clock3.979166ms,expected4ms", "regular-48000.mp4:4.000001ms:4800bytes expected4796", "regular-48000.mp4:7.999999ms:clock7.979166ms,expected8ms", "regular-48000.mp4:8.000001ms:4672bytes expected4668", "regular-48000.mp4:15.999999ms:clock15.979166ms,expected16ms", "regular-48000.mp4:16.000001ms:4416bytes expected4412", "regular-48000.mp4:23.999999ms:clock23.979166ms,expected24ms", "regular-48000.mp4:24.000001ms:4160bytes expected4156", "regular-48000.mp4:27.999999ms:clock27.979166ms,expected28ms", "regular-48000.mp4:28.000001ms:4032bytes expected4028", "regular-48000.mp4:31.999999ms:clock31.979166ms,expected32ms", "regular-48000.mp4:32.000001ms:3904bytes expected3896", "regular-48000.mp4:34.249999ms:clock34.229166ms,expected34.25ms", "regular-48000.mp4:34.250001ms:3616bytes expected3608", "regular-48000.mp4:36.499999ms:clock36.479166ms,expected36.5ms", "regular-48000.mp4:36.500001ms:3328bytes expected3320", "regular-48000.mp4:40.999999ms:clock40.979166ms,expected41ms", "regular-48000.mp4:41.000001ms:2752bytes expected2744", "regular-48000.mp4:45.499999ms:clock45.479166ms,expected45.5ms", "regular-48000.mp4:45.500001ms:2176bytes expected2168", "regular-48000.mp4:47.749999ms:clock47.729166ms,expected47.75ms", "regular-48000.mp4:47.750001ms:1888bytes expected1880", "regular-48000.mp4:49.999999ms:clock49.979166ms,expected50ms", "regular-48000.mp4:50.000001ms:1600bytes expected1596", "regular-48000.mp4:52.249999ms:clock52.229166ms,expected52.25ms", "regular-48000.mp4:52.250001ms:1528bytes expected1524", "regular-48000.mp4:54.499999ms:clock54.479166ms,expected54.5ms", "regular-48000.mp4:54.500001ms:1456bytes expected1452", "regular-48000.mp4:58.999999ms:clock58.979166ms,expected59ms", "regular-48000.mp4:59.000001ms:1312bytes expected1308", "regular-48000.mp4:63.499999ms:clock63.479166ms,expected63.5ms", "regular-48000.mp4:63.500001ms:1168bytes expected1164", "regular-48000.mp4:65.749999ms:clock65.729166ms,expected65.75ms", "regular-48000.mp4:65.750001ms:1096bytes expected1092", "regular-48000.mp4:67.999999ms:clock67.979166ms,expected68ms", "regular-48000.mp4:68.000001ms:1024bytes expected1020", "regular-48000.mp4:71.999999ms:clock71.979166ms,expected72ms", "regular-48000.mp4:72.000001ms:896bytes expected892", "regular-48000.mp4:75.999999ms:clock75.979166ms,expected76ms", "regular-48000.mp4:76.000001ms:768bytes expected764", "regular-48000.mp4:83.999999ms:clock83.979166ms,expected84ms", "regular-48000.mp4:84.000001ms:512bytes expected508", "regular-48000.mp4:91.999999ms:clock91.979166ms,expected92ms", "regular-48000.mp4:92.000001ms:256bytes expected252", "regular-48000.mp4:95.999999ms:clock95.979166ms,expected96ms", "regular-48000.mp4:96.000001ms:128bytes expected124", "regular-48000.mp4:99.999999ms:clock99.979166ms,expected100ms", "fragmented-48000.mp4:1ns:4928bytes expected4924", "fragmented-48000.mp4:125.001µs:4924bytes expected4920", "fragmented-48000.mp4:3.999999ms:clock3.979166ms,expected4ms", "fragmented-48000.mp4:4.000001ms:4800bytes expected4796", "fragmented-48000.mp4:7.999999ms:clock7.979166ms,expected8ms", "fragmented-48000.mp4:8.000001ms:4672bytes expected4668", "fragmented-48000.mp4:15.999999ms:clock15.979166ms,expected16ms", "fragmented-48000.mp4:16.000001ms:4416bytes expected4412", "fragmented-48000.mp4:23.999999ms:clock23.979166ms,expected24ms", "fragmented-48000.mp4:24.000001ms:4160bytes expected4156", "fragmented-48000.mp4:27.999999ms:clock27.979166ms,expected28ms", "fragmented-48000.mp4:28.000001ms:4032bytes expected4028", "fragmented-48000.mp4:31.999999ms:clock31.979166ms,expected32ms", "fragmented-48000.mp4:32.000001ms:3904bytes expected3896", "fragmented-48000.mp4:34.249999ms:clock34.229166ms,expected34.25ms", "fragmented-48000.mp4:34.250001ms:3616bytes expected3608", "fragmented-48000.mp4:36.499999ms:clock36.479166ms,expected36.5ms", "fragmented-48000.mp4:36.500001ms:3328bytes expected3320", "fragmented-48000.mp4:40.999999ms:clock40.979166ms,expected41ms", "fragmented-48000.mp4:41.000001ms:2752bytes expected2744", "fragmented-48000.mp4:45.499999ms:clock45.479166ms,expected45.5ms", "fragmented-48000.mp4:45.500001ms:2176bytes expected2168", "fragmented-48000.mp4:47.749999ms:clock47.729166ms,expected47.75ms", "fragmented-48000.mp4:47.750001ms:1888bytes expected1880", "fragmented-48000.mp4:49.999999ms:clock49.979166ms,expected50ms", "fragmented-48000.mp4:50.000001ms:1600bytes expected1596", "fragmented-48000.mp4:52.249999ms:clock52.229166ms,expected52.25ms", "fragmented-48000.mp4:52.250001ms:1528bytes expected1524", "fragmented-48000.mp4:54.499999ms:clock54.479166ms,expected54.5ms", "fragmented-48000.mp4:54.500001ms:1456bytes expected1452", "fragmented-48000.mp4:58.999999ms:clock58.979166ms,expected59ms", "fragmented-48000.mp4:59.000001ms:1312bytes expected1308", "fragmented-48000.mp4:63.499999ms:clock63.479166ms,expected63.5ms", "fragmented-48000.mp4:63.500001ms:1168bytes expected1164", "fragmented-48000.mp4:65.749999ms:clock65.729166ms,expected65.75ms", "fragmented-48000.mp4:65.750001ms:1096bytes expected1092", "fragmented-48000.mp4:67.999999ms:clock67.979166ms,expected68ms", "fragmented-48000.mp4:68.000001ms:1024bytes expected1020", "fragmented-48000.mp4:71.999999ms:clock71.979166ms,expected72ms", "fragmented-48000.mp4:72.000001ms:896bytes expected892", "fragmented-48000.mp4:75.999999ms:clock75.979166ms,expected76ms", "fragmented-48000.mp4:76.000001ms:768bytes expected764", "fragmented-48000.mp4:83.999999ms:clock83.979166ms,expected84ms", "fragmented-48000.mp4:84.000001ms:512bytes expected508", "fragmented-48000.mp4:91.999999ms:clock91.979166ms,expected92ms", "fragmented-48000.mp4:92.000001ms:256bytes expected252", "fragmented-48000.mp4:95.999999ms:clock95.979166ms,expected96ms", "fragmented-48000.mp4:96.000001ms:128bytes expected124", "fragmented-48000.mp4:99.999999ms:clock99.979166ms,expected100ms", "trim-48000.mp4:1ns:4800bytes expected4796", "trim-48000.mp4:125.001µs:4796bytes expected4792", "trim-48000.mp4:3.999999ms:clock3.979166ms,expected4ms", "trim-48000.mp4:4.000001ms:4672bytes expected4668", "trim-48000.mp4:7.999999ms:clock7.979166ms,expected8ms", "trim-48000.mp4:8.000001ms:4544bytes expected4540", "trim-48000.mp4:15.999999ms:clock15.979166ms,expected16ms", "trim-48000.mp4:16.000001ms:4288bytes expected4284", "trim-48000.mp4:23.999999ms:clock23.979166ms,expected24ms", "trim-48000.mp4:24.000001ms:4032bytes expected4028", "trim-48000.mp4:26.999999ms:clock26.979166ms,expected27ms", "trim-48000.mp4:27.000001ms:3936bytes expected3932", "trim-48000.mp4:29.999999ms:clock29.979166ms,expected30ms", "trim-48000.mp4:30.000001ms:3840bytes expected3832", "trim-48000.mp4:32.249999ms:clock32.229166ms,expected32.25ms", "trim-48000.mp4:32.250001ms:3552bytes expected3544", "trim-48000.mp4:34.499999ms:clock34.479166ms,expected34.5ms", "trim-48000.mp4:34.500001ms:3264bytes expected3256", "trim-48000.mp4:38.999999ms:clock38.979166ms,expected39ms", "trim-48000.mp4:39.000001ms:2688bytes expected2680", "trim-48000.mp4:43.499999ms:clock43.479166ms,expected43.5ms", "trim-48000.mp4:43.500001ms:2112bytes expected2104", "trim-48000.mp4:45.749999ms:clock45.729166ms,expected45.75ms", "trim-48000.mp4:45.750001ms:1824bytes expected1816", "trim-48000.mp4:47.999999ms:clock47.979166ms,expected48ms", "trim-48000.mp4:48.000001ms:1536bytes expected1532", "trim-48000.mp4:50.249999ms:clock50.229166ms,expected50.25ms", "trim-48000.mp4:50.250001ms:1464bytes expected1460", "trim-48000.mp4:52.499999ms:clock52.479166ms,expected52.5ms", "trim-48000.mp4:52.500001ms:1392bytes expected1388", "trim-48000.mp4:56.999999ms:clock56.979166ms,expected57ms", "trim-48000.mp4:57.000001ms:1248bytes expected1244", "trim-48000.mp4:61.499999ms:clock61.479166ms,expected61.5ms", "trim-48000.mp4:61.500001ms:1104bytes expected1100", "trim-48000.mp4:63.749999ms:clock63.729166ms,expected63.75ms", "trim-48000.mp4:63.750001ms:1032bytes expected1028", "trim-48000.mp4:65.999999ms:clock65.979166ms,expected66ms", "trim-48000.mp4:66.000001ms:960bytes expected956", "trim-48000.mp4:69.999999ms:clock69.979166ms,expected70ms", "trim-48000.mp4:70.000001ms:832bytes expected828", "trim-48000.mp4:73.999999ms:clock73.979166ms,expected74ms", "trim-48000.mp4:74.000001ms:704bytes expected700", "trim-48000.mp4:81.999999ms:clock81.979166ms,expected82ms", "trim-48000.mp4:82.000001ms:448bytes expected444", "trim-48000.mp4:89.999999ms:clock89.979166ms,expected90ms", "trim-48000.mp4:90.000001ms:192bytes expected188", "trim-48000.mp4:92.999999ms:clock92.979166ms,expected93ms", "trim-48000.mp4:93.000001ms:96bytes expected92", "trim-48000.mp4:95.999999ms:clock95.979166ms,expected96ms", "third-48000.mp4:1ns:4928bytes expected4924", "third-48000.mp4:125.001µs:4924bytes expected4920", "third-48000.mp4:3.999999ms:clock3.979166ms,expected4ms", "third-48000.mp4:4.000001ms:4800bytes expected4796", "third-48000.mp4:7.999999ms:clock7.979166ms,expected8ms", "third-48000.mp4:8.000001ms:4672bytes expected4668", "third-48000.mp4:15.999999ms:clock15.979166ms,expected16ms", "third-48000.mp4:16.000001ms:4416bytes expected4412", "third-48000.mp4:23.999999ms:clock23.979166ms,expected24ms", "third-48000.mp4:24.000001ms:4160bytes expected4156", "third-48000.mp4:27.999999ms:clock27.979166ms,expected28ms", "third-48000.mp4:28.000001ms:4032bytes expected4028", "third-48000.mp4:31.999999ms:clock31.979166ms,expected32ms", "third-48000.mp4:32.000001ms:3904bytes expected3896", "third-48000.mp4:34.249999ms:clock34.229166ms,expected34.25ms", "third-48000.mp4:34.250001ms:3616bytes expected3608", "third-48000.mp4:36.499999ms:clock36.479166ms,expected36.5ms", "third-48000.mp4:36.500001ms:3328bytes expected3320", "third-48000.mp4:40.999999ms:clock40.979166ms,expected41ms", "third-48000.mp4:41.000001ms:2752bytes expected2744", "third-48000.mp4:45.499999ms:clock45.479166ms,expected45.5ms", "third-48000.mp4:45.500001ms:2176bytes expected2168", "third-48000.mp4:47.749999ms:clock47.729166ms,expected47.75ms", "third-48000.mp4:47.750001ms:1888bytes expected1880", "third-48000.mp4:49.999999ms:clock49.979166ms,expected50ms", "third-48000.mp4:50.000001ms:1600bytes expected1596", "third-48000.mp4:52.249999ms:clock52.229166ms,expected52.25ms", "third-48000.mp4:52.250001ms:1528bytes expected1524", "third-48000.mp4:54.499999ms:clock54.479166ms,expected54.5ms", "third-48000.mp4:54.500001ms:1456bytes expected1452", "third-48000.mp4:58.999999ms:clock58.979166ms,expected59ms", "third-48000.mp4:59.000001ms:1312bytes expected1308", "third-48000.mp4:63.499999ms:clock63.479166ms,expected63.5ms", "third-48000.mp4:63.500001ms:1168bytes expected1164", "third-48000.mp4:65.749999ms:clock65.729166ms,expected65.75ms", "third-48000.mp4:65.750001ms:1096bytes expected1092", "third-48000.mp4:67.999999ms:clock67.979166ms,expected68ms", "third-48000.mp4:68.000001ms:1024bytes expected1020", "third-48000.mp4:71.999999ms:clock71.979166ms,expected72ms", "third-48000.mp4:72.000001ms:896bytes expected892", "third-48000.mp4:75.999999ms:clock75.979166ms,expected76ms", "third-48000.mp4:76.000001ms:768bytes expected764", "third-48000.mp4:83.999999ms:clock83.979166ms,expected84ms", "third-48000.mp4:84.000001ms:512bytes expected508", "third-48000.mp4:91.999999ms:clock91.979166ms,expected92ms", "third-48000.mp4:92.000001ms:256bytes expected252", "third-48000.mp4:95.999999ms:clock95.979166ms,expected96ms", "third-48000.mp4:96.000001ms:128bytes expected124", "third-48000.mp4:99.999999ms:clock99.979166ms,expected100ms", "regular-96000.mp4:1ns:4928bytes expected4924", "regular-96000.mp4:125.001µs:4924bytes expected4920", "regular-96000.mp4:3.999999ms:clock3.989583ms,expected4ms", "regular-96000.mp4:4.000001ms:4800bytes expected4796", "regular-96000.mp4:7.999999ms:clock7.989583ms,expected8ms", "regular-96000.mp4:8.000001ms:4672bytes expected4668", "regular-96000.mp4:15.999999ms:clock15.989583ms,expected16ms", "regular-96000.mp4:16.000001ms:4416bytes expected4412", "regular-96000.mp4:23.999999ms:clock23.989583ms,expected24ms", "regular-96000.mp4:24.000001ms:4160bytes expected4156", "regular-96000.mp4:27.999999ms:clock27.989583ms,expected28ms", "regular-96000.mp4:28.000001ms:4032bytes expected4028", "regular-96000.mp4:31.999999ms:clock31.989583ms,expected32ms", "regular-96000.mp4:32.000001ms:3904bytes expected3896", "regular-96000.mp4:34.249999ms:clock34.239583ms,expected34.25ms", "regular-96000.mp4:34.250001ms:3616bytes expected3608", "regular-96000.mp4:36.499999ms:clock36.489583ms,expected36.5ms", "regular-96000.mp4:36.500001ms:3328bytes expected3320", "regular-96000.mp4:40.999999ms:clock40.989583ms,expected41ms", "regular-96000.mp4:41.000001ms:2752bytes expected2744", "regular-96000.mp4:45.499999ms:clock45.489583ms,expected45.5ms", "regular-96000.mp4:45.500001ms:2176bytes expected2168", "regular-96000.mp4:47.749999ms:clock47.739583ms,expected47.75ms", "regular-96000.mp4:47.750001ms:1888bytes expected1880", "regular-96000.mp4:49.999999ms:clock49.989583ms,expected50ms", "regular-96000.mp4:50.000001ms:1600bytes expected1596", "regular-96000.mp4:52.249999ms:clock52.239583ms,expected52.25ms", "regular-96000.mp4:52.250001ms:1528bytes expected1524", "regular-96000.mp4:54.499999ms:clock54.489583ms,expected54.5ms", "regular-96000.mp4:54.500001ms:1456bytes expected1452", "regular-96000.mp4:58.999999ms:clock58.989583ms,expected59ms", "regular-96000.mp4:59.000001ms:1312bytes expected1308", "regular-96000.mp4:63.499999ms:clock63.489583ms,expected63.5ms", "regular-96000.mp4:63.500001ms:1168bytes expected1164", "regular-96000.mp4:65.749999ms:clock65.739583ms,expected65.75ms", "regular-96000.mp4:65.750001ms:1096bytes expected1092", "regular-96000.mp4:67.999999ms:clock67.989583ms,expected68ms", "regular-96000.mp4:68.000001ms:1024bytes expected1020", "regular-96000.mp4:71.999999ms:clock71.989583ms,expected72ms", "regular-96000.mp4:72.000001ms:896bytes expected892", "regular-96000.mp4:75.999999ms:clock75.989583ms,expected76ms", "regular-96000.mp4:76.000001ms:768bytes expected764", "regular-96000.mp4:83.999999ms:clock83.989583ms,expected84ms", "regular-96000.mp4:84.000001ms:512bytes expected508", "regular-96000.mp4:91.999999ms:clock91.989583ms,expected92ms", "regular-96000.mp4:92.000001ms:256bytes expected252", "regular-96000.mp4:95.999999ms:clock95.989583ms,expected96ms", "regular-96000.mp4:96.000001ms:128bytes expected124", "regular-96000.mp4:99.999999ms:clock99.989583ms,expected100ms", "control-0.mp4:1ns:1024bytes expected1020", "control-0.mp4:125.001µs:1024bytes expected1016", "control-0.mp4:3.999999ms:912bytes expected896", "control-0.mp4:4ms:clock0ns,expected4ms", "control-0.mp4:4.000001ms:896bytes expected892", "control-0.mp4:7.999999ms:784bytes expected768", "control-0.mp4:8.000001ms:768bytes expected764", "control-0.mp4:15.999999ms:528bytes expected512", "control-0.mp4:16ms:clock8ms,expected16ms", "control-0.mp4:16.000001ms:512bytes expected508", "control-0.mp4:23.999999ms:272bytes expected256", "control-0.mp4:24.000001ms:256bytes expected252", "control-0.mp4:27.999999ms:144bytes expected128", "control-0.mp4:28ms:clock24ms,expected28ms", "control-0.mp4:28.000001ms:128bytes expected124", "control-0.mp4:31.999999ms:16bytes expected0", "control-1.mp4:1ns:2304bytes expected2296", "control-1.mp4:125.001µs:2304bytes expected2280", "control-1.mp4:2.249999ms:2048bytes expected2016", "control-1.mp4:2.25ms:2048bytes expected2016", "control-1.mp4:2.250001ms:2048bytes expected2008", "control-1.mp4:4.499999ms:1792bytes expected1728", "control-1.mp4:4.500001ms:1728bytes expected1720", "control-1.mp4:8.999999ms:1216bytes expected1152", "control-1.mp4:9ms:clock4.5ms,expected9ms", "control-1.mp4:9.000001ms:1152bytes expected1144", "control-1.mp4:13.499999ms:640bytes expected576", "control-1.mp4:13.500001ms:576bytes expected568", "control-1.mp4:15.749999ms:320bytes expected288", "control-1.mp4:15.75ms:320bytes expected288", "control-1.mp4:15.750001ms:320bytes expected280", "control-1.mp4:17.999999ms:64bytes expected0", "control-2.mp4:1ns:576bytes expected572", "control-2.mp4:125.001µs:576bytes expected568", "control-2.mp4:2.249999ms:512bytes expected504", "control-2.mp4:2.25ms:512bytes expected504", "control-2.mp4:2.250001ms:512bytes expected500", "control-2.mp4:4.499999ms:448bytes expected432", "control-2.mp4:4.500001ms:432bytes expected428", "control-2.mp4:8.999999ms:304bytes expected288", "control-2.mp4:9ms:clock4.5ms,expected9ms", "control-2.mp4:9.000001ms:288bytes expected284", "control-2.mp4:13.499999ms:160bytes expected144", "control-2.mp4:13.500001ms:144bytes expected140", "control-2.mp4:15.749999ms:80bytes expected72", "control-2.mp4:15.75ms:80bytes expected72", "control-2.mp4:15.750001ms:80bytes expected68", "control-2.mp4:17.999999ms:16bytes expected0", "regular-2000-edits.mp4:1ns:2464bytes expected2460", "regular-2000-edits.mp4:125.001µs:2464bytes expected2456", "regular-2000-edits.mp4:999.999µs:2448bytes expected2432", "regular-2000-edits.mp4:1.000001ms:2432bytes expected2428", "regular-2000-edits.mp4:1.999999ms:2416bytes expected2400", "regular-2000-edits.mp4:2.000001ms:2400bytes expected2396", "regular-2000-edits.mp4:3.999999ms:2352bytes expected2336", "regular-2000-edits.mp4:4.000001ms:2336bytes expected2332", "regular-2000-edits.mp4:5.999999ms:2288bytes expected2272", "regular-2000-edits.mp4:6.000001ms:2272bytes expected2268", "regular-2000-edits.mp4:13.999999ms:2032bytes expected2016", "regular-2000-edits.mp4:14.000001ms:2016bytes expected2012", "regular-2000-edits.mp4:21.999999ms:1776bytes expected1760", "regular-2000-edits.mp4:22.000001ms:1760bytes expected1756", "regular-2000-edits.mp4:25.999999ms:1648bytes expected1632", "regular-2000-edits.mp4:26.000001ms:1632bytes expected1628", "regular-2000-edits.mp4:29.999999ms:1520bytes expected1504", "regular-2000-edits.mp4:30.000001ms:1504bytes expected1496", "regular-2000-edits.mp4:30.999999ms:1440bytes expected1376", "regular-2000-edits.mp4:31.000001ms:1376bytes expected1368", "regular-2000-edits.mp4:31.999999ms:1312bytes expected1248", "regular-2000-edits.mp4:32.000001ms:1248bytes expected1244", "regular-2000-edits.mp4:33.499999ms:1216bytes expected1200", "regular-2000-edits.mp4:33.500001ms:1200bytes expected1196", "regular-2000-edits.mp4:34.999999ms:1168bytes expected1152", "regular-2000-edits.mp4:35.000001ms:1152bytes expected1148", "regular-2000-edits.mp4:36.999999ms:1104bytes expected1088", "regular-2000-edits.mp4:37.000001ms:1088bytes expected1084", "regular-2000-edits.mp4:38.999999ms:1040bytes expected1024", "regular-2000-edits.mp4:39.000001ms:1024bytes expected1020", "regular-2000-edits.mp4:46.999999ms:784bytes expected768", "regular-2000-edits.mp4:47.000001ms:768bytes expected764", "regular-2000-edits.mp4:54.999999ms:528bytes expected512", "regular-2000-edits.mp4:55.000001ms:512bytes expected508", "regular-2000-edits.mp4:58.999999ms:400bytes expected384", "regular-2000-edits.mp4:59.000001ms:384bytes expected380", "regular-2000-edits.mp4:62.999999ms:272bytes expected256", "regular-2000-edits.mp4:63.000001ms:256bytes expected248", "regular-2000-edits.mp4:63.999999ms:192bytes expected128", "regular-2000-edits.mp4:64.000001ms:128bytes expected120", "regular-2000-edits.mp4:64.999999ms:64bytes expected0", "fragmented-2000-edits.mp4:1ns:2464bytes expected2460", "fragmented-2000-edits.mp4:125.001µs:2464bytes expected2456", "fragmented-2000-edits.mp4:999.999µs:2448bytes expected2432", "fragmented-2000-edits.mp4:1.000001ms:2432bytes expected2428", "fragmented-2000-edits.mp4:1.999999ms:2416bytes expected2400", "fragmented-2000-edits.mp4:2.000001ms:2400bytes expected2396", "fragmented-2000-edits.mp4:3.999999ms:2352bytes expected2336", "fragmented-2000-edits.mp4:4.000001ms:2336bytes expected2332", "fragmented-2000-edits.mp4:5.999999ms:2288bytes expected2272", "fragmented-2000-edits.mp4:6.000001ms:2272bytes expected2268", "fragmented-2000-edits.mp4:13.999999ms:2032bytes expected2016", "fragmented-2000-edits.mp4:14.000001ms:2016bytes expected2012", "fragmented-2000-edits.mp4:21.999999ms:1776bytes expected1760", "fragmented-2000-edits.mp4:22.000001ms:1760bytes expected1756", "fragmented-2000-edits.mp4:25.999999ms:1648bytes expected1632", "fragmented-2000-edits.mp4:26.000001ms:1632bytes expected1628", "fragmented-2000-edits.mp4:29.999999ms:1520bytes expected1504", "fragmented-2000-edits.mp4:30.000001ms:1504bytes expected1496", "fragmented-2000-edits.mp4:30.999999ms:1440bytes expected1376", "fragmented-2000-edits.mp4:31.000001ms:1376bytes expected1368", "fragmented-2000-edits.mp4:31.999999ms:1312bytes expected1248", "fragmented-2000-edits.mp4:32.000001ms:1248bytes expected1244", "fragmented-2000-edits.mp4:33.499999ms:1216bytes expected1200", "fragmented-2000-edits.mp4:33.500001ms:1200bytes expected1196", "fragmented-2000-edits.mp4:34.999999ms:1168bytes expected1152", "fragmented-2000-edits.mp4:35.000001ms:1152bytes expected1148", "fragmented-2000-edits.mp4:36.999999ms:1104bytes expected1088", "fragmented-2000-edits.mp4:37.000001ms:1088bytes expected1084", "fragmented-2000-edits.mp4:38.999999ms:1040bytes expected1024", "fragmented-2000-edits.mp4:39.000001ms:1024bytes expected1020", "fragmented-2000-edits.mp4:46.999999ms:784bytes expected768", "fragmented-2000-edits.mp4:47.000001ms:768bytes expected764", "fragmented-2000-edits.mp4:54.999999ms:528bytes expected512", "fragmented-2000-edits.mp4:55.000001ms:512bytes expected508", "fragmented-2000-edits.mp4:58.999999ms:400bytes expected384", "fragmented-2000-edits.mp4:59.000001ms:384bytes expected380", "fragmented-2000-edits.mp4:62.999999ms:272bytes expected256", "fragmented-2000-edits.mp4:63.000001ms:256bytes expected248", "fragmented-2000-edits.mp4:63.999999ms:192bytes expected128", "fragmented-2000-edits.mp4:64.000001ms:128bytes expected120", "fragmented-2000-edits.mp4:64.999999ms:64bytes expected0", "third-2000-edits.mp4:1ns:2464bytes expected2460", "third-2000-edits.mp4:125.001µs:2464bytes expected2456", "third-2000-edits.mp4:999.999µs:2448bytes expected2432", "third-2000-edits.mp4:1.000001ms:2432bytes expected2428", "third-2000-edits.mp4:1.999999ms:2416bytes expected2400", "third-2000-edits.mp4:2.000001ms:2400bytes expected2396", "third-2000-edits.mp4:3.999999ms:2352bytes expected2336", "third-2000-edits.mp4:4.000001ms:2336bytes expected2332", "third-2000-edits.mp4:5.999999ms:2288bytes expected2272", "third-2000-edits.mp4:6.000001ms:2272bytes expected2268", "third-2000-edits.mp4:13.999999ms:2032bytes expected2016", "third-2000-edits.mp4:14.000001ms:2016bytes expected2012", "third-2000-edits.mp4:21.999999ms:1776bytes expected1760", "third-2000-edits.mp4:22.000001ms:1760bytes expected1756", "third-2000-edits.mp4:25.999999ms:1648bytes expected1632", "third-2000-edits.mp4:26.000001ms:1632bytes expected1628", "third-2000-edits.mp4:29.999999ms:1520bytes expected1504", "third-2000-edits.mp4:30.000001ms:1504bytes expected1496", "third-2000-edits.mp4:30.999999ms:1440bytes expected1376", "third-2000-edits.mp4:31.000001ms:1376bytes expected1368", "third-2000-edits.mp4:31.999999ms:1312bytes expected1248", "third-2000-edits.mp4:32.000001ms:1248bytes expected1244", "third-2000-edits.mp4:33.499999ms:1216bytes expected1200", "third-2000-edits.mp4:33.500001ms:1200bytes expected1196", "third-2000-edits.mp4:34.999999ms:1168bytes expected1152", "third-2000-edits.mp4:35.000001ms:1152bytes expected1148", "third-2000-edits.mp4:36.999999ms:1104bytes expected1088", "third-2000-edits.mp4:37.000001ms:1088bytes expected1084", "third-2000-edits.mp4:38.999999ms:1040bytes expected1024", "third-2000-edits.mp4:39.000001ms:1024bytes expected1020", "third-2000-edits.mp4:46.999999ms:784bytes expected768", "third-2000-edits.mp4:47.000001ms:768bytes expected764", "third-2000-edits.mp4:54.999999ms:528bytes expected512", "third-2000-edits.mp4:55.000001ms:512bytes expected508", "third-2000-edits.mp4:58.999999ms:400bytes expected384", "third-2000-edits.mp4:59.000001ms:384bytes expected380", "third-2000-edits.mp4:62.999999ms:272bytes expected256", "third-2000-edits.mp4:63.000001ms:256bytes expected248", "third-2000-edits.mp4:63.999999ms:192bytes expected128", "third-2000-edits.mp4:64.000001ms:128bytes expected120", "third-2000-edits.mp4:64.999999ms:64bytes expected0", "regular-48000-edits.mp4:1ns:2464bytes expected2460", "regular-48000-edits.mp4:125.001µs:2460bytes expected2456", "regular-48000-edits.mp4:999.999µs:clock979.166µs,expected1ms", "regular-48000-edits.mp4:1.000001ms:2432bytes expected2428", "regular-48000-edits.mp4:1.999999ms:clock1.979166ms,expected2ms", "regular-48000-edits.mp4:2.000001ms:2400bytes expected2396", "regular-48000-edits.mp4:3.999999ms:clock3.979166ms,expected4ms", "regular-48000-edits.mp4:4.000001ms:2336bytes expected2332", "regular-48000-edits.mp4:5.999999ms:clock5.979166ms,expected6ms", "regular-48000-edits.mp4:6.000001ms:2272bytes expected2268", "regular-48000-edits.mp4:13.999999ms:clock13.979166ms,expected14ms", "regular-48000-edits.mp4:14.000001ms:2016bytes expected2012", "regular-48000-edits.mp4:21.999999ms:clock21.979166ms,expected22ms", "regular-48000-edits.mp4:22.000001ms:1760bytes expected1756", "regular-48000-edits.mp4:25.999999ms:clock25.979166ms,expected26ms", "regular-48000-edits.mp4:26.000001ms:1632bytes expected1628", "regular-48000-edits.mp4:29.999999ms:clock29.979166ms,expected30ms", "regular-48000-edits.mp4:30.000001ms:1504bytes expected1496", "regular-48000-edits.mp4:30.999999ms:clock30.979166ms,expected31ms", "regular-48000-edits.mp4:31.000001ms:1376bytes expected1368", "regular-48000-edits.mp4:31.999999ms:clock31.979166ms,expected32ms", "regular-48000-edits.mp4:32.000001ms:1248bytes expected1244", "regular-48000-edits.mp4:33.499999ms:clock33.479166ms,expected33.5ms", "regular-48000-edits.mp4:33.500001ms:1200bytes expected1196", "regular-48000-edits.mp4:34.999999ms:clock34.979166ms,expected35ms", "regular-48000-edits.mp4:35.000001ms:1152bytes expected1148", "regular-48000-edits.mp4:36.999999ms:clock36.979166ms,expected37ms", "regular-48000-edits.mp4:37.000001ms:1088bytes expected1084", "regular-48000-edits.mp4:38.999999ms:clock38.979166ms,expected39ms", "regular-48000-edits.mp4:39.000001ms:1024bytes expected1020", "regular-48000-edits.mp4:46.999999ms:clock46.979166ms,expected47ms", "regular-48000-edits.mp4:47.000001ms:768bytes expected764", "regular-48000-edits.mp4:54.999999ms:clock54.979166ms,expected55ms", "regular-48000-edits.mp4:55.000001ms:512bytes expected508", "regular-48000-edits.mp4:58.999999ms:clock58.979166ms,expected59ms", "regular-48000-edits.mp4:59.000001ms:384bytes expected380", "regular-48000-edits.mp4:62.999999ms:clock62.979166ms,expected63ms", "regular-48000-edits.mp4:63.000001ms:256bytes expected248", "regular-48000-edits.mp4:63.999999ms:clock63.979166ms,expected64ms", "regular-48000-edits.mp4:64.000001ms:128bytes expected120", "regular-48000-edits.mp4:64.999999ms:clock64.979166ms,expected65ms", "fragmented-48000-edits.mp4:1ns:2464bytes expected2460", "fragmented-48000-edits.mp4:125.001µs:2460bytes expected2456", "fragmented-48000-edits.mp4:999.999µs:clock979.166µs,expected1ms", "fragmented-48000-edits.mp4:1.000001ms:2432bytes expected2428", "fragmented-48000-edits.mp4:1.999999ms:clock1.979166ms,expected2ms", "fragmented-48000-edits.mp4:2.000001ms:2400bytes expected2396", "fragmented-48000-edits.mp4:3.999999ms:clock3.979166ms,expected4ms", "fragmented-48000-edits.mp4:4.000001ms:2336bytes expected2332", "fragmented-48000-edits.mp4:5.999999ms:clock5.979166ms,expected6ms", "fragmented-48000-edits.mp4:6.000001ms:2272bytes expected2268", "fragmented-48000-edits.mp4:13.999999ms:clock13.979166ms,expected14ms", "fragmented-48000-edits.mp4:14.000001ms:2016bytes expected2012", "fragmented-48000-edits.mp4:21.999999ms:clock21.979166ms,expected22ms", "fragmented-48000-edits.mp4:22.000001ms:1760bytes expected1756", "fragmented-48000-edits.mp4:25.999999ms:clock25.979166ms,expected26ms", "fragmented-48000-edits.mp4:26.000001ms:1632bytes expected1628", "fragmented-48000-edits.mp4:29.999999ms:clock29.979166ms,expected30ms", "fragmented-48000-edits.mp4:30.000001ms:1504bytes expected1496", "fragmented-48000-edits.mp4:30.999999ms:clock30.979166ms,expected31ms", "fragmented-48000-edits.mp4:31.000001ms:1376bytes expected1368", "fragmented-48000-edits.mp4:31.999999ms:clock31.979166ms,expected32ms", "fragmented-48000-edits.mp4:32.000001ms:1248bytes expected1244", "fragmented-48000-edits.mp4:33.499999ms:clock33.479166ms,expected33.5ms", "fragmented-48000-edits.mp4:33.500001ms:1200bytes expected1196", "fragmented-48000-edits.mp4:34.999999ms:clock34.979166ms,expected35ms", "fragmented-48000-edits.mp4:35.000001ms:1152bytes expected1148", "fragmented-48000-edits.mp4:36.999999ms:clock36.979166ms,expected37ms", "fragmented-48000-edits.mp4:37.000001ms:1088bytes expected1084", "fragmented-48000-edits.mp4:38.999999ms:clock38.979166ms,expected39ms", "fragmented-48000-edits.mp4:39.000001ms:1024bytes expected1020", "fragmented-48000-edits.mp4:46.999999ms:clock46.979166ms,expected47ms", "fragmented-48000-edits.mp4:47.000001ms:768bytes expected764", "fragmented-48000-edits.mp4:54.999999ms:clock54.979166ms,expected55ms", "fragmented-48000-edits.mp4:55.000001ms:512bytes expected508", "fragmented-48000-edits.mp4:58.999999ms:clock58.979166ms,expected59ms", "fragmented-48000-edits.mp4:59.000001ms:384bytes expected380", "fragmented-48000-edits.mp4:62.999999ms:clock62.979166ms,expected63ms", "fragmented-48000-edits.mp4:63.000001ms:256bytes expected248", "fragmented-48000-edits.mp4:63.999999ms:clock63.979166ms,expected64ms", "fragmented-48000-edits.mp4:64.000001ms:128bytes expected120", "fragmented-48000-edits.mp4:64.999999ms:clock64.979166ms,expected65ms", "third-48000-edits.mp4:1ns:2464bytes expected2460", "third-48000-edits.mp4:125.001µs:2460bytes expected2456", "third-48000-edits.mp4:999.999µs:clock979.166µs,expected1ms", "third-48000-edits.mp4:1.000001ms:2432bytes expected2428", "third-48000-edits.mp4:1.999999ms:clock1.979166ms,expected2ms", "third-48000-edits.mp4:2.000001ms:2400bytes expected2396", "third-48000-edits.mp4:3.999999ms:clock3.979166ms,expected4ms", "third-48000-edits.mp4:4.000001ms:2336bytes expected2332", "third-48000-edits.mp4:5.999999ms:clock5.979166ms,expected6ms", "third-48000-edits.mp4:6.000001ms:2272bytes expected2268", "third-48000-edits.mp4:13.999999ms:clock13.979166ms,expected14ms", "third-48000-edits.mp4:14.000001ms:2016bytes expected2012", "third-48000-edits.mp4:21.999999ms:clock21.979166ms,expected22ms", "third-48000-edits.mp4:22.000001ms:1760bytes expected1756", "third-48000-edits.mp4:25.999999ms:clock25.979166ms,expected26ms", "third-48000-edits.mp4:26.000001ms:1632bytes expected1628", "third-48000-edits.mp4:29.999999ms:clock29.979166ms,expected30ms", "third-48000-edits.mp4:30.000001ms:1504bytes expected1496", "third-48000-edits.mp4:30.999999ms:clock30.979166ms,expected31ms", "third-48000-edits.mp4:31.000001ms:1376bytes expected1368", "third-48000-edits.mp4:31.999999ms:clock31.979166ms,expected32ms", "third-48000-edits.mp4:32.000001ms:1248bytes expected1244", "third-48000-edits.mp4:33.499999ms:clock33.479166ms,expected33.5ms", "third-48000-edits.mp4:33.500001ms:1200bytes expected1196", "third-48000-edits.mp4:34.999999ms:clock34.979166ms,expected35ms", "third-48000-edits.mp4:35.000001ms:1152bytes expected1148", "third-48000-edits.mp4:36.999999ms:clock36.979166ms,expected37ms", "third-48000-edits.mp4:37.000001ms:1088bytes expected1084", "third-48000-edits.mp4:38.999999ms:clock38.979166ms,expected39ms", "third-48000-edits.mp4:39.000001ms:1024bytes expected1020", "third-48000-edits.mp4:46.999999ms:clock46.979166ms,expected47ms", "third-48000-edits.mp4:47.000001ms:768bytes expected764", "third-48000-edits.mp4:54.999999ms:clock54.979166ms,expected55ms", "third-48000-edits.mp4:55.000001ms:512bytes expected508", "third-48000-edits.mp4:58.999999ms:clock58.979166ms,expected59ms", "third-48000-edits.mp4:59.000001ms:384bytes expected380", "third-48000-edits.mp4:62.999999ms:clock62.979166ms,expected63ms", "third-48000-edits.mp4:63.000001ms:256bytes expected248", "third-48000-edits.mp4:63.999999ms:clock63.979166ms,expected64ms", "third-48000-edits.mp4:64.000001ms:128bytes expected120", "third-48000-edits.mp4:64.999999ms:clock64.979166ms,expected65ms", "ima4-native-8000.mp4:1ns:1536bytes expected1532", "ima4-native-8000.mp4:125.001µs:1532bytes expected1528", "ima4-native-8000.mp4:23.999999ms:772bytes expected768", "ima4-native-8000.mp4:24.000001ms:768bytes expected764", "ima4-native-8000.mp4:47.999999ms:4bytes expected0"]
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+---- actual_worker_adpcm_flushes_at_the_native_sample stdout ----
+
+thread 'actual_worker_adpcm_flushes_at_the_native_sample' (6537337) panicked at tests/mp4_adpcm_subtick_seek.rs:236:5:
+["regular-2000.mp4:1ns:flush[0ns],expected125µs", "regular-2000.mp4:1ns:4928bytes expected4924", "regular-2000.mp4:125.001µs:flush[0ns],expected250µs", "regular-2000.mp4:125.001µs:4928bytes expected4920", "regular-2000.mp4:3.999999ms:flush[3.5ms],expected4ms", "regular-2000.mp4:3.999999ms:4816bytes expected4800", "regular-2000.mp4:4.000001ms:flush[4ms],expected4.125ms", "regular-2000.mp4:4.000001ms:4800bytes expected4796", "regular-2000.mp4:7.999999ms:flush[7.5ms],expected8ms", "regular-2000.mp4:7.999999ms:4688bytes expected4672", "regular-2000.mp4:8.000001ms:flush[8ms],expected8.125ms", "regular-2000.mp4:8.000001ms:4672bytes expected4668", "regular-2000.mp4:15.999999ms:flush[15.5ms],expected16ms", "regular-2000.mp4:15.999999ms:4432bytes expected4416", "regular-2000.mp4:16.000001ms:flush[16ms],expected16.125ms", "regular-2000.mp4:16.000001ms:4416bytes expected4412", "regular-2000.mp4:23.999999ms:flush[23.5ms],expected24ms", "regular-2000.mp4:23.999999ms:4176bytes expected4160", "regular-2000.mp4:24.000001ms:flush[24ms],expected24.125ms", "regular-2000.mp4:24.000001ms:4160bytes expected4156", "regular-2000.mp4:27.999999ms:flush[27.5ms],expected28ms", "regular-2000.mp4:27.999999ms:4048bytes expected4032", "regular-2000.mp4:28.000001ms:flush[28ms],expected28.125ms", "regular-2000.mp4:28.000001ms:4032bytes expected4028", "regular-2000.mp4:31.999999ms:flush[31.5ms],expected32ms", "regular-2000.mp4:31.999999ms:3920bytes expected3904", "regular-2000.mp4:32.000001ms:flush[32ms],expected32.0625ms", "regular-2000.mp4:32.000001ms:3904bytes expected3896", "regular-2000.mp4:34.249999ms:flush[34ms],expected34.25ms", "regular-2000.mp4:34.249999ms:3648bytes expected3616", "regular-2000.mp4:34.25ms:flush[34ms],expected34.25ms", "regular-2000.mp4:34.25ms:3648bytes expected3616", "regular-2000.mp4:34.250001ms:flush[34ms],expected34.3125ms", "regular-2000.mp4:34.250001ms:3648bytes expected3608", "regular-2000.mp4:36.499999ms:flush[36ms],expected36.5ms", "regular-2000.mp4:36.499999ms:3392bytes expected3328", "regular-2000.mp4:36.500001ms:flush[36.5ms],expected36.5625ms", "regular-2000.mp4:36.500001ms:3328bytes expected3320", "regular-2000.mp4:40.999999ms:flush[40.5ms],expected41ms", "regular-2000.mp4:40.999999ms:2816bytes expected2752", "regular-2000.mp4:41.000001ms:flush[41ms],expected41.0625ms", "regular-2000.mp4:41.000001ms:2752bytes expected2744", "regular-2000.mp4:45.499999ms:flush[45ms],expected45.5ms", "regular-2000.mp4:45.499999ms:2240bytes expected2176", "regular-2000.mp4:45.500001ms:flush[45.5ms],expected45.5625ms", "regular-2000.mp4:45.500001ms:2176bytes expected2168", "regular-2000.mp4:47.749999ms:flush[47.5ms],expected47.75ms", "regular-2000.mp4:47.749999ms:1920bytes expected1888", "regular-2000.mp4:47.75ms:flush[47.5ms],expected47.75ms", "regular-2000.mp4:47.75ms:1920bytes expected1888", "regular-2000.mp4:47.750001ms:flush[47.5ms],expected47.8125ms", "regular-2000.mp4:47.750001ms:1920bytes expected1880", "regular-2000.mp4:49.999999ms:flush[49.5ms],expected50ms", "regular-2000.mp4:49.999999ms:1664bytes expected1600", "regular-2000.mp4:50.000001ms:flush[50ms],expected50.125ms", "regular-2000.mp4:50.000001ms:1600bytes expected1596", "regular-2000.mp4:52.249999ms:flush[52ms],expected52.25ms", "regular-2000.mp4:52.249999ms:1536bytes expected1528", "regular-2000.mp4:52.25ms:flush[52ms],expected52.25ms", "regular-2000.mp4:52.25ms:1536bytes expected1528", "regular-2000.mp4:52.250001ms:flush[52ms],expected52.375ms", "regular-2000.mp4:52.250001ms:1536bytes expected1524", "regular-2000.mp4:54.499999ms:flush[54ms],expected54.5ms", "regular-2000.mp4:54.499999ms:1472bytes expected1456", "regular-2000.mp4:54.500001ms:flush[54.5ms],expected54.625ms", "regular-2000.mp4:54.500001ms:1456bytes expected1452", "regular-2000.mp4:58.999999ms:flush[58.5ms],expected59ms", "regular-2000.mp4:58.999999ms:1328bytes expected1312", "regular-2000.mp4:59.000001ms:flush[59ms],expected59.125ms", "regular-2000.mp4:59.000001ms:1312bytes expected1308", "regular-2000.mp4:63.499999ms:flush[63ms],expected63.5ms", "regular-2000.mp4:63.499999ms:1184bytes expected1168", "regular-2000.mp4:63.500001ms:flush[63.5ms],expected63.625ms", "regular-2000.mp4:63.500001ms:1168bytes expected1164", "regular-2000.mp4:65.749999ms:flush[65.5ms],expected65.75ms", "regular-2000.mp4:65.749999ms:1104bytes expected1096", "regular-2000.mp4:65.75ms:flush[65.5ms],expected65.75ms", "regular-2000.mp4:65.75ms:1104bytes expected1096", "regular-2000.mp4:65.750001ms:flush[65.5ms],expected65.875ms", "regular-2000.mp4:65.750001ms:1104bytes expected1092", "regular-2000.mp4:67.999999ms:flush[67.5ms],expected68ms", "regular-2000.mp4:67.999999ms:1040bytes expected1024", "regular-2000.mp4:68.000001ms:flush[68ms],expected68.125ms", "regular-2000.mp4:68.000001ms:1024bytes expected1020", "regular-2000.mp4:71.999999ms:flush[71.5ms],expected72ms", "regular-2000.mp4:71.999999ms:912bytes expected896", "regular-2000.mp4:72.000001ms:flush[72ms],expected72.125ms", "regular-2000.mp4:72.000001ms:896bytes expected892", "regular-2000.mp4:75.999999ms:flush[75.5ms],expected76ms", "regular-2000.mp4:75.999999ms:784bytes expected768", "regular-2000.mp4:76.000001ms:flush[76ms],expected76.125ms", "regular-2000.mp4:76.000001ms:768bytes expected764", "regular-2000.mp4:83.999999ms:flush[83.5ms],expected84ms", "regular-2000.mp4:83.999999ms:528bytes expected512", "regular-2000.mp4:84.000001ms:flush[84ms],expected84.125ms", "regular-2000.mp4:84.000001ms:512bytes expected508", "regular-2000.mp4:91.999999ms:flush[91.5ms],expected92ms", "regular-2000.mp4:91.999999ms:272bytes expected256", "regular-2000.mp4:92.000001ms:flush[92ms],expected92.125ms", "regular-2000.mp4:92.000001ms:256bytes expected252", "regular-2000.mp4:95.999999ms:flush[95.5ms],expected96ms", "regular-2000.mp4:95.999999ms:144bytes expected128", "regular-2000.mp4:96.000001ms:flush[96ms],expected96.125ms", "regular-2000.mp4:96.000001ms:128bytes expected124", "regular-2000.mp4:99.999999ms:flush[99.5ms],expected100ms", "regular-2000.mp4:99.999999ms:16bytes expected0", "regular-48000.mp4:1ns:flush[0ns],expected125µs", "regular-48000.mp4:1ns:4928bytes expected4924", "regular-48000.mp4:125.001µs:flush[125µs],expected250µs", "regular-48000.mp4:125.001µs:4924bytes expected4920", "regular-48000.mp4:3.999999ms:flush[3.979166ms],expected4ms", "regular-48000.mp4:4.000001ms:flush[4ms],expected4.125ms", "regular-48000.mp4:4.000001ms:4800bytes expected4796", "regular-48000.mp4:7.999999ms:flush[7.979166ms],expected8ms", "regular-48000.mp4:8.000001ms:flush[8ms],expected8.125ms", "regular-48000.mp4:8.000001ms:4672bytes expected4668", "regular-48000.mp4:15.999999ms:flush[15.979166ms],expected16ms", "regular-48000.mp4:16.000001ms:flush[16ms],expected16.125ms", "regular-48000.mp4:16.000001ms:4416bytes expected4412", "regular-48000.mp4:23.999999ms:flush[23.979166ms],expected24ms", "regular-48000.mp4:24.000001ms:flush[24ms],expected24.125ms", "regular-48000.mp4:24.000001ms:4160bytes expected4156", "regular-48000.mp4:27.999999ms:flush[27.979166ms],expected28ms", "regular-48000.mp4:28.000001ms:flush[28ms],expected28.125ms", "regular-48000.mp4:28.000001ms:4032bytes expected4028", "regular-48000.mp4:31.999999ms:flush[31.979166ms],expected32ms", "regular-48000.mp4:32.000001ms:flush[32ms],expected32.0625ms", "regular-48000.mp4:32.000001ms:3904bytes expected3896", "regular-48000.mp4:34.249999ms:flush[34.229166ms],expected34.25ms", "regular-48000.mp4:34.250001ms:flush[34.25ms],expected34.3125ms", "regular-48000.mp4:34.250001ms:3616bytes expected3608", "regular-48000.mp4:36.499999ms:flush[36.479166ms],expected36.5ms", "regular-48000.mp4:36.500001ms:flush[36.5ms],expected36.5625ms", "regular-48000.mp4:36.500001ms:3328bytes expected3320", "regular-48000.mp4:40.999999ms:flush[40.979166ms],expected41ms", "regular-48000.mp4:41.000001ms:flush[41ms],expected41.0625ms", "regular-48000.mp4:41.000001ms:2752bytes expected2744", "regular-48000.mp4:45.499999ms:flush[45.479166ms],expected45.5ms", "regular-48000.mp4:45.500001ms:flush[45.5ms],expected45.5625ms", "regular-48000.mp4:45.500001ms:2176bytes expected2168", "regular-48000.mp4:47.749999ms:flush[47.729166ms],expected47.75ms", "regular-48000.mp4:47.750001ms:flush[47.75ms],expected47.8125ms", "regular-48000.mp4:47.750001ms:1888bytes expected1880", "regular-48000.mp4:49.999999ms:flush[49.979166ms],expected50ms", "regular-48000.mp4:50.000001ms:flush[50ms],expected50.125ms", "regular-48000.mp4:50.000001ms:1600bytes expected1596", "regular-48000.mp4:52.249999ms:flush[52.229166ms],expected52.25ms", "regular-48000.mp4:52.250001ms:flush[52.25ms],expected52.375ms", "regular-48000.mp4:52.250001ms:1528bytes expected1524", "regular-48000.mp4:54.499999ms:flush[54.479166ms],expected54.5ms", "regular-48000.mp4:54.500001ms:flush[54.5ms],expected54.625ms", "regular-48000.mp4:54.500001ms:1456bytes expected1452", "regular-48000.mp4:58.999999ms:flush[58.979166ms],expected59ms", "regular-48000.mp4:59.000001ms:flush[59ms],expected59.125ms", "regular-48000.mp4:59.000001ms:1312bytes expected1308", "regular-48000.mp4:63.499999ms:flush[63.479166ms],expected63.5ms", "regular-48000.mp4:63.500001ms:flush[63.5ms],expected63.625ms", "regular-48000.mp4:63.500001ms:1168bytes expected1164", "regular-48000.mp4:65.749999ms:flush[65.729166ms],expected65.75ms", "regular-48000.mp4:65.750001ms:flush[65.75ms],expected65.875ms", "regular-48000.mp4:65.750001ms:1096bytes expected1092", "regular-48000.mp4:67.999999ms:flush[67.979166ms],expected68ms", "regular-48000.mp4:68.000001ms:flush[68ms],expected68.125ms", "regular-48000.mp4:68.000001ms:1024bytes expected1020", "regular-48000.mp4:71.999999ms:flush[71.979166ms],expected72ms", "regular-48000.mp4:72.000001ms:flush[72ms],expected72.125ms", "regular-48000.mp4:72.000001ms:896bytes expected892", "regular-48000.mp4:75.999999ms:flush[75.979166ms],expected76ms", "regular-48000.mp4:76.000001ms:flush[76ms],expected76.125ms", "regular-48000.mp4:76.000001ms:768bytes expected764", "regular-48000.mp4:83.999999ms:flush[83.979166ms],expected84ms", "regular-48000.mp4:84.000001ms:flush[84ms],expected84.125ms", "regular-48000.mp4:84.000001ms:512bytes expected508", "regular-48000.mp4:91.999999ms:flush[91.979166ms],expected92ms", "regular-48000.mp4:92.000001ms:flush[92ms],expected92.125ms", "regular-48000.mp4:92.000001ms:256bytes expected252", "regular-48000.mp4:95.999999ms:flush[95.979166ms],expected96ms", "regular-48000.mp4:96.000001ms:flush[96ms],expected96.125ms", "regular-48000.mp4:96.000001ms:128bytes expected124", "regular-48000.mp4:99.999999ms:flush[99.979166ms],expected100ms", "regular-48000.mp4:EOF99.979166ms expected100ms", "fragmented-48000.mp4:1ns:flush[0ns],expected125µs", "fragmented-48000.mp4:1ns:4928bytes expected4924", "fragmented-48000.mp4:125.001µs:flush[125µs],expected250µs", "fragmented-48000.mp4:125.001µs:4924bytes expected4920", "fragmented-48000.mp4:3.999999ms:flush[3.979166ms],expected4ms", "fragmented-48000.mp4:4.000001ms:flush[4ms],expected4.125ms", "fragmented-48000.mp4:4.000001ms:4800bytes expected4796", "fragmented-48000.mp4:7.999999ms:flush[7.979166ms],expected8ms", "fragmented-48000.mp4:8.000001ms:flush[8ms],expected8.125ms", "fragmented-48000.mp4:8.000001ms:4672bytes expected4668", "fragmented-48000.mp4:15.999999ms:flush[15.979166ms],expected16ms", "fragmented-48000.mp4:16.000001ms:flush[16ms],expected16.125ms", "fragmented-48000.mp4:16.000001ms:4416bytes expected4412", "fragmented-48000.mp4:23.999999ms:flush[23.979166ms],expected24ms", "fragmented-48000.mp4:24.000001ms:flush[24ms],expected24.125ms", "fragmented-48000.mp4:24.000001ms:4160bytes expected4156", "fragmented-48000.mp4:27.999999ms:flush[27.979166ms],expected28ms", "fragmented-48000.mp4:28.000001ms:flush[28ms],expected28.125ms", "fragmented-48000.mp4:28.000001ms:4032bytes expected4028", "fragmented-48000.mp4:31.999999ms:flush[31.979166ms],expected32ms", "fragmented-48000.mp4:32.000001ms:flush[32ms],expected32.0625ms", "fragmented-48000.mp4:32.000001ms:3904bytes expected3896", "fragmented-48000.mp4:34.249999ms:flush[34.229166ms],expected34.25ms", "fragmented-48000.mp4:34.250001ms:flush[34.25ms],expected34.3125ms", "fragmented-48000.mp4:34.250001ms:3616bytes expected3608", "fragmented-48000.mp4:36.499999ms:flush[36.479166ms],expected36.5ms", "fragmented-48000.mp4:36.500001ms:flush[36.5ms],expected36.5625ms", "fragmented-48000.mp4:36.500001ms:3328bytes expected3320", "fragmented-48000.mp4:40.999999ms:flush[40.979166ms],expected41ms", "fragmented-48000.mp4:41.000001ms:flush[41ms],expected41.0625ms", "fragmented-48000.mp4:41.000001ms:2752bytes expected2744", "fragmented-48000.mp4:45.499999ms:flush[45.479166ms],expected45.5ms", "fragmented-48000.mp4:45.500001ms:flush[45.5ms],expected45.5625ms", "fragmented-48000.mp4:45.500001ms:2176bytes expected2168", "fragmented-48000.mp4:47.749999ms:flush[47.729166ms],expected47.75ms", "fragmented-48000.mp4:47.750001ms:flush[47.75ms],expected47.8125ms", "fragmented-48000.mp4:47.750001ms:1888bytes expected1880", "fragmented-48000.mp4:49.999999ms:flush[49.979166ms],expected50ms", "fragmented-48000.mp4:50.000001ms:flush[50ms],expected50.125ms", "fragmented-48000.mp4:50.000001ms:1600bytes expected1596", "fragmented-48000.mp4:52.249999ms:flush[52.229166ms],expected52.25ms", "fragmented-48000.mp4:52.250001ms:flush[52.25ms],expected52.375ms", "fragmented-48000.mp4:52.250001ms:1528bytes expected1524", "fragmented-48000.mp4:54.499999ms:flush[54.479166ms],expected54.5ms", "fragmented-48000.mp4:54.500001ms:flush[54.5ms],expected54.625ms", "fragmented-48000.mp4:54.500001ms:1456bytes expected1452", "fragmented-48000.mp4:58.999999ms:flush[58.979166ms],expected59ms", "fragmented-48000.mp4:59.000001ms:flush[59ms],expected59.125ms", "fragmented-48000.mp4:59.000001ms:1312bytes expected1308", "fragmented-48000.mp4:63.499999ms:flush[63.479166ms],expected63.5ms", "fragmented-48000.mp4:63.500001ms:flush[63.5ms],expected63.625ms", "fragmented-48000.mp4:63.500001ms:1168bytes expected1164", "fragmented-48000.mp4:65.749999ms:flush[65.729166ms],expected65.75ms", "fragmented-48000.mp4:65.750001ms:flush[65.75ms],expected65.875ms", "fragmented-48000.mp4:65.750001ms:1096bytes expected1092", "fragmented-48000.mp4:67.999999ms:flush[67.979166ms],expected68ms", "fragmented-48000.mp4:68.000001ms:flush[68ms],expected68.125ms", "fragmented-48000.mp4:68.000001ms:1024bytes expected1020", "fragmented-48000.mp4:71.999999ms:flush[71.979166ms],expected72ms", "fragmented-48000.mp4:72.000001ms:flush[72ms],expected72.125ms", "fragmented-48000.mp4:72.000001ms:896bytes expected892", "fragmented-48000.mp4:75.999999ms:flush[75.979166ms],expected76ms", "fragmented-48000.mp4:76.000001ms:flush[76ms],expected76.125ms", "fragmented-48000.mp4:76.000001ms:768bytes expected764", "fragmented-48000.mp4:83.999999ms:flush[83.979166ms],expected84ms", "fragmented-48000.mp4:84.000001ms:flush[84ms],expected84.125ms", "fragmented-48000.mp4:84.000001ms:512bytes expected508", "fragmented-48000.mp4:91.999999ms:flush[91.979166ms],expected92ms", "fragmented-48000.mp4:92.000001ms:flush[92ms],expected92.125ms", "fragmented-48000.mp4:92.000001ms:256bytes expected252", "fragmented-48000.mp4:95.999999ms:flush[95.979166ms],expected96ms", "fragmented-48000.mp4:96.000001ms:flush[96ms],expected96.125ms", "fragmented-48000.mp4:96.000001ms:128bytes expected124", "fragmented-48000.mp4:99.999999ms:flush[99.979166ms],expected100ms", "fragmented-48000.mp4:EOF99.979166ms expected100ms", "trim-48000.mp4:1ns:flush[0ns],expected125µs", "trim-48000.mp4:1ns:4800bytes expected4796", "trim-48000.mp4:125.001µs:flush[125µs],expected250µs", "trim-48000.mp4:125.001µs:4796bytes expected4792", "trim-48000.mp4:3.999999ms:flush[3.979166ms],expected4ms", "trim-48000.mp4:4.000001ms:flush[4ms],expected4.125ms", "trim-48000.mp4:4.000001ms:4672bytes expected4668", "trim-48000.mp4:7.999999ms:flush[7.979166ms],expected8ms", "trim-48000.mp4:8.000001ms:flush[8ms],expected8.125ms", "trim-48000.mp4:8.000001ms:4544bytes expected4540", "trim-48000.mp4:15.999999ms:flush[15.979166ms],expected16ms", "trim-48000.mp4:16.000001ms:flush[16ms],expected16.125ms", "trim-48000.mp4:16.000001ms:4288bytes expected4284", "trim-48000.mp4:23.999999ms:flush[23.979166ms],expected24ms", "trim-48000.mp4:24.000001ms:flush[24ms],expected24.125ms", "trim-48000.mp4:24.000001ms:4032bytes expected4028", "trim-48000.mp4:26.999999ms:flush[26.979166ms],expected27ms", "trim-48000.mp4:27.000001ms:flush[27ms],expected27.125ms", "trim-48000.mp4:27.000001ms:3936bytes expected3932", "trim-48000.mp4:29.999999ms:flush[29.979166ms],expected30ms", "trim-48000.mp4:30.000001ms:flush[30ms],expected30.0625ms", "trim-48000.mp4:30.000001ms:3840bytes expected3832", "trim-48000.mp4:32.249999ms:flush[32.229166ms],expected32.25ms", "trim-48000.mp4:32.250001ms:flush[32.25ms],expected32.3125ms", "trim-48000.mp4:32.250001ms:3552bytes expected3544", "trim-48000.mp4:34.499999ms:flush[34.479166ms],expected34.5ms", "trim-48000.mp4:34.500001ms:flush[34.5ms],expected34.5625ms", "trim-48000.mp4:34.500001ms:3264bytes expected3256", "trim-48000.mp4:38.999999ms:flush[38.979166ms],expected39ms", "trim-48000.mp4:39.000001ms:flush[39ms],expected39.0625ms", "trim-48000.mp4:39.000001ms:2688bytes expected2680", "trim-48000.mp4:43.499999ms:flush[43.479166ms],expected43.5ms", "trim-48000.mp4:43.500001ms:flush[43.5ms],expected43.5625ms", "trim-48000.mp4:43.500001ms:2112bytes expected2104", "trim-48000.mp4:45.749999ms:flush[45.729166ms],expected45.75ms", "trim-48000.mp4:45.750001ms:flush[45.75ms],expected45.8125ms", "trim-48000.mp4:45.750001ms:1824bytes expected1816", "trim-48000.mp4:47.999999ms:flush[47.979166ms],expected48ms", "trim-48000.mp4:48.000001ms:flush[48ms],expected48.125ms", "trim-48000.mp4:48.000001ms:1536bytes expected1532", "trim-48000.mp4:50.249999ms:flush[50.229166ms],expected50.25ms", "trim-48000.mp4:50.250001ms:flush[50.25ms],expected50.375ms", "trim-48000.mp4:50.250001ms:1464bytes expected1460", "trim-48000.mp4:52.499999ms:flush[52.479166ms],expected52.5ms", "trim-48000.mp4:52.500001ms:flush[52.5ms],expected52.625ms", "trim-48000.mp4:52.500001ms:1392bytes expected1388", "trim-48000.mp4:56.999999ms:flush[56.979166ms],expected57ms", "trim-48000.mp4:57.000001ms:flush[57ms],expected57.125ms", "trim-48000.mp4:57.000001ms:1248bytes expected1244", "trim-48000.mp4:61.499999ms:flush[61.479166ms],expected61.5ms", "trim-48000.mp4:61.500001ms:flush[61.5ms],expected61.625ms", "trim-48000.mp4:61.500001ms:1104bytes expected1100", "trim-48000.mp4:63.749999ms:flush[63.729166ms],expected63.75ms", "trim-48000.mp4:63.750001ms:flush[63.75ms],expected63.875ms", "trim-48000.mp4:63.750001ms:1032bytes expected1028", "trim-48000.mp4:65.999999ms:flush[65.979166ms],expected66ms", "trim-48000.mp4:66.000001ms:flush[66ms],expected66.125ms", "trim-48000.mp4:66.000001ms:960bytes expected956", "trim-48000.mp4:69.999999ms:flush[69.979166ms],expected70ms", "trim-48000.mp4:70.000001ms:flush[70ms],expected70.125ms", "trim-48000.mp4:70.000001ms:832bytes expected828", "trim-48000.mp4:73.999999ms:flush[73.979166ms],expected74ms", "trim-48000.mp4:74.000001ms:flush[74ms],expected74.125ms", "trim-48000.mp4:74.000001ms:704bytes expected700", "trim-48000.mp4:81.999999ms:flush[81.979166ms],expected82ms", "trim-48000.mp4:82.000001ms:flush[82ms],expected82.125ms", "trim-48000.mp4:82.000001ms:448bytes expected444", "trim-48000.mp4:89.999999ms:flush[89.979166ms],expected90ms", "trim-48000.mp4:90.000001ms:flush[90ms],expected90.125ms", "trim-48000.mp4:90.000001ms:192bytes expected188", "trim-48000.mp4:92.999999ms:flush[92.979166ms],expected93ms", "trim-48000.mp4:93.000001ms:flush[93ms],expected93.125ms", "trim-48000.mp4:93.000001ms:96bytes expected92", "trim-48000.mp4:95.999999ms:flush[95.979166ms],expected96ms", "trim-48000.mp4:EOF95.979166ms expected96ms", "third-48000.mp4:1ns:flush[0ns],expected125µs", "third-48000.mp4:1ns:4928bytes expected4924", "third-48000.mp4:125.001µs:flush[125µs],expected250µs", "third-48000.mp4:125.001µs:4924bytes expected4920", "third-48000.mp4:3.999999ms:flush[3.979166ms],expected4ms", "third-48000.mp4:4.000001ms:flush[4ms],expected4.125ms", "third-48000.mp4:4.000001ms:4800bytes expected4796", "third-48000.mp4:7.999999ms:flush[7.979166ms],expected8ms", "third-48000.mp4:8.000001ms:flush[8ms],expected8.125ms", "third-48000.mp4:8.000001ms:4672bytes expected4668", "third-48000.mp4:15.999999ms:flush[15.979166ms],expected16ms", "third-48000.mp4:16.000001ms:flush[16ms],expected16.125ms", "third-48000.mp4:16.000001ms:4416bytes expected4412", "third-48000.mp4:23.999999ms:flush[23.979166ms],expected24ms", "third-48000.mp4:24.000001ms:flush[24ms],expected24.125ms", "third-48000.mp4:24.000001ms:4160bytes expected4156", "third-48000.mp4:27.999999ms:flush[27.979166ms],expected28ms", "third-48000.mp4:28.000001ms:flush[28ms],expected28.125ms", "third-48000.mp4:28.000001ms:4032bytes expected4028", "third-48000.mp4:31.999999ms:flush[31.979166ms],expected32ms", "third-48000.mp4:32.000001ms:flush[32ms],expected32.0625ms", "third-48000.mp4:32.000001ms:3904bytes expected3896", "third-48000.mp4:34.249999ms:flush[34.229166ms],expected34.25ms", "third-48000.mp4:34.250001ms:flush[34.25ms],expected34.3125ms", "third-48000.mp4:34.250001ms:3616bytes expected3608", "third-48000.mp4:36.499999ms:flush[36.479166ms],expected36.5ms", "third-48000.mp4:36.500001ms:flush[36.5ms],expected36.5625ms", "third-48000.mp4:36.500001ms:3328bytes expected3320", "third-48000.mp4:40.999999ms:flush[40.979166ms],expected41ms", "third-48000.mp4:41.000001ms:flush[41ms],expected41.0625ms", "third-48000.mp4:41.000001ms:2752bytes expected2744", "third-48000.mp4:45.499999ms:flush[45.479166ms],expected45.5ms", "third-48000.mp4:45.500001ms:flush[45.5ms],expected45.5625ms", "third-48000.mp4:45.500001ms:2176bytes expected2168", "third-48000.mp4:47.749999ms:flush[47.729166ms],expected47.75ms", "third-48000.mp4:47.750001ms:flush[47.75ms],expected47.8125ms", "third-48000.mp4:47.750001ms:1888bytes expected1880", "third-48000.mp4:49.999999ms:flush[49.979166ms],expected50ms", "third-48000.mp4:50.000001ms:flush[50ms],expected50.125ms", "third-48000.mp4:50.000001ms:1600bytes expected1596", "third-48000.mp4:52.249999ms:flush[52.229166ms],expected52.25ms", "third-48000.mp4:52.250001ms:flush[52.25ms],expected52.375ms", "third-48000.mp4:52.250001ms:1528bytes expected1524", "third-48000.mp4:54.499999ms:flush[54.479166ms],expected54.5ms", "third-48000.mp4:54.500001ms:flush[54.5ms],expected54.625ms", "third-48000.mp4:54.500001ms:1456bytes expected1452", "third-48000.mp4:58.999999ms:flush[58.979166ms],expected59ms", "third-48000.mp4:59.000001ms:flush[59ms],expected59.125ms", "third-48000.mp4:59.000001ms:1312bytes expected1308", "third-48000.mp4:63.499999ms:flush[63.479166ms],expected63.5ms", "third-48000.mp4:63.500001ms:flush[63.5ms],expected63.625ms", "third-48000.mp4:63.500001ms:1168bytes expected1164", "third-48000.mp4:65.749999ms:flush[65.729166ms],expected65.75ms", "third-48000.mp4:65.750001ms:flush[65.75ms],expected65.875ms", "third-48000.mp4:65.750001ms:1096bytes expected1092", "third-48000.mp4:67.999999ms:flush[67.979166ms],expected68ms", "third-48000.mp4:68.000001ms:flush[68ms],expected68.125ms", "third-48000.mp4:68.000001ms:1024bytes expected1020", "third-48000.mp4:71.999999ms:flush[71.979166ms],expected72ms", "third-48000.mp4:72.000001ms:flush[72ms],expected72.125ms", "third-48000.mp4:72.000001ms:896bytes expected892", "third-48000.mp4:75.999999ms:flush[75.979166ms],expected76ms", "third-48000.mp4:76.000001ms:flush[76ms],expected76.125ms", "third-48000.mp4:76.000001ms:768bytes expected764", "third-48000.mp4:83.999999ms:flush[83.979166ms],expected84ms", "third-48000.mp4:84.000001ms:flush[84ms],expected84.125ms", "third-48000.mp4:84.000001ms:512bytes expected508", "third-48000.mp4:91.999999ms:flush[91.979166ms],expected92ms", "third-48000.mp4:92.000001ms:flush[92ms],expected92.125ms", "third-48000.mp4:92.000001ms:256bytes expected252", "third-48000.mp4:95.999999ms:flush[95.979166ms],expected96ms", "third-48000.mp4:96.000001ms:flush[96ms],expected96.125ms", "third-48000.mp4:96.000001ms:128bytes expected124", "third-48000.mp4:99.999999ms:flush[99.979166ms],expected100ms", "third-48000.mp4:EOF99.979166ms expected100ms", "regular-96000.mp4:1ns:flush[0ns],expected125µs", "regular-96000.mp4:1ns:4928bytes expected4924", "regular-96000.mp4:125.001µs:flush[125µs],expected250µs", "regular-96000.mp4:125.001µs:4924bytes expected4920", "regular-96000.mp4:3.999999ms:flush[3.989583ms],expected4ms", "regular-96000.mp4:4.000001ms:flush[4ms],expected4.125ms", "regular-96000.mp4:4.000001ms:4800bytes expected4796", "regular-96000.mp4:7.999999ms:flush[7.989583ms],expected8ms", "regular-96000.mp4:8.000001ms:flush[8ms],expected8.125ms", "regular-96000.mp4:8.000001ms:4672bytes expected4668", "regular-96000.mp4:15.999999ms:flush[15.989583ms],expected16ms", "regular-96000.mp4:16.000001ms:flush[16ms],expected16.125ms", "regular-96000.mp4:16.000001ms:4416bytes expected4412", "regular-96000.mp4:23.999999ms:flush[23.989583ms],expected24ms", "regular-96000.mp4:24.000001ms:flush[24ms],expected24.125ms", "regular-96000.mp4:24.000001ms:4160bytes expected4156", "regular-96000.mp4:27.999999ms:flush[27.989583ms],expected28ms", "regular-96000.mp4:28.000001ms:flush[28ms],expected28.125ms", "regular-96000.mp4:28.000001ms:4032bytes expected4028", "regular-96000.mp4:31.999999ms:flush[31.989583ms],expected32ms", "regular-96000.mp4:32.000001ms:flush[32ms],expected32.0625ms", "regular-96000.mp4:32.000001ms:3904bytes expected3896", "regular-96000.mp4:34.249999ms:flush[34.239583ms],expected34.25ms", "regular-96000.mp4:34.250001ms:flush[34.25ms],expected34.3125ms", "regular-96000.mp4:34.250001ms:3616bytes expected3608", "regular-96000.mp4:36.499999ms:flush[36.489583ms],expected36.5ms", "regular-96000.mp4:36.500001ms:flush[36.5ms],expected36.5625ms", "regular-96000.mp4:36.500001ms:3328bytes expected3320", "regular-96000.mp4:40.999999ms:flush[40.989583ms],expected41ms", "regular-96000.mp4:41.000001ms:flush[41ms],expected41.0625ms", "regular-96000.mp4:41.000001ms:2752bytes expected2744", "regular-96000.mp4:45.499999ms:flush[45.489583ms],expected45.5ms", "regular-96000.mp4:45.500001ms:flush[45.5ms],expected45.5625ms", "regular-96000.mp4:45.500001ms:2176bytes expected2168", "regular-96000.mp4:47.749999ms:flush[47.739583ms],expected47.75ms", "regular-96000.mp4:47.750001ms:flush[47.75ms],expected47.8125ms", "regular-96000.mp4:47.750001ms:1888bytes expected1880", "regular-96000.mp4:49.999999ms:flush[49.989583ms],expected50ms", "regular-96000.mp4:50.000001ms:flush[50ms],expected50.125ms", "regular-96000.mp4:50.000001ms:1600bytes expected1596", "regular-96000.mp4:52.249999ms:flush[52.239583ms],expected52.25ms", "regular-96000.mp4:52.250001ms:flush[52.25ms],expected52.375ms", "regular-96000.mp4:52.250001ms:1528bytes expected1524", "regular-96000.mp4:54.499999ms:flush[54.489583ms],expected54.5ms", "regular-96000.mp4:54.500001ms:flush[54.5ms],expected54.625ms", "regular-96000.mp4:54.500001ms:1456bytes expected1452", "regular-96000.mp4:58.999999ms:flush[58.989583ms],expected59ms", "regular-96000.mp4:59.000001ms:flush[59ms],expected59.125ms", "regular-96000.mp4:59.000001ms:1312bytes expected1308", "regular-96000.mp4:63.499999ms:flush[63.489583ms],expected63.5ms", "regular-96000.mp4:63.500001ms:flush[63.5ms],expected63.625ms", "regular-96000.mp4:63.500001ms:1168bytes expected1164", "regular-96000.mp4:65.749999ms:flush[65.739583ms],expected65.75ms", "regular-96000.mp4:65.750001ms:flush[65.75ms],expected65.875ms", "regular-96000.mp4:65.750001ms:1096bytes expected1092", "regular-96000.mp4:67.999999ms:flush[67.989583ms],expected68ms", "regular-96000.mp4:68.000001ms:flush[68ms],expected68.125ms", "regular-96000.mp4:68.000001ms:1024bytes expected1020", "regular-96000.mp4:71.999999ms:flush[71.989583ms],expected72ms", "regular-96000.mp4:72.000001ms:flush[72ms],expected72.125ms", "regular-96000.mp4:72.000001ms:896bytes expected892", "regular-96000.mp4:75.999999ms:flush[75.989583ms],expected76ms", "regular-96000.mp4:76.000001ms:flush[76ms],expected76.125ms", "regular-96000.mp4:76.000001ms:768bytes expected764", "regular-96000.mp4:83.999999ms:flush[83.989583ms],expected84ms", "regular-96000.mp4:84.000001ms:flush[84ms],expected84.125ms", "regular-96000.mp4:84.000001ms:512bytes expected508", "regular-96000.mp4:91.999999ms:flush[91.989583ms],expected92ms", "regular-96000.mp4:92.000001ms:flush[92ms],expected92.125ms", "regular-96000.mp4:92.000001ms:256bytes expected252", "regular-96000.mp4:95.999999ms:flush[95.989583ms],expected96ms", "regular-96000.mp4:96.000001ms:flush[96ms],expected96.125ms", "regular-96000.mp4:96.000001ms:128bytes expected124", "regular-96000.mp4:99.999999ms:flush[99.989583ms],expected100ms", "regular-96000.mp4:EOF99.989583ms expected100ms", "control-0.mp4:1ns:flush[0ns],expected125µs", "control-0.mp4:1ns:1024bytes expected1020", "control-0.mp4:125.001µs:flush[0ns],expected250µs", "control-0.mp4:125.001µs:1024bytes expected1016", "control-0.mp4:3.999999ms:flush[0ns],expected4ms", "control-0.mp4:3.999999ms:912bytes expected896", "control-0.mp4:4ms:flush[0ns],expected4ms", "control-0.mp4:4.000001ms:flush[0ns],expected4.125ms", "control-0.mp4:4.000001ms:896bytes expected892", "control-0.mp4:7.999999ms:flush[0ns],expected8ms", "control-0.mp4:7.999999ms:784bytes expected768", "control-0.mp4:8.000001ms:flush[8ms],expected8.125ms", "control-0.mp4:8.000001ms:768bytes expected764", "control-0.mp4:15.999999ms:flush[8ms],expected16ms", "control-0.mp4:15.999999ms:528bytes expected512", "control-0.mp4:16ms:flush[8ms],expected16ms", "control-0.mp4:16.000001ms:flush[8ms],expected16.125ms", "control-0.mp4:16.000001ms:512bytes expected508", "control-0.mp4:23.999999ms:flush[8ms],expected24ms", "control-0.mp4:23.999999ms:272bytes expected256", "control-0.mp4:24.000001ms:flush[24ms],expected24.125ms", "control-0.mp4:24.000001ms:256bytes expected252", "control-0.mp4:27.999999ms:flush[24ms],expected28ms", "control-0.mp4:27.999999ms:144bytes expected128", "control-0.mp4:28ms:flush[24ms],expected28ms", "control-0.mp4:28.000001ms:flush[24ms],expected28.125ms", "control-0.mp4:28.000001ms:128bytes expected124", "control-0.mp4:31.999999ms:flush[24ms],expected32ms", "control-0.mp4:31.999999ms:16bytes expected0", "control-1.mp4:1ns:flush[0ns],expected62.5µs", "control-1.mp4:1ns:2304bytes expected2296", "control-1.mp4:125.001µs:flush[0ns],expected187.5µs", "control-1.mp4:125.001µs:2304bytes expected2280", "control-1.mp4:2.249999ms:flush[0ns],expected2.25ms", "control-1.mp4:2.249999ms:2048bytes expected2016", "control-1.mp4:2.25ms:flush[0ns],expected2.25ms", "control-1.mp4:2.25ms:2048bytes expected2016", "control-1.mp4:2.250001ms:flush[0ns],expected2.3125ms", "control-1.mp4:2.250001ms:2048bytes expected2008", "control-1.mp4:4.499999ms:flush[0ns],expected4.5ms", "control-1.mp4:4.499999ms:1792bytes expected1728", "control-1.mp4:4.500001ms:flush[4.5ms],expected4.5625ms", "control-1.mp4:4.500001ms:1728bytes expected1720", "control-1.mp4:8.999999ms:flush[4.5ms],expected9ms", "control-1.mp4:8.999999ms:1216bytes expected1152", "control-1.mp4:9ms:flush[4.5ms],expected9ms", "control-1.mp4:9.000001ms:flush[4.5ms],expected9.0625ms", "control-1.mp4:9.000001ms:1152bytes expected1144", "control-1.mp4:13.499999ms:flush[4.5ms],expected13.5ms", "control-1.mp4:13.499999ms:640bytes expected576", "control-1.mp4:13.500001ms:flush[13.5ms],expected13.5625ms", "control-1.mp4:13.500001ms:576bytes expected568", "control-1.mp4:15.749999ms:flush[13.5ms],expected15.75ms", "control-1.mp4:15.749999ms:320bytes expected288", "control-1.mp4:15.75ms:flush[13.5ms],expected15.75ms", "control-1.mp4:15.75ms:320bytes expected288", "control-1.mp4:15.750001ms:flush[13.5ms],expected15.8125ms", "control-1.mp4:15.750001ms:320bytes expected280", "control-1.mp4:17.999999ms:flush[13.5ms],expected18ms", "control-1.mp4:17.999999ms:64bytes expected0", "control-2.mp4:1ns:flush[0ns],expected125µs", "control-2.mp4:1ns:576bytes expected572", "control-2.mp4:125.001µs:flush[0ns],expected250µs", "control-2.mp4:125.001µs:576bytes expected568", "control-2.mp4:2.249999ms:flush[0ns],expected2.25ms", "control-2.mp4:2.249999ms:512bytes expected504", "control-2.mp4:2.25ms:flush[0ns],expected2.25ms", "control-2.mp4:2.25ms:512bytes expected504", "control-2.mp4:2.250001ms:flush[0ns],expected2.375ms", "control-2.mp4:2.250001ms:512bytes expected500", "control-2.mp4:4.499999ms:flush[0ns],expected4.5ms", "control-2.mp4:4.499999ms:448bytes expected432", "control-2.mp4:4.500001ms:flush[4.5ms],expected4.625ms", "control-2.mp4:4.500001ms:432bytes expected428", "control-2.mp4:8.999999ms:flush[4.5ms],expected9ms", "control-2.mp4:8.999999ms:304bytes expected288", "control-2.mp4:9ms:flush[4.5ms],expected9ms", "control-2.mp4:9.000001ms:flush[4.5ms],expected9.125ms", "control-2.mp4:9.000001ms:288bytes expected284", "control-2.mp4:13.499999ms:flush[4.5ms],expected13.5ms", "control-2.mp4:13.499999ms:160bytes expected144", "control-2.mp4:13.500001ms:flush[13.5ms],expected13.625ms", "control-2.mp4:13.500001ms:144bytes expected140", "control-2.mp4:15.749999ms:flush[13.5ms],expected15.75ms", "control-2.mp4:15.749999ms:80bytes expected72", "control-2.mp4:15.75ms:flush[13.5ms],expected15.75ms", "control-2.mp4:15.75ms:80bytes expected72", "control-2.mp4:15.750001ms:flush[13.5ms],expected15.875ms", "control-2.mp4:15.750001ms:80bytes expected68", "control-2.mp4:17.999999ms:flush[13.5ms],expected18ms", "control-2.mp4:17.999999ms:16bytes expected0", "regular-2000-edits.mp4:1ns:flush[0ns],expected125µs", "regular-2000-edits.mp4:1ns:2464bytes expected2460", "regular-2000-edits.mp4:125.001µs:flush[0ns],expected250µs", "regular-2000-edits.mp4:125.001µs:2464bytes expected2456", "regular-2000-edits.mp4:999.999µs:flush[500µs],expected1ms", "regular-2000-edits.mp4:999.999µs:2448bytes expected2432", "regular-2000-edits.mp4:1.000001ms:flush[1ms],expected1.125ms", "regular-2000-edits.mp4:1.000001ms:2432bytes expected2428", "regular-2000-edits.mp4:1.999999ms:flush[1.5ms],expected2ms", "regular-2000-edits.mp4:1.999999ms:2416bytes expected2400", "regular-2000-edits.mp4:2.000001ms:flush[2ms],expected2.125ms", "regular-2000-edits.mp4:2.000001ms:2400bytes expected2396", "regular-2000-edits.mp4:3.999999ms:flush[3.5ms],expected4ms", "regular-2000-edits.mp4:3.999999ms:2352bytes expected2336", "regular-2000-edits.mp4:4.000001ms:flush[4ms],expected4.125ms", "regular-2000-edits.mp4:4.000001ms:2336bytes expected2332", "regular-2000-edits.mp4:5.999999ms:flush[5.5ms],expected6ms", "regular-2000-edits.mp4:5.999999ms:2288bytes expected2272", "regular-2000-edits.mp4:6.000001ms:flush[6ms],expected6.125ms", "regular-2000-edits.mp4:6.000001ms:2272bytes expected2268", "regular-2000-edits.mp4:13.999999ms:flush[13.5ms],expected14ms", "regular-2000-edits.mp4:13.999999ms:2032bytes expected2016", "regular-2000-edits.mp4:14.000001ms:flush[14ms],expected14.125ms", "regular-2000-edits.mp4:14.000001ms:2016bytes expected2012", "regular-2000-edits.mp4:21.999999ms:flush[21.5ms],expected22ms", "regular-2000-edits.mp4:21.999999ms:1776bytes expected1760", "regular-2000-edits.mp4:22.000001ms:flush[22ms],expected22.125ms", "regular-2000-edits.mp4:22.000001ms:1760bytes expected1756", "regular-2000-edits.mp4:25.999999ms:flush[25.5ms],expected26ms", "regular-2000-edits.mp4:25.999999ms:1648bytes expected1632", "regular-2000-edits.mp4:26.000001ms:flush[26ms],expected26.125ms", "regular-2000-edits.mp4:26.000001ms:1632bytes expected1628", "regular-2000-edits.mp4:29.999999ms:flush[29.5ms],expected30ms", "regular-2000-edits.mp4:29.999999ms:1520bytes expected1504", "regular-2000-edits.mp4:30.000001ms:flush[30ms],expected30.0625ms", "regular-2000-edits.mp4:30.000001ms:1504bytes expected1496", "regular-2000-edits.mp4:30.999999ms:flush[30.5ms],expected31ms", "regular-2000-edits.mp4:30.999999ms:1440bytes expected1376", "regular-2000-edits.mp4:31.000001ms:flush[31ms],expected31.0625ms", "regular-2000-edits.mp4:31.000001ms:1376bytes expected1368", "regular-2000-edits.mp4:31.999999ms:flush[31.5ms],expected32ms", "regular-2000-edits.mp4:31.999999ms:1312bytes expected1248", "regular-2000-edits.mp4:32.000001ms:flush[32ms],expected32.125ms", "regular-2000-edits.mp4:32.000001ms:1248bytes expected1244", "regular-2000-edits.mp4:33.499999ms:flush[33ms],expected33.5ms", "regular-2000-edits.mp4:33.499999ms:1216bytes expected1200", "regular-2000-edits.mp4:33.500001ms:flush[33.5ms],expected33.625ms", "regular-2000-edits.mp4:33.500001ms:1200bytes expected1196", "regular-2000-edits.mp4:34.999999ms:flush[34.5ms],expected35ms", "regular-2000-edits.mp4:34.999999ms:1168bytes expected1152", "regular-2000-edits.mp4:35.000001ms:flush[35ms],expected35.125ms", "regular-2000-edits.mp4:35.000001ms:1152bytes expected1148", "regular-2000-edits.mp4:36.999999ms:flush[36.5ms],expected37ms", "regular-2000-edits.mp4:36.999999ms:1104bytes expected1088", "regular-2000-edits.mp4:37.000001ms:flush[37ms],expected37.125ms", "regular-2000-edits.mp4:37.000001ms:1088bytes expected1084", "regular-2000-edits.mp4:38.999999ms:flush[38.5ms],expected39ms", "regular-2000-edits.mp4:38.999999ms:1040bytes expected1024", "regular-2000-edits.mp4:39.000001ms:flush[39ms],expected39.125ms", "regular-2000-edits.mp4:39.000001ms:1024bytes expected1020", "regular-2000-edits.mp4:46.999999ms:flush[46.5ms],expected47ms", "regular-2000-edits.mp4:46.999999ms:784bytes expected768", "regular-2000-edits.mp4:47.000001ms:flush[47ms],expected47.125ms", "regular-2000-edits.mp4:47.000001ms:768bytes expected764", "regular-2000-edits.mp4:54.999999ms:flush[54.5ms],expected55ms", "regular-2000-edits.mp4:54.999999ms:528bytes expected512", "regular-2000-edits.mp4:55.000001ms:flush[55ms],expected55.125ms", "regular-2000-edits.mp4:55.000001ms:512bytes expected508", "regular-2000-edits.mp4:58.999999ms:flush[58.5ms],expected59ms", "regular-2000-edits.mp4:58.999999ms:400bytes expected384", "regular-2000-edits.mp4:59.000001ms:flush[59ms],expected59.125ms", "regular-2000-edits.mp4:59.000001ms:384bytes expected380", "regular-2000-edits.mp4:62.999999ms:flush[62.5ms],expected63ms", "regular-2000-edits.mp4:62.999999ms:272bytes expected256", "regular-2000-edits.mp4:63.000001ms:flush[63ms],expected63.0625ms", "regular-2000-edits.mp4:63.000001ms:256bytes expected248", "regular-2000-edits.mp4:63.999999ms:flush[63.5ms],expected64ms", "regular-2000-edits.mp4:63.999999ms:192bytes expected128", "regular-2000-edits.mp4:64.000001ms:flush[64ms],expected64.0625ms", "regular-2000-edits.mp4:64.000001ms:128bytes expected120", "regular-2000-edits.mp4:64.999999ms:flush[64.5ms],expected65ms", "regular-2000-edits.mp4:64.999999ms:64bytes expected0", "fragmented-2000-edits.mp4:1ns:flush[0ns],expected125µs", "fragmented-2000-edits.mp4:1ns:2464bytes expected2460", "fragmented-2000-edits.mp4:125.001µs:flush[0ns],expected250µs", "fragmented-2000-edits.mp4:125.001µs:2464bytes expected2456", "fragmented-2000-edits.mp4:999.999µs:flush[500µs],expected1ms", "fragmented-2000-edits.mp4:999.999µs:2448bytes expected2432", "fragmented-2000-edits.mp4:1.000001ms:flush[1ms],expected1.125ms", "fragmented-2000-edits.mp4:1.000001ms:2432bytes expected2428", "fragmented-2000-edits.mp4:1.999999ms:flush[1.5ms],expected2ms", "fragmented-2000-edits.mp4:1.999999ms:2416bytes expected2400", "fragmented-2000-edits.mp4:2.000001ms:flush[2ms],expected2.125ms", "fragmented-2000-edits.mp4:2.000001ms:2400bytes expected2396", "fragmented-2000-edits.mp4:3.999999ms:flush[3.5ms],expected4ms", "fragmented-2000-edits.mp4:3.999999ms:2352bytes expected2336", "fragmented-2000-edits.mp4:4.000001ms:flush[4ms],expected4.125ms", "fragmented-2000-edits.mp4:4.000001ms:2336bytes expected2332", "fragmented-2000-edits.mp4:5.999999ms:flush[5.5ms],expected6ms", "fragmented-2000-edits.mp4:5.999999ms:2288bytes expected2272", "fragmented-2000-edits.mp4:6.000001ms:flush[6ms],expected6.125ms", "fragmented-2000-edits.mp4:6.000001ms:2272bytes expected2268", "fragmented-2000-edits.mp4:13.999999ms:flush[13.5ms],expected14ms", "fragmented-2000-edits.mp4:13.999999ms:2032bytes expected2016", "fragmented-2000-edits.mp4:14.000001ms:flush[14ms],expected14.125ms", "fragmented-2000-edits.mp4:14.000001ms:2016bytes expected2012", "fragmented-2000-edits.mp4:21.999999ms:flush[21.5ms],expected22ms", "fragmented-2000-edits.mp4:21.999999ms:1776bytes expected1760", "fragmented-2000-edits.mp4:22.000001ms:flush[22ms],expected22.125ms", "fragmented-2000-edits.mp4:22.000001ms:1760bytes expected1756", "fragmented-2000-edits.mp4:25.999999ms:flush[25.5ms],expected26ms", "fragmented-2000-edits.mp4:25.999999ms:1648bytes expected1632", "fragmented-2000-edits.mp4:26.000001ms:flush[26ms],expected26.125ms", "fragmented-2000-edits.mp4:26.000001ms:1632bytes expected1628", "fragmented-2000-edits.mp4:29.999999ms:flush[29.5ms],expected30ms", "fragmented-2000-edits.mp4:29.999999ms:1520bytes expected1504", "fragmented-2000-edits.mp4:30.000001ms:flush[30ms],expected30.0625ms", "fragmented-2000-edits.mp4:30.000001ms:1504bytes expected1496", "fragmented-2000-edits.mp4:30.999999ms:flush[30.5ms],expected31ms", "fragmented-2000-edits.mp4:30.999999ms:1440bytes expected1376", "fragmented-2000-edits.mp4:31.000001ms:flush[31ms],expected31.0625ms", "fragmented-2000-edits.mp4:31.000001ms:1376bytes expected1368", "fragmented-2000-edits.mp4:31.999999ms:flush[31.5ms],expected32ms", "fragmented-2000-edits.mp4:31.999999ms:1312bytes expected1248", "fragmented-2000-edits.mp4:32.000001ms:flush[32ms],expected32.125ms", "fragmented-2000-edits.mp4:32.000001ms:1248bytes expected1244", "fragmented-2000-edits.mp4:33.499999ms:flush[33ms],expected33.5ms", "fragmented-2000-edits.mp4:33.499999ms:1216bytes expected1200", "fragmented-2000-edits.mp4:33.500001ms:flush[33.5ms],expected33.625ms", "fragmented-2000-edits.mp4:33.500001ms:1200bytes expected1196", "fragmented-2000-edits.mp4:34.999999ms:flush[34.5ms],expected35ms", "fragmented-2000-edits.mp4:34.999999ms:1168bytes expected1152", "fragmented-2000-edits.mp4:35.000001ms:flush[35ms],expected35.125ms", "fragmented-2000-edits.mp4:35.000001ms:1152bytes expected1148", "fragmented-2000-edits.mp4:36.999999ms:flush[36.5ms],expected37ms", "fragmented-2000-edits.mp4:36.999999ms:1104bytes expected1088", "fragmented-2000-edits.mp4:37.000001ms:flush[37ms],expected37.125ms", "fragmented-2000-edits.mp4:37.000001ms:1088bytes expected1084", "fragmented-2000-edits.mp4:38.999999ms:flush[38.5ms],expected39ms", "fragmented-2000-edits.mp4:38.999999ms:1040bytes expected1024", "fragmented-2000-edits.mp4:39.000001ms:flush[39ms],expected39.125ms", "fragmented-2000-edits.mp4:39.000001ms:1024bytes expected1020", "fragmented-2000-edits.mp4:46.999999ms:flush[46.5ms],expected47ms", "fragmented-2000-edits.mp4:46.999999ms:784bytes expected768", "fragmented-2000-edits.mp4:47.000001ms:flush[47ms],expected47.125ms", "fragmented-2000-edits.mp4:47.000001ms:768bytes expected764", "fragmented-2000-edits.mp4:54.999999ms:flush[54.5ms],expected55ms", "fragmented-2000-edits.mp4:54.999999ms:528bytes expected512", "fragmented-2000-edits.mp4:55.000001ms:flush[55ms],expected55.125ms", "fragmented-2000-edits.mp4:55.000001ms:512bytes expected508", "fragmented-2000-edits.mp4:58.999999ms:flush[58.5ms],expected59ms", "fragmented-2000-edits.mp4:58.999999ms:400bytes expected384", "fragmented-2000-edits.mp4:59.000001ms:flush[59ms],expected59.125ms", "fragmented-2000-edits.mp4:59.000001ms:384bytes expected380", "fragmented-2000-edits.mp4:62.999999ms:flush[62.5ms],expected63ms", "fragmented-2000-edits.mp4:62.999999ms:272bytes expected256", "fragmented-2000-edits.mp4:63.000001ms:flush[63ms],expected63.0625ms", "fragmented-2000-edits.mp4:63.000001ms:256bytes expected248", "fragmented-2000-edits.mp4:63.999999ms:flush[63.5ms],expected64ms", "fragmented-2000-edits.mp4:63.999999ms:192bytes expected128", "fragmented-2000-edits.mp4:64.000001ms:flush[64ms],expected64.0625ms", "fragmented-2000-edits.mp4:64.000001ms:128bytes expected120", "fragmented-2000-edits.mp4:64.999999ms:flush[64.5ms],expected65ms", "fragmented-2000-edits.mp4:64.999999ms:64bytes expected0", "third-2000-edits.mp4:1ns:flush[0ns],expected125µs", "third-2000-edits.mp4:1ns:2464bytes expected2460", "third-2000-edits.mp4:125.001µs:flush[0ns],expected250µs", "third-2000-edits.mp4:125.001µs:2464bytes expected2456", "third-2000-edits.mp4:999.999µs:flush[500µs],expected1ms", "third-2000-edits.mp4:999.999µs:2448bytes expected2432", "third-2000-edits.mp4:1.000001ms:flush[1ms],expected1.125ms", "third-2000-edits.mp4:1.000001ms:2432bytes expected2428", "third-2000-edits.mp4:1.999999ms:flush[1.5ms],expected2ms", "third-2000-edits.mp4:1.999999ms:2416bytes expected2400", "third-2000-edits.mp4:2.000001ms:flush[2ms],expected2.125ms", "third-2000-edits.mp4:2.000001ms:2400bytes expected2396", "third-2000-edits.mp4:3.999999ms:flush[3.5ms],expected4ms", "third-2000-edits.mp4:3.999999ms:2352bytes expected2336", "third-2000-edits.mp4:4.000001ms:flush[4ms],expected4.125ms", "third-2000-edits.mp4:4.000001ms:2336bytes expected2332", "third-2000-edits.mp4:5.999999ms:flush[5.5ms],expected6ms", "third-2000-edits.mp4:5.999999ms:2288bytes expected2272", "third-2000-edits.mp4:6.000001ms:flush[6ms],expected6.125ms", "third-2000-edits.mp4:6.000001ms:2272bytes expected2268", "third-2000-edits.mp4:13.999999ms:flush[13.5ms],expected14ms", "third-2000-edits.mp4:13.999999ms:2032bytes expected2016", "third-2000-edits.mp4:14.000001ms:flush[14ms],expected14.125ms", "third-2000-edits.mp4:14.000001ms:2016bytes expected2012", "third-2000-edits.mp4:21.999999ms:flush[21.5ms],expected22ms", "third-2000-edits.mp4:21.999999ms:1776bytes expected1760", "third-2000-edits.mp4:22.000001ms:flush[22ms],expected22.125ms", "third-2000-edits.mp4:22.000001ms:1760bytes expected1756", "third-2000-edits.mp4:25.999999ms:flush[25.5ms],expected26ms", "third-2000-edits.mp4:25.999999ms:1648bytes expected1632", "third-2000-edits.mp4:26.000001ms:flush[26ms],expected26.125ms", "third-2000-edits.mp4:26.000001ms:1632bytes expected1628", "third-2000-edits.mp4:29.999999ms:flush[29.5ms],expected30ms", "third-2000-edits.mp4:29.999999ms:1520bytes expected1504", "third-2000-edits.mp4:30.000001ms:flush[30ms],expected30.0625ms", "third-2000-edits.mp4:30.000001ms:1504bytes expected1496", "third-2000-edits.mp4:30.999999ms:flush[30.5ms],expected31ms", "third-2000-edits.mp4:30.999999ms:1440bytes expected1376", "third-2000-edits.mp4:31.000001ms:flush[31ms],expected31.0625ms", "third-2000-edits.mp4:31.000001ms:1376bytes expected1368", "third-2000-edits.mp4:31.999999ms:flush[31.5ms],expected32ms", "third-2000-edits.mp4:31.999999ms:1312bytes expected1248", "third-2000-edits.mp4:32.000001ms:flush[32ms],expected32.125ms", "third-2000-edits.mp4:32.000001ms:1248bytes expected1244", "third-2000-edits.mp4:33.499999ms:flush[33ms],expected33.5ms", "third-2000-edits.mp4:33.499999ms:1216bytes expected1200", "third-2000-edits.mp4:33.500001ms:flush[33.5ms],expected33.625ms", "third-2000-edits.mp4:33.500001ms:1200bytes expected1196", "third-2000-edits.mp4:34.999999ms:flush[34.5ms],expected35ms", "third-2000-edits.mp4:34.999999ms:1168bytes expected1152", "third-2000-edits.mp4:35.000001ms:flush[35ms],expected35.125ms", "third-2000-edits.mp4:35.000001ms:1152bytes expected1148", "third-2000-edits.mp4:36.999999ms:flush[36.5ms],expected37ms", "third-2000-edits.mp4:36.999999ms:1104bytes expected1088", "third-2000-edits.mp4:37.000001ms:flush[37ms],expected37.125ms", "third-2000-edits.mp4:37.000001ms:1088bytes expected1084", "third-2000-edits.mp4:38.999999ms:flush[38.5ms],expected39ms", "third-2000-edits.mp4:38.999999ms:1040bytes expected1024", "third-2000-edits.mp4:39.000001ms:flush[39ms],expected39.125ms", "third-2000-edits.mp4:39.000001ms:1024bytes expected1020", "third-2000-edits.mp4:46.999999ms:flush[46.5ms],expected47ms", "third-2000-edits.mp4:46.999999ms:784bytes expected768", "third-2000-edits.mp4:47.000001ms:flush[47ms],expected47.125ms", "third-2000-edits.mp4:47.000001ms:768bytes expected764", "third-2000-edits.mp4:54.999999ms:flush[54.5ms],expected55ms", "third-2000-edits.mp4:54.999999ms:528bytes expected512", "third-2000-edits.mp4:55.000001ms:flush[55ms],expected55.125ms", "third-2000-edits.mp4:55.000001ms:512bytes expected508", "third-2000-edits.mp4:58.999999ms:flush[58.5ms],expected59ms", "third-2000-edits.mp4:58.999999ms:400bytes expected384", "third-2000-edits.mp4:59.000001ms:flush[59ms],expected59.125ms", "third-2000-edits.mp4:59.000001ms:384bytes expected380", "third-2000-edits.mp4:62.999999ms:flush[62.5ms],expected63ms", "third-2000-edits.mp4:62.999999ms:272bytes expected256", "third-2000-edits.mp4:63.000001ms:flush[63ms],expected63.0625ms", "third-2000-edits.mp4:63.000001ms:256bytes expected248", "third-2000-edits.mp4:63.999999ms:flush[63.5ms],expected64ms", "third-2000-edits.mp4:63.999999ms:192bytes expected128", "third-2000-edits.mp4:64.000001ms:flush[64ms],expected64.0625ms", "third-2000-edits.mp4:64.000001ms:128bytes expected120", "third-2000-edits.mp4:64.999999ms:flush[64.5ms],expected65ms", "third-2000-edits.mp4:64.999999ms:64bytes expected0", "regular-48000-edits.mp4:1ns:flush[0ns],expected125µs", "regular-48000-edits.mp4:1ns:2464bytes expected2460", "regular-48000-edits.mp4:125.001µs:flush[125µs],expected250µs", "regular-48000-edits.mp4:125.001µs:2460bytes expected2456", "regular-48000-edits.mp4:999.999µs:flush[979.166µs],expected1ms", "regular-48000-edits.mp4:1.000001ms:flush[1ms],expected1.125ms", "regular-48000-edits.mp4:1.000001ms:2432bytes expected2428", "regular-48000-edits.mp4:1.999999ms:flush[1.979166ms],expected2ms", "regular-48000-edits.mp4:2.000001ms:flush[2ms],expected2.125ms", "regular-48000-edits.mp4:2.000001ms:2400bytes expected2396", "regular-48000-edits.mp4:3.999999ms:flush[3.979166ms],expected4ms", "regular-48000-edits.mp4:4.000001ms:flush[4ms],expected4.125ms", "regular-48000-edits.mp4:4.000001ms:2336bytes expected2332", "regular-48000-edits.mp4:5.999999ms:flush[5.979166ms],expected6ms", "regular-48000-edits.mp4:6.000001ms:flush[6ms],expected6.125ms", "regular-48000-edits.mp4:6.000001ms:2272bytes expected2268", "regular-48000-edits.mp4:13.999999ms:flush[13.979166ms],expected14ms", "regular-48000-edits.mp4:14.000001ms:flush[14ms],expected14.125ms", "regular-48000-edits.mp4:14.000001ms:2016bytes expected2012", "regular-48000-edits.mp4:21.999999ms:flush[21.979166ms],expected22ms", "regular-48000-edits.mp4:22.000001ms:flush[22ms],expected22.125ms", "regular-48000-edits.mp4:22.000001ms:1760bytes expected1756", "regular-48000-edits.mp4:25.999999ms:flush[25.979166ms],expected26ms", "regular-48000-edits.mp4:26.000001ms:flush[26ms],expected26.125ms", "regular-48000-edits.mp4:26.000001ms:1632bytes expected1628", "regular-48000-edits.mp4:29.999999ms:flush[29.979166ms],expected30ms", "regular-48000-edits.mp4:30.000001ms:flush[30ms],expected30.0625ms", "regular-48000-edits.mp4:30.000001ms:1504bytes expected1496", "regular-48000-edits.mp4:30.999999ms:flush[30.979166ms],expected31ms", "regular-48000-edits.mp4:31.000001ms:flush[31ms],expected31.0625ms", "regular-48000-edits.mp4:31.000001ms:1376bytes expected1368", "regular-48000-edits.mp4:31.999999ms:flush[31.979166ms],expected32ms", "regular-48000-edits.mp4:32.000001ms:flush[32ms],expected32.125ms", "regular-48000-edits.mp4:32.000001ms:1248bytes expected1244", "regular-48000-edits.mp4:33.499999ms:flush[33.479166ms],expected33.5ms", "regular-48000-edits.mp4:33.500001ms:flush[33.5ms],expected33.625ms", "regular-48000-edits.mp4:33.500001ms:1200bytes expected1196", "regular-48000-edits.mp4:34.999999ms:flush[34.979166ms],expected35ms", "regular-48000-edits.mp4:35.000001ms:flush[35ms],expected35.125ms", "regular-48000-edits.mp4:35.000001ms:1152bytes expected1148", "regular-48000-edits.mp4:36.999999ms:flush[36.979166ms],expected37ms", "regular-48000-edits.mp4:37.000001ms:flush[37ms],expected37.125ms", "regular-48000-edits.mp4:37.000001ms:1088bytes expected1084", "regular-48000-edits.mp4:38.999999ms:flush[38.979166ms],expected39ms", "regular-48000-edits.mp4:39.000001ms:flush[39ms],expected39.125ms", "regular-48000-edits.mp4:39.000001ms:1024bytes expected1020", "regular-48000-edits.mp4:46.999999ms:flush[46.979166ms],expected47ms", "regular-48000-edits.mp4:47.000001ms:flush[47ms],expected47.125ms", "regular-48000-edits.mp4:47.000001ms:768bytes expected764", "regular-48000-edits.mp4:54.999999ms:flush[54.979166ms],expected55ms", "regular-48000-edits.mp4:55.000001ms:flush[55ms],expected55.125ms", "regular-48000-edits.mp4:55.000001ms:512bytes expected508", "regular-48000-edits.mp4:58.999999ms:flush[58.979166ms],expected59ms", "regular-48000-edits.mp4:59.000001ms:flush[59ms],expected59.125ms", "regular-48000-edits.mp4:59.000001ms:384bytes expected380", "regular-48000-edits.mp4:62.999999ms:flush[62.979166ms],expected63ms", "regular-48000-edits.mp4:63.000001ms:flush[63ms],expected63.0625ms", "regular-48000-edits.mp4:63.000001ms:256bytes expected248", "regular-48000-edits.mp4:63.999999ms:flush[63.979166ms],expected64ms", "regular-48000-edits.mp4:64.000001ms:flush[64ms],expected64.0625ms", "regular-48000-edits.mp4:64.000001ms:128bytes expected120", "regular-48000-edits.mp4:64.999999ms:flush[64.979166ms],expected65ms", "regular-48000-edits.mp4:EOF64.979166ms expected65ms", "fragmented-48000-edits.mp4:1ns:flush[0ns],expected125µs", "fragmented-48000-edits.mp4:1ns:2464bytes expected2460", "fragmented-48000-edits.mp4:125.001µs:flush[125µs],expected250µs", "fragmented-48000-edits.mp4:125.001µs:2460bytes expected2456", "fragmented-48000-edits.mp4:999.999µs:flush[979.166µs],expected1ms", "fragmented-48000-edits.mp4:1.000001ms:flush[1ms],expected1.125ms", "fragmented-48000-edits.mp4:1.000001ms:2432bytes expected2428", "fragmented-48000-edits.mp4:1.999999ms:flush[1.979166ms],expected2ms", "fragmented-48000-edits.mp4:2.000001ms:flush[2ms],expected2.125ms", "fragmented-48000-edits.mp4:2.000001ms:2400bytes expected2396", "fragmented-48000-edits.mp4:3.999999ms:flush[3.979166ms],expected4ms", "fragmented-48000-edits.mp4:4.000001ms:flush[4ms],expected4.125ms", "fragmented-48000-edits.mp4:4.000001ms:2336bytes expected2332", "fragmented-48000-edits.mp4:5.999999ms:flush[5.979166ms],expected6ms", "fragmented-48000-edits.mp4:6.000001ms:flush[6ms],expected6.125ms", "fragmented-48000-edits.mp4:6.000001ms:2272bytes expected2268", "fragmented-48000-edits.mp4:13.999999ms:flush[13.979166ms],expected14ms", "fragmented-48000-edits.mp4:14.000001ms:flush[14ms],expected14.125ms", "fragmented-48000-edits.mp4:14.000001ms:2016bytes expected2012", "fragmented-48000-edits.mp4:21.999999ms:flush[21.979166ms],expected22ms", "fragmented-48000-edits.mp4:22.000001ms:flush[22ms],expected22.125ms", "fragmented-48000-edits.mp4:22.000001ms:1760bytes expected1756", "fragmented-48000-edits.mp4:25.999999ms:flush[25.979166ms],expected26ms", "fragmented-48000-edits.mp4:26.000001ms:flush[26ms],expected26.125ms", "fragmented-48000-edits.mp4:26.000001ms:1632bytes expected1628", "fragmented-48000-edits.mp4:29.999999ms:flush[29.979166ms],expected30ms", "fragmented-48000-edits.mp4:30.000001ms:flush[30ms],expected30.0625ms", "fragmented-48000-edits.mp4:30.000001ms:1504bytes expected1496", "fragmented-48000-edits.mp4:30.999999ms:flush[30.979166ms],expected31ms", "fragmented-48000-edits.mp4:31.000001ms:flush[31ms],expected31.0625ms", "fragmented-48000-edits.mp4:31.000001ms:1376bytes expected1368", "fragmented-48000-edits.mp4:31.999999ms:flush[31.979166ms],expected32ms", "fragmented-48000-edits.mp4:32.000001ms:flush[32ms],expected32.125ms", "fragmented-48000-edits.mp4:32.000001ms:1248bytes expected1244", "fragmented-48000-edits.mp4:33.499999ms:flush[33.479166ms],expected33.5ms", "fragmented-48000-edits.mp4:33.500001ms:flush[33.5ms],expected33.625ms", "fragmented-48000-edits.mp4:33.500001ms:1200bytes expected1196", "fragmented-48000-edits.mp4:34.999999ms:flush[34.979166ms],expected35ms", "fragmented-48000-edits.mp4:35.000001ms:flush[35ms],expected35.125ms", "fragmented-48000-edits.mp4:35.000001ms:1152bytes expected1148", "fragmented-48000-edits.mp4:36.999999ms:flush[36.979166ms],expected37ms", "fragmented-48000-edits.mp4:37.000001ms:flush[37ms],expected37.125ms", "fragmented-48000-edits.mp4:37.000001ms:1088bytes expected1084", "fragmented-48000-edits.mp4:38.999999ms:flush[38.979166ms],expected39ms", "fragmented-48000-edits.mp4:39.000001ms:flush[39ms],expected39.125ms", "fragmented-48000-edits.mp4:39.000001ms:1024bytes expected1020", "fragmented-48000-edits.mp4:46.999999ms:flush[46.979166ms],expected47ms", "fragmented-48000-edits.mp4:47.000001ms:flush[47ms],expected47.125ms", "fragmented-48000-edits.mp4:47.000001ms:768bytes expected764", "fragmented-48000-edits.mp4:54.999999ms:flush[54.979166ms],expected55ms", "fragmented-48000-edits.mp4:55.000001ms:flush[55ms],expected55.125ms", "fragmented-48000-edits.mp4:55.000001ms:512bytes expected508", "fragmented-48000-edits.mp4:58.999999ms:flush[58.979166ms],expected59ms", "fragmented-48000-edits.mp4:59.000001ms:flush[59ms],expected59.125ms", "fragmented-48000-edits.mp4:59.000001ms:384bytes expected380", "fragmented-48000-edits.mp4:62.999999ms:flush[62.979166ms],expected63ms", "fragmented-48000-edits.mp4:63.000001ms:flush[63ms],expected63.0625ms", "fragmented-48000-edits.mp4:63.000001ms:256bytes expected248", "fragmented-48000-edits.mp4:63.999999ms:flush[63.979166ms],expected64ms", "fragmented-48000-edits.mp4:64.000001ms:flush[64ms],expected64.0625ms", "fragmented-48000-edits.mp4:64.000001ms:128bytes expected120", "fragmented-48000-edits.mp4:64.999999ms:flush[64.979166ms],expected65ms", "fragmented-48000-edits.mp4:EOF64.979166ms expected65ms", "third-48000-edits.mp4:1ns:flush[0ns],expected125µs", "third-48000-edits.mp4:1ns:2464bytes expected2460", "third-48000-edits.mp4:125.001µs:flush[125µs],expected250µs", "third-48000-edits.mp4:125.001µs:2460bytes expected2456", "third-48000-edits.mp4:999.999µs:flush[979.166µs],expected1ms", "third-48000-edits.mp4:1.000001ms:flush[1ms],expected1.125ms", "third-48000-edits.mp4:1.000001ms:2432bytes expected2428", "third-48000-edits.mp4:1.999999ms:flush[1.979166ms],expected2ms", "third-48000-edits.mp4:2.000001ms:flush[2ms],expected2.125ms", "third-48000-edits.mp4:2.000001ms:2400bytes expected2396", "third-48000-edits.mp4:3.999999ms:flush[3.979166ms],expected4ms", "third-48000-edits.mp4:4.000001ms:flush[4ms],expected4.125ms", "third-48000-edits.mp4:4.000001ms:2336bytes expected2332", "third-48000-edits.mp4:5.999999ms:flush[5.979166ms],expected6ms", "third-48000-edits.mp4:6.000001ms:flush[6ms],expected6.125ms", "third-48000-edits.mp4:6.000001ms:2272bytes expected2268", "third-48000-edits.mp4:13.999999ms:flush[13.979166ms],expected14ms", "third-48000-edits.mp4:14.000001ms:flush[14ms],expected14.125ms", "third-48000-edits.mp4:14.000001ms:2016bytes expected2012", "third-48000-edits.mp4:21.999999ms:flush[21.979166ms],expected22ms", "third-48000-edits.mp4:22.000001ms:flush[22ms],expected22.125ms", "third-48000-edits.mp4:22.000001ms:1760bytes expected1756", "third-48000-edits.mp4:25.999999ms:flush[25.979166ms],expected26ms", "third-48000-edits.mp4:26.000001ms:flush[26ms],expected26.125ms", "third-48000-edits.mp4:26.000001ms:1632bytes expected1628", "third-48000-edits.mp4:29.999999ms:flush[29.979166ms],expected30ms", "third-48000-edits.mp4:30.000001ms:flush[30ms],expected30.0625ms", "third-48000-edits.mp4:30.000001ms:1504bytes expected1496", "third-48000-edits.mp4:30.999999ms:flush[30.979166ms],expected31ms", "third-48000-edits.mp4:31.000001ms:flush[31ms],expected31.0625ms", "third-48000-edits.mp4:31.000001ms:1376bytes expected1368", "third-48000-edits.mp4:31.999999ms:flush[31.979166ms],expected32ms", "third-48000-edits.mp4:32.000001ms:flush[32ms],expected32.125ms", "third-48000-edits.mp4:32.000001ms:1248bytes expected1244", "third-48000-edits.mp4:33.499999ms:flush[33.479166ms],expected33.5ms", "third-48000-edits.mp4:33.500001ms:flush[33.5ms],expected33.625ms", "third-48000-edits.mp4:33.500001ms:1200bytes expected1196", "third-48000-edits.mp4:34.999999ms:flush[34.979166ms],expected35ms", "third-48000-edits.mp4:35.000001ms:flush[35ms],expected35.125ms", "third-48000-edits.mp4:35.000001ms:1152bytes expected1148", "third-48000-edits.mp4:36.999999ms:flush[36.979166ms],expected37ms", "third-48000-edits.mp4:37.000001ms:flush[37ms],expected37.125ms", "third-48000-edits.mp4:37.000001ms:1088bytes expected1084", "third-48000-edits.mp4:38.999999ms:flush[38.979166ms],expected39ms", "third-48000-edits.mp4:39.000001ms:flush[39ms],expected39.125ms", "third-48000-edits.mp4:39.000001ms:1024bytes expected1020", "third-48000-edits.mp4:46.999999ms:flush[46.979166ms],expected47ms", "third-48000-edits.mp4:47.000001ms:flush[47ms],expected47.125ms", "third-48000-edits.mp4:47.000001ms:768bytes expected764", "third-48000-edits.mp4:54.999999ms:flush[54.979166ms],expected55ms", "third-48000-edits.mp4:55.000001ms:flush[55ms],expected55.125ms", "third-48000-edits.mp4:55.000001ms:512bytes expected508", "third-48000-edits.mp4:58.999999ms:flush[58.979166ms],expected59ms", "third-48000-edits.mp4:59.000001ms:flush[59ms],expected59.125ms", "third-48000-edits.mp4:59.000001ms:384bytes expected380", "third-48000-edits.mp4:62.999999ms:flush[62.979166ms],expected63ms", "third-48000-edits.mp4:63.000001ms:flush[63ms],expected63.0625ms", "third-48000-edits.mp4:63.000001ms:256bytes expected248", "third-48000-edits.mp4:63.999999ms:flush[63.979166ms],expected64ms", "third-48000-edits.mp4:64.000001ms:flush[64ms],expected64.0625ms", "third-48000-edits.mp4:64.000001ms:128bytes expected120", "third-48000-edits.mp4:64.999999ms:flush[64.979166ms],expected65ms", "third-48000-edits.mp4:EOF64.979166ms expected65ms", "ima4-native-8000.mp4:1ns:flush[0ns],expected125µs", "ima4-native-8000.mp4:1ns:1536bytes expected1532", "ima4-native-8000.mp4:125.001µs:flush[0ns],expected250µs", "ima4-native-8000.mp4:125.001µs:1532bytes expected1528", "ima4-native-8000.mp4:23.999999ms:flush[16ms],expected24ms", "ima4-native-8000.mp4:23.999999ms:772bytes expected768", "ima4-native-8000.mp4:24.000001ms:flush[24ms],expected24.125ms", "ima4-native-8000.mp4:24.000001ms:768bytes expected764", "ima4-native-8000.mp4:47.999999ms:flush[40ms],expected48ms", "ima4-native-8000.mp4:47.999999ms:4bytes expected0"]
+
+
+failures:
+    actual_worker_adpcm_flushes_at_the_native_sample
+    adpcm_duration_seek_preserves_exact_native_floor
+
+test result: FAILED. 2 passed; 2 failed; 0 ignored; 0 measured; 0 filtered out; finished in 42.95s
+
+error: test failed, to rerun pass `--test mp4_adpcm_subtick_seek`
+error: 1 target failed:
+    `--test mp4_adpcm_subtick_seek`
