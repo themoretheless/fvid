@@ -1,0 +1,10 @@
+{
+  "published_commit": "3285a04f6cf63e388a9467d72120afaff4b9a07b",
+  "remote": "https://github.com/themoretheless/fvid.git",
+  "verified_refs": [
+    "3285a04f6cf63e388a9467d72120afaff4b9a07b\trefs/heads/codex/deliver-fvid-20261029",
+    "3285a04f6cf63e388a9467d72120afaff4b9a07b\trefs/heads/main"
+  ],
+  "clean_worktree_at_verification": true,
+  "accepted_count": 528
+}
