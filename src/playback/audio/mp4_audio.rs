@@ -451,7 +451,7 @@ impl<R: Read + Seek> Mp4AudioReader<R> {
                 let frames=u128::from(sample.duration)*u128::from(rate);let scale=u128::from(self.track().timescale);
                 if scale==0 || frames%scale!=0 {return Err(invalid("MP4 AAC packet duration is not sample aligned"));}
                 i128::try_from(frames/scale).map_err(|_|invalid("MP4 seek frame count overflow"))?
-            }else if matches!(&setup.codec,b"ima4"|b"ms\0\x11"|b"ms\0\x02") {
+            }else if matches!(&setup.codec,b"ima4"|b"ms\0\x11"|b"ms\0\x02"|b"MAC3"|b"MAC6") {
                 let coded=fvid_media::owned_mp4_audio_packet_frames::frames(
                     &setup.codec,&setup.configuration,rate,setup.channels,setup.bit_depth,
                     sample.size as usize,None).map_err(|error|invalid(&error))?;
@@ -1537,6 +1537,9 @@ impl<R: Read + Seek + Send> crate::audio::AudioStream for Mp4AudioReader<R> {
         let exact_adpcm=self.track().sample_descriptions.iter().enumerate().all(|(i,header)|
             matches!(&header.codec,b"ima4"|b"ms\0\x11"|b"ms\0\x02")
                 || !clock_recovery::clock_description_used(&self.track().samples,i+1));
+        let exact_mace=self.track().sample_descriptions.iter().enumerate().all(|(i,header)|
+            matches!(&header.codec,b"MAC3"|b"MAC6")
+                || !clock_recovery::clock_description_used(&self.track().samples,i+1));
         if self.clock.is_some() || exact_aac_edits || exact_pcm_edits || exact_alac_edits
             || (self.variable_edits.is_some() && exact_adpcm) {
             let time=EditTime::new(target.as_nanos() as i128,1_000_000_000).and_then(|t|self.seek_exact(t,true));
@@ -1552,7 +1555,8 @@ impl<R: Read + Seek + Send> crate::audio::AudioStream for Mp4AudioReader<R> {
                         || !clock_recovery::clock_description_used(&self.track().samples,i+1)))
                 || (self.track().codec==*b"alac" && self.track().sample_descriptions.iter().enumerate().all(|(i,header)|
                     header.codec==*b"alac" || !clock_recovery::clock_description_used(&self.track().samples,i+1)))
-                || (matches!(&self.track().codec,b"ima4"|b"ms\0\x11"|b"ms\0\x02") && exact_adpcm)) {
+                || (matches!(&self.track().codec,b"ima4"|b"ms\0\x11"|b"ms\0\x02") && exact_adpcm)
+                || (matches!(&self.track().codec,b"MAC3"|b"MAC6") && exact_mace)) {
             let precise=(||->Result<i64> {
                 let end=EditTime::new(i128::try_from(self.presentation_end_ticks().unwrap_or(0))
                     .map_err(|_|invalid("MP4 PCM presentation endpoint overflow"))?,scale)?;

@@ -1,0 +1,7 @@
+# MACE native Duration seek follow-up
+
+Accepted zero-count FVID-0484 follow-up;counter511,next FVID-0512. Ten short authored MACE3/MACE6 mono/stereo controls cover grouped blocks,changing descriptions,fragmented/reordered/hybrid MP4. Eleven fixture files reproduce exactly without external tools or network. The original source passes full natural PCM/video and raw-origin history restoration but fails both precise native seek and actual-worker flush anchors. Each requested suffix is independently selected by integer native-grid arithmetic from complete natural playback,not another seek. Every output native timestamp and PCM byte is compared,including codec history across blocks. This is a seek oracle,not an independent absolute MACE decoder qualification.
+
+The candidate extends coded frame geometry to MACE and preserves rational Duration floors/anchors while retaining the original stateful preroll and decoder setup boundaries. All four focused tests pass. All seven qualification gates pass1004 test executions,two prior ignores;16 additional MACE subsystem tests pass;three repeated78-test runs pass on frozen source. Edited or mixed PCM/MACE timelines retain their prior routing. No new ID,speedup or physical-device claim.
+
+The inherited integration command does not contain the three older MACE suites. Qualification therefore also requires a separate16-test gate covering MACE transitions,composition runs and export;all16 join each repeated run. Their source hashes are frozen separately. No existing test expectations are changed.

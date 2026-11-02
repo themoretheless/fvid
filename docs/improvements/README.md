@@ -3511,3 +3511,7 @@ FVID-0484 now retains exact Duration floors in pure ALAC edit timelines. Fifteen
 ## Batch 516 — ADPCM native seek precision,zero new IDs
 
 FVID-0484 now retains exact Duration floors in pure ADPCM timelines. Sixteen authored movies verify bit-exact PCM/video,grouped blocks,rate changes,silence,repeated edits and actual-worker anchors. Invalid active MS predictors still refuse. Seven gates pass1000 test executions,two old ignores,and three repeated58-test runs pass. Counter511,next FVID-0512. See `batch-516-validation.json`.
+
+## Batch 517 — MACE native seek precision,zero new IDs
+
+FVID-0484 now retains precise Duration floors in unedited pure MACE3/MACE6 tracks without losing decoder history. Ten authored mono/stereo,grouped,changing-description and fragmented/reordered/hybrid movies compare exact PCM suffixes and native timestamps with full natural playback;actual-worker anchors and raw reseeks pass. Seven gates pass1004 test executions,two old ignores;16 additional MACE subsystem tests pass,and three repeated78-test runs pass. Counter511,next FVID-0512. See `batch-517-validation.json`.

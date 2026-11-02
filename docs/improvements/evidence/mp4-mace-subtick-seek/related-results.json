@@ -1,0 +1,19 @@
+{
+  "command": [
+    "cargo",
+    "test",
+    "--locked",
+    "--offline",
+    "--no-default-features",
+    "--features",
+    "player",
+    "--no-fail-fast",
+    "--test",
+    "mp4_mace_transitions",
+    "--test",
+    "mp4_mace_composition_runs",
+    "--test",
+    "mp4_mace_export"
+  ],
+  "exit_code": 0
+}

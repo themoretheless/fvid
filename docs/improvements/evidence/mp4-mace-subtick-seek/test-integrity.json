@@ -1,0 +1,11 @@
+{
+  "baseline_head": "ad59e9ca4622997ef69ed6a5510997a09fc15173",
+  "baseline_production_matches_commit": true,
+  "new_tests_and_generator_identical_before_after": true,
+  "existing_subsystem_tests_and_capture_unchanged": [
+    "tests/mp4_mace_transitions.rs",
+    "tests/mp4_mace_composition_runs.rs",
+    "tests/mp4_mace_export.rs",
+    "tests/support/audio_transitions.rs"
+  ]
+}

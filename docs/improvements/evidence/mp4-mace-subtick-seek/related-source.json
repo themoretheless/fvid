@@ -1,0 +1,8 @@
+{
+  "tests/mp4_mace_transitions.rs": "e1bc9bf14927896fb38b142686dea504b486457567018cefe903a5a92000ca7c",
+  "tests/mp4_mace_composition_runs.rs": "5fc89d7b32ac2a7873073c6b183d3f75fe09cf820d2bd0f8fa8fc02bae28ba6e",
+  "tests/mp4_mace_export.rs": "5e1450395d9e82d40b31c2483655aa5eba5443e08e1f6486ee7e30b705083f33",
+  "scripts/generate_mp4_mace_transitions.py": "43565e8323e067cca49a4d3e0e468ff4ffc085aea883aec80ba97a96a43a2da9",
+  "tests/support/audio_transitions.rs": "15581a6596247fe67c4da14a33b65538df26652b94b059b39aef56a9ca514b96",
+  "src/playback/audio/mp4_audio.rs": "3021c5da7880229ab81bc978d441211bb8453a528bff50f2c4d21216f9b76c59"
+}
