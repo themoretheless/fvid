@@ -1,0 +1,14 @@
+{
+  "source_commit": "b8462e33100607aa749770ee9c93f3a64b7b034f",
+  "verified_utc": "2026-11-02T21:43:46.614123+00:00",
+  "remote": "https://github.com/themoretheless/fvid.git",
+  "verified_refs": {
+    "refs/heads/codex/deliver-fvid-20261029": "b8462e33100607aa749770ee9c93f3a64b7b034f",
+    "refs/heads/main": "b8462e33100607aa749770ee9c93f3a64b7b034f"
+  },
+  "working_tree_clean": true,
+  "frozen_source_hashes_verified": 3185,
+  "accepted_count": 526,
+  "owned_test_artifacts_removed": true,
+  "regression_fixtures_and_evidence_preserved": true
+}
