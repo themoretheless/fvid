@@ -6,5 +6,10 @@
     "/private/tmp/fvid-aiff-precision-original-check-20261102.py"
   ],
   "regression_fixtures_and_evidence_retained": true,
-  "candidate_source_backup": "Retained until source commit,then remove after hash comparison."
+  "candidate_source_backup": {
+    "path": "/private/tmp/fvid-aiff-precision-baseline-source-20261102",
+    "removed": true,
+    "source_commit": "63a70bfdd49bfd8627c3787fe6d1e593a0a1db5f",
+    "committed_hashes_verified": 2
+  }
 }

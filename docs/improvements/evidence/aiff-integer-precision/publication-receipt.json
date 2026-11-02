@@ -1,0 +1,15 @@
+{
+  "source_commit": "63a70bfdd49bfd8627c3787fe6d1e593a0a1db5f",
+  "verified_remote_commit": "63a70bfdd49bfd8627c3787fe6d1e593a0a1db5f",
+  "published_refs": [
+    "refs/heads/main",
+    "refs/heads/codex/deliver-fvid-20261029"
+  ],
+  "accepted_id": "FVID-0515",
+  "accepted_total": 515,
+  "qualification_source_hashes_verified": 2693,
+  "owned_target_removed": true,
+  "owned_source_backup_removed": true,
+  "working_tree_clean_before_receipt": true,
+  "verified_at": "2026-11-02T15:58:35.497551+00:00"
+}
