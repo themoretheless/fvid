@@ -1,0 +1,17 @@
+{
+  "commit": "0265b5d33174c317aaa89ef5f5c963b3d9e07461",
+  "sha256": {
+    "src/playback/audio/mp4_audio.rs": "37329dd8162e258cc8d346ade8ade203555bd3775c0d28450df5f0a5e48d9877",
+    "tests/mp4_dolby_concealed_seek.rs": "12126641eb58326c962e004baa0ac34a2c699dd5c10ace60f38c39b784799e8c",
+    "scripts/generate_mp4_dolby_concealed_seek.py": "eb4262083c5470f61473f32f5b25e7d61543a12cde5c94fc9e567a25b4804285",
+    "tests/fixtures/playback-errors/mp4-dolby-concealed-seek/stereo-fragmented.mp4": "6b18a39240e8e52e5adeea4b34271e6b57468f14bf3710138637cebb86d26a71",
+    "tests/fixtures/playback-errors/mp4-dolby-concealed-seek/programme-hybrid.mp4": "152d2b796041fb9f8cd95fd1f7097b4eab557cd57e17306bcef4fbaee7e829a5",
+    "tests/fixtures/playback-errors/mp4-dolby-concealed-seek/stereo-hybrid.mp4": "dba3b7f46f02d25610d8dcf5a75b2087db176f237c5fde9fab11909ace0267c9",
+    "tests/fixtures/playback-errors/mp4-dolby-concealed-seek/stereo-control.mp4": "e071aada0161cee9997b7167be35351594424762c173b6a9a6ea1ae67e6cefcd",
+    "tests/fixtures/playback-errors/mp4-dolby-concealed-seek/stereo-classic.mp4": "72475a460fb53b2fa1feb90c7774d3b96fa6bd4854fabd21affbec2fe468b79a",
+    "tests/fixtures/playback-errors/mp4-dolby-concealed-seek/programme-classic.mp4": "10889a45cd62944ffdc39a5b101b29911ab375257198fd383ef5af03cedb5acf",
+    "tests/fixtures/playback-errors/mp4-dolby-concealed-seek/programme-control.mp4": "c3f116ffe964b304a9963edfd86a763e383786f1dd2ebc55725170725351db90",
+    "tests/fixtures/playback-errors/mp4-dolby-concealed-seek/manifest.json": "975a4506304cf860a343cb0a4c49edd8289f0f031078072a8febe2bdbdcbbba2",
+    "tests/fixtures/playback-errors/mp4-dolby-concealed-seek/programme-fragmented.mp4": "472959832b947db10fadc8b6039f23483139daadfe7eb125db0bd2ea0b2c502c"
+  }
+}

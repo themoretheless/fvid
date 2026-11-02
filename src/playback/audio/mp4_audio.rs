@@ -437,18 +437,12 @@ impl<R: Read + Seek> Mp4AudioReader<R> {
         };
         let codec=setup.codec;let fallback=setup.sample_rate;
         let rate=if let Some(rate)=known {rate}else if matches!(&codec,b"ac-3"|b"ec-3") {
-            // A future description has not negotiated its decoder yet. In
-            // particular E-AC-3 sample entries may contain placeholder rates.
-            // Read through the normal packet admission before choosing the
-            // selected programme's native seek lattice.
-            self.demuxer.read_packet(self.track_index,index,&mut self.packet)?;
-            if codec==*b"ec-3" {
-                crate::codec::eac3_decoder::checked_programme_frame(&self.packet,self.eac3_programme)
-                    .ok_or_else(||invalid("missing selected E-AC-3 native seek rate"))?.sample_rate
-            }else{
-                crate::codec::ac3_decoder::syncframe(&self.packet)
-                    .ok_or_else(||invalid("invalid AC-3 native seek rate"))?.sample_rate
-            }
+            // Negotiate the same checked setup that ordinary playback uses,
+            // without activating a future decoder. A seek target can be a
+            // concealable CRC-bad packet; its header must not replace the
+            // validated description rate or cause a spurious refusal.
+            self.description_state(selected)?.rate
+                .ok_or_else(||invalid("missing Dolby native seek rate"))?
         }else{fallback};
         if rate==0 {return Err(invalid("zero MP4 native seek rate"));}Ok(rate)
     }
@@ -684,7 +678,7 @@ impl<R: Read + Seek> Mp4AudioReader<R> {
         source.opening_sample_index=source.sample_index;
         Ok(source)
     }
-    fn configure_description(&mut self, selected: usize) -> Result<()> {
+    fn description_state(&mut self, selected: usize) -> Result<DescriptionState> {
         let state = if let Some(state) = self.description_states[selected].clone() {
             state
         } else {
@@ -796,6 +790,10 @@ impl<R: Read + Seek> Mp4AudioReader<R> {
             self.description_states[selected] = Some(state.clone());
             state
         };
+        Ok(state)
+    }
+    fn configure_description(&mut self, selected: usize) -> Result<()> {
+        let state=self.description_state(selected)?;
         self.active_description = selected;
         self.configuration_pending = false;
         self.in_band_ps = state.in_band_ps;

@@ -1,0 +1,81 @@
+{
+  "provenance": "Authored PCM,neutral VP9 and EAC3 spectra only. A single CRC trailer bit in the selected second independent frame is deliberately invalid;good first/third frames remain unchanged. Successful concealment and seek acceptance,not a missing-programme refusal. No private media,FFmpeg,network or mutation audit.",
+  "cases": [
+    {
+      "file": "stereo-classic.mp4",
+      "control": "stereo-control.mp4",
+      "programme": 0,
+      "rate": 48000,
+      "channels": 2,
+      "frames": 4800,
+      "end_num": 1411200,
+      "end_den": 14112000,
+      "target_ns": 34500001
+    },
+    {
+      "file": "stereo-fragmented.mp4",
+      "control": "stereo-control.mp4",
+      "programme": 0,
+      "rate": 48000,
+      "channels": 2,
+      "frames": 4800,
+      "end_num": 1411200,
+      "end_den": 14112000,
+      "target_ns": 34500001
+    },
+    {
+      "file": "stereo-hybrid.mp4",
+      "control": "stereo-control.mp4",
+      "programme": 0,
+      "rate": 48000,
+      "channels": 2,
+      "frames": 4800,
+      "end_num": 1411200,
+      "end_den": 14112000,
+      "target_ns": 34500001
+    },
+    {
+      "file": "programme-classic.mp4",
+      "control": "programme-control.mp4",
+      "programme": 1,
+      "rate": 44100,
+      "channels": 3,
+      "frames": 4800,
+      "end_num": 1531008,
+      "end_den": 14112000,
+      "target_ns": 37329932
+    },
+    {
+      "file": "programme-fragmented.mp4",
+      "control": "programme-control.mp4",
+      "programme": 1,
+      "rate": 44100,
+      "channels": 3,
+      "frames": 4800,
+      "end_num": 1531008,
+      "end_den": 14112000,
+      "target_ns": 37329932
+    },
+    {
+      "file": "programme-hybrid.mp4",
+      "control": "programme-control.mp4",
+      "programme": 1,
+      "rate": 44100,
+      "channels": 3,
+      "frames": 4800,
+      "end_num": 1531008,
+      "end_den": 14112000,
+      "target_ns": 37329932
+    }
+  ],
+  "sha256": {
+    "stereo-control.mp4": "e071aada0161cee9997b7167be35351594424762c173b6a9a6ea1ae67e6cefcd",
+    "stereo-classic.mp4": "72475a460fb53b2fa1feb90c7774d3b96fa6bd4854fabd21affbec2fe468b79a",
+    "stereo-fragmented.mp4": "6b18a39240e8e52e5adeea4b34271e6b57468f14bf3710138637cebb86d26a71",
+    "stereo-hybrid.mp4": "dba3b7f46f02d25610d8dcf5a75b2087db176f237c5fde9fab11909ace0267c9",
+    "programme-control.mp4": "c3f116ffe964b304a9963edfd86a763e383786f1dd2ebc55725170725351db90",
+    "programme-classic.mp4": "10889a45cd62944ffdc39a5b101b29911ab375257198fd383ef5af03cedb5acf",
+    "programme-fragmented.mp4": "472959832b947db10fadc8b6039f23483139daadfe7eb125db0bd2ea0b2c502c",
+    "programme-hybrid.mp4": "152d2b796041fb9f8cd95fd1f7097b4eab557cd57e17306bcef4fbaee7e829a5"
+  }
+}
