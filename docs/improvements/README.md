@@ -3519,3 +3519,7 @@ FVID-0484 now retains precise Duration floors in unedited pure MACE3/MACE6 track
 ## Batch 518 — Edited MACE native seek precision,zero new IDs
 
 FVID-0484 now preserves exact Duration floors in pure MACE edit timelines,including initial/intermediate silence and repeated source ranges. Eight authored movies compare every native timestamp and PCM byte with independently sliced full natural playback;raw reseek and actual-worker anchors pass. Seven gates include all old MACE suites and pass1024 test executions,two prior ignores;three repeated82-test runs pass. Counter511,next FVID-0512. See `batch-518-validation.json`.
+
+## Batch 519 — Constant ADPCM/AC3 edit seek precision,zero new IDs
+
+FVID-0484 now preserves exact Duration floors for constant AudioTimeline cursors. Six authored ADPCM/AC3 cases reproduce the failure;two EAC3 rates are passing controls. All eight verify natural PCM/video,silence,repeats,exact native suffixes,raw clock restoration and actual-worker anchors. Seven gates include19 older ADPCM/Dolby tests and pass1047 test executions,two prior ignores;three repeated105-test runs pass. One independent strict packet-stamp test fails before,passes after and repeats three times,including48k native cursors. Counter511,next FVID-0512. See `batch-519-validation.json`.

@@ -1,0 +1,4 @@
+stamp repeat 1 0
+stamp repeat 2 0
+stamp repeat 3 0
+strict packet stamps qualified

@@ -1,0 +1,14 @@
+{
+  "status": "source-inspection-only",
+  "accepted_ids": [],
+  "count_delta": 0,
+  "scope": "Mixed PCM/MACE and PCM/ADPCM edit timelines",
+  "observation": "Exact variable-edit routing still recognizes pure codec families independently. The readonly native landing helper can count PCM,MACE and ADPCM per selected packet,but mixed-family Duration routing needs authored full-playback/native-suffix/actual-worker controls before any correction. Mixed ALAC requires additional coded-header dispatch analysis.",
+  "not_a_confirmed_defect": true,
+  "required_before_fix": [
+    "Valid authored mixed-family movies with full PCM/video controls",
+    "Direct Duration seek and actual-worker anchors compared to natural playback",
+    "Raw reseek and setup-history controls",
+    "Before/after evidence with unchanged tests"
+  ]
+}

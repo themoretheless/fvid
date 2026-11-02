@@ -1,0 +1,71 @@
+{
+  "provenance": "Repository-authored analytic ADPCM,existing synthetic AC3 5.1 tone and authored EAC3 spectra with neutral VP9. Three-ms silence,eight-ms source from four ms,two-ms silence,repeated source. All edit origins are exactly native aligned. No private media/parameters,FFmpeg,process or network.",
+  "cases": [
+    {
+      "file": "ima4.mp4",
+      "rate": 8000,
+      "channels": 1,
+      "video_frames": 6,
+      "native_frames": 168
+    },
+    {
+      "file": "ima-wav.mp4",
+      "rate": 16000,
+      "channels": 2,
+      "video_frames": 6,
+      "native_frames": 336
+    },
+    {
+      "file": "ms-adpcm.mp4",
+      "rate": 8000,
+      "channels": 1,
+      "video_frames": 6,
+      "native_frames": 168
+    },
+    {
+      "file": "ac3.mp4",
+      "rate": 48000,
+      "channels": 6,
+      "video_frames": 5,
+      "native_frames": 1008
+    },
+    {
+      "file": "ac3-grouped.mp4",
+      "rate": 48000,
+      "channels": 6,
+      "video_frames": 5,
+      "native_frames": 1008
+    },
+    {
+      "file": "ac3-one-packet.mp4",
+      "rate": 48000,
+      "channels": 6,
+      "video_frames": 5,
+      "native_frames": 1008
+    },
+    {
+      "file": "eac3-48000.mp4",
+      "rate": 48000,
+      "channels": 2,
+      "video_frames": 17,
+      "native_frames": 1008
+    },
+    {
+      "file": "eac3-32000.mp4",
+      "rate": 32000,
+      "channels": 1,
+      "video_frames": 17,
+      "native_frames": 672
+    }
+  ],
+  "sha256": {
+    "ima4.mp4": "094b997ecf9048010997acb9ae7eb641bb97d6b1eac28e64935c230d444aab52",
+    "ima-wav.mp4": "4e72d23f9283e9f148bf6a78eecf6b99b5239f0a97af35616ee053bba9e0d66c",
+    "ms-adpcm.mp4": "35aff7315354eafc1411a86d42a1672caf424638dea4ba74e38c695789480865",
+    "ac3.mp4": "29a9b61704d524a42aacf484e1b9b2551695cf28aa0109fcc6a9b89ab2ef3ac2",
+    "ac3-grouped.mp4": "f6d6ab948fe2affe46e85d160711c638b3574517c413f8330b190079ec6ba838",
+    "ac3-one-packet.mp4": "6fcc5d5fc64a9aa91e6bf4e1b4ed16643f8ff2116cc5ad0a39a790c9e3b5cee7",
+    "eac3-48000.mp4": "0d95f164e7f3a7fa1ae703c210e98688c9b071477b18fdea40766c9972c92114",
+    "eac3-32000.mp4": "ff0828487537e4d245183ed3605ee1fc370922ba3fff132bf429f8670f1909f8"
+  }
+}

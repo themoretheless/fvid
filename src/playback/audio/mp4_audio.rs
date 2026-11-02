@@ -1545,15 +1545,14 @@ impl<R: Read + Seek + Send> crate::audio::AudioStream for Mp4AudioReader<R> {
             let time=EditTime::new(target.as_nanos() as i128,1_000_000_000).and_then(|t|self.seek_exact(t,true));
             return match time {Ok(at)=>at,Err(error)=>{self.navigation_error=Some(error);0}};
         }
-        if exact_mace && matches!(&self.track().codec,b"MAC3"|b"MAC6")
-            && let Some(frames)=self.timeline.as_ref().map(|timeline|timeline.sample_frames) {
+        if let Some(frames)=self.timeline.as_ref().map(|timeline|timeline.sample_frames) {
             let precise=(||->Result<i64> {
                 let rate=self.sample_rate();
                 let cursor=EditTime::new(target.as_nanos() as i128,1_000_000_000)?
                     .ceil_frames(rate)?.clamp(0,i128::from(frames));
                 let aligned=EditTime::new(cursor,u128::from(rate))?;
                 let returned=i64::try_from(aligned.floor_ticks(self.track().timescale)?)
-                    .map_err(|_|invalid("MP4 MACE seek timestamp overflow"))?;
+                    .map_err(|_|invalid("MP4 audio seek timestamp overflow"))?;
                 // Start each selected edit with its ordinary decoder history;
                 // only the sample-clock cursor and reported anchor change.
                 self.rewind();self.edit_cursor.set(cursor as u64);
@@ -1657,6 +1656,7 @@ impl<R: Read + Seek + Send> crate::audio::AudioStream for Mp4AudioReader<R> {
             let rate=u128::from(self.sample_rate());let scale=u128::from(self.track().timescale);
             let cursor=(pts.max(0) as u128*rate/scale).min(u128::from(timeline.sample_frames)) as u64;
             self.edit_cursor.set(cursor);self.edit_segment.set(None);self.sample_index=0;
+            self.clock_anchor.set(None);
             return ((u128::from(cursor)*scale/rate).min(i64::MAX as u128)) as i64;
         }
         let track = self.track();

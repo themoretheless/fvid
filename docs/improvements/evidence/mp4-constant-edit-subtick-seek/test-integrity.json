@@ -1,0 +1,14 @@
+{
+  "baseline_head": "3018b23b2df943fbd50b20959b81e8d8f4a7a15c",
+  "baseline_production_matches_commit": true,
+  "new_tests_and_generator_identical_before_after": true,
+  "existing_tests_and_capture_unchanged": [
+    "tests/mp4_adpcm_transitions.rs",
+    "tests/mp4_geometry_lossless_adpcm.rs",
+    "tests/mp4_ac3_sample_clock.rs",
+    "tests/ac3_mp4_channels.rs",
+    "tests/mp4_eac3_programme_clock.rs",
+    "tests/eac3_mp4_programmes.rs",
+    "tests/support/audio_transitions.rs"
+  ]
+}

@@ -1,0 +1,18 @@
+{
+  "baseline_exit_code": 101,
+  "passed_tests": 2,
+  "failed_tests": 2,
+  "precise_seek_failures": [
+    "ima4",
+    "ima-wav",
+    "ms-adpcm",
+    "ac3",
+    "ac3-grouped",
+    "ac3-one-packet"
+  ],
+  "passing_seek_controls": [
+    "eac3-48000",
+    "eac3-32000"
+  ],
+  "full_pcm_video_and_raw_reseek_all_passed": true
+}

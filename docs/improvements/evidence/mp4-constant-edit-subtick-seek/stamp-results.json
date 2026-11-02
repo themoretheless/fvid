@@ -1,0 +1,25 @@
+{
+  "command": [
+    "cargo",
+    "test",
+    "--locked",
+    "--offline",
+    "--no-default-features",
+    "--features",
+    "player",
+    "--test",
+    "mp4_constant_edit_stamp_grid"
+  ],
+  "baseline_head": "3018b23b2df943fbd50b20959b81e8d8f4a7a15c",
+  "backup": "/private/tmp/fvid-constant-edit-candidate-source-20261102.rs",
+  "status": "qualified",
+  "before_exit_code": 101,
+  "candidate_restored": true,
+  "after_exit_code": 0,
+  "repeat_exit_codes": [
+    0,
+    0,
+    0
+  ],
+  "backup_removed": true
+}
