@@ -1,8 +1,8 @@
 {
   "target": 1000,
   "counting_rule": "One independently confirmed problem or useful capability; fixture variants and baseline integration repairs are excluded. Only accepted entries count.",
-  "accepted_count": 513,
-  "next_id": "FVID-0514",
+  "accepted_count": 514,
+  "next_id": "FVID-0515",
   "entries": [
     {
       "id": "FVID-0001",
@@ -5817,6 +5817,17 @@
       "result": "One compatibility capability:existing Rust G711 companders now decode QuickTime alaw/ulaw through parsed sample tables,player/native descriptors,precise native-clock seek,owned float32/float64 intervals and public float64 WAVE export. Forty-eight authored v1/compressionID-2 movies cover8k mono,48/44.1k stereo,dense/uniform/fragmented/hybrid tables,silence/repeated edits,all256 codes and neutral VP9. Native counts use one coded byte per channel rather than uncompressed sampleSize16. Independent PCM/WAVE controls,exact rational timestamps/PCM,EOF/MAX/raw reset,actual workers,compact record budgets,orphan-channel refusal and full packet admission pass. Primary QuickTime references and initial before failures are preserved. A separate zero-count FVID-0193 correction restores standards-valid AIFC original-width metadata;the unchanged old G711 test failed identically on original source before that correction. Nine gates pass1114 Rust executions,four Python units,two old ignores;three15-test repeats pass with2399 stable source/fixture hashes. No speedup,physical-device or visual-player claim.",
       "status": "accepted",
       "validation": "batch-524-validation.json"
+    },
+    {
+      "id": "FVID-0514",
+      "batch": 525,
+      "title": "Exclude explicitly block-aligned AIFF/AIFC storage padding from playback and seek duration",
+      "source": "src/playback/audio/aiff.rs",
+      "regression": "tests/aiff_block_padding.rs",
+      "before": "Original32badf386d passes unblocked PCM/G711 and neutral-video controls plus strict refusal checks,but counts sentinel SSND alignment padding as sound:2080 frames instead of2051 in int16-offset0.aiff;actual worker emits a spurious native frame2051 after seek. Before suite passes2/fails2. Apple AIFF1.3 explicitly permits soundData to extend beyond valid frames to finish a storage block.",
+      "result": "For explicitly block-aligned PCM/G711,limit playback bytes to COMM declared frame count with checked coded-stride multiplication. Charge the entire stored run before trimming;retain truncated EOF/partial-frame refusals,unblocked compatibility and MACE conventions. Ten authored mono/stereo AIFF/AIFC cases cover16/24-bit PCM,float32,ALaw/MuLaw,offset0/3,sentinel padding and the2048-frame packet boundary. Exact waveform/native timestamps,duration,raw/Duration seek,EOF/MAX,rewind and actual worker drain match independent mathematical oracles. Five frozen-source gates pass81 Rust executions,zero ignores and core/player checks;three repeats pass9 tests each. All24 fixture files regenerate byte-identically;2425 source/fixture hashes stay stable. No performance or physical-device claim.",
+      "status": "accepted",
+      "validation": "batch-525-validation.json"
     }
   ]
 }

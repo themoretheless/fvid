@@ -13,7 +13,8 @@
 //! against each other, an AIFF file states each number once. So what this reader
 //! holds the header to instead is the sample run: the bytes the `SSND` chunk
 //! actually carries decide how much plays, and a `COMM` frame count that promises
-//! more is kept as the file's own claim rather than played as silence.
+//! more is kept as the file's own claim rather than played as silence. Explicitly
+//! block-aligned PCM/G.711 uses that count to exclude storage padding at the tail.
 //!
 //! MACE is the one coding whose geometry the header does not state at all. Its two
 //! compression types name their own block widths - two bytes a channel for 3-to-1,
@@ -168,6 +169,21 @@ impl Aiff {
                 limits.data_bytes
             )));
         }
+        // An explicitly block-aligned SSND can extend beyond the valid audio
+        // to finish its last storage block. COMM counts the valid frames;
+        // those trailing bytes need not form channel frames or contain silence.
+        // Charge the full stored run above before excluding its padding. Keep
+        // the existing unblocked and MACE compatibility conventions unchanged.
+        let block_size = u32::from_be_bytes(bytes[start + 4..start + 8].try_into().unwrap());
+        let samples = if block_size != 0
+            && matches!(pcm.coding, Coding::Pcm(_) | Coding::ALaw | Coding::MuLaw)
+        {
+            let valid_bytes = declared_frames.checked_mul(pcm.block_align())
+                .ok_or_else(|| invalid("AIFF declared sample byte count overflows"))?;
+            &samples[..valid_bytes.min(samples.len())]
+        } else {
+            samples
+        };
         if matches!(pcm.coding, Coding::Pcm(_) | Coding::ALaw | Coding::MuLaw)
             && !samples.len().is_multiple_of(pcm.block_align())
         {

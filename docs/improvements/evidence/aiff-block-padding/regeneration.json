@@ -1,0 +1,31 @@
+{
+  "files": 24,
+  "identical": true,
+  "sha256": {
+    "neutral-video.mp4": "94344c6e9a7d6e44345541fc0e3e5120db912e79483033d7452fd39ee4865fe5",
+    "int16.f32le": "79032b9f46c8d65e4edc4277cbaf47b965bd50d0f039d074ae7260253d6e592c",
+    "int16-offset0.aiff": "d79add1f2ace11378f1c62a5fce1a3df5a54dae0dcc35fb66476eaa6c8c594d5",
+    "int16-offset3.aiff": "f0eebf19b25cb6f0711f0d233f20b43950e3f16b581e340e80afba6084386317",
+    "int16-control.aiff": "12c22633a0919acfbe2d5e3642000c2babd225a375a38959a33d08f05e1a0b0f",
+    "int24.f32le": "e86eb7c7e5ea3018367b879b59e39437f9a8dc3c1ec0e9e461f35d141470f870",
+    "int24-offset0.aiff": "ece1fd31c7b73c399cf33fea6f3b29270a85cbfd8e8bff54c73868265976e86e",
+    "int24-offset3.aiff": "a0811cabcd071894193bbed0c00d925bf5851e00c0fe2a21854e59c34c1e5ce1",
+    "int24-control.aiff": "58a02b02b450e2053b7f5e43a4645bf3f169cfeb6d371125037bafeff544c299",
+    "float.f32le": "fe8e89b65e63658b99895988e9ebbc9c51a5a61c923a75e1c133ebc69d7dbb2c",
+    "float-offset0.aifc": "a28c629910b88cc1a9457c391d66b24bb007809048c395fecb1b415f2db3987d",
+    "float-offset3.aifc": "2afec8e3229ab48f90a7faad4b1dfba931744744c7dd18b828965eb3425b4430",
+    "float-control.aiff": "1baf343aff1d724f60a0ff0c6b95dac16dbd51a8ba7afef9ebf96cd8101e6fd2",
+    "alaw.f32le": "75a5be8693971a1fba459cab8deddc0e9b81a66ce9584f1777ae66f8bf3b2731",
+    "alaw-offset0.aifc": "2dd1a4b785d896f1f0623d0f77d34b166414f04072e9e44ca2dadfe2e1d8c3ef",
+    "alaw-offset3.aifc": "178c633d81c47479cd8b757ca477a46fed5e694d73c691772280a0dab8116d1e",
+    "alaw-control.aiff": "c2802bb0227959ff26c4a736135478ed43873e1f0f0443a026a8eed7283bbfcc",
+    "mulaw.f32le": "d8e630fdab897f04b9c69ef7d100c56da2bae9cc8eac9f42f3799a13938cbd3c",
+    "mulaw-offset0.aifc": "6b5968713abc72fbf9d0a87d29c7a7be2d1ad328f44c8b844af03d547cd864c0",
+    "mulaw-offset3.aifc": "9970ecc9f864f69629928c490c3ff4d9230764cabb54d5dd98a965cd21cac256",
+    "mulaw-control.aiff": "013fbcc4c9e85a33e16fd00125c2eababce5f5923178c710353d91b47a2e3661",
+    "truncated-declared.aiff": "1e3fa6da45a948bfda6fd48e39d186c0614be9c5028101473286230d48ebef49",
+    "incomplete-frame.aiff": "2f46167e2aa312760d427f5b30365f92733e0c538489720d0ec5db01a7a2b939",
+    "manifest.json": "b92895caa036b19bc9ea6f598e8822a255705d6938dd4a47d80a1ca402350d27"
+  },
+  "generation": "Standalone pure Python; ordinary Rust tests read checked-in fixtures only."
+}

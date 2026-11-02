@@ -1,0 +1,9 @@
+{
+  "source_commit": "32badf386d7711e3fcb3eb9c4372990f749849a3",
+  "sha256": {
+    "src/playback/audio/aiff.rs": "0ebe165a118db7be13b80591d8f3bf7cddaf44158d86d73f6f8da187f6a3b701",
+    "src/playback/audio/wav.rs": "c88ab340277ccfa85c0531f99a376a6ad1c32de4015b8573ce21036a4a5ad6c9",
+    "tests/aiff_block_padding.rs": "1b4f95b93015dcb3ce56998cf37a7d15faaa60374cdd6f465d37ed4376c4ac32",
+    "scripts/generate_aiff_block_padding.py": "9002fcd21cecc659dae9729fdfee9576ce16d4558d8d10bea4d3c29ac03987e2"
+  }
+}

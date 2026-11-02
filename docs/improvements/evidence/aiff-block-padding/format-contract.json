@@ -1,0 +1,11 @@
+{
+  "source": "https://www.mmsp.ece.mcgill.ca/Documents/AudioFormats/AIFF/Docs/AIFF-1.3.pdf",
+  "publisher": "Apple Computer, Inc.",
+  "version": "1.3, January 4 1989",
+  "sections": [
+    "Sound Data Chunk",
+    "Block-Aligning Sound Data"
+  ],
+  "interpretation": "COMM numSampleFrames determines valid audio. SSND soundData may extend after the valid frames to complete a block. offset skips leading unused bytes; blockSize signals alignment. Tail sentinels are padding, not additional audio.",
+  "planned_scope": "Honor declared frames for explicitly block-aligned PCM/G711; retain current unblocked compatibility behavior and MACE handling. Charge the complete stored payload before trimming padding."
+}
