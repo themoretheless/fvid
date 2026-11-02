@@ -1,0 +1,12 @@
+{
+  "published_commit": "bfe010304ae61b5b18ec427e1d86cd2f8e863567",
+  "remote": "https://github.com/themoretheless/fvid.git",
+  "verified_refs": [
+    "bfe010304ae61b5b18ec427e1d86cd2f8e863567\trefs/heads/codex/deliver-fvid-20261029",
+    "bfe010304ae61b5b18ec427e1d86cd2f8e863567\trefs/heads/main"
+  ],
+  "clean_worktree_at_verification": true,
+  "source_freeze_matches": 3543,
+  "accepted_count": 529,
+  "cleanup": "Removed only owned Wave64/BW64 target directory, temporary qualification scripts/log copy and generated Python caches. Fixtures, source freezes, tests and proof logs retained; parallel worktrees, branches and stashes retained."
+}
