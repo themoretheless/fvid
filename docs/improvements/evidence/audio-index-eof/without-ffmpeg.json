@@ -1,0 +1,23 @@
+{
+  "PATH": "/usr/bin:/bin",
+  "ffmpeg_resolves": false,
+  "runs": [
+    {
+      "command": [
+        "/private/tmp/fvid-index-eof-target-20261102/debug/deps/audio_index_eof-e9cc6b7b35152cab",
+        "--test-threads=2"
+      ],
+      "exit_code": 0,
+      "binary_sha256": "01f9a74c874d14811161ff5d7e1b9b26ecc1cd2f5efb672729ac5a829eabd107"
+    },
+    {
+      "command": [
+        "/private/tmp/fvid-index-eof-target-20261102/debug/deps/coded_audio_index_eof-b7f94779406354cc",
+        "--test-threads=2"
+      ],
+      "exit_code": 0,
+      "binary_sha256": "ea187af895e2df167175b5353960f452e183fbe6b9e2c50880d487f07339f68b"
+    }
+  ],
+  "source_stable": true
+}

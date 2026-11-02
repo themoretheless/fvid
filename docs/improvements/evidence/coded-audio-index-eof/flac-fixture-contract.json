@@ -1,0 +1,8 @@
+{
+  "source": "https://www.rfc-editor.org/rfc/rfc9639.html#section-8.2",
+  "nonseekable_pipe": "Provisional nonzero maximum2069 differs from actual maximum658;known frame sizes describe actual frame sizes. RFC8.2 permits decoder refusal for incorrect/incomplete STREAMINFO.",
+  "acceptance": "Seekable encoder output finalizes STREAMINFO. This valid file must reach the index-EOF test.",
+  "refusal": "Original pipe bytes retained separately and specifically rejected for the frame-size claim,not used as an EOF reproducer.",
+  "parser_validation_relaxed": false,
+  "count_delta": 0
+}

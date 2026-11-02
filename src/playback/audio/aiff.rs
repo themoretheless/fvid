@@ -217,9 +217,13 @@ impl Aiff {
     /// One packet's bytes, aligned to a block. A tail shorter than a block holds no
     /// complete frame - not one sample for every channel, and for MACE 3-to-1 not one
     /// of the six its two bytes code - and is not handed over at all.
+    /// An index at or beyond `packets()` returns an empty slice.
     pub fn packet(&self, index: usize) -> &[u8] {
+        if index >= self.packets() {
+            return &[];
+        }
         let width = self.window_bytes();
-        let start = index.min(self.packets().saturating_sub(1)) * width;
+        let start = index * width;
         let end = start.saturating_add(width).min(self.data.len());
         let whole = (end - start) / self.pcm.block_align() * self.pcm.block_align();
         &self.data[start..start + whole]

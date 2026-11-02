@@ -1,0 +1,14 @@
+{
+  "source_commit": "f87769a3c2a7c671ff75c4c5d1b12913d6cf1938",
+  "coded_accessors_match_original_commit": true,
+  "pcm_candidate_already_present": true,
+  "sha256": {
+    "src/playback/audio/ac3.rs": "ced0e20e54e9eceb46fb5ca65706bb837227dfde844d71e0e07151794f1e08c7",
+    "src/container/xm.rs": "75cc47f3a2a8f10586b3d3158971ecb7c85288a748e2e18d47a04b9a0f4f9a82",
+    "crates/fvid-media/src/owned_flac.rs": "85889489c776506fe6d0bcfe33d984a2c1df53224fc32934b2cae770d0ad3b3c",
+    "crates/fvid-media/src/owned_mpeg_audio.rs": "f448f69d85636cad80a630a48d5b8d6ac77cadbdae1af159e8ef44c1c43010da",
+    "crates/fvid-media/src/owned_aac/adts_impl.rs": "7637df53d32490fab10ac2f41cfb5e3c84c811aee190414379ce92daff01385a",
+    "tests/coded_audio_index_eof.rs": "a9485c25e421515c493a5e1c7e001cd8c4ee2f9594eb43f514cadec38a53f81e",
+    "scripts/generate_coded_audio_index_eof.py": "92449daca5e26a81c6f35e8d5039a5624c8c5761947e243db756b48386200c8c"
+  }
+}

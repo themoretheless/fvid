@@ -1,8 +1,8 @@
 {
   "target": 1000,
   "counting_rule": "One independently confirmed problem or useful capability; fixture variants and baseline integration repairs are excluded. Only accepted entries count.",
-  "accepted_count": 515,
-  "next_id": "FVID-0516",
+  "accepted_count": 516,
+  "next_id": "FVID-0517",
   "entries": [
     {
       "id": "FVID-0001",
@@ -3033,7 +3033,9 @@
       "before": "validate_audio_packet_budget and admit_audio_reader in `crates/fvid-media/src/owned_matroska_audio.rs`, validate_encoded_audio_packet_budget in `src/native_plan.rs`, try_plan in `src/native_loudnorm.rs`, and extract_source_pcm_metadata in `src/native_export/pcm_matroska.rs` scan every packet of the selected audio track across the entire container without bounding by `options.max_packets`, causing `plan_decode_audio`, `decode_audio_transformed`, `plan_trim`, `trim`, `plan_loudnorm`, `apply_loudnorm`, and WAVE/Matroska `mix_audio_with_controls` / `merge_audio_with_controls` to reject prefix-bounded (`max_packets = Some(n)`) Matroska and MP4 audio when an oversized packet lies after the first `n` packets; `Mp4Reader::parse_ilst` (`crates/fvid-media/src/owned_mp4_impl.rs`) ignores QuickTime/iTunes `\u00a9too` (`0xa9746f6f`) encoder atoms so `probe`, WAVE `ISFT` (`owned_wave_metadata::mp4_source_info`), and Matroska `ENCODER` tags (`export_pcm_selected`, `extract_source_pcm_metadata_with_packet_limit`) drop MP4 encoder metadata; and `normalize_loudness_controlled` (`src/media.rs`) and CLI `normalize-loudness` (`src/media_cli.rs`) forward output metadata mutations into `loudness_channel_weights_with_options`, failing with `\"owned loudness requires at most one audio stream and no metadata edits\"` before normalization.",
       "result": "Bound `validate_audio_packet_budget` and `admit_audio_reader` (`crates/fvid-media/src/owned_matroska_audio.rs`), `validate_encoded_audio_packet_budget` (`src/native_plan.rs`), `native_loudnorm::try_plan` (`src/native_loudnorm.rs`), and `extract_source_pcm_metadata_with_packet_limit` (`src/native_export/pcm_matroska.rs`) by `options.max_packets`; parse QuickTime/iTunes `\u00a9too` into `Mp4Reader::encoder()` (`crates/fvid-media/src/owned_mp4_impl.rs`) and expose it in `try_mp4` (`crates/fvid-media/src/owned_mp4_probe_impl.rs`), `mp4_source_info` (`crates/fvid-media/src/owned_wave_metadata.rs`), `export_pcm_selected` (`src/native_export.rs`), and `extract_source_pcm_metadata_with_packet_limit`; and clear output metadata edits before `loudness_channel_weights_with_options` in `src/media.rs` and `src/media_cli.rs`. Two focused integration tests, 5 related test suites, and 2 offline fixture unit tests pass.",
       "status": "accepted",
-      "validation": "batch-262-validation.json"
+      "validation": "batch-262-validation.json",
+      "resample_metadata_test_correction_validation": "batch-527-validation.json",
+      "resample_metadata_test_correction_note": "Original f87769a3c2 already writes34 bytes of LIST/INFO/ISFT source-encoder metadata in resampled WAVE. Old native_aac_media test incorrectly expected80+PCM total bytes. Same failure and identical PCM proved on original source;test now requires exact PCM length,RIFF size,independently built source-encoder metadata suffix,total file size and existing rate/fact/stereo/audibility checks at both output rates. Export production code unchanged;zero extra IDs."
     },
     {
       "id": "FVID-0270",
@@ -5841,6 +5843,20 @@
       "result": "Keep COMM logical precision while mapping left-justified signed integers to the existing whole-byte decoder. Round frame stride per channel and refuse nonzero unused low bits after resource admission and storage-tail trimming. All192 AIFF/NONE/sowt \u00d71..32-bit \u00d7mono/stereo cases match independent mathematical f32 levels,exact native timestamps,duration,packet-boundary seek,EOF/MAX and rewind;168 nonbyte cases also pass actual worker capture. Invalid widths,dirty unused bits,partial frames,truncated EOF,file/data budgets and explicit block padding remain strict. Seven gates pass146 Rust executions,zero ignores,both core/player checks;three repeats pass14 tests each with2693 frozen hashes. All266 fixture files regenerate byte-identically. A pre-existing CLI test incorrectly refusing supported plan --progress was proved on original source and strengthened to require identical JSON/no writes while retaining strict invalid-option refusals;zero extra IDs. No generic PCM API expansion,performance or physical-device claim.",
       "status": "accepted",
       "validation": "batch-526-validation.json"
+    },
+    {
+      "id": "FVID-0516",
+      "batch": 527,
+      "title": "Reach indexed audio payload EOF without repeating the final packet",
+      "source": "src/playback/audio/wav.rs",
+      "regression": "tests/audio_index_eof.rs",
+      "before": "Original f87769a3c2 repeats a final payload for packet(packets()) in WAVE/AIFF/AU,AAC,FLAC,MPEG audio,Dolby and generates another XM release-tail packet. PCM baseline passes2 controls/fails3 format-specific EOF tests;coded baseline passes decoded-tone/worker/refusal controls and fails6 EOF checks,including root/owned ADTS. Ordinary AudioStream workers already stop correctly;the defect is public indexed payload access.",
+      "result": "Return empty bytes for an index at/beyond declared packet count,including usize::MAX,before offset math or tail construction. Preserve all valid payloads,decoder inputs,XM single valid release tail,seek and timestamps. One shared EOF-contract problem across8 payload adapters,not an ID per codec. Eighteen PCM and8 coded/tracker cases cover single/full/partial windows,mono/stereo,AAC/FLAC,MPEG layersI/II/III,AC3/EAC3 and XM. Independent PCM/silent-control oracles,exact valid indexed/stream byte parity and actual workers pass. Fourteen frozen-source gates pass826 test executions,one prior ignore,core/player checks;three24-test repeats pass. Both new suites also pass14 executions with PATH excluding FFmpeg. All37 fixture files regenerate identically;2734 source/fixture hashes stay stable. Provisional encoder FLAC is retained as a separate permitted refusal,not counted as EOF failure. A pre-existing resampled-WAVE test is corrected to verify exact PCM,RIFF and source-encoder INFO metadata after reproducing its failure on original source;zero extra IDs. Public out-of-range behavior change/migration is documented;no signature,performance or physical-device claim.",
+      "status": "accepted",
+      "validation": "batch-527-validation.json",
+      "additional_regressions": [
+        "tests/coded_audio_index_eof.rs"
+      ]
     }
   ]
 }

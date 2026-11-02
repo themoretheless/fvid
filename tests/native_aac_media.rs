@@ -385,6 +385,22 @@ fn native_resample_cli_keeps_duration_and_sets_output_geometry() {
     let dir = std::env::temp_dir().join(format!("fvid-aac-rate-{}", std::process::id()));
     std::fs::create_dir(&dir).unwrap();
     let source = std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("tests/fixtures/audio/aac-native-edit.m4a");
+    let container = fvid::container::mp4::Mp4Reader::open(
+        std::io::Cursor::new(std::fs::read(&source).unwrap()), Default::default()
+    ).unwrap();
+    let encoder = container.encoder();
+    assert!(!encoder.is_empty());
+    // FVID-0269 preserves the source encoder as WAVE INFO/ISFT. Build its
+    // exact independent RIFF representation instead of assuming no metadata.
+    let mut value = encoder.as_bytes().to_vec();
+    value.push(0);
+    let mut info = b"INFOISFT".to_vec();
+    info.extend_from_slice(&(value.len() as u32).to_le_bytes());
+    info.extend_from_slice(&value);
+    if value.len() % 2 != 0 { info.push(0); }
+    let mut expected_tail = b"LIST".to_vec();
+    expected_tail.extend_from_slice(&(info.len() as u32).to_le_bytes());
+    expected_tail.extend_from_slice(&info);
     for rate in [16000u32, 48000] {
         let output = dir.join(format!("{rate}.wav"));
         let run = std::process::Command::new(env!("CARGO_BIN_EXE_fvid"))
@@ -397,7 +413,11 @@ fn native_resample_cli_keeps_duration_and_sets_output_geometry() {
         assert_eq!(u32::from_le_bytes(bytes[24..28].try_into().unwrap()), rate);
         assert_eq!(u32::from_le_bytes(bytes[28..32].try_into().unwrap()), rate*8);
         assert_eq!(u32::from_le_bytes(bytes[68..72].try_into().unwrap()), frames);
-        assert_eq!(bytes.len(), 80+frames as usize*8);
+        let pcm = wave_chunks::data(&bytes);
+        assert_eq!(pcm.len(), frames as usize*8);
+        assert_eq!(u32::from_le_bytes(bytes[4..8].try_into().unwrap()) as usize+8, bytes.len());
+        assert_eq!(&bytes[80+pcm.len()..], expected_tail);
+        assert_eq!(bytes.len(), 80+pcm.len()+expected_tail.len());
         for pair in wave_chunks::data(&bytes).as_chunks::<8>().0.iter() { assert_eq!(&pair[..4], &pair[4..]); }
         // Mono source remains audible in both output channels.
         assert!(wave_chunks::data(&bytes).as_chunks::<4>().0.iter().any(|v| f32::from_le_bytes(*v).abs()>0.01));

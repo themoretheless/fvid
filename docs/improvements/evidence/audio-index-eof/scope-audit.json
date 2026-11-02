@@ -1,0 +1,18 @@
+{
+  "public_payload_accessors": [
+    "Wav::packet",
+    "Aiff::packet",
+    "Au::packet",
+    "Ac3::packet",
+    "Flac::packet",
+    "Mp3::packet (MPEG layersI/II/III)",
+    "Aac::packet (root and owned)",
+    "Module::packet (XM)"
+  ],
+  "common_problem": "Out-of-range indexed payload access repeats a final payload or constructs another release-tail packet rather than reaching EOF.",
+  "valid_packet_behavior": "Unchanged;XM declared packet count includes its single valid release-tail packet.",
+  "different_internal_api": "pub(crate) AacPacketPlan::packet returns an internal timestamp schedule,not a public payload accessor;not changed or counted.",
+  "count_delta_if_accepted": 1,
+  "pcm_initial_qualification": "pcm-only-qualification/qualification-results.json",
+  "original_flac_pipe_retained_byte_identically_as_refusal": true
+}

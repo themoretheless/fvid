@@ -3553,3 +3553,7 @@ Explicitly block-aligned PCM/G711 AIFF/AIFC now excludes SSND tail padding from 
 ## Batch 526 — FVID-0515: AIFF integer precision
 
 AIFF/AIFC signed PCM now supports every valid1..32-bit logical precision with whole-byte per-channel storage and strict zero-padding validation.192 authored variants and168 actual-worker captures pass;seven gates cover146 test executions,two build checks and three14-test repeats. A pre-existing CLI plan-progress test is corrected with stronger acceptance/refusal checks and zero extra IDs. Evidence:`evidence/aiff-integer-precision/README.md`. Accepted total:515/1000.
+
+## Batch 527 — FVID-0516: indexed audio EOF
+
+Eight public payload adapters now return empty beyond their declared packet count instead of repeating the final packet/XM tail. All valid bytes and actual-worker playback are preserved. PCM and coded/tracker originals reproduce the exact EOF failures;14 gates pass826 executions,one prior ignore,two build checks and three24-test repeats. Both new suites pass without FFmpeg. A pre-existing WAVE metadata size expectation is corrected with stronger checks and zero extra IDs. Migration:`evidence/audio-index-eof/API-MIGRATION.md`;evidence:`evidence/audio-index-eof/README.md`. Accepted total516/1000.

@@ -1,0 +1,16 @@
+{
+  "follow_up_id": "FVID-0269",
+  "count_delta": 0,
+  "original_failure": "original-native-aac-resample.log",
+  "original_source": "original-native-aac-resample.json",
+  "wave_layout": "original-wave-layout.json",
+  "reason": "Source encoder is intentionally preserved as LIST/INFO/ISFT;old test assumed a metadata-free80-byte prefix plus PCM only.",
+  "strengthened_checks": [
+    "Exact PCM byte count for both16000/48000 outputs",
+    "Declared RIFF size equals full file size",
+    "Exact independently built LIST/INFO/ISFT suffix from source encoder",
+    "Exact total length including metadata",
+    "Existing rate/byte-rate/fact/channels/audibility checks retained"
+  ],
+  "production_wave_export_changed": false
+}

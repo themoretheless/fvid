@@ -413,9 +413,13 @@ impl Wav {
     /// One packet's bytes, aligned to a block. A tail shorter than a block holds no
     /// complete frame - not one sample for every channel, and for a coding that packs
     /// two frames into a byte neither of them - and is not handed over at all.
+    /// An index at or beyond `packets()` returns an empty slice.
     pub fn packet(&self, index: usize) -> &[u8] {
+        if index >= self.packets() {
+            return &[];
+        }
         let width = self.window_bytes();
-        let start = index.min(self.packets().saturating_sub(1)) * width;
+        let start = index * width;
         let end = start.saturating_add(width).min(self.data.len());
         let whole = (end - start) / self.pcm.block_align() * self.pcm.block_align();
         &self.data[start..start + whole]

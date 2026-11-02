@@ -175,9 +175,13 @@ impl Au {
 
     /// One packet's bytes, aligned to a frame. A tail shorter than a frame holds no
     /// complete sample for every channel and is not handed over at all.
+    /// An index at or beyond `packets()` returns an empty slice.
     pub fn packet(&self, index: usize) -> &[u8] {
+        if index >= self.packets() {
+            return &[];
+        }
         let width = PACKET_FRAMES * self.pcm.block_align();
-        let start = index.min(self.packets().saturating_sub(1)) * width;
+        let start = index * width;
         let end = start.saturating_add(width).min(self.data.len());
         let whole = (end - start) / self.pcm.block_align() * self.pcm.block_align();
         &self.data[start..start + whole]

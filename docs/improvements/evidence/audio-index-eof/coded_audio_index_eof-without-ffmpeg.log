@@ -1,0 +1,14 @@
+
+running 9 tests
+test aac_index_eof ... ok
+test dolby_index_eof ... ok
+test flac_index_eof ... ok
+test mpeg_index_eof ... ok
+test owned_aac_index_eof ... ok
+test provisional_streaminfo_is_separate_correct_refusal ... ok
+test valid_payloads_decode_before_testing_index_boundaries ... ok
+test xm_index_eof_keeps_valid_release_tail ... ok
+test actual_workers_preserve_valid_pcm_and_native_stamps ... ok
+
+test result: ok. 9 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.23s
+

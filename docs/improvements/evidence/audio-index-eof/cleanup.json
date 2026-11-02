@@ -1,0 +1,11 @@
+{
+  "owned_target_removed": true,
+  "owned_failed_test_dirs_removed": [
+    "/var/folders/jx/ps1h62vx3gdgly_ddwly4mqr0000gn/T/fvid-aac-rate-88976",
+    "/var/folders/jx/ps1h62vx3gdgly_ddwly4mqr0000gn/T/fvid-aac-rate-91141"
+  ],
+  "preserved_dirs": [],
+  "execution_wrappers_removed": true,
+  "source_backup": "Retained until source commit;then remove after committed hash comparison.",
+  "fixtures_and_evidence_retained": true
+}

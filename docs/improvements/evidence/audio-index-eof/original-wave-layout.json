@@ -1,0 +1,59 @@
+{
+  "before_candidate_and_original": [
+    {
+      "owned_test_dir": "/var/folders/jx/ps1h62vx3gdgly_ddwly4mqr0000gn/T/fvid-aac-rate-88976",
+      "file_bytes": 16506,
+      "riff_declared_bytes": 16506,
+      "chunks": [
+        {
+          "tag": "fmt ",
+          "bytes": 40
+        },
+        {
+          "tag": "fact",
+          "bytes": 4
+        },
+        {
+          "tag": "data",
+          "bytes": 16392
+        },
+        {
+          "tag": "LIST",
+          "bytes": 26
+        }
+      ],
+      "pcm_bytes": 16392,
+      "pcm_sha256": "676b69a1289d472c8ed2a4b5da0a6ed32d4549e9e4fdd098b629ea796ac48dd3"
+    },
+    {
+      "owned_test_dir": "/var/folders/jx/ps1h62vx3gdgly_ddwly4mqr0000gn/T/fvid-aac-rate-91141",
+      "file_bytes": 16506,
+      "riff_declared_bytes": 16506,
+      "chunks": [
+        {
+          "tag": "fmt ",
+          "bytes": 40
+        },
+        {
+          "tag": "fact",
+          "bytes": 4
+        },
+        {
+          "tag": "data",
+          "bytes": 16392
+        },
+        {
+          "tag": "LIST",
+          "bytes": 26
+        }
+      ],
+      "pcm_bytes": 16392,
+      "pcm_sha256": "676b69a1289d472c8ed2a4b5da0a6ed32d4549e9e4fdd098b629ea796ac48dd3"
+    }
+  ],
+  "same_pcm": true,
+  "metadata_overhead_bytes": 34,
+  "old_hardcoded_header_bytes": 80,
+  "source_contract_follow_up": "FVID-0269",
+  "count_delta": 0
+}

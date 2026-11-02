@@ -504,7 +504,11 @@ impl Module {
     /// The packet for one row: the tempo it is played under and the cells every
     /// channel is told to act on. The tail packet holds no row, so it states the
     /// length it was given with nothing for any channel to do.
+    /// An index at or beyond `packets()` returns an empty vector.
     pub fn packet(&self, index: usize) -> Vec<u8> {
+        if index >= self.packets() {
+            return Vec::new();
+        }
         let mut data = Vec::new();
         match self.timeline.get(index) {
             Some(row) => write_row(self, row, self.row_continuations[index], &mut data),

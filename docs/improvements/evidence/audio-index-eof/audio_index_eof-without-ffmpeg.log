@@ -1,0 +1,10 @@
+
+running 5 tests
+test aiff_index_reaches_eof ... ok
+test au_index_reaches_eof ... ok
+test valid_indexed_packets_and_normal_playback_match_independent_pcm ... ok
+test wave_index_reaches_eof ... ok
+test actual_reader_worker_keeps_seek_and_end_of_stream ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.24s
+

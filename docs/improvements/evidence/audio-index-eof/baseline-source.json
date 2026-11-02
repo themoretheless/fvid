@@ -1,0 +1,10 @@
+{
+  "source_commit": "f87769a3c2a7c671ff75c4c5d1b12913d6cf1938",
+  "sha256": {
+    "src/playback/audio/wav.rs": "8f40dd58e67e1df3ee98cf50009d73524e640c7c320a88569b89681a8dc7d42b",
+    "src/playback/audio/aiff.rs": "4856e34565815b441e77571af00f2ac231a28c09fd3cde7f34cccf8d2886c5cf",
+    "src/playback/audio/au.rs": "5e2ba64efa356a77a837f8801c754f0efcd605c8ab6e3ecb1e81981a7c0c1b83",
+    "tests/audio_index_eof.rs": "ec49188cd12f46ebca8ba419de14571627136596d8e5c49248f67b53b5535f90",
+    "scripts/generate_audio_index_eof.py": "3fd3ffbeac76fbb25ab4a31f961c5f6061111f04e1d4e0de9019b37cfc7e183f"
+  }
+}

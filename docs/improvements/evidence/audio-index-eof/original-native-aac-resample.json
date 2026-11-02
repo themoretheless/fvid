@@ -1,0 +1,40 @@
+{
+  "source_commit": "f87769a3c2a7c671ff75c4c5d1b12913d6cf1938",
+  "command": [
+    "cargo",
+    "test",
+    "--locked",
+    "--offline",
+    "--no-default-features",
+    "--features",
+    "player",
+    "--test",
+    "native_aac_media",
+    "native_resample_cli_keeps_duration_and_sets_output_geometry",
+    "--",
+    "--exact",
+    "--nocapture"
+  ],
+  "exit_code": 101,
+  "candidate_restored": true,
+  "original_source": {
+    "src/playback/audio/wav.rs": "8f40dd58e67e1df3ee98cf50009d73524e640c7c320a88569b89681a8dc7d42b",
+    "src/playback/audio/aiff.rs": "4856e34565815b441e77571af00f2ac231a28c09fd3cde7f34cccf8d2886c5cf",
+    "src/playback/audio/au.rs": "5e2ba64efa356a77a837f8801c754f0efcd605c8ab6e3ecb1e81981a7c0c1b83",
+    "src/playback/audio/ac3.rs": "ced0e20e54e9eceb46fb5ca65706bb837227dfde844d71e0e07151794f1e08c7",
+    "src/container/xm.rs": "75cc47f3a2a8f10586b3d3158971ecb7c85288a748e2e18d47a04b9a0f4f9a82",
+    "crates/fvid-media/src/owned_flac.rs": "85889489c776506fe6d0bcfe33d984a2c1df53224fc32934b2cae770d0ad3b3c",
+    "crates/fvid-media/src/owned_mpeg_audio.rs": "f448f69d85636cad80a630a48d5b8d6ac77cadbdae1af159e8ef44c1c43010da",
+    "crates/fvid-media/src/owned_aac/adts_impl.rs": "7637df53d32490fab10ac2f41cfb5e3c84c811aee190414379ce92daff01385a"
+  },
+  "candidate_source": {
+    "src/playback/audio/wav.rs": "29cda4c35d3ca55bcc3ef103f0c5b1ad744ddf7c397ddbc49b9db1bcbc8a06c8",
+    "src/playback/audio/aiff.rs": "0549d5b5d52e4dbacee339bd8a50e8a82f98c4a8778fc9b48070e90985b69cb6",
+    "src/playback/audio/au.rs": "b54716c4533dcbacb3e61942bd09aec9cb2b2e0c6f82ae65f13d41aedebbff94",
+    "src/playback/audio/ac3.rs": "9f75b4ebda62f0081d92d59dff81aac687b9e63865170490ddda04b74455bcef",
+    "src/container/xm.rs": "61e77b6f24b00c893e940cf26baae2917deca76e83d7f392fd45e7865a16d43c",
+    "crates/fvid-media/src/owned_flac.rs": "18d16a9847fa012f11e3b11edc54029af23774026e6704c3271bdda7e5ab2c38",
+    "crates/fvid-media/src/owned_mpeg_audio.rs": "6a73f166c21781c610dddeea3d3a867e79498c420c18129900784576c4d901eb",
+    "crates/fvid-media/src/owned_aac/adts_impl.rs": "1c42a0be484843c07d8a67cd99ce3f87a9c3321cfeba9cc474859cb523a0e4a7"
+  }
+}

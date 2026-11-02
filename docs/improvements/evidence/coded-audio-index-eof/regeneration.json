@@ -1,0 +1,18 @@
+{
+  "files": 11,
+  "identical": true,
+  "generation_separate_from_tests": true,
+  "sha256": {
+    "neutral-video.mp4": "94344c6e9a7d6e44345541fc0e3e5120db912e79483033d7452fd39ee4865fe5",
+    "tone.aac": "917ff21379079f886a78418dc8fb2442e52b04b2eb9656f5c81f1e3dd1e5700c",
+    "tone.flac": "d14fb09f5677ebde944cdbb86ea3b942a15da615e8e277546f5e8247ec03ac6f",
+    "provisional-streaminfo.flac": "3fe5888e494efb196dd6f89be32b055596a0b49932391c56aa9b385e7ee746a1",
+    "tone.mp2": "858922b48356877c6f21cf28d205f71731aa36d8acb64c7ab419e6df447b2d45",
+    "tone.mp3": "dd6b3f6cdbd0dae865ba6e0c4431ddf07b7550543c07bad6c7614a22042071e5",
+    "tone.ac3": "e9fd53834d1543d52c9266bf9dac9c0d6aeddca08ec43e12a912bce04cccd635",
+    "tone.eac3": "49b60ee98666a3f52374f5137aa73ee44a69d4250261ccc99ebabb93b5752593",
+    "silence.mp1": "d49fead10e2cc2a4a6fb09135d88cca58b15dfb1bc62141e43b2f0b1545a5d4c",
+    "silent-row.xm": "86c6aa13c50657c8509c01e10ea6673403469ce99fa760025028ad11930f97a9",
+    "manifest.json": "1bdb6a58397ba12183113ec0978df22d9ad6e553ba374390fc31434cb5a07beb"
+  }
+}

@@ -574,8 +574,9 @@ impl Flac {
     }
 
     /// One frame's bytes, header included, as the decoder expects them.
+    /// An index at or beyond `packets()` returns an empty slice.
     pub fn packet(&self, index: usize) -> &[u8] {
-        let at = self.frames[index.min(self.frames.len() - 1)];
+        let Some(at) = self.frames.get(index) else { return &[]; };
         &self.data[at.start..at.start + at.size]
     }
 
