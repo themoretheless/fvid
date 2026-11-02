@@ -1,0 +1,21 @@
+{
+  "source_commit": "f81a0c71dccdaaef68fd51f1a0d0199697fa0997",
+  "verified_remote_commit": "f81a0c71dccdaaef68fd51f1a0d0199697fa0997",
+  "published_refs": [
+    "refs/heads/main",
+    "refs/heads/codex/deliver-fvid-20261029"
+  ],
+  "accepted_id": "FVID-0518",
+  "accepted_total": 518,
+  "qualification_source_hashes_verified": 2752,
+  "owned_outputs_removed": [
+    "/private/tmp/fvid-ac3-window-target-20261102",
+    "/private/tmp/fvid-ac3-window-bench-20261102",
+    "/private/tmp/fvid-ac3-window-qualification-20261102.py"
+  ],
+  "working_tree_clean_before_receipt": true,
+  "other_live_worktrees_clean": true,
+  "stashes_preserved": 4,
+  "active_historical_branches_preserved": true,
+  "verified_at": "2026-11-02T17:37:18.372079+00:00"
+}
