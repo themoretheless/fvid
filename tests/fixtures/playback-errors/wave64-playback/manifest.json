@@ -1,0 +1,431 @@
+{
+  "provenance": "Full GUID Wave64,header-inclusive64-bit sizes,8-byte alignment,GUID-prefix decoys and analytic/invented RIFF audio controls. No encoder,network or private media.",
+  "cases": [
+    {
+      "name": "classic-t1-b8-c1-base",
+      "control": "classic-t1-b8-c1.riff.wav",
+      "oracle": "classic-t1-b8-c1.f32le",
+      "frames": 4099,
+      "rate": 8000,
+      "channels": 1,
+      "data_bytes": 4099,
+      "mode": "base",
+      "external": true,
+      "variant": "base"
+    },
+    {
+      "name": "classic-t1-b8-c2-base",
+      "control": "classic-t1-b8-c2.riff.wav",
+      "oracle": "classic-t1-b8-c2.f32le",
+      "frames": 4099,
+      "rate": 44100,
+      "channels": 2,
+      "data_bytes": 8198,
+      "mode": "base",
+      "external": true,
+      "variant": "base"
+    },
+    {
+      "name": "classic-t1-b16-c1-base",
+      "control": "classic-t1-b16-c1.riff.wav",
+      "oracle": "classic-t1-b16-c1.f32le",
+      "frames": 4099,
+      "rate": 48000,
+      "channels": 1,
+      "data_bytes": 8198,
+      "mode": "base",
+      "external": true,
+      "variant": "base"
+    },
+    {
+      "name": "classic-t1-b16-c2-base",
+      "control": "classic-t1-b16-c2.riff.wav",
+      "oracle": "classic-t1-b16-c2.f32le",
+      "frames": 4099,
+      "rate": 8000,
+      "channels": 2,
+      "data_bytes": 16396,
+      "mode": "base",
+      "external": true,
+      "variant": "base"
+    },
+    {
+      "name": "classic-t1-b16-c2-nofact",
+      "control": "classic-t1-b16-c2.riff.wav",
+      "oracle": "classic-t1-b16-c2.f32le",
+      "frames": 4099,
+      "rate": 8000,
+      "channels": 2,
+      "data_bytes": 16396,
+      "mode": "base",
+      "external": true,
+      "variant": "nofact"
+    },
+    {
+      "name": "classic-t1-b16-c2-fact32",
+      "control": "classic-t1-b16-c2.riff.wav",
+      "oracle": "classic-t1-b16-c2.f32le",
+      "frames": 4099,
+      "rate": 8000,
+      "channels": 2,
+      "data_bytes": 16396,
+      "mode": "base",
+      "external": true,
+      "variant": "fact32"
+    },
+    {
+      "name": "classic-t1-b24-c1-base",
+      "control": "classic-t1-b24-c1.riff.wav",
+      "oracle": "classic-t1-b24-c1.f32le",
+      "frames": 4099,
+      "rate": 44100,
+      "channels": 1,
+      "data_bytes": 12297,
+      "mode": "base",
+      "external": true,
+      "variant": "base"
+    },
+    {
+      "name": "classic-t1-b24-c2-base",
+      "control": "classic-t1-b24-c2.riff.wav",
+      "oracle": "classic-t1-b24-c2.f32le",
+      "frames": 4099,
+      "rate": 48000,
+      "channels": 2,
+      "data_bytes": 24594,
+      "mode": "base",
+      "external": true,
+      "variant": "base"
+    },
+    {
+      "name": "classic-t1-b32-c1-base",
+      "control": "classic-t1-b32-c1.riff.wav",
+      "oracle": "classic-t1-b32-c1.f32le",
+      "frames": 4099,
+      "rate": 8000,
+      "channels": 1,
+      "data_bytes": 16396,
+      "mode": "base",
+      "external": true,
+      "variant": "base"
+    },
+    {
+      "name": "classic-t1-b32-c2-base",
+      "control": "classic-t1-b32-c2.riff.wav",
+      "oracle": "classic-t1-b32-c2.f32le",
+      "frames": 4099,
+      "rate": 44100,
+      "channels": 2,
+      "data_bytes": 32792,
+      "mode": "base",
+      "external": true,
+      "variant": "base"
+    },
+    {
+      "name": "classic-t3-b32-c1-base",
+      "control": "classic-t3-b32-c1.riff.wav",
+      "oracle": "classic-t3-b32-c1.f32le",
+      "frames": 4099,
+      "rate": 48000,
+      "channels": 1,
+      "data_bytes": 16396,
+      "mode": "base",
+      "external": true,
+      "variant": "base"
+    },
+    {
+      "name": "classic-t3-b32-c2-base",
+      "control": "classic-t3-b32-c2.riff.wav",
+      "oracle": "classic-t3-b32-c2.f32le",
+      "frames": 4099,
+      "rate": 8000,
+      "channels": 2,
+      "data_bytes": 32792,
+      "mode": "base",
+      "external": true,
+      "variant": "base"
+    },
+    {
+      "name": "classic-t3-b64-c1-base",
+      "control": "classic-t3-b64-c1.riff.wav",
+      "oracle": "classic-t3-b64-c1.f32le",
+      "frames": 4099,
+      "rate": 44100,
+      "channels": 1,
+      "data_bytes": 32792,
+      "mode": "base",
+      "external": true,
+      "variant": "base"
+    },
+    {
+      "name": "classic-t3-b64-c2-base",
+      "control": "classic-t3-b64-c2.riff.wav",
+      "oracle": "classic-t3-b64-c2.f32le",
+      "frames": 4099,
+      "rate": 48000,
+      "channels": 2,
+      "data_bytes": 65584,
+      "mode": "base",
+      "external": true,
+      "variant": "base"
+    },
+    {
+      "name": "classic-t6-b8-c1-base",
+      "control": "classic-t6-b8-c1.riff.wav",
+      "oracle": "classic-t6-b8-c1.f32le",
+      "frames": 4099,
+      "rate": 8000,
+      "channels": 1,
+      "data_bytes": 4099,
+      "mode": "base",
+      "external": true,
+      "variant": "base"
+    },
+    {
+      "name": "classic-t6-b8-c2-base",
+      "control": "classic-t6-b8-c2.riff.wav",
+      "oracle": "classic-t6-b8-c2.f32le",
+      "frames": 4099,
+      "rate": 44100,
+      "channels": 2,
+      "data_bytes": 8198,
+      "mode": "base",
+      "external": true,
+      "variant": "base"
+    },
+    {
+      "name": "classic-t7-b8-c1-base",
+      "control": "classic-t7-b8-c1.riff.wav",
+      "oracle": "classic-t7-b8-c1.f32le",
+      "frames": 4099,
+      "rate": 48000,
+      "channels": 1,
+      "data_bytes": 4099,
+      "mode": "base",
+      "external": true,
+      "variant": "base"
+    },
+    {
+      "name": "classic-t7-b8-c2-base",
+      "control": "classic-t7-b8-c2.riff.wav",
+      "oracle": "classic-t7-b8-c2.f32le",
+      "frames": 4099,
+      "rate": 8000,
+      "channels": 2,
+      "data_bytes": 8198,
+      "mode": "base",
+      "external": true,
+      "variant": "base"
+    },
+    {
+      "name": "speaker-six-base",
+      "control": "speaker-six.riff.wav",
+      "oracle": "speaker-six.f32le",
+      "frames": 4099,
+      "rate": 44100,
+      "channels": 6,
+      "data_bytes": 49188,
+      "mode": "base",
+      "external": true,
+      "variant": "base"
+    },
+    {
+      "name": "speaker-six-nofact",
+      "control": "speaker-six.riff.wav",
+      "oracle": "speaker-six.f32le",
+      "frames": 4099,
+      "rate": 44100,
+      "channels": 6,
+      "data_bytes": 49188,
+      "mode": "base",
+      "external": true,
+      "variant": "nofact"
+    },
+    {
+      "name": "speaker-six-fact32",
+      "control": "speaker-six.riff.wav",
+      "oracle": "speaker-six.f32le",
+      "frames": 4099,
+      "rate": 44100,
+      "channels": 6,
+      "data_bytes": 49188,
+      "mode": "base",
+      "external": true,
+      "variant": "fact32"
+    },
+    {
+      "name": "speaker-rear-float-base",
+      "control": "speaker-rear-float.riff.wav",
+      "oracle": "speaker-rear-float.f32le",
+      "frames": 4099,
+      "rate": 44100,
+      "channels": 2,
+      "data_bytes": 32792,
+      "mode": "base",
+      "external": true,
+      "variant": "base"
+    },
+    {
+      "name": "speaker-discrete-nine-base",
+      "control": "speaker-discrete-nine.riff.wav",
+      "oracle": "speaker-discrete-nine.f32le",
+      "frames": 4099,
+      "rate": 44100,
+      "channels": 9,
+      "data_bytes": 73782,
+      "mode": "base",
+      "external": true,
+      "variant": "base"
+    },
+    {
+      "name": "precision-twenty-base",
+      "control": "precision-twenty.riff.wav",
+      "oracle": "precision-twenty.f32le",
+      "frames": 4099,
+      "rate": 8000,
+      "channels": 1,
+      "data_bytes": 12297,
+      "mode": "base",
+      "external": true,
+      "variant": "base"
+    },
+    {
+      "name": "predictive-gsm-base",
+      "control": "predictive-gsm.riff.wav",
+      "oracle": null,
+      "frames": 4480,
+      "rate": 8000,
+      "channels": 1,
+      "data_bytes": 910,
+      "mode": "base",
+      "external": false,
+      "variant": "base"
+    },
+    {
+      "name": "predictive-truespeech-base",
+      "control": "predictive-truespeech.riff.wav",
+      "oracle": null,
+      "frames": 4800,
+      "rate": 8000,
+      "channels": 1,
+      "data_bytes": 640,
+      "mode": "base",
+      "external": false,
+      "variant": "base"
+    },
+    {
+      "name": "predictive-g722-base",
+      "control": "predictive-g722.riff.wav",
+      "oracle": null,
+      "frames": 6144,
+      "rate": 16000,
+      "channels": 1,
+      "data_bytes": 3072,
+      "mode": "base",
+      "external": false,
+      "variant": "base"
+    },
+    {
+      "name": "predictive-creative-base",
+      "control": "predictive-creative.riff.wav",
+      "oracle": null,
+      "frames": 6144,
+      "rate": 8000,
+      "channels": 1,
+      "data_bytes": 3072,
+      "mode": "base",
+      "external": false,
+      "variant": "base"
+    },
+    {
+      "name": "predictive-g726-2-base",
+      "control": "predictive-g726-2.riff.wav",
+      "oracle": null,
+      "frames": 6144,
+      "rate": 8000,
+      "channels": 1,
+      "data_bytes": 1536,
+      "mode": "base",
+      "external": false,
+      "variant": "base"
+    },
+    {
+      "name": "predictive-g726-3-base",
+      "control": "predictive-g726-3.riff.wav",
+      "oracle": null,
+      "frames": 6144,
+      "rate": 8000,
+      "channels": 1,
+      "data_bytes": 2304,
+      "mode": "base",
+      "external": false,
+      "variant": "base"
+    },
+    {
+      "name": "predictive-g726-4-base",
+      "control": "predictive-g726-4.riff.wav",
+      "oracle": null,
+      "frames": 6144,
+      "rate": 8000,
+      "channels": 1,
+      "data_bytes": 3072,
+      "mode": "base",
+      "external": false,
+      "variant": "base"
+    },
+    {
+      "name": "predictive-g726-5-base",
+      "control": "predictive-g726-5.riff.wav",
+      "oracle": null,
+      "frames": 6144,
+      "rate": 8000,
+      "channels": 1,
+      "data_bytes": 3840,
+      "mode": "base",
+      "external": false,
+      "variant": "base"
+    }
+  ],
+  "bad": [
+    {
+      "file": "bad-riff-guid.w64",
+      "needle": "Wave64",
+      "unsupported": false
+    },
+    {
+      "file": "bad-wave-guid.w64",
+      "needle": "Wave64",
+      "unsupported": false
+    },
+    {
+      "file": "small-file-size.w64",
+      "needle": "Wave64",
+      "unsupported": false
+    },
+    {
+      "file": "huge-file-size.w64",
+      "needle": "file limit",
+      "unsupported": false
+    },
+    {
+      "file": "small-chunk-size.w64",
+      "needle": "chunk size",
+      "unsupported": false
+    },
+    {
+      "file": "overflow-chunk.w64",
+      "needle": "extent",
+      "unsupported": false
+    },
+    {
+      "file": "multiple-data.w64",
+      "needle": "multiple Wave64 data",
+      "unsupported": true
+    },
+    {
+      "file": "conflicting-fmt.w64",
+      "needle": "conflicting Wave64 fmt",
+      "unsupported": false
+    }
+  ]
+}

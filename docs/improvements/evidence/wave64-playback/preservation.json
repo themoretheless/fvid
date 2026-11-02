@@ -1,0 +1,12 @@
+{
+  "status": "incomplete; not accepted; not merged or pushed",
+  "base": "f2eb89f56cc3660ed9536979cd8a4576d90a8826",
+  "command": "CARGO_TARGET_DIR=/private/tmp/fvid-wave64-target-20261103 CARGO_BUILD_JOBS=4 cargo test --locked --offline --no-default-features --features player --test wave64_playback -- --test-threads=2",
+  "result": {
+    "passed": 1,
+    "failed": 4
+  },
+  "evidence": "before.log",
+  "reason": "Native Wave64 support is absent. Synthetic cases and tests are preparation, not an accepted improvement.",
+  "accepted_count_unchanged": 527
+}
