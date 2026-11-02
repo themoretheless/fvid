@@ -1,0 +1,10 @@
+
+running 5 tests
+test missing_wave64_tail_and_large_declared_data_fail_eof_after_exact_bounded_prefix ... ok
+test riff_waveform_and_neutral_video_controls_are_independent_of_wave64 ... ok
+test wave64_metadata_failures_refuse_specifically_and_limits_remain_enforced ... ok
+test wave64_sizes_tables_and_finite_fields_preserve_exact_native_pcm_and_packets ... ok
+test actual_workers_play_wave64_through_seek_and_eof ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 2.22s
+

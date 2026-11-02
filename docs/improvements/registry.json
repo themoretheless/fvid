@@ -1,8 +1,8 @@
 {
   "target": 1000,
   "counting_rule": "One independently confirmed problem or useful capability; fixture variants and baseline integration repairs are excluded. Only accepted entries count.",
-  "accepted_count": 527,
-  "next_id": "FVID-0528",
+  "accepted_count": 528,
+  "next_id": "FVID-0529",
   "entries": [
     {
       "id": "FVID-0001",
@@ -5987,6 +5987,17 @@
       "additional_regressions": [
         "src/playback/audio/wav.rs"
       ]
+    },
+    {
+      "id": "FVID-0528",
+      "batch": 539,
+      "title": "Play bounded Sony Wave64 streams natively with complete GUID and extent checks",
+      "source": "src/playback/audio/wav_wave64.rs",
+      "regression": "tests/wave64_playback.rs",
+      "before": "Authored valid Wave64 streams failed to open as not a RIFF/WAVE file; baseline independent RIFF/video control passed while four format tests failed.",
+      "result": "Full GUIDs, header-inclusive 64-bit sizes and eight-byte alignment feed shared WAVE admission without payload rewriting. Exact PCM/packets/native seek and EOF pass for 32 cases, 128 worker sessions; invalid extents refuse specifically, large declared payloads retain only available samples and fail EOF. Player factory accepts w64 and case-insensitive paths.",
+      "status": "accepted",
+      "validation": "batch-539-validation.json"
     }
   ]
 }

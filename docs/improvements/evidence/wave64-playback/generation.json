@@ -1,0 +1,6 @@
+{
+  "byte_identical": true,
+  "files": 97,
+  "generator": "scripts/generate_wave64_playback.py",
+  "external_tools_required": false
+}

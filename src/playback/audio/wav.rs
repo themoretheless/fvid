@@ -27,6 +27,8 @@
 
 #[path = "wav_rf64.rs"]
 mod rf64;
+#[path = "wav_wave64.rs"]
+mod wave64;
 
 use crate::audio::{AudioStream, AudioTrack, EncodedPacket};
 use crate::codec::pcm_decoder::PcmFormat;
@@ -281,7 +283,7 @@ pub struct Wav {
     // None is a classic header; Some(0) explicitly leaves roles unassigned.
     speaker_mask: Option<u32>,
     big_endian: bool,
-    rf64_extent: Option<(u64, usize)>,
+    known_extent: Option<(u64, usize, &'static str)>,
 }
 
 impl Wav {
@@ -300,6 +302,7 @@ impl Wav {
                 limits.file_bytes
             )));
         }
+        if bytes.starts_with(b"riff") { return wave64::parse(bytes, limits); }
         if bytes.len() < 12 || !matches!(&bytes[..4], b"RIFF" | b"RIFX" | b"RF64") || &bytes[8..12] != b"WAVE" {
             return Err(invalid("not a RIFF/WAVE file"));
         }
@@ -312,7 +315,7 @@ impl Wav {
         let mut rf64 = if &bytes[..4] == b"RF64" {
             Some(rf64::Rf64::parse(bytes, limits)?)
         } else { None };
-        let rf64_extent = rf64.as_ref().map(|r| (r.end, bytes.len()));
+        let known_extent = rf64.as_ref().map(|r| (r.end, bytes.len(), "RF64"));
         let walk_end = rf64.as_ref().map_or(bytes.len(), |r| r.end.min(bytes.len() as u64) as usize);
         let mut fmt = None;
         let mut data = None;
@@ -404,10 +407,14 @@ impl Wav {
                 .map_err(|_| invalid("RF64 sample count exceeds address space"))?),
             (fact, _) => fact,
         };
-        let (pcm, speaker_mask, padding_bits) = fmt.ok_or_else(|| invalid("a Wave file with no fmt chunk"))?;
-        let (start, end, declared_bytes) =
-            data.ok_or_else(|| invalid("a Wave file with no data chunk"))?;
-        let samples = &bytes[start..end];
+        let format = fmt.ok_or_else(|| invalid("a Wave file with no fmt chunk"))?;
+        let (start, end, declared_bytes) = data.ok_or_else(|| invalid("a Wave file with no data chunk"))?;
+        Self::from_samples(&bytes[start..end], format, declared_bytes, fact, big_endian, known_extent, limits)
+    }
+
+    fn from_samples(samples: &[u8], format: (Pcm, Option<u32>, u8), declared_bytes: usize,
+        fact: Option<usize>, big_endian: bool, known_extent: Option<(u64, usize, &'static str)>, limits: &Limits) -> Result<Self> {
+        let (pcm, speaker_mask, padding_bits) = format;
         if samples.is_empty() {
             return Err(invalid("a Wave file with no samples in it"));
         }
@@ -452,7 +459,7 @@ impl Wav {
             data: samples.to_vec(),
             speaker_mask,
             big_endian,
-            rf64_extent,
+            known_extent,
         })
     }
 
@@ -837,11 +844,11 @@ impl AudioStream for WavAudioReader {
     fn validate_eof(&self) -> Result<()> {
         let declared = self.wav.declared_bytes;
         let available = self.wav.data.len();
-        if (self.wav.rf64_extent.is_some() || declared != u32::MAX as usize) && available < declared {
+        if (self.wav.known_extent.is_some() || declared != u32::MAX as usize) && available < declared {
             return Err(invalid(&format!("Wave data payload is truncated: declared {declared} bytes, available {available}")));
         }
-        if let Some((expected, actual)) = self.wav.rf64_extent && expected > actual as u64 {
-            return Err(invalid("RF64 file extent is truncated"));
+        if let Some((expected, actual, kind)) = self.wav.known_extent && expected > actual as u64 {
+            return Err(invalid(&format!("{kind} file extent is truncated")));
         }
         Ok(())
     }
@@ -2160,6 +2167,26 @@ mod rf64_storage_limits {
             assert!(reader.wav.data.capacity() <= 8192);
             let packet = reader.next_packet().unwrap().unwrap();
             assert_eq!(packet.data.len(), 2048);
+            assert!(packet.data.capacity() <= 4096);
+            assert!(reader.validate_eof().is_err());
+        }
+    }
+}
+
+#[cfg(all(test, target_pointer_width = "64"))]
+mod wave64_storage_limits {
+    use super::*;
+    #[test]
+    fn large_wave64_declarations_do_not_reserve_declared_payload() {
+        for bytes in [
+            include_bytes!("../../../tests/fixtures/playback-errors/wave64-playback/large-declared.w64").as_slice(),
+            include_bytes!("../../../tests/fixtures/playback-errors/wave64-playback/large64-declared.w64").as_slice(),
+        ] {
+            let limits = Limits { file_bytes: 1usize << 34, data_bytes: 1usize << 34, ..Default::default() };
+            let mut reader = WavAudioReader::open(bytes, limits).unwrap();
+            assert_eq!(reader.wav.data.len(), 4097);
+            assert!(reader.wav.data.capacity() <= 8192);
+            let packet = reader.next_packet().unwrap().unwrap();
             assert!(packet.data.capacity() <= 4096);
             assert!(reader.validate_eof().is_err());
         }

@@ -1,0 +1,122 @@
+[
+  {
+    "name": "integration",
+    "command": [
+      "cargo",
+      "test",
+      "--locked",
+      "--offline",
+      "--no-default-features",
+      "--features",
+      "player",
+      "--test",
+      "rf64_playback",
+      "--test",
+      "rifx_playback",
+      "--test",
+      "pcm_padding_playback",
+      "--test",
+      "avi_extensible_pcm",
+      "--test",
+      "wave_speaker_playback",
+      "--test",
+      "wav_valid_bits",
+      "--test",
+      "wav_unsigned8",
+      "--test",
+      "wav_aiff_au_regressions",
+      "--test",
+      "wave_ogg_flac_plan_regressions",
+      "--test",
+      "audio_reader_eof",
+      "--test",
+      "block_audio_eof",
+      "--test",
+      "audio_index_eof",
+      "--test",
+      "coded_seek_history",
+      "--test",
+      "coded_window_clock",
+      "--test",
+      "aifc_g711_original_width",
+      "--test",
+      "g711_native",
+      "--",
+      "--test-threads=2",
+      "--test",
+      "wave64_playback"
+    ],
+    "exit_code": 0
+  },
+  {
+    "name": "wav-unit",
+    "command": [
+      "cargo",
+      "test",
+      "--locked",
+      "--offline",
+      "--no-default-features",
+      "--features",
+      "player",
+      "--lib",
+      "playback_wav"
+    ],
+    "exit_code": 0
+  },
+  {
+    "name": "player-factory",
+    "command": [
+      "cargo",
+      "test",
+      "--locked",
+      "--offline",
+      "--no-default-features",
+      "--features",
+      "player",
+      "--bin",
+      "fvid-player",
+      "native_wave64_file_regressions"
+    ],
+    "exit_code": 0
+  },
+  {
+    "name": "player-queue",
+    "command": [
+      "cargo",
+      "test",
+      "--locked",
+      "--offline",
+      "--no-default-features",
+      "--features",
+      "player",
+      "--bin",
+      "fvid-player",
+      "player_queue_and_geometry_regressions"
+    ],
+    "exit_code": 0
+  },
+  {
+    "name": "core-check",
+    "command": [
+      "cargo",
+      "check",
+      "--locked",
+      "--offline",
+      "--no-default-features"
+    ],
+    "exit_code": 0
+  },
+  {
+    "name": "player-check",
+    "command": [
+      "cargo",
+      "check",
+      "--locked",
+      "--offline",
+      "--no-default-features",
+      "--features",
+      "player"
+    ],
+    "exit_code": 0
+  }
+]

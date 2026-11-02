@@ -3670,7 +3670,7 @@ impl Player {
                 .add_filter(
                     "Audio",
                     &[
-                        "mp3", "mp2", "mp1", "flac", "aac", "ac3", "wav", "aif", "aiff", "au", "snd",
+                        "mp3", "mp2", "mp1", "flac", "aac", "ac3", "wav", "w64", "aif", "aiff", "au", "snd",
                         "ogg", "wv", "wvc", "mid", "xm",
                     ],
                 ),
@@ -5424,7 +5424,7 @@ fn playlist_osd(index: usize, len: usize) -> String {
 fn playable_path(path: &Path) -> bool {
     matches!(path.extension().and_then(|ext| ext.to_str()).map(str::to_ascii_lowercase).as_deref(),
         Some("y4m" | "mp4" | "mov" | "m4v" | "m4a" | "webm" | "mkv" | "mka" | "avi" |
-            "mp3" | "mp2" | "mp1" | "flac" | "aac" | "ac3" | "wav" | "aif" | "aiff" |
+            "mp3" | "mp2" | "mp1" | "flac" | "aac" | "ac3" | "wav" | "w64" | "aif" | "aiff" |
             "au" | "snd" | "ogg" | "wv" | "wvc" | "mid" | "xm"))
 }
 
@@ -13281,3 +13281,26 @@ mod track_source_lifetime_regressions;
 #[cfg(test)]
 #[path = "player_short_track_clock_tests.rs"]
 mod short_track_clock_regressions;
+
+#[cfg(test)]
+mod native_wave64_file_regressions {
+    use super::*;
+    #[test]
+    fn wave64_paths_and_native_factory_preserve_pcm() {
+        assert!(playable_path(Path::new("synthetic.w64")));
+        assert!(playable_path(Path::new("synthetic.W64")));
+        let root = Path::new(env!("CARGO_MANIFEST_DIR")).join("tests/fixtures/playback-errors/wave64-playback");
+        let path = root.join("classic-t1-b16-c2-base.w64");
+        assert_eq!(expand_inputs(&[path.clone()]), vec![path.clone()]);
+        let mut stream = AUDIO_READERS.iter().find_map(|attempt| attempt.open(&path, None)).expect("native Wave64 factory");
+        let mut decoder = stream.make_decoder().unwrap();
+        let mut out = Vec::new();
+        while let Some(packet) = stream.next_packet().unwrap() {
+            if let Some(decoded) = decoder.decode_packet(&packet.data, stream.decoder_stamp(&packet), packet.duration as u64).unwrap() {
+                if let Some(packet) = stream.present_decoded(decoded.packet, decoded.source_pts).unwrap() { out.extend(packet.data); }
+            }
+        }
+        stream.validate_eof().unwrap();
+        assert_eq!(out, std::fs::read(root.join("classic-t1-b16-c2.f32le")).unwrap());
+    }
+}
