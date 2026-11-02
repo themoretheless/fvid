@@ -2,7 +2,7 @@
 use super::{Limits, Result, invalid};
 pub(super) struct Rf64<'a> {
     pub end: u64,
-    pub samples: u64,
+    pub samples: Option<u64>,
     pub next: usize,
     data: u64,
     table: &'a [u8],
@@ -65,7 +65,8 @@ impl<'a> Rf64<'a> {
         });
         Ok(Self {
             end: riff_end,
-            samples: u64::from_le_bytes(body[16..24].try_into().unwrap()),
+            // BW64 reserves these words; they are not a frame count.
+            samples: if bytes.starts_with(b"BW64") { None } else { Some(u64::from_le_bytes(body[16..24].try_into().unwrap())) },
             next,
             data: u64::from_le_bytes(body[8..16].try_into().unwrap()),
             table,

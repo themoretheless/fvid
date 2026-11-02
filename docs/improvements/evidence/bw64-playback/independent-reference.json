@@ -1,0 +1,150 @@
+{
+  "version": "ffmpeg version 9.0.2 Copyright (c) 2000-2026 the FFmpeg developers",
+  "scope": "16 base-marker PCM/float/extensible signals;other variants use independently decoded RIFF controls",
+  "cases": [
+    {
+      "file": "classic-t1-b8-c1-base.bw64.wav",
+      "exit_code": 0,
+      "byte_identical": true,
+      "stderr": "",
+      "decoded_sha256": "af18b5050aa8b400824b30843d0bfc8d9e41d97d78341f06d3ab5b1ccd0d8d80",
+      "expected_sha256": "af18b5050aa8b400824b30843d0bfc8d9e41d97d78341f06d3ab5b1ccd0d8d80",
+      "source_sha256": "152319f575a0f1f9c8231a5425caa332284b22ebb8c5cd36d5a23598a215127f"
+    },
+    {
+      "file": "classic-t1-b8-c2-base.bw64.wav",
+      "exit_code": 0,
+      "byte_identical": true,
+      "stderr": "",
+      "decoded_sha256": "7885b9be9664c11131f2542e982c8ae7b808bda0ccadb5f3e45acc6292b807d6",
+      "expected_sha256": "7885b9be9664c11131f2542e982c8ae7b808bda0ccadb5f3e45acc6292b807d6",
+      "source_sha256": "89c38f4dafe51a21cf0a693d9bf2379742ea50e3ba94786dce9c74cf5087db1e"
+    },
+    {
+      "file": "classic-t1-b16-c1-base.bw64.wav",
+      "exit_code": 0,
+      "byte_identical": true,
+      "stderr": "",
+      "decoded_sha256": "402c6f2b4607fd33af49b944d7b129505c35bc3b2147a477c33b2457ea6ba1f1",
+      "expected_sha256": "402c6f2b4607fd33af49b944d7b129505c35bc3b2147a477c33b2457ea6ba1f1",
+      "source_sha256": "e249c788d9710041f01c4a6034279a4b327397443e1bd54e72ac765e69be605f"
+    },
+    {
+      "file": "classic-t1-b16-c2-base.bw64.wav",
+      "exit_code": 0,
+      "byte_identical": true,
+      "stderr": "",
+      "decoded_sha256": "9fde4460191c5cda393fb7534d0000afd4eac82154bc3d45212588fa1fe886d3",
+      "expected_sha256": "9fde4460191c5cda393fb7534d0000afd4eac82154bc3d45212588fa1fe886d3",
+      "source_sha256": "64328a3b8fa415db99298925f5f2f8f45d5127f2f7dc68057eaad07d1935f01f"
+    },
+    {
+      "file": "classic-t1-b24-c1-base.bw64.wav",
+      "exit_code": 0,
+      "byte_identical": true,
+      "stderr": "",
+      "decoded_sha256": "bf0f5a8b9ff32b32a75cd218e03ea6a93f1ee22fa413a928173af33291046cc0",
+      "expected_sha256": "bf0f5a8b9ff32b32a75cd218e03ea6a93f1ee22fa413a928173af33291046cc0",
+      "source_sha256": "8a1c64aaa31bd3a6f4f743b81e27d9ba8b61eb4cabb87d43dac41a2c2b256b95"
+    },
+    {
+      "file": "classic-t1-b24-c2-base.bw64.wav",
+      "exit_code": 0,
+      "byte_identical": true,
+      "stderr": "",
+      "decoded_sha256": "55ae1ba60abb03113880d9bb40cde9c1c7411e3b93126deda2f75343b8d080e6",
+      "expected_sha256": "55ae1ba60abb03113880d9bb40cde9c1c7411e3b93126deda2f75343b8d080e6",
+      "source_sha256": "499c0ed5c8fc9e2288feb36fcc056b30299447864224c8953ca20301b77e3156"
+    },
+    {
+      "file": "classic-t1-b32-c1-base.bw64.wav",
+      "exit_code": 0,
+      "byte_identical": true,
+      "stderr": "",
+      "decoded_sha256": "4ad630d3c5b61ba51d73c17e5cf7d6384516f45373a70561582968289a64b23a",
+      "expected_sha256": "4ad630d3c5b61ba51d73c17e5cf7d6384516f45373a70561582968289a64b23a",
+      "source_sha256": "2451ec72e8bcba9182455420bc9257be8e219a3e305a5f26549a12b644f37b3e"
+    },
+    {
+      "file": "classic-t1-b32-c2-base.bw64.wav",
+      "exit_code": 0,
+      "byte_identical": true,
+      "stderr": "",
+      "decoded_sha256": "839fbde1ae8e8d4ef7cd30c3b5356baa9753f12411c143c3aee3454011c9435f",
+      "expected_sha256": "839fbde1ae8e8d4ef7cd30c3b5356baa9753f12411c143c3aee3454011c9435f",
+      "source_sha256": "a40daf7f0908766db7a374035bdd5b3f66305a88f57c0142e7fe014fd25feeb4"
+    },
+    {
+      "file": "classic-t3-b32-c1-base.bw64.wav",
+      "exit_code": 0,
+      "byte_identical": true,
+      "stderr": "",
+      "decoded_sha256": "d19b1fe0b3c811db7ce28984f6e92bea3e59b80d54b041f0beed2910ccadb016",
+      "expected_sha256": "d19b1fe0b3c811db7ce28984f6e92bea3e59b80d54b041f0beed2910ccadb016",
+      "source_sha256": "a6d5cf447739562e4ab45cdff7942762b4f85f406a6d68c2cfc8191efc63789a"
+    },
+    {
+      "file": "classic-t3-b32-c2-base.bw64.wav",
+      "exit_code": 0,
+      "byte_identical": true,
+      "stderr": "",
+      "decoded_sha256": "d04b49ddc44b856919c0b4590ceb006ec61db8c9c289e6017241f32847ca8587",
+      "expected_sha256": "d04b49ddc44b856919c0b4590ceb006ec61db8c9c289e6017241f32847ca8587",
+      "source_sha256": "192edf9e98c5b69bd12b3233834afaa4043774f9c27b18a70bf409f5806145f9"
+    },
+    {
+      "file": "classic-t3-b64-c1-base.bw64.wav",
+      "exit_code": 0,
+      "byte_identical": true,
+      "stderr": "",
+      "decoded_sha256": "d19b1fe0b3c811db7ce28984f6e92bea3e59b80d54b041f0beed2910ccadb016",
+      "expected_sha256": "d19b1fe0b3c811db7ce28984f6e92bea3e59b80d54b041f0beed2910ccadb016",
+      "source_sha256": "6e11b37bdfd7ce5667d24bc364b83d96e3acb513e124d30527790f58a7e451bc"
+    },
+    {
+      "file": "classic-t3-b64-c2-base.bw64.wav",
+      "exit_code": 0,
+      "byte_identical": true,
+      "stderr": "",
+      "decoded_sha256": "d04b49ddc44b856919c0b4590ceb006ec61db8c9c289e6017241f32847ca8587",
+      "expected_sha256": "d04b49ddc44b856919c0b4590ceb006ec61db8c9c289e6017241f32847ca8587",
+      "source_sha256": "e35b38a6bb48c7b4afaff974b53abcf40f936e08566683fb4c18bca7e9e73b16"
+    },
+    {
+      "file": "speaker-six-base.bw64.wav",
+      "exit_code": 0,
+      "byte_identical": true,
+      "stderr": "",
+      "decoded_sha256": "779bf07ebabbc548ed8f57e017d433ac5bcd5164d890d1b4d8572338f60f2283",
+      "expected_sha256": "779bf07ebabbc548ed8f57e017d433ac5bcd5164d890d1b4d8572338f60f2283",
+      "source_sha256": "f9fea7372dd940ac4bc9be44777347dc7be1e4978855a550ac32aa7554ab513f"
+    },
+    {
+      "file": "speaker-rear-float-base.bw64.wav",
+      "exit_code": 0,
+      "byte_identical": true,
+      "stderr": "",
+      "decoded_sha256": "3bc7f8cd3df2972477842de68192542905221cc332e864f91b4c9468e97cd78d",
+      "expected_sha256": "3bc7f8cd3df2972477842de68192542905221cc332e864f91b4c9468e97cd78d",
+      "source_sha256": "92f8f2a8bca3e407374ae2ea1c7364f0b3577fd9bb8716bcc1593133f604cd45"
+    },
+    {
+      "file": "speaker-discrete-nine-base.bw64.wav",
+      "exit_code": 0,
+      "byte_identical": true,
+      "stderr": "",
+      "decoded_sha256": "2feddb7176b6c80d6ac9c920c36a5b6e42f76ba761bf1ed2ee7e59d2e1af1355",
+      "expected_sha256": "2feddb7176b6c80d6ac9c920c36a5b6e42f76ba761bf1ed2ee7e59d2e1af1355",
+      "source_sha256": "06e5fb7f6961a07a7e259c69259ed8ed81c227d141355902b4ca90d1b5f160dc"
+    },
+    {
+      "file": "precision-twenty-base.bw64.wav",
+      "exit_code": 0,
+      "byte_identical": true,
+      "stderr": "",
+      "decoded_sha256": "98bf918b47c6f4f3c0cd220583831e4cd12c4a3d17698d22a20d963a2ecc4195",
+      "expected_sha256": "98bf918b47c6f4f3c0cd220583831e4cd12c4a3d17698d22a20d963a2ecc4195",
+      "source_sha256": "19422070adc0c26b108b300e8f4be545445df004bdc6bdbbc8a1aec004b7d687"
+    }
+  ]
+}

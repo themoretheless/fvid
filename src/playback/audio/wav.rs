@@ -303,7 +303,7 @@ impl Wav {
             )));
         }
         if bytes.starts_with(b"riff") { return wave64::parse(bytes, limits); }
-        if bytes.len() < 12 || !matches!(&bytes[..4], b"RIFF" | b"RIFX" | b"RF64") || &bytes[8..12] != b"WAVE" {
+        if bytes.len() < 12 || !matches!(&bytes[..4], b"RIFF" | b"RIFX" | b"RF64" | b"BW64") || &bytes[8..12] != b"WAVE" {
             return Err(invalid("not a RIFF/WAVE file"));
         }
         let big_endian = &bytes[..4] == b"RIFX";
@@ -312,10 +312,11 @@ impl Wav {
         } else {
             u32::from_le_bytes(word)
         };
-        let mut rf64 = if &bytes[..4] == b"RF64" {
+        let bw64 = &bytes[..4] == b"BW64";
+        let mut rf64 = if matches!(&bytes[..4], b"RF64" | b"BW64") {
             Some(rf64::Rf64::parse(bytes, limits)?)
         } else { None };
-        let known_extent = rf64.as_ref().map(|r| (r.end, bytes.len(), "RF64"));
+        let known_extent = rf64.as_ref().map(|r| (r.end, bytes.len(), if bw64 { "BW64" } else { "RF64" }));
         let walk_end = rf64.as_ref().map_or(bytes.len(), |r| r.end.min(bytes.len() as u64) as usize);
         let mut fmt = None;
         let mut data = None;
@@ -364,10 +365,10 @@ impl Wav {
             {
                 return Err(invalid("conflicting Wave fmt chunks"));
             }
-            let stated_fact = if tag == b"fact" {
+            let stated_fact = if tag == b"fact" && !bw64 {
                 if let Some(field) = bytes.get(body..end).and_then(|chunk| chunk.get(..4)) {
                     let count = number(field.try_into().unwrap());
-                    let count = if count == u32::MAX && let Some(r) = &rf64 { r.samples } else { u64::from(count) };
+                    let count = if count == u32::MAX { rf64.as_ref().and_then(|r| r.samples).unwrap_or(u64::from(count)) } else { u64::from(count) };
                     Some(usize::try_from(count).map_err(|_| invalid("RF64 sample count exceeds address space"))?)
                 } else { None }
             } else { None };
@@ -381,7 +382,7 @@ impl Wav {
                 // redundant ways of saying how long the track is, so it is kept for the
                 // codings whose own byte rate says nothing - see `parse`. Audio
                 // lists refuse above; other metadata does not change the sample run.
-                b"fact" => fact.is_none(),
+                b"fact" => !bw64 && fact.is_none(),
                 _ => false,
             };
             if first_unseen {
@@ -403,8 +404,8 @@ impl Wav {
             }
         }
         let fact = match (fact, &rf64) {
-            (None, Some(r)) => Some(usize::try_from(r.samples)
-                .map_err(|_| invalid("RF64 sample count exceeds address space"))?),
+            (None, Some(r)) => r.samples.map(usize::try_from).transpose()
+                .map_err(|_| invalid("RF64 sample count exceeds address space"))?,
             (fact, _) => fact,
         };
         let format = fmt.ok_or_else(|| invalid("a Wave file with no fmt chunk"))?;
@@ -2181,6 +2182,26 @@ mod wave64_storage_limits {
         for bytes in [
             include_bytes!("../../../tests/fixtures/playback-errors/wave64-playback/large-declared.w64").as_slice(),
             include_bytes!("../../../tests/fixtures/playback-errors/wave64-playback/large64-declared.w64").as_slice(),
+        ] {
+            let limits = Limits { file_bytes: 1usize << 34, data_bytes: 1usize << 34, ..Default::default() };
+            let mut reader = WavAudioReader::open(bytes, limits).unwrap();
+            assert_eq!(reader.wav.data.len(), 4097);
+            assert!(reader.wav.data.capacity() <= 8192);
+            let packet = reader.next_packet().unwrap().unwrap();
+            assert!(packet.data.capacity() <= 4096);
+            assert!(reader.validate_eof().is_err());
+        }
+    }
+}
+
+#[cfg(all(test, target_pointer_width = "64"))]
+mod bw64_storage_limits {
+    use super::*;
+    #[test]
+    fn large_bw64_declarations_do_not_reserve_declared_payload() {
+        for bytes in [
+            include_bytes!("../../../tests/fixtures/playback-errors/bw64-playback/large-declared.wav").as_slice(),
+            include_bytes!("../../../tests/fixtures/playback-errors/bw64-playback/large64-declared.wav").as_slice(),
         ] {
             let limits = Limits { file_bytes: 1usize << 34, data_bytes: 1usize << 34, ..Default::default() };
             let mut reader = WavAudioReader::open(bytes, limits).unwrap();

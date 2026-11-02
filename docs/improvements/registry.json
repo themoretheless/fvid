@@ -1,8 +1,8 @@
 {
   "target": 1000,
   "counting_rule": "One independently confirmed problem or useful capability; fixture variants and baseline integration repairs are excluded. Only accepted entries count.",
-  "accepted_count": 528,
-  "next_id": "FVID-0529",
+  "accepted_count": 529,
+  "next_id": "FVID-0530",
   "entries": [
     {
       "id": "FVID-0001",
@@ -5998,6 +5998,17 @@
       "result": "Full GUIDs, header-inclusive 64-bit sizes and eight-byte alignment feed shared WAVE admission without payload rewriting. Exact PCM/packets/native seek and EOF pass for 32 cases, 128 worker sessions; invalid extents refuse specifically, large declared payloads retain only available samples and fail EOF. Player factory accepts w64 and case-insensitive paths.",
       "status": "accepted",
       "validation": "batch-539-validation.json"
+    },
+    {
+      "id": "FVID-0529",
+      "batch": 540,
+      "title": "Play flat PCM BW64 while ignoring reserved ds64 dummy words",
+      "source": "src/playback/audio/wav_rf64.rs",
+      "regression": "tests/bw64_playback.rs",
+      "before": "Native reader rejected valid authored BW64. Baseline RIFF/video control passed and four format tests failed; treating BW64 as RF64 would also incorrectly expose reserved dummy words as declared frame counts.",
+      "result": "BW64 shares checked size resolution and existing WAVE sample admission, with optional RF64-only sample counts. Reserved dummy words and RF64-only fact replacement do not influence BW64 timing. All 64 PCM cases preserve exact samples, packets, seek and EOF; 256 playback-worker sessions and native factory pass. Specific malformed metadata refusals and bounded large-declaration prefix/EOF checks pass.",
+      "status": "accepted",
+      "validation": "batch-540-validation.json"
     }
   ]
 }

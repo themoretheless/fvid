@@ -13304,3 +13304,24 @@ mod native_wave64_file_regressions {
         assert_eq!(out, std::fs::read(root.join("classic-t1-b16-c2.f32le")).unwrap());
     }
 }
+
+#[cfg(test)]
+mod native_bw64_file_regressions {
+    use super::*;
+    #[test]
+    fn bw64_native_factory_preserves_pcm() {
+        let root = Path::new(env!("CARGO_MANIFEST_DIR")).join("tests/fixtures/playback-errors/bw64-playback");
+        let path = root.join("classic-t1-b16-c2-base.bw64.wav");
+        assert_eq!(expand_inputs(&[path.clone()]), vec![path.clone()]);
+        let mut stream = AUDIO_READERS.iter().find_map(|attempt| attempt.open(&path, None)).expect("native BW64 factory");
+        let mut decoder = stream.make_decoder().unwrap();
+        let mut out = Vec::new();
+        while let Some(packet) = stream.next_packet().unwrap() {
+            if let Some(decoded) = decoder.decode_packet(&packet.data, stream.decoder_stamp(&packet), packet.duration as u64).unwrap() {
+                if let Some(packet) = stream.present_decoded(decoded.packet, decoded.source_pts).unwrap() { out.extend(packet.data); }
+            }
+        }
+        stream.validate_eof().unwrap();
+        assert_eq!(out, std::fs::read(root.join("classic-t1-b16-c2.f32le")).unwrap());
+    }
+}

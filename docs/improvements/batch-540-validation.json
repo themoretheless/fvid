@@ -1,0 +1,279 @@
+{
+  "status": "accepted",
+  "accepted_ids": [
+    "FVID-0529"
+  ],
+  "count_delta": 1,
+  "accepted_count": 529,
+  "next_id": "FVID-0530",
+  "qualification": [
+    {
+      "name": "integration",
+      "command": [
+        "cargo",
+        "test",
+        "--locked",
+        "--offline",
+        "--no-default-features",
+        "--features",
+        "player",
+        "--test",
+        "rf64_playback",
+        "--test",
+        "rifx_playback",
+        "--test",
+        "pcm_padding_playback",
+        "--test",
+        "avi_extensible_pcm",
+        "--test",
+        "wave_speaker_playback",
+        "--test",
+        "wav_valid_bits",
+        "--test",
+        "wav_unsigned8",
+        "--test",
+        "wav_aiff_au_regressions",
+        "--test",
+        "wave_ogg_flac_plan_regressions",
+        "--test",
+        "audio_reader_eof",
+        "--test",
+        "block_audio_eof",
+        "--test",
+        "audio_index_eof",
+        "--test",
+        "coded_seek_history",
+        "--test",
+        "coded_window_clock",
+        "--test",
+        "aifc_g711_original_width",
+        "--test",
+        "g711_native",
+        "--test",
+        "wave64_playback",
+        "--test",
+        "bw64_playback",
+        "--",
+        "--test-threads=2"
+      ],
+      "exit_code": 0,
+      "passed": 57,
+      "ignored": 0
+    },
+    {
+      "name": "root-wave",
+      "command": [
+        "cargo",
+        "test",
+        "--locked",
+        "--offline",
+        "--no-default-features",
+        "--features",
+        "player",
+        "--lib",
+        "playback_wav",
+        "--",
+        "--test-threads=2"
+      ],
+      "exit_code": 0,
+      "passed": 36,
+      "ignored": 0
+    },
+    {
+      "name": "root-aiff",
+      "command": [
+        "cargo",
+        "test",
+        "--locked",
+        "--offline",
+        "--no-default-features",
+        "--features",
+        "player",
+        "--lib",
+        "playback_aiff",
+        "--",
+        "--test-threads=2"
+      ],
+      "exit_code": 0,
+      "passed": 14,
+      "ignored": 0
+    },
+    {
+      "name": "root-avi",
+      "command": [
+        "cargo",
+        "test",
+        "--locked",
+        "--offline",
+        "--no-default-features",
+        "--features",
+        "player",
+        "--lib",
+        "playback_avi_audio",
+        "--",
+        "--test-threads=2"
+      ],
+      "exit_code": 0,
+      "passed": 13,
+      "ignored": 0
+    },
+    {
+      "name": "audio-worker",
+      "command": [
+        "cargo",
+        "test",
+        "--locked",
+        "--offline",
+        "--no-default-features",
+        "--features",
+        "player",
+        "--lib",
+        "audio_thread",
+        "--",
+        "--test-threads=2"
+      ],
+      "exit_code": 0,
+      "passed": 39,
+      "ignored": 0
+    },
+    {
+      "name": "root-cpal",
+      "command": [
+        "cargo",
+        "test",
+        "--locked",
+        "--offline",
+        "--no-default-features",
+        "--features",
+        "player",
+        "--lib",
+        "audio::cpal_backend",
+        "--",
+        "--test-threads=2"
+      ],
+      "exit_code": 0,
+      "passed": 43,
+      "ignored": 2
+    },
+    {
+      "name": "owned-wave",
+      "command": [
+        "cargo",
+        "test",
+        "-p",
+        "fvid-media",
+        "--locked",
+        "--offline",
+        "--no-default-features",
+        "--features",
+        "player",
+        "--lib",
+        "owned_wave",
+        "--",
+        "--test-threads=2"
+      ],
+      "exit_code": 0,
+      "passed": 11,
+      "ignored": 0
+    },
+    {
+      "name": "player-factory",
+      "command": [
+        "cargo",
+        "test",
+        "--locked",
+        "--offline",
+        "--no-default-features",
+        "--features",
+        "player",
+        "--lib",
+        "native_wave64_file_regressions"
+      ],
+      "exit_code": 0,
+      "passed": 1,
+      "ignored": 0
+    },
+    {
+      "name": "player-queue",
+      "command": [
+        "cargo",
+        "test",
+        "--locked",
+        "--offline",
+        "--no-default-features",
+        "--features",
+        "player",
+        "--lib",
+        "player_queue_and_geometry_regressions"
+      ],
+      "exit_code": 0,
+      "passed": 3,
+      "ignored": 0
+    },
+    {
+      "name": "core-check",
+      "command": [
+        "cargo",
+        "check",
+        "--locked",
+        "--offline",
+        "--no-default-features"
+      ],
+      "exit_code": 0,
+      "passed": 0,
+      "ignored": 0
+    },
+    {
+      "name": "player-check",
+      "command": [
+        "cargo",
+        "check",
+        "--locked",
+        "--offline",
+        "--no-default-features",
+        "--features",
+        "player"
+      ],
+      "exit_code": 0,
+      "passed": 0,
+      "ignored": 0
+    },
+    {
+      "name": "bw64-player-factory",
+      "command": [
+        "cargo",
+        "test",
+        "--locked",
+        "--offline",
+        "--no-default-features",
+        "--features",
+        "player",
+        "--lib",
+        "native_bw64_file_regressions"
+      ],
+      "exit_code": 0,
+      "passed": 1,
+      "ignored": 0
+    }
+  ],
+  "executed_tests": 218,
+  "ignored": 2,
+  "source_stability": {
+    "paths": 3543,
+    "all_match": true,
+    "manifest": "evidence/bw64-playback/candidate-source.json"
+  },
+  "before": "evidence/bw64-playback/before.log",
+  "reference": {
+    "byte_identical": 16,
+    "total": 16,
+    "evidence": "evidence/bw64-playback/independent-reference.json"
+  },
+  "repeat_executions": 15,
+  "external_tools_unavailable_in_repeats": true,
+  "fixture_regeneration": {
+    "files": 114,
+    "byte_identical": true
+  },
+  "limits": "Flat PCM only; no ADM rendering, XML channel mapping, export, physical audio output, peak RSS or full multi-gigabyte playback claim."
+}
