@@ -1,0 +1,23 @@
+{
+  "status": "verified",
+  "source_commit": "f7adc0a0276b58bdb11df748c7f1d711ffdfea95",
+  "remote_refs": {
+    "refs/heads/codex/deliver-fvid-20261029": "f7adc0a0276b58bdb11df748c7f1d711ffdfea95",
+    "refs/heads/main": "f7adc0a0276b58bdb11df748c7f1d711ffdfea95"
+  },
+  "worktree_clean_before_receipt": true,
+  "source_and_fixture_hashes_match": true,
+  "owned_target_removed": true,
+  "accepted_count": 512,
+  "count_delta": 0,
+  "follow_up_id": "FVID-0484",
+  "regression_of_batch": 522,
+  "test_executions": 1082,
+  "preexisting_ignored": 2,
+  "repeated_focused_passes": [
+    4,
+    4,
+    4
+  ],
+  "utc": "2026-11-02T06:07:44.929198+00:00"
+}
