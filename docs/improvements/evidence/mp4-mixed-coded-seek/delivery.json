@@ -1,0 +1,30 @@
+{
+  "source_commit": "958c7016365b7026d3a4161a6e604a3fbe43426c",
+  "verified_remote_refs": {
+    "refs/heads/codex/deliver-fvid-20261029": "958c7016365b7026d3a4161a6e604a3fbe43426c",
+    "refs/heads/main": "958c7016365b7026d3a4161a6e604a3fbe43426c"
+  },
+  "accepted_ids": [
+    "FVID-0512"
+  ],
+  "follow_up_ids": [
+    "FVID-0484"
+  ],
+  "count_delta": 1,
+  "accepted_count": 512,
+  "next_id": "FVID-0513",
+  "goal_complete": false,
+  "worktree_clean_before_receipt": true,
+  "qualified_source_and_19_fixture_hashes_verified": true,
+  "isolated_stamp_only_source_hash_verified": true,
+  "independent_raw_media_tick_regression_before_after_verified": true,
+  "mixed_duration_failures_persist_after_stamp_only_then_pass_with_routing_fix": true,
+  "owned_build_target_absent": true,
+  "qualification_test_executions": 1068,
+  "repeat_runs": 3,
+  "repeat_passed_each": 126,
+  "existing_tests_unchanged": true,
+  "fixture_stand_repair_counted": 0,
+  "raw_log_trailing_blank_lines_retained": true,
+  "parallel_worktrees_preserved": true
+}
