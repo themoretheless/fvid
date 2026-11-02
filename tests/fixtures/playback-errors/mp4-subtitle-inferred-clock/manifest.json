@@ -1,0 +1,474 @@
+{
+  "provenance": "Pure authored three-color16x16 VP9 plus invented visible tx3g text. Single terminal zero STTS duration and explicit signed CTTS; identity-edit and unedited controls. No private input, FFmpeg or network.",
+  "cases": [
+    {
+      "file": "negative-successor-50-plain.mp4",
+      "scale": 50,
+      "pts": [
+        -2,
+        1,
+        -3
+      ],
+      "durations": [
+        1,
+        1,
+        0
+      ],
+      "texts": [
+        "first invented line",
+        "second invented line",
+        "last invented line"
+      ],
+      "identity": false,
+      "cues": [
+        {
+          "text": "second invented line",
+          "start_ns": 20000000,
+          "end_ns": 40000000
+        }
+      ]
+    },
+    {
+      "file": "negative-successor-50-identity.mp4",
+      "scale": 50,
+      "pts": [
+        -2,
+        1,
+        -3
+      ],
+      "durations": [
+        1,
+        1,
+        0
+      ],
+      "texts": [
+        "first invented line",
+        "second invented line",
+        "last invented line"
+      ],
+      "identity": true,
+      "cues": [
+        {
+          "text": "second invented line",
+          "start_ns": 20000000,
+          "end_ns": 40000000
+        }
+      ]
+    },
+    {
+      "file": "negative-last-50-plain.mp4",
+      "scale": 50,
+      "pts": [
+        -3,
+        -2,
+        -1
+      ],
+      "durations": [
+        1,
+        1,
+        0
+      ],
+      "texts": [
+        "first invented line",
+        "second invented line",
+        "last invented line"
+      ],
+      "identity": false,
+      "cues": [
+        {
+          "text": "last invented line",
+          "start_ns": 0,
+          "end_ns": 1980000000
+        }
+      ]
+    },
+    {
+      "file": "negative-last-50-identity.mp4",
+      "scale": 50,
+      "pts": [
+        -3,
+        -2,
+        -1
+      ],
+      "durations": [
+        1,
+        1,
+        0
+      ],
+      "texts": [
+        "first invented line",
+        "second invented line",
+        "last invented line"
+      ],
+      "identity": true,
+      "cues": [
+        {
+          "text": "last invented line",
+          "start_ns": 0,
+          "end_ns": 1980000000
+        }
+      ]
+    },
+    {
+      "file": "wholly-negative-50-plain.mp4",
+      "scale": 50,
+      "pts": [
+        -150,
+        -125,
+        -101
+      ],
+      "durations": [
+        1,
+        1,
+        0
+      ],
+      "texts": [
+        "first invented line",
+        "second invented line",
+        "last invented line"
+      ],
+      "identity": false,
+      "cues": []
+    },
+    {
+      "file": "wholly-negative-50-identity.mp4",
+      "scale": 50,
+      "pts": [
+        -150,
+        -125,
+        -101
+      ],
+      "durations": [
+        1,
+        1,
+        0
+      ],
+      "texts": [
+        "first invented line",
+        "second invented line",
+        "last invented line"
+      ],
+      "identity": true,
+      "cues": []
+    },
+    {
+      "file": "positive-50-plain.mp4",
+      "scale": 50,
+      "pts": [
+        0,
+        1,
+        3
+      ],
+      "durations": [
+        1,
+        1,
+        0
+      ],
+      "texts": [
+        "first invented line",
+        "second invented line",
+        "last invented line"
+      ],
+      "identity": false,
+      "cues": [
+        {
+          "text": "first invented line",
+          "start_ns": 0,
+          "end_ns": 20000000
+        },
+        {
+          "text": "second invented line",
+          "start_ns": 20000000,
+          "end_ns": 40000000
+        },
+        {
+          "text": "last invented line",
+          "start_ns": 60000000,
+          "end_ns": 2060000000
+        }
+      ]
+    },
+    {
+      "file": "positive-50-identity.mp4",
+      "scale": 50,
+      "pts": [
+        0,
+        1,
+        3
+      ],
+      "durations": [
+        1,
+        1,
+        0
+      ],
+      "texts": [
+        "first invented line",
+        "second invented line",
+        "last invented line"
+      ],
+      "identity": true,
+      "cues": [
+        {
+          "text": "first invented line",
+          "start_ns": 0,
+          "end_ns": 20000000
+        },
+        {
+          "text": "second invented line",
+          "start_ns": 20000000,
+          "end_ns": 40000000
+        },
+        {
+          "text": "last invented line",
+          "start_ns": 60000000,
+          "end_ns": 2060000000
+        }
+      ]
+    },
+    {
+      "file": "negative-successor-1001-plain.mp4",
+      "scale": 1001,
+      "pts": [
+        -2,
+        1,
+        -3
+      ],
+      "durations": [
+        1,
+        1,
+        0
+      ],
+      "texts": [
+        "first invented line",
+        "second invented line",
+        "last invented line"
+      ],
+      "identity": false,
+      "cues": [
+        {
+          "text": "second invented line",
+          "start_ns": 999000,
+          "end_ns": 1998001
+        }
+      ]
+    },
+    {
+      "file": "negative-successor-1001-identity.mp4",
+      "scale": 1001,
+      "pts": [
+        -2,
+        1,
+        -3
+      ],
+      "durations": [
+        1,
+        1,
+        0
+      ],
+      "texts": [
+        "first invented line",
+        "second invented line",
+        "last invented line"
+      ],
+      "identity": true,
+      "cues": [
+        {
+          "text": "second invented line",
+          "start_ns": 999000,
+          "end_ns": 1998001
+        }
+      ]
+    },
+    {
+      "file": "negative-last-1001-plain.mp4",
+      "scale": 1001,
+      "pts": [
+        -3,
+        -2,
+        -1
+      ],
+      "durations": [
+        1,
+        1,
+        0
+      ],
+      "texts": [
+        "first invented line",
+        "second invented line",
+        "last invented line"
+      ],
+      "identity": false,
+      "cues": [
+        {
+          "text": "last invented line",
+          "start_ns": 0,
+          "end_ns": 1999000999
+        }
+      ]
+    },
+    {
+      "file": "negative-last-1001-identity.mp4",
+      "scale": 1001,
+      "pts": [
+        -3,
+        -2,
+        -1
+      ],
+      "durations": [
+        1,
+        1,
+        0
+      ],
+      "texts": [
+        "first invented line",
+        "second invented line",
+        "last invented line"
+      ],
+      "identity": true,
+      "cues": [
+        {
+          "text": "last invented line",
+          "start_ns": 0,
+          "end_ns": 1999000999
+        }
+      ]
+    },
+    {
+      "file": "wholly-negative-1001-plain.mp4",
+      "scale": 1001,
+      "pts": [
+        -3003,
+        -2503,
+        -2003
+      ],
+      "durations": [
+        1,
+        1,
+        0
+      ],
+      "texts": [
+        "first invented line",
+        "second invented line",
+        "last invented line"
+      ],
+      "identity": false,
+      "cues": []
+    },
+    {
+      "file": "wholly-negative-1001-identity.mp4",
+      "scale": 1001,
+      "pts": [
+        -3003,
+        -2503,
+        -2003
+      ],
+      "durations": [
+        1,
+        1,
+        0
+      ],
+      "texts": [
+        "first invented line",
+        "second invented line",
+        "last invented line"
+      ],
+      "identity": true,
+      "cues": []
+    },
+    {
+      "file": "positive-1001-plain.mp4",
+      "scale": 1001,
+      "pts": [
+        0,
+        1,
+        3
+      ],
+      "durations": [
+        1,
+        1,
+        0
+      ],
+      "texts": [
+        "first invented line",
+        "second invented line",
+        "last invented line"
+      ],
+      "identity": false,
+      "cues": [
+        {
+          "text": "first invented line",
+          "start_ns": 0,
+          "end_ns": 999000
+        },
+        {
+          "text": "second invented line",
+          "start_ns": 999000,
+          "end_ns": 1998001
+        },
+        {
+          "text": "last invented line",
+          "start_ns": 2997002,
+          "end_ns": 2002997002
+        }
+      ]
+    },
+    {
+      "file": "positive-1001-identity.mp4",
+      "scale": 1001,
+      "pts": [
+        0,
+        1,
+        3
+      ],
+      "durations": [
+        1,
+        1,
+        0
+      ],
+      "texts": [
+        "first invented line",
+        "second invented line",
+        "last invented line"
+      ],
+      "identity": true,
+      "cues": [
+        {
+          "text": "first invented line",
+          "start_ns": 0,
+          "end_ns": 999000
+        },
+        {
+          "text": "second invented line",
+          "start_ns": 999000,
+          "end_ns": 1998001
+        },
+        {
+          "text": "last invented line",
+          "start_ns": 2997002,
+          "end_ns": 2002997002
+        }
+      ]
+    }
+  ],
+  "sha256": {
+    "frame-0.yuv16": "b4cc94ff03bd17b32107a79a64ba427cd43b6e49d209bb4d29190f3deb737a11",
+    "frame-1.yuv16": "31d05f629132273f660622387ef2865866de6688c0969265e891ad9d4c936237",
+    "frame-2.yuv16": "2f59155bee83baf25a0d39c17290257f055569e5b1d77ca8b866b1a4b2cee6f7",
+    "negative-successor-50-plain.mp4": "4a9d73d0b650f5ee6bc4cda6190b066a74eca0c6b10e816790fd28937e464d95",
+    "negative-successor-50-identity.mp4": "42029ce5ec93fa3f8955e06e7efd9b626886780c994973db748546b96b953aef",
+    "negative-last-50-plain.mp4": "a3e0d02405f7b4c41a85a65b73c1a87e06fff7d341f5a104f49c20096160b817",
+    "negative-last-50-identity.mp4": "b6c779a31d505aff3bfc07d8c613f81c9d8d225dcc7d0f67054ddbfbe59055f1",
+    "wholly-negative-50-plain.mp4": "265751f7a8389f5934b77c917849e091375bff33941c721ea37099d262dc0755",
+    "wholly-negative-50-identity.mp4": "9d840bd0305fbdde2b787586f7407851a640ad72ed835f5b7cba03001b5d0d30",
+    "positive-50-plain.mp4": "eefd15d91afcceeb89f4eee55746ddc3a13dc97cf6157c5eae7b5c06467914ac",
+    "positive-50-identity.mp4": "dcaa4698da172ccceb070c09f8ecbd6045431001488093d4666257774481302c",
+    "negative-successor-1001-plain.mp4": "f1044f836d735f7d90ab45cf98533a10fb762c554b7de26454fb9ff717551539",
+    "negative-successor-1001-identity.mp4": "62b661fea88b72dab92fb479a9144d53fd9c6b4acf51bedda73a94573b692ab7",
+    "negative-last-1001-plain.mp4": "9d882063826489ac71db64a7743f28c74ecffe74ed3a883dbac7c321446b96c1",
+    "negative-last-1001-identity.mp4": "1b84d398d059a8ff7bd0dd051bd0e03e5af5eec619a8bf8ed9a6a064f602364a",
+    "wholly-negative-1001-plain.mp4": "9b8cce1ee76db9fca43675815af18c3e2500ca84a276df0e7bb87c10d93c0c22",
+    "wholly-negative-1001-identity.mp4": "c3b6d09a8af0fdf9f81c9a5f7629fe87bde1a7f348f5b5940e0e0455bda3c751",
+    "positive-1001-plain.mp4": "0dc520db7863a4a8366f5f0375a2e313edf5bf1540bc6dedfef2c9b7aaa335ab",
+    "positive-1001-identity.mp4": "516cf5c66e94c9260f78cef40d35cbe3c66518e510d6d8d0da49023688b60d88"
+  }
+}

@@ -1,8 +1,8 @@
 {
   "target": 1000,
   "counting_rule": "One independently confirmed problem or useful capability; fixture variants and baseline integration repairs are excluded. Only accepted entries count.",
-  "accepted_count": 518,
-  "next_id": "FVID-0519",
+  "accepted_count": 519,
+  "next_id": "FVID-0520",
   "entries": [
     {
       "id": "FVID-0001",
@@ -5879,6 +5879,17 @@
       "result": "Lower-bound lookup reduces the per-packet lookup to logarithmic index comparisons while retaining the first equal key,missing-key1536 fallback,signed coordinate bit-pattern equivalence and no extra heap index/cache. Checked cumulative addition supports the sorted nonwrapping clock invariant and is not a separately counted overflow fix. Two final executions each contain five paired samples per size with equal result checksums:at65536 records all ten pairs improve at least267.11x;median ratios444.46x/462.59x. At128 records both medians exceed3.85x. Tiny1..16 indexes have subnanosecond median overhead;no universal short-stream or whole-player speedup claim. Offline new AC3/EAC3 controls and related real-worker/Dolby suites pass87 executions,zero ignores,core/player checks and three10-test repeats;2752 source/fixture hashes remain stable. Existing authored short tones are reused;no new parsing/decoding failure or public API change.",
       "status": "accepted",
       "validation": "batch-529-validation.json"
+    },
+    {
+      "id": "FVID-0519",
+      "batch": 530,
+      "title": "Infer unspecified MP4 subtitle endpoints before clipping their signed source clocks",
+      "source": "src/playback/subtitles/mp4_subtitles.rs",
+      "regression": "tests/mp4_subtitle_inferred_clock.rs",
+      "before": "Original09e80937ca clips negative starts/successors before no-edit duration inference and anchors edited final fallback at max(source start,0). A terminal decode sample at-3 ticks whose presentation successor starts at-2 incorrectly displays from0 to2seconds;last-line negative fallback also extends or exposes invisible text. Final16 authored movies pass both parser/packet/video and refusal controls;two cue/actual-seek tests fail specifically on these clock results. Initial invalid multiple-zero-duration authoring was separately refused and is not counted.",
+      "result": "Resolve an unspecified successor/fallback end once on signed i128 source ticks,then clip/map both endpoints. Preserve explicit durations,positive behavior,edit mapping,rounding,limits and public signatures.16 authored short16x16 VP9/visible-tx3g movies at50/1001Hz cover negative successors,negative final starts,wholly pre-origin fallbacks,positive controls and identity edits. Exact signed packets,all independently known video pictures,EOF/restart,nanosecond cues,repeated extraction and active text after real native-video seek pass. Six frozen gates pass83 Rust executions representing76 distinct checks after excluding7 overlapping root checks,zero ignores,core/player builds;three4-test repeats and4 executions without FFmpeg pass. All20 fixture files regenerate byte-identically and2778 source/fixture hashes stay stable. One unspecified-duration inference defect,distinct from FVID-0422 stated-duration endpoints which explicitly preserved this behavior;no per-variant IDs,performance or visual-rendering claim.",
+      "status": "accepted",
+      "validation": "batch-530-validation.json"
     }
   ]
 }

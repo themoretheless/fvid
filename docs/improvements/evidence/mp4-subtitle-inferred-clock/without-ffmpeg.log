@@ -1,0 +1,9 @@
+
+running 4 tests
+test packet_budget_and_missing_track_refusals_remain_strict ... ok
+test authored_zero_duration_packets_and_actual_video_remain_valid ... ok
+test unspecified_endpoints_are_inferred_before_signed_clipping ... ok
+test subtitle_lookup_matches_the_authored_clock_after_real_video_seek ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s
+

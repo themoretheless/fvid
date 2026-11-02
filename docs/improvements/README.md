@@ -3565,3 +3565,7 @@ Duration navigation now presents the first native FLAC sample at/after the reque
 ## Batch 529 — FVID-0518: ordered raw Dolby window lookup
 
 Linear per-packet frame-index scanning becomes logarithmic without an extra heap index. Two five-pair benchmark runs preserve result checksums and improve65536-record lookup at least267x;this is a helper measurement,not player throughput. Tiny indexes have subnanosecond median overhead.87 test executions,zero ignores,two build checks and three10-test repeats pass with2752 frozen hashes. Existing authored Dolby fixtures and actual-worker controls remain intact. Evidence:`evidence/ac3-window-lookup/README.md`. Accepted total518/1000.
+
+## Batch 530 — FVID-0519: signed unspecified MP4 subtitle endpoints
+
+Infer successor/fallback endpoints before clipping signed media time,preventing phantom pre-origin subtitles and overlong negative final lines.16 authored short videos pass exact cues,packets,pictures and real-video-seek lookup. Six gates pass83 executions(76 distinct checks),zero ignores,both builds;three4-test repeats and4 no-FFmpeg executions pass.20 fixture files regenerate identically with2778 frozen hashes. Initial invalid authoring refusal is retained separately and not counted. Evidence:`evidence/mp4-subtitle-inferred-clock/README.md`. Accepted total519/1000.

@@ -148,24 +148,8 @@ impl<R: Read + Seek> Mp4SubtitleReader<R> {
             let Some(text) = sample_text(&packet) else {
                 continue;
             };
-            if edits.is_empty() && origin == 0 {
-                // Preserve the existing no-edit fallback and rounding policy.
-                let start = clock(i128::from(*pts))?;
-                let end = if *duration != 0 {
-                    clock(i128::from(*pts) + i128::from(*duration))?
-                } else {
-                    let next = lines
-                        .get(position + 1)
-                        .map(|(pts, _, _)| clock(i128::from(*pts)))
-                        .transpose()?;
-                    subtitles::cue_end(start, Duration::ZERO, next)
-                };
-                if end > start {
-                    reserve_cue(&mut cues, self.cue_limit)?;
-                    cues.push(Cue { start, end, text });
-                }
-                continue;
-            }
+            // Infer missing endpoints on the signed media clock before clipping.
+            // A pre-origin successor must not turn into a fresh fallback at zero.
             let raw_start = i128::from(*pts);
             let raw_end = if *duration != 0 {
                 raw_start + i128::from(*duration)
@@ -174,8 +158,17 @@ impl<R: Read + Seek> Mp4SubtitleReader<R> {
                     .get(position + 1)
                     .map(|(p, _, _)| i128::from(*p))
                     .filter(|next| *next > raw_start)
-                    .unwrap_or(raw_start.max(0) + 2 * i128::from(timescale))
+                    .unwrap_or(raw_start + 2 * i128::from(timescale))
             };
+            if edits.is_empty() && origin == 0 {
+                let start = clock(raw_start)?;
+                let end = clock(raw_end)?;
+                if end > start {
+                    reserve_cue(&mut cues, self.cue_limit)?;
+                    cues.push(Cue { start, end, text });
+                }
+                continue;
+            }
             if edits.is_empty() {
                 let start = mapped_clock.at(0, raw_start)?;
                 let end = mapped_clock.at(0, raw_end)?;

@@ -1,0 +1,116 @@
+{
+  "integration": {
+    "command": [
+      "cargo",
+      "test",
+      "--locked",
+      "--offline",
+      "--no-default-features",
+      "--features",
+      "player",
+      "--test",
+      "mp4_subtitle_inferred_clock",
+      "--test",
+      "mp4_subtitle_negative_clock",
+      "--test",
+      "mp4_subtitle_unicode",
+      "--test",
+      "mp4_subtitle_edits",
+      "--test",
+      "mp4_text_descriptions",
+      "--test",
+      "mp4_seek_navigation",
+      "--test",
+      "mp4_elst_validation",
+      "--test",
+      "mp4_signed_offset",
+      "--test",
+      "mp4_nondisplay_endpoint",
+      "--",
+      "--test-threads=2"
+    ],
+    "exit_code": 0,
+    "seconds": 7.095640182495117,
+    "source_stable": true
+  },
+  "subtitle-reader": {
+    "command": [
+      "cargo",
+      "test",
+      "--locked",
+      "--offline",
+      "--no-default-features",
+      "--features",
+      "player",
+      "--lib",
+      "playback_mp4_subtitles",
+      "--",
+      "--test-threads=2"
+    ],
+    "exit_code": 0,
+    "seconds": 20.72493886947632,
+    "source_stable": true
+  },
+  "subtitle-clock": {
+    "command": [
+      "cargo",
+      "test",
+      "--locked",
+      "--offline",
+      "--no-default-features",
+      "--features",
+      "player",
+      "--lib",
+      "subtitles::tests",
+      "--",
+      "--test-threads=2"
+    ],
+    "exit_code": 0,
+    "seconds": 0.8248710632324219,
+    "source_stable": true
+  },
+  "mp4-video": {
+    "command": [
+      "cargo",
+      "test",
+      "--locked",
+      "--offline",
+      "--no-default-features",
+      "--features",
+      "player",
+      "--lib",
+      "playback_mp4::",
+      "--",
+      "--test-threads=2"
+    ],
+    "exit_code": 0,
+    "seconds": 0.8795738220214844,
+    "source_stable": true
+  },
+  "core-check": {
+    "command": [
+      "cargo",
+      "check",
+      "--locked",
+      "--offline",
+      "--no-default-features"
+    ],
+    "exit_code": 0,
+    "seconds": 35.41479992866516,
+    "source_stable": true
+  },
+  "player-check": {
+    "command": [
+      "cargo",
+      "check",
+      "--locked",
+      "--offline",
+      "--no-default-features",
+      "--features",
+      "player"
+    ],
+    "exit_code": 0,
+    "seconds": 19.9017391204834,
+    "source_stable": true
+  }
+}
