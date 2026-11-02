@@ -1,0 +1,110 @@
+{
+  "integration": {
+    "command": [
+      "cargo",
+      "test",
+      "--locked",
+      "--offline",
+      "--no-default-features",
+      "--features",
+      "player",
+      "--test",
+      "flac_sample_seek",
+      "--test",
+      "flac_native_owned",
+      "--test",
+      "flac_number_timeline",
+      "--test",
+      "flac_coded_numbers",
+      "--test",
+      "flac_rate_escape",
+      "--test",
+      "flac_block_codes",
+      "--test",
+      "flac_boundary_collision",
+      "--test",
+      "audio_sample_seek_clock",
+      "--test",
+      "audio_stream_clock",
+      "--test",
+      "audio_reader_eof",
+      "--test",
+      "audio_truncated_eof",
+      "--test",
+      "block_audio_eof",
+      "--test",
+      "coded_audio_index_eof",
+      "--test",
+      "audio_index_eof",
+      "--test",
+      "pcm_exact_seek",
+      "--",
+      "--test-threads=2"
+    ],
+    "exit_code": 0,
+    "seconds": 16.84489417076111,
+    "source_stable": true
+  },
+  "root-flac": {
+    "command": [
+      "cargo",
+      "test",
+      "--locked",
+      "--offline",
+      "--no-default-features",
+      "--features",
+      "player",
+      "--lib",
+      "playback_flac",
+      "--",
+      "--test-threads=2"
+    ],
+    "exit_code": 0,
+    "seconds": 23.77729082107544,
+    "source_stable": true
+  },
+  "audio-worker": {
+    "command": [
+      "cargo",
+      "test",
+      "--locked",
+      "--offline",
+      "--no-default-features",
+      "--features",
+      "player",
+      "--lib",
+      "audio_thread",
+      "--",
+      "--test-threads=2"
+    ],
+    "exit_code": 0,
+    "seconds": 7.86933708190918,
+    "source_stable": true
+  },
+  "core-check": {
+    "command": [
+      "cargo",
+      "check",
+      "--locked",
+      "--offline",
+      "--no-default-features"
+    ],
+    "exit_code": 0,
+    "seconds": 44.6514630317688,
+    "source_stable": true
+  },
+  "player-check": {
+    "command": [
+      "cargo",
+      "check",
+      "--locked",
+      "--offline",
+      "--no-default-features",
+      "--features",
+      "player"
+    ],
+    "exit_code": 0,
+    "seconds": 30.119316339492798,
+    "source_stable": true
+  }
+}

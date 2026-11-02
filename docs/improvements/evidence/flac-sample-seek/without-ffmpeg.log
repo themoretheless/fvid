@@ -1,0 +1,9 @@
+
+running 4 tests
+test duration_seek_starts_at_the_first_native_sample_at_or_after_request ... ok
+test file_and_packet_count_admission_stay_strict ... ok
+test independent_pcm_raw_packet_seek_and_video_controls ... ok
+test actual_flac_worker_preserves_precise_pcm_stamps_and_flush_anchor ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.44s
+

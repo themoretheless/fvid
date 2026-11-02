@@ -1,6 +1,6 @@
 //! Player adapter for the canonical owned bare FLAC parser.
 use crate::audio::{AudioStream, AudioTrack, EncodedPacket};
-use crate::Result;
+use crate::{Result, invalid};
 #[cfg(test)]
 use fvid_media::owned_flac::{crc16, crc8, frame_header};
 pub use fvid_media::owned_flac::{Flac, Frame, Limits, TAG};
@@ -9,6 +9,7 @@ use std::{io::Read, time::Duration};
 pub struct FlacAudioReader {
     flac: Flac,
     packet: usize,
+    presentation_floor: u64,
 }
 
 impl FlacAudioReader {
@@ -24,6 +25,7 @@ impl FlacAudioReader {
         Ok(Self {
             flac: Flac::parse(&bytes, &limits)?,
             packet: 0,
+            presentation_floor: 0,
         })
     }
 
@@ -90,9 +92,44 @@ impl AudioStream for FlacAudioReader {
 
     fn rewind(&mut self) {
         self.packet = 0;
+        self.presentation_floor = 0;
+    }
+
+    fn present_decoded(&self, mut packet: crate::audio::AudioPacket, source_pts: i64)
+        -> Result<Option<crate::audio::AudioPacket>>
+    {
+        let stride = usize::from(self.channels()) * 4;
+        if stride == 0 || !packet.data.len().is_multiple_of(stride) {
+            return Err(invalid("invalid decoded FLAC geometry"));
+        }
+        packet.pts = u64::try_from(source_pts)
+            .map_err(|_| invalid("decoded FLAC precedes its source timeline"))?;
+        packet.timebase_num = 1;
+        packet.timebase_den = self.sample_rate();
+        let frames = packet.data.len() / stride;
+        let skip = self.presentation_floor.saturating_sub(packet.pts).min(frames as u64) as usize;
+        if skip == frames { return Ok(None); }
+        if skip != 0 {
+            packet.data.copy_within(skip * stride.., 0);
+            packet.data.truncate((frames - skip) * stride);
+            packet.pts += skip as u64;
+        }
+        Ok(Some(packet))
+    }
+
+    fn seek_time(&mut self, target: Duration) -> i64 {
+        let wanted = (target.as_nanos() * u128::from(self.sample_rate()))
+            .div_ceil(1_000_000_000).min(u128::from(self.flac.samples())) as u64;
+        let coordinate = i64::try_from(wanted).unwrap_or(i64::MAX);
+        // Decode the containing frame, but present only samples at/after the
+        // requested native point. Raw seek_to retains its frame-coordinate API.
+        self.seek_to(coordinate);
+        self.presentation_floor = wanted;
+        coordinate
     }
 
     fn seek_to(&mut self, pts: i64) -> i64 {
+        self.presentation_floor = 0;
         let target = pts.max(0) as u64;
         if target >= self.flac.samples() {
             self.packet = self.flac.frames.len();

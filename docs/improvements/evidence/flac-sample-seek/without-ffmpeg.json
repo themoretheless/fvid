@@ -1,0 +1,11 @@
+{
+  "PATH": "/usr/bin:/bin",
+  "ffmpeg_resolves": false,
+  "command": [
+    "/private/tmp/fvid-flac-sample-seek-target-20261102/debug/deps/flac_sample_seek-0ef4a4b69b7746c8",
+    "--test-threads=2"
+  ],
+  "exit_code": 0,
+  "binary_sha256": "bc2598f43a2a19a17ca4cd0b2210f90bc059172d1738998006c59b011f15970e",
+  "source_stable": true
+}

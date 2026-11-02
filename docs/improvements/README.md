@@ -3557,3 +3557,7 @@ AIFF/AIFC signed PCM now supports every valid1..32-bit logical precision with wh
 ## Batch 527 — FVID-0516: indexed audio EOF
 
 Eight public payload adapters now return empty beyond their declared packet count instead of repeating the final packet/XM tail. All valid bytes and actual-worker playback are preserved. PCM and coded/tracker originals reproduce the exact EOF failures;14 gates pass826 executions,one prior ignore,two build checks and three24-test repeats. Both new suites pass without FFmpeg. A pre-existing WAVE metadata size expectation is corrected with stronger checks and zero extra IDs. Migration:`evidence/audio-index-eof/API-MIGRATION.md`;evidence:`evidence/audio-index-eof/README.md`. Accepted total516/1000.
+
+## Batch 528 — FVID-0517: bare FLAC precise time seek
+
+Duration navigation now presents the first native FLAC sample at/after the request while preserving raw packet seek behavior. Six independent rate/channel files verify PCM,clocks,fractional/frame boundaries,EOF/MAX,mode changes and actual workers. Five gates pass94 executions,two build checks and three13-test repeats;the new suite passes without FFmpeg. Evidence:`evidence/flac-sample-seek/README.md`. Accepted total517/1000.

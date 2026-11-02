@@ -1,8 +1,8 @@
 {
   "target": 1000,
   "counting_rule": "One independently confirmed problem or useful capability; fixture variants and baseline integration repairs are excluded. Only accepted entries count.",
-  "accepted_count": 516,
-  "next_id": "FVID-0517",
+  "accepted_count": 517,
+  "next_id": "FVID-0518",
   "entries": [
     {
       "id": "FVID-0001",
@@ -5857,6 +5857,17 @@
       "additional_regressions": [
         "tests/coded_audio_index_eof.rs"
       ]
+    },
+    {
+      "id": "FVID-0517",
+      "batch": 528,
+      "title": "Present bare FLAC Duration seeks at the requested native sample boundary",
+      "source": "src/playback/audio/flac.rs",
+      "regression": "tests/flac_sample_seek.rs",
+      "before": "Original7a56ea2bf5 fully decodes six independent PCM controls and preserves raw packet seeking/EOF/budgets,but seek_time(1ns) in8kHz FLAC returns0ns rather than the first native point125us. The actual worker emits sample0 instead of sample1. Corrected original suite passes2 controls/fails2 precise seek/worker tests;an initial resource-error-string assertion mismatch is retained and not counted as a media defect.",
+      "result": "Compute the first native sample at/after Duration using integer ceiling and clamp to stream extent before narrowing. Decode the containing FLAC frame,then trim decoded PCM before that native floor and publish exact1/rate timestamps. Preserve raw seek_to frame-coordinate/data behavior and clear precise floors on raw seek/rewind. Six authored mono/stereo8/44.1/48kHz files have4099 independently generated PCM16 frames,lossless seekable encoding and a separate neutral VP9 control. Fractional/native/frame boundaries,EOF/MAX,mode changes,rewind,full PCM/native stamps and actual worker flush anchors pass. Five frozen-source gates pass94 Rust executions,zero ignores,core/player checks;three13-test repeats pass. The new4-test suite also passes with FFmpeg absent from PATH. All14 fixture files regenerate identically and2750 source/fixture hashes stay stable. No parser/decoder algorithm,public signature,raw seek contract,performance or physical-device claim.",
+      "status": "accepted",
+      "validation": "batch-528-validation.json"
     }
   ]
 }

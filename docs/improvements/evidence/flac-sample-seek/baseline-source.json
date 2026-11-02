@@ -1,0 +1,8 @@
+{
+  "source_commit": "7a56ea2bf5fb891c588ece9438015a0c2bb49b29",
+  "sha256": {
+    "src/playback/audio/flac.rs": "832569dc468ce8cd820da7a5bbe667dafa2c4d7a55995f03348cdd65e4bdfd3a",
+    "tests/flac_sample_seek.rs": "26f3695e241945a09a8fe38a5ae21c6b3624d0983516f5f452a6137445ec7430",
+    "scripts/generate_flac_sample_seek.py": "474f645d082d05e276b2edd7724d6439046f5d4703dab2c2dc0f399f0849f92c"
+  }
+}
