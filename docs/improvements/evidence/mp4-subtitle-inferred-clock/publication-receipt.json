@@ -1,0 +1,17 @@
+{
+  "source_commit": "6527ebee98cc3c54fca91495ebeba91d34be02cf",
+  "verified_remote_commit": "6527ebee98cc3c54fca91495ebeba91d34be02cf",
+  "published_refs": [
+    "refs/heads/main",
+    "refs/heads/codex/deliver-fvid-20261029"
+  ],
+  "accepted_id": "FVID-0519",
+  "accepted_total": 519,
+  "qualification_source_hashes_verified": 2778,
+  "owned_outputs_removed": [
+    "/private/tmp/fvid-subtitle-inferred-target-20261102",
+    "/private/tmp/fvid-subtitle-inferred-qualification-20261102.py"
+  ],
+  "working_tree_clean_before_receipt": true,
+  "verified_at": "2026-11-02T17:46:32.670483+00:00"
+}
