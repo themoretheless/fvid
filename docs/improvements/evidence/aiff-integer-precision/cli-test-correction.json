@@ -1,0 +1,15 @@
+{
+  "count_delta": 0,
+  "follow_up_id": "FVID-0228",
+  "original_source": "0aef5cfaaa6d1f1e881feb129a03715ddee8e00e",
+  "original_same_failure": "original-native-pcm-trim.log",
+  "independent_cli_probe": "original-cli-option-probe.json",
+  "reason": "Published CLI already accepts --progress during read-only plan without changing JSON;the old test incorrectly demanded refusal. Existing FVID-0228 records that supported policy.",
+  "retained_and_strengthened_checks": [
+    "Invalid stream and sub-microsecond boundaries still refuse,with and without --progress",
+    "Negative commands emit no plan JSON",
+    "Full successful JSON plan matches with/without --progress",
+    "No stderr progress events,no destination,no source modification"
+  ],
+  "production_cli_changed": false
+}

@@ -1,0 +1,10 @@
+{
+  "owned_target": "/private/tmp/fvid-aiff-precision-target-20261102",
+  "removed": true,
+  "wrappers_removed": [
+    "/private/tmp/fvid-aiff-precision-qualification-20261102.py",
+    "/private/tmp/fvid-aiff-precision-original-check-20261102.py"
+  ],
+  "regression_fixtures_and_evidence_retained": true,
+  "candidate_source_backup": "Retained until source commit,then remove after hash comparison."
+}

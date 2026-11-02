@@ -1,0 +1,28 @@
+{
+  "source_commit": "0aef5cfaaa6d1f1e881feb129a03715ddee8e00e",
+  "command": [
+    "cargo",
+    "test",
+    "--locked",
+    "--offline",
+    "--no-default-features",
+    "--features",
+    "player",
+    "--test",
+    "native_pcm_trim",
+    "plan_and_execution_reject_the_same_bad_intervals_and_structures",
+    "--",
+    "--exact",
+    "--nocapture"
+  ],
+  "exit_code": 101,
+  "candidate_restored": true,
+  "original_source": {
+    "src/playback/audio/aiff.rs": "5ef45d09984296aef81876bb88fed9ecab8ef194e291acf318997d9784274406",
+    "src/playback/audio/wav.rs": "c88ab340277ccfa85c0531f99a376a6ad1c32de4015b8573ce21036a4a5ad6c9"
+  },
+  "candidate_source": {
+    "src/playback/audio/aiff.rs": "4856e34565815b441e77571af00f2ac231a28c09fd3cde7f34cccf8d2886c5cf",
+    "src/playback/audio/wav.rs": "8f40dd58e67e1df3ee98cf50009d73524e640c7c320a88569b89681a8dc7d42b"
+  }
+}

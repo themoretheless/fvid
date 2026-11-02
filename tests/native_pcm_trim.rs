@@ -378,15 +378,35 @@ fn plan_and_execution_reject_the_same_bad_intervals_and_structures() {
     for options in [
         vec!["--from", "0", "--to", "0.001", "--streams", "1"],
         vec!["--from", "0.0000001", "--to", "0.001"],
-        vec!["--from", "0", "--to", "0.001", "--progress"],
+        vec!["--from", "0", "--to", "0.001", "--streams", "1", "--progress"],
+        vec!["--from", "0.0000001", "--to", "0.001", "--progress"],
     ] {
         let result = std::process::Command::new(env!("CARGO_BIN_EXE_fvid"))
             .args(["media", "plan", "trim-pcm"])
             .arg(&source)
-            .args(options)
+            .args(&options)
             .output()
             .unwrap();
-        assert!(!result.status.success());
+        assert!(!result.status.success(), "invalid options accepted: {options:?}");
+        assert!(result.stdout.is_empty());
     }
+    // Read-only plans already accept --progress as a no-op (FVID-0228).
+    // Require the entire plan to match, no progress output and no file writes.
+    let before = std::fs::read(&source).unwrap();
+    let mut baseline = None;
+    for progress in [false, true] {
+        let mut command = std::process::Command::new(env!("CARGO_BIN_EXE_fvid"));
+        command.args(["media", "plan", "trim-pcm"]).arg(&source)
+            .args(["--from", "0", "--to", "0.001"]);
+        if progress { command.arg("--progress"); }
+        let result = command.output().unwrap();
+        assert!(result.status.success(), "{}", String::from_utf8_lossy(&result.stderr));
+        assert!(result.stderr.is_empty());
+        let plan: serde_json::Value = serde_json::from_slice(&result.stdout).unwrap();
+        if let Some(ref baseline) = baseline { assert_eq!(&plan, baseline); }
+        else { baseline = Some(plan); }
+    }
+    assert_eq!(std::fs::read(&source).unwrap(), before);
+    assert!(!dest.exists());
     assert_eq!(std::fs::read_dir(&dir.0).unwrap().count(), 1);
 }

@@ -1,0 +1,10 @@
+{
+  "source_commit": "0aef5cfaaa6d1f1e881feb129a03715ddee8e00e",
+  "sha256": {
+    "src/playback/audio/aiff.rs": "5ef45d09984296aef81876bb88fed9ecab8ef194e291acf318997d9784274406",
+    "src/playback/audio/wav.rs": "c88ab340277ccfa85c0531f99a376a6ad1c32de4015b8573ce21036a4a5ad6c9",
+    "crates/fvid-media/src/owned_pcm_decoder_impl.rs": "b0970fbbd8c683bf36296e5ad331ee32d3629ee64221a8c4bfa852706c965e05",
+    "tests/aiff_integer_precision.rs": "235c9f61d1c625a9d48a48ad3e0a81640e93416640e0beec87a98ff30a46f4c5",
+    "scripts/generate_aiff_integer_precision.py": "adc4fd2fdfb53729928cee0aef39ec14a83d9fac839b14639962bb0a0ebf0793"
+  }
+}

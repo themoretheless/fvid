@@ -161,9 +161,9 @@ pub struct Pcm {
 }
 
 impl Pcm {
-    /// Bytes of one block: every channel's contribution to the run, packed with no
-    /// padding. Only a coding narrower than a byte can state a width that does not
-    /// divide into this product, which is what makes a G.722 block a byte per channel
+    /// Bytes of one block: every channel's encoded contribution to the run.
+    /// Linear integer samples each occupy whole bytes, rounded per channel.
+    /// Other sub-byte codings define their own blocks: a G.722 block is a byte per channel
     /// holding two samples rather than one, and a G.726 one at the 24 and 40 kbit/s
     /// rates several bytes wide.
     pub fn block_align(&self) -> usize {
@@ -177,6 +177,9 @@ impl Pcm {
             // Two bytes of 3-to-1 or one of 6-to-1 per channel, both coding six samples.
             Coding::Mace3 => 2 * usize::from(self.channels),
             Coding::Mace6 => usize::from(self.channels),
+            // AIFF integer precision need not fill its last stored byte.
+            Coding::Pcm(PcmFormat::Int { .. }) => usize::from(self.channels)
+                * usize::from(self.bits_per_sample.div_ceil(8)),
             _ => usize::from(self.channels) * usize::from(self.bits_per_sample) / 8,
         }
     }

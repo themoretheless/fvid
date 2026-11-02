@@ -1,0 +1,10 @@
+{
+  "primary_sources": [
+    "https://www.mmsp.ece.mcgill.ca/Documents/AudioFormats/AIFF/Docs/AIFF-1.3.pdf",
+    "https://www.mmsp.ece.mcgill.ca/Documents/AudioFormats/AIFF/Docs/AIFF-C.9.26.91.pdf"
+  ],
+  "contract": "Linear signed integer precision1..32 bits. Store each channel sample in ceil(bits/8) whole bytes,left-justified with zero unused low bits. Uncompressed AIFC NONE retains this layout;sowt retains the existing FVid endian reversal.",
+  "implementation": "Keep logical COMM precision in metadata;construct existing integer decoder at whole-byte stored width. Frame stride rounds per channel before multiplying by channel count. Reject nonzero unused low bits after stored-payload budget,storage-tail trimming and channel-frame alignment checks.",
+  "scope": "AIFF/AIFC reader and actual FVid playback worker;no generic PCM API expansion,no full-format or external-decoder interoperability claim.",
+  "oracle": "Generate mathematical signed integers and normalized f32 expectations independently of the Rust decoder;no FFmpeg invocation or decoder-derived golden samples."
+}

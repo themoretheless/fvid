@@ -1,8 +1,8 @@
 {
   "target": 1000,
   "counting_rule": "One independently confirmed problem or useful capability; fixture variants and baseline integration repairs are excluded. Only accepted entries count.",
-  "accepted_count": 514,
-  "next_id": "FVID-0515",
+  "accepted_count": 515,
+  "next_id": "FVID-0516",
   "entries": [
     {
       "id": "FVID-0001",
@@ -2570,7 +2570,9 @@
       "before": "owned_loudnorm_cli::{run, run_plan} (`src/owned_loudnorm_cli.rs`) rejects `-q` on `loudnorm` (`unsupported loudnorm option: -q`) and rejects both `-q` and `--quiet` on `plan loudnorm` (`unsupported loudnorm plan option: --quiet`); in `src/media_cli.rs`, `plan loudness` and `plan decode-audio` reject both `-q` and `--quiet`, `loudness`, `decode-audio`, `plain_decode`, `try_native_audio_trim`, `try_owned_overlay`, `owned_lossless_command_with_name`, and the `transcode` / `transcode-lossless` / `plan remux` fast paths only accept `--quiet` and reject `-q` (or fail to normalize `-q` to `--quiet` in duplicate-flag tracking), and `try_owned_overlay`, `owned_lossless_command_with_name`, `owned_xfade_command`, `owned_subtitle_burn_command`, `try_video_concat`, and `try_video_trim` match `\"--progress\" if !planning`, causing `--progress` during `plan` to fall through to unknown-option rejection or legacy fallback.",
       "result": "Accept both `-q` and `--quiet` (and normalize `-q` to `\"--quiet\"` in duplicate-option tracking) in `owned_loudnorm_cli::{run, run_plan}` and across `plan loudness`, `loudness`, `plan decode-audio`, `decode-audio`, `plain_decode`, `try_native_audio_trim`, `try_owned_overlay`, `owned_lossless_command_with_name`, and the `transcode`, `transcode-lossless`, `crop-lossless`, and `plan remux` fast paths in `src/media_cli.rs`; and accept `--progress` as a no-op during `plan` in `try_owned_overlay`, `owned_lossless_command_with_name`, `owned_xfade_command`, `owned_subtitle_burn_command`, `try_video_concat`, and `try_video_trim`. One focused integration test, 3 related integration tests, and 1 offline fixture unit test pass.",
       "status": "accepted",
-      "validation": "batch-221-validation.json"
+      "validation": "batch-221-validation.json",
+      "progress_plan_integration_correction_validation": "batch-526-validation.json",
+      "progress_plan_integration_correction_note": "Original0aef5cfaaa already accepts plan trim-pcm --progress as a read-only no-op. The old native_pcm_trim test incorrectly expected refusal. Same failure proved on unchanged original source;independent original binary probes retain invalid stream/sub-microsecond refusals and identical successful JSON plans. Updated test requires full-plan equality,no stderr progress,no destination,no source modification and the two refusals both with/without --progress. CLI production source unchanged;zero new IDs."
     },
     {
       "id": "FVID-0229",
@@ -5828,6 +5830,17 @@
       "result": "For explicitly block-aligned PCM/G711,limit playback bytes to COMM declared frame count with checked coded-stride multiplication. Charge the entire stored run before trimming;retain truncated EOF/partial-frame refusals,unblocked compatibility and MACE conventions. Ten authored mono/stereo AIFF/AIFC cases cover16/24-bit PCM,float32,ALaw/MuLaw,offset0/3,sentinel padding and the2048-frame packet boundary. Exact waveform/native timestamps,duration,raw/Duration seek,EOF/MAX,rewind and actual worker drain match independent mathematical oracles. Five frozen-source gates pass81 Rust executions,zero ignores and core/player checks;three repeats pass9 tests each. All24 fixture files regenerate byte-identically;2425 source/fixture hashes stay stable. No performance or physical-device claim.",
       "status": "accepted",
       "validation": "batch-525-validation.json"
+    },
+    {
+      "id": "FVID-0515",
+      "batch": 526,
+      "title": "Play AIFF/AIFC signed PCM with any valid1..32-bit precision",
+      "source": "src/playback/audio/aiff.rs",
+      "regression": "tests/aiff_integer_precision.rs",
+      "before": "Original0aef5cfaaa passes byte-aligned PCM and neutral-video controls but rejects an authored nonempty1-bit AIFF with unsupported PCM width,both directly and through the actual worker. Before suite passes2/fails4;only the valid-format refusals establish the compatibility defect,while new negative tests distinguish their intended refusal reasons.",
+      "result": "Keep COMM logical precision while mapping left-justified signed integers to the existing whole-byte decoder. Round frame stride per channel and refuse nonzero unused low bits after resource admission and storage-tail trimming. All192 AIFF/NONE/sowt \u00d71..32-bit \u00d7mono/stereo cases match independent mathematical f32 levels,exact native timestamps,duration,packet-boundary seek,EOF/MAX and rewind;168 nonbyte cases also pass actual worker capture. Invalid widths,dirty unused bits,partial frames,truncated EOF,file/data budgets and explicit block padding remain strict. Seven gates pass146 Rust executions,zero ignores,both core/player checks;three repeats pass14 tests each with2693 frozen hashes. All266 fixture files regenerate byte-identically. A pre-existing CLI test incorrectly refusing supported plan --progress was proved on original source and strengthened to require identical JSON/no writes while retaining strict invalid-option refusals;zero extra IDs. No generic PCM API expansion,performance or physical-device claim.",
+      "status": "accepted",
+      "validation": "batch-526-validation.json"
     }
   ]
 }

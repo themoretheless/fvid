@@ -3549,3 +3549,7 @@ One compatibility capability:existing Rust G711 companders now decode QuickTime 
 ## Batch 525 — FVID-0514: AIFF storage padding
 
 Explicitly block-aligned PCM/G711 AIFF/AIFC now excludes SSND tail padding from sound and seek duration. Original worker reproduces extra audio;ten authored variants,strict refusal controls,81 test executions,two build checks and three9-test repeats pass. Full stored bytes remain charged. Evidence:`evidence/aiff-block-padding/README.md`. Accepted total:514/1000.
+
+## Batch 526 — FVID-0515: AIFF integer precision
+
+AIFF/AIFC signed PCM now supports every valid1..32-bit logical precision with whole-byte per-channel storage and strict zero-padding validation.192 authored variants and168 actual-worker captures pass;seven gates cover146 test executions,two build checks and three14-test repeats. A pre-existing CLI plan-progress test is corrected with stronger acceptance/refusal checks and zero extra IDs. Evidence:`evidence/aiff-integer-precision/README.md`. Accepted total:515/1000.

@@ -189,6 +189,17 @@ impl Aiff {
         {
             return Err(invalid("AIFF PCM sample run ends in an incomplete channel frame"));
         }
+        if let Coding::Pcm(PcmFormat::Int { bits: stored_bits, big_endian }) = pcm.coding {
+            let unused = u16::from(stored_bits) - pcm.bits_per_sample;
+            if unused != 0 {
+                let width = usize::from(stored_bits) / 8;
+                let low_byte = if big_endian { width - 1 } else { 0 };
+                let mask = (1u8 << unused) - 1;
+                if samples.chunks_exact(width).any(|sample| sample[low_byte] & mask != 0) {
+                    return Err(invalid("AIFF PCM sample has nonzero unused bits"));
+                }
+            }
+        }
         Ok(Self {
             pcm,
             declared_frames,
@@ -266,17 +277,18 @@ fn parse_comm(body: &[u8], aifc: bool, limits: &Limits) -> Result<(Pcm, usize)> 
         Coding::Mace3
     } else if kind == MAC6 {
         Coding::Mace6
-    } else if kind == NONE {
+    } else if kind == NONE || kind == SOWT {
+        if !(1..=32).contains(&bits) {
+            return Err(unsupported(&format!(
+                "AIFF PCM of {bits} bits a sample is a width this player has no decoder for"
+            )));
+        }
+        // Significant integer bits are left-justified in whole bytes. Decoding
+        // at the stored width retains their scale; the reported precision stays
+        // the COMM value. sowt reverses byte order, not bit justification.
         Coding::Pcm(PcmFormat::Int {
-            bits: bits as u8,
-            big_endian: true,
-        })
-    } else if kind == SOWT {
-        // Byte-swapped PCM, which is how an AIFC file says it holds the little-endian
-        // widths its successors took from the PC.
-        Coding::Pcm(PcmFormat::Int {
-            bits: bits as u8,
-            big_endian: false,
+            bits: (bits.div_ceil(8) * 8) as u8,
+            big_endian: kind != SOWT,
         })
     } else {
         return Err(unsupported(&format!(
@@ -302,15 +314,6 @@ fn parse_comm(body: &[u8], aifc: bool, limits: &Limits) -> Result<(Pcm, usize)> 
     if matches!(coding, Coding::ALaw | Coding::MuLaw) && !(1..=32).contains(&bits) {
         return Err(invalid(&format!(
             "G.711 original sample size must be 1..32 bits, this track states {bits}"
-        )));
-    }
-    if !matches!(
-        coding,
-        Coding::Mace3 | Coding::Mace6 | Coding::ALaw | Coding::MuLaw | Coding::Pcm(PcmFormat::Float { .. })
-    ) && !matches!(bits, 8 | 16 | 24 | 32)
-    {
-        return Err(unsupported(&format!(
-            "AIFF PCM of {bits} bits a sample is a width this player has no decoder for"
         )));
     }
     Ok((
@@ -830,11 +833,12 @@ mod tests {
         bytes[50..54].copy_from_slice(b"fl32");
         bytes.extend_from_slice(&[0x00, 0x00, 0x00, 0x00, 0x3b, 0xeb, 0x00, 0x00]);
         assert!(Aiff::parse(&bytes, &Limits::default()).is_err());
-        // So is a width this decoder has no sample layout for, such as the 12-bit row
-        // that some writers name in a header.
+        // A 12-bit header is valid, but this copy still has no sample payload.
+        // Nonempty left-justified precision is covered by aiff_integer_precision.
         let mut bytes = head.clone();
         bytes[39] = 0x0c;
-        assert!(Aiff::parse(&bytes, &Limits::default()).is_err());
+        let error = Aiff::parse(&bytes, &Limits::default()).unwrap_err();
+        assert!(error.to_string().contains("no samples"), "{error}");
         // And a channel count of zero, which no header of either form may name.
         let bytes = file(
             b"AIFF",

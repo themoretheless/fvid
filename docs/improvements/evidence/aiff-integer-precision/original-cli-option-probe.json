@@ -1,0 +1,75 @@
+{
+  "binary_sha256": "5cde22669ab0473918c6e2e4c8692876f6fd6d0781a6897aedca561903f864d0",
+  "source_fixture_sha256": "2f6885059b932b9bd1bd4e9ada0e699733d68aa8a7c7db170877e1f4b1f821e2",
+  "source_unchanged": true,
+  "same_plan_with_progress": true,
+  "commands": {
+    "base": {
+      "command": [
+        "/private/tmp/fvid-aiff-precision-target-20261102/debug/fvid",
+        "media",
+        "plan",
+        "trim-pcm",
+        "/Users/themoretheless/.codex/worktrees/fvid-push-20261029/fvid/tests/fixtures/playback-errors/cli-quiet-flag/tone.wav",
+        "--from",
+        "0",
+        "--to",
+        "0.001"
+      ],
+      "exit_code": 0,
+      "stdout": "{\n  \"command\": \"trim-pcm\",\n  \"input\": \"/Users/themoretheless/.codex/worktrees/fvid-push-20261029/fvid/tests/fixtures/playback-errors/cli-quiet-flag/tone.wav\",\n  \"inputs\": [\n    \"/Users/themoretheless/.codex/worktrees/fvid-push-20261029/fvid/tests/fixtures/playback-errors/cli-quiet-flag/tone.wav\"\n  ],\n  \"streams\": [\n    {\n      \"index\": 0,\n      \"media_type\": \"audio\",\n      \"codec\": \"pcm_s16le\",\n      \"disposition\": \"trim_pcm\"\n    }\n  ],\n  \"steps\": [\n    {\n      \"action\": \"interval\",\n      \"detail\": \"exact sample range [0, 48) at 48000 Hz; 48 retained frames, 96 PCM bytes; requested [0, 1000) \u00b5s, clipped at EOF\"\n    },\n    {\n      \"action\": \"trim\",\n      \"detail\": \"FVid RIFF reader copies unchanged 16-bit samples in 1 channels through aligned blocks of at most 64 KiB; no decoder\"\n    },\n    {\n      \"action\": \"metadata\",\n      \"detail\": \"preserve fmt, INFO, JUNK and PAD chunks; rewrite RIFF/data lengths and fact sample count; reject unsupported timed metadata\"\n    },\n    {\n      \"action\": \"write\",\n      \"detail\": \"publish .wav atomically without overwriting an existing path; errors and cancellation remove the temporary output\"\n    }\n  ],\n  \"graph\": null,\n  \"notes\": [\n    \"backend: fvid; no external demuxer, decoder or muxer\",\n    \"metadata-only plan: RIFF geometry and interval are validated; payload reading, output permissions and publication are checked during execution\"\n  ]\n}\n",
+      "stderr": ""
+    },
+    "invalid-stream": {
+      "command": [
+        "/private/tmp/fvid-aiff-precision-target-20261102/debug/fvid",
+        "media",
+        "plan",
+        "trim-pcm",
+        "/Users/themoretheless/.codex/worktrees/fvid-push-20261029/fvid/tests/fixtures/playback-errors/cli-quiet-flag/tone.wav",
+        "--from",
+        "0",
+        "--to",
+        "0.001",
+        "--streams",
+        "1"
+      ],
+      "exit_code": 1,
+      "stdout": "",
+      "stderr": "fvid: WAVE has only stream 0\n"
+    },
+    "sub-microsecond": {
+      "command": [
+        "/private/tmp/fvid-aiff-precision-target-20261102/debug/fvid",
+        "media",
+        "plan",
+        "trim-pcm",
+        "/Users/themoretheless/.codex/worktrees/fvid-push-20261029/fvid/tests/fixtures/playback-errors/cli-quiet-flag/tone.wav",
+        "--from",
+        "0.0000001",
+        "--to",
+        "0.001"
+      ],
+      "exit_code": 1,
+      "stdout": "",
+      "stderr": "fvid: time must be nonnegative decimal seconds with at most 6 fractional digits\n"
+    },
+    "progress": {
+      "command": [
+        "/private/tmp/fvid-aiff-precision-target-20261102/debug/fvid",
+        "media",
+        "plan",
+        "trim-pcm",
+        "/Users/themoretheless/.codex/worktrees/fvid-push-20261029/fvid/tests/fixtures/playback-errors/cli-quiet-flag/tone.wav",
+        "--from",
+        "0",
+        "--to",
+        "0.001",
+        "--progress"
+      ],
+      "exit_code": 0,
+      "stdout": "{\n  \"command\": \"trim-pcm\",\n  \"input\": \"/Users/themoretheless/.codex/worktrees/fvid-push-20261029/fvid/tests/fixtures/playback-errors/cli-quiet-flag/tone.wav\",\n  \"inputs\": [\n    \"/Users/themoretheless/.codex/worktrees/fvid-push-20261029/fvid/tests/fixtures/playback-errors/cli-quiet-flag/tone.wav\"\n  ],\n  \"streams\": [\n    {\n      \"index\": 0,\n      \"media_type\": \"audio\",\n      \"codec\": \"pcm_s16le\",\n      \"disposition\": \"trim_pcm\"\n    }\n  ],\n  \"steps\": [\n    {\n      \"action\": \"interval\",\n      \"detail\": \"exact sample range [0, 48) at 48000 Hz; 48 retained frames, 96 PCM bytes; requested [0, 1000) \u00b5s, clipped at EOF\"\n    },\n    {\n      \"action\": \"trim\",\n      \"detail\": \"FVid RIFF reader copies unchanged 16-bit samples in 1 channels through aligned blocks of at most 64 KiB; no decoder\"\n    },\n    {\n      \"action\": \"metadata\",\n      \"detail\": \"preserve fmt, INFO, JUNK and PAD chunks; rewrite RIFF/data lengths and fact sample count; reject unsupported timed metadata\"\n    },\n    {\n      \"action\": \"write\",\n      \"detail\": \"publish .wav atomically without overwriting an existing path; errors and cancellation remove the temporary output\"\n    }\n  ],\n  \"graph\": null,\n  \"notes\": [\n    \"backend: fvid; no external demuxer, decoder or muxer\",\n    \"metadata-only plan: RIFF geometry and interval are validated; payload reading, output permissions and publication are checked during execution\"\n  ]\n}\n",
+      "stderr": ""
+    }
+  }
+}

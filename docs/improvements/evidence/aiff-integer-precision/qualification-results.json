@@ -1,0 +1,148 @@
+{
+  "integration": {
+    "command": [
+      "cargo",
+      "test",
+      "--locked",
+      "--offline",
+      "--no-default-features",
+      "--features",
+      "player",
+      "--test",
+      "aiff_integer_precision",
+      "--test",
+      "aiff_block_padding",
+      "--test",
+      "aifc_g711_original_width",
+      "--test",
+      "aiff_signed8_native",
+      "--test",
+      "g711_native",
+      "--test",
+      "wav_aiff_au_regressions",
+      "--test",
+      "audio_truncated_eof",
+      "--test",
+      "block_audio_eof",
+      "--test",
+      "audio_reader_eof",
+      "--test",
+      "coded_seek_history",
+      "--test",
+      "audio_sample_seek_clock",
+      "--test",
+      "pcm_run_alignment",
+      "--test",
+      "pcm_packet_admission",
+      "--test",
+      "pcm_exact_seek",
+      "--test",
+      "mp4_g711_seek",
+      "--test",
+      "native_pcm_trim",
+      "--",
+      "--test-threads=2"
+    ],
+    "exit_code": 0,
+    "seconds": 33.30385494232178,
+    "source_stable": true
+  },
+  "root-aiff": {
+    "command": [
+      "cargo",
+      "test",
+      "--locked",
+      "--offline",
+      "--no-default-features",
+      "--features",
+      "player",
+      "--lib",
+      "aiff",
+      "--",
+      "--test-threads=2"
+    ],
+    "exit_code": 0,
+    "seconds": 25.28848695755005,
+    "source_stable": true
+  },
+  "root-wav": {
+    "command": [
+      "cargo",
+      "test",
+      "--locked",
+      "--offline",
+      "--no-default-features",
+      "--features",
+      "player",
+      "--lib",
+      "playback_wav",
+      "--",
+      "--test-threads=2"
+    ],
+    "exit_code": 0,
+    "seconds": 0.28093504905700684,
+    "source_stable": true
+  },
+  "pcm-decoder": {
+    "command": [
+      "cargo",
+      "test",
+      "--locked",
+      "--offline",
+      "--no-default-features",
+      "--features",
+      "player",
+      "--lib",
+      "pcm_decoder",
+      "--",
+      "--test-threads=2"
+    ],
+    "exit_code": 0,
+    "seconds": 0.2648601531982422,
+    "source_stable": true
+  },
+  "audio-worker": {
+    "command": [
+      "cargo",
+      "test",
+      "--locked",
+      "--offline",
+      "--no-default-features",
+      "--features",
+      "player",
+      "--lib",
+      "audio_thread",
+      "--",
+      "--test-threads=2"
+    ],
+    "exit_code": 0,
+    "seconds": 7.677567005157471,
+    "source_stable": true
+  },
+  "core-check": {
+    "command": [
+      "cargo",
+      "check",
+      "--locked",
+      "--offline",
+      "--no-default-features"
+    ],
+    "exit_code": 0,
+    "seconds": 38.879836082458496,
+    "source_stable": true
+  },
+  "player-check": {
+    "command": [
+      "cargo",
+      "check",
+      "--locked",
+      "--offline",
+      "--no-default-features",
+      "--features",
+      "player"
+    ],
+    "exit_code": 0,
+    "seconds": 28.91596007347107,
+    "source_stable": true
+  }
+}
