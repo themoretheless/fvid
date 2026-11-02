@@ -1,0 +1,9 @@
+{
+  "base": "f20209bd624447cd85765d045abeee7526fd6994",
+  "sha256": {
+    "src/playback/audio/mp4_audio.rs": "cb0aab965ac66620b93800d2c535a803effdf17681355c6882ea957c04ebffe3",
+    "tests/mp4_alac_edit_subtick_seek.rs": "f80da8f81c387cdbd2d34f1d1f5bf6f7c7ed55c20128f0bd635363aed898fb8a",
+    "tests/mp4_alac_edit_truncated_seek.rs": "1f6ce529e4de1f88c67c6e247b36aa2656ffecb994bb915a12e8f3b7a9031e41",
+    "scripts/generate_mp4_alac_edit_subtick_seek.py": "9e917e4eb0038450d010178a0bd36767b5133346e2da4cfa196ce25792690c08"
+  }
+}

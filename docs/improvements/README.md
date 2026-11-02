@@ -3503,3 +3503,7 @@ FVID-0484 now preserves exact Duration floors for unedited native PCM,including 
 ## Batch 514 — Unedited ALAC seek precision,zero new IDs
 
 FVID-0484 now retains exact Duration floors for unedited ALAC and computes its native anchor from the actual coded sample-count header. Nine valid authored raw/Rice/media-clock/reordered/fill movies preserve full PCM/video and raw navigation;the separate truncated-body movie still refuses EOF seeks after its valid header. Seven gates pass990 executions,two prior ignores,and three repeated48-test runs pass. No performance claim. Counter511,next FVID-0512. See `batch-514-validation.json`.
+
+## Batch 515 — Edited ALAC native seek precision,zero new IDs
+
+FVID-0484 now retains exact Duration floors in pure ALAC edit timelines. Fifteen authored raw/Rice/reordered/fill/changing-rate movies verify bit-exact PCM/video,leading silence,repeated ranges and actual-worker anchors. A malformed active packet still refuses playback after seek. Seven gates pass995 executions,two prior ignores,and three repeated53-test runs pass. Counter511,next FVID-0512. See `batch-515-validation.json`.

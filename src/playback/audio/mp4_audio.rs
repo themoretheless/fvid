@@ -504,9 +504,9 @@ impl<R: Read + Seek> Mp4AudioReader<R> {
         }
         Ok(None)
     }
-    fn align_variable_seek(&self,mut position:EditTime,sample_aligned_silence:bool)->Result<EditTime> {
-        let timeline=self.variable_edits.as_ref().ok_or_else(||invalid("missing MP4 edit timeline"))?;
+    fn align_variable_seek(&mut self,mut position:EditTime,sample_aligned_silence:bool)->Result<EditTime> {
         loop {
+            let timeline=self.variable_edits.as_ref().ok_or_else(||invalid("missing MP4 edit timeline"))?;
             // A preceding native sample can occupy every remaining edit.
             // The navigation clock still ends at the declared presentation end.
             if position.cmp(timeline.end)!=std::cmp::Ordering::Less {return Ok(timeline.end);}
@@ -535,9 +535,10 @@ impl<R: Read + Seek> Mp4AudioReader<R> {
             }
             if let Some(media)=segment.media {
                 let wanted=media.add(position.sub(segment.start)?)?;
-                let landed=if self.clock.is_some() {self.clock_landing(wanted)?.1}
-                    else if let Some(at)=self.native_landing(wanted)? {at}
-                    else {return Err(invalid("MP4 audio edit extends beyond source packets"));};
+                let landed=if self.clock.is_some() {Some(self.clock_landing(wanted)?.1)}
+                    else if self.setup().codec==*b"alac" {self.alac_native_landing(wanted)?}
+                    else {self.native_landing(wanted)?};
+                let landed=landed.ok_or_else(||invalid("MP4 audio edit extends beyond source packets"))?;
                 let mapped=landed.add(segment.start)?.sub(media)?;
                 if mapped.cmp(segment.end)!=std::cmp::Ordering::Less {position=segment.end;continue;}
                 position=position.max(mapped);
@@ -554,11 +555,14 @@ impl<R: Read + Seek> Mp4AudioReader<R> {
     fn seek_exact(&mut self,wanted:EditTime,sample_aligned_silence:bool)->Result<i64> {
         if self.variable_edits.is_none() {return self.seek_recovered(wanted);}
         self.rewind();
-        let timeline=self.variable_edits.as_ref().unwrap();
-        let position=if wanted.cmp(timeline.end)==std::cmp::Ordering::Greater {timeline.end}else{wanted};
-        timeline.cursor.set(position);
-        let position=timeline.locate().map_or(position,|i|position.max(timeline.minimum_starts[i]));
-        let position=self.align_variable_seek(position,sample_aligned_silence)?;timeline.cursor.set(position);
+        let position={
+            let timeline=self.variable_edits.as_ref().unwrap();
+            let position=if wanted.cmp(timeline.end)==std::cmp::Ordering::Greater {timeline.end}else{wanted};
+            timeline.cursor.set(position);
+            timeline.locate().map_or(position,|i|position.max(timeline.minimum_starts[i]))
+        };
+        let position=self.align_variable_seek(position,sample_aligned_silence)?;
+        self.variable_edits.as_ref().unwrap().cursor.set(position);
         self.variable_edits.as_mut().unwrap().active=None;
         let returned=i64::try_from(position.floor_ticks(self.track().timescale)?).map_err(|_|invalid("MP4 seek clock overflow"))?;
         self.clock_anchor.set(Some((returned,position)));Ok(returned)
@@ -1523,7 +1527,9 @@ impl<R: Read + Seek + Send> crate::audio::AudioStream for Mp4AudioReader<R> {
         let exact_pcm_edits=self.variable_edits.is_some() && self.track().sample_descriptions.iter().enumerate().all(|(i,header)|
             matches!(&header.codec,b"sowt"|b"twos"|b"raw "|b"in24"|b"in32"|b"fl32"|b"fl64")
                 || !clock_recovery::clock_description_used(&self.track().samples,i+1));
-        if self.clock.is_some() || exact_aac_edits || exact_pcm_edits {
+        let exact_alac_edits=self.variable_edits.is_some() && self.track().sample_descriptions.iter().enumerate().all(|(i,header)|
+            header.codec==*b"alac" || !clock_recovery::clock_description_used(&self.track().samples,i+1));
+        if self.clock.is_some() || exact_aac_edits || exact_pcm_edits || exact_alac_edits {
             let time=EditTime::new(target.as_nanos() as i128,1_000_000_000).and_then(|t|self.seek_exact(t,true));
             return match time {Ok(at)=>at,Err(error)=>{self.navigation_error=Some(error);0}};
         }
