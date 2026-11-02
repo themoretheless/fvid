@@ -1,0 +1,24 @@
+{
+  "source_commit": "ede39be8e0da3975c228ab82b6a52d8666ca16df",
+  "verified_remote_refs": {
+    "refs/heads/codex/deliver-fvid-20261029": "ede39be8e0da3975c228ab82b6a52d8666ca16df",
+    "refs/heads/main": "ede39be8e0da3975c228ab82b6a52d8666ca16df"
+  },
+  "accepted_ids": [],
+  "follow_up_ids": [
+    "FVID-0484"
+  ],
+  "count_delta": 0,
+  "accepted_count": 511,
+  "next_id": "FVID-0512",
+  "goal_complete": false,
+  "worktree_clean_before_receipt": true,
+  "qualified_source_and_eighteen_fixture_hashes_verified": true,
+  "owned_build_target_absent": true,
+  "qualification_test_executions": 990,
+  "repeat_runs": 3,
+  "repeat_passed_each": 48,
+  "valid_alac_fill_rice_raw_pcm_video_and_seek_verified": true,
+  "header_valid_body_short_refuses_eof_and_durationmax_before_and_after": true,
+  "existing_tests_unchanged": true
+}
