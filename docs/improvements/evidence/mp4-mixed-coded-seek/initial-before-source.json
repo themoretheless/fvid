@@ -1,0 +1,9 @@
+{
+  "head": "94722ab15471c283a343e9b1e1e4b908ade60f3a",
+  "sha256": {
+    "src/playback/audio/mp4_audio.rs": "d19dda08e1cabac2c5cf7971948bb2d95d1f09c1d7ac588bc3207bf7d287a04a",
+    "tests/mp4_mixed_coded_seek.rs": "310a344304734858f0eeb4524b9dc8908e2a77777d341322cf92f197f69bdc1e",
+    "tests/support/rational_audio_seek.rs": "22fa68ebcf86a6b8a4e8cf606d412cc76d46cb6e8eda9c50ee2322d955cae478",
+    "scripts/generate_mp4_mixed_coded_seek.py": "153ef122109ca4622a42b629422b128dc38e893ff9c59c1692b35839ac0d22d9"
+  }
+}

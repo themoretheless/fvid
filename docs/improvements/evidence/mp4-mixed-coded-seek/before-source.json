@@ -1,0 +1,10 @@
+{
+  "head": "94722ab15471c283a343e9b1e1e4b908ade60f3a",
+  "sha256": {
+    "src/playback/audio/mp4_audio.rs": "d19dda08e1cabac2c5cf7971948bb2d95d1f09c1d7ac588bc3207bf7d287a04a",
+    "tests/mp4_mixed_coded_seek.rs": "310a344304734858f0eeb4524b9dc8908e2a77777d341322cf92f197f69bdc1e",
+    "tests/mp4_native_pcm_fractional_stamp.rs": "832de70e4520ea9b7fe13e476171c78141009c2ea2ee2a3ef0ae24a249635e8f",
+    "tests/support/rational_audio_seek.rs": "22fa68ebcf86a6b8a4e8cf606d412cc76d46cb6e8eda9c50ee2322d955cae478",
+    "scripts/generate_mp4_mixed_coded_seek.py": "bbbcb996e8a1fa5a4b1595d954fa006228ce92cec611563f52ad27a45482d11b"
+  }
+}

@@ -1,6 +1,6 @@
 # Verified improvements
 
-Accepted: **511 / 1000 independent, useful changes**. Only entries marked `accepted` in
+Accepted: **512 / 1000 independent, useful changes**. Only entries marked `accepted` in
 [`registry.json`](registry.json) count. Fixture variants, test cases, documentation
 and baseline integration repairs do not inflate the count.
 
@@ -3527,3 +3527,7 @@ FVID-0484 now preserves exact Duration floors for constant AudioTimeline cursors
 ## Batch 520 — Mixed PCM/MACE/ADPCM native seek precision,zero new IDs
 
 FVID-0484 now preserves exact Duration floors across supported PCM/MACE/ADPCM description mixtures. Sixteen authored classic/reordered/fragmented/hybrid files cover normal playback,silence/repeated edits,native PCM suffixes/actual packet timestamps,raw reseek and actual-worker anchors. Seven gates pass1061 test executions,two prior ignores;three repeated119-test runs pass. Counter511,next FVID-0512. See `batch-520-validation.json`.
+
+## Batch 521 — Exact native packet stamps and mixed coded seek
+
+FVID-0512 preserves representable rational native PCM timestamps after raw media-tick clipping. A pure44.1k fixture proves the right waveform had the wrong native sample label,without any Duration request;the isolated stamp correction passes its regression while FVID-0484 mixed routing still fails. A separate zero-count extension then corrects AAC/ALAC/PCM routing and packet-specific ALAC counts. Sixteen mixed movies preserve rational timestamps,PCM,history,silence/repeated edits and actual-worker anchors. Seven gates pass1068 test executions,two prior ignores;three repeated126-test runs pass. Counter512,next FVID-0513. See `batch-521-validation.json`.

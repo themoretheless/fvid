@@ -1,0 +1,15 @@
+{
+  "raw_media_tick": 1,
+  "source_scale": 14112000,
+  "rate": 44100,
+  "decoded_first_native_index": 1,
+  "original_packet_num": 22675,
+  "original_packet_den": 1000000000,
+  "original_implied_native_index_floor": 0,
+  "exact_packet_num": 1,
+  "exact_packet_den": 44100,
+  "exact_implied_native_index_floor": 1,
+  "before_source": "before.log",
+  "isolated_fix": "phase-only-source.rs.txt",
+  "pcm_bytes_identical_before_after": true
+}

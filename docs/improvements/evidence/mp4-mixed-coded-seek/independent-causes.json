@@ -1,0 +1,39 @@
+{
+  "candidate_new_id": "FVID-0512",
+  "existing_follow_up_id": "FVID-0484",
+  "accepted_count_before": 511,
+  "new_cause": "Generic clipped PCM timestamps are floored to integer nanoseconds despite an exact rational packet-clock API;raw media-tick seek reproduces this without Duration conversion.",
+  "new_cause_fixture": "pcm-phase.mp4",
+  "original_raw_tests": {
+    "passed": 1,
+    "failed": 1
+  },
+  "after_stamp_only_raw_tests": {
+    "passed": 2,
+    "failed": 0
+  },
+  "duration_route_still_fails_after_stamp_only": {
+    "passed": 3,
+    "failed": 2,
+    "cases": [
+      "alac-classic.mp4",
+      "alac-classic-edits.mp4",
+      "alac-third.mp4",
+      "alac-third-edits.mp4",
+      "alac-fragmented.mp4",
+      "alac-fragmented-edits.mp4",
+      "aac-classic.mp4",
+      "aac-classic-edits.mp4",
+      "aac-third.mp4",
+      "aac-third-edits.mp4",
+      "aac-fragmented.mp4",
+      "aac-fragmented-edits.mp4",
+      "all-classic.mp4",
+      "all-classic-edits.mp4",
+      "all-hybrid.mp4",
+      "all-hybrid-edits.mp4"
+    ]
+  },
+  "stamp_only_source": "phase-only-source.json",
+  "tests_unchanged": true
+}

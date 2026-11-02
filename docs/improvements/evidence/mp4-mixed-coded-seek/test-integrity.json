@@ -1,0 +1,13 @@
+{
+  "baseline_head": "94722ab15471c283a343e9b1e1e4b908ade60f3a",
+  "baseline_production_matches_commit": true,
+  "new_tests_helpers_generator_identical_before_after": true,
+  "existing_tests_and_capture_unchanged": [
+    "tests/mp4_aac_transitions.rs",
+    "tests/mp4_audio_packet_seek.rs",
+    "tests/mp4_audio_metadata_admission.rs",
+    "tests/mp4_unedited_alac_subtick_seek.rs",
+    "tests/mp4_alac_edit_subtick_seek.rs",
+    "tests/support/audio_transitions.rs"
+  ]
+}

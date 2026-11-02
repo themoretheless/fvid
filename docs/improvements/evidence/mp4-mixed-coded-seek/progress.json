@@ -1,0 +1,14 @@
+{
+  "status": "accepted",
+  "accepted_ids": [
+    "FVID-0512"
+  ],
+  "follow_up_ids": [
+    "FVID-0484"
+  ],
+  "count_delta": 1,
+  "accepted_count": 512,
+  "next_id": "FVID-0513",
+  "qualification_test_executions": 1068,
+  "repeat_passed_each": 126
+}

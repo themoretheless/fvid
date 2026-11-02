@@ -1,0 +1,9 @@
+{
+  "count_delta": 0,
+  "production_unchanged": true,
+  "problem": "Five unedited AAC/all-family movie headers inherited the short video duration while their audio track was longer.",
+  "repair": "Set mvhd duration to at least the audio track duration in the existing movie clock;media/sample tables and expectations remain unchanged.",
+  "initial_baseline": "initial-before.log",
+  "initial_generator": "initial-generator.py.txt",
+  "independent_raw_pcm_phase_control_added": true
+}

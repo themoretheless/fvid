@@ -1,0 +1,6 @@
+{
+  "files": 19,
+  "mixed_cases": 16,
+  "dedicated_pcm_phase_fixture": true,
+  "movie_duration_covers_all_track_durations": true
+}

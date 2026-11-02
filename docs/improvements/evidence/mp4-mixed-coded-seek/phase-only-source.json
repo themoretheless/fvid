@@ -1,0 +1,6 @@
+{
+  "change": "Packet-stamp precision only;Duration routing unchanged",
+  "sha256": {
+    "src/playback/audio/mp4_audio.rs": "fbf9643a9c3732135482d92309af3cf2c460ca7c1af8b0afaaa8e182f5bde407"
+  }
+}

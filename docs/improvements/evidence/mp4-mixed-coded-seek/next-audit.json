@@ -1,0 +1,15 @@
+{
+  "status": "source-inspection-only",
+  "accepted_ids": [],
+  "count_delta": 0,
+  "scope": "Aligned-clock mixed Dolby/PCM seeks and preplay negotiated rates",
+  "observation": "PlaybackClock::build returns no recovered clock when the media scale divides all used native rates. The precise description predicate still excludes AC3/EAC3. Authored aligned-clock mixed Dolby/PCM controls are needed before any correction;preplay rate probing and programme/header disagreements need separate coverage. Existing native raw-tick/packet contracts and bounded packet admission must be preserved.",
+  "not_a_confirmed_defect": true,
+  "required_before_fix": [
+    "Valid full PCM/video controls",
+    "Rational native suffixes and actual-worker anchors",
+    "Fresh-reader and preplay seeks before cached setup negotiation",
+    "Selected programme and actual coded rates",
+    "Raw media-tick compatibility and refusal controls"
+  ]
+}
