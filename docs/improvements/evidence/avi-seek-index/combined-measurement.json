@@ -1,0 +1,54 @@
+{
+  "scope": "Actual public AviAudioReader::seek_to in default dev build;excludes parsing,packet I/O,decoding and whole-player throughput",
+  "independent_epochs": 2,
+  "same_preserved_binaries": true,
+  "source_stable": true,
+  "checksums_equal": true,
+  "summary": {
+    "1": {
+      "case_epochs": 6,
+      "pairs": 30,
+      "ratio_min": 1.048419293440416,
+      "median_extra_ns_range": [
+        -3.9250000000000043,
+        -3.0461538461538495
+      ]
+    },
+    "16": {
+      "case_epochs": 6,
+      "pairs": 30,
+      "ratio_min": 0.8288079402851506,
+      "median_extra_ns_range": [
+        7.130769230769232,
+        13.70192307692308
+      ]
+    },
+    "1024": {
+      "case_epochs": 6,
+      "pairs": 30,
+      "ratio_min": 8.317576591941151,
+      "median_extra_ns_range": [
+        -1445.5942307692308,
+        -1379.1653846153847
+      ]
+    },
+    "16384": {
+      "case_epochs": 6,
+      "pairs": 30,
+      "ratio_min": 94.72715201692785,
+      "median_extra_ns_range": [
+        -25748.236538461537,
+        -24731.009615384613
+      ]
+    },
+    "65536": {
+      "case_epochs": 6,
+      "pairs": 30,
+      "ratio_min": 243.71839782366098,
+      "median_extra_ns_range": [
+        -101957.21153846155,
+        -98372.27692307692
+      ]
+    }
+  }
+}

@@ -337,3 +337,7 @@ required-features = ["player"]
 [[example]]
 name = "bench_mp4_clock_description_scan"
 required-features = ["player"]
+
+[[example]]
+name = "bench_avi_seek_index"
+required-features = ["player"]

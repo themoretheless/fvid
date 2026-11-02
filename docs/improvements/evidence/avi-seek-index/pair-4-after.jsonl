@@ -1,0 +1,15 @@
+{"checksum":259,"elapsed_ns":21041,"file":"pcm16-one.avi","queries":520,"records":1,"round":4}
+{"checksum":42097,"elapsed_ns":46000,"file":"pcm16-small.avi","queries":520,"records":16,"round":4}
+{"checksum":264386,"elapsed_ns":92708,"file":"pcm16-medium.avi","queries":520,"records":1024,"round":4}
+{"checksum":17058739,"elapsed_ns":178792,"file":"pcm16-dense.avi","queries":520,"records":65536,"round":4}
+{"checksum":13729600,"elapsed_ns":135833,"file":"pcm16-irregular.avi","queries":520,"records":16384,"round":4}
+{"checksum":259,"elapsed_ns":21041,"file":"alaw-one.avi","queries":520,"records":1,"round":4}
+{"checksum":42097,"elapsed_ns":45000,"file":"alaw-small.avi","queries":520,"records":16,"round":4}
+{"checksum":264386,"elapsed_ns":94042,"file":"alaw-medium.avi","queries":520,"records":1024,"round":4}
+{"checksum":17058739,"elapsed_ns":171625,"file":"alaw-dense.avi","queries":520,"records":65536,"round":4}
+{"checksum":13729600,"elapsed_ns":133458,"file":"alaw-irregular.avi","queries":520,"records":16384,"round":4}
+{"checksum":259,"elapsed_ns":20583,"file":"mulaw-one.avi","queries":520,"records":1,"round":4}
+{"checksum":42097,"elapsed_ns":43875,"file":"mulaw-small.avi","queries":520,"records":16,"round":4}
+{"checksum":264386,"elapsed_ns":93042,"file":"mulaw-medium.avi","queries":520,"records":1024,"round":4}
+{"checksum":17058739,"elapsed_ns":188375,"file":"mulaw-dense.avi","queries":520,"records":65536,"round":4}
+{"checksum":13729600,"elapsed_ns":130250,"file":"mulaw-irregular.avi","queries":520,"records":16384,"round":4}

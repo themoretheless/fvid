@@ -1,0 +1,142 @@
+paired round 0 passed
+paired round 1 passed
+paired round 2 passed
+paired round 3 passed
+paired round 4 passed
+{
+  "pcm16-one.avi": {
+    "pairs": 5,
+    "records": 1,
+    "before_ns_per_seek_median": 43.99038461538461,
+    "after_ns_per_seek_median": 40.784615384615385,
+    "ratio_min": 1.0744941176470588,
+    "ratio_median": 1.0796439556342623,
+    "ratio_max": 1.098217653715579
+  },
+  "pcm16-small.avi": {
+    "pairs": 5,
+    "records": 16,
+    "before_ns_per_seek_median": 78.28653846153846,
+    "after_ns_per_seek_median": 88.46153846153847,
+    "ratio_min": 0.833637089672967,
+    "ratio_median": 0.9037433155080213,
+    "ratio_max": 0.9290975440481788
+  },
+  "pcm16-medium.avi": {
+    "pairs": 5,
+    "records": 1024,
+    "before_ns_per_seek_median": 1626.123076923077,
+    "after_ns_per_seek_median": 180.52884615384616,
+    "ratio_min": 8.714471968709256,
+    "ratio_median": 8.917117444570353,
+    "ratio_max": 9.199296937416777
+  },
+  "pcm16-dense.avi": {
+    "pairs": 5,
+    "records": 65536,
+    "before_ns_per_seek_median": 102307.13076923077,
+    "after_ns_per_seek_median": 349.91923076923075,
+    "ratio_min": 290.55514459380737,
+    "ratio_median": 294.98243769296164,
+    "ratio_max": 331.4623551401869
+  },
+  "pcm16-irregular.avi": {
+    "pairs": 5,
+    "records": 16384,
+    "before_ns_per_seek_median": 25535.096153846152,
+    "after_ns_per_seek_median": 261.2173076923077,
+    "ratio_min": 95.58270533003527,
+    "ratio_median": 98.48287523598579,
+    "ratio_max": 100.98004316589304
+  },
+  "alaw-one.avi": {
+    "pairs": 5,
+    "records": 1,
+    "before_ns_per_seek_median": 43.50961538461539,
+    "after_ns_per_seek_median": 40.46346153846154,
+    "ratio_min": 1.048419293440416,
+    "ratio_median": 1.0769567118495846,
+    "ratio_max": 1.0838323353293413
+  },
+  "alaw-small.avi": {
+    "pairs": 5,
+    "records": 16,
+    "before_ns_per_seek_median": 78.68461538461538,
+    "after_ns_per_seek_median": 88.05961538461538,
+    "ratio_min": 0.8598688634835239,
+    "ratio_median": 0.8962888888888889,
+    "ratio_max": 0.9363193640671748
+  },
+  "alaw-medium.avi": {
+    "pairs": 5,
+    "records": 1024,
+    "before_ns_per_seek_median": 1609.6153846153845,
+    "after_ns_per_seek_median": 183.975,
+    "ratio_min": 8.749098435197089,
+    "ratio_median": 8.800796193201256,
+    "ratio_max": 8.96066114993783
+  },
+  "alaw-dense.avi": {
+    "pairs": 5,
+    "records": 65536,
+    "before_ns_per_seek_median": 101511.2173076923,
+    "after_ns_per_seek_median": 353.6865384615385,
+    "ratio_min": 272.50653932909796,
+    "ratio_median": 292.4251591750627,
+    "ratio_max": 305.72639184268024
+  },
+  "alaw-irregular.avi": {
+    "pairs": 5,
+    "records": 16384,
+    "before_ns_per_seek_median": 25554.967307692306,
+    "after_ns_per_seek_median": 260.8173076923077,
+    "ratio_min": 94.72715201692785,
+    "ratio_median": 98.41459643260197,
+    "ratio_max": 99.5894538606403
+  },
+  "mulaw-one.avi": {
+    "pairs": 5,
+    "records": 1,
+    "before_ns_per_seek_median": 43.83076923076923,
+    "after_ns_per_seek_median": 40.54423076923077,
+    "ratio_min": 1.062532227066048,
+    "ratio_median": 1.0826758633722304,
+    "ratio_max": 1.1073215760579118
+  },
+  "mulaw-small.avi": {
+    "pairs": 5,
+    "records": 16,
+    "before_ns_per_seek_median": 78.84615384615384,
+    "after_ns_per_seek_median": 85.97692307692307,
+    "ratio_min": 0.8288079402851506,
+    "ratio_median": 0.9198577435805673,
+    "ratio_max": 0.9807167630057804
+  },
+  "mulaw-medium.avi": {
+    "pairs": 5,
+    "records": 1024,
+    "before_ns_per_seek_median": 1608.6538461538462,
+    "after_ns_per_seek_median": 182.45192307692307,
+    "ratio_min": 8.542686225870007,
+    "ratio_median": 8.816864295125164,
+    "ratio_max": 9.022059135451576
+  },
+  "mulaw-dense.avi": {
+    "pairs": 5,
+    "records": 65536,
+    "before_ns_per_seek_median": 101855.04807692308,
+    "after_ns_per_seek_median": 358.65384615384613,
+    "ratio_min": 259.3673124743015,
+    "ratio_median": 283.54803753351206,
+    "ratio_max": 300.9296469702164
+  },
+  "mulaw-irregular.avi": {
+    "pairs": 5,
+    "records": 16384,
+    "before_ns_per_seek_median": 26006.330769230768,
+    "after_ns_per_seek_median": 258.09423076923076,
+    "ratio_min": 98.25222132621128,
+    "ratio_median": 101.58341408450704,
+    "ratio_max": 102.8237674075509
+  }
+}

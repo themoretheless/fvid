@@ -1,0 +1,1722 @@
+{
+  "scope": "Actual public AviAudioReader::seek_to in default dev build;excludes parsing,packet I/O,decoding and whole-player throughput",
+  "alternating_binary_order": true,
+  "checksums_equal": true,
+  "source_stable": true,
+  "before_binary_sha256": "4d723b13a01367438e6bdfd97f041562909020484e9432cb5ff511eb38818d31",
+  "after_binary_sha256": "b7a6ee7751e1c18245c7962b4a521b9d9b308b1d43f47213ae789a2c36bf6d19",
+  "summary": {
+    "pcm16-one.avi": {
+      "pairs": 5,
+      "records": 1,
+      "before_ns_per_seek_median": 43.10961538461538,
+      "after_ns_per_seek_median": 39.98461538461538,
+      "ratio_min": 1.0560792612543286,
+      "ratio_median": 1.0749349112426037,
+      "ratio_max": 1.2290552147239264
+    },
+    "pcm16-small.avi": {
+      "pairs": 5,
+      "records": 16,
+      "before_ns_per_seek_median": 78.28461538461538,
+      "after_ns_per_seek_median": 89.74423076923077,
+      "ratio_min": 0.8689839572192514,
+      "ratio_median": 0.8773192224239472,
+      "ratio_max": 0.9155776209452992
+    },
+    "pcm16-medium.avi": {
+      "pairs": 5,
+      "records": 1024,
+      "before_ns_per_seek_median": 1580.6076923076923,
+      "after_ns_per_seek_median": 177.00192307692308,
+      "ratio_min": 8.851916883004966,
+      "ratio_median": 8.945131972789115,
+      "ratio_max": 9.300797409251722
+    },
+    "pcm16-dense.avi": {
+      "pairs": 5,
+      "records": 65536,
+      "before_ns_per_seek_median": 99145.67307692308,
+      "after_ns_per_seek_median": 328.92692307692306,
+      "ratio_min": 269.45560880768085,
+      "ratio_median": 299.9117175898317,
+      "ratio_max": 347.8660345804224
+    },
+    "pcm16-irregular.avi": {
+      "pairs": 5,
+      "records": 16384,
+      "before_ns_per_seek_median": 25002.003846153846,
+      "after_ns_per_seek_median": 247.6769230769231,
+      "ratio_min": 96.27406288413975,
+      "ratio_median": 100.55,
+      "ratio_max": 102.795858710811
+    },
+    "alaw-one.avi": {
+      "pairs": 5,
+      "records": 1,
+      "before_ns_per_seek_median": 43.02884615384615,
+      "after_ns_per_seek_median": 39.50192307692308,
+      "ratio_min": 1.0598802395209581,
+      "ratio_median": 1.1115817146195415,
+      "ratio_max": 1.1588956119387808
+    },
+    "alaw-small.avi": {
+      "pairs": 5,
+      "records": 16,
+      "before_ns_per_seek_median": 77.725,
+      "after_ns_per_seek_median": 88.38076923076923,
+      "ratio_min": 0.8607805027188749,
+      "ratio_median": 0.8785195178206189,
+      "ratio_max": 0.9159660056657224
+    },
+    "alaw-medium.avi": {
+      "pairs": 5,
+      "records": 1024,
+      "before_ns_per_seek_median": 1585.8173076923076,
+      "after_ns_per_seek_median": 177.0826923076923,
+      "ratio_min": 8.785050128933543,
+      "ratio_median": 9.004127403557428,
+      "ratio_max": 9.119490025303259
+    },
+    "alaw-dense.avi": {
+      "pairs": 5,
+      "records": 65536,
+      "before_ns_per_seek_median": 98885.97884615384,
+      "after_ns_per_seek_median": 338.7019230769231,
+      "ratio_min": 274.77733790373196,
+      "ratio_median": 291.890464158978,
+      "ratio_max": 305.1876526170506
+    },
+    "alaw-irregular.avi": {
+      "pairs": 5,
+      "records": 16384,
+      "before_ns_per_seek_median": 24986.05769230769,
+      "after_ns_per_seek_median": 255.04807692307693,
+      "ratio_min": 96.08760420736067,
+      "ratio_median": 97.6487615457116,
+      "ratio_max": 100.91187739463602
+    },
+    "mulaw-one.avi": {
+      "pairs": 5,
+      "records": 1,
+      "before_ns_per_seek_median": 42.386538461538464,
+      "after_ns_per_seek_median": 38.46153846153846,
+      "ratio_min": 1.0848695652173912,
+      "ratio_median": 1.09585,
+      "ratio_max": 1.2016815286624203
+    },
+    "mulaw-small.avi": {
+      "pairs": 5,
+      "records": 16,
+      "before_ns_per_seek_median": 76.20192307692308,
+      "after_ns_per_seek_median": 89.90384615384616,
+      "ratio_min": 0.8314025299203543,
+      "ratio_median": 0.8511657754010695,
+      "ratio_max": 0.8839260250531996
+    },
+    "mulaw-medium.avi": {
+      "pairs": 5,
+      "records": 1024,
+      "before_ns_per_seek_median": 1556.8903846153846,
+      "after_ns_per_seek_median": 177.725,
+      "ratio_min": 8.317576591941151,
+      "ratio_median": 8.83433787561146,
+      "ratio_max": 9.119697478627385
+    },
+    "mulaw-dense.avi": {
+      "pairs": 5,
+      "records": 65536,
+      "before_ns_per_seek_median": 98721.875,
+      "after_ns_per_seek_median": 349.5980769230769,
+      "ratio_min": 243.71839782366098,
+      "ratio_median": 283.5804577784379,
+      "ratio_max": 299.29601254927763
+    },
+    "mulaw-irregular.avi": {
+      "pairs": 5,
+      "records": 16384,
+      "before_ns_per_seek_median": 25024.840384615385,
+      "after_ns_per_seek_median": 250.96153846153845,
+      "ratio_min": 97.92036260623229,
+      "ratio_median": 99.88059003831418,
+      "ratio_max": 101.993993993994
+    }
+  },
+  "pairs": [
+    {
+      "file": "pcm16-one.avi",
+      "round": 0,
+      "before": {
+        "checksum": 259,
+        "elapsed_ns": 21958,
+        "file": "pcm16-one.avi",
+        "queries": 520,
+        "records": 1,
+        "round": 0
+      },
+      "after": {
+        "checksum": 259,
+        "elapsed_ns": 20792,
+        "file": "pcm16-one.avi",
+        "queries": 520,
+        "records": 1,
+        "round": 0
+      },
+      "ratio": 1.0560792612543286
+    },
+    {
+      "file": "pcm16-small.avi",
+      "round": 0,
+      "before": {
+        "checksum": 42097,
+        "elapsed_ns": 40625,
+        "file": "pcm16-small.avi",
+        "queries": 520,
+        "records": 16,
+        "round": 0
+      },
+      "after": {
+        "checksum": 42097,
+        "elapsed_ns": 46750,
+        "file": "pcm16-small.avi",
+        "queries": 520,
+        "records": 16,
+        "round": 0
+      },
+      "ratio": 0.8689839572192514
+    },
+    {
+      "file": "pcm16-medium.avi",
+      "round": 0,
+      "before": {
+        "checksum": 264386,
+        "elapsed_ns": 821834,
+        "file": "pcm16-medium.avi",
+        "queries": 520,
+        "records": 1024,
+        "round": 0
+      },
+      "after": {
+        "checksum": 264386,
+        "elapsed_ns": 91875,
+        "file": "pcm16-medium.avi",
+        "queries": 520,
+        "records": 1024,
+        "round": 0
+      },
+      "ratio": 8.945131972789115
+    },
+    {
+      "file": "pcm16-dense.avi",
+      "round": 0,
+      "before": {
+        "checksum": 17058739,
+        "elapsed_ns": 51247167,
+        "file": "pcm16-dense.avi",
+        "queries": 520,
+        "records": 65536,
+        "round": 0
+      },
+      "after": {
+        "checksum": 17058739,
+        "elapsed_ns": 182000,
+        "file": "pcm16-dense.avi",
+        "queries": 520,
+        "records": 65536,
+        "round": 0
+      },
+      "ratio": 281.57784065934067
+    },
+    {
+      "file": "pcm16-irregular.avi",
+      "round": 0,
+      "before": {
+        "checksum": 13729600,
+        "elapsed_ns": 12889541,
+        "file": "pcm16-irregular.avi",
+        "queries": 520,
+        "records": 16384,
+        "round": 0
+      },
+      "after": {
+        "checksum": 13729600,
+        "elapsed_ns": 132875,
+        "file": "pcm16-irregular.avi",
+        "queries": 520,
+        "records": 16384,
+        "round": 0
+      },
+      "ratio": 97.00501222953903
+    },
+    {
+      "file": "alaw-one.avi",
+      "round": 0,
+      "before": {
+        "checksum": 259,
+        "elapsed_ns": 22833,
+        "file": "alaw-one.avi",
+        "queries": 520,
+        "records": 1,
+        "round": 0
+      },
+      "after": {
+        "checksum": 259,
+        "elapsed_ns": 20541,
+        "file": "alaw-one.avi",
+        "queries": 520,
+        "records": 1,
+        "round": 0
+      },
+      "ratio": 1.1115817146195415
+    },
+    {
+      "file": "alaw-small.avi",
+      "round": 0,
+      "before": {
+        "checksum": 42097,
+        "elapsed_ns": 40833,
+        "file": "alaw-small.avi",
+        "queries": 520,
+        "records": 16,
+        "round": 0
+      },
+      "after": {
+        "checksum": 42097,
+        "elapsed_ns": 46791,
+        "file": "alaw-small.avi",
+        "queries": 520,
+        "records": 16,
+        "round": 0
+      },
+      "ratio": 0.8726678207347567
+    },
+    {
+      "file": "alaw-medium.avi",
+      "round": 0,
+      "before": {
+        "checksum": 264386,
+        "elapsed_ns": 821042,
+        "file": "alaw-medium.avi",
+        "queries": 520,
+        "records": 1024,
+        "round": 0
+      },
+      "after": {
+        "checksum": 264386,
+        "elapsed_ns": 93459,
+        "file": "alaw-medium.avi",
+        "queries": 520,
+        "records": 1024,
+        "round": 0
+      },
+      "ratio": 8.785050128933543
+    },
+    {
+      "file": "alaw-dense.avi",
+      "round": 0,
+      "before": {
+        "checksum": 17058739,
+        "elapsed_ns": 51555750,
+        "file": "alaw-dense.avi",
+        "queries": 520,
+        "records": 65536,
+        "round": 0
+      },
+      "after": {
+        "checksum": 17058739,
+        "elapsed_ns": 186542,
+        "file": "alaw-dense.avi",
+        "queries": 520,
+        "records": 65536,
+        "round": 0
+      },
+      "ratio": 276.37609760804537
+    },
+    {
+      "file": "alaw-irregular.avi",
+      "round": 0,
+      "before": {
+        "checksum": 13729600,
+        "elapsed_ns": 13035917,
+        "file": "alaw-irregular.avi",
+        "queries": 520,
+        "records": 16384,
+        "round": 0
+      },
+      "after": {
+        "checksum": 13729600,
+        "elapsed_ns": 135667,
+        "file": "alaw-irregular.avi",
+        "queries": 520,
+        "records": 16384,
+        "round": 0
+      },
+      "ratio": 96.08760420736067
+    },
+    {
+      "file": "mulaw-one.avi",
+      "round": 0,
+      "before": {
+        "checksum": 259,
+        "elapsed_ns": 23583,
+        "file": "mulaw-one.avi",
+        "queries": 520,
+        "records": 1,
+        "round": 0
+      },
+      "after": {
+        "checksum": 259,
+        "elapsed_ns": 19625,
+        "file": "mulaw-one.avi",
+        "queries": 520,
+        "records": 1,
+        "round": 0
+      },
+      "ratio": 1.2016815286624203
+    },
+    {
+      "file": "mulaw-small.avi",
+      "round": 0,
+      "before": {
+        "checksum": 42097,
+        "elapsed_ns": 39792,
+        "file": "mulaw-small.avi",
+        "queries": 520,
+        "records": 16,
+        "round": 0
+      },
+      "after": {
+        "checksum": 42097,
+        "elapsed_ns": 46750,
+        "file": "mulaw-small.avi",
+        "queries": 520,
+        "records": 16,
+        "round": 0
+      },
+      "ratio": 0.8511657754010695
+    },
+    {
+      "file": "mulaw-medium.avi",
+      "round": 0,
+      "before": {
+        "checksum": 264386,
+        "elapsed_ns": 826250,
+        "file": "mulaw-medium.avi",
+        "queries": 520,
+        "records": 1024,
+        "round": 0
+      },
+      "after": {
+        "checksum": 264386,
+        "elapsed_ns": 92417,
+        "file": "mulaw-medium.avi",
+        "queries": 520,
+        "records": 1024,
+        "round": 0
+      },
+      "ratio": 8.940454678251836
+    },
+    {
+      "file": "mulaw-dense.avi",
+      "round": 0,
+      "before": {
+        "checksum": 17058739,
+        "elapsed_ns": 50886208,
+        "file": "mulaw-dense.avi",
+        "queries": 520,
+        "records": 65536,
+        "round": 0
+      },
+      "after": {
+        "checksum": 17058739,
+        "elapsed_ns": 208791,
+        "file": "mulaw-dense.avi",
+        "queries": 520,
+        "records": 65536,
+        "round": 0
+      },
+      "ratio": 243.71839782366098
+    },
+    {
+      "file": "mulaw-irregular.avi",
+      "round": 0,
+      "before": {
+        "checksum": 13729600,
+        "elapsed_ns": 12736500,
+        "file": "mulaw-irregular.avi",
+        "queries": 520,
+        "records": 16384,
+        "round": 0
+      },
+      "after": {
+        "checksum": 13729600,
+        "elapsed_ns": 124875,
+        "file": "mulaw-irregular.avi",
+        "queries": 520,
+        "records": 16384,
+        "round": 0
+      },
+      "ratio": 101.993993993994
+    },
+    {
+      "file": "pcm16-one.avi",
+      "round": 1,
+      "before": {
+        "checksum": 259,
+        "elapsed_ns": 25042,
+        "file": "pcm16-one.avi",
+        "queries": 520,
+        "records": 1,
+        "round": 1
+      },
+      "after": {
+        "checksum": 259,
+        "elapsed_ns": 20375,
+        "file": "pcm16-one.avi",
+        "queries": 520,
+        "records": 1,
+        "round": 1
+      },
+      "ratio": 1.2290552147239264
+    },
+    {
+      "file": "pcm16-small.avi",
+      "round": 1,
+      "before": {
+        "checksum": 42097,
+        "elapsed_ns": 42416,
+        "file": "pcm16-small.avi",
+        "queries": 520,
+        "records": 16,
+        "round": 1
+      },
+      "after": {
+        "checksum": 42097,
+        "elapsed_ns": 46667,
+        "file": "pcm16-small.avi",
+        "queries": 520,
+        "records": 16,
+        "round": 1
+      },
+      "ratio": 0.9089077935157606
+    },
+    {
+      "file": "pcm16-medium.avi",
+      "round": 1,
+      "before": {
+        "checksum": 264386,
+        "elapsed_ns": 823334,
+        "file": "pcm16-medium.avi",
+        "queries": 520,
+        "records": 1024,
+        "round": 1
+      },
+      "after": {
+        "checksum": 264386,
+        "elapsed_ns": 92041,
+        "file": "pcm16-medium.avi",
+        "queries": 520,
+        "records": 1024,
+        "round": 1
+      },
+      "ratio": 8.945296118034355
+    },
+    {
+      "file": "pcm16-dense.avi",
+      "round": 1,
+      "before": {
+        "checksum": 17058739,
+        "elapsed_ns": 51297500,
+        "file": "pcm16-dense.avi",
+        "queries": 520,
+        "records": 65536,
+        "round": 1
+      },
+      "after": {
+        "checksum": 17058739,
+        "elapsed_ns": 171042,
+        "file": "pcm16-dense.avi",
+        "queries": 520,
+        "records": 65536,
+        "round": 1
+      },
+      "ratio": 299.9117175898317
+    },
+    {
+      "file": "pcm16-irregular.avi",
+      "round": 1,
+      "before": {
+        "checksum": 13729600,
+        "elapsed_ns": 13041583,
+        "file": "pcm16-irregular.avi",
+        "queries": 520,
+        "records": 16384,
+        "round": 1
+      },
+      "after": {
+        "checksum": 13729600,
+        "elapsed_ns": 128792,
+        "file": "pcm16-irregular.avi",
+        "queries": 520,
+        "records": 16384,
+        "round": 1
+      },
+      "ratio": 101.26081588918566
+    },
+    {
+      "file": "alaw-one.avi",
+      "round": 1,
+      "before": {
+        "checksum": 259,
+        "elapsed_ns": 22375,
+        "file": "alaw-one.avi",
+        "queries": 520,
+        "records": 1,
+        "round": 1
+      },
+      "after": {
+        "checksum": 259,
+        "elapsed_ns": 20000,
+        "file": "alaw-one.avi",
+        "queries": 520,
+        "records": 1,
+        "round": 1
+      },
+      "ratio": 1.11875
+    },
+    {
+      "file": "alaw-small.avi",
+      "round": 1,
+      "before": {
+        "checksum": 42097,
+        "elapsed_ns": 39416,
+        "file": "alaw-small.avi",
+        "queries": 520,
+        "records": 16,
+        "round": 1
+      },
+      "after": {
+        "checksum": 42097,
+        "elapsed_ns": 45791,
+        "file": "alaw-small.avi",
+        "queries": 520,
+        "records": 16,
+        "round": 1
+      },
+      "ratio": 0.8607805027188749
+    },
+    {
+      "file": "alaw-medium.avi",
+      "round": 1,
+      "before": {
+        "checksum": 264386,
+        "elapsed_ns": 813458,
+        "file": "alaw-medium.avi",
+        "queries": 520,
+        "records": 1024,
+        "round": 1
+      },
+      "after": {
+        "checksum": 264386,
+        "elapsed_ns": 91792,
+        "file": "alaw-medium.avi",
+        "queries": 520,
+        "records": 1024,
+        "round": 1
+      },
+      "ratio": 8.861970542095172
+    },
+    {
+      "file": "alaw-dense.avi",
+      "round": 1,
+      "before": {
+        "checksum": 17058739,
+        "elapsed_ns": 51420709,
+        "file": "alaw-dense.avi",
+        "queries": 520,
+        "records": 65536,
+        "round": 1
+      },
+      "after": {
+        "checksum": 17058739,
+        "elapsed_ns": 171500,
+        "file": "alaw-dense.avi",
+        "queries": 520,
+        "records": 65536,
+        "round": 1
+      },
+      "ratio": 299.82920699708455
+    },
+    {
+      "file": "alaw-irregular.avi",
+      "round": 1,
+      "before": {
+        "checksum": 13729600,
+        "elapsed_ns": 12950667,
+        "file": "alaw-irregular.avi",
+        "queries": 520,
+        "records": 16384,
+        "round": 1
+      },
+      "after": {
+        "checksum": 13729600,
+        "elapsed_ns": 132625,
+        "file": "alaw-irregular.avi",
+        "queries": 520,
+        "records": 16384,
+        "round": 1
+      },
+      "ratio": 97.6487615457116
+    },
+    {
+      "file": "mulaw-one.avi",
+      "round": 1,
+      "before": {
+        "checksum": 259,
+        "elapsed_ns": 22208,
+        "file": "mulaw-one.avi",
+        "queries": 520,
+        "records": 1,
+        "round": 1
+      },
+      "after": {
+        "checksum": 259,
+        "elapsed_ns": 19917,
+        "file": "mulaw-one.avi",
+        "queries": 520,
+        "records": 1,
+        "round": 1
+      },
+      "ratio": 1.1150273635587689
+    },
+    {
+      "file": "mulaw-small.avi",
+      "round": 1,
+      "before": {
+        "checksum": 42097,
+        "elapsed_ns": 39625,
+        "file": "mulaw-small.avi",
+        "queries": 520,
+        "records": 16,
+        "round": 1
+      },
+      "after": {
+        "checksum": 42097,
+        "elapsed_ns": 47250,
+        "file": "mulaw-small.avi",
+        "queries": 520,
+        "records": 16,
+        "round": 1
+      },
+      "ratio": 0.8386243386243386
+    },
+    {
+      "file": "mulaw-medium.avi",
+      "round": 1,
+      "before": {
+        "checksum": 264386,
+        "elapsed_ns": 809583,
+        "file": "mulaw-medium.avi",
+        "queries": 520,
+        "records": 1024,
+        "round": 1
+      },
+      "after": {
+        "checksum": 264386,
+        "elapsed_ns": 97334,
+        "file": "mulaw-medium.avi",
+        "queries": 520,
+        "records": 1024,
+        "round": 1
+      },
+      "ratio": 8.317576591941151
+    },
+    {
+      "file": "mulaw-dense.avi",
+      "round": 1,
+      "before": {
+        "checksum": 17058739,
+        "elapsed_ns": 51802542,
+        "file": "mulaw-dense.avi",
+        "queries": 520,
+        "records": 65536,
+        "round": 1
+      },
+      "after": {
+        "checksum": 17058739,
+        "elapsed_ns": 193000,
+        "file": "mulaw-dense.avi",
+        "queries": 520,
+        "records": 65536,
+        "round": 1
+      },
+      "ratio": 268.40695336787564
+    },
+    {
+      "file": "mulaw-irregular.avi",
+      "round": 1,
+      "before": {
+        "checksum": 13729600,
+        "elapsed_ns": 13121167,
+        "file": "mulaw-irregular.avi",
+        "queries": 520,
+        "records": 16384,
+        "round": 1
+      },
+      "after": {
+        "checksum": 13729600,
+        "elapsed_ns": 131583,
+        "file": "mulaw-irregular.avi",
+        "queries": 520,
+        "records": 16384,
+        "round": 1
+      },
+      "ratio": 99.71779789182493
+    },
+    {
+      "file": "pcm16-one.avi",
+      "round": 2,
+      "before": {
+        "checksum": 259,
+        "elapsed_ns": 22708,
+        "file": "pcm16-one.avi",
+        "queries": 520,
+        "records": 1,
+        "round": 2
+      },
+      "after": {
+        "checksum": 259,
+        "elapsed_ns": 21125,
+        "file": "pcm16-one.avi",
+        "queries": 520,
+        "records": 1,
+        "round": 2
+      },
+      "ratio": 1.0749349112426037
+    },
+    {
+      "file": "pcm16-small.avi",
+      "round": 2,
+      "before": {
+        "checksum": 42097,
+        "elapsed_ns": 41125,
+        "file": "pcm16-small.avi",
+        "queries": 520,
+        "records": 16,
+        "round": 2
+      },
+      "after": {
+        "checksum": 42097,
+        "elapsed_ns": 44917,
+        "file": "pcm16-small.avi",
+        "queries": 520,
+        "records": 16,
+        "round": 2
+      },
+      "ratio": 0.9155776209452992
+    },
+    {
+      "file": "pcm16-medium.avi",
+      "round": 2,
+      "before": {
+        "checksum": 264386,
+        "elapsed_ns": 821916,
+        "file": "pcm16-medium.avi",
+        "queries": 520,
+        "records": 1024,
+        "round": 2
+      },
+      "after": {
+        "checksum": 264386,
+        "elapsed_ns": 92125,
+        "file": "pcm16-medium.avi",
+        "queries": 520,
+        "records": 1024,
+        "round": 2
+      },
+      "ratio": 8.92174762550882
+    },
+    {
+      "file": "pcm16-dense.avi",
+      "round": 2,
+      "before": {
+        "checksum": 17058739,
+        "elapsed_ns": 52059583,
+        "file": "pcm16-dense.avi",
+        "queries": 520,
+        "records": 65536,
+        "round": 2
+      },
+      "after": {
+        "checksum": 17058739,
+        "elapsed_ns": 155417,
+        "file": "pcm16-dense.avi",
+        "queries": 520,
+        "records": 65536,
+        "round": 2
+      },
+      "ratio": 334.9671078453451
+    },
+    {
+      "file": "pcm16-irregular.avi",
+      "round": 2,
+      "before": {
+        "checksum": 13729600,
+        "elapsed_ns": 13001042,
+        "file": "pcm16-irregular.avi",
+        "queries": 520,
+        "records": 16384,
+        "round": 2
+      },
+      "after": {
+        "checksum": 13729600,
+        "elapsed_ns": 135042,
+        "file": "pcm16-irregular.avi",
+        "queries": 520,
+        "records": 16384,
+        "round": 2
+      },
+      "ratio": 96.27406288413975
+    },
+    {
+      "file": "alaw-one.avi",
+      "round": 2,
+      "before": {
+        "checksum": 259,
+        "elapsed_ns": 22042,
+        "file": "alaw-one.avi",
+        "queries": 520,
+        "records": 1,
+        "round": 2
+      },
+      "after": {
+        "checksum": 259,
+        "elapsed_ns": 20583,
+        "file": "alaw-one.avi",
+        "queries": 520,
+        "records": 1,
+        "round": 2
+      },
+      "ratio": 1.070883739007919
+    },
+    {
+      "file": "alaw-small.avi",
+      "round": 2,
+      "before": {
+        "checksum": 42097,
+        "elapsed_ns": 40417,
+        "file": "alaw-small.avi",
+        "queries": 520,
+        "records": 16,
+        "round": 2
+      },
+      "after": {
+        "checksum": 42097,
+        "elapsed_ns": 44125,
+        "file": "alaw-small.avi",
+        "queries": 520,
+        "records": 16,
+        "round": 2
+      },
+      "ratio": 0.9159660056657224
+    },
+    {
+      "file": "alaw-medium.avi",
+      "round": 2,
+      "before": {
+        "checksum": 264386,
+        "elapsed_ns": 839750,
+        "file": "alaw-medium.avi",
+        "queries": 520,
+        "records": 1024,
+        "round": 2
+      },
+      "after": {
+        "checksum": 264386,
+        "elapsed_ns": 92083,
+        "file": "alaw-medium.avi",
+        "queries": 520,
+        "records": 1024,
+        "round": 2
+      },
+      "ratio": 9.119490025303259
+    },
+    {
+      "file": "alaw-dense.avi",
+      "round": 2,
+      "before": {
+        "checksum": 17058739,
+        "elapsed_ns": 51742125,
+        "file": "alaw-dense.avi",
+        "queries": 520,
+        "records": 65536,
+        "round": 2
+      },
+      "after": {
+        "checksum": 17058739,
+        "elapsed_ns": 169542,
+        "file": "alaw-dense.avi",
+        "queries": 520,
+        "records": 65536,
+        "round": 2
+      },
+      "ratio": 305.1876526170506
+    },
+    {
+      "file": "alaw-irregular.avi",
+      "round": 2,
+      "before": {
+        "checksum": 13729600,
+        "elapsed_ns": 12992750,
+        "file": "alaw-irregular.avi",
+        "queries": 520,
+        "records": 16384,
+        "round": 2
+      },
+      "after": {
+        "checksum": 13729600,
+        "elapsed_ns": 133291,
+        "file": "alaw-irregular.avi",
+        "queries": 520,
+        "records": 16384,
+        "round": 2
+      },
+      "ratio": 97.47657381218536
+    },
+    {
+      "file": "mulaw-one.avi",
+      "round": 2,
+      "before": {
+        "checksum": 259,
+        "elapsed_ns": 21833,
+        "file": "mulaw-one.avi",
+        "queries": 520,
+        "records": 1,
+        "round": 2
+      },
+      "after": {
+        "checksum": 259,
+        "elapsed_ns": 20125,
+        "file": "mulaw-one.avi",
+        "queries": 520,
+        "records": 1,
+        "round": 2
+      },
+      "ratio": 1.0848695652173912
+    },
+    {
+      "file": "mulaw-small.avi",
+      "round": 2,
+      "before": {
+        "checksum": 42097,
+        "elapsed_ns": 39041,
+        "file": "mulaw-small.avi",
+        "queries": 520,
+        "records": 16,
+        "round": 2
+      },
+      "after": {
+        "checksum": 42097,
+        "elapsed_ns": 46958,
+        "file": "mulaw-small.avi",
+        "queries": 520,
+        "records": 16,
+        "round": 2
+      },
+      "ratio": 0.8314025299203543
+    },
+    {
+      "file": "mulaw-medium.avi",
+      "round": 2,
+      "before": {
+        "checksum": 264386,
+        "elapsed_ns": 798917,
+        "file": "mulaw-medium.avi",
+        "queries": 520,
+        "records": 1024,
+        "round": 2
+      },
+      "after": {
+        "checksum": 264386,
+        "elapsed_ns": 93333,
+        "file": "mulaw-medium.avi",
+        "queries": 520,
+        "records": 1024,
+        "round": 2
+      },
+      "ratio": 8.559855570912752
+    },
+    {
+      "file": "mulaw-dense.avi",
+      "round": 2,
+      "before": {
+        "checksum": 17058739,
+        "elapsed_ns": 51552375,
+        "file": "mulaw-dense.avi",
+        "queries": 520,
+        "records": 65536,
+        "round": 2
+      },
+      "after": {
+        "checksum": 17058739,
+        "elapsed_ns": 181791,
+        "file": "mulaw-dense.avi",
+        "queries": 520,
+        "records": 65536,
+        "round": 2
+      },
+      "ratio": 283.5804577784379
+    },
+    {
+      "file": "mulaw-irregular.avi",
+      "round": 2,
+      "before": {
+        "checksum": 13729600,
+        "elapsed_ns": 12962208,
+        "file": "mulaw-irregular.avi",
+        "queries": 520,
+        "records": 16384,
+        "round": 2
+      },
+      "after": {
+        "checksum": 13729600,
+        "elapsed_ns": 132375,
+        "file": "mulaw-irregular.avi",
+        "queries": 520,
+        "records": 16384,
+        "round": 2
+      },
+      "ratio": 97.92036260623229
+    },
+    {
+      "file": "pcm16-one.avi",
+      "round": 3,
+      "before": {
+        "checksum": 259,
+        "elapsed_ns": 22208,
+        "file": "pcm16-one.avi",
+        "queries": 520,
+        "records": 1,
+        "round": 3
+      },
+      "after": {
+        "checksum": 259,
+        "elapsed_ns": 20583,
+        "file": "pcm16-one.avi",
+        "queries": 520,
+        "records": 1,
+        "round": 3
+      },
+      "ratio": 1.078948646941651
+    },
+    {
+      "file": "pcm16-small.avi",
+      "round": 3,
+      "before": {
+        "checksum": 42097,
+        "elapsed_ns": 39625,
+        "file": "pcm16-small.avi",
+        "queries": 520,
+        "records": 16,
+        "round": 3
+      },
+      "after": {
+        "checksum": 42097,
+        "elapsed_ns": 45166,
+        "file": "pcm16-small.avi",
+        "queries": 520,
+        "records": 16,
+        "round": 3
+      },
+      "ratio": 0.8773192224239472
+    },
+    {
+      "file": "pcm16-medium.avi",
+      "round": 3,
+      "before": {
+        "checksum": 264386,
+        "elapsed_ns": 838625,
+        "file": "pcm16-medium.avi",
+        "queries": 520,
+        "records": 1024,
+        "round": 3
+      },
+      "after": {
+        "checksum": 264386,
+        "elapsed_ns": 90167,
+        "file": "pcm16-medium.avi",
+        "queries": 520,
+        "records": 1024,
+        "round": 3
+      },
+      "ratio": 9.300797409251722
+    },
+    {
+      "file": "pcm16-dense.avi",
+      "round": 3,
+      "before": {
+        "checksum": 17058739,
+        "elapsed_ns": 51555750,
+        "file": "pcm16-dense.avi",
+        "queries": 520,
+        "records": 65536,
+        "round": 3
+      },
+      "after": {
+        "checksum": 17058739,
+        "elapsed_ns": 191333,
+        "file": "pcm16-dense.avi",
+        "queries": 520,
+        "records": 65536,
+        "round": 3
+      },
+      "ratio": 269.45560880768085
+    },
+    {
+      "file": "pcm16-irregular.avi",
+      "round": 3,
+      "before": {
+        "checksum": 13729600,
+        "elapsed_ns": 13046542,
+        "file": "pcm16-irregular.avi",
+        "queries": 520,
+        "records": 16384,
+        "round": 3
+      },
+      "after": {
+        "checksum": 13729600,
+        "elapsed_ns": 126917,
+        "file": "pcm16-irregular.avi",
+        "queries": 520,
+        "records": 16384,
+        "round": 3
+      },
+      "ratio": 102.795858710811
+    },
+    {
+      "file": "alaw-one.avi",
+      "round": 3,
+      "before": {
+        "checksum": 259,
+        "elapsed_ns": 22125,
+        "file": "alaw-one.avi",
+        "queries": 520,
+        "records": 1,
+        "round": 3
+      },
+      "after": {
+        "checksum": 259,
+        "elapsed_ns": 20875,
+        "file": "alaw-one.avi",
+        "queries": 520,
+        "records": 1,
+        "round": 3
+      },
+      "ratio": 1.0598802395209581
+    },
+    {
+      "file": "alaw-small.avi",
+      "round": 3,
+      "before": {
+        "checksum": 42097,
+        "elapsed_ns": 40375,
+        "file": "alaw-small.avi",
+        "queries": 520,
+        "records": 16,
+        "round": 3
+      },
+      "after": {
+        "checksum": 42097,
+        "elapsed_ns": 45958,
+        "file": "alaw-small.avi",
+        "queries": 520,
+        "records": 16,
+        "round": 3
+      },
+      "ratio": 0.8785195178206189
+    },
+    {
+      "file": "alaw-medium.avi",
+      "round": 3,
+      "before": {
+        "checksum": 264386,
+        "elapsed_ns": 840292,
+        "file": "alaw-medium.avi",
+        "queries": 520,
+        "records": 1024,
+        "round": 3
+      },
+      "after": {
+        "checksum": 264386,
+        "elapsed_ns": 92458,
+        "file": "alaw-medium.avi",
+        "queries": 520,
+        "records": 1024,
+        "round": 3
+      },
+      "ratio": 9.088364446559519
+    },
+    {
+      "file": "alaw-dense.avi",
+      "round": 3,
+      "before": {
+        "checksum": 17058739,
+        "elapsed_ns": 51409208,
+        "file": "alaw-dense.avi",
+        "queries": 520,
+        "records": 65536,
+        "round": 3
+      },
+      "after": {
+        "checksum": 17058739,
+        "elapsed_ns": 176125,
+        "file": "alaw-dense.avi",
+        "queries": 520,
+        "records": 65536,
+        "round": 3
+      },
+      "ratio": 291.890464158978
+    },
+    {
+      "file": "alaw-irregular.avi",
+      "round": 3,
+      "before": {
+        "checksum": 13729600,
+        "elapsed_ns": 13169000,
+        "file": "alaw-irregular.avi",
+        "queries": 520,
+        "records": 16384,
+        "round": 3
+      },
+      "after": {
+        "checksum": 13729600,
+        "elapsed_ns": 130500,
+        "file": "alaw-irregular.avi",
+        "queries": 520,
+        "records": 16384,
+        "round": 3
+      },
+      "ratio": 100.91187739463602
+    },
+    {
+      "file": "mulaw-one.avi",
+      "round": 3,
+      "before": {
+        "checksum": 259,
+        "elapsed_ns": 22041,
+        "file": "mulaw-one.avi",
+        "queries": 520,
+        "records": 1,
+        "round": 3
+      },
+      "after": {
+        "checksum": 259,
+        "elapsed_ns": 20208,
+        "file": "mulaw-one.avi",
+        "queries": 520,
+        "records": 1,
+        "round": 3
+      },
+      "ratio": 1.0907066508313539
+    },
+    {
+      "file": "mulaw-small.avi",
+      "round": 3,
+      "before": {
+        "checksum": 42097,
+        "elapsed_ns": 40292,
+        "file": "mulaw-small.avi",
+        "queries": 520,
+        "records": 16,
+        "round": 3
+      },
+      "after": {
+        "checksum": 42097,
+        "elapsed_ns": 45583,
+        "file": "mulaw-small.avi",
+        "queries": 520,
+        "records": 16,
+        "round": 3
+      },
+      "ratio": 0.8839260250531996
+    },
+    {
+      "file": "mulaw-medium.avi",
+      "round": 3,
+      "before": {
+        "checksum": 264386,
+        "elapsed_ns": 841666,
+        "file": "mulaw-medium.avi",
+        "queries": 520,
+        "records": 1024,
+        "round": 3
+      },
+      "after": {
+        "checksum": 264386,
+        "elapsed_ns": 92291,
+        "file": "mulaw-medium.avi",
+        "queries": 520,
+        "records": 1024,
+        "round": 3
+      },
+      "ratio": 9.119697478627385
+    },
+    {
+      "file": "mulaw-dense.avi",
+      "round": 3,
+      "before": {
+        "checksum": 17058739,
+        "elapsed_ns": 50942875,
+        "file": "mulaw-dense.avi",
+        "queries": 520,
+        "records": 65536,
+        "round": 3
+      },
+      "after": {
+        "checksum": 17058739,
+        "elapsed_ns": 170209,
+        "file": "mulaw-dense.avi",
+        "queries": 520,
+        "records": 65536,
+        "round": 3
+      },
+      "ratio": 299.29601254927763
+    },
+    {
+      "file": "mulaw-irregular.avi",
+      "round": 3,
+      "before": {
+        "checksum": 13729600,
+        "elapsed_ns": 13012917,
+        "file": "mulaw-irregular.avi",
+        "queries": 520,
+        "records": 16384,
+        "round": 3
+      },
+      "after": {
+        "checksum": 13729600,
+        "elapsed_ns": 130166,
+        "file": "mulaw-irregular.avi",
+        "queries": 520,
+        "records": 16384,
+        "round": 3
+      },
+      "ratio": 99.97170536084691
+    },
+    {
+      "file": "pcm16-one.avi",
+      "round": 4,
+      "before": {
+        "checksum": 259,
+        "elapsed_ns": 22417,
+        "file": "pcm16-one.avi",
+        "queries": 520,
+        "records": 1,
+        "round": 4
+      },
+      "after": {
+        "checksum": 259,
+        "elapsed_ns": 20875,
+        "file": "pcm16-one.avi",
+        "queries": 520,
+        "records": 1,
+        "round": 4
+      },
+      "ratio": 1.0738682634730539
+    },
+    {
+      "file": "pcm16-small.avi",
+      "round": 4,
+      "before": {
+        "checksum": 42097,
+        "elapsed_ns": 40708,
+        "file": "pcm16-small.avi",
+        "queries": 520,
+        "records": 16,
+        "round": 4
+      },
+      "after": {
+        "checksum": 42097,
+        "elapsed_ns": 46750,
+        "file": "pcm16-small.avi",
+        "queries": 520,
+        "records": 16,
+        "round": 4
+      },
+      "ratio": 0.87075935828877
+    },
+    {
+      "file": "pcm16-medium.avi",
+      "round": 4,
+      "before": {
+        "checksum": 264386,
+        "elapsed_ns": 821750,
+        "file": "pcm16-medium.avi",
+        "queries": 520,
+        "records": 1024,
+        "round": 4
+      },
+      "after": {
+        "checksum": 264386,
+        "elapsed_ns": 92833,
+        "file": "pcm16-medium.avi",
+        "queries": 520,
+        "records": 1024,
+        "round": 4
+      },
+      "ratio": 8.851916883004966
+    },
+    {
+      "file": "pcm16-dense.avi",
+      "round": 4,
+      "before": {
+        "checksum": 17058739,
+        "elapsed_ns": 51585750,
+        "file": "pcm16-dense.avi",
+        "queries": 520,
+        "records": 65536,
+        "round": 4
+      },
+      "after": {
+        "checksum": 17058739,
+        "elapsed_ns": 148292,
+        "file": "pcm16-dense.avi",
+        "queries": 520,
+        "records": 65536,
+        "round": 4
+      },
+      "ratio": 347.8660345804224
+    },
+    {
+      "file": "pcm16-irregular.avi",
+      "round": 4,
+      "before": {
+        "checksum": 13729600,
+        "elapsed_ns": 12820125,
+        "file": "pcm16-irregular.avi",
+        "queries": 520,
+        "records": 16384,
+        "round": 4
+      },
+      "after": {
+        "checksum": 13729600,
+        "elapsed_ns": 127500,
+        "file": "pcm16-irregular.avi",
+        "queries": 520,
+        "records": 16384,
+        "round": 4
+      },
+      "ratio": 100.55
+    },
+    {
+      "file": "alaw-one.avi",
+      "round": 4,
+      "before": {
+        "checksum": 259,
+        "elapsed_ns": 22792,
+        "file": "alaw-one.avi",
+        "queries": 520,
+        "records": 1,
+        "round": 4
+      },
+      "after": {
+        "checksum": 259,
+        "elapsed_ns": 19667,
+        "file": "alaw-one.avi",
+        "queries": 520,
+        "records": 1,
+        "round": 4
+      },
+      "ratio": 1.1588956119387808
+    },
+    {
+      "file": "alaw-small.avi",
+      "round": 4,
+      "before": {
+        "checksum": 42097,
+        "elapsed_ns": 40459,
+        "file": "alaw-small.avi",
+        "queries": 520,
+        "records": 16,
+        "round": 4
+      },
+      "after": {
+        "checksum": 42097,
+        "elapsed_ns": 46000,
+        "file": "alaw-small.avi",
+        "queries": 520,
+        "records": 16,
+        "round": 4
+      },
+      "ratio": 0.8795434782608695
+    },
+    {
+      "file": "alaw-medium.avi",
+      "round": 4,
+      "before": {
+        "checksum": 264386,
+        "elapsed_ns": 824625,
+        "file": "alaw-medium.avi",
+        "queries": 520,
+        "records": 1024,
+        "round": 4
+      },
+      "after": {
+        "checksum": 264386,
+        "elapsed_ns": 91583,
+        "file": "alaw-medium.avi",
+        "queries": 520,
+        "records": 1024,
+        "round": 4
+      },
+      "ratio": 9.004127403557428
+    },
+    {
+      "file": "alaw-dense.avi",
+      "round": 4,
+      "before": {
+        "checksum": 17058739,
+        "elapsed_ns": 51223167,
+        "file": "alaw-dense.avi",
+        "queries": 520,
+        "records": 65536,
+        "round": 4
+      },
+      "after": {
+        "checksum": 17058739,
+        "elapsed_ns": 186417,
+        "file": "alaw-dense.avi",
+        "queries": 520,
+        "records": 65536,
+        "round": 4
+      },
+      "ratio": 274.77733790373196
+    },
+    {
+      "file": "alaw-irregular.avi",
+      "round": 4,
+      "before": {
+        "checksum": 13729600,
+        "elapsed_ns": 12951708,
+        "file": "alaw-irregular.avi",
+        "queries": 520,
+        "records": 16384,
+        "round": 4
+      },
+      "after": {
+        "checksum": 13729600,
+        "elapsed_ns": 130916,
+        "file": "alaw-irregular.avi",
+        "queries": 520,
+        "records": 16384,
+        "round": 4
+      },
+      "ratio": 98.93143695193865
+    },
+    {
+      "file": "mulaw-one.avi",
+      "round": 4,
+      "before": {
+        "checksum": 259,
+        "elapsed_ns": 21917,
+        "file": "mulaw-one.avi",
+        "queries": 520,
+        "records": 1,
+        "round": 4
+      },
+      "after": {
+        "checksum": 259,
+        "elapsed_ns": 20000,
+        "file": "mulaw-one.avi",
+        "queries": 520,
+        "records": 1,
+        "round": 4
+      },
+      "ratio": 1.09585
+    },
+    {
+      "file": "mulaw-small.avi",
+      "round": 4,
+      "before": {
+        "checksum": 42097,
+        "elapsed_ns": 39333,
+        "file": "mulaw-small.avi",
+        "queries": 520,
+        "records": 16,
+        "round": 4
+      },
+      "after": {
+        "checksum": 42097,
+        "elapsed_ns": 45000,
+        "file": "mulaw-small.avi",
+        "queries": 520,
+        "records": 16,
+        "round": 4
+      },
+      "ratio": 0.8740666666666667
+    },
+    {
+      "file": "mulaw-medium.avi",
+      "round": 4,
+      "before": {
+        "checksum": 264386,
+        "elapsed_ns": 809084,
+        "file": "mulaw-medium.avi",
+        "queries": 520,
+        "records": 1024,
+        "round": 4
+      },
+      "after": {
+        "checksum": 264386,
+        "elapsed_ns": 91584,
+        "file": "mulaw-medium.avi",
+        "queries": 520,
+        "records": 1024,
+        "round": 4
+      },
+      "ratio": 8.83433787561146
+    },
+    {
+      "file": "mulaw-dense.avi",
+      "round": 4,
+      "before": {
+        "checksum": 17058739,
+        "elapsed_ns": 51335375,
+        "file": "mulaw-dense.avi",
+        "queries": 520,
+        "records": 65536,
+        "round": 4
+      },
+      "after": {
+        "checksum": 17058739,
+        "elapsed_ns": 179750,
+        "file": "mulaw-dense.avi",
+        "queries": 520,
+        "records": 65536,
+        "round": 4
+      },
+      "ratio": 285.5931849791377
+    },
+    {
+      "file": "mulaw-irregular.avi",
+      "round": 4,
+      "before": {
+        "checksum": 13729600,
+        "elapsed_ns": 13034417,
+        "file": "mulaw-irregular.avi",
+        "queries": 520,
+        "records": 16384,
+        "round": 4
+      },
+      "after": {
+        "checksum": 13729600,
+        "elapsed_ns": 130500,
+        "file": "mulaw-irregular.avi",
+        "queries": 520,
+        "records": 16384,
+        "round": 4
+      },
+      "ratio": 99.88059003831418
+    }
+  ]
+}

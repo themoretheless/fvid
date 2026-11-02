@@ -1,0 +1,197 @@
+{
+  "status": "accepted",
+  "accepted_ids": [
+    "FVID-0521"
+  ],
+  "follow_up_ids": [],
+  "count_delta": 1,
+  "accepted_count": 521,
+  "next_id": "FVID-0522",
+  "qualification": {
+    "integration": {
+      "command": [
+        "cargo",
+        "test",
+        "--locked",
+        "--offline",
+        "--no-default-features",
+        "--features",
+        "player",
+        "--test",
+        "avi_seek_index",
+        "--test",
+        "avi_g711_windows",
+        "--test",
+        "avi_pcm",
+        "--test",
+        "avi_headers_seek",
+        "--test",
+        "g711_native",
+        "--test",
+        "avi_audio_eof",
+        "--test",
+        "avi_adpcm_grouped",
+        "--test",
+        "avi_chunk_extent",
+        "--test",
+        "avi_duration_grid",
+        "--test",
+        "avi_index_origin",
+        "--test",
+        "avi_main_header_bounds",
+        "--test",
+        "avi_riff_boundary",
+        "--test",
+        "aifc_g711_original_width",
+        "--test",
+        "mp4_g711_seek",
+        "--test",
+        "audio_reader_eof",
+        "--test",
+        "block_audio_eof",
+        "--",
+        "--test-threads=2"
+      ],
+      "exit_code": 0,
+      "seconds": 15.750350713729858,
+      "source_stable": true
+    },
+    "root-avi": {
+      "command": [
+        "cargo",
+        "test",
+        "--locked",
+        "--offline",
+        "--no-default-features",
+        "--features",
+        "player",
+        "--lib",
+        "playback_avi_audio",
+        "--",
+        "--test-threads=2"
+      ],
+      "exit_code": 0,
+      "seconds": 16.18033790588379,
+      "source_stable": true
+    },
+    "audio-worker": {
+      "command": [
+        "cargo",
+        "test",
+        "--locked",
+        "--offline",
+        "--no-default-features",
+        "--features",
+        "player",
+        "--lib",
+        "audio_thread",
+        "--",
+        "--test-threads=2"
+      ],
+      "exit_code": 0,
+      "seconds": 6.1402199268341064,
+      "source_stable": true
+    },
+    "core-check": {
+      "command": [
+        "cargo",
+        "check",
+        "--locked",
+        "--offline",
+        "--no-default-features"
+      ],
+      "exit_code": 0,
+      "seconds": 39.93984889984131,
+      "source_stable": true
+    },
+    "player-check": {
+      "command": [
+        "cargo",
+        "check",
+        "--locked",
+        "--offline",
+        "--no-default-features",
+        "--features",
+        "player"
+      ],
+      "exit_code": 0,
+      "seconds": 23.845927238464355,
+      "source_stable": true
+    }
+  },
+  "rust_test_executions": 109,
+  "preexisting_ignored": 0,
+  "repeats": {
+    "runs": 3,
+    "passed_per_run": 3,
+    "failed": 0
+  },
+  "without_ffmpeg_extra_executions": 3,
+  "source_frozen_count": 2860,
+  "source_frozen_manifest": "evidence/avi-seek-index/candidate-source.json",
+  "fixture_files_regenerated_identically": 32,
+  "measurement": {
+    "scope": "Actual public AviAudioReader::seek_to in default dev build;excludes parsing,packet I/O,decoding and whole-player throughput",
+    "independent_epochs": 2,
+    "same_preserved_binaries": true,
+    "source_stable": true,
+    "checksums_equal": true,
+    "summary": {
+      "1": {
+        "case_epochs": 6,
+        "pairs": 30,
+        "ratio_min": 1.048419293440416,
+        "median_extra_ns_range": [
+          -3.9250000000000043,
+          -3.0461538461538495
+        ]
+      },
+      "16": {
+        "case_epochs": 6,
+        "pairs": 30,
+        "ratio_min": 0.8288079402851506,
+        "median_extra_ns_range": [
+          7.130769230769232,
+          13.70192307692308
+        ]
+      },
+      "1024": {
+        "case_epochs": 6,
+        "pairs": 30,
+        "ratio_min": 8.317576591941151,
+        "median_extra_ns_range": [
+          -1445.5942307692308,
+          -1379.1653846153847
+        ]
+      },
+      "16384": {
+        "case_epochs": 6,
+        "pairs": 30,
+        "ratio_min": 94.72715201692785,
+        "median_extra_ns_range": [
+          -25748.236538461537,
+          -24731.009615384613
+        ]
+      },
+      "65536": {
+        "case_epochs": 6,
+        "pairs": 30,
+        "ratio_min": 243.71839782366098,
+        "median_extra_ns_range": [
+          -101957.21153846155,
+          -98372.27692307692
+        ]
+      }
+    }
+  },
+  "notes": [
+    "One CPU seek-selection opportunity across15 profiles;original audio correctness already passed.",
+    "Measurements use the actual public method in the recorded default dev build;parsing,I/O,decoding and end-to-end player timing are excluded.",
+    "Small16-record controls have7..14ns median extra cost. Optimized release performance is unqualified.",
+    "No new index/cache/allocation or public signature change;no existing test expectation changed.",
+    "All measurement executables are preserved separately until both paired epochs and correctness gates complete,then removed as owned artifacts."
+  ],
+  "evidence_directories": [
+    "evidence/avi-seek-index"
+  ]
+}

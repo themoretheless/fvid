@@ -1,0 +1,19 @@
+{
+  "build_command": [
+    "cargo",
+    "build",
+    "--locked",
+    "--offline",
+    "--no-default-features",
+    "--features",
+    "player",
+    "--example",
+    "bench_avi_seek_index"
+  ],
+  "build_exit_code": 0,
+  "profile": "default dev profile;public seek method only,not parsing or playback throughput",
+  "binary": "/private/tmp/fvid-avi-seek-index-before-20261102",
+  "sha256": "4d723b13a01367438e6bdfd97f041562909020484e9432cb5ff511eb38818d31",
+  "compiler": "rustc 1.98.1 (48a229cea 2026-09-01)\nbinary: rustc\ncommit-hash: 48a229ceaefd4985c50990b14116b6d856af0985\ncommit-date: 2026-09-01\nhost: aarch64-apple-darwin\nrelease: 1.98.1\nLLVM version: 22.1.8\n",
+  "source_stable": true
+}

@@ -442,7 +442,9 @@ impl AudioStream for AviAudioReader {
             let start=samples.first().map_or(0,|&(at,_)|at);
             let end=samples.last().map_or(0,|&(at,n)|at+n);
             let target=(pts.max(0)as u64).clamp(start,end);
-            let packet=samples.iter().position(|&(at,n)|at+n>target).unwrap_or(samples.len());
+            // Construction advances a checked native clock by each nonempty record.
+            // Select the first exclusive record end strictly after the target.
+            let packet=samples.partition_point(|&(at,n)|at+n<=target);
             let skip=samples.get(packet).map_or(0,|&(at,_)|target.saturating_sub(at)as usize);
             self.packet=packet;self.frame_skip=skip;return target as i64;
         }

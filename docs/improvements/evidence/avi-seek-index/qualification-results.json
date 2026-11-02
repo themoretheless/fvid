@@ -1,0 +1,112 @@
+{
+  "integration": {
+    "command": [
+      "cargo",
+      "test",
+      "--locked",
+      "--offline",
+      "--no-default-features",
+      "--features",
+      "player",
+      "--test",
+      "avi_seek_index",
+      "--test",
+      "avi_g711_windows",
+      "--test",
+      "avi_pcm",
+      "--test",
+      "avi_headers_seek",
+      "--test",
+      "g711_native",
+      "--test",
+      "avi_audio_eof",
+      "--test",
+      "avi_adpcm_grouped",
+      "--test",
+      "avi_chunk_extent",
+      "--test",
+      "avi_duration_grid",
+      "--test",
+      "avi_index_origin",
+      "--test",
+      "avi_main_header_bounds",
+      "--test",
+      "avi_riff_boundary",
+      "--test",
+      "aifc_g711_original_width",
+      "--test",
+      "mp4_g711_seek",
+      "--test",
+      "audio_reader_eof",
+      "--test",
+      "block_audio_eof",
+      "--",
+      "--test-threads=2"
+    ],
+    "exit_code": 0,
+    "seconds": 15.750350713729858,
+    "source_stable": true
+  },
+  "root-avi": {
+    "command": [
+      "cargo",
+      "test",
+      "--locked",
+      "--offline",
+      "--no-default-features",
+      "--features",
+      "player",
+      "--lib",
+      "playback_avi_audio",
+      "--",
+      "--test-threads=2"
+    ],
+    "exit_code": 0,
+    "seconds": 16.18033790588379,
+    "source_stable": true
+  },
+  "audio-worker": {
+    "command": [
+      "cargo",
+      "test",
+      "--locked",
+      "--offline",
+      "--no-default-features",
+      "--features",
+      "player",
+      "--lib",
+      "audio_thread",
+      "--",
+      "--test-threads=2"
+    ],
+    "exit_code": 0,
+    "seconds": 6.1402199268341064,
+    "source_stable": true
+  },
+  "core-check": {
+    "command": [
+      "cargo",
+      "check",
+      "--locked",
+      "--offline",
+      "--no-default-features"
+    ],
+    "exit_code": 0,
+    "seconds": 39.93984889984131,
+    "source_stable": true
+  },
+  "player-check": {
+    "command": [
+      "cargo",
+      "check",
+      "--locked",
+      "--offline",
+      "--no-default-features",
+      "--features",
+      "player"
+    ],
+    "exit_code": 0,
+    "seconds": 23.845927238464355,
+    "source_stable": true
+  }
+}
