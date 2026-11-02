@@ -3495,3 +3495,7 @@ FVID-0510 reapplies each selected edit segment minimum occupied-sample start aft
 ## Batch 512 — Bound occupied final edit seek frontiers at declared EOF
 
 FVID-0511 prevents exact and raw MP4 seek clocks from escaping the declared presentation endpoint when a preceding native sample occupies every remaining edit. Six authored AAC/PCM+VP9 movies retain full independent PCM/video while direct and actual-worker EOF anchors now stay bounded. Raw navigation keeps its media-tick contract. Seven gates pass980 test executions,two prior ignored tests,and three repeated38-test runs pass. See `batch-512-validation.json` and `evidence/mp4-edit-frontier-eof-seek`.
+
+## Batch 513 — Unedited native PCM seek precision,zero new IDs
+
+FVID-0484 now preserves exact Duration floors for unedited native PCM,including compact indexes and changes in rate,channels and storage format. Eleven authored movies retain independent full PCM/video,precise suffixes,raw navigation and actual-worker anchors. The fractional Player test checks native sample601 instead of the previously repeated sample600;the original source fails that stricter expectation,and all other player assertions remain. Seven gates pass985 executions,two prior ignores,and three repeated43-test runs pass. Counter511,next FVID-0512. See `batch-513-validation.json`.

@@ -146,6 +146,12 @@ fn restart_supersedes_a_blocked_seek_with_zero_transport_phase(){
 }
 #[test]
 fn acknowledged_fractional_request_releases_to_quantized_actual_mp4_clock(){
-    let(mut p,ctx,clock,trace,_gate)=open(25);p.seek_time(Duration::from_nanos(75_000_001));last_pcm(&trace,Duration::from_millis(75));until(||p.audio.as_ref().unwrap().position()==Duration::from_millis(75));assert_eq!(p.presentation_clock(),Some(Duration::from_millis(75)));
+    let(mut p,ctx,clock,trace,_gate)=open(25);
+    let requested=Duration::from_nanos(75_000_001);
+    let first=(requested.as_nanos()*8000).div_ceil(1_000_000_000);
+    assert_eq!(first,601,"first native sample must not precede the request");
+    let actual=Duration::from_nanos((first*1_000_000_000/8000) as u64);
+    assert!(actual>requested,"acknowledgement must release the unquantized intent");
+    p.seek_time(requested);last_pcm(&trace,actual);until(||p.audio.as_ref().unwrap().position()==actual);assert_eq!(p.presentation_clock(),Some(actual));
     clock.store(100_000_000,Ordering::SeqCst);until(||p.presentation_clock()==Some(Duration::from_millis(100)));finish(&mut p,&ctx,&clock);
 }

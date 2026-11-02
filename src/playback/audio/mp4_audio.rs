@@ -1314,9 +1314,10 @@ impl<R: Read + Seek + Send> crate::audio::AudioStream for Mp4AudioReader<R> {
             }
             let frames = packet.data.len() / stride;
             if frames == 0 { return Ok(None); }
-            if source_pts < self.presentation_floor {
-                let skip = (((i128::from(self.presentation_floor) - i128::from(source_pts)) as u128 * u128::from(rate))
-                    .div_ceil(u128::from(scale))).min(frames as u128) as usize;
+            let start=EditTime::signed_ticks(source_pts,scale)?;
+            let floor=EditTime::signed_ticks(self.presentation_floor,scale)?.max(self.clock_floor.get());
+            if start.cmp(floor)==std::cmp::Ordering::Less {
+                let skip=floor.sub(start)?.ceil_frames(rate)?.clamp(0,frames as i128) as usize;
                 if skip == frames { return Ok(None); }
                 packet.data.copy_within(skip * stride.., 0);
                 packet.data.truncate((frames - skip) * stride);
@@ -1493,6 +1494,25 @@ impl<R: Read + Seek + Send> crate::audio::AudioStream for Mp4AudioReader<R> {
         let scale=u128::from(self.track().timescale);let mut ticks=target.as_nanos()*scale/1_000_000_000;
         if scale>0 && scale<1_000_000_000 && (ticks+1)*1_000_000_000/scale==target.as_nanos(){ticks+=1;}
         let landed=self.seek_to(i64::try_from(ticks).unwrap_or(i64::MAX));
+        if self.navigation_error.is_none() && self.variable_edits.is_none() && self.timeline.is_none()
+            && matches!(&self.track().codec,b"sowt"|b"twos"|b"raw "|b"in24"|b"in32"|b"fl32"|b"fl64")
+            && self.track().sample_descriptions.iter().enumerate().all(|(i,header)|
+                matches!(&header.codec,b"sowt"|b"twos"|b"raw "|b"in24"|b"in32"|b"fl32"|b"fl64")
+                    || !clock_recovery::clock_description_used(&self.track().samples,i+1)) {
+            let precise=(||->Result<i64> {
+                let end=EditTime::new(i128::try_from(self.presentation_end_ticks().unwrap_or(0))
+                    .map_err(|_|invalid("MP4 PCM presentation endpoint overflow"))?,scale)?;
+                let wanted=EditTime::new(target.as_nanos() as i128,1_000_000_000)?;
+                let wanted=if wanted.cmp(end)==std::cmp::Ordering::Greater {end}else{wanted};
+                self.clock_floor.set(wanted);
+                let aligned=self.native_landing(wanted)?.unwrap_or(end);
+                let aligned=if aligned.cmp(end)==std::cmp::Ordering::Greater {end}else{aligned};
+                let returned=if aligned==end {i64::try_from(end.floor_ticks(self.track().timescale)?)
+                    .map_err(|_|invalid("MP4 PCM seek endpoint overflow"))?}else{landed};
+                self.clock_anchor.set(Some((returned,aligned)));Ok(returned)
+            })();
+            return match precise {Ok(at)=>at,Err(error)=>{self.navigation_error=Some(error);0}};
+        }
         if self.navigation_error.is_none() && !self.changing && self.variable_edits.is_none()
             && self.timeline.is_none() && self.track().codec == *b"mp4a"
             && self.track().edits.len() <= 1

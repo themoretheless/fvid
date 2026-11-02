@@ -1,0 +1,8 @@
+{
+  "base": "c71b33a2ef91626395f30599e358232874511be7",
+  "sha256": {
+    "src/playback/audio/mp4_audio.rs": "d526d70cba93e40e8ae555e9a2dbd8e598f4eebce36130e432fd4111937b0256",
+    "tests/mp4_unedited_pcm_subtick_seek.rs": "b2fa1c9c9aa88887afb5f79aad2586ef3939cad9f39f49613f83a744b6dd3178",
+    "scripts/generate_mp4_unedited_pcm_subtick_seek.py": "22d8d6fe712a1e2022df054bdc1f84985066769b9b8744ed245cf115b872cfa5"
+  }
+}

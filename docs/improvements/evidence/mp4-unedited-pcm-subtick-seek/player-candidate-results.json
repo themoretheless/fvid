@@ -1,0 +1,32 @@
+{
+  "player-after": {
+    "command": [
+      "cargo",
+      "test",
+      "--locked",
+      "--offline",
+      "--no-default-features",
+      "--features",
+      "player",
+      "--lib",
+      "audio_seek_intent",
+      "--",
+      "--test-threads=2"
+    ],
+    "exit_code": 0
+  },
+  "after-player-focused": {
+    "command": [
+      "cargo",
+      "test",
+      "--locked",
+      "--offline",
+      "--no-default-features",
+      "--features",
+      "player",
+      "--test",
+      "mp4_unedited_pcm_subtick_seek"
+    ],
+    "exit_code": 0
+  }
+}

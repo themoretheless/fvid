@@ -1,0 +1,1253 @@
+{
+  "provenance": "Own8kHz mono integer ramp and48kHz constant0.125 PCM,compact native sample indexes and alias/endian descriptions,three neutral VP9 pictures each. No edit lists,private media,FFmpeg or network. Rational native ceil suffix oracle.",
+  "cases": [
+    {
+      "file": "pcm-8000.mp4",
+      "queries": [
+        {
+          "target_ns": "0",
+          "parts": [
+            {
+              "control": 0,
+              "rate": 8000,
+              "channels": 1,
+              "first": 0,
+              "last": 480,
+              "start_ns": 0
+            }
+          ],
+          "anchor_ns": 0
+        },
+        {
+          "target_ns": "1",
+          "parts": [
+            {
+              "control": 0,
+              "rate": 8000,
+              "channels": 1,
+              "first": 1,
+              "last": 480,
+              "start_ns": 0
+            }
+          ],
+          "anchor_ns": 125000
+        },
+        {
+          "target_ns": "20833",
+          "parts": [
+            {
+              "control": 0,
+              "rate": 8000,
+              "channels": 1,
+              "first": 1,
+              "last": 480,
+              "start_ns": 0
+            }
+          ],
+          "anchor_ns": 125000
+        },
+        {
+          "target_ns": "20834",
+          "parts": [
+            {
+              "control": 0,
+              "rate": 8000,
+              "channels": 1,
+              "first": 1,
+              "last": 480,
+              "start_ns": 0
+            }
+          ],
+          "anchor_ns": 125000
+        },
+        {
+          "target_ns": "124999",
+          "parts": [
+            {
+              "control": 0,
+              "rate": 8000,
+              "channels": 1,
+              "first": 1,
+              "last": 480,
+              "start_ns": 0
+            }
+          ],
+          "anchor_ns": 125000
+        },
+        {
+          "target_ns": "125000",
+          "parts": [
+            {
+              "control": 0,
+              "rate": 8000,
+              "channels": 1,
+              "first": 1,
+              "last": 480,
+              "start_ns": 0
+            }
+          ],
+          "anchor_ns": 125000
+        },
+        {
+          "target_ns": "125001",
+          "parts": [
+            {
+              "control": 0,
+              "rate": 8000,
+              "channels": 1,
+              "first": 2,
+              "last": 480,
+              "start_ns": 0
+            }
+          ],
+          "anchor_ns": 250000
+        },
+        {
+          "target_ns": "19999999",
+          "parts": [
+            {
+              "control": 0,
+              "rate": 8000,
+              "channels": 1,
+              "first": 160,
+              "last": 480,
+              "start_ns": 0
+            }
+          ],
+          "anchor_ns": 20000000
+        },
+        {
+          "target_ns": "20000000",
+          "parts": [
+            {
+              "control": 0,
+              "rate": 8000,
+              "channels": 1,
+              "first": 160,
+              "last": 480,
+              "start_ns": 0
+            }
+          ],
+          "anchor_ns": 20000000
+        },
+        {
+          "target_ns": "20000001",
+          "parts": [
+            {
+              "control": 0,
+              "rate": 8000,
+              "channels": 1,
+              "first": 161,
+              "last": 480,
+              "start_ns": 0
+            }
+          ],
+          "anchor_ns": 20125000
+        },
+        {
+          "target_ns": "39999999",
+          "parts": [
+            {
+              "control": 0,
+              "rate": 8000,
+              "channels": 1,
+              "first": 320,
+              "last": 480,
+              "start_ns": 0
+            }
+          ],
+          "anchor_ns": 40000000
+        },
+        {
+          "target_ns": "40000001",
+          "parts": [
+            {
+              "control": 0,
+              "rate": 8000,
+              "channels": 1,
+              "first": 321,
+              "last": 480,
+              "start_ns": 0
+            }
+          ],
+          "anchor_ns": 40125000
+        },
+        {
+          "target_ns": "59999999",
+          "parts": [],
+          "anchor_ns": 60000000
+        },
+        {
+          "target_ns": "60000000",
+          "parts": [],
+          "anchor_ns": 60000000
+        },
+        {
+          "target_ns": "60000001",
+          "parts": [],
+          "anchor_ns": 60000000
+        },
+        {
+          "target_ns": "18446744073709551615999999999",
+          "parts": [],
+          "anchor_ns": 60000000
+        }
+      ],
+      "duration_ns": 60000000,
+      "scale": 8000,
+      "video_frames": 3
+    },
+    {
+      "file": "pcm-48000.mp4",
+      "queries": [
+        {
+          "target_ns": "0",
+          "parts": [
+            {
+              "control": 0,
+              "rate": 8000,
+              "channels": 1,
+              "first": 0,
+              "last": 480,
+              "start_ns": 0
+            }
+          ],
+          "anchor_ns": 0
+        },
+        {
+          "target_ns": "1",
+          "parts": [
+            {
+              "control": 0,
+              "rate": 8000,
+              "channels": 1,
+              "first": 1,
+              "last": 480,
+              "start_ns": 0
+            }
+          ],
+          "anchor_ns": 125000
+        },
+        {
+          "target_ns": "20833",
+          "parts": [
+            {
+              "control": 0,
+              "rate": 8000,
+              "channels": 1,
+              "first": 1,
+              "last": 480,
+              "start_ns": 0
+            }
+          ],
+          "anchor_ns": 125000
+        },
+        {
+          "target_ns": "20834",
+          "parts": [
+            {
+              "control": 0,
+              "rate": 8000,
+              "channels": 1,
+              "first": 1,
+              "last": 480,
+              "start_ns": 0
+            }
+          ],
+          "anchor_ns": 125000
+        },
+        {
+          "target_ns": "124999",
+          "parts": [
+            {
+              "control": 0,
+              "rate": 8000,
+              "channels": 1,
+              "first": 1,
+              "last": 480,
+              "start_ns": 0
+            }
+          ],
+          "anchor_ns": 125000
+        },
+        {
+          "target_ns": "125000",
+          "parts": [
+            {
+              "control": 0,
+              "rate": 8000,
+              "channels": 1,
+              "first": 1,
+              "last": 480,
+              "start_ns": 0
+            }
+          ],
+          "anchor_ns": 125000
+        },
+        {
+          "target_ns": "125001",
+          "parts": [
+            {
+              "control": 0,
+              "rate": 8000,
+              "channels": 1,
+              "first": 2,
+              "last": 480,
+              "start_ns": 0
+            }
+          ],
+          "anchor_ns": 250000
+        },
+        {
+          "target_ns": "19999999",
+          "parts": [
+            {
+              "control": 0,
+              "rate": 8000,
+              "channels": 1,
+              "first": 160,
+              "last": 480,
+              "start_ns": 0
+            }
+          ],
+          "anchor_ns": 20000000
+        },
+        {
+          "target_ns": "20000000",
+          "parts": [
+            {
+              "control": 0,
+              "rate": 8000,
+              "channels": 1,
+              "first": 160,
+              "last": 480,
+              "start_ns": 0
+            }
+          ],
+          "anchor_ns": 20000000
+        },
+        {
+          "target_ns": "20000001",
+          "parts": [
+            {
+              "control": 0,
+              "rate": 8000,
+              "channels": 1,
+              "first": 161,
+              "last": 480,
+              "start_ns": 0
+            }
+          ],
+          "anchor_ns": 20125000
+        },
+        {
+          "target_ns": "39999999",
+          "parts": [
+            {
+              "control": 0,
+              "rate": 8000,
+              "channels": 1,
+              "first": 320,
+              "last": 480,
+              "start_ns": 0
+            }
+          ],
+          "anchor_ns": 40000000
+        },
+        {
+          "target_ns": "40000001",
+          "parts": [
+            {
+              "control": 0,
+              "rate": 8000,
+              "channels": 1,
+              "first": 321,
+              "last": 480,
+              "start_ns": 0
+            }
+          ],
+          "anchor_ns": 40125000
+        },
+        {
+          "target_ns": "59999999",
+          "parts": [],
+          "anchor_ns": 60000000
+        },
+        {
+          "target_ns": "60000000",
+          "parts": [],
+          "anchor_ns": 60000000
+        },
+        {
+          "target_ns": "60000001",
+          "parts": [],
+          "anchor_ns": 60000000
+        },
+        {
+          "target_ns": "18446744073709551615999999999",
+          "parts": [],
+          "anchor_ns": 60000000
+        }
+      ],
+      "duration_ns": 60000000,
+      "scale": 48000,
+      "video_frames": 3
+    },
+    {
+      "file": "pcm-90000.mp4",
+      "queries": [
+        {
+          "target_ns": "0",
+          "parts": [
+            {
+              "control": 0,
+              "rate": 8000,
+              "channels": 1,
+              "first": 0,
+              "last": 480,
+              "start_ns": 0
+            }
+          ],
+          "anchor_ns": 0
+        },
+        {
+          "target_ns": "1",
+          "parts": [
+            {
+              "control": 0,
+              "rate": 8000,
+              "channels": 1,
+              "first": 1,
+              "last": 480,
+              "start_ns": 0
+            }
+          ],
+          "anchor_ns": 125000
+        },
+        {
+          "target_ns": "20833",
+          "parts": [
+            {
+              "control": 0,
+              "rate": 8000,
+              "channels": 1,
+              "first": 1,
+              "last": 480,
+              "start_ns": 0
+            }
+          ],
+          "anchor_ns": 125000
+        },
+        {
+          "target_ns": "20834",
+          "parts": [
+            {
+              "control": 0,
+              "rate": 8000,
+              "channels": 1,
+              "first": 1,
+              "last": 480,
+              "start_ns": 0
+            }
+          ],
+          "anchor_ns": 125000
+        },
+        {
+          "target_ns": "124999",
+          "parts": [
+            {
+              "control": 0,
+              "rate": 8000,
+              "channels": 1,
+              "first": 1,
+              "last": 480,
+              "start_ns": 0
+            }
+          ],
+          "anchor_ns": 125000
+        },
+        {
+          "target_ns": "125000",
+          "parts": [
+            {
+              "control": 0,
+              "rate": 8000,
+              "channels": 1,
+              "first": 1,
+              "last": 480,
+              "start_ns": 0
+            }
+          ],
+          "anchor_ns": 125000
+        },
+        {
+          "target_ns": "125001",
+          "parts": [
+            {
+              "control": 0,
+              "rate": 8000,
+              "channels": 1,
+              "first": 2,
+              "last": 480,
+              "start_ns": 0
+            }
+          ],
+          "anchor_ns": 250000
+        },
+        {
+          "target_ns": "19999999",
+          "parts": [
+            {
+              "control": 0,
+              "rate": 8000,
+              "channels": 1,
+              "first": 160,
+              "last": 480,
+              "start_ns": 0
+            }
+          ],
+          "anchor_ns": 20000000
+        },
+        {
+          "target_ns": "20000000",
+          "parts": [
+            {
+              "control": 0,
+              "rate": 8000,
+              "channels": 1,
+              "first": 160,
+              "last": 480,
+              "start_ns": 0
+            }
+          ],
+          "anchor_ns": 20000000
+        },
+        {
+          "target_ns": "20000001",
+          "parts": [
+            {
+              "control": 0,
+              "rate": 8000,
+              "channels": 1,
+              "first": 161,
+              "last": 480,
+              "start_ns": 0
+            }
+          ],
+          "anchor_ns": 20125000
+        },
+        {
+          "target_ns": "39999999",
+          "parts": [
+            {
+              "control": 0,
+              "rate": 8000,
+              "channels": 1,
+              "first": 320,
+              "last": 480,
+              "start_ns": 0
+            }
+          ],
+          "anchor_ns": 40000000
+        },
+        {
+          "target_ns": "40000001",
+          "parts": [
+            {
+              "control": 0,
+              "rate": 8000,
+              "channels": 1,
+              "first": 321,
+              "last": 480,
+              "start_ns": 0
+            }
+          ],
+          "anchor_ns": 40125000
+        },
+        {
+          "target_ns": "59999999",
+          "parts": [],
+          "anchor_ns": 60000000
+        },
+        {
+          "target_ns": "60000000",
+          "parts": [],
+          "anchor_ns": 60000000
+        },
+        {
+          "target_ns": "60000001",
+          "parts": [],
+          "anchor_ns": 60000000
+        },
+        {
+          "target_ns": "18446744073709551615999999999",
+          "parts": [],
+          "anchor_ns": 60000000
+        }
+      ],
+      "duration_ns": 60000000,
+      "scale": 90000,
+      "video_frames": 3
+    },
+    {
+      "file": "pcm-1000.mp4",
+      "queries": [
+        {
+          "target_ns": "0",
+          "parts": [
+            {
+              "control": 0,
+              "rate": 8000,
+              "channels": 1,
+              "first": 0,
+              "last": 480,
+              "start_ns": 0
+            }
+          ],
+          "anchor_ns": 0
+        },
+        {
+          "target_ns": "1",
+          "parts": [
+            {
+              "control": 0,
+              "rate": 8000,
+              "channels": 1,
+              "first": 1,
+              "last": 480,
+              "start_ns": 0
+            }
+          ],
+          "anchor_ns": 125000
+        },
+        {
+          "target_ns": "20833",
+          "parts": [
+            {
+              "control": 0,
+              "rate": 8000,
+              "channels": 1,
+              "first": 1,
+              "last": 480,
+              "start_ns": 0
+            }
+          ],
+          "anchor_ns": 125000
+        },
+        {
+          "target_ns": "20834",
+          "parts": [
+            {
+              "control": 0,
+              "rate": 8000,
+              "channels": 1,
+              "first": 1,
+              "last": 480,
+              "start_ns": 0
+            }
+          ],
+          "anchor_ns": 125000
+        },
+        {
+          "target_ns": "124999",
+          "parts": [
+            {
+              "control": 0,
+              "rate": 8000,
+              "channels": 1,
+              "first": 1,
+              "last": 480,
+              "start_ns": 0
+            }
+          ],
+          "anchor_ns": 125000
+        },
+        {
+          "target_ns": "125000",
+          "parts": [
+            {
+              "control": 0,
+              "rate": 8000,
+              "channels": 1,
+              "first": 1,
+              "last": 480,
+              "start_ns": 0
+            }
+          ],
+          "anchor_ns": 125000
+        },
+        {
+          "target_ns": "125001",
+          "parts": [
+            {
+              "control": 0,
+              "rate": 8000,
+              "channels": 1,
+              "first": 2,
+              "last": 480,
+              "start_ns": 0
+            }
+          ],
+          "anchor_ns": 250000
+        },
+        {
+          "target_ns": "19999999",
+          "parts": [
+            {
+              "control": 0,
+              "rate": 8000,
+              "channels": 1,
+              "first": 160,
+              "last": 480,
+              "start_ns": 0
+            }
+          ],
+          "anchor_ns": 20000000
+        },
+        {
+          "target_ns": "20000000",
+          "parts": [
+            {
+              "control": 0,
+              "rate": 8000,
+              "channels": 1,
+              "first": 160,
+              "last": 480,
+              "start_ns": 0
+            }
+          ],
+          "anchor_ns": 20000000
+        },
+        {
+          "target_ns": "20000001",
+          "parts": [
+            {
+              "control": 0,
+              "rate": 8000,
+              "channels": 1,
+              "first": 161,
+              "last": 480,
+              "start_ns": 0
+            }
+          ],
+          "anchor_ns": 20125000
+        },
+        {
+          "target_ns": "39999999",
+          "parts": [
+            {
+              "control": 0,
+              "rate": 8000,
+              "channels": 1,
+              "first": 320,
+              "last": 480,
+              "start_ns": 0
+            }
+          ],
+          "anchor_ns": 40000000
+        },
+        {
+          "target_ns": "40000001",
+          "parts": [
+            {
+              "control": 0,
+              "rate": 8000,
+              "channels": 1,
+              "first": 321,
+              "last": 480,
+              "start_ns": 0
+            }
+          ],
+          "anchor_ns": 40125000
+        },
+        {
+          "target_ns": "59999999",
+          "parts": [],
+          "anchor_ns": 60000000
+        },
+        {
+          "target_ns": "60000000",
+          "parts": [],
+          "anchor_ns": 60000000
+        },
+        {
+          "target_ns": "60000001",
+          "parts": [],
+          "anchor_ns": 60000000
+        },
+        {
+          "target_ns": "18446744073709551615999999999",
+          "parts": [],
+          "anchor_ns": 60000000
+        }
+      ],
+      "duration_ns": 60000000,
+      "scale": 1000,
+      "video_frames": 3
+    },
+    {
+      "file": "frames-64.mp4",
+      "queries": [
+        {
+          "target_ns": "0",
+          "parts": [
+            {
+              "control": 1,
+              "rate": 48000,
+              "channels": 1,
+              "first": 0,
+              "last": 64,
+              "start_ns": 0
+            }
+          ],
+          "anchor_ns": 0
+        },
+        {
+          "target_ns": "1",
+          "parts": [
+            {
+              "control": 1,
+              "rate": 48000,
+              "channels": 1,
+              "first": 1,
+              "last": 64,
+              "start_ns": 0
+            }
+          ],
+          "anchor_ns": 20833
+        },
+        {
+          "target_ns": "20833",
+          "parts": [
+            {
+              "control": 1,
+              "rate": 48000,
+              "channels": 1,
+              "first": 1,
+              "last": 64,
+              "start_ns": 0
+            }
+          ],
+          "anchor_ns": 20833
+        },
+        {
+          "target_ns": "20834",
+          "parts": [
+            {
+              "control": 1,
+              "rate": 48000,
+              "channels": 1,
+              "first": 2,
+              "last": 64,
+              "start_ns": 0
+            }
+          ],
+          "anchor_ns": 41666
+        },
+        {
+          "target_ns": "124999",
+          "parts": [
+            {
+              "control": 1,
+              "rate": 48000,
+              "channels": 1,
+              "first": 6,
+              "last": 64,
+              "start_ns": 0
+            }
+          ],
+          "anchor_ns": 125000
+        },
+        {
+          "target_ns": "125000",
+          "parts": [
+            {
+              "control": 1,
+              "rate": 48000,
+              "channels": 1,
+              "first": 6,
+              "last": 64,
+              "start_ns": 0
+            }
+          ],
+          "anchor_ns": 125000
+        },
+        {
+          "target_ns": "125001",
+          "parts": [
+            {
+              "control": 1,
+              "rate": 48000,
+              "channels": 1,
+              "first": 7,
+              "last": 64,
+              "start_ns": 0
+            }
+          ],
+          "anchor_ns": 145833
+        },
+        {
+          "target_ns": "1333332",
+          "parts": [],
+          "anchor_ns": 1333333
+        },
+        {
+          "target_ns": "1333333",
+          "parts": [],
+          "anchor_ns": 1333333
+        },
+        {
+          "target_ns": "1333334",
+          "parts": [],
+          "anchor_ns": 1333333
+        },
+        {
+          "target_ns": "19999999",
+          "parts": [],
+          "anchor_ns": 1333333
+        },
+        {
+          "target_ns": "20000000",
+          "parts": [],
+          "anchor_ns": 1333333
+        },
+        {
+          "target_ns": "20000001",
+          "parts": [],
+          "anchor_ns": 1333333
+        },
+        {
+          "target_ns": "39999999",
+          "parts": [],
+          "anchor_ns": 1333333
+        },
+        {
+          "target_ns": "40000001",
+          "parts": [],
+          "anchor_ns": 1333333
+        },
+        {
+          "target_ns": "18446744073709551615999999999",
+          "parts": [],
+          "anchor_ns": 1333333
+        }
+      ],
+      "duration_ns": 1333333,
+      "scale": 48000,
+      "video_frames": 3
+    },
+    {
+      "file": "control-alias.mp4",
+      "queries": [
+        {
+          "target_ns": "0",
+          "parts": [
+            {
+              "control": 1,
+              "rate": 48000,
+              "channels": 1,
+              "first": 0,
+              "last": 64,
+              "start_ns": 0
+            }
+          ],
+          "anchor_ns": 0
+        },
+        {
+          "target_ns": "1",
+          "parts": [
+            {
+              "control": 1,
+              "rate": 48000,
+              "channels": 1,
+              "first": 1,
+              "last": 64,
+              "start_ns": 0
+            }
+          ],
+          "anchor_ns": 20833
+        },
+        {
+          "target_ns": "20833",
+          "parts": [
+            {
+              "control": 1,
+              "rate": 48000,
+              "channels": 1,
+              "first": 1,
+              "last": 64,
+              "start_ns": 0
+            }
+          ],
+          "anchor_ns": 20833
+        },
+        {
+          "target_ns": "20834",
+          "parts": [
+            {
+              "control": 1,
+              "rate": 48000,
+              "channels": 1,
+              "first": 2,
+              "last": 64,
+              "start_ns": 0
+            }
+          ],
+          "anchor_ns": 41666
+        },
+        {
+          "target_ns": "124999",
+          "parts": [
+            {
+              "control": 1,
+              "rate": 48000,
+              "channels": 1,
+              "first": 6,
+              "last": 64,
+              "start_ns": 0
+            }
+          ],
+          "anchor_ns": 125000
+        },
+        {
+          "target_ns": "125000",
+          "parts": [
+            {
+              "control": 1,
+              "rate": 48000,
+              "channels": 1,
+              "first": 6,
+              "last": 64,
+              "start_ns": 0
+            }
+          ],
+          "anchor_ns": 125000
+        },
+        {
+          "target_ns": "125001",
+          "parts": [
+            {
+              "control": 1,
+              "rate": 48000,
+              "channels": 1,
+              "first": 7,
+              "last": 64,
+              "start_ns": 0
+            }
+          ],
+          "anchor_ns": 145833
+        },
+        {
+          "target_ns": "1333332",
+          "parts": [],
+          "anchor_ns": 1333333
+        },
+        {
+          "target_ns": "1333333",
+          "parts": [],
+          "anchor_ns": 1333333
+        },
+        {
+          "target_ns": "1333334",
+          "parts": [],
+          "anchor_ns": 1333333
+        },
+        {
+          "target_ns": "19999999",
+          "parts": [],
+          "anchor_ns": 1333333
+        },
+        {
+          "target_ns": "20000000",
+          "parts": [],
+          "anchor_ns": 1333333
+        },
+        {
+          "target_ns": "20000001",
+          "parts": [],
+          "anchor_ns": 1333333
+        },
+        {
+          "target_ns": "39999999",
+          "parts": [],
+          "anchor_ns": 1333333
+        },
+        {
+          "target_ns": "40000001",
+          "parts": [],
+          "anchor_ns": 1333333
+        },
+        {
+          "target_ns": "18446744073709551615999999999",
+          "parts": [],
+          "anchor_ns": 1333333
+        }
+      ],
+      "duration_ns": 1333333,
+      "scale": 48000,
+      "video_frames": 3
+    },
+    {
+      "file": "control-endian.mp4",
+      "queries": [
+        {
+          "target_ns": "0",
+          "parts": [
+            {
+              "control": 1,
+              "rate": 48000,
+              "channels": 1,
+              "first": 0,
+              "last": 64,
+              "start_ns": 0
+            }
+          ],
+          "anchor_ns": 0
+        },
+        {
+          "target_ns": "1",
+          "parts": [
+            {
+              "control": 1,
+              "rate": 48000,
+              "channels": 1,
+              "first": 1,
+              "last": 64,
+              "start_ns": 0
+            }
+          ],
+          "anchor_ns": 20833
+        },
+        {
+          "target_ns": "20833",
+          "parts": [
+            {
+              "control": 1,
+              "rate": 48000,
+              "channels": 1,
+              "first": 1,
+              "last": 64,
+              "start_ns": 0
+            }
+          ],
+          "anchor_ns": 20833
+        },
+        {
+          "target_ns": "20834",
+          "parts": [
+            {
+              "control": 1,
+              "rate": 48000,
+              "channels": 1,
+              "first": 2,
+              "last": 64,
+              "start_ns": 0
+            }
+          ],
+          "anchor_ns": 41666
+        },
+        {
+          "target_ns": "124999",
+          "parts": [
+            {
+              "control": 1,
+              "rate": 48000,
+              "channels": 1,
+              "first": 6,
+              "last": 64,
+              "start_ns": 0
+            }
+          ],
+          "anchor_ns": 125000
+        },
+        {
+          "target_ns": "125000",
+          "parts": [
+            {
+              "control": 1,
+              "rate": 48000,
+              "channels": 1,
+              "first": 6,
+              "last": 64,
+              "start_ns": 0
+            }
+          ],
+          "anchor_ns": 125000
+        },
+        {
+          "target_ns": "125001",
+          "parts": [
+            {
+              "control": 1,
+              "rate": 48000,
+              "channels": 1,
+              "first": 7,
+              "last": 64,
+              "start_ns": 0
+            }
+          ],
+          "anchor_ns": 145833
+        },
+        {
+          "target_ns": "1333332",
+          "parts": [],
+          "anchor_ns": 1333333
+        },
+        {
+          "target_ns": "1333333",
+          "parts": [],
+          "anchor_ns": 1333333
+        },
+        {
+          "target_ns": "1333334",
+          "parts": [],
+          "anchor_ns": 1333333
+        },
+        {
+          "target_ns": "19999999",
+          "parts": [],
+          "anchor_ns": 1333333
+        },
+        {
+          "target_ns": "20000000",
+          "parts": [],
+          "anchor_ns": 1333333
+        },
+        {
+          "target_ns": "20000001",
+          "parts": [],
+          "anchor_ns": 1333333
+        },
+        {
+          "target_ns": "39999999",
+          "parts": [],
+          "anchor_ns": 1333333
+        },
+        {
+          "target_ns": "40000001",
+          "parts": [],
+          "anchor_ns": 1333333
+        },
+        {
+          "target_ns": "18446744073709551615999999999",
+          "parts": [],
+          "anchor_ns": 1333333
+        }
+      ],
+      "duration_ns": 1333333,
+      "scale": 48000,
+      "video_frames": 3
+    }
+  ],
+  "sha256": {
+    "reference-0.f32le": "fbdb42ac4eb6f259aa4e98001a43a676ba3204e1af62e6d1bb608f781a905189",
+    "reference-1.f32le": "f521dbc648eadbf6a83b90b978dbf7bddb6e5ace8ecf4a582059d1ec95c4ff1b",
+    "pcm-8000.mp4": "56a8b2fd0d842a36229b3294f434cacd0ce7036601b761acd0b6c3c1617b73ee",
+    "pcm-48000.mp4": "7805e1d8f3cd3d9390fca78f3c1813ee028d94c31fde829b56a62a3905fdd162",
+    "pcm-90000.mp4": "a90fb92ddca9f77578006149ed379d18d4e68647943ae5d834159730c4b05257",
+    "pcm-1000.mp4": "0315e937c4680085e78cbe5ae8188b6a4d48b0ff2e8860015ca8abce81d08f87",
+    "frames-64.mp4": "ea90d98d8a1d90dfd17582ac56965b362fad1ea07ebdfad033ce49b4f51413fb",
+    "control-alias.mp4": "c1a1fd9a6eb5d6aa46b54f88ffc14a9020e1e70460309810daddf588dfa4048d",
+    "control-endian.mp4": "f19ba536aa68abd41e1af509d5180e1a3159359b763842872ff7110dea73cadd"
+  }
+}

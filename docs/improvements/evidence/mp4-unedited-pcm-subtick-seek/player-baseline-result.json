@@ -1,0 +1,17 @@
+{
+  "command": [
+    "cargo",
+    "test",
+    "--locked",
+    "--offline",
+    "--no-default-features",
+    "--features",
+    "player",
+    "--lib",
+    "player::audio_seek_intent_regressions::acknowledged_fractional_request_releases_to_quantized_actual_mp4_clock",
+    "--",
+    "--exact"
+  ],
+  "exit_code": 101,
+  "candidate_restored": true
+}
