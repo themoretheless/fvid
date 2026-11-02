@@ -1,0 +1,150 @@
+{
+  "version": "ffmpeg version 9.0.2 Copyright (c) 2000-2026 the FFmpeg developers",
+  "command": "ffmpeg -nostdin -v error -i FILE -map 0:a:0 -c:a pcm_f32le -f f32le -",
+  "cases": [
+    {
+      "file": "t1-b8-c1.rifx.wav",
+      "exit_code": 0,
+      "stderr": "",
+      "source_sha256": "66a31762590d1948efbb4e8fc7e8794432fd39519d1a48ac146c8e2e1df38b1c",
+      "decoded_sha256": "af18b5050aa8b400824b30843d0bfc8d9e41d97d78341f06d3ab5b1ccd0d8d80",
+      "expected_sha256": "af18b5050aa8b400824b30843d0bfc8d9e41d97d78341f06d3ab5b1ccd0d8d80",
+      "byte_identical": true
+    },
+    {
+      "file": "t1-b8-c2.rifx.wav",
+      "exit_code": 0,
+      "stderr": "",
+      "source_sha256": "1b9a87e007d01173f9370dbab2ad5f7ceee7c1f145ba9662ef2b024358fff0ba",
+      "decoded_sha256": "7885b9be9664c11131f2542e982c8ae7b808bda0ccadb5f3e45acc6292b807d6",
+      "expected_sha256": "7885b9be9664c11131f2542e982c8ae7b808bda0ccadb5f3e45acc6292b807d6",
+      "byte_identical": true
+    },
+    {
+      "file": "t1-b16-c1.rifx.wav",
+      "exit_code": 0,
+      "stderr": "",
+      "source_sha256": "e03d9db0230085985a5b6ac4eeaef92481596d86c8363e0c05661b3c18b43f87",
+      "decoded_sha256": "09daffd35c1391b330a60a02079b31ee8dd04d4a3f1c1158da91181107bcf372",
+      "expected_sha256": "402c6f2b4607fd33af49b944d7b129505c35bc3b2147a477c33b2457ea6ba1f1",
+      "byte_identical": false
+    },
+    {
+      "file": "t1-b16-c2.rifx.wav",
+      "exit_code": 0,
+      "stderr": "",
+      "source_sha256": "d2b0df7e0af5616a26f47191d72c27128e15c9e683d66a9921213ad2c8a1f6dc",
+      "decoded_sha256": "8e47d0094ca2f3b181f4427e26e037242bcaa40bac855064e275502b7cc7a439",
+      "expected_sha256": "9fde4460191c5cda393fb7534d0000afd4eac82154bc3d45212588fa1fe886d3",
+      "byte_identical": false
+    },
+    {
+      "file": "t1-b24-c1.rifx.wav",
+      "exit_code": 0,
+      "stderr": "",
+      "source_sha256": "f42b12c04658393b56a837805f07375f45c070a25490c9d9df960b53f5e4c71d",
+      "decoded_sha256": "7ae119ede6d1c52ea91a71e4f0e945ad8e3d324c683e290f40e357dc0199e7f6",
+      "expected_sha256": "bf0f5a8b9ff32b32a75cd218e03ea6a93f1ee22fa413a928173af33291046cc0",
+      "byte_identical": false
+    },
+    {
+      "file": "t1-b24-c2.rifx.wav",
+      "exit_code": 0,
+      "stderr": "",
+      "source_sha256": "047f11cf03e83d03407e5d083f7a6a50deb756d0d91cf4b80c5a615f3a9d6652",
+      "decoded_sha256": "0ebcdfb7ae1790794ed39d8983c3c073fab1aa22c2f5f176dc1c9adca49d69ff",
+      "expected_sha256": "55ae1ba60abb03113880d9bb40cde9c1c7411e3b93126deda2f75343b8d080e6",
+      "byte_identical": false
+    },
+    {
+      "file": "t1-b32-c1.rifx.wav",
+      "exit_code": 0,
+      "stderr": "",
+      "source_sha256": "8fc883ae87679c24891cec5980c49cf6d474cc7867f3810f5f99904878ff5e27",
+      "decoded_sha256": "a879981ec0240202ff0ae49a1a8c922b91d9a9d52f2f135282a70fc3f12e0e92",
+      "expected_sha256": "4ad630d3c5b61ba51d73c17e5cf7d6384516f45373a70561582968289a64b23a",
+      "byte_identical": false
+    },
+    {
+      "file": "t1-b32-c2.rifx.wav",
+      "exit_code": 0,
+      "stderr": "",
+      "source_sha256": "685ed2516a8107d09ec79b5409ceabdc15c4908ff47fc552c69b32169cd2d8b9",
+      "decoded_sha256": "b2379dd87a17223ad885664364ea3bcb9bca59e182b1301ed8b405db19271056",
+      "expected_sha256": "839fbde1ae8e8d4ef7cd30c3b5356baa9753f12411c143c3aee3454011c9435f",
+      "byte_identical": false
+    },
+    {
+      "file": "t3-b32-c1.rifx.wav",
+      "exit_code": 176,
+      "stderr": "[in#0 @ 0xb9505c000] Error opening input: Not yet implemented in FFmpeg, patches welcome\nError opening input file /Users/themoretheless/.codex/worktrees/fvid-push-20261029/fvid/tests/fixtures/playback-errors/rifx-playback/t3-b32-c1.rifx.wav.\nError opening input files: Not yet implemented in FFmpeg, patches welcome\n",
+      "source_sha256": "393aab896c9b525e5e470d3c4013b34069bb1c906db851973bb2fb7053845f9d",
+      "decoded_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "expected_sha256": "d19b1fe0b3c811db7ce28984f6e92bea3e59b80d54b041f0beed2910ccadb016",
+      "byte_identical": false
+    },
+    {
+      "file": "t3-b32-c2.rifx.wav",
+      "exit_code": 176,
+      "stderr": "[in#0 @ 0xb3305c000] Error opening input: Not yet implemented in FFmpeg, patches welcome\nError opening input file /Users/themoretheless/.codex/worktrees/fvid-push-20261029/fvid/tests/fixtures/playback-errors/rifx-playback/t3-b32-c2.rifx.wav.\nError opening input files: Not yet implemented in FFmpeg, patches welcome\n",
+      "source_sha256": "69616c83ba8b09532645f4ba1ca17c1ee7d596b707bad0124cc24373e45c97e8",
+      "decoded_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "expected_sha256": "d04b49ddc44b856919c0b4590ceb006ec61db8c9c289e6017241f32847ca8587",
+      "byte_identical": false
+    },
+    {
+      "file": "t3-b64-c1.rifx.wav",
+      "exit_code": 176,
+      "stderr": "[in#0 @ 0xa8f058000] Error opening input: Not yet implemented in FFmpeg, patches welcome\nError opening input file /Users/themoretheless/.codex/worktrees/fvid-push-20261029/fvid/tests/fixtures/playback-errors/rifx-playback/t3-b64-c1.rifx.wav.\nError opening input files: Not yet implemented in FFmpeg, patches welcome\n",
+      "source_sha256": "1dd57bfa433156ecfc4b9c09dfcd74646581d3d8a4e2b26cf8a7dad999a5d8d0",
+      "decoded_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "expected_sha256": "d19b1fe0b3c811db7ce28984f6e92bea3e59b80d54b041f0beed2910ccadb016",
+      "byte_identical": false
+    },
+    {
+      "file": "t3-b64-c2.rifx.wav",
+      "exit_code": 176,
+      "stderr": "[in#0 @ 0x7bcc68000] Error opening input: Not yet implemented in FFmpeg, patches welcome\nError opening input file /Users/themoretheless/.codex/worktrees/fvid-push-20261029/fvid/tests/fixtures/playback-errors/rifx-playback/t3-b64-c2.rifx.wav.\nError opening input files: Not yet implemented in FFmpeg, patches welcome\n",
+      "source_sha256": "3005863e83ecc910b628c936c82c84f05a8a4cec4a057778adad8f469feb9588",
+      "decoded_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "expected_sha256": "d04b49ddc44b856919c0b4590ceb006ec61db8c9c289e6017241f32847ca8587",
+      "byte_identical": false
+    },
+    {
+      "file": "t6-b8-c1.rifx.wav",
+      "exit_code": 176,
+      "stderr": "[in#0 @ 0xcad058000] Error opening input: Not yet implemented in FFmpeg, patches welcome\nError opening input file /Users/themoretheless/.codex/worktrees/fvid-push-20261029/fvid/tests/fixtures/playback-errors/rifx-playback/t6-b8-c1.rifx.wav.\nError opening input files: Not yet implemented in FFmpeg, patches welcome\n",
+      "source_sha256": "30d88e7331d8faf2c87340dfa92cdaedda17ed47a0b4f0ecfc1707717183ce9b",
+      "decoded_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "expected_sha256": "1941432d529c5e3b1f29e8aebecc49732d2f7dc82d101983d9017493e67ae1d0",
+      "byte_identical": false
+    },
+    {
+      "file": "t6-b8-c2.rifx.wav",
+      "exit_code": 176,
+      "stderr": "[in#0 @ 0xb91438000] Error opening input: Not yet implemented in FFmpeg, patches welcome\nError opening input file /Users/themoretheless/.codex/worktrees/fvid-push-20261029/fvid/tests/fixtures/playback-errors/rifx-playback/t6-b8-c2.rifx.wav.\nError opening input files: Not yet implemented in FFmpeg, patches welcome\n",
+      "source_sha256": "78d24032c18d5a4ea4672516dc948d48e830489d652729e6668492632b2444ba",
+      "decoded_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "expected_sha256": "83ce11ac4c6fbd87f582969c703816fae21a56c556f1e49d9ca0ea4139fbc9e9",
+      "byte_identical": false
+    },
+    {
+      "file": "t7-b8-c1.rifx.wav",
+      "exit_code": 176,
+      "stderr": "[in#0 @ 0x92303c000] Error opening input: Not yet implemented in FFmpeg, patches welcome\nError opening input file /Users/themoretheless/.codex/worktrees/fvid-push-20261029/fvid/tests/fixtures/playback-errors/rifx-playback/t7-b8-c1.rifx.wav.\nError opening input files: Not yet implemented in FFmpeg, patches welcome\n",
+      "source_sha256": "9f484c7499b46c2137a05a1e17fa2f9e9939e30e439b5b31c9442ec0f6db09fc",
+      "decoded_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "expected_sha256": "c83d22107ce24008b6ee0c1bca8d594563cf653f8abb903efabe58b0a9eef135",
+      "byte_identical": false
+    },
+    {
+      "file": "t7-b8-c2.rifx.wav",
+      "exit_code": 176,
+      "stderr": "[in#0 @ 0xca1058000] Error opening input: Not yet implemented in FFmpeg, patches welcome\nError opening input file /Users/themoretheless/.codex/worktrees/fvid-push-20261029/fvid/tests/fixtures/playback-errors/rifx-playback/t7-b8-c2.rifx.wav.\nError opening input files: Not yet implemented in FFmpeg, patches welcome\n",
+      "source_sha256": "2a7f123b772533ce4424ab11960c8dabf60f4022d17312b47a91f9ca53ac68fb",
+      "decoded_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "expected_sha256": "8458891c339c22769dcca1c6e0207324d273b383a9b2391c98e3639b74ff43ba",
+      "byte_identical": false
+    }
+  ]
+}

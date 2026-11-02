@@ -1,0 +1,199 @@
+#![cfg(feature = "player")]
+#[path = "support/rational_audio_seek.rs"]
+mod rational;
+#[path = "support/audio_transitions.rs"]
+mod transitions;
+use fvid::audio::AudioStream;
+use std::{
+    io::Cursor,
+    path::{Path, PathBuf},
+    sync::{Arc, Mutex},
+    time::Duration,
+};
+fn root() -> PathBuf {
+    Path::new(env!("CARGO_MANIFEST_DIR")).join("tests/fixtures/playback-errors/rifx-playback")
+}
+fn bytes(n: &str) -> Vec<u8> {
+    std::fs::read(root().join(n)).unwrap()
+}
+fn cases(key: &str) -> Vec<serde_json::Value> {
+    serde_json::from_slice::<serde_json::Value>(&bytes("manifest.json")).unwrap()[key]
+        .as_array()
+        .unwrap()
+        .clone()
+}
+fn source(c: &serde_json::Value, kind: &str) -> Box<dyn AudioStream> {
+    Box::new(
+        fvid::playback_wav::WavAudioReader::open(
+            Cursor::new(bytes(&format!(
+                "{}.{}.wav",
+                c["name"].as_str().unwrap(),
+                kind
+            ))),
+            Default::default(),
+        )
+        .expect("authored classic WAVE must open"),
+    )
+}
+#[test]
+fn independent_riff_pcm_and_neutral_video_controls_are_exact() {
+    for c in cases("cases") {
+        let full = rational::collect(&mut *source(&c, "riff"));
+        assert_eq!(
+            full.iter().flat_map(|p| p.data.clone()).collect::<Vec<_>>(),
+            bytes(&format!("{}.f32le", c["name"].as_str().unwrap()))
+        );
+        assert_eq!(
+            full.iter().map(rational::Packet::frames).sum::<usize>(),
+            4099
+        );
+    }
+    let mut v = fvid::playback_mp4::Mp4VideoReader::open_software(
+        Cursor::new(bytes("neutral-video.mp4")),
+        Default::default(),
+        32 << 20,
+    )
+    .unwrap();
+    for i in 0..3 {
+        let f = v.read_frame().unwrap().unwrap();
+        let got: Vec<_> = f
+            .picture
+            .y
+            .iter()
+            .chain(&f.picture.cb)
+            .chain(&f.picture.cr)
+            .flat_map(|v| v.to_le_bytes())
+            .collect();
+        assert_eq!(got, bytes(&format!("frame-{i}.yuv16")));
+    }
+    assert!(v.read_frame().unwrap().is_none());
+}
+#[test]
+fn rifx_native_pcm_descriptors_and_stored_bytes_preserve_big_endian_samples() {
+    for c in cases("cases") {
+        let name = c["name"].as_str().unwrap();
+        let mut s = source(&c, "rifx");
+        let expected = match (c["tag"].as_u64().unwrap(), c["bits"].as_u64().unwrap()) {
+            (1, 8) => "A_PCM/INT/LIT",
+            (1, _) => "A_PCM/INT/BIG",
+            (3, 32) => "fl32",
+            (3, 64) => "fl64",
+            (6, _) => "pcm_alaw",
+            (7, _) => "pcm_mulaw",
+            _ => panic!("bad authored kind"),
+        };
+        assert_eq!(s.codec(), expected);
+        assert_eq!(
+            s.extra_data(),
+            if c["tag"] == 3 { &[0][..] } else { &[][..] }
+        );
+        let full = rational::collect(&mut *s);
+        let control = rational::collect(&mut *source(&c, "riff"));
+        rational::exact(&full, &control, name);
+        s.rewind();
+        let mut raw = Vec::new();
+        while let Some(p) = s.next_packet().unwrap() {
+            raw.extend(p.data);
+        }
+        assert_eq!(raw, bytes(&format!("{name}.raw")));
+        s.validate_eof().unwrap();
+        s.rewind();
+        rational::exact(&rational::collect(&mut *s), &full, name);
+        let rate = c["rate"].as_u64().unwrap();
+        let end = full.last().unwrap().point(full.last().unwrap().frames());
+        for at in [
+            Duration::from_nanos(1),
+            Duration::from_nanos(2048 * 1_000_000_000 / rate + 1),
+            Duration::MAX,
+        ] {
+            s.seek_time(at);
+            rational::exact(
+                &rational::collect(&mut *s),
+                &rational::suffix(&full, at, end),
+                name,
+            );
+        }
+    }
+}
+#[test]
+fn actual_workers_play_exact_rifx_native_pcm_after_fractional_seek_and_eof() {
+    for c in cases("cases") {
+        let full = rational::collect(&mut *source(&c, "riff"));
+        let last = full.last().unwrap();
+        let end = last.point(last.frames());
+        let rate = c["rate"].as_u64().unwrap();
+        for at in [
+            Duration::ZERO,
+            Duration::from_nanos(1),
+            Duration::from_nanos(2048 * 1_000_000_000 / rate + 1),
+            Duration::MAX,
+        ] {
+            let wanted = rational::suffix(&full, at, end);
+            let raw = Arc::new(Mutex::new(rational::RawTrace::default()));
+            let copy = raw.clone();
+            let trace = Arc::new(Mutex::new(transitions::Trace::default()));
+            let mut worker =
+                fvid::audio_thread::AudioPlayback::start(source(&c, "rifx"), move || {
+                    Box::new(rational::RawCapture {
+                        inner: transitions::Capture::new(trace),
+                        raw: copy,
+                    })
+                });
+            worker.seek(at);
+            worker.play();
+            transitions::ended(&worker, worker.generation());
+            let got = raw.lock().unwrap();
+            rational::exact(&got.packets, &wanted, "RIFX worker");
+            assert_eq!(got.anchors, vec![rational::anchor(&wanted, end)]);
+        }
+    }
+}
+#[test]
+fn corrupted_and_unqualified_rifx_headers_have_specific_refusals() {
+    for c in cases("bad") {
+        let e = fvid::playback_wav::WavAudioReader::open(
+            Cursor::new(bytes(c["file"].as_str().unwrap())),
+            Default::default(),
+        )
+        .err()
+        .unwrap();
+        if c["unsupported"] == true {
+            assert!(matches!(e, fvid::Error::Unsupported(_)), "{e}");
+        } else {
+            assert!(matches!(e, fvid::Error::Invalid(_)), "{e}");
+        }
+        assert!(e.to_string().contains(c["needle"].as_str().unwrap()), "{e}");
+    }
+}
+#[test]
+fn rifx_truncated_payload_reports_eof_failure_after_exact_available_pcm() {
+    let mut s = fvid::playback_wav::WavAudioReader::open(
+        Cursor::new(bytes("truncated.wav")),
+        Default::default(),
+    )
+    .unwrap();
+    let mut d = s.make_decoder().unwrap();
+    let mut pcm = Vec::new();
+    while let Some(p) = s.next_packet().unwrap() {
+        let f = d
+            .decode_packet(&p.data, s.decoder_stamp(&p), p.duration as u64)
+            .unwrap()
+            .unwrap();
+        pcm.extend(
+            s.present_decoded(f.packet, f.source_pts)
+                .unwrap()
+                .unwrap()
+                .data,
+        );
+    }
+    assert_eq!(pcm, bytes("truncated.f32le"));
+    assert!(
+        s.validate_eof()
+            .unwrap_err()
+            .to_string()
+            .contains("truncated")
+    );
+    s.seek_to(i64::MAX);
+    assert!(s.next_packet().unwrap().is_none());
+    assert!(s.validate_eof().is_err());
+}

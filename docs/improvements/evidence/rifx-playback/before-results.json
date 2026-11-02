@@ -1,0 +1,18 @@
+{
+  "command": [
+    "cargo",
+    "test",
+    "--locked",
+    "--offline",
+    "--no-default-features",
+    "--features",
+    "player",
+    "--test",
+    "rifx_playback",
+    "--",
+    "--test-threads=2"
+  ],
+  "exit_code": 101,
+  "source_stable": true,
+  "original_pcm_fact_hint_control_passes": true
+}

@@ -1,0 +1,7 @@
+{
+  "scope": "Diagnostic only;default-demuxer selection is separately preserved",
+  "command": "ffmpeg -nostdin -v error -c:a pcm_s16be -i t1-b16-c1.rifx.wav -c:a pcm_f32le -f f32le OUTPUT",
+  "byte_identical": true,
+  "decoded_sha256": "402c6f2b4607fd33af49b944d7b129505c35bc3b2147a477c33b2457ea6ba1f1",
+  "expected_sha256": "402c6f2b4607fd33af49b944d7b129505c35bc3b2147a477c33b2457ea6ba1f1"
+}

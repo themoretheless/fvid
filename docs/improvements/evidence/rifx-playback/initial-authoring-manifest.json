@@ -1,0 +1,160 @@
+{
+  "provenance": "Analytic integer extremes,signed float zeros/dyadic/decimal values,all256 G711 codes. Big-endian classic RIFX and independently packed RIFF controls;authored VP9. No encoder,network or private media.",
+  "cases": [
+    {
+      "name": "t1-b8-c1",
+      "tag": 1,
+      "bits": 8,
+      "channels": 1,
+      "rate": 8000,
+      "frames": 4099
+    },
+    {
+      "name": "t1-b8-c2",
+      "tag": 1,
+      "bits": 8,
+      "channels": 2,
+      "rate": 44100,
+      "frames": 4099
+    },
+    {
+      "name": "t1-b16-c1",
+      "tag": 1,
+      "bits": 16,
+      "channels": 1,
+      "rate": 48000,
+      "frames": 4099
+    },
+    {
+      "name": "t1-b16-c2",
+      "tag": 1,
+      "bits": 16,
+      "channels": 2,
+      "rate": 8000,
+      "frames": 4099
+    },
+    {
+      "name": "t1-b24-c1",
+      "tag": 1,
+      "bits": 24,
+      "channels": 1,
+      "rate": 44100,
+      "frames": 4099
+    },
+    {
+      "name": "t1-b24-c2",
+      "tag": 1,
+      "bits": 24,
+      "channels": 2,
+      "rate": 48000,
+      "frames": 4099
+    },
+    {
+      "name": "t1-b32-c1",
+      "tag": 1,
+      "bits": 32,
+      "channels": 1,
+      "rate": 8000,
+      "frames": 4099
+    },
+    {
+      "name": "t1-b32-c2",
+      "tag": 1,
+      "bits": 32,
+      "channels": 2,
+      "rate": 44100,
+      "frames": 4099
+    },
+    {
+      "name": "t3-b32-c1",
+      "tag": 3,
+      "bits": 32,
+      "channels": 1,
+      "rate": 48000,
+      "frames": 4099
+    },
+    {
+      "name": "t3-b32-c2",
+      "tag": 3,
+      "bits": 32,
+      "channels": 2,
+      "rate": 8000,
+      "frames": 4099
+    },
+    {
+      "name": "t3-b64-c1",
+      "tag": 3,
+      "bits": 64,
+      "channels": 1,
+      "rate": 44100,
+      "frames": 4099
+    },
+    {
+      "name": "t3-b64-c2",
+      "tag": 3,
+      "bits": 64,
+      "channels": 2,
+      "rate": 48000,
+      "frames": 4099
+    },
+    {
+      "name": "t6-b8-c1",
+      "tag": 6,
+      "bits": 8,
+      "channels": 1,
+      "rate": 8000,
+      "frames": 4099
+    },
+    {
+      "name": "t6-b8-c2",
+      "tag": 6,
+      "bits": 8,
+      "channels": 2,
+      "rate": 44100,
+      "frames": 4099
+    },
+    {
+      "name": "t7-b8-c1",
+      "tag": 7,
+      "bits": 8,
+      "channels": 1,
+      "rate": 48000,
+      "frames": 4099
+    },
+    {
+      "name": "t7-b8-c2",
+      "tag": 7,
+      "bits": 8,
+      "channels": 2,
+      "rate": 8000,
+      "frames": 4099
+    }
+  ],
+  "bad": [
+    {
+      "file": "bad-align.wav",
+      "unsupported": false,
+      "needle": "block alignment"
+    },
+    {
+      "file": "bad-byte-rate.wav",
+      "unsupported": false,
+      "needle": "byte rate"
+    },
+    {
+      "file": "bad-fact.wav",
+      "unsupported": false,
+      "needle": "fact chunk"
+    },
+    {
+      "file": "bad-unsupported.wav",
+      "unsupported": true,
+      "needle": "RIFX"
+    },
+    {
+      "file": "unsupported-extensible.wav",
+      "unsupported": true,
+      "needle": "RIFX"
+    }
+  ]
+}

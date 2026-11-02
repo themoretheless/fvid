@@ -1,0 +1,10 @@
+
+running 5 tests
+test corrupted_and_unqualified_rifx_headers_have_specific_refusals ... ok
+test independent_riff_pcm_and_neutral_video_controls_are_exact ... ok
+test rifx_native_pcm_descriptors_and_stored_bytes_preserve_big_endian_samples ... ok
+test rifx_truncated_payload_reports_eof_failure_after_exact_available_pcm ... ok
+test actual_workers_play_exact_rifx_native_pcm_after_fractional_seek_and_eof ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.94s
+

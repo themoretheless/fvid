@@ -1,0 +1,248 @@
+{
+  "status": "accepted",
+  "accepted_ids": [
+    "FVID-0526"
+  ],
+  "follow_up_ids": [],
+  "count_delta": 1,
+  "accepted_count": 526,
+  "next_id": "FVID-0527",
+  "qualification": {
+    "integration": {
+      "command": [
+        "cargo",
+        "test",
+        "--locked",
+        "--offline",
+        "--no-default-features",
+        "--features",
+        "player",
+        "--test",
+        "rifx_playback",
+        "--test",
+        "pcm_padding_playback",
+        "--test",
+        "avi_extensible_pcm",
+        "--test",
+        "wave_speaker_playback",
+        "--test",
+        "wav_valid_bits",
+        "--test",
+        "wav_unsigned8",
+        "--test",
+        "wav_aiff_au_regressions",
+        "--test",
+        "wave_ogg_flac_plan_regressions",
+        "--test",
+        "audio_reader_eof",
+        "--test",
+        "block_audio_eof",
+        "--test",
+        "audio_index_eof",
+        "--test",
+        "coded_seek_history",
+        "--test",
+        "coded_window_clock",
+        "--test",
+        "aifc_g711_original_width",
+        "--test",
+        "g711_native",
+        "--",
+        "--test-threads=2"
+      ],
+      "exit_code": 0,
+      "seconds": 28.24895477294922,
+      "source_stable": true,
+      "passed": 42,
+      "failed": 0,
+      "ignored": 0
+    },
+    "root-wave": {
+      "command": [
+        "cargo",
+        "test",
+        "--locked",
+        "--offline",
+        "--no-default-features",
+        "--features",
+        "player",
+        "--lib",
+        "playback_wav",
+        "--",
+        "--test-threads=2"
+      ],
+      "exit_code": 0,
+      "seconds": 18.29278588294983,
+      "source_stable": true,
+      "passed": 33,
+      "failed": 0,
+      "ignored": 0
+    },
+    "root-aiff": {
+      "command": [
+        "cargo",
+        "test",
+        "--locked",
+        "--offline",
+        "--no-default-features",
+        "--features",
+        "player",
+        "--lib",
+        "playback_aiff",
+        "--",
+        "--test-threads=2"
+      ],
+      "exit_code": 0,
+      "seconds": 0.23879122734069824,
+      "source_stable": true,
+      "passed": 14,
+      "failed": 0,
+      "ignored": 0
+    },
+    "root-avi": {
+      "command": [
+        "cargo",
+        "test",
+        "--locked",
+        "--offline",
+        "--no-default-features",
+        "--features",
+        "player",
+        "--lib",
+        "playback_avi_audio",
+        "--",
+        "--test-threads=2"
+      ],
+      "exit_code": 0,
+      "seconds": 0.23201990127563477,
+      "source_stable": true,
+      "passed": 13,
+      "failed": 0,
+      "ignored": 0
+    },
+    "audio-worker": {
+      "command": [
+        "cargo",
+        "test",
+        "--locked",
+        "--offline",
+        "--no-default-features",
+        "--features",
+        "player",
+        "--lib",
+        "audio_thread",
+        "--",
+        "--test-threads=2"
+      ],
+      "exit_code": 0,
+      "seconds": 6.309289932250977,
+      "source_stable": true,
+      "passed": 39,
+      "failed": 0,
+      "ignored": 0
+    },
+    "root-cpal": {
+      "command": [
+        "cargo",
+        "test",
+        "--locked",
+        "--offline",
+        "--no-default-features",
+        "--features",
+        "player",
+        "--lib",
+        "audio::cpal_backend",
+        "--",
+        "--test-threads=2"
+      ],
+      "exit_code": 0,
+      "seconds": 4.757730960845947,
+      "source_stable": true,
+      "passed": 43,
+      "failed": 0,
+      "ignored": 2
+    },
+    "owned-wave": {
+      "command": [
+        "cargo",
+        "test",
+        "-p",
+        "fvid-media",
+        "--locked",
+        "--offline",
+        "--no-default-features",
+        "--features",
+        "player",
+        "--lib",
+        "owned_wave",
+        "--",
+        "--test-threads=2"
+      ],
+      "exit_code": 0,
+      "seconds": 32.33960294723511,
+      "source_stable": true,
+      "passed": 11,
+      "failed": 0,
+      "ignored": 0
+    },
+    "core-check": {
+      "command": [
+        "cargo",
+        "check",
+        "--locked",
+        "--offline",
+        "--no-default-features"
+      ],
+      "exit_code": 0,
+      "seconds": 36.86931800842285,
+      "source_stable": true,
+      "passed": 0,
+      "failed": 0,
+      "ignored": 0
+    },
+    "player-check": {
+      "command": [
+        "cargo",
+        "check",
+        "--locked",
+        "--offline",
+        "--no-default-features",
+        "--features",
+        "player"
+      ],
+      "exit_code": 0,
+      "seconds": 30.778913974761963,
+      "source_stable": true,
+      "passed": 0,
+      "failed": 0,
+      "ignored": 0
+    }
+  },
+  "rust_test_executions": 195,
+  "preexisting_ignored": 2,
+  "repeats": {
+    "runs": 3,
+    "passed_per_run": 5,
+    "failed": 0
+  },
+  "without_ffmpeg_extra_executions": 5,
+  "source_frozen_count": 3185,
+  "source_frozen_manifest": "evidence/rifx-playback/candidate-source.json",
+  "fixture_files_regenerated_identically": 77,
+  "independent_reference": {
+    "library": "libsndfile-1.2.2",
+    "files": 16,
+    "byte_identical": true
+  },
+  "notes": [
+    "One native-player container capability across16 width/codec/layout variants;not one ID per variant.",
+    "Classic PCM/float/G711 are supported;RIFX extensible and other codings remain Unsupported. Owned export/normalization inspection still has its earlier RIFX refusal.",
+    "Full stored payload bytes are preserved;only16 scalar header bytes are normalized on a fixed stack buffer. No performance claim.",
+    "Initial fact-count refusal expectation was wrong for the existing PCM compatibility policy. Final original-source RIFF control confirms metadata preservation with4099 actual frames despite a4098 hint. Initial test/generator/manifest and logs are retained;no existing regression is weakened.",
+    "FFmpeg9.0.2 matches only2/16 authored RIFX files in its default invocation;the diagnostic is preserved,not used as a correctness oracle. Independent libsndfile1.2.2 matches16/16 exactly.",
+    "Two existing physical-device ignores remain unchanged;physical audio and visual UI are unqualified."
+  ],
+  "evidence_directories": [
+    "evidence/rifx-playback"
+  ]
+}

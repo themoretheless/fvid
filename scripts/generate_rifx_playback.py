@@ -1,0 +1,43 @@
+"""Author big-endian classic WAVE with independent little-endian/float controls."""
+from pathlib import Path
+import json,struct
+from generate_mp4_seek_io_regressions import generate as video
+from generate_g711_fixtures import level
+OUT=Path(__file__).resolve().parents[1]/'tests/fixtures/playback-errors/rifx-playback'
+def chunk(tag,data,endian):return tag+struct.pack(endian+'I',len(data))+data+bytes(len(data)%2)
+def wave(fmt,raw,endian,n=4099):
+    body=b'WAVE'+chunk(b'JUNK',b'own',endian)+chunk(b'fmt ',fmt,endian)+chunk(b'fact',struct.pack(endian+'I',n),endian)+chunk(b'data',raw,endian)
+    return (b'RIFX'if endian=='>'else b'RIFF')+struct.pack(endian+'I',len(body))+body
+
+def generate():
+    v=video();files={'neutral-video.mp4':v['three-colors.mp4'],**{f'frame-{i}.yuv16':v[f'frame-{i}.yuv16']for i in range(3)}};cases=[];bad=[]
+    profiles=[(tag,bits,c)for tag,bits in [(1,8),(1,16),(1,24),(1,32),(3,32),(3,64),(6,8),(7,8)]for c in [1,2]]
+    for i,(tag,bits,channels)in enumerate(profiles):
+        rate=[8000,44100,48000][i%3];width=bits//8;stride=width*channels;name=f't{tag}-b{bits}-c{channels}';raw_be=b'';raw_le=b'';gold=b''
+        for t in range(4099):
+            for c in range(channels):
+                j=t+c*3
+                if tag in [6,7]:
+                    value=(j*17)%256;be=le=bytes([value]);x=level('alaw'if tag==6 else'mulaw',value)/32768.
+                elif tag==3:
+                    value=[-.75,-0.0,0.0,0.1,1e-20,.75][j%6];be=struct.pack('>f'if bits==32 else'>d',value);le=be[::-1];x=struct.unpack('<f'if bits==32 else'<d',le)[0]
+                elif bits==8:
+                    value=[0,1,127,128,129,254,255][j%7];be=le=bytes([value]);x=(value-128)/128.
+                else:
+                    half=1<<(bits-1);value=[-half,-half+1,-1,0,1,half-1][j%6];be=value.to_bytes(width,'big',signed=True);le=be[::-1];x=value/half
+                raw_be+=be;raw_le+=le;gold+=struct.pack('<f',x)
+        def fmt(endian,align=stride,avg=rate*stride,kind=tag):return struct.pack(endian+'HHIIHH',kind,channels,rate,avg,align,bits)+(struct.pack(endian+'H',0)if kind!=1 else b'')
+        files[name+'.rifx.wav']=wave(fmt('>'),raw_be,'>');files[name+'.riff.wav']=wave(fmt('<'),raw_le,'<');files[name+'.raw']=raw_be;files[name+'.f32le']=gold
+        cases.append(dict(name=name,tag=tag,bits=bits,channels=channels,rate=rate,frames=4099))
+        if i==3:
+            for reason,f,n in [('align',fmt('>',align=stride+1),4099),('byte-rate',fmt('>',avg=rate*stride+1),4099),('fact',fmt('>'),4098),('unsupported',fmt('>',kind=0x1234),4099)]:
+                file='bad-'+reason+'.wav';files[file]=wave(f,raw_be,'>',n);
+                if reason!='fact':bad.append(dict(file=file,unsupported=reason=='unsupported',needle={'align':'block alignment','byte-rate':'byte rate','unsupported':'RIFX'}[reason]))
+                else:files['fact-hint-riff.wav']=wave(fmt('<'),raw_le,'<',4098)
+            ext=struct.pack('>HHIIHHHHI',65534,channels,rate,rate*stride,stride,bits,22,bits,3)+struct.pack('<I',1)+bytes.fromhex('00001000800000aa00389b71');files['unsupported-extensible.wav']=wave(ext,raw_be,'>');bad.append(dict(file='unsupported-extensible.wav',unsupported=True,needle='RIFX'))
+            # Full declared payload,one complete frame absent;no physical pad to hide it.
+            full=files[name+'.rifx.wav'];files['truncated.wav']=full[:-stride];files['truncated.f32le']=gold[:-channels*4]
+    files['manifest.json']=(json.dumps(dict(provenance='Analytic integer extremes,signed float zeros/dyadic/decimal values,all256 G711 codes. Big-endian classic RIFX and independently packed RIFF controls;authored VP9. No encoder,network or private media.',cases=cases,bad=bad),indent=2)+'\n').encode();return files
+if __name__=='__main__':
+    OUT.mkdir(parents=True,exist_ok=True)
+    for name,data in generate().items():(OUT/name).write_bytes(data)

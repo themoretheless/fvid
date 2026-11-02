@@ -277,9 +277,16 @@ pub struct Wav {
     data: Vec<u8>,
     // None is a classic header; Some(0) explicitly leaves roles unassigned.
     speaker_mask: Option<u32>,
+    big_endian: bool,
 }
 
 impl Wav {
+    /// Byte order of the container and its multibyte PCM words. For float PCM,
+    /// combine this with the stored precision when constructing a decoder.
+    pub fn is_big_endian(&self) -> bool {
+        self.big_endian
+    }
+
     /// Read a whole file: the `RIFF`/`WAVE` envelope, the `fmt ` chunk that states
     /// the geometry, and the `data` chunk that follows it.
     pub fn parse(bytes: &[u8], limits: &Limits) -> Result<Self> {
@@ -289,9 +296,15 @@ impl Wav {
                 limits.file_bytes
             )));
         }
-        if bytes.len() < 12 || &bytes[..4] != b"RIFF" || &bytes[8..12] != b"WAVE" {
+        if bytes.len() < 12 || !matches!(&bytes[..4], b"RIFF" | b"RIFX") || &bytes[8..12] != b"WAVE" {
             return Err(invalid("not a RIFF/WAVE file"));
         }
+        let big_endian = &bytes[..4] == b"RIFX";
+        let number = |word: [u8; 4]| if big_endian {
+            u32::from_be_bytes(word)
+        } else {
+            u32::from_le_bytes(word)
+        };
         let mut fmt = None;
         let mut data = None;
         let mut fact = None;
@@ -304,7 +317,7 @@ impl Wav {
         while at + 8 <= bytes.len() {
             let tag = &bytes[at..at + 4];
             let declared =
-                u32::from_le_bytes(bytes[at + 4..at + 8].try_into().unwrap_or([0xff; 4]));
+                number(bytes[at + 4..at + 8].try_into().unwrap_or([0xff; 4]));
             let declared = usize::try_from(declared).unwrap_or(usize::MAX);
             let body = at + 8;
             // The claim is the writer's, the bytes are the reader's: a chunk that
@@ -328,7 +341,7 @@ impl Wav {
             }
             let stated_fact = if tag == b"fact" {
                 bytes.get(body..end).and_then(|chunk| chunk.get(..4)).map(|field| {
-                    usize::try_from(u32::from_le_bytes(field.try_into().unwrap())).unwrap_or(usize::MAX)
+                    usize::try_from(number(field.try_into().unwrap())).unwrap_or(usize::MAX)
                 })
             } else { None };
             if let (Some(first), Some(second)) = (fact, stated_fact) && first != second {
@@ -346,7 +359,11 @@ impl Wav {
             };
             if first_unseen {
                 if tag == b"fmt " {
-                    fmt = Some(parse_fmt(&bytes[body..end], limits)?);
+                    fmt = Some(if big_endian {
+                        parse_rifx_fmt(&bytes[body..end], limits)?
+                    } else {
+                        parse_fmt(&bytes[body..end], limits)?
+                    });
                     fmt_body = Some((body, end));
                 } else if tag == b"fact" {
                     // A `fact` chunk that stops before its one field states nothing,
@@ -405,6 +422,7 @@ impl Wav {
             frames,
             data: samples.to_vec(),
             speaker_mask,
+            big_endian,
         })
     }
 
@@ -439,6 +457,29 @@ impl Wav {
     fn window_bytes(&self) -> usize {
         PACKET_FRAMES / self.pcm.frames_per_block() * self.pcm.block_align()
     }
+}
+
+// The classic RIFX header has the same fields in Motorola order. Normalize
+// only its sixteen scalar format bytes; packet payload always stays untouched.
+fn parse_rifx_fmt(body: &[u8], limits: &Limits) -> Result<(Pcm, Option<u32>, u8)> {
+    if body.len() < 16 {
+        return Err(invalid("fmt chunk is shorter than its seven fields"));
+    }
+    let tag = u16::from_be_bytes(body[..2].try_into().unwrap());
+    if !matches!(tag, PCM | IEEE_FLOAT | ALAW | MULAW) {
+        return Err(unsupported("RIFX coding or extensible format is not supported"));
+    }
+    let mut normalized = [0u8; 16];
+    for (at, width) in [(0, 2), (2, 2), (4, 4), (8, 4), (12, 2), (14, 2)] {
+        for i in 0..width {
+            normalized[at + i] = body[at + width - i - 1];
+        }
+    }
+    let (mut pcm, mask, padding) = parse_fmt(&normalized, limits)?;
+    if let Coding::Pcm(PcmFormat::Int { bits, .. }) = pcm.coding {
+        pcm.coding = Coding::Pcm(PcmFormat::Int { bits, big_endian: true });
+    }
+    Ok((pcm, mask, padding))
 }
 
 /// Validate unused low bits before publishing any PCM from an admitted file.
@@ -729,7 +770,11 @@ impl AudioStream for WavAudioReader {
     }
 
     fn codec(&self) -> &str {
-        self.wav.pcm.codec()
+        match self.wav.pcm.coding {
+            Coding::Pcm(PcmFormat::Float { bits: 32 }) if self.wav.is_big_endian() => "fl32",
+            Coding::Pcm(PcmFormat::Float { bits: 64 }) if self.wav.is_big_endian() => "fl64",
+            _ => self.wav.pcm.codec(),
+        }
     }
 
     fn timescale(&self) -> u32 {
@@ -769,7 +814,12 @@ impl AudioStream for WavAudioReader {
     }
 
     fn extra_data(&self) -> &[u8] {
-        &[]
+        if self.wav.is_big_endian() && matches!(self.wav.pcm.coding, Coding::Pcm(PcmFormat::Float { .. })) {
+            // Existing QuickTime/AIFF float dispatch uses zero for big endian.
+            &[0]
+        } else {
+            &[]
+        }
     }
 
     fn audio_tracks(&self) -> Vec<AudioTrack> {

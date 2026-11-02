@@ -1,8 +1,8 @@
 {
   "target": 1000,
   "counting_rule": "One independently confirmed problem or useful capability; fixture variants and baseline integration repairs are excluded. Only accepted entries count.",
-  "accepted_count": 525,
-  "next_id": "FVID-0526",
+  "accepted_count": 526,
+  "next_id": "FVID-0527",
   "entries": [
     {
       "id": "FVID-0001",
@@ -5962,6 +5962,17 @@
       "result": "Resolve extensible PCM/IEEE-float subformats through the same crate-private WAVE format validator,retaining GUID,cbSize,valid-bit/storage-width,speaker and geometry checks. Feed validated codecs into existing AVI PCM record/sample windows and preserve explicit masks for stereo device negotiation. Unsupported subformats remain skippable so a valid later track still plays;malformed recognized headers refuse as Invalid. Twenty-two authored AVI/WAVE pairs cover unsigned8,signed16/24/32,float32/64,mono/rear-stereo/surround/discrete9,20-in24 and24-in32 precision,grouped4099-frame records,delayed start73 and valid audio following an unsupported GUID. Independent literal PCM,exact native clocks/masks,2048-frame windows,raw seek/EOF/i64MAX,rewind,file/channel/record budgets and88 actual-worker stereo sessions pass. Nine frozen gates pass204 Rust executions,two existing physical-device ignores,core/player checks;three4-test repeats and4 binary executions without FFmpeg pass. All75 fixture files regenerate byte-identically and3025 source/fixture hashes stay stable. One format capability across widths/layouts/refusals;no decoder algorithm,external public signature,performance,physical-output or AVI video-playback claim.",
       "status": "accepted",
       "validation": "batch-535-validation.json"
+    },
+    {
+      "id": "FVID-0526",
+      "batch": 537,
+      "title": "Play classic big-endian RIFX PCM float and G711 with native Wave readers",
+      "source": "src/playback/audio/wav.rs",
+      "regression": "tests/rifx_playback.rs",
+      "before": "Original af565016fe accepts all independently packed RIFF controls but refuses classic RIFX at its magic check as Invalid(not a RIFF/WAVE file). The identical final five-test stand passes the RIFF PCM/video and original informational-fact policy control,then fails native RIFX decoding,actual workers,format-specific refusals and truncated-prefix handling. Sixteen authored RIFX signals are independently confirmed byte-for-byte by libsndfile1.2.2.",
+      "result": "Read RIFX chunk lengths,fact counts and classic format scalars in big endian while retaining raw packet payload bytes. Reuse validated classic WAVE geometry,mark integer PCM big endian,and supply existing fl32/fl64 plus endian metadata for IEEE floats. Add the backward-compatible Wav::is_big_endian getter for raw-parser consumers. Sixteen mono/stereo8/44.1/48kHz cases cover unsigned8,signed16/24/32,float32/64,A-law/mu-law,integer extrema,signed float zero,odd JUNK padding and fact metadata. Exact independent PCM/raw bytes/native clocks,cold precise seek/rewind/EOF/MAX,64 actual-worker sessions and exact truncated-prefix EOF failure pass. Unknown codings and RIFX extensible headers remain explicit Unsupported refusals;wrong alignment/byte rate are Invalid. Original RIFF PCM fact-hint compatibility is preserved and explicitly checked on original source;an incorrect initial new-test refusal expectation is archived and not counted as a product defect. Nine frozen gates pass195 Rust executions,two old physical-device ignores,core/player checks,three5-test repeats and5 no-FFmpeg executions. All77 files regenerate identically and3185 hashes stay stable. Independent libsndfile matches all16 files;FFmpeg9.0.2 diagnostic mismatches/unsupported cases are retained and not used to weaken the oracle. One native-player format capability;owned export/loudness RIFX support,physical devices and performance remain unqualified.",
+      "status": "accepted",
+      "validation": "batch-537-validation.json"
     }
   ]
 }
