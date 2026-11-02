@@ -1,0 +1,17 @@
+{
+  "source_commit": "a04cb52b1c99eafb45bf988fa711d1835851b326",
+  "verified_remote_commit": "a04cb52b1c99eafb45bf988fa711d1835851b326",
+  "published_refs": [
+    "refs/heads/main",
+    "refs/heads/codex/deliver-fvid-20261029"
+  ],
+  "accepted_id": "FVID-0520",
+  "accepted_total": 520,
+  "qualification_source_hashes_verified": 2825,
+  "owned_outputs_removed": [
+    "/private/tmp/fvid-avi-g711-windows-target-20261102",
+    "/private/tmp/fvid-avi-g711-windows-qualification-20261102.py"
+  ],
+  "working_tree_clean_before_receipt": true,
+  "verified_at": "2026-11-02T18:00:31.675763+00:00"
+}
