@@ -1,0 +1,13 @@
+{
+  "provenance": "Own deterministic arithmetic MACE bytes and neutral VP9 from the standalone MACE generator. No FFmpeg,network,private media or parameters.",
+  "sha256": {
+    "control-0-edits.mp4": "7e73636ef31a2b4b5560d23ea90842cb53846941a565a97e758e458935706dbe",
+    "control-1-edits.mp4": "43fd5db64ee86b55f947b9dd62020297187e8649cec6b98534923d1a2ecd8d50",
+    "control-2-edits.mp4": "6f57e730312818a35f56453102103ea7a52e8fc6ec2e11839b10524bbd8e5798",
+    "control-6mono-edits.mp4": "105552a286051e34bccdcde641780368ed3bbbb5d558996807f1a87ba3247eb2",
+    "control-6mono-grouped-edits.mp4": "cb875f21c06cb0ca42e89632e28fdc940fe3e06471d77ff432fa29cd2bfad4c1",
+    "edits.mp4": "0438636c34bec799773c3a67747198bbcc3c253fad70407108b1f1dbbe09a576",
+    "fragmented-edits.mp4": "68e74063a206ccf085707d93dc07d3c771f9565663cdc7e8842e880bd3e07cfe",
+    "hybrid-edits.mp4": "8825fea135fe09dcce92393caa7d4f3e68eff42e3e1e44681076bee3ab5bcaba"
+  }
+}

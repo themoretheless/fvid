@@ -1,0 +1,13 @@
+{
+  "status": "source-inspection-only",
+  "accepted_ids": [],
+  "count_delta": 0,
+  "scope": "Constant-description ADPCM and Dolby edit timelines",
+  "observation": "The constant AudioTimeline path remains native-cursor floor based in seek_to. This candidate adjusts only pure MACE Duration seeks;earlier ADPCM edited controls exercise changing-description timelines. Authored constant-description edit controls are needed before making or accepting any further correction.",
+  "required_before_fix": [
+    "Full native PCM/video controls",
+    "Precise direct and actual-worker seek with raw reseek guard",
+    "Before/after failure evidence without modifying the new oracle"
+  ],
+  "not_a_confirmed_defect": true
+}
