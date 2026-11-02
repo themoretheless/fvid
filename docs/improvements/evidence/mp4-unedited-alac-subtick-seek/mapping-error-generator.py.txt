@@ -1,0 +1,55 @@
+"""Own raw/Rice ALAC unedited native seek witnesses; independent PCM references."""
+from pathlib import Path
+import json,hashlib,copy,struct
+from generate_mp4_unedited_pcm_subtick_seek import generate as pcm
+from generate_mp4_audio_clock_regressions import generate as clocks
+from generate_mp4_alac_transitions import convert
+from generate_mp4_fragment_description_regressions import atoms
+from generate_vp9_chroma import atom,word
+OUT=Path(__file__).resolve().parents[1]/'tests/fixtures/playback-errors/mp4-unedited-alac-subtick-seek'
+def generate():
+    source=pcm();catalog=json.loads(source['manifest.json']);base=clocks();files={n:b for n,b in source.items()if n.startswith('reference-')and n!='reference-1.f32le'};cases=[]
+    for c in catalog['cases']:
+        if c['file'].startswith('pcm-'):
+            c=copy.deepcopy(c);c['file']=c['file'].replace('pcm-','alac-');files[c['file']]=base[c['file']];cases.append(c)
+    template=next(c for c in catalog['cases']if c['file']=='changing-pcm.mp4')
+    def reorder(data,audio=False):
+        out=[]
+        for k,b in atoms(data):
+            if k==b'trak':b=reorder(b,b'soun'in b)
+            elif k in [b'moov',b'mdia',b'minf',b'stbl']:b=reorder(b,audio)
+            elif audio and k==b'stsd':b=word(0,3)+b''.join(atom(t,v)for t,v in reversed(list(atoms(b[8:]))))
+            elif audio and k==b'stsc':
+                b=bytearray(b)
+                for i in range(int.from_bytes(b[4:8],'big')):
+                    at=16+12*i;b[at:at+4]=word(4-int.from_bytes(b[at:at+4],'big'))
+            out.append(atom(k,b))
+        return b''.join(out)
+    for compressed in [False,True]:
+        data=convert(source['changing-pcm.mp4'],compressed=compressed)
+        for reverse in [False,True]:
+            name='changing-'+('rice'if compressed else'raw')+('-third'if reverse else'')+'.mp4';files[name]=reorder(data)if reverse else data;c=copy.deepcopy(template);c['file']=name;cases.append(c)
+    def transport(fill=False,short=False):
+        data=base['alac-8000.mp4'];top=dict(atoms(data));audio=next(b for k,b in atoms(top[b'moov'])if k==b'trak'and b'soun'in b);mdia=dict(atoms(audio));stbl=dict(atoms(dict(atoms(dict(atoms(mdia[b'mdia']))[b'minf']))[b'stbl']));first=int.from_bytes(stbl[b'stco'][8:12],'big');header=atom(b'ftyp',top[b'ftyp']);video_bytes=first-len(header)-8;packets=[]
+        for index in range(3):
+            count=156 if short and index==2 else 160
+            values=[((index*160+n)*37)%32768-16384 for n in range(count)]
+            bits=('110'+'0001'+'00000000'if fill else'')+'000'+'0000'+'0'*12+'1001'+f'{160:032b}'+''.join(f'{v&65535:016b}'for v in values)+'111';bits+='0'*(-len(bits)%8);packets.append(int(bits,2).to_bytes(len(bits)//8,'big'))
+        offsets=[];cursor=first
+        for b in packets:offsets.append(cursor);cursor+=len(b)
+        def tables(data,audio=False):
+            out=[]
+            for k,b in atoms(data):
+                if k==b'trak':b=tables(b,b'soun'in b)
+                elif k in [b'moov',b'mdia',b'minf',b'stbl']:b=tables(b,audio)
+                elif audio and k==b'stsz':b=word(0,0,3,*map(len,packets))
+                elif audio and k==b'stco':b=word(0,3,*offsets)
+                out.append(atom(k,b))
+            return b''.join(out)
+        return header+atom(b'mdat',top[b'mdat'][:video_bytes]+b''.join(packets))+atom(b'moov',tables(top[b'moov']))
+    name='alac-fill-prefix.mp4';files[name]=transport(fill=True);c=copy.deepcopy(next(c for c in cases if c['file']=='alac-8000.mp4'));c['file']=name;cases.append(c)
+    files['header-valid-body-short.mp4']=transport(short=True)
+    files['manifest.json']=(json.dumps(dict(refusal_file='header-valid-body-short.mp4',provenance='Only authored neutral VP9 and8kHz analytic ramp/raw ALAC;raw and first-order Rice ALAC of own48k stereo16/32k mono16/44.1k stereo24 packet waveforms,reordered descriptions and exact rational seek suffix references. Valid fill-prefix control and separately declared truncated final uncompressed coded body refusal. No edit lists,private input,FFmpeg or network.',cases=cases,sha256={n:hashlib.sha256(b).hexdigest()for n,b in files.items()}),indent=2)+'\n').encode();return files
+if __name__=='__main__':
+    OUT.mkdir(parents=True,exist_ok=True)
+    for n,b in generate().items():(OUT/n).write_bytes(b)

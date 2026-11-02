@@ -468,6 +468,42 @@ impl<R: Read + Seek> Mp4AudioReader<R> {
         }
         Ok(None)
     }
+    fn alac_native_landing(&mut self,wanted:EditTime)->Result<Option<EditTime>> {
+        let scale=self.track().timescale;
+        let tick=i64::try_from(wanted.floor_ticks(scale)?).unwrap_or(i64::MAX);
+        let first=self.track().samples.at_or_before(tick);
+        for index in first..self.track().samples.len() {
+            let sample=self.track().samples.get(index).ok_or_else(||invalid("missing MP4 ALAC seek sample"))?;
+            if sample.duration==0 {continue;}
+            let rate=self.native_rate_at(index)?;
+            let start=EditTime::signed_ticks(sample.pts,scale)?;
+            let offset=wanted.sub(start)?.ceil_frames(rate)?.max(0);
+            // The usual first element fits in eight bytes. Ancillary elements
+            // may move it later; retain the normal full-packet budget on fallback.
+            let mut prefix=[0u8;8];
+            let n=self.demuxer.read_packet_range(self.track_index,index,0,&mut prefix)?;
+            let setup=self.track().description_for_sample(index).ok_or_else(||invalid("missing MP4 ALAC seek header"))?;
+            let count=crate::codec::alac_decoder::AlacDecoder::packet_samples(&setup.configuration,rate,setup.channels,&prefix[..n]);
+            let count=match count {
+                Ok(count)=>count,
+                Err(_)=>{
+                    self.demuxer.read_packet(self.track_index,index,&mut self.packet)?;
+                    let setup=self.track().description_for_sample(index).ok_or_else(||invalid("missing MP4 ALAC seek header"))?;
+                    crate::codec::alac_decoder::AlacDecoder::packet_samples(&setup.configuration,rate,setup.channels,&self.packet)
+                        .map_err(|e|invalid(&e.to_string()))?
+                }
+            };
+            let duration=EditTime::ticks(u64::from(sample.duration),scale)?;
+            let frames=(count as i128).min(duration.ceil_frames(rate)?);
+            if offset<frames {return start.add(EditTime::new(offset,u128::from(rate))?).map(Some);}
+            let declared_end=start.add(duration)?;
+            let native_end=start.add(EditTime::new(frames,u128::from(rate))?)?;
+            let available_end=if native_end.cmp(declared_end)==std::cmp::Ordering::Less {native_end}else{declared_end};
+            if wanted.cmp(available_end)!=std::cmp::Ordering::Greater {return Ok(Some(available_end));}
+            if wanted.cmp(declared_end)==std::cmp::Ordering::Less {return Err(invalid("MP4 audio edit extends beyond source packets"));}
+        }
+        Ok(None)
+    }
     fn align_variable_seek(&self,mut position:EditTime,sample_aligned_silence:bool)->Result<EditTime> {
         let timeline=self.variable_edits.as_ref().ok_or_else(||invalid("missing MP4 edit timeline"))?;
         loop {
@@ -1495,17 +1531,20 @@ impl<R: Read + Seek + Send> crate::audio::AudioStream for Mp4AudioReader<R> {
         if scale>0 && scale<1_000_000_000 && (ticks+1)*1_000_000_000/scale==target.as_nanos(){ticks+=1;}
         let landed=self.seek_to(i64::try_from(ticks).unwrap_or(i64::MAX));
         if self.navigation_error.is_none() && self.variable_edits.is_none() && self.timeline.is_none()
-            && matches!(&self.track().codec,b"sowt"|b"twos"|b"raw "|b"in24"|b"in32"|b"fl32"|b"fl64")
-            && self.track().sample_descriptions.iter().enumerate().all(|(i,header)|
-                matches!(&header.codec,b"sowt"|b"twos"|b"raw "|b"in24"|b"in32"|b"fl32"|b"fl64")
-                    || !clock_recovery::clock_description_used(&self.track().samples,i+1)) {
+            && ((matches!(&self.track().codec,b"sowt"|b"twos"|b"raw "|b"in24"|b"in32"|b"fl32"|b"fl64")
+                && self.track().sample_descriptions.iter().enumerate().all(|(i,header)|
+                    matches!(&header.codec,b"sowt"|b"twos"|b"raw "|b"in24"|b"in32"|b"fl32"|b"fl64")
+                        || !clock_recovery::clock_description_used(&self.track().samples,i+1)))
+                || (self.track().codec==*b"alac" && self.track().sample_descriptions.iter().enumerate().all(|(i,header)|
+                    header.codec==*b"alac" || !clock_recovery::clock_description_used(&self.track().samples,i+1)))) {
             let precise=(||->Result<i64> {
                 let end=EditTime::new(i128::try_from(self.presentation_end_ticks().unwrap_or(0))
                     .map_err(|_|invalid("MP4 PCM presentation endpoint overflow"))?,scale)?;
                 let wanted=EditTime::new(target.as_nanos() as i128,1_000_000_000)?;
                 let wanted=if wanted.cmp(end)==std::cmp::Ordering::Greater {end}else{wanted};
                 self.clock_floor.set(wanted);
-                let aligned=self.native_landing(wanted)?.unwrap_or(end);
+                let aligned=if self.track().codec==*b"alac" {self.alac_native_landing(wanted)?}else{self.native_landing(wanted)?};
+                let aligned=aligned.unwrap_or(end);
                 let aligned=if aligned.cmp(end)==std::cmp::Ordering::Greater {end}else{aligned};
                 let returned=if aligned==end {i64::try_from(end.floor_ticks(self.track().timescale)?)
                     .map_err(|_|invalid("MP4 PCM seek endpoint overflow"))?}else{landed};

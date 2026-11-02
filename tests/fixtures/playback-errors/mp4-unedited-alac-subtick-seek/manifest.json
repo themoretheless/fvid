@@ -1,0 +1,3345 @@
+{
+  "refusal_file": "header-valid-body-short.mp4",
+  "provenance": "Only authored neutral VP9 and8kHz analytic ramp/raw ALAC;raw and first-order Rice ALAC of own48k stereo16/32k mono16/44.1k stereo24 packet waveforms,reordered descriptions and exact rational seek suffix references. Valid fill-prefix control and separately declared truncated final uncompressed coded body refusal. No edit lists,private input,FFmpeg or network.",
+  "cases": [
+    {
+      "file": "alac-8000.mp4",
+      "queries": [
+        {
+          "target_ns": "0",
+          "parts": [
+            {
+              "control": 0,
+              "rate": 8000,
+              "channels": 1,
+              "first": 0,
+              "last": 480,
+              "start_ns": 0
+            }
+          ],
+          "anchor_ns": 0
+        },
+        {
+          "target_ns": "1",
+          "parts": [
+            {
+              "control": 0,
+              "rate": 8000,
+              "channels": 1,
+              "first": 1,
+              "last": 480,
+              "start_ns": 0
+            }
+          ],
+          "anchor_ns": 125000
+        },
+        {
+          "target_ns": "20833",
+          "parts": [
+            {
+              "control": 0,
+              "rate": 8000,
+              "channels": 1,
+              "first": 1,
+              "last": 480,
+              "start_ns": 0
+            }
+          ],
+          "anchor_ns": 125000
+        },
+        {
+          "target_ns": "20834",
+          "parts": [
+            {
+              "control": 0,
+              "rate": 8000,
+              "channels": 1,
+              "first": 1,
+              "last": 480,
+              "start_ns": 0
+            }
+          ],
+          "anchor_ns": 125000
+        },
+        {
+          "target_ns": "124999",
+          "parts": [
+            {
+              "control": 0,
+              "rate": 8000,
+              "channels": 1,
+              "first": 1,
+              "last": 480,
+              "start_ns": 0
+            }
+          ],
+          "anchor_ns": 125000
+        },
+        {
+          "target_ns": "125000",
+          "parts": [
+            {
+              "control": 0,
+              "rate": 8000,
+              "channels": 1,
+              "first": 1,
+              "last": 480,
+              "start_ns": 0
+            }
+          ],
+          "anchor_ns": 125000
+        },
+        {
+          "target_ns": "125001",
+          "parts": [
+            {
+              "control": 0,
+              "rate": 8000,
+              "channels": 1,
+              "first": 2,
+              "last": 480,
+              "start_ns": 0
+            }
+          ],
+          "anchor_ns": 250000
+        },
+        {
+          "target_ns": "19999999",
+          "parts": [
+            {
+              "control": 0,
+              "rate": 8000,
+              "channels": 1,
+              "first": 160,
+              "last": 480,
+              "start_ns": 0
+            }
+          ],
+          "anchor_ns": 20000000
+        },
+        {
+          "target_ns": "20000000",
+          "parts": [
+            {
+              "control": 0,
+              "rate": 8000,
+              "channels": 1,
+              "first": 160,
+              "last": 480,
+              "start_ns": 0
+            }
+          ],
+          "anchor_ns": 20000000
+        },
+        {
+          "target_ns": "20000001",
+          "parts": [
+            {
+              "control": 0,
+              "rate": 8000,
+              "channels": 1,
+              "first": 161,
+              "last": 480,
+              "start_ns": 0
+            }
+          ],
+          "anchor_ns": 20125000
+        },
+        {
+          "target_ns": "39999999",
+          "parts": [
+            {
+              "control": 0,
+              "rate": 8000,
+              "channels": 1,
+              "first": 320,
+              "last": 480,
+              "start_ns": 0
+            }
+          ],
+          "anchor_ns": 40000000
+        },
+        {
+          "target_ns": "40000001",
+          "parts": [
+            {
+              "control": 0,
+              "rate": 8000,
+              "channels": 1,
+              "first": 321,
+              "last": 480,
+              "start_ns": 0
+            }
+          ],
+          "anchor_ns": 40125000
+        },
+        {
+          "target_ns": "59999999",
+          "parts": [],
+          "anchor_ns": 60000000
+        },
+        {
+          "target_ns": "60000000",
+          "parts": [],
+          "anchor_ns": 60000000
+        },
+        {
+          "target_ns": "60000001",
+          "parts": [],
+          "anchor_ns": 60000000
+        },
+        {
+          "target_ns": "18446744073709551615999999999",
+          "parts": [],
+          "anchor_ns": 60000000
+        }
+      ],
+      "duration_ns": 60000000,
+      "scale": 8000,
+      "video_frames": 3
+    },
+    {
+      "file": "alac-48000.mp4",
+      "queries": [
+        {
+          "target_ns": "0",
+          "parts": [
+            {
+              "control": 0,
+              "rate": 8000,
+              "channels": 1,
+              "first": 0,
+              "last": 480,
+              "start_ns": 0
+            }
+          ],
+          "anchor_ns": 0
+        },
+        {
+          "target_ns": "1",
+          "parts": [
+            {
+              "control": 0,
+              "rate": 8000,
+              "channels": 1,
+              "first": 1,
+              "last": 480,
+              "start_ns": 0
+            }
+          ],
+          "anchor_ns": 125000
+        },
+        {
+          "target_ns": "20833",
+          "parts": [
+            {
+              "control": 0,
+              "rate": 8000,
+              "channels": 1,
+              "first": 1,
+              "last": 480,
+              "start_ns": 0
+            }
+          ],
+          "anchor_ns": 125000
+        },
+        {
+          "target_ns": "20834",
+          "parts": [
+            {
+              "control": 0,
+              "rate": 8000,
+              "channels": 1,
+              "first": 1,
+              "last": 480,
+              "start_ns": 0
+            }
+          ],
+          "anchor_ns": 125000
+        },
+        {
+          "target_ns": "124999",
+          "parts": [
+            {
+              "control": 0,
+              "rate": 8000,
+              "channels": 1,
+              "first": 1,
+              "last": 480,
+              "start_ns": 0
+            }
+          ],
+          "anchor_ns": 125000
+        },
+        {
+          "target_ns": "125000",
+          "parts": [
+            {
+              "control": 0,
+              "rate": 8000,
+              "channels": 1,
+              "first": 1,
+              "last": 480,
+              "start_ns": 0
+            }
+          ],
+          "anchor_ns": 125000
+        },
+        {
+          "target_ns": "125001",
+          "parts": [
+            {
+              "control": 0,
+              "rate": 8000,
+              "channels": 1,
+              "first": 2,
+              "last": 480,
+              "start_ns": 0
+            }
+          ],
+          "anchor_ns": 250000
+        },
+        {
+          "target_ns": "19999999",
+          "parts": [
+            {
+              "control": 0,
+              "rate": 8000,
+              "channels": 1,
+              "first": 160,
+              "last": 480,
+              "start_ns": 0
+            }
+          ],
+          "anchor_ns": 20000000
+        },
+        {
+          "target_ns": "20000000",
+          "parts": [
+            {
+              "control": 0,
+              "rate": 8000,
+              "channels": 1,
+              "first": 160,
+              "last": 480,
+              "start_ns": 0
+            }
+          ],
+          "anchor_ns": 20000000
+        },
+        {
+          "target_ns": "20000001",
+          "parts": [
+            {
+              "control": 0,
+              "rate": 8000,
+              "channels": 1,
+              "first": 161,
+              "last": 480,
+              "start_ns": 0
+            }
+          ],
+          "anchor_ns": 20125000
+        },
+        {
+          "target_ns": "39999999",
+          "parts": [
+            {
+              "control": 0,
+              "rate": 8000,
+              "channels": 1,
+              "first": 320,
+              "last": 480,
+              "start_ns": 0
+            }
+          ],
+          "anchor_ns": 40000000
+        },
+        {
+          "target_ns": "40000001",
+          "parts": [
+            {
+              "control": 0,
+              "rate": 8000,
+              "channels": 1,
+              "first": 321,
+              "last": 480,
+              "start_ns": 0
+            }
+          ],
+          "anchor_ns": 40125000
+        },
+        {
+          "target_ns": "59999999",
+          "parts": [],
+          "anchor_ns": 60000000
+        },
+        {
+          "target_ns": "60000000",
+          "parts": [],
+          "anchor_ns": 60000000
+        },
+        {
+          "target_ns": "60000001",
+          "parts": [],
+          "anchor_ns": 60000000
+        },
+        {
+          "target_ns": "18446744073709551615999999999",
+          "parts": [],
+          "anchor_ns": 60000000
+        }
+      ],
+      "duration_ns": 60000000,
+      "scale": 48000,
+      "video_frames": 3
+    },
+    {
+      "file": "alac-90000.mp4",
+      "queries": [
+        {
+          "target_ns": "0",
+          "parts": [
+            {
+              "control": 0,
+              "rate": 8000,
+              "channels": 1,
+              "first": 0,
+              "last": 480,
+              "start_ns": 0
+            }
+          ],
+          "anchor_ns": 0
+        },
+        {
+          "target_ns": "1",
+          "parts": [
+            {
+              "control": 0,
+              "rate": 8000,
+              "channels": 1,
+              "first": 1,
+              "last": 480,
+              "start_ns": 0
+            }
+          ],
+          "anchor_ns": 125000
+        },
+        {
+          "target_ns": "20833",
+          "parts": [
+            {
+              "control": 0,
+              "rate": 8000,
+              "channels": 1,
+              "first": 1,
+              "last": 480,
+              "start_ns": 0
+            }
+          ],
+          "anchor_ns": 125000
+        },
+        {
+          "target_ns": "20834",
+          "parts": [
+            {
+              "control": 0,
+              "rate": 8000,
+              "channels": 1,
+              "first": 1,
+              "last": 480,
+              "start_ns": 0
+            }
+          ],
+          "anchor_ns": 125000
+        },
+        {
+          "target_ns": "124999",
+          "parts": [
+            {
+              "control": 0,
+              "rate": 8000,
+              "channels": 1,
+              "first": 1,
+              "last": 480,
+              "start_ns": 0
+            }
+          ],
+          "anchor_ns": 125000
+        },
+        {
+          "target_ns": "125000",
+          "parts": [
+            {
+              "control": 0,
+              "rate": 8000,
+              "channels": 1,
+              "first": 1,
+              "last": 480,
+              "start_ns": 0
+            }
+          ],
+          "anchor_ns": 125000
+        },
+        {
+          "target_ns": "125001",
+          "parts": [
+            {
+              "control": 0,
+              "rate": 8000,
+              "channels": 1,
+              "first": 2,
+              "last": 480,
+              "start_ns": 0
+            }
+          ],
+          "anchor_ns": 250000
+        },
+        {
+          "target_ns": "19999999",
+          "parts": [
+            {
+              "control": 0,
+              "rate": 8000,
+              "channels": 1,
+              "first": 160,
+              "last": 480,
+              "start_ns": 0
+            }
+          ],
+          "anchor_ns": 20000000
+        },
+        {
+          "target_ns": "20000000",
+          "parts": [
+            {
+              "control": 0,
+              "rate": 8000,
+              "channels": 1,
+              "first": 160,
+              "last": 480,
+              "start_ns": 0
+            }
+          ],
+          "anchor_ns": 20000000
+        },
+        {
+          "target_ns": "20000001",
+          "parts": [
+            {
+              "control": 0,
+              "rate": 8000,
+              "channels": 1,
+              "first": 161,
+              "last": 480,
+              "start_ns": 0
+            }
+          ],
+          "anchor_ns": 20125000
+        },
+        {
+          "target_ns": "39999999",
+          "parts": [
+            {
+              "control": 0,
+              "rate": 8000,
+              "channels": 1,
+              "first": 320,
+              "last": 480,
+              "start_ns": 0
+            }
+          ],
+          "anchor_ns": 40000000
+        },
+        {
+          "target_ns": "40000001",
+          "parts": [
+            {
+              "control": 0,
+              "rate": 8000,
+              "channels": 1,
+              "first": 321,
+              "last": 480,
+              "start_ns": 0
+            }
+          ],
+          "anchor_ns": 40125000
+        },
+        {
+          "target_ns": "59999999",
+          "parts": [],
+          "anchor_ns": 60000000
+        },
+        {
+          "target_ns": "60000000",
+          "parts": [],
+          "anchor_ns": 60000000
+        },
+        {
+          "target_ns": "60000001",
+          "parts": [],
+          "anchor_ns": 60000000
+        },
+        {
+          "target_ns": "18446744073709551615999999999",
+          "parts": [],
+          "anchor_ns": 60000000
+        }
+      ],
+      "duration_ns": 60000000,
+      "scale": 90000,
+      "video_frames": 3
+    },
+    {
+      "file": "alac-1000.mp4",
+      "queries": [
+        {
+          "target_ns": "0",
+          "parts": [
+            {
+              "control": 0,
+              "rate": 8000,
+              "channels": 1,
+              "first": 0,
+              "last": 480,
+              "start_ns": 0
+            }
+          ],
+          "anchor_ns": 0
+        },
+        {
+          "target_ns": "1",
+          "parts": [
+            {
+              "control": 0,
+              "rate": 8000,
+              "channels": 1,
+              "first": 1,
+              "last": 480,
+              "start_ns": 0
+            }
+          ],
+          "anchor_ns": 125000
+        },
+        {
+          "target_ns": "20833",
+          "parts": [
+            {
+              "control": 0,
+              "rate": 8000,
+              "channels": 1,
+              "first": 1,
+              "last": 480,
+              "start_ns": 0
+            }
+          ],
+          "anchor_ns": 125000
+        },
+        {
+          "target_ns": "20834",
+          "parts": [
+            {
+              "control": 0,
+              "rate": 8000,
+              "channels": 1,
+              "first": 1,
+              "last": 480,
+              "start_ns": 0
+            }
+          ],
+          "anchor_ns": 125000
+        },
+        {
+          "target_ns": "124999",
+          "parts": [
+            {
+              "control": 0,
+              "rate": 8000,
+              "channels": 1,
+              "first": 1,
+              "last": 480,
+              "start_ns": 0
+            }
+          ],
+          "anchor_ns": 125000
+        },
+        {
+          "target_ns": "125000",
+          "parts": [
+            {
+              "control": 0,
+              "rate": 8000,
+              "channels": 1,
+              "first": 1,
+              "last": 480,
+              "start_ns": 0
+            }
+          ],
+          "anchor_ns": 125000
+        },
+        {
+          "target_ns": "125001",
+          "parts": [
+            {
+              "control": 0,
+              "rate": 8000,
+              "channels": 1,
+              "first": 2,
+              "last": 480,
+              "start_ns": 0
+            }
+          ],
+          "anchor_ns": 250000
+        },
+        {
+          "target_ns": "19999999",
+          "parts": [
+            {
+              "control": 0,
+              "rate": 8000,
+              "channels": 1,
+              "first": 160,
+              "last": 480,
+              "start_ns": 0
+            }
+          ],
+          "anchor_ns": 20000000
+        },
+        {
+          "target_ns": "20000000",
+          "parts": [
+            {
+              "control": 0,
+              "rate": 8000,
+              "channels": 1,
+              "first": 160,
+              "last": 480,
+              "start_ns": 0
+            }
+          ],
+          "anchor_ns": 20000000
+        },
+        {
+          "target_ns": "20000001",
+          "parts": [
+            {
+              "control": 0,
+              "rate": 8000,
+              "channels": 1,
+              "first": 161,
+              "last": 480,
+              "start_ns": 0
+            }
+          ],
+          "anchor_ns": 20125000
+        },
+        {
+          "target_ns": "39999999",
+          "parts": [
+            {
+              "control": 0,
+              "rate": 8000,
+              "channels": 1,
+              "first": 320,
+              "last": 480,
+              "start_ns": 0
+            }
+          ],
+          "anchor_ns": 40000000
+        },
+        {
+          "target_ns": "40000001",
+          "parts": [
+            {
+              "control": 0,
+              "rate": 8000,
+              "channels": 1,
+              "first": 321,
+              "last": 480,
+              "start_ns": 0
+            }
+          ],
+          "anchor_ns": 40125000
+        },
+        {
+          "target_ns": "59999999",
+          "parts": [],
+          "anchor_ns": 60000000
+        },
+        {
+          "target_ns": "60000000",
+          "parts": [],
+          "anchor_ns": 60000000
+        },
+        {
+          "target_ns": "60000001",
+          "parts": [],
+          "anchor_ns": 60000000
+        },
+        {
+          "target_ns": "18446744073709551615999999999",
+          "parts": [],
+          "anchor_ns": 60000000
+        }
+      ],
+      "duration_ns": 60000000,
+      "scale": 1000,
+      "video_frames": 3
+    },
+    {
+      "file": "changing-raw.mp4",
+      "queries": [
+        {
+          "target_ns": "0",
+          "parts": [
+            {
+              "control": 2,
+              "rate": 48000,
+              "channels": 2,
+              "first": 0,
+              "last": 960,
+              "start_ns": 0
+            },
+            {
+              "control": 3,
+              "rate": 32000,
+              "channels": 1,
+              "first": 0,
+              "last": 640,
+              "start_ns": 20000000
+            },
+            {
+              "control": 4,
+              "rate": 44100,
+              "channels": 2,
+              "first": 0,
+              "last": 882,
+              "start_ns": 40000000
+            },
+            {
+              "control": 5,
+              "rate": 48000,
+              "channels": 2,
+              "first": 0,
+              "last": 960,
+              "start_ns": 60000000
+            },
+            {
+              "control": 6,
+              "rate": 32000,
+              "channels": 1,
+              "first": 0,
+              "last": 640,
+              "start_ns": 80000000
+            },
+            {
+              "control": 7,
+              "rate": 44100,
+              "channels": 2,
+              "first": 0,
+              "last": 882,
+              "start_ns": 100000000
+            }
+          ],
+          "anchor_ns": 0
+        },
+        {
+          "target_ns": "1",
+          "parts": [
+            {
+              "control": 2,
+              "rate": 48000,
+              "channels": 2,
+              "first": 1,
+              "last": 960,
+              "start_ns": 0
+            },
+            {
+              "control": 3,
+              "rate": 32000,
+              "channels": 1,
+              "first": 0,
+              "last": 640,
+              "start_ns": 20000000
+            },
+            {
+              "control": 4,
+              "rate": 44100,
+              "channels": 2,
+              "first": 0,
+              "last": 882,
+              "start_ns": 40000000
+            },
+            {
+              "control": 5,
+              "rate": 48000,
+              "channels": 2,
+              "first": 0,
+              "last": 960,
+              "start_ns": 60000000
+            },
+            {
+              "control": 6,
+              "rate": 32000,
+              "channels": 1,
+              "first": 0,
+              "last": 640,
+              "start_ns": 80000000
+            },
+            {
+              "control": 7,
+              "rate": 44100,
+              "channels": 2,
+              "first": 0,
+              "last": 882,
+              "start_ns": 100000000
+            }
+          ],
+          "anchor_ns": 20833
+        },
+        {
+          "target_ns": "20833",
+          "parts": [
+            {
+              "control": 2,
+              "rate": 48000,
+              "channels": 2,
+              "first": 1,
+              "last": 960,
+              "start_ns": 0
+            },
+            {
+              "control": 3,
+              "rate": 32000,
+              "channels": 1,
+              "first": 0,
+              "last": 640,
+              "start_ns": 20000000
+            },
+            {
+              "control": 4,
+              "rate": 44100,
+              "channels": 2,
+              "first": 0,
+              "last": 882,
+              "start_ns": 40000000
+            },
+            {
+              "control": 5,
+              "rate": 48000,
+              "channels": 2,
+              "first": 0,
+              "last": 960,
+              "start_ns": 60000000
+            },
+            {
+              "control": 6,
+              "rate": 32000,
+              "channels": 1,
+              "first": 0,
+              "last": 640,
+              "start_ns": 80000000
+            },
+            {
+              "control": 7,
+              "rate": 44100,
+              "channels": 2,
+              "first": 0,
+              "last": 882,
+              "start_ns": 100000000
+            }
+          ],
+          "anchor_ns": 20833
+        },
+        {
+          "target_ns": "20834",
+          "parts": [
+            {
+              "control": 2,
+              "rate": 48000,
+              "channels": 2,
+              "first": 2,
+              "last": 960,
+              "start_ns": 0
+            },
+            {
+              "control": 3,
+              "rate": 32000,
+              "channels": 1,
+              "first": 0,
+              "last": 640,
+              "start_ns": 20000000
+            },
+            {
+              "control": 4,
+              "rate": 44100,
+              "channels": 2,
+              "first": 0,
+              "last": 882,
+              "start_ns": 40000000
+            },
+            {
+              "control": 5,
+              "rate": 48000,
+              "channels": 2,
+              "first": 0,
+              "last": 960,
+              "start_ns": 60000000
+            },
+            {
+              "control": 6,
+              "rate": 32000,
+              "channels": 1,
+              "first": 0,
+              "last": 640,
+              "start_ns": 80000000
+            },
+            {
+              "control": 7,
+              "rate": 44100,
+              "channels": 2,
+              "first": 0,
+              "last": 882,
+              "start_ns": 100000000
+            }
+          ],
+          "anchor_ns": 41666
+        },
+        {
+          "target_ns": "19999999",
+          "parts": [
+            {
+              "control": 3,
+              "rate": 32000,
+              "channels": 1,
+              "first": 0,
+              "last": 640,
+              "start_ns": 20000000
+            },
+            {
+              "control": 4,
+              "rate": 44100,
+              "channels": 2,
+              "first": 0,
+              "last": 882,
+              "start_ns": 40000000
+            },
+            {
+              "control": 5,
+              "rate": 48000,
+              "channels": 2,
+              "first": 0,
+              "last": 960,
+              "start_ns": 60000000
+            },
+            {
+              "control": 6,
+              "rate": 32000,
+              "channels": 1,
+              "first": 0,
+              "last": 640,
+              "start_ns": 80000000
+            },
+            {
+              "control": 7,
+              "rate": 44100,
+              "channels": 2,
+              "first": 0,
+              "last": 882,
+              "start_ns": 100000000
+            }
+          ],
+          "anchor_ns": 20000000
+        },
+        {
+          "target_ns": "20000000",
+          "parts": [
+            {
+              "control": 3,
+              "rate": 32000,
+              "channels": 1,
+              "first": 0,
+              "last": 640,
+              "start_ns": 20000000
+            },
+            {
+              "control": 4,
+              "rate": 44100,
+              "channels": 2,
+              "first": 0,
+              "last": 882,
+              "start_ns": 40000000
+            },
+            {
+              "control": 5,
+              "rate": 48000,
+              "channels": 2,
+              "first": 0,
+              "last": 960,
+              "start_ns": 60000000
+            },
+            {
+              "control": 6,
+              "rate": 32000,
+              "channels": 1,
+              "first": 0,
+              "last": 640,
+              "start_ns": 80000000
+            },
+            {
+              "control": 7,
+              "rate": 44100,
+              "channels": 2,
+              "first": 0,
+              "last": 882,
+              "start_ns": 100000000
+            }
+          ],
+          "anchor_ns": 20000000
+        },
+        {
+          "target_ns": "20000001",
+          "parts": [
+            {
+              "control": 3,
+              "rate": 32000,
+              "channels": 1,
+              "first": 1,
+              "last": 640,
+              "start_ns": 20000000
+            },
+            {
+              "control": 4,
+              "rate": 44100,
+              "channels": 2,
+              "first": 0,
+              "last": 882,
+              "start_ns": 40000000
+            },
+            {
+              "control": 5,
+              "rate": 48000,
+              "channels": 2,
+              "first": 0,
+              "last": 960,
+              "start_ns": 60000000
+            },
+            {
+              "control": 6,
+              "rate": 32000,
+              "channels": 1,
+              "first": 0,
+              "last": 640,
+              "start_ns": 80000000
+            },
+            {
+              "control": 7,
+              "rate": 44100,
+              "channels": 2,
+              "first": 0,
+              "last": 882,
+              "start_ns": 100000000
+            }
+          ],
+          "anchor_ns": 20031250
+        },
+        {
+          "target_ns": "39999999",
+          "parts": [
+            {
+              "control": 4,
+              "rate": 44100,
+              "channels": 2,
+              "first": 0,
+              "last": 882,
+              "start_ns": 40000000
+            },
+            {
+              "control": 5,
+              "rate": 48000,
+              "channels": 2,
+              "first": 0,
+              "last": 960,
+              "start_ns": 60000000
+            },
+            {
+              "control": 6,
+              "rate": 32000,
+              "channels": 1,
+              "first": 0,
+              "last": 640,
+              "start_ns": 80000000
+            },
+            {
+              "control": 7,
+              "rate": 44100,
+              "channels": 2,
+              "first": 0,
+              "last": 882,
+              "start_ns": 100000000
+            }
+          ],
+          "anchor_ns": 40000000
+        },
+        {
+          "target_ns": "40000001",
+          "parts": [
+            {
+              "control": 4,
+              "rate": 44100,
+              "channels": 2,
+              "first": 1,
+              "last": 882,
+              "start_ns": 40000000
+            },
+            {
+              "control": 5,
+              "rate": 48000,
+              "channels": 2,
+              "first": 0,
+              "last": 960,
+              "start_ns": 60000000
+            },
+            {
+              "control": 6,
+              "rate": 32000,
+              "channels": 1,
+              "first": 0,
+              "last": 640,
+              "start_ns": 80000000
+            },
+            {
+              "control": 7,
+              "rate": 44100,
+              "channels": 2,
+              "first": 0,
+              "last": 882,
+              "start_ns": 100000000
+            }
+          ],
+          "anchor_ns": 40022675
+        },
+        {
+          "target_ns": "59999999",
+          "parts": [
+            {
+              "control": 5,
+              "rate": 48000,
+              "channels": 2,
+              "first": 0,
+              "last": 960,
+              "start_ns": 60000000
+            },
+            {
+              "control": 6,
+              "rate": 32000,
+              "channels": 1,
+              "first": 0,
+              "last": 640,
+              "start_ns": 80000000
+            },
+            {
+              "control": 7,
+              "rate": 44100,
+              "channels": 2,
+              "first": 0,
+              "last": 882,
+              "start_ns": 100000000
+            }
+          ],
+          "anchor_ns": 60000000
+        },
+        {
+          "target_ns": "60000001",
+          "parts": [
+            {
+              "control": 5,
+              "rate": 48000,
+              "channels": 2,
+              "first": 1,
+              "last": 960,
+              "start_ns": 60000000
+            },
+            {
+              "control": 6,
+              "rate": 32000,
+              "channels": 1,
+              "first": 0,
+              "last": 640,
+              "start_ns": 80000000
+            },
+            {
+              "control": 7,
+              "rate": 44100,
+              "channels": 2,
+              "first": 0,
+              "last": 882,
+              "start_ns": 100000000
+            }
+          ],
+          "anchor_ns": 60020833
+        },
+        {
+          "target_ns": "79999999",
+          "parts": [
+            {
+              "control": 6,
+              "rate": 32000,
+              "channels": 1,
+              "first": 0,
+              "last": 640,
+              "start_ns": 80000000
+            },
+            {
+              "control": 7,
+              "rate": 44100,
+              "channels": 2,
+              "first": 0,
+              "last": 882,
+              "start_ns": 100000000
+            }
+          ],
+          "anchor_ns": 80000000
+        },
+        {
+          "target_ns": "80000001",
+          "parts": [
+            {
+              "control": 6,
+              "rate": 32000,
+              "channels": 1,
+              "first": 1,
+              "last": 640,
+              "start_ns": 80000000
+            },
+            {
+              "control": 7,
+              "rate": 44100,
+              "channels": 2,
+              "first": 0,
+              "last": 882,
+              "start_ns": 100000000
+            }
+          ],
+          "anchor_ns": 80031250
+        },
+        {
+          "target_ns": "99999999",
+          "parts": [
+            {
+              "control": 7,
+              "rate": 44100,
+              "channels": 2,
+              "first": 0,
+              "last": 882,
+              "start_ns": 100000000
+            }
+          ],
+          "anchor_ns": 100000000
+        },
+        {
+          "target_ns": "100000001",
+          "parts": [
+            {
+              "control": 7,
+              "rate": 44100,
+              "channels": 2,
+              "first": 1,
+              "last": 882,
+              "start_ns": 100000000
+            }
+          ],
+          "anchor_ns": 100022675
+        },
+        {
+          "target_ns": "119999999",
+          "parts": [],
+          "anchor_ns": 120000000
+        },
+        {
+          "target_ns": "120000000",
+          "parts": [],
+          "anchor_ns": 120000000
+        },
+        {
+          "target_ns": "18446744073709551615999999999",
+          "parts": [],
+          "anchor_ns": 120000000
+        }
+      ],
+      "duration_ns": 120000000,
+      "scale": 1000000,
+      "video_frames": 6
+    },
+    {
+      "file": "changing-raw-third.mp4",
+      "queries": [
+        {
+          "target_ns": "0",
+          "parts": [
+            {
+              "control": 2,
+              "rate": 48000,
+              "channels": 2,
+              "first": 0,
+              "last": 960,
+              "start_ns": 0
+            },
+            {
+              "control": 3,
+              "rate": 32000,
+              "channels": 1,
+              "first": 0,
+              "last": 640,
+              "start_ns": 20000000
+            },
+            {
+              "control": 4,
+              "rate": 44100,
+              "channels": 2,
+              "first": 0,
+              "last": 882,
+              "start_ns": 40000000
+            },
+            {
+              "control": 5,
+              "rate": 48000,
+              "channels": 2,
+              "first": 0,
+              "last": 960,
+              "start_ns": 60000000
+            },
+            {
+              "control": 6,
+              "rate": 32000,
+              "channels": 1,
+              "first": 0,
+              "last": 640,
+              "start_ns": 80000000
+            },
+            {
+              "control": 7,
+              "rate": 44100,
+              "channels": 2,
+              "first": 0,
+              "last": 882,
+              "start_ns": 100000000
+            }
+          ],
+          "anchor_ns": 0
+        },
+        {
+          "target_ns": "1",
+          "parts": [
+            {
+              "control": 2,
+              "rate": 48000,
+              "channels": 2,
+              "first": 1,
+              "last": 960,
+              "start_ns": 0
+            },
+            {
+              "control": 3,
+              "rate": 32000,
+              "channels": 1,
+              "first": 0,
+              "last": 640,
+              "start_ns": 20000000
+            },
+            {
+              "control": 4,
+              "rate": 44100,
+              "channels": 2,
+              "first": 0,
+              "last": 882,
+              "start_ns": 40000000
+            },
+            {
+              "control": 5,
+              "rate": 48000,
+              "channels": 2,
+              "first": 0,
+              "last": 960,
+              "start_ns": 60000000
+            },
+            {
+              "control": 6,
+              "rate": 32000,
+              "channels": 1,
+              "first": 0,
+              "last": 640,
+              "start_ns": 80000000
+            },
+            {
+              "control": 7,
+              "rate": 44100,
+              "channels": 2,
+              "first": 0,
+              "last": 882,
+              "start_ns": 100000000
+            }
+          ],
+          "anchor_ns": 20833
+        },
+        {
+          "target_ns": "20833",
+          "parts": [
+            {
+              "control": 2,
+              "rate": 48000,
+              "channels": 2,
+              "first": 1,
+              "last": 960,
+              "start_ns": 0
+            },
+            {
+              "control": 3,
+              "rate": 32000,
+              "channels": 1,
+              "first": 0,
+              "last": 640,
+              "start_ns": 20000000
+            },
+            {
+              "control": 4,
+              "rate": 44100,
+              "channels": 2,
+              "first": 0,
+              "last": 882,
+              "start_ns": 40000000
+            },
+            {
+              "control": 5,
+              "rate": 48000,
+              "channels": 2,
+              "first": 0,
+              "last": 960,
+              "start_ns": 60000000
+            },
+            {
+              "control": 6,
+              "rate": 32000,
+              "channels": 1,
+              "first": 0,
+              "last": 640,
+              "start_ns": 80000000
+            },
+            {
+              "control": 7,
+              "rate": 44100,
+              "channels": 2,
+              "first": 0,
+              "last": 882,
+              "start_ns": 100000000
+            }
+          ],
+          "anchor_ns": 20833
+        },
+        {
+          "target_ns": "20834",
+          "parts": [
+            {
+              "control": 2,
+              "rate": 48000,
+              "channels": 2,
+              "first": 2,
+              "last": 960,
+              "start_ns": 0
+            },
+            {
+              "control": 3,
+              "rate": 32000,
+              "channels": 1,
+              "first": 0,
+              "last": 640,
+              "start_ns": 20000000
+            },
+            {
+              "control": 4,
+              "rate": 44100,
+              "channels": 2,
+              "first": 0,
+              "last": 882,
+              "start_ns": 40000000
+            },
+            {
+              "control": 5,
+              "rate": 48000,
+              "channels": 2,
+              "first": 0,
+              "last": 960,
+              "start_ns": 60000000
+            },
+            {
+              "control": 6,
+              "rate": 32000,
+              "channels": 1,
+              "first": 0,
+              "last": 640,
+              "start_ns": 80000000
+            },
+            {
+              "control": 7,
+              "rate": 44100,
+              "channels": 2,
+              "first": 0,
+              "last": 882,
+              "start_ns": 100000000
+            }
+          ],
+          "anchor_ns": 41666
+        },
+        {
+          "target_ns": "19999999",
+          "parts": [
+            {
+              "control": 3,
+              "rate": 32000,
+              "channels": 1,
+              "first": 0,
+              "last": 640,
+              "start_ns": 20000000
+            },
+            {
+              "control": 4,
+              "rate": 44100,
+              "channels": 2,
+              "first": 0,
+              "last": 882,
+              "start_ns": 40000000
+            },
+            {
+              "control": 5,
+              "rate": 48000,
+              "channels": 2,
+              "first": 0,
+              "last": 960,
+              "start_ns": 60000000
+            },
+            {
+              "control": 6,
+              "rate": 32000,
+              "channels": 1,
+              "first": 0,
+              "last": 640,
+              "start_ns": 80000000
+            },
+            {
+              "control": 7,
+              "rate": 44100,
+              "channels": 2,
+              "first": 0,
+              "last": 882,
+              "start_ns": 100000000
+            }
+          ],
+          "anchor_ns": 20000000
+        },
+        {
+          "target_ns": "20000000",
+          "parts": [
+            {
+              "control": 3,
+              "rate": 32000,
+              "channels": 1,
+              "first": 0,
+              "last": 640,
+              "start_ns": 20000000
+            },
+            {
+              "control": 4,
+              "rate": 44100,
+              "channels": 2,
+              "first": 0,
+              "last": 882,
+              "start_ns": 40000000
+            },
+            {
+              "control": 5,
+              "rate": 48000,
+              "channels": 2,
+              "first": 0,
+              "last": 960,
+              "start_ns": 60000000
+            },
+            {
+              "control": 6,
+              "rate": 32000,
+              "channels": 1,
+              "first": 0,
+              "last": 640,
+              "start_ns": 80000000
+            },
+            {
+              "control": 7,
+              "rate": 44100,
+              "channels": 2,
+              "first": 0,
+              "last": 882,
+              "start_ns": 100000000
+            }
+          ],
+          "anchor_ns": 20000000
+        },
+        {
+          "target_ns": "20000001",
+          "parts": [
+            {
+              "control": 3,
+              "rate": 32000,
+              "channels": 1,
+              "first": 1,
+              "last": 640,
+              "start_ns": 20000000
+            },
+            {
+              "control": 4,
+              "rate": 44100,
+              "channels": 2,
+              "first": 0,
+              "last": 882,
+              "start_ns": 40000000
+            },
+            {
+              "control": 5,
+              "rate": 48000,
+              "channels": 2,
+              "first": 0,
+              "last": 960,
+              "start_ns": 60000000
+            },
+            {
+              "control": 6,
+              "rate": 32000,
+              "channels": 1,
+              "first": 0,
+              "last": 640,
+              "start_ns": 80000000
+            },
+            {
+              "control": 7,
+              "rate": 44100,
+              "channels": 2,
+              "first": 0,
+              "last": 882,
+              "start_ns": 100000000
+            }
+          ],
+          "anchor_ns": 20031250
+        },
+        {
+          "target_ns": "39999999",
+          "parts": [
+            {
+              "control": 4,
+              "rate": 44100,
+              "channels": 2,
+              "first": 0,
+              "last": 882,
+              "start_ns": 40000000
+            },
+            {
+              "control": 5,
+              "rate": 48000,
+              "channels": 2,
+              "first": 0,
+              "last": 960,
+              "start_ns": 60000000
+            },
+            {
+              "control": 6,
+              "rate": 32000,
+              "channels": 1,
+              "first": 0,
+              "last": 640,
+              "start_ns": 80000000
+            },
+            {
+              "control": 7,
+              "rate": 44100,
+              "channels": 2,
+              "first": 0,
+              "last": 882,
+              "start_ns": 100000000
+            }
+          ],
+          "anchor_ns": 40000000
+        },
+        {
+          "target_ns": "40000001",
+          "parts": [
+            {
+              "control": 4,
+              "rate": 44100,
+              "channels": 2,
+              "first": 1,
+              "last": 882,
+              "start_ns": 40000000
+            },
+            {
+              "control": 5,
+              "rate": 48000,
+              "channels": 2,
+              "first": 0,
+              "last": 960,
+              "start_ns": 60000000
+            },
+            {
+              "control": 6,
+              "rate": 32000,
+              "channels": 1,
+              "first": 0,
+              "last": 640,
+              "start_ns": 80000000
+            },
+            {
+              "control": 7,
+              "rate": 44100,
+              "channels": 2,
+              "first": 0,
+              "last": 882,
+              "start_ns": 100000000
+            }
+          ],
+          "anchor_ns": 40022675
+        },
+        {
+          "target_ns": "59999999",
+          "parts": [
+            {
+              "control": 5,
+              "rate": 48000,
+              "channels": 2,
+              "first": 0,
+              "last": 960,
+              "start_ns": 60000000
+            },
+            {
+              "control": 6,
+              "rate": 32000,
+              "channels": 1,
+              "first": 0,
+              "last": 640,
+              "start_ns": 80000000
+            },
+            {
+              "control": 7,
+              "rate": 44100,
+              "channels": 2,
+              "first": 0,
+              "last": 882,
+              "start_ns": 100000000
+            }
+          ],
+          "anchor_ns": 60000000
+        },
+        {
+          "target_ns": "60000001",
+          "parts": [
+            {
+              "control": 5,
+              "rate": 48000,
+              "channels": 2,
+              "first": 1,
+              "last": 960,
+              "start_ns": 60000000
+            },
+            {
+              "control": 6,
+              "rate": 32000,
+              "channels": 1,
+              "first": 0,
+              "last": 640,
+              "start_ns": 80000000
+            },
+            {
+              "control": 7,
+              "rate": 44100,
+              "channels": 2,
+              "first": 0,
+              "last": 882,
+              "start_ns": 100000000
+            }
+          ],
+          "anchor_ns": 60020833
+        },
+        {
+          "target_ns": "79999999",
+          "parts": [
+            {
+              "control": 6,
+              "rate": 32000,
+              "channels": 1,
+              "first": 0,
+              "last": 640,
+              "start_ns": 80000000
+            },
+            {
+              "control": 7,
+              "rate": 44100,
+              "channels": 2,
+              "first": 0,
+              "last": 882,
+              "start_ns": 100000000
+            }
+          ],
+          "anchor_ns": 80000000
+        },
+        {
+          "target_ns": "80000001",
+          "parts": [
+            {
+              "control": 6,
+              "rate": 32000,
+              "channels": 1,
+              "first": 1,
+              "last": 640,
+              "start_ns": 80000000
+            },
+            {
+              "control": 7,
+              "rate": 44100,
+              "channels": 2,
+              "first": 0,
+              "last": 882,
+              "start_ns": 100000000
+            }
+          ],
+          "anchor_ns": 80031250
+        },
+        {
+          "target_ns": "99999999",
+          "parts": [
+            {
+              "control": 7,
+              "rate": 44100,
+              "channels": 2,
+              "first": 0,
+              "last": 882,
+              "start_ns": 100000000
+            }
+          ],
+          "anchor_ns": 100000000
+        },
+        {
+          "target_ns": "100000001",
+          "parts": [
+            {
+              "control": 7,
+              "rate": 44100,
+              "channels": 2,
+              "first": 1,
+              "last": 882,
+              "start_ns": 100000000
+            }
+          ],
+          "anchor_ns": 100022675
+        },
+        {
+          "target_ns": "119999999",
+          "parts": [],
+          "anchor_ns": 120000000
+        },
+        {
+          "target_ns": "120000000",
+          "parts": [],
+          "anchor_ns": 120000000
+        },
+        {
+          "target_ns": "18446744073709551615999999999",
+          "parts": [],
+          "anchor_ns": 120000000
+        }
+      ],
+      "duration_ns": 120000000,
+      "scale": 1000000,
+      "video_frames": 6
+    },
+    {
+      "file": "changing-rice.mp4",
+      "queries": [
+        {
+          "target_ns": "0",
+          "parts": [
+            {
+              "control": 2,
+              "rate": 48000,
+              "channels": 2,
+              "first": 0,
+              "last": 960,
+              "start_ns": 0
+            },
+            {
+              "control": 3,
+              "rate": 32000,
+              "channels": 1,
+              "first": 0,
+              "last": 640,
+              "start_ns": 20000000
+            },
+            {
+              "control": 4,
+              "rate": 44100,
+              "channels": 2,
+              "first": 0,
+              "last": 882,
+              "start_ns": 40000000
+            },
+            {
+              "control": 5,
+              "rate": 48000,
+              "channels": 2,
+              "first": 0,
+              "last": 960,
+              "start_ns": 60000000
+            },
+            {
+              "control": 6,
+              "rate": 32000,
+              "channels": 1,
+              "first": 0,
+              "last": 640,
+              "start_ns": 80000000
+            },
+            {
+              "control": 7,
+              "rate": 44100,
+              "channels": 2,
+              "first": 0,
+              "last": 882,
+              "start_ns": 100000000
+            }
+          ],
+          "anchor_ns": 0
+        },
+        {
+          "target_ns": "1",
+          "parts": [
+            {
+              "control": 2,
+              "rate": 48000,
+              "channels": 2,
+              "first": 1,
+              "last": 960,
+              "start_ns": 0
+            },
+            {
+              "control": 3,
+              "rate": 32000,
+              "channels": 1,
+              "first": 0,
+              "last": 640,
+              "start_ns": 20000000
+            },
+            {
+              "control": 4,
+              "rate": 44100,
+              "channels": 2,
+              "first": 0,
+              "last": 882,
+              "start_ns": 40000000
+            },
+            {
+              "control": 5,
+              "rate": 48000,
+              "channels": 2,
+              "first": 0,
+              "last": 960,
+              "start_ns": 60000000
+            },
+            {
+              "control": 6,
+              "rate": 32000,
+              "channels": 1,
+              "first": 0,
+              "last": 640,
+              "start_ns": 80000000
+            },
+            {
+              "control": 7,
+              "rate": 44100,
+              "channels": 2,
+              "first": 0,
+              "last": 882,
+              "start_ns": 100000000
+            }
+          ],
+          "anchor_ns": 20833
+        },
+        {
+          "target_ns": "20833",
+          "parts": [
+            {
+              "control": 2,
+              "rate": 48000,
+              "channels": 2,
+              "first": 1,
+              "last": 960,
+              "start_ns": 0
+            },
+            {
+              "control": 3,
+              "rate": 32000,
+              "channels": 1,
+              "first": 0,
+              "last": 640,
+              "start_ns": 20000000
+            },
+            {
+              "control": 4,
+              "rate": 44100,
+              "channels": 2,
+              "first": 0,
+              "last": 882,
+              "start_ns": 40000000
+            },
+            {
+              "control": 5,
+              "rate": 48000,
+              "channels": 2,
+              "first": 0,
+              "last": 960,
+              "start_ns": 60000000
+            },
+            {
+              "control": 6,
+              "rate": 32000,
+              "channels": 1,
+              "first": 0,
+              "last": 640,
+              "start_ns": 80000000
+            },
+            {
+              "control": 7,
+              "rate": 44100,
+              "channels": 2,
+              "first": 0,
+              "last": 882,
+              "start_ns": 100000000
+            }
+          ],
+          "anchor_ns": 20833
+        },
+        {
+          "target_ns": "20834",
+          "parts": [
+            {
+              "control": 2,
+              "rate": 48000,
+              "channels": 2,
+              "first": 2,
+              "last": 960,
+              "start_ns": 0
+            },
+            {
+              "control": 3,
+              "rate": 32000,
+              "channels": 1,
+              "first": 0,
+              "last": 640,
+              "start_ns": 20000000
+            },
+            {
+              "control": 4,
+              "rate": 44100,
+              "channels": 2,
+              "first": 0,
+              "last": 882,
+              "start_ns": 40000000
+            },
+            {
+              "control": 5,
+              "rate": 48000,
+              "channels": 2,
+              "first": 0,
+              "last": 960,
+              "start_ns": 60000000
+            },
+            {
+              "control": 6,
+              "rate": 32000,
+              "channels": 1,
+              "first": 0,
+              "last": 640,
+              "start_ns": 80000000
+            },
+            {
+              "control": 7,
+              "rate": 44100,
+              "channels": 2,
+              "first": 0,
+              "last": 882,
+              "start_ns": 100000000
+            }
+          ],
+          "anchor_ns": 41666
+        },
+        {
+          "target_ns": "19999999",
+          "parts": [
+            {
+              "control": 3,
+              "rate": 32000,
+              "channels": 1,
+              "first": 0,
+              "last": 640,
+              "start_ns": 20000000
+            },
+            {
+              "control": 4,
+              "rate": 44100,
+              "channels": 2,
+              "first": 0,
+              "last": 882,
+              "start_ns": 40000000
+            },
+            {
+              "control": 5,
+              "rate": 48000,
+              "channels": 2,
+              "first": 0,
+              "last": 960,
+              "start_ns": 60000000
+            },
+            {
+              "control": 6,
+              "rate": 32000,
+              "channels": 1,
+              "first": 0,
+              "last": 640,
+              "start_ns": 80000000
+            },
+            {
+              "control": 7,
+              "rate": 44100,
+              "channels": 2,
+              "first": 0,
+              "last": 882,
+              "start_ns": 100000000
+            }
+          ],
+          "anchor_ns": 20000000
+        },
+        {
+          "target_ns": "20000000",
+          "parts": [
+            {
+              "control": 3,
+              "rate": 32000,
+              "channels": 1,
+              "first": 0,
+              "last": 640,
+              "start_ns": 20000000
+            },
+            {
+              "control": 4,
+              "rate": 44100,
+              "channels": 2,
+              "first": 0,
+              "last": 882,
+              "start_ns": 40000000
+            },
+            {
+              "control": 5,
+              "rate": 48000,
+              "channels": 2,
+              "first": 0,
+              "last": 960,
+              "start_ns": 60000000
+            },
+            {
+              "control": 6,
+              "rate": 32000,
+              "channels": 1,
+              "first": 0,
+              "last": 640,
+              "start_ns": 80000000
+            },
+            {
+              "control": 7,
+              "rate": 44100,
+              "channels": 2,
+              "first": 0,
+              "last": 882,
+              "start_ns": 100000000
+            }
+          ],
+          "anchor_ns": 20000000
+        },
+        {
+          "target_ns": "20000001",
+          "parts": [
+            {
+              "control": 3,
+              "rate": 32000,
+              "channels": 1,
+              "first": 1,
+              "last": 640,
+              "start_ns": 20000000
+            },
+            {
+              "control": 4,
+              "rate": 44100,
+              "channels": 2,
+              "first": 0,
+              "last": 882,
+              "start_ns": 40000000
+            },
+            {
+              "control": 5,
+              "rate": 48000,
+              "channels": 2,
+              "first": 0,
+              "last": 960,
+              "start_ns": 60000000
+            },
+            {
+              "control": 6,
+              "rate": 32000,
+              "channels": 1,
+              "first": 0,
+              "last": 640,
+              "start_ns": 80000000
+            },
+            {
+              "control": 7,
+              "rate": 44100,
+              "channels": 2,
+              "first": 0,
+              "last": 882,
+              "start_ns": 100000000
+            }
+          ],
+          "anchor_ns": 20031250
+        },
+        {
+          "target_ns": "39999999",
+          "parts": [
+            {
+              "control": 4,
+              "rate": 44100,
+              "channels": 2,
+              "first": 0,
+              "last": 882,
+              "start_ns": 40000000
+            },
+            {
+              "control": 5,
+              "rate": 48000,
+              "channels": 2,
+              "first": 0,
+              "last": 960,
+              "start_ns": 60000000
+            },
+            {
+              "control": 6,
+              "rate": 32000,
+              "channels": 1,
+              "first": 0,
+              "last": 640,
+              "start_ns": 80000000
+            },
+            {
+              "control": 7,
+              "rate": 44100,
+              "channels": 2,
+              "first": 0,
+              "last": 882,
+              "start_ns": 100000000
+            }
+          ],
+          "anchor_ns": 40000000
+        },
+        {
+          "target_ns": "40000001",
+          "parts": [
+            {
+              "control": 4,
+              "rate": 44100,
+              "channels": 2,
+              "first": 1,
+              "last": 882,
+              "start_ns": 40000000
+            },
+            {
+              "control": 5,
+              "rate": 48000,
+              "channels": 2,
+              "first": 0,
+              "last": 960,
+              "start_ns": 60000000
+            },
+            {
+              "control": 6,
+              "rate": 32000,
+              "channels": 1,
+              "first": 0,
+              "last": 640,
+              "start_ns": 80000000
+            },
+            {
+              "control": 7,
+              "rate": 44100,
+              "channels": 2,
+              "first": 0,
+              "last": 882,
+              "start_ns": 100000000
+            }
+          ],
+          "anchor_ns": 40022675
+        },
+        {
+          "target_ns": "59999999",
+          "parts": [
+            {
+              "control": 5,
+              "rate": 48000,
+              "channels": 2,
+              "first": 0,
+              "last": 960,
+              "start_ns": 60000000
+            },
+            {
+              "control": 6,
+              "rate": 32000,
+              "channels": 1,
+              "first": 0,
+              "last": 640,
+              "start_ns": 80000000
+            },
+            {
+              "control": 7,
+              "rate": 44100,
+              "channels": 2,
+              "first": 0,
+              "last": 882,
+              "start_ns": 100000000
+            }
+          ],
+          "anchor_ns": 60000000
+        },
+        {
+          "target_ns": "60000001",
+          "parts": [
+            {
+              "control": 5,
+              "rate": 48000,
+              "channels": 2,
+              "first": 1,
+              "last": 960,
+              "start_ns": 60000000
+            },
+            {
+              "control": 6,
+              "rate": 32000,
+              "channels": 1,
+              "first": 0,
+              "last": 640,
+              "start_ns": 80000000
+            },
+            {
+              "control": 7,
+              "rate": 44100,
+              "channels": 2,
+              "first": 0,
+              "last": 882,
+              "start_ns": 100000000
+            }
+          ],
+          "anchor_ns": 60020833
+        },
+        {
+          "target_ns": "79999999",
+          "parts": [
+            {
+              "control": 6,
+              "rate": 32000,
+              "channels": 1,
+              "first": 0,
+              "last": 640,
+              "start_ns": 80000000
+            },
+            {
+              "control": 7,
+              "rate": 44100,
+              "channels": 2,
+              "first": 0,
+              "last": 882,
+              "start_ns": 100000000
+            }
+          ],
+          "anchor_ns": 80000000
+        },
+        {
+          "target_ns": "80000001",
+          "parts": [
+            {
+              "control": 6,
+              "rate": 32000,
+              "channels": 1,
+              "first": 1,
+              "last": 640,
+              "start_ns": 80000000
+            },
+            {
+              "control": 7,
+              "rate": 44100,
+              "channels": 2,
+              "first": 0,
+              "last": 882,
+              "start_ns": 100000000
+            }
+          ],
+          "anchor_ns": 80031250
+        },
+        {
+          "target_ns": "99999999",
+          "parts": [
+            {
+              "control": 7,
+              "rate": 44100,
+              "channels": 2,
+              "first": 0,
+              "last": 882,
+              "start_ns": 100000000
+            }
+          ],
+          "anchor_ns": 100000000
+        },
+        {
+          "target_ns": "100000001",
+          "parts": [
+            {
+              "control": 7,
+              "rate": 44100,
+              "channels": 2,
+              "first": 1,
+              "last": 882,
+              "start_ns": 100000000
+            }
+          ],
+          "anchor_ns": 100022675
+        },
+        {
+          "target_ns": "119999999",
+          "parts": [],
+          "anchor_ns": 120000000
+        },
+        {
+          "target_ns": "120000000",
+          "parts": [],
+          "anchor_ns": 120000000
+        },
+        {
+          "target_ns": "18446744073709551615999999999",
+          "parts": [],
+          "anchor_ns": 120000000
+        }
+      ],
+      "duration_ns": 120000000,
+      "scale": 1000000,
+      "video_frames": 6
+    },
+    {
+      "file": "changing-rice-third.mp4",
+      "queries": [
+        {
+          "target_ns": "0",
+          "parts": [
+            {
+              "control": 2,
+              "rate": 48000,
+              "channels": 2,
+              "first": 0,
+              "last": 960,
+              "start_ns": 0
+            },
+            {
+              "control": 3,
+              "rate": 32000,
+              "channels": 1,
+              "first": 0,
+              "last": 640,
+              "start_ns": 20000000
+            },
+            {
+              "control": 4,
+              "rate": 44100,
+              "channels": 2,
+              "first": 0,
+              "last": 882,
+              "start_ns": 40000000
+            },
+            {
+              "control": 5,
+              "rate": 48000,
+              "channels": 2,
+              "first": 0,
+              "last": 960,
+              "start_ns": 60000000
+            },
+            {
+              "control": 6,
+              "rate": 32000,
+              "channels": 1,
+              "first": 0,
+              "last": 640,
+              "start_ns": 80000000
+            },
+            {
+              "control": 7,
+              "rate": 44100,
+              "channels": 2,
+              "first": 0,
+              "last": 882,
+              "start_ns": 100000000
+            }
+          ],
+          "anchor_ns": 0
+        },
+        {
+          "target_ns": "1",
+          "parts": [
+            {
+              "control": 2,
+              "rate": 48000,
+              "channels": 2,
+              "first": 1,
+              "last": 960,
+              "start_ns": 0
+            },
+            {
+              "control": 3,
+              "rate": 32000,
+              "channels": 1,
+              "first": 0,
+              "last": 640,
+              "start_ns": 20000000
+            },
+            {
+              "control": 4,
+              "rate": 44100,
+              "channels": 2,
+              "first": 0,
+              "last": 882,
+              "start_ns": 40000000
+            },
+            {
+              "control": 5,
+              "rate": 48000,
+              "channels": 2,
+              "first": 0,
+              "last": 960,
+              "start_ns": 60000000
+            },
+            {
+              "control": 6,
+              "rate": 32000,
+              "channels": 1,
+              "first": 0,
+              "last": 640,
+              "start_ns": 80000000
+            },
+            {
+              "control": 7,
+              "rate": 44100,
+              "channels": 2,
+              "first": 0,
+              "last": 882,
+              "start_ns": 100000000
+            }
+          ],
+          "anchor_ns": 20833
+        },
+        {
+          "target_ns": "20833",
+          "parts": [
+            {
+              "control": 2,
+              "rate": 48000,
+              "channels": 2,
+              "first": 1,
+              "last": 960,
+              "start_ns": 0
+            },
+            {
+              "control": 3,
+              "rate": 32000,
+              "channels": 1,
+              "first": 0,
+              "last": 640,
+              "start_ns": 20000000
+            },
+            {
+              "control": 4,
+              "rate": 44100,
+              "channels": 2,
+              "first": 0,
+              "last": 882,
+              "start_ns": 40000000
+            },
+            {
+              "control": 5,
+              "rate": 48000,
+              "channels": 2,
+              "first": 0,
+              "last": 960,
+              "start_ns": 60000000
+            },
+            {
+              "control": 6,
+              "rate": 32000,
+              "channels": 1,
+              "first": 0,
+              "last": 640,
+              "start_ns": 80000000
+            },
+            {
+              "control": 7,
+              "rate": 44100,
+              "channels": 2,
+              "first": 0,
+              "last": 882,
+              "start_ns": 100000000
+            }
+          ],
+          "anchor_ns": 20833
+        },
+        {
+          "target_ns": "20834",
+          "parts": [
+            {
+              "control": 2,
+              "rate": 48000,
+              "channels": 2,
+              "first": 2,
+              "last": 960,
+              "start_ns": 0
+            },
+            {
+              "control": 3,
+              "rate": 32000,
+              "channels": 1,
+              "first": 0,
+              "last": 640,
+              "start_ns": 20000000
+            },
+            {
+              "control": 4,
+              "rate": 44100,
+              "channels": 2,
+              "first": 0,
+              "last": 882,
+              "start_ns": 40000000
+            },
+            {
+              "control": 5,
+              "rate": 48000,
+              "channels": 2,
+              "first": 0,
+              "last": 960,
+              "start_ns": 60000000
+            },
+            {
+              "control": 6,
+              "rate": 32000,
+              "channels": 1,
+              "first": 0,
+              "last": 640,
+              "start_ns": 80000000
+            },
+            {
+              "control": 7,
+              "rate": 44100,
+              "channels": 2,
+              "first": 0,
+              "last": 882,
+              "start_ns": 100000000
+            }
+          ],
+          "anchor_ns": 41666
+        },
+        {
+          "target_ns": "19999999",
+          "parts": [
+            {
+              "control": 3,
+              "rate": 32000,
+              "channels": 1,
+              "first": 0,
+              "last": 640,
+              "start_ns": 20000000
+            },
+            {
+              "control": 4,
+              "rate": 44100,
+              "channels": 2,
+              "first": 0,
+              "last": 882,
+              "start_ns": 40000000
+            },
+            {
+              "control": 5,
+              "rate": 48000,
+              "channels": 2,
+              "first": 0,
+              "last": 960,
+              "start_ns": 60000000
+            },
+            {
+              "control": 6,
+              "rate": 32000,
+              "channels": 1,
+              "first": 0,
+              "last": 640,
+              "start_ns": 80000000
+            },
+            {
+              "control": 7,
+              "rate": 44100,
+              "channels": 2,
+              "first": 0,
+              "last": 882,
+              "start_ns": 100000000
+            }
+          ],
+          "anchor_ns": 20000000
+        },
+        {
+          "target_ns": "20000000",
+          "parts": [
+            {
+              "control": 3,
+              "rate": 32000,
+              "channels": 1,
+              "first": 0,
+              "last": 640,
+              "start_ns": 20000000
+            },
+            {
+              "control": 4,
+              "rate": 44100,
+              "channels": 2,
+              "first": 0,
+              "last": 882,
+              "start_ns": 40000000
+            },
+            {
+              "control": 5,
+              "rate": 48000,
+              "channels": 2,
+              "first": 0,
+              "last": 960,
+              "start_ns": 60000000
+            },
+            {
+              "control": 6,
+              "rate": 32000,
+              "channels": 1,
+              "first": 0,
+              "last": 640,
+              "start_ns": 80000000
+            },
+            {
+              "control": 7,
+              "rate": 44100,
+              "channels": 2,
+              "first": 0,
+              "last": 882,
+              "start_ns": 100000000
+            }
+          ],
+          "anchor_ns": 20000000
+        },
+        {
+          "target_ns": "20000001",
+          "parts": [
+            {
+              "control": 3,
+              "rate": 32000,
+              "channels": 1,
+              "first": 1,
+              "last": 640,
+              "start_ns": 20000000
+            },
+            {
+              "control": 4,
+              "rate": 44100,
+              "channels": 2,
+              "first": 0,
+              "last": 882,
+              "start_ns": 40000000
+            },
+            {
+              "control": 5,
+              "rate": 48000,
+              "channels": 2,
+              "first": 0,
+              "last": 960,
+              "start_ns": 60000000
+            },
+            {
+              "control": 6,
+              "rate": 32000,
+              "channels": 1,
+              "first": 0,
+              "last": 640,
+              "start_ns": 80000000
+            },
+            {
+              "control": 7,
+              "rate": 44100,
+              "channels": 2,
+              "first": 0,
+              "last": 882,
+              "start_ns": 100000000
+            }
+          ],
+          "anchor_ns": 20031250
+        },
+        {
+          "target_ns": "39999999",
+          "parts": [
+            {
+              "control": 4,
+              "rate": 44100,
+              "channels": 2,
+              "first": 0,
+              "last": 882,
+              "start_ns": 40000000
+            },
+            {
+              "control": 5,
+              "rate": 48000,
+              "channels": 2,
+              "first": 0,
+              "last": 960,
+              "start_ns": 60000000
+            },
+            {
+              "control": 6,
+              "rate": 32000,
+              "channels": 1,
+              "first": 0,
+              "last": 640,
+              "start_ns": 80000000
+            },
+            {
+              "control": 7,
+              "rate": 44100,
+              "channels": 2,
+              "first": 0,
+              "last": 882,
+              "start_ns": 100000000
+            }
+          ],
+          "anchor_ns": 40000000
+        },
+        {
+          "target_ns": "40000001",
+          "parts": [
+            {
+              "control": 4,
+              "rate": 44100,
+              "channels": 2,
+              "first": 1,
+              "last": 882,
+              "start_ns": 40000000
+            },
+            {
+              "control": 5,
+              "rate": 48000,
+              "channels": 2,
+              "first": 0,
+              "last": 960,
+              "start_ns": 60000000
+            },
+            {
+              "control": 6,
+              "rate": 32000,
+              "channels": 1,
+              "first": 0,
+              "last": 640,
+              "start_ns": 80000000
+            },
+            {
+              "control": 7,
+              "rate": 44100,
+              "channels": 2,
+              "first": 0,
+              "last": 882,
+              "start_ns": 100000000
+            }
+          ],
+          "anchor_ns": 40022675
+        },
+        {
+          "target_ns": "59999999",
+          "parts": [
+            {
+              "control": 5,
+              "rate": 48000,
+              "channels": 2,
+              "first": 0,
+              "last": 960,
+              "start_ns": 60000000
+            },
+            {
+              "control": 6,
+              "rate": 32000,
+              "channels": 1,
+              "first": 0,
+              "last": 640,
+              "start_ns": 80000000
+            },
+            {
+              "control": 7,
+              "rate": 44100,
+              "channels": 2,
+              "first": 0,
+              "last": 882,
+              "start_ns": 100000000
+            }
+          ],
+          "anchor_ns": 60000000
+        },
+        {
+          "target_ns": "60000001",
+          "parts": [
+            {
+              "control": 5,
+              "rate": 48000,
+              "channels": 2,
+              "first": 1,
+              "last": 960,
+              "start_ns": 60000000
+            },
+            {
+              "control": 6,
+              "rate": 32000,
+              "channels": 1,
+              "first": 0,
+              "last": 640,
+              "start_ns": 80000000
+            },
+            {
+              "control": 7,
+              "rate": 44100,
+              "channels": 2,
+              "first": 0,
+              "last": 882,
+              "start_ns": 100000000
+            }
+          ],
+          "anchor_ns": 60020833
+        },
+        {
+          "target_ns": "79999999",
+          "parts": [
+            {
+              "control": 6,
+              "rate": 32000,
+              "channels": 1,
+              "first": 0,
+              "last": 640,
+              "start_ns": 80000000
+            },
+            {
+              "control": 7,
+              "rate": 44100,
+              "channels": 2,
+              "first": 0,
+              "last": 882,
+              "start_ns": 100000000
+            }
+          ],
+          "anchor_ns": 80000000
+        },
+        {
+          "target_ns": "80000001",
+          "parts": [
+            {
+              "control": 6,
+              "rate": 32000,
+              "channels": 1,
+              "first": 1,
+              "last": 640,
+              "start_ns": 80000000
+            },
+            {
+              "control": 7,
+              "rate": 44100,
+              "channels": 2,
+              "first": 0,
+              "last": 882,
+              "start_ns": 100000000
+            }
+          ],
+          "anchor_ns": 80031250
+        },
+        {
+          "target_ns": "99999999",
+          "parts": [
+            {
+              "control": 7,
+              "rate": 44100,
+              "channels": 2,
+              "first": 0,
+              "last": 882,
+              "start_ns": 100000000
+            }
+          ],
+          "anchor_ns": 100000000
+        },
+        {
+          "target_ns": "100000001",
+          "parts": [
+            {
+              "control": 7,
+              "rate": 44100,
+              "channels": 2,
+              "first": 1,
+              "last": 882,
+              "start_ns": 100000000
+            }
+          ],
+          "anchor_ns": 100022675
+        },
+        {
+          "target_ns": "119999999",
+          "parts": [],
+          "anchor_ns": 120000000
+        },
+        {
+          "target_ns": "120000000",
+          "parts": [],
+          "anchor_ns": 120000000
+        },
+        {
+          "target_ns": "18446744073709551615999999999",
+          "parts": [],
+          "anchor_ns": 120000000
+        }
+      ],
+      "duration_ns": 120000000,
+      "scale": 1000000,
+      "video_frames": 6
+    },
+    {
+      "file": "alac-fill-prefix.mp4",
+      "queries": [
+        {
+          "target_ns": "0",
+          "parts": [
+            {
+              "control": 0,
+              "rate": 8000,
+              "channels": 1,
+              "first": 0,
+              "last": 480,
+              "start_ns": 0
+            }
+          ],
+          "anchor_ns": 0
+        },
+        {
+          "target_ns": "1",
+          "parts": [
+            {
+              "control": 0,
+              "rate": 8000,
+              "channels": 1,
+              "first": 1,
+              "last": 480,
+              "start_ns": 0
+            }
+          ],
+          "anchor_ns": 125000
+        },
+        {
+          "target_ns": "20833",
+          "parts": [
+            {
+              "control": 0,
+              "rate": 8000,
+              "channels": 1,
+              "first": 1,
+              "last": 480,
+              "start_ns": 0
+            }
+          ],
+          "anchor_ns": 125000
+        },
+        {
+          "target_ns": "20834",
+          "parts": [
+            {
+              "control": 0,
+              "rate": 8000,
+              "channels": 1,
+              "first": 1,
+              "last": 480,
+              "start_ns": 0
+            }
+          ],
+          "anchor_ns": 125000
+        },
+        {
+          "target_ns": "124999",
+          "parts": [
+            {
+              "control": 0,
+              "rate": 8000,
+              "channels": 1,
+              "first": 1,
+              "last": 480,
+              "start_ns": 0
+            }
+          ],
+          "anchor_ns": 125000
+        },
+        {
+          "target_ns": "125000",
+          "parts": [
+            {
+              "control": 0,
+              "rate": 8000,
+              "channels": 1,
+              "first": 1,
+              "last": 480,
+              "start_ns": 0
+            }
+          ],
+          "anchor_ns": 125000
+        },
+        {
+          "target_ns": "125001",
+          "parts": [
+            {
+              "control": 0,
+              "rate": 8000,
+              "channels": 1,
+              "first": 2,
+              "last": 480,
+              "start_ns": 0
+            }
+          ],
+          "anchor_ns": 250000
+        },
+        {
+          "target_ns": "19999999",
+          "parts": [
+            {
+              "control": 0,
+              "rate": 8000,
+              "channels": 1,
+              "first": 160,
+              "last": 480,
+              "start_ns": 0
+            }
+          ],
+          "anchor_ns": 20000000
+        },
+        {
+          "target_ns": "20000000",
+          "parts": [
+            {
+              "control": 0,
+              "rate": 8000,
+              "channels": 1,
+              "first": 160,
+              "last": 480,
+              "start_ns": 0
+            }
+          ],
+          "anchor_ns": 20000000
+        },
+        {
+          "target_ns": "20000001",
+          "parts": [
+            {
+              "control": 0,
+              "rate": 8000,
+              "channels": 1,
+              "first": 161,
+              "last": 480,
+              "start_ns": 0
+            }
+          ],
+          "anchor_ns": 20125000
+        },
+        {
+          "target_ns": "39999999",
+          "parts": [
+            {
+              "control": 0,
+              "rate": 8000,
+              "channels": 1,
+              "first": 320,
+              "last": 480,
+              "start_ns": 0
+            }
+          ],
+          "anchor_ns": 40000000
+        },
+        {
+          "target_ns": "40000001",
+          "parts": [
+            {
+              "control": 0,
+              "rate": 8000,
+              "channels": 1,
+              "first": 321,
+              "last": 480,
+              "start_ns": 0
+            }
+          ],
+          "anchor_ns": 40125000
+        },
+        {
+          "target_ns": "59999999",
+          "parts": [],
+          "anchor_ns": 60000000
+        },
+        {
+          "target_ns": "60000000",
+          "parts": [],
+          "anchor_ns": 60000000
+        },
+        {
+          "target_ns": "60000001",
+          "parts": [],
+          "anchor_ns": 60000000
+        },
+        {
+          "target_ns": "18446744073709551615999999999",
+          "parts": [],
+          "anchor_ns": 60000000
+        }
+      ],
+      "duration_ns": 60000000,
+      "scale": 8000,
+      "video_frames": 3
+    }
+  ],
+  "sha256": {
+    "reference-0.f32le": "fbdb42ac4eb6f259aa4e98001a43a676ba3204e1af62e6d1bb608f781a905189",
+    "reference-2.f32le": "91243e0046d268fb98e826ad735fda18effda33fed04c3806ca3039b55a57fb7",
+    "reference-3.f32le": "7ab44742e070c61034a5a2bf5dacd09ec53c03ff357dd265b9b36fab37b8274e",
+    "reference-4.f32le": "37a5267ed10d74f6955236b12fe93186887f0964aeac2535e71f21b822d30deb",
+    "reference-5.f32le": "4a88419d89ac5e1ace3bb61933c10661e96884e4ed5c9e094b4781e142ac441d",
+    "reference-6.f32le": "7ab44742e070c61034a5a2bf5dacd09ec53c03ff357dd265b9b36fab37b8274e",
+    "reference-7.f32le": "8747eb3a25994a84497c16aa57501004e8164e4629338ee332c23cbda6d3d0cc",
+    "alac-8000.mp4": "6a8dfb2a7060a95796abdcb0e52e932455ef9fd737afbdea0c4543cba6cf4dd4",
+    "alac-48000.mp4": "6c532abc5abd7076de676a5f3dced7595a439921f0569c4bf72b540332c678a1",
+    "alac-90000.mp4": "ae157ec0e54b5ac533bdf63e1c9a7772bf90cec9dcafb35dfa5a16b1a093baef",
+    "alac-1000.mp4": "fe37897f88e3aca225e88bca23142c1138bd637cd743edf5eaf5553e3b782475",
+    "changing-raw.mp4": "7ae16735a2a28b0c992e98ebe5bf80a01f9166fa36ac21abf5fde14ab659d561",
+    "changing-raw-third.mp4": "ef28e8b135a3f4ece84598915ce38295b72d89dabc6548d4885b395a6a1f0a57",
+    "changing-rice.mp4": "e54c12758faf1787b8b53a9d1aa09a4333052571e0a61365ccaf259e600e700e",
+    "changing-rice-third.mp4": "463f641f65382453ac0197a5aa5ed8cc21cb8e2b299adc3c72b57c39438279c7",
+    "alac-fill-prefix.mp4": "28244cff38d27c43d7f3a623d217b6058ba39dc244ca8371c6fac64dc46b583c",
+    "header-valid-body-short.mp4": "54e979f57febe999cc3858299b4668e2ce36923b5c195c941796b171e1c0073c"
+  }
+}

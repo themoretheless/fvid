@@ -3499,3 +3499,7 @@ FVID-0511 prevents exact and raw MP4 seek clocks from escaping the declared pres
 ## Batch 513 — Unedited native PCM seek precision,zero new IDs
 
 FVID-0484 now preserves exact Duration floors for unedited native PCM,including compact indexes and changes in rate,channels and storage format. Eleven authored movies retain independent full PCM/video,precise suffixes,raw navigation and actual-worker anchors. The fractional Player test checks native sample601 instead of the previously repeated sample600;the original source fails that stricter expectation,and all other player assertions remain. Seven gates pass985 executions,two prior ignores,and three repeated43-test runs pass. Counter511,next FVID-0512. See `batch-513-validation.json`.
+
+## Batch 514 — Unedited ALAC seek precision,zero new IDs
+
+FVID-0484 now retains exact Duration floors for unedited ALAC and computes its native anchor from the actual coded sample-count header. Nine valid authored raw/Rice/media-clock/reordered/fill movies preserve full PCM/video and raw navigation;the separate truncated-body movie still refuses EOF seeks after its valid header. Seven gates pass990 executions,two prior ignores,and three repeated48-test runs pass. No performance claim. Counter511,next FVID-0512. See `batch-514-validation.json`.

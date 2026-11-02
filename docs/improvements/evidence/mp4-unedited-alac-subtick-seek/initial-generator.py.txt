@@ -1,0 +1,35 @@
+"""Own raw/Rice ALAC unedited native seek witnesses; independent PCM references."""
+from pathlib import Path
+import json,hashlib,copy,struct
+from generate_mp4_unedited_pcm_subtick_seek import generate as pcm
+from generate_mp4_audio_clock_regressions import generate as clocks
+from generate_mp4_alac_transitions import convert
+from generate_mp4_fragment_description_regressions import atoms
+from generate_vp9_chroma import atom,word
+OUT=Path(__file__).resolve().parents[1]/'tests/fixtures/playback-errors/mp4-unedited-alac-subtick-seek'
+def generate():
+    source=pcm();catalog=json.loads(source['manifest.json']);base=clocks();files={n:b for n,b in source.items()if n.startswith('reference-')and n!='reference-1.f32le'};cases=[]
+    for c in catalog['cases']:
+        if c['file'].startswith('pcm-'):
+            c=copy.deepcopy(c);c['file']=c['file'].replace('pcm-','alac-');files[c['file']]=base[c['file']];cases.append(c)
+    template=next(c for c in catalog['cases']if c['file']=='changing-pcm.mp4')
+    def reorder(data,audio=False):
+        out=[]
+        for k,b in atoms(data):
+            if k==b'trak':b=reorder(b,b'soun'in b)
+            elif k in [b'moov',b'mdia',b'minf',b'stbl']:b=reorder(b,audio)
+            elif audio and k==b'stsd':b=word(0,3)+b''.join(atom(t,v)for t,v in reversed(list(atoms(b[8:]))))
+            elif audio and k==b'stsc':
+                b=bytearray(b)
+                for i in range(int.from_bytes(b[4:8],'big')):
+                    at=16+12*i;b[at:at+4]=word(4-int.from_bytes(b[at:at+4],'big'))
+            out.append(atom(k,b))
+        return b''.join(out)
+    for compressed in [False,True]:
+        data=convert(source['changing-pcm.mp4'],compressed=compressed)
+        for reverse in [False,True]:
+            name='changing-'+('rice'if compressed else'raw')+('-third'if reverse else'')+'.mp4';files[name]=reorder(data)if reverse else data;c=copy.deepcopy(template);c['file']=name;cases.append(c)
+    files['manifest.json']=(json.dumps(dict(provenance='Only authored neutral VP9 and8kHz analytic ramp/raw ALAC;raw and first-order Rice ALAC of own48k stereo16/32k mono16/44.1k stereo24 packet waveforms,reordered descriptions and exact rational seek suffix references. No edit lists,private input,FFmpeg or network.',cases=cases,sha256={n:hashlib.sha256(b).hexdigest()for n,b in files.items()}),indent=2)+'\n').encode();return files
+if __name__=='__main__':
+    OUT.mkdir(parents=True,exist_ok=True)
+    for n,b in generate().items():(OUT/n).write_bytes(b)
