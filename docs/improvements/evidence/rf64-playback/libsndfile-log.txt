@@ -1,0 +1,13 @@
+File : tests/fixtures/playback-errors/rf64-playback/classic-t1-b8-c1-base.rf64.wav
+Length : 4222
+RF64
+  WAVE
+ds64 : 28
+  Riff size : 4214
+  Data size : 4099
+  Frames    : 4099
+  Table length : 0
+JUNK : 3
+  Unknown chunk marker at position 0x101C. Resynching.
+*** Unknown chunk marker (0x10) at position 0x44. Exiting parser.
+*** Chunk size 65537 > file length 4222. Exiting parser.

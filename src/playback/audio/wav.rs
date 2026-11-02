@@ -25,6 +25,9 @@
 //! stating one geometry, and the redundancy is the only way a reader has of telling
 //! a header from a mistake.
 
+#[path = "wav_rf64.rs"]
+mod rf64;
+
 use crate::audio::{AudioStream, AudioTrack, EncodedPacket};
 use crate::codec::pcm_decoder::PcmFormat;
 use crate::{Result, invalid, unsupported};
@@ -268,9 +271,9 @@ impl Pcm {
 pub struct Wav {
     pub pcm: Pcm,
     /// What the `data` chunk's own length field claims, which may be more than the
-    /// file carries.
+    /// file carries. RF64 resolves its ds64 replacement before exposing this value.
     pub declared_bytes: usize,
-    /// What a `fact` chunk states about the run, when the file has one.
+    /// A fact count, or its RF64 ds64 replacement when absent or marked extended.
     pub declared_frames: Option<usize>,
     /// Frames the reader will hand over, a short tail included.
     pub frames: usize,
@@ -278,6 +281,7 @@ pub struct Wav {
     // None is a classic header; Some(0) explicitly leaves roles unassigned.
     speaker_mask: Option<u32>,
     big_endian: bool,
+    rf64_extent: Option<(u64, usize)>,
 }
 
 impl Wav {
@@ -296,7 +300,7 @@ impl Wav {
                 limits.file_bytes
             )));
         }
-        if bytes.len() < 12 || !matches!(&bytes[..4], b"RIFF" | b"RIFX") || &bytes[8..12] != b"WAVE" {
+        if bytes.len() < 12 || !matches!(&bytes[..4], b"RIFF" | b"RIFX" | b"RF64") || &bytes[8..12] != b"WAVE" {
             return Err(invalid("not a RIFF/WAVE file"));
         }
         let big_endian = &bytes[..4] == b"RIFX";
@@ -305,6 +309,11 @@ impl Wav {
         } else {
             u32::from_le_bytes(word)
         };
+        let mut rf64 = if &bytes[..4] == b"RF64" {
+            Some(rf64::Rf64::parse(bytes, limits)?)
+        } else { None };
+        let rf64_extent = rf64.as_ref().map(|r| (r.end, bytes.len()));
+        let walk_end = rf64.as_ref().map_or(bytes.len(), |r| r.end.min(bytes.len() as u64) as usize);
         let mut fmt = None;
         let mut data = None;
         let mut fact = None;
@@ -313,21 +322,34 @@ impl Wav {
         // declared size: a writer that got that size wrong still has readable chunks
         // in it, and the only claim a reader can check against samples is the one the
         // header's redundant fields make against each other.
-        let mut at = 12usize;
-        while at + 8 <= bytes.len() {
+        let mut at = rf64.as_ref().map_or(12, |r| r.next);
+        while at.checked_add(8).is_some_and(|end| end <= walk_end) {
             let tag = &bytes[at..at + 4];
             let declared =
                 number(bytes[at + 4..at + 8].try_into().unwrap_or([0xff; 4]));
-            let declared = usize::try_from(declared).unwrap_or(usize::MAX);
+            if rf64.is_some() && tag == b"ds64" {
+                return Err(invalid("multiple RF64 ds64 chunks"));
+            }
+            let declared = if let Some(r) = &mut rf64 {
+                r.size(tag.try_into().unwrap(), declared, limits)?
+            } else { usize::try_from(declared).unwrap_or(usize::MAX) };
             let body = at + 8;
             // The claim is the writer's, the bytes are the reader's: a chunk that
             // promises more than the file holds is taken as far as the file goes, and
             // a chunk that ends early leaves whatever follows it to be read as the
             // next chunk rather than played as audio.
-            let end = body.saturating_add(declared).min(bytes.len());
+            let chunk_end = if rf64.is_some() {
+                body.checked_add(declared).ok_or_else(|| invalid("RF64 chunk extent overflow"))?
+            } else { body.saturating_add(declared) };
+            if rf64.is_some() && tag != b"data" && chunk_end > walk_end {
+                return Err(invalid("RF64 metadata chunk is truncated"));
+            }
+            let end = chunk_end.min(walk_end);
             // Chunks are word aligned, so a writer adds a byte after an odd-length
             // one, and the next chunk starts past it.
-            at = body.saturating_add(declared.saturating_add(declared & 1));
+            at = if rf64.is_some() {
+                chunk_end.checked_add(declared & 1).ok_or_else(|| invalid("RF64 chunk padding overflow"))?
+            } else { body.saturating_add(declared.saturating_add(declared & 1)) };
             if tag == b"LIST" && bytes[body..end].starts_with(b"wavl") {
                 return Err(unsupported("Wave LIST/wavl audio is not supported"));
             }
@@ -340,9 +362,11 @@ impl Wav {
                 return Err(invalid("conflicting Wave fmt chunks"));
             }
             let stated_fact = if tag == b"fact" {
-                bytes.get(body..end).and_then(|chunk| chunk.get(..4)).map(|field| {
-                    usize::try_from(number(field.try_into().unwrap())).unwrap_or(usize::MAX)
-                })
+                if let Some(field) = bytes.get(body..end).and_then(|chunk| chunk.get(..4)) {
+                    let count = number(field.try_into().unwrap());
+                    let count = if count == u32::MAX && let Some(r) = &rf64 { r.samples } else { u64::from(count) };
+                    Some(usize::try_from(count).map_err(|_| invalid("RF64 sample count exceeds address space"))?)
+                } else { None }
             } else { None };
             if let (Some(first), Some(second)) = (fact, stated_fact) && first != second {
                 return Err(invalid("conflicting Wave fact sample counts"));
@@ -375,6 +399,11 @@ impl Wav {
                 }
             }
         }
+        let fact = match (fact, &rf64) {
+            (None, Some(r)) => Some(usize::try_from(r.samples)
+                .map_err(|_| invalid("RF64 sample count exceeds address space"))?),
+            (fact, _) => fact,
+        };
         let (pcm, speaker_mask, padding_bits) = fmt.ok_or_else(|| invalid("a Wave file with no fmt chunk"))?;
         let (start, end, declared_bytes) =
             data.ok_or_else(|| invalid("a Wave file with no data chunk"))?;
@@ -423,6 +452,7 @@ impl Wav {
             data: samples.to_vec(),
             speaker_mask,
             big_endian,
+            rf64_extent,
         })
     }
 
@@ -807,8 +837,11 @@ impl AudioStream for WavAudioReader {
     fn validate_eof(&self) -> Result<()> {
         let declared = self.wav.declared_bytes;
         let available = self.wav.data.len();
-        if declared != u32::MAX as usize && available < declared {
+        if (self.wav.rf64_extent.is_some() || declared != u32::MAX as usize) && available < declared {
             return Err(invalid(&format!("Wave data payload is truncated: declared {declared} bytes, available {available}")));
+        }
+        if let Some((expected, actual)) = self.wav.rf64_extent && expected > actual as u64 {
+            return Err(invalid("RF64 file extent is truncated"));
         }
         Ok(())
     }
@@ -2107,6 +2140,28 @@ mod tests {
         assert_eq!(wav.packet(255).len(), 976, "the tail is whole bytes");
         for index in 0..wav.packets() {
             assert_eq!(wav.packet(index).len() % 2, 0, "window {index}");
+        }
+    }
+}
+
+#[cfg(all(test, target_pointer_width = "64"))]
+mod rf64_storage_limits {
+    use super::*;
+    #[test]
+    fn large_rf64_declarations_keep_retained_pcm_capacity_bounded_by_available_data() {
+        for bytes in [
+            include_bytes!("../../../tests/fixtures/playback-errors/rf64-playback/large-declared.wav").as_slice(),
+            include_bytes!("../../../tests/fixtures/playback-errors/rf64-playback/large64-declared.wav").as_slice(),
+        ] {
+            let limits = Limits { file_bytes: 1usize << 34, data_bytes: 1usize << 34, ..Default::default() };
+            let mut reader = WavAudioReader::open(bytes, limits).unwrap();
+            assert!(reader.wav.declared_bytes >= u32::MAX as usize);
+            assert_eq!(reader.wav.data.len(), 4097);
+            assert!(reader.wav.data.capacity() <= 8192);
+            let packet = reader.next_packet().unwrap().unwrap();
+            assert_eq!(packet.data.len(), 2048);
+            assert!(packet.data.capacity() <= 4096);
+            assert!(reader.validate_eof().is_err());
         }
     }
 }

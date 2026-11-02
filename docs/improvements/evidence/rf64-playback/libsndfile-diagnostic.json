@@ -1,0 +1,226 @@
+{
+  "version": "libsndfile-1.2.2",
+  "scope": "20 base-marker raw PCM/float/G711 and extensible signals;table/finite/predictive variants are separately tested against RIFF controls",
+  "cases": [
+    {
+      "file": "classic-t1-b8-c1-base.rf64.wav",
+      "opened": false,
+      "source_sha256": "96fe2afe21669d1aa940af83ee7d1c0325bdfe3a22afb3b18baa4f4ebdbb41e4",
+      "expected_sha256": "af18b5050aa8b400824b30843d0bfc8d9e41d97d78341f06d3ab5b1ccd0d8d80",
+      "frames": 0,
+      "rate": 0,
+      "channels": 0,
+      "byte_identical": false,
+      "error": "Error in RF64 file. No 'data' chunk marker."
+    },
+    {
+      "file": "classic-t1-b8-c2-base.rf64.wav",
+      "opened": false,
+      "source_sha256": "a639042e483b0ade332e0c98b3f4c417850d75175a51fcd0b6d290fbf91d01df",
+      "expected_sha256": "7885b9be9664c11131f2542e982c8ae7b808bda0ccadb5f3e45acc6292b807d6",
+      "frames": 0,
+      "rate": 0,
+      "channels": 0,
+      "byte_identical": false,
+      "error": "Error in RF64 file. No 'data' chunk marker."
+    },
+    {
+      "file": "classic-t1-b16-c1-base.rf64.wav",
+      "opened": false,
+      "source_sha256": "38257a507225c5751b87a143fe207b7c6327c12d38a7360539b2282abb0bc6c4",
+      "expected_sha256": "402c6f2b4607fd33af49b944d7b129505c35bc3b2147a477c33b2457ea6ba1f1",
+      "frames": 0,
+      "rate": 0,
+      "channels": 0,
+      "byte_identical": false,
+      "error": "Error in RF64 file. No 'data' chunk marker."
+    },
+    {
+      "file": "classic-t1-b16-c2-base.rf64.wav",
+      "opened": false,
+      "source_sha256": "a6b454f2be01e6bcf97c0c561656611d8932a2ef85b98a9b3e63ed4bd4709879",
+      "expected_sha256": "9fde4460191c5cda393fb7534d0000afd4eac82154bc3d45212588fa1fe886d3",
+      "frames": 0,
+      "rate": 0,
+      "channels": 0,
+      "byte_identical": false,
+      "error": "Error in RF64 file. No 'data' chunk marker."
+    },
+    {
+      "file": "classic-t1-b24-c1-base.rf64.wav",
+      "opened": false,
+      "source_sha256": "90a9da8a86100b946f4b01a53287e9d47ae1803ed820a3510c2b90c2738ef20b",
+      "expected_sha256": "bf0f5a8b9ff32b32a75cd218e03ea6a93f1ee22fa413a928173af33291046cc0",
+      "frames": 0,
+      "rate": 0,
+      "channels": 0,
+      "byte_identical": false,
+      "error": "Error in RF64 file. No 'data' chunk marker."
+    },
+    {
+      "file": "classic-t1-b24-c2-base.rf64.wav",
+      "opened": false,
+      "source_sha256": "d24398fc0cc3ceda18a2261abec0208510dee0c2c4d30364c83c5600940ae382",
+      "expected_sha256": "55ae1ba60abb03113880d9bb40cde9c1c7411e3b93126deda2f75343b8d080e6",
+      "frames": 0,
+      "rate": 0,
+      "channels": 0,
+      "byte_identical": false,
+      "error": "Error in RF64 file. No 'data' chunk marker."
+    },
+    {
+      "file": "classic-t1-b32-c1-base.rf64.wav",
+      "opened": false,
+      "source_sha256": "4d578409d499e31f3b30dea8d59f4dfddc25d452e7b6d5b38cde39382f6a5ddf",
+      "expected_sha256": "4ad630d3c5b61ba51d73c17e5cf7d6384516f45373a70561582968289a64b23a",
+      "frames": 0,
+      "rate": 0,
+      "channels": 0,
+      "byte_identical": false,
+      "error": "Error in RF64 file. No 'data' chunk marker."
+    },
+    {
+      "file": "classic-t1-b32-c2-base.rf64.wav",
+      "opened": false,
+      "source_sha256": "f58b2770c768921ce1ad18080ac3907b837ea155bb2cd2a20b8aa4e641190278",
+      "expected_sha256": "839fbde1ae8e8d4ef7cd30c3b5356baa9753f12411c143c3aee3454011c9435f",
+      "frames": 0,
+      "rate": 0,
+      "channels": 0,
+      "byte_identical": false,
+      "error": "Error in RF64 file. No 'data' chunk marker."
+    },
+    {
+      "file": "classic-t3-b32-c1-base.rf64.wav",
+      "opened": false,
+      "source_sha256": "0d9f6973f22d9481bf8872842930f0ed3f1565ab64f77830a339c45c378eb7a0",
+      "expected_sha256": "d19b1fe0b3c811db7ce28984f6e92bea3e59b80d54b041f0beed2910ccadb016",
+      "frames": 0,
+      "rate": 0,
+      "channels": 0,
+      "byte_identical": false,
+      "error": "Error in RF64 file. No 'data' chunk marker."
+    },
+    {
+      "file": "classic-t3-b32-c2-base.rf64.wav",
+      "opened": false,
+      "source_sha256": "aa567c1aa52d0d19e95bd68afa5f57763bf69a20ce9d36e05275ecc407766389",
+      "expected_sha256": "d04b49ddc44b856919c0b4590ceb006ec61db8c9c289e6017241f32847ca8587",
+      "frames": 0,
+      "rate": 0,
+      "channels": 0,
+      "byte_identical": false,
+      "error": "Error in RF64 file. No 'data' chunk marker."
+    },
+    {
+      "file": "classic-t3-b64-c1-base.rf64.wav",
+      "opened": false,
+      "source_sha256": "d1f014d85b154dbcde7c564bd9537306a57ff489e0b17ccda8e4e334e01a1ee3",
+      "expected_sha256": "d19b1fe0b3c811db7ce28984f6e92bea3e59b80d54b041f0beed2910ccadb016",
+      "frames": 0,
+      "rate": 0,
+      "channels": 0,
+      "byte_identical": false,
+      "error": "Error in RF64 file. No 'data' chunk marker."
+    },
+    {
+      "file": "classic-t3-b64-c2-base.rf64.wav",
+      "opened": false,
+      "source_sha256": "cccb4060d89e06948282825adb519531fabe00ffbaffb1457e9b97c8a4270f75",
+      "expected_sha256": "d04b49ddc44b856919c0b4590ceb006ec61db8c9c289e6017241f32847ca8587",
+      "frames": 0,
+      "rate": 0,
+      "channels": 0,
+      "byte_identical": false,
+      "error": "Error in RF64 file. No 'data' chunk marker."
+    },
+    {
+      "file": "classic-t6-b8-c1-base.rf64.wav",
+      "opened": false,
+      "source_sha256": "cc016c98252fb8f3505db1bc3eb2f6452dd4f0b04cd7d6b95fa9213e43681033",
+      "expected_sha256": "1941432d529c5e3b1f29e8aebecc49732d2f7dc82d101983d9017493e67ae1d0",
+      "frames": 0,
+      "rate": 0,
+      "channels": 0,
+      "byte_identical": false,
+      "error": "Error in RF64 file. No 'data' chunk marker."
+    },
+    {
+      "file": "classic-t6-b8-c2-base.rf64.wav",
+      "opened": false,
+      "source_sha256": "a1033875a5881f2c87f1d8eebc111b5086242fd1642db54bd007d779f23ad7f5",
+      "expected_sha256": "83ce11ac4c6fbd87f582969c703816fae21a56c556f1e49d9ca0ea4139fbc9e9",
+      "frames": 0,
+      "rate": 0,
+      "channels": 0,
+      "byte_identical": false,
+      "error": "Error in RF64 file. No 'data' chunk marker."
+    },
+    {
+      "file": "classic-t7-b8-c1-base.rf64.wav",
+      "opened": false,
+      "source_sha256": "68c86cb721371d99635a78ddadd5a845098ce11e667d6d3675fe9d7cbd0c990b",
+      "expected_sha256": "c83d22107ce24008b6ee0c1bca8d594563cf653f8abb903efabe58b0a9eef135",
+      "frames": 0,
+      "rate": 0,
+      "channels": 0,
+      "byte_identical": false,
+      "error": "Error in RF64 file. No 'data' chunk marker."
+    },
+    {
+      "file": "classic-t7-b8-c2-base.rf64.wav",
+      "opened": false,
+      "source_sha256": "e136fac0d80f714d06e586c1110a5c34956bf9abdcfb999e500cc2151716c456",
+      "expected_sha256": "8458891c339c22769dcca1c6e0207324d273b383a9b2391c98e3639b74ff43ba",
+      "frames": 0,
+      "rate": 0,
+      "channels": 0,
+      "byte_identical": false,
+      "error": "Error in RF64 file. No 'data' chunk marker."
+    },
+    {
+      "file": "speaker-six-base.rf64.wav",
+      "opened": false,
+      "source_sha256": "ad5234c995556f2b59529e2c3e1a55cefcf8f42fda97ba58f1da01d7924e4ce4",
+      "expected_sha256": "779bf07ebabbc548ed8f57e017d433ac5bcd5164d890d1b4d8572338f60f2283",
+      "frames": 0,
+      "rate": 0,
+      "channels": 0,
+      "byte_identical": false,
+      "error": "Error in RF64 file. No 'data' chunk marker."
+    },
+    {
+      "file": "speaker-rear-float-base.rf64.wav",
+      "opened": false,
+      "source_sha256": "0f3839ee45f4d95f04be8109aafc9e81e239201a09dfc3ca8b1a317a022b025a",
+      "expected_sha256": "3bc7f8cd3df2972477842de68192542905221cc332e864f91b4c9468e97cd78d",
+      "frames": 0,
+      "rate": 0,
+      "channels": 0,
+      "byte_identical": false,
+      "error": "Error in RF64 file. No 'data' chunk marker."
+    },
+    {
+      "file": "speaker-discrete-nine-base.rf64.wav",
+      "opened": false,
+      "source_sha256": "fba9f6df3705c8d883081b6d87ae389055c8c9136eda32b2998fc6b0fddcea08",
+      "expected_sha256": "2feddb7176b6c80d6ac9c920c36a5b6e42f76ba761bf1ed2ee7e59d2e1af1355",
+      "frames": 0,
+      "rate": 0,
+      "channels": 0,
+      "byte_identical": false,
+      "error": "Error in RF64 file. No 'data' chunk marker."
+    },
+    {
+      "file": "precision-twenty-base.rf64.wav",
+      "opened": false,
+      "source_sha256": "64aacc682abf5d2899db44395bab1f9a8dc17f2480e02afca7999fe677d1a3ec",
+      "expected_sha256": "98bf918b47c6f4f3c0cd220583831e4cd12c4a3d17698d22a20d963a2ecc4195",
+      "frames": 0,
+      "rate": 0,
+      "channels": 0,
+      "byte_identical": false,
+      "error": "Error in RF64 file. No 'data' chunk marker."
+    }
+  ]
+}

@@ -1,0 +1,260 @@
+{
+  "status": "accepted",
+  "accepted_ids": [
+    "FVID-0527"
+  ],
+  "follow_up_ids": [],
+  "count_delta": 1,
+  "accepted_count": 527,
+  "next_id": "FVID-0528",
+  "qualification": {
+    "integration": {
+      "command": [
+        "cargo",
+        "test",
+        "--locked",
+        "--offline",
+        "--no-default-features",
+        "--features",
+        "player",
+        "--test",
+        "rf64_playback",
+        "--test",
+        "rifx_playback",
+        "--test",
+        "pcm_padding_playback",
+        "--test",
+        "avi_extensible_pcm",
+        "--test",
+        "wave_speaker_playback",
+        "--test",
+        "wav_valid_bits",
+        "--test",
+        "wav_unsigned8",
+        "--test",
+        "wav_aiff_au_regressions",
+        "--test",
+        "wave_ogg_flac_plan_regressions",
+        "--test",
+        "audio_reader_eof",
+        "--test",
+        "block_audio_eof",
+        "--test",
+        "audio_index_eof",
+        "--test",
+        "coded_seek_history",
+        "--test",
+        "coded_window_clock",
+        "--test",
+        "aifc_g711_original_width",
+        "--test",
+        "g711_native",
+        "--",
+        "--test-threads=2"
+      ],
+      "exit_code": 0,
+      "seconds": 36.04254126548767,
+      "source_stable": true,
+      "passed": 47,
+      "failed": 0,
+      "ignored": 0
+    },
+    "root-wave": {
+      "command": [
+        "cargo",
+        "test",
+        "--locked",
+        "--offline",
+        "--no-default-features",
+        "--features",
+        "player",
+        "--lib",
+        "playback_wav",
+        "--",
+        "--test-threads=2"
+      ],
+      "exit_code": 0,
+      "seconds": 20.121462106704712,
+      "source_stable": true,
+      "passed": 34,
+      "failed": 0,
+      "ignored": 0
+    },
+    "root-aiff": {
+      "command": [
+        "cargo",
+        "test",
+        "--locked",
+        "--offline",
+        "--no-default-features",
+        "--features",
+        "player",
+        "--lib",
+        "playback_aiff",
+        "--",
+        "--test-threads=2"
+      ],
+      "exit_code": 0,
+      "seconds": 0.26426100730895996,
+      "source_stable": true,
+      "passed": 14,
+      "failed": 0,
+      "ignored": 0
+    },
+    "root-avi": {
+      "command": [
+        "cargo",
+        "test",
+        "--locked",
+        "--offline",
+        "--no-default-features",
+        "--features",
+        "player",
+        "--lib",
+        "playback_avi_audio",
+        "--",
+        "--test-threads=2"
+      ],
+      "exit_code": 0,
+      "seconds": 0.25560998916625977,
+      "source_stable": true,
+      "passed": 13,
+      "failed": 0,
+      "ignored": 0
+    },
+    "audio-worker": {
+      "command": [
+        "cargo",
+        "test",
+        "--locked",
+        "--offline",
+        "--no-default-features",
+        "--features",
+        "player",
+        "--lib",
+        "audio_thread",
+        "--",
+        "--test-threads=2"
+      ],
+      "exit_code": 0,
+      "seconds": 5.968971014022827,
+      "source_stable": true,
+      "passed": 39,
+      "failed": 0,
+      "ignored": 0
+    },
+    "root-cpal": {
+      "command": [
+        "cargo",
+        "test",
+        "--locked",
+        "--offline",
+        "--no-default-features",
+        "--features",
+        "player",
+        "--lib",
+        "audio::cpal_backend",
+        "--",
+        "--test-threads=2"
+      ],
+      "exit_code": 0,
+      "seconds": 2.860283136367798,
+      "source_stable": true,
+      "passed": 43,
+      "failed": 0,
+      "ignored": 2
+    },
+    "owned-wave": {
+      "command": [
+        "cargo",
+        "test",
+        "-p",
+        "fvid-media",
+        "--locked",
+        "--offline",
+        "--no-default-features",
+        "--features",
+        "player",
+        "--lib",
+        "owned_wave",
+        "--",
+        "--test-threads=2"
+      ],
+      "exit_code": 0,
+      "seconds": 38.99785804748535,
+      "source_stable": true,
+      "passed": 11,
+      "failed": 0,
+      "ignored": 0
+    },
+    "core-check": {
+      "command": [
+        "cargo",
+        "check",
+        "--locked",
+        "--offline",
+        "--no-default-features"
+      ],
+      "exit_code": 0,
+      "seconds": 47.04801678657532,
+      "source_stable": true,
+      "passed": 0,
+      "failed": 0,
+      "ignored": 0
+    },
+    "player-check": {
+      "command": [
+        "cargo",
+        "check",
+        "--locked",
+        "--offline",
+        "--no-default-features",
+        "--features",
+        "player"
+      ],
+      "exit_code": 0,
+      "seconds": 39.304649114608765,
+      "source_stable": true,
+      "passed": 0,
+      "failed": 0,
+      "ignored": 0
+    }
+  },
+  "rust_test_executions": 201,
+  "preexisting_ignored": 2,
+  "repeats": {
+    "runs": 3,
+    "passed_per_run": 5,
+    "failed": 0
+  },
+  "without_ffmpeg_extra_executions": 5,
+  "source_frozen_count": 3325,
+  "source_frozen_manifest": "evidence/rf64-playback/candidate-source.json",
+  "fixture_files_regenerated_identically": 136,
+  "independent_reference": {
+    "version": "ffmpeg version 9.0.2 Copyright (c) 2000-2026 the FFmpeg developers",
+    "base_signals": 20,
+    "byte_identical": true
+  },
+  "resource_qualification": {
+    "scope": "64-bit private retained-capacity unit and tiny truncated declarations under explicit limits;not process peak or valid full4GiB playback",
+    "declared_data_bytes": [
+      4294967295,
+      4294967296
+    ],
+    "available_pcm_frames": 4097,
+    "retained_sample_capacity_max": 8192,
+    "encoded_packet_capacity_max": 4096
+  },
+  "notes": [
+    "One RF64 container capability across70 variants,including eight authored predictive sources,not separate IDs for ds64 guards.",
+    "Existing whole-file in-memory architecture and default file/data limits remain. Format64-bit support is not streaming or large-file performance qualification.",
+    "Optional table index uses8 bytes per physically present12-byte row;counts/extents are validated before allocation. Lookup consumes repeated IDs in original per-ID order.",
+    "Finite32-bit fields override ignored64-bit fields;metadata fallback conversion is lazy so unused values are not narrowed.",
+    "Complete PCM with absent final metadata is still truncated RF64;actual data-size0xffffffff is not treated as unknown after64-bit resolution.",
+    "Two pre-existing physical hardware ignores remain unchanged;owned export/loudness RF64 support and physical output are unqualified."
+  ],
+  "evidence_directories": [
+    "evidence/rf64-playback"
+  ]
+}
