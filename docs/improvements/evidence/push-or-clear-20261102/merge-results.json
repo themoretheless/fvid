@@ -1,0 +1,182 @@
+{
+  "start": "7d87ad071f569890188f81006611ccadf41c6e59",
+  "unchanged_tree": "db9383b0b1d7f5ca89e4a29c10e0c9def34714a5",
+  "branches": [
+    {
+      "branch": "codex/ac3-alternate-bsi-downmix-20261025",
+      "status": "merged-proven-equivalent",
+      "commit": "b95841e0e740462edb4033ee87eff8ca857ecb2a",
+      "unchanged_tree": "db9383b0b1d7f5ca89e4a29c10e0c9def34714a5"
+    },
+    {
+      "branch": "codex/ac3-player-stereo-20261025",
+      "status": "merged-proven-equivalent",
+      "commit": "cfc1bfd75335b25f02e2495b4d8092543e866fe5",
+      "unchanged_tree": "db9383b0b1d7f5ca89e4a29c10e0c9def34714a5"
+    },
+    {
+      "branch": "codex/ac3-reduced-rate-compatibility-20261025",
+      "status": "contained-by-earlier-merge"
+    },
+    {
+      "branch": "codex/ac3-stereo-downmix-policy-20261025",
+      "status": "contained-by-earlier-merge"
+    },
+    {
+      "branch": "codex/dolby-little-endian-20261025",
+      "status": "contained-by-earlier-merge"
+    },
+    {
+      "branch": "codex/dolby-reduced-rate-allocation-20261025",
+      "status": "contained-by-earlier-merge"
+    },
+    {
+      "branch": "codex/eac3-dec3-height-union-20261025",
+      "status": "merged-proven-equivalent",
+      "commit": "272cf1bd41684a4b0fa731441c3e440cc38ffc86",
+      "unchanged_tree": "db9383b0b1d7f5ca89e4a29c10e0c9def34714a5"
+    },
+    {
+      "branch": "codex/eac3-expanded-stereo-20261025",
+      "status": "contained-by-earlier-merge"
+    },
+    {
+      "branch": "codex/eac3-independent-native-20261025",
+      "status": "merged-proven-equivalent",
+      "commit": "7cb8b234ad7804fe4e3f013d4861088cc662affc",
+      "unchanged_tree": "db9383b0b1d7f5ca89e4a29c10e0c9def34714a5"
+    },
+    {
+      "branch": "codex/eac3-matroska-auto-layout-20261025",
+      "status": "contained-by-earlier-merge"
+    },
+    {
+      "branch": "codex/eac3-mp4-auto-layout-20261025",
+      "status": "contained-by-earlier-merge"
+    },
+    {
+      "branch": "codex/eac3-native-replacement-20261025",
+      "status": "contained-by-earlier-merge"
+    },
+    {
+      "branch": "codex/eac3-optional-dependent-reader-20261025",
+      "status": "merged-proven-equivalent",
+      "commit": "9e95cfb7ff41a1bb919f90dc1272102106a0a6ee",
+      "unchanged_tree": "db9383b0b1d7f5ca89e4a29c10e0c9def34714a5"
+    },
+    {
+      "branch": "codex/eac3-output-layout-query-20261025",
+      "status": "contained-by-earlier-merge"
+    },
+    {
+      "branch": "codex/eac3-player-stereo-20261025",
+      "status": "contained-by-earlier-merge"
+    },
+    {
+      "branch": "codex/eac3-raw-auto-layout-20261025",
+      "status": "contained-by-earlier-merge"
+    },
+    {
+      "branch": "codex/eac3-short-word-order-20261025",
+      "status": "merged-proven-equivalent",
+      "commit": "063858163f99e148f5dc6fc4043481a3d6f114ba",
+      "unchanged_tree": "db9383b0b1d7f5ca89e4a29c10e0c9def34714a5"
+    },
+    {
+      "branch": "codex/eac3-stable-speaker-layout-20261025",
+      "status": "contained-by-earlier-merge"
+    },
+    {
+      "branch": "codex/eac3-stereo-downmix-policy-20261025",
+      "status": "contained-by-earlier-merge"
+    },
+    {
+      "branch": "codex/hevc-additional-layer-sets-20261025",
+      "status": "merged-proven-equivalent",
+      "commit": "6e5aeeea347bd0f9b9a78421cf7bbfdb523f12b9",
+      "unchanged_tree": "db9383b0b1d7f5ca89e4a29c10e0c9def34714a5"
+    },
+    {
+      "branch": "codex/hevc-automatic-ols-epochs-20261025",
+      "status": "contained-by-earlier-merge"
+    },
+    {
+      "branch": "codex/hevc-idr-output-epochs-20261025",
+      "status": "contained-by-earlier-merge"
+    },
+    {
+      "branch": "codex/hevc-independent-layer-rewrite-20261025",
+      "status": "merged-proven-equivalent",
+      "commit": "40e59e795829dae270afbd1cf4f1f8730091f09e",
+      "unchanged_tree": "db9383b0b1d7f5ca89e4a29c10e0c9def34714a5"
+    },
+    {
+      "branch": "codex/hevc-matroska-layered-20261025",
+      "status": "contained-by-earlier-merge"
+    },
+    {
+      "branch": "codex/hevc-matroska-vps-epochs-20261025",
+      "status": "contained-by-earlier-merge"
+    },
+    {
+      "branch": "codex/hevc-mp4-description-epochs-20261025",
+      "status": "contained-by-earlier-merge"
+    },
+    {
+      "branch": "codex/hevc-topology-transitions-20261025",
+      "status": "contained-by-earlier-merge"
+    },
+    {
+      "branch": "codex/hevc-vpsless-layered-epochs-20261025",
+      "status": "merged-proven-equivalent",
+      "commit": "ff10f98fac79616d031e36fa874f2941470bf15d",
+      "unchanged_tree": "db9383b0b1d7f5ca89e4a29c10e0c9def34714a5"
+    },
+    {
+      "branch": "codex/mixed-layered-hevc-descriptions-20261025",
+      "status": "contained-by-earlier-merge"
+    },
+    {
+      "branch": "codex/mp4-audio-export-transitions-20261025",
+      "status": "merged-proven-equivalent",
+      "commit": "6e861145a440804cee9bae059c48d2e669809bf2",
+      "unchanged_tree": "db9383b0b1d7f5ca89e4a29c10e0c9def34714a5"
+    },
+    {
+      "branch": "codex/mp4-audio-geometry-20261025",
+      "status": "merged-proven-equivalent",
+      "commit": "a96340c89e53056306a06408990e410b1d5afaaa",
+      "unchanged_tree": "db9383b0b1d7f5ca89e4a29c10e0c9def34714a5"
+    },
+    {
+      "branch": "codex/mp4-dolby-sample-clock-20261025",
+      "status": "contained-by-earlier-merge"
+    },
+    {
+      "branch": "codex/mp4-eac3-programme-clock-20261025",
+      "status": "contained-by-earlier-merge"
+    },
+    {
+      "branch": "codex/mp4-quantized-audio-clock-20261025",
+      "status": "merged-proven-equivalent",
+      "commit": "1c09ca1adf6fd99f509c2108523e7d73e9a9310f",
+      "unchanged_tree": "db9383b0b1d7f5ca89e4a29c10e0c9def34714a5"
+    },
+    {
+      "branch": "codex/mp4-quantized-audio-playback-20261025",
+      "status": "contained-by-earlier-merge"
+    },
+    {
+      "branch": "codex/mp4-used-description-dispatch-20261025",
+      "status": "contained-by-earlier-merge"
+    },
+    {
+      "branch": "codex/native-mp4-audio-transitions-20261025",
+      "status": "merged-proven-equivalent",
+      "commit": "52401fe2fbac1ea0f9c81ce6f6b11df5b04c6ad5",
+      "unchanged_tree": "db9383b0b1d7f5ca89e4a29c10e0c9def34714a5"
+    }
+  ],
+  "complete": true,
+  "count_delta": 0
+}
