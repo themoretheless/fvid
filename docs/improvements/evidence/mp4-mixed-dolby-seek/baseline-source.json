@@ -1,0 +1,12 @@
+{
+  "fixture_hashes_valid": true,
+  "cases": 19,
+  "files": 30,
+  "source_sha256": {
+    "src/playback/audio/mp4_audio.rs": "9a11234e2ee87de2f3bbce29fa5444e100ab226bb35cd894b07e7f73f856e01b",
+    "src/playback/audio/mp4_clock_recovery.rs": "4bd9dc0452bc30e79dad6985e57085cff81da2f522426c037930c3f27e3abad6",
+    "tests/mp4_mixed_dolby_seek.rs": "87a64a54d284a2375229053db6897571a0eac815052ff6393b0402675ef7c7d3",
+    "scripts/generate_mp4_mixed_dolby_seek.py": "cfa065baec28f1bd15ed58005e0a83bce723a7c6c5bd73459e75bff9999423f4",
+    "scripts/mp4_audio_witness.py": "b4daabb4986ef11b1a0e042a15fc600a80aaeea40238bd712582d3feda824cb1"
+  }
+}

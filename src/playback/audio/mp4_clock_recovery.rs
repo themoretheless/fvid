@@ -4,7 +4,7 @@ use crate::{container::mp4::{Mp4Reader as Mp4TimelineReader, Track},native_media
 fn mp4_coded_packet_frames(codec:&[u8;4], configuration:&[u8], rate:u32, channels:u16, bits:u16, bytes:usize, payload:Option<&[u8]>)->std::result::Result<u64,String> {
     mp4_coded_packet_frames_for_programme(0,codec,configuration,rate,channels,bits,bytes,payload)
 }
-fn mp4_coded_packet_frames_for_programme(programme:u8,codec:&[u8;4], configuration:&[u8], rate:u32, channels:u16, bits:u16, bytes:usize, payload:Option<&[u8]>)->std::result::Result<u64,String> {
+pub(super) fn mp4_coded_packet_frames_for_programme(programme:u8,codec:&[u8;4], configuration:&[u8], rate:u32, channels:u16, bits:u16, bytes:usize, payload:Option<&[u8]>)->std::result::Result<u64,String> {
     if codec==b"ec-3" {
         let mut encoded=payload.ok_or("E-AC-3 coded count requires packet headers")?;
         let mut samples=0u64;

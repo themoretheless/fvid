@@ -427,14 +427,29 @@ impl<R: Read + Seek> Mp4AudioReader<R> {
         let returned=i64::try_from(landed.floor_ticks(self.track().timescale)?).map_err(|_|invalid("MP4 seek clock overflow"))?;
         self.rewind();self.sample_index=first;self.clock_floor.set(landed);self.presentation_floor=returned;self.clock_anchor.set(Some((returned,landed)));Ok(returned)
     }
-    fn native_rate_at(&self,index:usize)->Result<u32> {
+    fn native_rate_at(&mut self,index:usize)->Result<u32> {
         if let Some(clock)=&self.clock {return clock.rate(index);}
         let sample=self.track().samples.get(index).ok_or_else(||invalid("missing MP4 native-rate sample"))?;
         let selected=sample.description_index.checked_sub(1).ok_or_else(||invalid("missing MP4 native-rate description"))? as usize;
         let setup=self.track().sample_descriptions.get(selected).ok_or_else(||invalid("missing MP4 native-rate description"))?;
-        let rate=if setup==self.setup() {self.negotiated_rate()}else{
-            self.description_states.get(selected).and_then(|state|state.as_ref()).and_then(|state|state.rate).unwrap_or(setup.sample_rate)
+        let known=if setup==self.setup() {Some(self.negotiated_rate())}else{
+            self.description_states.get(selected).and_then(|state|state.as_ref()).and_then(|state|state.rate)
         };
+        let codec=setup.codec;let fallback=setup.sample_rate;
+        let rate=if let Some(rate)=known {rate}else if matches!(&codec,b"ac-3"|b"ec-3") {
+            // A future description has not negotiated its decoder yet. In
+            // particular E-AC-3 sample entries may contain placeholder rates.
+            // Read through the normal packet admission before choosing the
+            // selected programme's native seek lattice.
+            self.demuxer.read_packet(self.track_index,index,&mut self.packet)?;
+            if codec==*b"ec-3" {
+                crate::codec::eac3_decoder::checked_programme_frame(&self.packet,self.eac3_programme)
+                    .ok_or_else(||invalid("missing selected E-AC-3 native seek rate"))?.sample_rate
+            }else{
+                crate::codec::ac3_decoder::syncframe(&self.packet)
+                    .ok_or_else(||invalid("invalid AC-3 native seek rate"))?.sample_rate
+            }
+        }else{fallback};
         if rate==0 {return Err(invalid("zero MP4 native seek rate"));}Ok(rate)
     }
     fn native_landing(&mut self,wanted:EditTime)->Result<Option<EditTime>> {
@@ -447,7 +462,14 @@ impl<R: Read + Seek> Mp4AudioReader<R> {
             let start=EditTime::signed_ticks(sample.pts,self.track().timescale)?;
             let offset=wanted.sub(start)?.ceil_frames(rate)?.max(0);
             let setup=self.track().description_for_sample(index).ok_or_else(||invalid("missing MP4 seek header"))?;
-            let frames=if setup.codec==*b"alac" {
+            let frames=if matches!(&setup.codec,b"ac-3"|b"ec-3") {
+                self.demuxer.read_packet(self.track_index,index,&mut self.packet)?;
+                let setup=self.track().description_for_sample(index).ok_or_else(||invalid("missing Dolby seek header"))?;
+                let coded=clock_recovery::mp4_coded_packet_frames_for_programme(
+                    self.eac3_programme,&setup.codec,&setup.configuration,rate,setup.channels,
+                    setup.bit_depth,sample.size as usize,Some(&self.packet)).map_err(|e|invalid(&e))?;
+                i128::from(coded).min(EditTime::ticks(u64::from(sample.duration),self.track().timescale)?.ceil_frames(rate)?)
+            }else if setup.codec==*b"alac" {
                 let count=self.alac_packet_frames(index,rate)?;
                 (count as i128).min(EditTime::ticks(u64::from(sample.duration),self.track().timescale)?.ceil_frames(rate)?)
             }else if setup.codec==*b"mp4a" {
@@ -1517,7 +1539,7 @@ impl<R: Read + Seek + Send> crate::audio::AudioStream for Mp4AudioReader<R> {
             header.codec==*b"alac" || !clock_recovery::clock_description_used(&self.track().samples,i+1));
         let native_codec=|codec:&[u8;4]| matches!(codec,
             b"sowt"|b"twos"|b"raw "|b"in24"|b"in32"|b"fl32"|b"fl64"
-                |b"ima4"|b"ms\0\x11"|b"ms\0\x02"|b"MAC3"|b"MAC6"|b"mp4a"|b"alac");
+                |b"ima4"|b"ms\0\x11"|b"ms\0\x02"|b"MAC3"|b"MAC6"|b"mp4a"|b"alac"|b"ac-3"|b"ec-3");
         // Mixed descriptions share the same per-packet native frame counter.
         // Unselected metadata must not narrow the precise seek route.
         let exact_native=self.track().sample_descriptions.iter().enumerate().all(|(i,header)|

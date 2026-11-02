@@ -1,0 +1,1447 @@
+{
+  "provenance": "Own short arithmetic PCM,existing repository-authored synthetic AC3 5.1 tone and authored EAC3 spectra/multiplexes. Exact aligned14112000Hz clock,classic/reordered/fragmented/hybrid,silence/repeated windows,selected programme1 and actual44.1k with48k metadata hint. Concealed CRC-bad AC3 is a successful concealment control;missing programme7 and packet budget are separate refusal controls. No private media/parameters,FFmpeg,process or network.",
+  "cases": [
+    {
+      "file": "ac3-classic.mp4",
+      "programme": null,
+      "native_frames": 7936,
+      "end_num": 83,
+      "end_den": 500,
+      "source_num": 83,
+      "source_den": 500,
+      "opening_silence_frames": 0,
+      "groups": [
+        {
+          "identity": 0,
+          "start": 0,
+          "rate": 48000,
+          "channels": 2,
+          "frames": 96,
+          "control": "control-0.mp4"
+        },
+        {
+          "identity": 3,
+          "start": 28224,
+          "rate": 48000,
+          "channels": 6,
+          "frames": 3072,
+          "control": "control-3.mp4"
+        },
+        {
+          "identity": 1,
+          "start": 931392,
+          "rate": 32000,
+          "channels": 1,
+          "frames": 64,
+          "control": "control-1.mp4"
+        },
+        {
+          "identity": 4,
+          "start": 959616,
+          "rate": 48000,
+          "channels": 6,
+          "frames": 4608,
+          "control": "control-4.mp4"
+        },
+        {
+          "identity": 0,
+          "start": 2314368,
+          "rate": 48000,
+          "channels": 2,
+          "frames": 96,
+          "control": "control-0.mp4"
+        }
+      ],
+      "edited": false,
+      "queries_ns": [
+        0,
+        1,
+        500001,
+        1000000,
+        1000001,
+        2500001,
+        66500001,
+        68500001,
+        165999999,
+        166000000,
+        166000001
+      ],
+      "preplay_ns": [
+        2500001,
+        68500001
+      ]
+    },
+    {
+      "file": "ac3-classic-edits.mp4",
+      "programme": null,
+      "native_frames": 15920,
+      "end_num": 333,
+      "end_den": 1000,
+      "source_num": 83,
+      "source_den": 500,
+      "opening_silence_frames": 48,
+      "groups": [
+        {
+          "identity": 0,
+          "start": 0,
+          "rate": 48000,
+          "channels": 2,
+          "frames": 96,
+          "control": "control-0.mp4"
+        },
+        {
+          "identity": 3,
+          "start": 28224,
+          "rate": 48000,
+          "channels": 6,
+          "frames": 3072,
+          "control": "control-3.mp4"
+        },
+        {
+          "identity": 1,
+          "start": 931392,
+          "rate": 32000,
+          "channels": 1,
+          "frames": 64,
+          "control": "control-1.mp4"
+        },
+        {
+          "identity": 4,
+          "start": 959616,
+          "rate": 48000,
+          "channels": 6,
+          "frames": 4608,
+          "control": "control-4.mp4"
+        },
+        {
+          "identity": 0,
+          "start": 2314368,
+          "rate": 48000,
+          "channels": 2,
+          "frames": 96,
+          "control": "control-0.mp4"
+        }
+      ],
+      "edited": true,
+      "queries_ns": [
+        0,
+        1,
+        500001,
+        1000000,
+        1000001,
+        1500001,
+        2500001,
+        66500001,
+        68500001,
+        168500001,
+        169500001,
+        233500001,
+        235500001,
+        332999999,
+        333000000,
+        333000001
+      ],
+      "preplay_ns": [
+        2500001,
+        68500001
+      ]
+    },
+    {
+      "file": "ac3-fragmented.mp4",
+      "programme": null,
+      "native_frames": 7936,
+      "end_num": 83,
+      "end_den": 500,
+      "source_num": 83,
+      "source_den": 500,
+      "opening_silence_frames": 0,
+      "groups": [
+        {
+          "identity": 0,
+          "start": 0,
+          "rate": 48000,
+          "channels": 2,
+          "frames": 96,
+          "control": "control-0.mp4"
+        },
+        {
+          "identity": 3,
+          "start": 28224,
+          "rate": 48000,
+          "channels": 6,
+          "frames": 3072,
+          "control": "control-3.mp4"
+        },
+        {
+          "identity": 1,
+          "start": 931392,
+          "rate": 32000,
+          "channels": 1,
+          "frames": 64,
+          "control": "control-1.mp4"
+        },
+        {
+          "identity": 4,
+          "start": 959616,
+          "rate": 48000,
+          "channels": 6,
+          "frames": 4608,
+          "control": "control-4.mp4"
+        },
+        {
+          "identity": 0,
+          "start": 2314368,
+          "rate": 48000,
+          "channels": 2,
+          "frames": 96,
+          "control": "control-0.mp4"
+        }
+      ],
+      "edited": false,
+      "queries_ns": [
+        0,
+        1,
+        500001,
+        1000000,
+        1000001,
+        2500001,
+        66500001,
+        68500001,
+        165999999,
+        166000000,
+        166000001
+      ],
+      "preplay_ns": [
+        2500001,
+        68500001
+      ]
+    },
+    {
+      "file": "ac3-fragmented-edits.mp4",
+      "programme": null,
+      "native_frames": 15920,
+      "end_num": 333,
+      "end_den": 1000,
+      "source_num": 83,
+      "source_den": 500,
+      "opening_silence_frames": 48,
+      "groups": [
+        {
+          "identity": 0,
+          "start": 0,
+          "rate": 48000,
+          "channels": 2,
+          "frames": 96,
+          "control": "control-0.mp4"
+        },
+        {
+          "identity": 3,
+          "start": 28224,
+          "rate": 48000,
+          "channels": 6,
+          "frames": 3072,
+          "control": "control-3.mp4"
+        },
+        {
+          "identity": 1,
+          "start": 931392,
+          "rate": 32000,
+          "channels": 1,
+          "frames": 64,
+          "control": "control-1.mp4"
+        },
+        {
+          "identity": 4,
+          "start": 959616,
+          "rate": 48000,
+          "channels": 6,
+          "frames": 4608,
+          "control": "control-4.mp4"
+        },
+        {
+          "identity": 0,
+          "start": 2314368,
+          "rate": 48000,
+          "channels": 2,
+          "frames": 96,
+          "control": "control-0.mp4"
+        }
+      ],
+      "edited": true,
+      "queries_ns": [
+        0,
+        1,
+        500001,
+        1000000,
+        1000001,
+        1500001,
+        2500001,
+        66500001,
+        68500001,
+        168500001,
+        169500001,
+        233500001,
+        235500001,
+        332999999,
+        333000000,
+        333000001
+      ],
+      "preplay_ns": [
+        2500001,
+        68500001
+      ]
+    },
+    {
+      "file": "eac3-classic.mp4",
+      "programme": 0,
+      "native_frames": 6416,
+      "end_num": 18281,
+      "end_den": 110250,
+      "source_num": 18281,
+      "source_den": 110250,
+      "opening_silence_frames": 0,
+      "groups": [
+        {
+          "identity": 0,
+          "start": 0,
+          "rate": 48000,
+          "channels": 2,
+          "frames": 96,
+          "control": "control-0.mp4"
+        },
+        {
+          "identity": 6,
+          "start": 28224,
+          "rate": 48000,
+          "channels": 2,
+          "frames": 3072,
+          "control": "control-6.mp4"
+        },
+        {
+          "identity": 2,
+          "start": 931392,
+          "rate": 44100,
+          "channels": 2,
+          "frames": 80,
+          "control": "control-2.mp4"
+        },
+        {
+          "identity": 7,
+          "start": 956992,
+          "rate": 32000,
+          "channels": 1,
+          "frames": 3072,
+          "control": "control-7.mp4"
+        },
+        {
+          "identity": 0,
+          "start": 2311744,
+          "rate": 48000,
+          "channels": 2,
+          "frames": 96,
+          "control": "control-0.mp4"
+        }
+      ],
+      "edited": false,
+      "queries_ns": [
+        0,
+        1,
+        500001,
+        1000000,
+        1000001,
+        2500001,
+        66500001,
+        68314059,
+        165814057,
+        165814058,
+        165814059
+      ],
+      "preplay_ns": [
+        2500001,
+        68314059
+      ]
+    },
+    {
+      "file": "eac3-classic-edits.mp4",
+      "programme": 0,
+      "native_frames": 12880,
+      "end_num": 146689,
+      "end_den": 441000,
+      "source_num": 18281,
+      "source_den": 110250,
+      "opening_silence_frames": 48,
+      "groups": [
+        {
+          "identity": 0,
+          "start": 0,
+          "rate": 48000,
+          "channels": 2,
+          "frames": 96,
+          "control": "control-0.mp4"
+        },
+        {
+          "identity": 6,
+          "start": 28224,
+          "rate": 48000,
+          "channels": 2,
+          "frames": 3072,
+          "control": "control-6.mp4"
+        },
+        {
+          "identity": 2,
+          "start": 931392,
+          "rate": 44100,
+          "channels": 2,
+          "frames": 80,
+          "control": "control-2.mp4"
+        },
+        {
+          "identity": 7,
+          "start": 956992,
+          "rate": 32000,
+          "channels": 1,
+          "frames": 3072,
+          "control": "control-7.mp4"
+        },
+        {
+          "identity": 0,
+          "start": 2311744,
+          "rate": 48000,
+          "channels": 2,
+          "frames": 96,
+          "control": "control-0.mp4"
+        }
+      ],
+      "edited": true,
+      "queries_ns": [
+        0,
+        1,
+        500001,
+        1000000,
+        1000001,
+        1500001,
+        2500001,
+        66500001,
+        68314059,
+        168314059,
+        169314059,
+        233314059,
+        235128118,
+        332628116,
+        332628117,
+        332628118
+      ],
+      "preplay_ns": [
+        2500001,
+        68314059
+      ]
+    },
+    {
+      "file": "eac3-fragmented.mp4",
+      "programme": 0,
+      "native_frames": 6416,
+      "end_num": 18281,
+      "end_den": 110250,
+      "source_num": 18281,
+      "source_den": 110250,
+      "opening_silence_frames": 0,
+      "groups": [
+        {
+          "identity": 0,
+          "start": 0,
+          "rate": 48000,
+          "channels": 2,
+          "frames": 96,
+          "control": "control-0.mp4"
+        },
+        {
+          "identity": 6,
+          "start": 28224,
+          "rate": 48000,
+          "channels": 2,
+          "frames": 3072,
+          "control": "control-6.mp4"
+        },
+        {
+          "identity": 2,
+          "start": 931392,
+          "rate": 44100,
+          "channels": 2,
+          "frames": 80,
+          "control": "control-2.mp4"
+        },
+        {
+          "identity": 7,
+          "start": 956992,
+          "rate": 32000,
+          "channels": 1,
+          "frames": 3072,
+          "control": "control-7.mp4"
+        },
+        {
+          "identity": 0,
+          "start": 2311744,
+          "rate": 48000,
+          "channels": 2,
+          "frames": 96,
+          "control": "control-0.mp4"
+        }
+      ],
+      "edited": false,
+      "queries_ns": [
+        0,
+        1,
+        500001,
+        1000000,
+        1000001,
+        2500001,
+        66500001,
+        68314059,
+        165814057,
+        165814058,
+        165814059
+      ],
+      "preplay_ns": [
+        2500001,
+        68314059
+      ]
+    },
+    {
+      "file": "eac3-fragmented-edits.mp4",
+      "programme": 0,
+      "native_frames": 12880,
+      "end_num": 146689,
+      "end_den": 441000,
+      "source_num": 18281,
+      "source_den": 110250,
+      "opening_silence_frames": 48,
+      "groups": [
+        {
+          "identity": 0,
+          "start": 0,
+          "rate": 48000,
+          "channels": 2,
+          "frames": 96,
+          "control": "control-0.mp4"
+        },
+        {
+          "identity": 6,
+          "start": 28224,
+          "rate": 48000,
+          "channels": 2,
+          "frames": 3072,
+          "control": "control-6.mp4"
+        },
+        {
+          "identity": 2,
+          "start": 931392,
+          "rate": 44100,
+          "channels": 2,
+          "frames": 80,
+          "control": "control-2.mp4"
+        },
+        {
+          "identity": 7,
+          "start": 956992,
+          "rate": 32000,
+          "channels": 1,
+          "frames": 3072,
+          "control": "control-7.mp4"
+        },
+        {
+          "identity": 0,
+          "start": 2311744,
+          "rate": 48000,
+          "channels": 2,
+          "frames": 96,
+          "control": "control-0.mp4"
+        }
+      ],
+      "edited": true,
+      "queries_ns": [
+        0,
+        1,
+        500001,
+        1000000,
+        1000001,
+        1500001,
+        2500001,
+        66500001,
+        68314059,
+        168314059,
+        169314059,
+        233314059,
+        235128118,
+        332628116,
+        332628117,
+        332628118
+      ],
+      "preplay_ns": [
+        2500001,
+        68314059
+      ]
+    },
+    {
+      "file": "programme-classic.mp4",
+      "programme": 1,
+      "native_frames": 6400,
+      "end_num": 2053,
+      "end_den": 14700,
+      "source_num": 2053,
+      "source_den": 14700,
+      "opening_silence_frames": 0,
+      "groups": [
+        {
+          "identity": 0,
+          "start": 0,
+          "rate": 48000,
+          "channels": 2,
+          "frames": 96,
+          "control": "control-0.mp4"
+        },
+        {
+          "identity": 8,
+          "start": 28224,
+          "rate": 44100,
+          "channels": 3,
+          "frames": 3072,
+          "control": "programme-44100-control.mp4"
+        },
+        {
+          "identity": 1,
+          "start": 1011264,
+          "rate": 32000,
+          "channels": 1,
+          "frames": 64,
+          "control": "control-1.mp4"
+        },
+        {
+          "identity": 9,
+          "start": 1039488,
+          "rate": 48000,
+          "channels": 2,
+          "frames": 3072,
+          "control": "programme-48000-control.mp4"
+        },
+        {
+          "identity": 0,
+          "start": 1942656,
+          "rate": 48000,
+          "channels": 2,
+          "frames": 96,
+          "control": "control-0.mp4"
+        }
+      ],
+      "edited": false,
+      "queries_ns": [
+        0,
+        1,
+        500001,
+        1000000,
+        1000001,
+        2500001,
+        72159864,
+        74159864,
+        139659862,
+        139659863,
+        139659864
+      ],
+      "preplay_ns": [
+        2500001,
+        74159864
+      ]
+    },
+    {
+      "file": "programme-classic-edits.mp4",
+      "programme": 1,
+      "native_frames": 12848,
+      "end_num": 41207,
+      "end_den": 147000,
+      "source_num": 2053,
+      "source_den": 14700,
+      "opening_silence_frames": 48,
+      "groups": [
+        {
+          "identity": 0,
+          "start": 0,
+          "rate": 48000,
+          "channels": 2,
+          "frames": 96,
+          "control": "control-0.mp4"
+        },
+        {
+          "identity": 8,
+          "start": 28224,
+          "rate": 44100,
+          "channels": 3,
+          "frames": 3072,
+          "control": "programme-44100-control.mp4"
+        },
+        {
+          "identity": 1,
+          "start": 1011264,
+          "rate": 32000,
+          "channels": 1,
+          "frames": 64,
+          "control": "control-1.mp4"
+        },
+        {
+          "identity": 9,
+          "start": 1039488,
+          "rate": 48000,
+          "channels": 2,
+          "frames": 3072,
+          "control": "programme-48000-control.mp4"
+        },
+        {
+          "identity": 0,
+          "start": 1942656,
+          "rate": 48000,
+          "channels": 2,
+          "frames": 96,
+          "control": "control-0.mp4"
+        }
+      ],
+      "edited": true,
+      "queries_ns": [
+        0,
+        1,
+        500001,
+        1000000,
+        1000001,
+        1500001,
+        2500001,
+        72159864,
+        74159864,
+        142159864,
+        143159864,
+        212819728,
+        214819728,
+        280319726,
+        280319727,
+        280319728
+      ],
+      "preplay_ns": [
+        2500001,
+        74159864
+      ]
+    },
+    {
+      "file": "programme-fragmented.mp4",
+      "programme": 1,
+      "native_frames": 6400,
+      "end_num": 2053,
+      "end_den": 14700,
+      "source_num": 2053,
+      "source_den": 14700,
+      "opening_silence_frames": 0,
+      "groups": [
+        {
+          "identity": 0,
+          "start": 0,
+          "rate": 48000,
+          "channels": 2,
+          "frames": 96,
+          "control": "control-0.mp4"
+        },
+        {
+          "identity": 8,
+          "start": 28224,
+          "rate": 44100,
+          "channels": 3,
+          "frames": 3072,
+          "control": "programme-44100-control.mp4"
+        },
+        {
+          "identity": 1,
+          "start": 1011264,
+          "rate": 32000,
+          "channels": 1,
+          "frames": 64,
+          "control": "control-1.mp4"
+        },
+        {
+          "identity": 9,
+          "start": 1039488,
+          "rate": 48000,
+          "channels": 2,
+          "frames": 3072,
+          "control": "programme-48000-control.mp4"
+        },
+        {
+          "identity": 0,
+          "start": 1942656,
+          "rate": 48000,
+          "channels": 2,
+          "frames": 96,
+          "control": "control-0.mp4"
+        }
+      ],
+      "edited": false,
+      "queries_ns": [
+        0,
+        1,
+        500001,
+        1000000,
+        1000001,
+        2500001,
+        72159864,
+        74159864,
+        139659862,
+        139659863,
+        139659864
+      ],
+      "preplay_ns": [
+        2500001,
+        74159864
+      ]
+    },
+    {
+      "file": "programme-fragmented-edits.mp4",
+      "programme": 1,
+      "native_frames": 12848,
+      "end_num": 41207,
+      "end_den": 147000,
+      "source_num": 2053,
+      "source_den": 14700,
+      "opening_silence_frames": 48,
+      "groups": [
+        {
+          "identity": 0,
+          "start": 0,
+          "rate": 48000,
+          "channels": 2,
+          "frames": 96,
+          "control": "control-0.mp4"
+        },
+        {
+          "identity": 8,
+          "start": 28224,
+          "rate": 44100,
+          "channels": 3,
+          "frames": 3072,
+          "control": "programme-44100-control.mp4"
+        },
+        {
+          "identity": 1,
+          "start": 1011264,
+          "rate": 32000,
+          "channels": 1,
+          "frames": 64,
+          "control": "control-1.mp4"
+        },
+        {
+          "identity": 9,
+          "start": 1039488,
+          "rate": 48000,
+          "channels": 2,
+          "frames": 3072,
+          "control": "programme-48000-control.mp4"
+        },
+        {
+          "identity": 0,
+          "start": 1942656,
+          "rate": 48000,
+          "channels": 2,
+          "frames": 96,
+          "control": "control-0.mp4"
+        }
+      ],
+      "edited": true,
+      "queries_ns": [
+        0,
+        1,
+        500001,
+        1000000,
+        1000001,
+        1500001,
+        2500001,
+        72159864,
+        74159864,
+        142159864,
+        143159864,
+        212819728,
+        214819728,
+        280319726,
+        280319727,
+        280319728
+      ],
+      "preplay_ns": [
+        2500001,
+        74159864
+      ]
+    },
+    {
+      "file": "programme-third.mp4",
+      "programme": 1,
+      "native_frames": 6400,
+      "end_num": 2053,
+      "end_den": 14700,
+      "source_num": 2053,
+      "source_den": 14700,
+      "opening_silence_frames": 0,
+      "groups": [
+        {
+          "identity": 0,
+          "start": 0,
+          "rate": 48000,
+          "channels": 2,
+          "frames": 96,
+          "control": "control-0.mp4"
+        },
+        {
+          "identity": 8,
+          "start": 28224,
+          "rate": 44100,
+          "channels": 3,
+          "frames": 3072,
+          "control": "programme-44100-control.mp4"
+        },
+        {
+          "identity": 1,
+          "start": 1011264,
+          "rate": 32000,
+          "channels": 1,
+          "frames": 64,
+          "control": "control-1.mp4"
+        },
+        {
+          "identity": 9,
+          "start": 1039488,
+          "rate": 48000,
+          "channels": 2,
+          "frames": 3072,
+          "control": "programme-48000-control.mp4"
+        },
+        {
+          "identity": 0,
+          "start": 1942656,
+          "rate": 48000,
+          "channels": 2,
+          "frames": 96,
+          "control": "control-0.mp4"
+        }
+      ],
+      "edited": false,
+      "queries_ns": [
+        0,
+        1,
+        500001,
+        1000000,
+        1000001,
+        2500001,
+        72159864,
+        74159864,
+        139659862,
+        139659863,
+        139659864
+      ],
+      "preplay_ns": [
+        2500001,
+        74159864
+      ]
+    },
+    {
+      "file": "programme-third-edits.mp4",
+      "programme": 1,
+      "native_frames": 12848,
+      "end_num": 41207,
+      "end_den": 147000,
+      "source_num": 2053,
+      "source_den": 14700,
+      "opening_silence_frames": 48,
+      "groups": [
+        {
+          "identity": 0,
+          "start": 0,
+          "rate": 48000,
+          "channels": 2,
+          "frames": 96,
+          "control": "control-0.mp4"
+        },
+        {
+          "identity": 8,
+          "start": 28224,
+          "rate": 44100,
+          "channels": 3,
+          "frames": 3072,
+          "control": "programme-44100-control.mp4"
+        },
+        {
+          "identity": 1,
+          "start": 1011264,
+          "rate": 32000,
+          "channels": 1,
+          "frames": 64,
+          "control": "control-1.mp4"
+        },
+        {
+          "identity": 9,
+          "start": 1039488,
+          "rate": 48000,
+          "channels": 2,
+          "frames": 3072,
+          "control": "programme-48000-control.mp4"
+        },
+        {
+          "identity": 0,
+          "start": 1942656,
+          "rate": 48000,
+          "channels": 2,
+          "frames": 96,
+          "control": "control-0.mp4"
+        }
+      ],
+      "edited": true,
+      "queries_ns": [
+        0,
+        1,
+        500001,
+        1000000,
+        1000001,
+        1500001,
+        2500001,
+        72159864,
+        74159864,
+        142159864,
+        143159864,
+        212819728,
+        214819728,
+        280319726,
+        280319727,
+        280319728
+      ],
+      "preplay_ns": [
+        2500001,
+        74159864
+      ]
+    },
+    {
+      "file": "programme-hybrid.mp4",
+      "programme": 1,
+      "native_frames": 6400,
+      "end_num": 2053,
+      "end_den": 14700,
+      "source_num": 2053,
+      "source_den": 14700,
+      "opening_silence_frames": 0,
+      "groups": [
+        {
+          "identity": 0,
+          "start": 0,
+          "rate": 48000,
+          "channels": 2,
+          "frames": 96,
+          "control": "control-0.mp4"
+        },
+        {
+          "identity": 8,
+          "start": 28224,
+          "rate": 44100,
+          "channels": 3,
+          "frames": 3072,
+          "control": "programme-44100-control.mp4"
+        },
+        {
+          "identity": 1,
+          "start": 1011264,
+          "rate": 32000,
+          "channels": 1,
+          "frames": 64,
+          "control": "control-1.mp4"
+        },
+        {
+          "identity": 9,
+          "start": 1039488,
+          "rate": 48000,
+          "channels": 2,
+          "frames": 3072,
+          "control": "programme-48000-control.mp4"
+        },
+        {
+          "identity": 0,
+          "start": 1942656,
+          "rate": 48000,
+          "channels": 2,
+          "frames": 96,
+          "control": "control-0.mp4"
+        }
+      ],
+      "edited": false,
+      "queries_ns": [
+        0,
+        1,
+        500001,
+        1000000,
+        1000001,
+        2500001,
+        72159864,
+        74159864,
+        139659862,
+        139659863,
+        139659864
+      ],
+      "preplay_ns": [
+        2500001,
+        74159864
+      ]
+    },
+    {
+      "file": "programme-hybrid-edits.mp4",
+      "programme": 1,
+      "native_frames": 12848,
+      "end_num": 41207,
+      "end_den": 147000,
+      "source_num": 2053,
+      "source_den": 14700,
+      "opening_silence_frames": 48,
+      "groups": [
+        {
+          "identity": 0,
+          "start": 0,
+          "rate": 48000,
+          "channels": 2,
+          "frames": 96,
+          "control": "control-0.mp4"
+        },
+        {
+          "identity": 8,
+          "start": 28224,
+          "rate": 44100,
+          "channels": 3,
+          "frames": 3072,
+          "control": "programme-44100-control.mp4"
+        },
+        {
+          "identity": 1,
+          "start": 1011264,
+          "rate": 32000,
+          "channels": 1,
+          "frames": 64,
+          "control": "control-1.mp4"
+        },
+        {
+          "identity": 9,
+          "start": 1039488,
+          "rate": 48000,
+          "channels": 2,
+          "frames": 3072,
+          "control": "programme-48000-control.mp4"
+        },
+        {
+          "identity": 0,
+          "start": 1942656,
+          "rate": 48000,
+          "channels": 2,
+          "frames": 96,
+          "control": "control-0.mp4"
+        }
+      ],
+      "edited": true,
+      "queries_ns": [
+        0,
+        1,
+        500001,
+        1000000,
+        1000001,
+        1500001,
+        2500001,
+        72159864,
+        74159864,
+        142159864,
+        143159864,
+        212819728,
+        214819728,
+        280319726,
+        280319727,
+        280319728
+      ],
+      "preplay_ns": [
+        2500001,
+        74159864
+      ]
+    },
+    {
+      "file": "combined-classic-edits.mp4",
+      "programme": 0,
+      "native_frames": 28208,
+      "end_num": 653,
+      "end_den": 1000,
+      "source_num": 163,
+      "source_den": 500,
+      "opening_silence_frames": 48,
+      "groups": [
+        {
+          "identity": 0,
+          "start": 0,
+          "rate": 48000,
+          "channels": 2,
+          "frames": 96,
+          "control": "control-0.mp4"
+        },
+        {
+          "identity": 3,
+          "start": 28224,
+          "rate": 48000,
+          "channels": 6,
+          "frames": 3072,
+          "control": "control-3.mp4"
+        },
+        {
+          "identity": 7,
+          "start": 931392,
+          "rate": 32000,
+          "channels": 1,
+          "frames": 3072,
+          "control": "control-7.mp4"
+        },
+        {
+          "identity": 1,
+          "start": 2286144,
+          "rate": 32000,
+          "channels": 1,
+          "frames": 64,
+          "control": "control-1.mp4"
+        },
+        {
+          "identity": 6,
+          "start": 2314368,
+          "rate": 48000,
+          "channels": 2,
+          "frames": 3072,
+          "control": "control-6.mp4"
+        },
+        {
+          "identity": 4,
+          "start": 3217536,
+          "rate": 48000,
+          "channels": 6,
+          "frames": 4608,
+          "control": "control-4.mp4"
+        },
+        {
+          "identity": 0,
+          "start": 4572288,
+          "rate": 48000,
+          "channels": 2,
+          "frames": 96,
+          "control": "control-0.mp4"
+        }
+      ],
+      "edited": true,
+      "queries_ns": [
+        0,
+        1,
+        500001,
+        1000000,
+        1000001,
+        1500001,
+        2500001,
+        66500001,
+        162500001,
+        164500001,
+        228500001,
+        328500001,
+        329500001,
+        393500001,
+        489500001,
+        491500001,
+        555500001,
+        652999999,
+        653000000,
+        653000001
+      ],
+      "preplay_ns": [
+        2500001,
+        66500001,
+        164500001,
+        228500001
+      ]
+    },
+    {
+      "file": "combined-hybrid.mp4",
+      "programme": 0,
+      "native_frames": 14080,
+      "end_num": 163,
+      "end_den": 500,
+      "source_num": 163,
+      "source_den": 500,
+      "opening_silence_frames": 0,
+      "groups": [
+        {
+          "identity": 0,
+          "start": 0,
+          "rate": 48000,
+          "channels": 2,
+          "frames": 96,
+          "control": "control-0.mp4"
+        },
+        {
+          "identity": 3,
+          "start": 28224,
+          "rate": 48000,
+          "channels": 6,
+          "frames": 3072,
+          "control": "control-3.mp4"
+        },
+        {
+          "identity": 7,
+          "start": 931392,
+          "rate": 32000,
+          "channels": 1,
+          "frames": 3072,
+          "control": "control-7.mp4"
+        },
+        {
+          "identity": 1,
+          "start": 2286144,
+          "rate": 32000,
+          "channels": 1,
+          "frames": 64,
+          "control": "control-1.mp4"
+        },
+        {
+          "identity": 6,
+          "start": 2314368,
+          "rate": 48000,
+          "channels": 2,
+          "frames": 3072,
+          "control": "control-6.mp4"
+        },
+        {
+          "identity": 4,
+          "start": 3217536,
+          "rate": 48000,
+          "channels": 6,
+          "frames": 4608,
+          "control": "control-4.mp4"
+        },
+        {
+          "identity": 0,
+          "start": 4572288,
+          "rate": 48000,
+          "channels": 2,
+          "frames": 96,
+          "control": "control-0.mp4"
+        }
+      ],
+      "edited": false,
+      "queries_ns": [
+        0,
+        1,
+        500001,
+        1000000,
+        1000001,
+        2500001,
+        66500001,
+        162500001,
+        164500001,
+        228500001,
+        325999999,
+        326000000,
+        326000001
+      ],
+      "preplay_ns": [
+        2500001,
+        66500001,
+        164500001,
+        228500001
+      ]
+    },
+    {
+      "file": "concealed-classic-edits.mp4",
+      "programme": null,
+      "native_frames": 6576,
+      "end_num": 137,
+      "end_den": 1000,
+      "source_num": 17,
+      "source_den": 250,
+      "opening_silence_frames": 48,
+      "groups": [
+        {
+          "identity": 0,
+          "start": 0,
+          "rate": 48000,
+          "channels": 2,
+          "frames": 96,
+          "control": "control-0.mp4"
+        },
+        {
+          "identity": 5,
+          "start": 28224,
+          "rate": 48000,
+          "channels": 6,
+          "frames": 3072,
+          "control": "control-5.mp4"
+        },
+        {
+          "identity": 0,
+          "start": 931392,
+          "rate": 48000,
+          "channels": 2,
+          "frames": 96,
+          "control": "control-0.mp4"
+        }
+      ],
+      "edited": true,
+      "queries_ns": [
+        0,
+        1,
+        500001,
+        1000000,
+        1000001,
+        1500001,
+        2500001,
+        70500001,
+        71500001,
+        136999999,
+        137000000,
+        137000001
+      ],
+      "preplay_ns": [
+        2500001
+      ]
+    }
+  ],
+  "refusal": {
+    "file": "missing-programme.mp4",
+    "programme": 7
+  },
+  "budget": {
+    "file": "ac3-classic.mp4",
+    "bytes": 1792,
+    "target_ns": 100500001
+  },
+  "sha256": {
+    "programme-44100-control.mp4": "de1923b6eb51a7f98300c2d95e58632f9ef27a3aff30bd6d7e89b0bf543bed18",
+    "programme-48000-control.mp4": "00dd0a87ff8a939d7508723639b963c22641dbd53ab88719f0276a72d8b1db87",
+    "control-0.mp4": "da9968b2af073db2d1c6c66e113c135437408c9758164cf3a12273c227afb0b2",
+    "control-1.mp4": "9ea218097afc5aece5f59960cfa26293e551445411a1d8eff108bc9140bbbc68",
+    "control-2.mp4": "1e07e02f74528cbf28d67a9f7c352d0bad6795f3d65150e4602705657aa63f9e",
+    "control-3.mp4": "099b7b37a824d4dd02329baba1896130aa6291b48081eba5c6b7db5eed7c8906",
+    "control-4.mp4": "92db25b61f7cdce4a506564d4e02c6e147b6333fa2a9cc6d02dfe27d62a95400",
+    "control-5.mp4": "9059b56733037e243248aa4d194ed268e9040a42ee39af763b61d92af192ef30",
+    "control-6.mp4": "b6f66638530738b841104a7ece8210ac4e3c8d787674e610ac70c6742d28ccb2",
+    "control-7.mp4": "822a2c0e560f2ac444b3ac4b83febbb9b91871465a772e12ab27e108efbfa73f",
+    "ac3-classic.mp4": "826f724675cc2a6754354b5af1c1a23f812517e481e6f10ca5b6d1f5a2e43e4b",
+    "ac3-classic-edits.mp4": "2194a3c127a4eb9e17d3c13224be7d2cda1ccaf7382fd6f943aacef9df425d7a",
+    "ac3-fragmented.mp4": "3cdc9a8e9cfddca70e292fbfb12a5dce7e9ef52e48ee7919189f445c8ba5f6b5",
+    "ac3-fragmented-edits.mp4": "b8e37bab546459b433184e08a0aab09e5287c3a79e8adbbe91e1ea719de79a59",
+    "eac3-classic.mp4": "ea711a2f500b07eafa50ac80da480874a76ffc2c5bf14cb21150e8fbf7006af4",
+    "eac3-classic-edits.mp4": "a936d3e87661e5cf9c08400ad7aaa9819453f7f2caacee353296d14bb449f8aa",
+    "eac3-fragmented.mp4": "21cf87cd8edc90aaf88223e980ae525d10a9b61ce4765b01dab52b244da3e48d",
+    "eac3-fragmented-edits.mp4": "d2e3cfb1ae60c2f780d373640d62dccbebbf14f74914f9f09f5f15888f5d6bce",
+    "programme-classic.mp4": "0f2101c4c953af2a7578ed4bb21c086ed924ec8f04ca5ebb71e4108dc636d0a2",
+    "programme-classic-edits.mp4": "871733951ae02acb3c4a64af2b02658b0c0f31a87e42b49c199b00753af4102a",
+    "programme-fragmented.mp4": "88e93785137e74dd080e9eb8f5c72c4869392de2585075c12238f5ed6ffed9d9",
+    "programme-fragmented-edits.mp4": "9e9509326cff309fc91eb8f8b8b266adabda51d164ffc9a2fd827a382ac4876d",
+    "programme-third.mp4": "47b7a02aca698a620322668f9a7d3f2e6b5080bf6e350b210a418b57009bbe66",
+    "programme-third-edits.mp4": "f7c7d7229037f2072dc3caa3d8324ee6846c71ca07b865e46057ea2cfb6fdc53",
+    "programme-hybrid.mp4": "0a5bd694ef9d6a7f4df41b776c90bccac512508332208afd02ce939e7480a70a",
+    "programme-hybrid-edits.mp4": "2c30a5c18297cb78ef191076244471147e73df695b030d7903e6bcc0633226af",
+    "combined-classic-edits.mp4": "f691ded794676fe028c0290738f9a58bd2b9a4ed390b7c742fd004002c247659",
+    "combined-hybrid.mp4": "8e0e789e2b3e8d351665bc3a76fe7a69ec9b5c6de7d56ecedecb81ae626972b7",
+    "concealed-classic-edits.mp4": "0007d7bbc9c81a47fd83b4a8cef92616c3b350f9f562819d38340cdf7121739d",
+    "missing-programme.mp4": "d131143e2b7ae5d5d36de758cc3d5156b17d0999503aae8958fcb9f8e07d4650"
+  }
+}

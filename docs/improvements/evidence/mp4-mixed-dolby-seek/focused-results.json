@@ -1,0 +1,30 @@
+{
+  "baseline": {
+    "test_results": [
+      "FAILED. 3 passed; 2 failed; 0 ignored; 0 measured; 0 filtered out; finished in 4.12s"
+    ],
+    "compile_error": false
+  },
+  "baseline-expanded": {
+    "test_results": [],
+    "compile_error": true
+  },
+  "baseline-expanded-fixed": {
+    "test_results": [
+      "FAILED. 4 passed; 3 failed; 0 ignored; 0 measured; 0 filtered out; finished in 3.83s"
+    ],
+    "compile_error": false
+  },
+  "candidate": {
+    "test_results": [
+      "ok. 7 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 35.72s"
+    ],
+    "compile_error": false
+  },
+  "candidate-expanded": {
+    "test_results": [
+      "ok. 10 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 36.25s"
+    ],
+    "compile_error": false
+  }
+}
