@@ -1,0 +1,117 @@
+{
+  "provenance": "Analytic interleaved exact binary PCM, handcrafted RIFF headers and authored VP9 control. No encoder, private media or network.",
+  "cases": [
+    {
+      "name": "s16-surround",
+      "channels": 6,
+      "mask": 63,
+      "rate": 44100,
+      "frames": 4099
+    },
+    {
+      "name": "s16-rear",
+      "channels": 2,
+      "mask": 48,
+      "rate": 44100,
+      "frames": 4099
+    },
+    {
+      "name": "s16-lfe",
+      "channels": 1,
+      "mask": 8,
+      "rate": 44100,
+      "frames": 4099
+    },
+    {
+      "name": "s16-front",
+      "channels": 3,
+      "mask": 7,
+      "rate": 44100,
+      "frames": 4099
+    },
+    {
+      "name": "s16-direct",
+      "channels": 3,
+      "mask": 0,
+      "rate": 44100,
+      "frames": 4099
+    },
+    {
+      "name": "s16-discrete",
+      "channels": 9,
+      "mask": 0,
+      "rate": 44100,
+      "frames": 4099
+    },
+    {
+      "name": "s16-partial",
+      "channels": 3,
+      "mask": 3,
+      "rate": 44100,
+      "frames": 4099
+    },
+    {
+      "name": "s16-classic",
+      "channels": 2,
+      "mask": null,
+      "rate": 44100,
+      "frames": 4099
+    },
+    {
+      "name": "f32-surround",
+      "channels": 6,
+      "mask": 63,
+      "rate": 44100,
+      "frames": 4099
+    },
+    {
+      "name": "f32-rear",
+      "channels": 2,
+      "mask": 48,
+      "rate": 44100,
+      "frames": 4099
+    },
+    {
+      "name": "f32-lfe",
+      "channels": 1,
+      "mask": 8,
+      "rate": 44100,
+      "frames": 4099
+    },
+    {
+      "name": "f32-front",
+      "channels": 3,
+      "mask": 7,
+      "rate": 44100,
+      "frames": 4099
+    },
+    {
+      "name": "f32-direct",
+      "channels": 3,
+      "mask": 0,
+      "rate": 44100,
+      "frames": 4099
+    },
+    {
+      "name": "f32-discrete",
+      "channels": 9,
+      "mask": 0,
+      "rate": 44100,
+      "frames": 4099
+    },
+    {
+      "name": "f32-partial",
+      "channels": 3,
+      "mask": 3,
+      "rate": 44100,
+      "frames": 4099
+    },
+    {
+      "name": "f32-classic",
+      "channels": 2,
+      "mask": null,
+      "rate": 44100,
+      "frames": 4099
+    }
+  ]
+}

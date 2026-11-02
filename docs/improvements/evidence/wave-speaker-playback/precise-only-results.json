@@ -1,0 +1,17 @@
+{
+  "command": [
+    "cargo",
+    "test",
+    "--locked",
+    "--offline",
+    "--no-default-features",
+    "--features",
+    "player",
+    "--test",
+    "wave_speaker_playback",
+    "--",
+    "--test-threads=2"
+  ],
+  "exit_code": 101,
+  "source_stable": true
+}

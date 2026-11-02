@@ -1,0 +1,163 @@
+{
+  "integration": {
+    "command": [
+      "cargo",
+      "test",
+      "--locked",
+      "--offline",
+      "--no-default-features",
+      "--features",
+      "player",
+      "--test",
+      "wave_speaker_playback",
+      "--test",
+      "wav_valid_bits",
+      "--test",
+      "wav_unsigned8",
+      "--test",
+      "wav_aiff_au_regressions",
+      "--test",
+      "audio_reader_eof",
+      "--test",
+      "block_audio_eof",
+      "--test",
+      "g711_native",
+      "--test",
+      "coded_seek_history",
+      "--test",
+      "coded_window_clock",
+      "--test",
+      "audio_index_eof",
+      "--test",
+      "native_wave_audio",
+      "--test",
+      "native_wave_route_regressions",
+      "--",
+      "--test-threads=2"
+    ],
+    "exit_code": 0,
+    "seconds": 31.186827898025513,
+    "source_stable": true,
+    "passed": 35,
+    "failed": 0,
+    "ignored": 0
+  },
+  "root-wave": {
+    "command": [
+      "cargo",
+      "test",
+      "--locked",
+      "--offline",
+      "--no-default-features",
+      "--features",
+      "player",
+      "--lib",
+      "playback_wav",
+      "--",
+      "--test-threads=2"
+    ],
+    "exit_code": 0,
+    "seconds": 19.12130308151245,
+    "source_stable": true,
+    "passed": 33,
+    "failed": 0,
+    "ignored": 0
+  },
+  "root-cpal": {
+    "command": [
+      "cargo",
+      "test",
+      "--locked",
+      "--offline",
+      "--no-default-features",
+      "--features",
+      "player",
+      "--lib",
+      "audio::cpal_backend",
+      "--",
+      "--test-threads=2"
+    ],
+    "exit_code": 0,
+    "seconds": 2.666728973388672,
+    "source_stable": true,
+    "passed": 43,
+    "failed": 0,
+    "ignored": 2
+  },
+  "audio-worker": {
+    "command": [
+      "cargo",
+      "test",
+      "--locked",
+      "--offline",
+      "--no-default-features",
+      "--features",
+      "player",
+      "--lib",
+      "audio_thread",
+      "--",
+      "--test-threads=2"
+    ],
+    "exit_code": 0,
+    "seconds": 5.719292163848877,
+    "source_stable": true,
+    "passed": 39,
+    "failed": 0,
+    "ignored": 0
+  },
+  "owned-router": {
+    "command": [
+      "cargo",
+      "test",
+      "-p",
+      "fvid-media",
+      "--locked",
+      "--offline",
+      "--no-default-features",
+      "--features",
+      "player",
+      "--lib",
+      "owned_stereo_router",
+      "--",
+      "--test-threads=2"
+    ],
+    "exit_code": 0,
+    "seconds": 30.596440076828003,
+    "source_stable": true,
+    "passed": 3,
+    "failed": 0,
+    "ignored": 0
+  },
+  "core-check": {
+    "command": [
+      "cargo",
+      "check",
+      "--locked",
+      "--offline",
+      "--no-default-features"
+    ],
+    "exit_code": 0,
+    "seconds": 78.35010409355164,
+    "source_stable": true,
+    "passed": 0,
+    "failed": 0,
+    "ignored": 0
+  },
+  "player-check": {
+    "command": [
+      "cargo",
+      "check",
+      "--locked",
+      "--offline",
+      "--no-default-features",
+      "--features",
+      "player"
+    ],
+    "exit_code": 0,
+    "seconds": 64.75974082946777,
+    "source_stable": true,
+    "passed": 0,
+    "failed": 0,
+    "ignored": 0
+  }
+}

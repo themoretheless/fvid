@@ -1,0 +1,35 @@
+{
+  "all-original": {
+    "candidate_difference_paths": [
+      "src/playback/audio/aiff.rs",
+      "src/playback/audio/au.rs",
+      "src/playback/audio/wav.rs"
+    ],
+    "passed": 1,
+    "failed": 5,
+    "ignored": 0,
+    "exit_code": 101
+  },
+  "mask-only-final": {
+    "candidate_difference_paths": [
+      "src/playback/audio/aiff.rs",
+      "src/playback/audio/au.rs",
+      "src/playback/audio/wav.rs"
+    ],
+    "passed": 2,
+    "failed": 4,
+    "ignored": 0,
+    "exit_code": 101
+  },
+  "precise-only-final": {
+    "candidate_difference_paths": [
+      "src/playback/audio/wav.rs"
+    ],
+    "passed": 4,
+    "failed": 2,
+    "ignored": 0,
+    "exit_code": 101
+  },
+  "frozen_paths": 2948,
+  "original_commit": "6920f9838479089b3e8cb1c6a740d8ff4a36c9a0"
+}

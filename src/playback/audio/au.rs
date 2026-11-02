@@ -326,6 +326,15 @@ impl AudioStream for AuAudioReader {
         self.presentation_floor = 0;
     }
 
+    fn seek_time(&mut self, target: Duration) -> i64 {
+        // Preserve raw coordinate seeking while presenting no sample before
+        // the unquantized user-time request.
+        let target = (target.as_nanos() * u128::from(self.sample_rate()))
+            .div_ceil(1_000_000_000)
+            .min(self.au.frames as u128) as i64;
+        self.seek_to(target)
+    }
+
     fn seek_to(&mut self, pts: i64) -> i64 {
         self.frame_skip = 0;
         self.presentation_floor = (pts.max(0) as u64).min(self.au.frames as u64);

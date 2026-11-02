@@ -1,8 +1,8 @@
 {
   "target": 1000,
   "counting_rule": "One independently confirmed problem or useful capability; fixture variants and baseline integration repairs are excluded. Only accepted entries count.",
-  "accepted_count": 522,
-  "next_id": "FVID-0523",
+  "accepted_count": 524,
+  "next_id": "FVID-0525",
   "entries": [
     {
       "id": "FVID-0001",
@@ -5926,6 +5926,28 @@
       "additional_regressions": [
         "src/audio/cpal_backend.rs"
       ]
+    },
+    {
+      "id": "FVID-0523",
+      "batch": 534,
+      "title": "Preserve WAVE extensible speaker assignments through player negotiation",
+      "source": "src/playback/audio/wav.rs",
+      "regression": "tests/wave_speaker_playback.rs",
+      "before": "Original6920f98384 validates dwChannelMask but discards it. An authored six-channel PCM file decodes exactly,then reports no speaker mask and fails actual-worker startup on a stereo-only sink. Native video/PCM,rewind and specific too-many-speakers refusal controls pass. Final original suite passes1/fails5;the mask-only variant passes the coefficient test while independent precise-seek tests still fail.",
+      "result": "Retain the validated optional mask privately in Wav and expose it through the existing AudioStream speaker_mask hook,thereby using the existing device stereo router. Preserve None for classic headers and Some(0) for explicitly unassigned channels;no PCM reordering or new folding policy. Sixteen PCM16/float32 authored WAVE cases include14 extensible layouts:surround,rear-only stereo,LFE-only mono,front three,discrete3/9 and partial assignment,plus two classic controls. Exact coefficients,basis routing,budgets and80 actual-worker seek/EOF sessions pass. The separate precise-only variant still fails speaker negotiation,proving independence from FVID-0524. Nine frozen-source gates pass178 Rust executions,two existing physical-device ignores,core/player checks;three6-test repeats and6 executions without FFmpeg pass. All42 new fixture files regenerate byte-identically and2948 source/fixture hashes stay stable. Physical audio hardware and performance are not qualified.",
+      "status": "accepted",
+      "validation": "batch-534-validation.json"
+    },
+    {
+      "id": "FVID-0524",
+      "batch": 534,
+      "title": "Offer unquantized native Duration seeking for bare WAVE AIFF and AU readers",
+      "source": "src/playback/audio/wav.rs",
+      "regression": "tests/wave_speaker_playback.rs",
+      "before": "These window readers inherit the documented default tick-quantized Duration navigation:1ns at44.1kHz lands on sample0. Native PCM is correct,but a first-native-sample-at-or-after-time capability is absent. Final original suite passes1/fails5;mask-only passes2/fails4,including native,actual-worker and predictive-history precise-seek checks. This is an explicit navigation capability upgrade,not a claim that the previous documented rounding contract was a parser defect.",
+      "result": "Override seek_time in WAVE,AIFF and AU with integer ceiling to native sample coordinates,clamped to available frame extent before narrowing. Reuse existing exact PCM/G711 offsets and predictive history/presentation-floor machinery;raw seek_to coordinates and rewind remain unchanged. Sixteen WAVE controls,three independently authored AIFF/AU PCM16/float32 controls and12 existing synthetic MACE/GSM/TrueSpeech/G722/G726/Creative sources verify cold/warm exact native suffixes,rational clocks,EOF/MAX,raw follow-up,rewind and143 total actual-worker sessions across the six-test suite. The precise-only variant passes4/fails2,leaving speaker-mask failures;each fix is independently required. All three window adapters count as one capability. Duration behavior migration is documented in the evidence README;call seek_to with explicit native ticks for coordinate navigation. Nine frozen-source gates pass178 Rust executions,two existing physical-device ignores,core/player checks;three6-test repeats and6 executions without FFmpeg pass. All42 new fixture files regenerate byte-identically and2948 source/fixture hashes stay stable. Physical audio hardware and performance are not qualified.",
+      "status": "accepted",
+      "validation": "batch-534-validation.json"
     }
   ]
 }

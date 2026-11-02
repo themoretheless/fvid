@@ -1,0 +1,8 @@
+{
+  "command": "cargo test --locked --offline --no-default-features --features player --test wave_speaker_playback -- --test-threads=2",
+  "exit_code": 101,
+  "passed": 1,
+  "failed": 2,
+  "source_stable": true,
+  "production_wave_matches_head": true
+}

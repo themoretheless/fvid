@@ -275,6 +275,8 @@ pub struct Wav {
     /// Frames the reader will hand over, a short tail included.
     pub frames: usize,
     data: Vec<u8>,
+    // None is a classic header; Some(0) explicitly leaves roles unassigned.
+    speaker_mask: Option<u32>,
 }
 
 impl Wav {
@@ -356,7 +358,7 @@ impl Wav {
                 }
             }
         }
-        let pcm = fmt.ok_or_else(|| invalid("a Wave file with no fmt chunk"))?;
+        let (pcm, speaker_mask) = fmt.ok_or_else(|| invalid("a Wave file with no fmt chunk"))?;
         let (start, end, declared_bytes) =
             data.ok_or_else(|| invalid("a Wave file with no data chunk"))?;
         let samples = &bytes[start..end];
@@ -401,6 +403,7 @@ impl Wav {
             declared_frames: fact,
             frames,
             data: samples.to_vec(),
+            speaker_mask,
         })
     }
 
@@ -437,7 +440,7 @@ impl Wav {
     }
 }
 
-fn parse_fmt(body: &[u8], limits: &Limits) -> Result<Pcm> {
+fn parse_fmt(body: &[u8], limits: &Limits) -> Result<(Pcm, Option<u32>)> {
     if body.len() < 16 {
         return Err(invalid("fmt chunk is shorter than its seven fields"));
     }
@@ -449,6 +452,7 @@ fn parse_fmt(body: &[u8], limits: &Limits) -> Result<Pcm> {
     let byte_rate = u32_at(8);
     let block_align = u16_at(12);
     let mut bits = u16_at(14);
+    let mut speaker_mask = None;
     if format == EXTENSIBLE {
         // WAVE_FORMAT_EXTENSIBLE repeats the geometry above and adds a GUID saying
         // what the samples actually are; the low half of the GUID's first word is
@@ -460,6 +464,7 @@ fn parse_fmt(body: &[u8], limits: &Limits) -> Result<Pcm> {
             return Err(invalid("extensible fmt chunk has no sub-format to read"));
         }
         let channel_mask = u32_at(20);
+        speaker_mask = Some(channel_mask);
         if channel_mask != 0 && channel_mask.count_ones() > u32::from(channels) {
             return Err(invalid(
                 "extensible Wave channel mask names more speakers than channels",
@@ -659,7 +664,7 @@ fn parse_fmt(body: &[u8], limits: &Limits) -> Result<Pcm> {
             return Err(invalid("byte rate does not match the geometry"));
         }
     }
-    Ok(pcm)
+    Ok((pcm, speaker_mask))
 }
 
 /// A Wave file read as an audio track.
@@ -692,6 +697,10 @@ impl WavAudioReader {
 }
 
 impl AudioStream for WavAudioReader {
+    fn speaker_mask(&self) -> Result<Option<u32>> {
+        Ok(self.wav.speaker_mask)
+    }
+
     fn codec(&self) -> &str {
         self.wav.pcm.codec()
     }
@@ -786,6 +795,15 @@ impl AudioStream for WavAudioReader {
         self.packet = 0;
         self.frame_skip = 0;
         self.presentation_floor = 0;
+    }
+
+    fn seek_time(&mut self, target: Duration) -> i64 {
+        // Keep raw seek_to coordinates unchanged, but do not present a native
+        // sample preceding an unquantized user-time request.
+        let target = (target.as_nanos() * u128::from(self.sample_rate()))
+            .div_ceil(1_000_000_000)
+            .min(self.wav.frames as u128) as i64;
+        self.seek_to(target)
     }
 
     fn seek_to(&mut self, pts: i64) -> i64 {

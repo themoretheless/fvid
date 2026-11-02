@@ -1,0 +1,237 @@
+{
+  "status": "accepted",
+  "accepted_ids": [
+    "FVID-0523",
+    "FVID-0524"
+  ],
+  "follow_up_ids": [],
+  "count_delta": 2,
+  "accepted_count": 524,
+  "next_id": "FVID-0525",
+  "qualification": {
+    "integration": {
+      "command": [
+        "cargo",
+        "test",
+        "--locked",
+        "--offline",
+        "--no-default-features",
+        "--features",
+        "player",
+        "--test",
+        "wave_speaker_playback",
+        "--test",
+        "wav_valid_bits",
+        "--test",
+        "wav_unsigned8",
+        "--test",
+        "wav_aiff_au_regressions",
+        "--test",
+        "audio_reader_eof",
+        "--test",
+        "block_audio_eof",
+        "--test",
+        "g711_native",
+        "--test",
+        "coded_seek_history",
+        "--test",
+        "coded_window_clock",
+        "--test",
+        "audio_index_eof",
+        "--test",
+        "native_wave_audio",
+        "--test",
+        "native_wave_route_regressions",
+        "--",
+        "--test-threads=2"
+      ],
+      "exit_code": 0,
+      "seconds": 28.909748077392578,
+      "source_stable": true,
+      "passed": 37,
+      "failed": 0,
+      "ignored": 0
+    },
+    "root-wave": {
+      "command": [
+        "cargo",
+        "test",
+        "--locked",
+        "--offline",
+        "--no-default-features",
+        "--features",
+        "player",
+        "--lib",
+        "playback_wav",
+        "--",
+        "--test-threads=2"
+      ],
+      "exit_code": 0,
+      "seconds": 20.081581115722656,
+      "source_stable": true,
+      "passed": 33,
+      "failed": 0,
+      "ignored": 0
+    },
+    "root-aiff": {
+      "command": [
+        "cargo",
+        "test",
+        "--locked",
+        "--offline",
+        "--no-default-features",
+        "--features",
+        "player",
+        "--lib",
+        "playback_aiff",
+        "--",
+        "--test-threads=2"
+      ],
+      "exit_code": 0,
+      "seconds": 0.2749660015106201,
+      "source_stable": true,
+      "passed": 14,
+      "failed": 0,
+      "ignored": 0
+    },
+    "root-au": {
+      "command": [
+        "cargo",
+        "test",
+        "--locked",
+        "--offline",
+        "--no-default-features",
+        "--features",
+        "player",
+        "--lib",
+        "playback_au",
+        "--",
+        "--test-threads=2"
+      ],
+      "exit_code": 0,
+      "seconds": 0.2454829216003418,
+      "source_stable": true,
+      "passed": 9,
+      "failed": 0,
+      "ignored": 0
+    },
+    "root-cpal": {
+      "command": [
+        "cargo",
+        "test",
+        "--locked",
+        "--offline",
+        "--no-default-features",
+        "--features",
+        "player",
+        "--lib",
+        "audio::cpal_backend",
+        "--",
+        "--test-threads=2"
+      ],
+      "exit_code": 0,
+      "seconds": 2.6914141178131104,
+      "source_stable": true,
+      "passed": 43,
+      "failed": 0,
+      "ignored": 2
+    },
+    "audio-worker": {
+      "command": [
+        "cargo",
+        "test",
+        "--locked",
+        "--offline",
+        "--no-default-features",
+        "--features",
+        "player",
+        "--lib",
+        "audio_thread",
+        "--",
+        "--test-threads=2"
+      ],
+      "exit_code": 0,
+      "seconds": 5.787203073501587,
+      "source_stable": true,
+      "passed": 39,
+      "failed": 0,
+      "ignored": 0
+    },
+    "owned-router": {
+      "command": [
+        "cargo",
+        "test",
+        "-p",
+        "fvid-media",
+        "--locked",
+        "--offline",
+        "--no-default-features",
+        "--features",
+        "player",
+        "--lib",
+        "owned_stereo_router",
+        "--",
+        "--test-threads=2"
+      ],
+      "exit_code": 0,
+      "seconds": 0.28313612937927246,
+      "source_stable": true,
+      "passed": 3,
+      "failed": 0,
+      "ignored": 0
+    },
+    "core-check": {
+      "command": [
+        "cargo",
+        "check",
+        "--locked",
+        "--offline",
+        "--no-default-features"
+      ],
+      "exit_code": 0,
+      "seconds": 0.15302586555480957,
+      "source_stable": true,
+      "passed": 0,
+      "failed": 0,
+      "ignored": 0
+    },
+    "player-check": {
+      "command": [
+        "cargo",
+        "check",
+        "--locked",
+        "--offline",
+        "--no-default-features",
+        "--features",
+        "player"
+      ],
+      "exit_code": 0,
+      "seconds": 5.415678977966309,
+      "source_stable": true,
+      "passed": 0,
+      "failed": 0,
+      "ignored": 0
+    }
+  },
+  "rust_test_executions": 178,
+  "preexisting_ignored": 2,
+  "repeats": {
+    "runs": 3,
+    "passed_per_run": 6,
+    "failed": 0
+  },
+  "without_ffmpeg_extra_executions": 6,
+  "source_frozen_count": 2948,
+  "source_frozen_manifest": "evidence/wave-speaker-playback/candidate-source.json",
+  "fixture_files_regenerated_identically": 42,
+  "independence_proof": "evidence/wave-speaker-playback/independence-proof.json",
+  "notes": [
+    "Original/mask-only/precise-only/full variants pass1/2/4/6 of the identical final6 tests,with independent native PCM/video/refusal controls passing throughout.",
+    "WAVE/AIFF/AU Duration navigation now selects a native sample at/after time. Raw seek_to remains the coordinate API. This intentional capability upgrade is documented,not counted per adapter.",
+    "Physical device output and performance remain unqualified;two pre-existing physical smoke ignores are unchanged.",
+    "first-wave-qualification retains the intermediate four-test stand and is not included in final counts."
+  ],
+  "evidence_directories": [
+    "evidence/wave-speaker-playback"
+  ]
+}
