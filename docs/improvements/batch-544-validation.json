@@ -1,0 +1,91 @@
+{
+  "status": "accepted",
+  "accepted_ids": [
+    "FVID-0533"
+  ],
+  "count_delta": 1,
+  "accepted_count": 533,
+  "next_id": "FVID-0534",
+  "qualification": [
+    {
+      "name": "final-integration",
+      "log": "docs/improvements/evidence/avi-adpcm-start/final-integration.log",
+      "passed": 27,
+      "ignored": 0
+    },
+    {
+      "name": "final-audio",
+      "log": "docs/improvements/evidence/avi-adpcm-start/final-audio.log",
+      "passed": 14,
+      "ignored": 0
+    },
+    {
+      "name": "final-container",
+      "log": "docs/improvements/evidence/avi-adpcm-start/final-container.log",
+      "passed": 17,
+      "ignored": 0
+    },
+    {
+      "name": "final-factory",
+      "log": "docs/improvements/evidence/avi-adpcm-start/final-factory.log",
+      "passed": 1,
+      "ignored": 0
+    },
+    {
+      "name": "final-worker",
+      "log": "docs/improvements/evidence/avi-adpcm-start/final-worker.log",
+      "passed": 39,
+      "ignored": 0
+    },
+    {
+      "name": "final-cpal",
+      "log": "docs/improvements/evidence/avi-adpcm-start/final-cpal.log",
+      "passed": 43,
+      "ignored": 2
+    },
+    {
+      "name": "final-acceptance",
+      "log": "docs/improvements/evidence/avi-adpcm-start/final-acceptance.log",
+      "passed": 4,
+      "ignored": 0
+    },
+    {
+      "name": "no-external-1",
+      "log": "docs/improvements/evidence/avi-adpcm-start/no-external-1.log",
+      "passed": 4,
+      "ignored": 0
+    },
+    {
+      "name": "no-external-2",
+      "log": "docs/improvements/evidence/avi-adpcm-start/no-external-2.log",
+      "passed": 4,
+      "ignored": 0
+    },
+    {
+      "name": "no-external-3",
+      "log": "docs/improvements/evidence/avi-adpcm-start/no-external-3.log",
+      "passed": 4,
+      "ignored": 0
+    },
+    {
+      "name": "final-core-check",
+      "log": "docs/improvements/evidence/avi-adpcm-start/final-core-check.log",
+      "passed": true
+    },
+    {
+      "name": "final-player-check",
+      "log": "docs/improvements/evidence/avi-adpcm-start/final-player-check.log",
+      "passed": true
+    }
+  ],
+  "baseline": "docs/improvements/evidence/avi-adpcm-start/final-baseline.json",
+  "reproducibility": "docs/improvements/evidence/avi-adpcm-start/reproducibility.json",
+  "frozen_source": "docs/improvements/evidence/avi-adpcm-start/candidate-source.json",
+  "rust_executions": 157,
+  "limitations": [
+    "Software CPU workers, not physical output",
+    "Native ADPCM block-aligned raw seek contract retained",
+    "Neutral MP4 is a video control, not AVI video playback qualification",
+    "No performance or RSS claim"
+  ]
+}

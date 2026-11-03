@@ -506,6 +506,24 @@ mod tests {
     use super::{AviAudioReader, Error, Limits};
     use crate::audio::AudioStream;
 
+    #[test]
+    fn huge_stream_origin_keeps_only_the_small_coded_run() {
+        let bytes = include_bytes!("../../../tests/fixtures/playback-errors/avi-adpcm-start/ms-stereo-three-start4294967295-equivalent.avi");
+        let mut reader = AviAudioReader::open(&bytes[..], Limits::default()).unwrap();
+        let program = reader.program();
+        let origin = u64::from(u32::MAX) * program.frames;
+        assert_eq!(program.origin, origin);
+        assert_eq!(program.records, 3);
+        assert!(program.samples.is_none());
+        let index = program.block_records.as_ref().unwrap();
+        assert_eq!(index.len(), 3);
+        assert!(index.capacity() <= 6);
+        assert!(reader.file.capacity() <= 8192);
+        let packet = reader.next_packet().unwrap().unwrap();
+        assert_eq!(packet.pts, origin as i64);
+        assert_eq!(packet.data.len(), 16);
+    }
+
     /// Four files of the same 0.2 s, 440 Hz sine at 48 kHz, one per coding and
     /// channel count, as this build's reference muxer writes them:
     ///

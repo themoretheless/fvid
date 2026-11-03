@@ -1,0 +1,20 @@
+{
+  "base": "189d3e01606030108f44156595749c4840fe6dbd",
+  "baseline_sha256": "b6e817457542ebe4be0109eebddc0c149ad4b6386c5f6439324327ee9464b25f",
+  "candidate_sha256": "577177dd1b1ee24179bd82008c5822c91cb21b140bc927cf02253f029ddce43c",
+  "regression_sha256": "ec9d54805a7f3ed55f6355aaeb9a0aaef5d7bd42441cdbf6c076b3ff24dde2d8",
+  "command": [
+    "cargo",
+    "test",
+    "--locked",
+    "--offline",
+    "--no-default-features",
+    "--features",
+    "player",
+    "--test",
+    "avi_adpcm_start",
+    "--",
+    "--test-threads=2"
+  ],
+  "returncode": 101
+}

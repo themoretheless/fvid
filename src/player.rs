@@ -13373,3 +13373,31 @@ mod native_wave_ms_adpcm_file_regressions {
         }
     }
 }
+
+#[cfg(test)]
+mod native_avi_adpcm_start_file_regressions {
+    use super::*;
+    #[test]
+    fn automatic_avi_factory_keeps_delayed_native_clocks_and_pcm() {
+        let root = Path::new(env!("CARGO_MANIFEST_DIR")).join("tests/fixtures/playback-errors/avi-adpcm-start");
+        let manifest: serde_json::Value = serde_json::from_slice(&std::fs::read(root.join("manifest.json")).unwrap()).unwrap();
+        for case in manifest["cases"].as_array().unwrap().iter().filter(|c| c["start"] == 73 && c["clock_mode"] == "equivalent") {
+            let path = root.join(case["file"].as_str().unwrap());
+            let origin = case["origin"].as_u64().unwrap();
+            let mut stream = AUDIO_READERS.iter().find_map(|attempt| attempt.open(&path, None)).expect("native delayed AVI");
+            assert_eq!(stream.duration(), Some(crate::audio::sample_duration(origin + case["frames"].as_u64().unwrap(), 8000)));
+            let mut decoder = stream.make_decoder().unwrap();
+            let mut out = Vec::new();
+            let mut first = true;
+            while let Some(packet) = stream.next_packet().unwrap() {
+                if first { assert_eq!(packet.pts, origin as i64); first = false; }
+                if let Some(decoded) = decoder.decode_packet(&packet.data, stream.decoder_stamp(&packet), packet.duration as u64).unwrap() {
+                    if let Some(pcm) = stream.present_decoded(decoded.packet, decoded.source_pts).unwrap() { out.extend(pcm.data); }
+                }
+            }
+            assert!(!first);
+            stream.validate_eof().unwrap();
+            assert_eq!(out, std::fs::read(root.join(case["expected"].as_str().unwrap())).unwrap());
+        }
+    }
+}

@@ -1,0 +1,9 @@
+
+running 4 tests
+test delayed_adpcm_packets_pcm_duration_seek_and_rewind_keep_absolute_origin ... ok
+test malformed_records_and_resource_limits_still_refuse ... ok
+test raw_start_units_ungrouped_controls_and_neutral_video_are_valid ... ok
+test actual_workers_keep_delayed_start_and_eof_anchors ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 5.83s
+

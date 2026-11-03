@@ -19,7 +19,7 @@ def generate():
     case=dict(c);case.update(file=file,control=c['file'],origin=delay*c['block_frames'],start=delay,clock_mode=mode,frames=c['frames'],rate=8000,block_frames=c['block_frames']);cases.append(case)
  bad=[]
  for c in m['malformed']:
-  data=bytearray(own[c['file']]);header=data.index(b'auds');struct.pack_into('<I',data,header+28,73);file='delay-'+c['file'];files[file]=bytes(data);bad.append(dict(file=file))
+  data=bytearray(own[c['file']]);header=data.index(b'auds');struct.pack_into('<I',data,header+28,73);file='delay-'+c['file'];files[file]=bytes(data);bad.append(dict(file=file,needle='whole ADPCM blocks' if c['reason']=='incomplete' else 'ADPCM blocks and the run holds'))
  files['manifest.json']=(json.dumps(dict(provenance='Authored VP9+IMA/MS AVI, mono/stereo, grouped/single/nested/indexed records; dwStart0/1/73/u32MAX in original/equivalent dwScale/dwRate units, literal PCM controls. No encoder, private media or network.',cases=cases,bad=bad),indent=2)+'\n').encode();return files
 if __name__=='__main__':
  OUT.mkdir(parents=True,exist_ok=True)

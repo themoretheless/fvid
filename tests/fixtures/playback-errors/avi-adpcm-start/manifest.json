@@ -2660,16 +2660,20 @@
   ],
   "bad": [
     {
-      "file": "delay-ima-incomplete.avi"
+      "file": "delay-ima-incomplete.avi",
+      "needle": "whole ADPCM blocks"
     },
     {
-      "file": "delay-ima-wrong-count.avi"
+      "file": "delay-ima-wrong-count.avi",
+      "needle": "ADPCM blocks and the run holds"
     },
     {
-      "file": "delay-ms-incomplete.avi"
+      "file": "delay-ms-incomplete.avi",
+      "needle": "whole ADPCM blocks"
     },
     {
-      "file": "delay-ms-wrong-count.avi"
+      "file": "delay-ms-wrong-count.avi",
+      "needle": "ADPCM blocks and the run holds"
     }
   ]
 }

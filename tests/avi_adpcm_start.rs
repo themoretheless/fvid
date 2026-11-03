@@ -171,7 +171,12 @@ fn actual_workers_keep_delayed_start_and_eof_anchors() {
 #[test]
 fn malformed_records_and_resource_limits_still_refuse() {
     for c in cases("bad") {
-        assert!(open(c["file"].as_str().unwrap()).is_err());
+        let error = match open(c["file"].as_str().unwrap()) {
+            Err(error) => error,
+            Ok(_) => panic!("malformed delayed record accepted"),
+        };
+        assert!(matches!(error, fvid::Error::Invalid(_)), "{error:?}");
+        assert!(error.to_string().contains(c["needle"].as_str().unwrap()), "{error}");
     }
     for c in cases("cases") {
         let data = bytes(c["file"].as_str().unwrap());

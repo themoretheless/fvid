@@ -1,0 +1,19 @@
+
+running 14 tests
+test playback_avi_audio::tests::a_coding_with_no_arm_is_named_by_the_number_the_file_states ... ok
+test playback_avi_audio::tests::a_byte_rate_the_block_and_rate_do_not_give_is_refused ... ok
+test playback_avi_audio::tests::a_geometry_the_coding_does_not_have_is_refused_not_guessed_at ... ok
+test playback_avi_audio::tests::a_length_that_does_not_count_the_run_is_a_disagreement ... ok
+test playback_avi_audio::tests::a_record_that_contains_a_partial_block_is_refused ... ok
+test playback_avi_audio::tests::a_second_track_key_has_nothing_to_land_on ... ok
+test playback_avi_audio::tests::a_microsoft_stream_carries_its_prediction_tables_in_the_setup_record ... ok
+test playback_avi_audio::tests::a_timeline_that_is_not_the_blocks_duration_is_refused ... ok
+test playback_avi_audio::tests::a_wav_shaped_ima_stream_reads_as_its_blocks_and_their_timing ... ok
+test playback_avi_audio::tests::an_unsupported_pcm_width_is_named_without_claiming_no_decoder ... ok
+test playback_avi_audio::tests::delayed_adpcm_offsets_packets_and_clamps_before_its_origin ... ok
+test playback_avi_audio::tests::huge_stream_origin_keeps_only_the_small_coded_run ... ok
+test playback_avi_audio::tests::seeking_lands_on_the_block_a_timestamp_falls_in ... ok
+test playback_avi_audio::tests::the_records_the_reader_hands_over_are_the_blocks_the_decoder_wants ... ok
+
+test result: ok. 14 passed; 0 failed; 0 ignored; 0 measured; 1214 filtered out; finished in 0.01s
+
