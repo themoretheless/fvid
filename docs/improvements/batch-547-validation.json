@@ -1,0 +1,109 @@
+{
+  "status": "accepted",
+  "accepted_ids": [
+    "FVID-0536"
+  ],
+  "count_delta": 1,
+  "accepted_count": 536,
+  "next_id": "FVID-0537",
+  "qualification": [
+    {
+      "name": "final-integration",
+      "log": "docs/improvements/evidence/mp4-unused-index-geometry/final-integration.log",
+      "passed": 38,
+      "ignored": 0
+    },
+    {
+      "name": "root-parser",
+      "log": "docs/improvements/evidence/mp4-unused-index-geometry/root-parser.log",
+      "passed": 17,
+      "ignored": 0
+    },
+    {
+      "name": "root-audio",
+      "log": "docs/improvements/evidence/mp4-unused-index-geometry/root-audio.log",
+      "passed": 15,
+      "ignored": 0
+    },
+    {
+      "name": "root-video",
+      "log": "docs/improvements/evidence/mp4-unused-index-geometry/root-video.log",
+      "passed": 7,
+      "ignored": 0
+    },
+    {
+      "name": "worker",
+      "log": "docs/improvements/evidence/mp4-unused-index-geometry/worker.log",
+      "passed": 39,
+      "ignored": 0
+    },
+    {
+      "name": "cpal",
+      "log": "docs/improvements/evidence/mp4-unused-index-geometry/cpal.log",
+      "passed": 43,
+      "ignored": 2
+    },
+    {
+      "name": "no-external-1",
+      "log": "docs/improvements/evidence/mp4-unused-index-geometry/no-external-1.log",
+      "passed": 5,
+      "ignored": 0
+    },
+    {
+      "name": "no-external-2",
+      "log": "docs/improvements/evidence/mp4-unused-index-geometry/no-external-2.log",
+      "passed": 5,
+      "ignored": 0
+    },
+    {
+      "name": "no-external-3",
+      "log": "docs/improvements/evidence/mp4-unused-index-geometry/no-external-3.log",
+      "passed": 5,
+      "ignored": 0
+    },
+    {
+      "name": "core-geometry-build",
+      "log": "docs/improvements/evidence/mp4-unused-index-geometry/core-geometry-build.log",
+      "passed": 1,
+      "ignored": 0
+    },
+    {
+      "name": "after-metrics-1",
+      "log": "docs/improvements/evidence/mp4-unused-index-geometry/after-metrics-1.log",
+      "passed": 1,
+      "ignored": 0
+    },
+    {
+      "name": "after-metrics-2",
+      "log": "docs/improvements/evidence/mp4-unused-index-geometry/after-metrics-2.log",
+      "passed": 1,
+      "ignored": 0
+    },
+    {
+      "name": "after-metrics-3",
+      "log": "docs/improvements/evidence/mp4-unused-index-geometry/after-metrics-3.log",
+      "passed": 1,
+      "ignored": 0
+    },
+    {
+      "name": "final-core-check",
+      "log": "docs/improvements/evidence/mp4-unused-index-geometry/final-core-check.log",
+      "passed": true
+    },
+    {
+      "name": "final-player-check",
+      "log": "docs/improvements/evidence/mp4-unused-index-geometry/final-player-check.log",
+      "passed": true
+    }
+  ],
+  "rust_executions": 178,
+  "baseline": "docs/improvements/evidence/mp4-unused-index-geometry/final-baseline.json",
+  "geometry_comparison": "docs/improvements/evidence/mp4-unused-index-geometry/geometry-comparison.json",
+  "reproducibility": "docs/improvements/evidence/mp4-unused-index-geometry/reproducibility.json",
+  "frozen_source": "docs/improvements/evidence/mp4-unused-index-geometry/candidate-source.json",
+  "limitations": [
+    "Correct existing index-budget admission, not general compressed-codec compaction",
+    "Retained payload API estimate, not RSS or timing",
+    "Software playback/video controls, not physical or hardware output"
+  ]
+}

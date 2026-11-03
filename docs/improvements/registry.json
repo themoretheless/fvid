@@ -1,8 +1,8 @@
 {
   "target": 1000,
   "counting_rule": "One independently confirmed problem or useful capability; fixture variants and baseline integration repairs are excluded. Only accepted entries count.",
-  "accepted_count": 535,
-  "next_id": "FVID-0536",
+  "accepted_count": 536,
+  "next_id": "FVID-0537",
   "entries": [
     {
       "id": "FVID-0001",
@@ -6075,6 +6075,17 @@
       "result": "Retain temporary per-description parser recognition through fragment indexing, publish the initial selected recognized header in Track metadata, and compare used descriptions to that representative header in the constant guard. Preserve the complete catalog, packet bytes and indexes; never promote opaque versions by FourCC or placeholder geometry. Initialize the now-admitted constant audio fast path from the first sample description rather than slot0. Fourteen positive variants and five unsupported-selection controls cover compact64-frame PCM, six-fragment120ms PCM and three distinct VP9 frames, unused supported/opaque/known-FourCC-unknown-version descriptions, root and owned APIs, exact geometry/configuration/bytes, PCM duration, rewind/seek/EOF,30 actual software-worker sessions and exact software-video seek suffixes. Genuine three-setup PCM remains refused by both constant APIs. Qualification passes170 Rust executions, two old device ignores, core/player checks and three external-tool-free5-test repeats. All28 generated files are byte-identical and4687 source/input hashes remain stable. An incomplete candidate fast-path failure and an authoring error are retained separately and not counted. One selected-header invariant with both rejection and admission consequences; no separate IDs for variants or compatibility fixes. Public signatures/struct fields remain unchanged; indexed consumers still select per packet. No performance, RSS, physical-device or hardware-video claim.",
       "status": "accepted",
       "validation": "batch-546-validation.json"
+    },
+    {
+      "id": "FVID-0536",
+      "batch": 547,
+      "title": "Preserve compact PCM and MACE index admission behind dormant compressed descriptions",
+      "source": "crates/fvid-media/src/owned_mp4_impl.rs",
+      "regression": "tests/mp4_unused_index_geometry.rs",
+      "before": "Published 5d991c83da already selects correct representative headers, but index construction still uses the first recognized catalog codec and every dormant MACE geometry. Four controls fit samples=4 (three video records plus one audio chunk), while32 variants with identical selected samples fail with MP4 sample count exceeds budget. Larger-budget packet/timestamp comparisons pass. The unchanged final five-test stand on that runtime passes three controls and fails tight-budget admission and actual-worker opening.",
+      "result": "Resolve the primary codec/channels and MACE-unit changes from STSC-selected descriptions before choosing the index representation. Preserve ordinary chunk-order/coverage/divisibility/extent/overlap checks and compact-size validation; refuse zero-byte units before publishing a uniform index. Forty authored variants cover mono PCM64/2048 frames, MACE3/6 with72 decoded samples and dormant ALAC/IMA4/MACE/float entries in either order. Root/owned APIs retain one audio chunk under the original limit4, exact logical units, every coded packet and raw clock; native PCM/MACE, owned PCM export, precise seek/rewind/EOF/MAX and120 actual software-worker sessions per stand pass. Four malformed controls keep specific typed refusals, exhausted budgets do not admit audio, and two positive-CTTS companions remain expanded and cannot bypass limits. Qualification passes178 Rust executions, two old device ignores, core/player checks and three external-tool-free repeats. All53 generated files are byte-identical and4742 source/input hashes remain stable. Three same-core-profile before/after metric repeats preserve packet checks:32 retained-index costs fall12/64/2048 to1 and eight remain unchanged; largest reported whole-reader index payload estimate84536 to2648 bytes. This supports a functional budget-admission fix, not a separate optimization ID or an RSS/speed claim. Distinct from FVID-0535 representative-header selection: this failure occurs while constructing the index. No public signature/struct change, physical-device or hardware-video claim.",
+      "status": "accepted",
+      "validation": "batch-547-validation.json"
     }
   ]
 }

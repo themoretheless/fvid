@@ -1,0 +1,10 @@
+
+running 5 tests
+test controls_fit_three_video_entries_and_one_audio_chunk ... ok
+test malformed_mapping_and_block_units_remain_specific_refusals ... ok
+test high_budget_packets_match_controls_and_record_retained_index_geometry ... ok
+test unused_coded_descriptions_do_not_expand_the_selected_chunk_index ... ok
+test tight_index_budget_keeps_actual_pcm_mace_and_worker_navigation ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 2.03s
+

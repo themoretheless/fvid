@@ -1,0 +1,381 @@
+{
+  "provenance": "Authored mono PCM constants and arithmetic MACE codewords beside three neutral VP9 pictures; one audio chunk and explicit whole-run stsc selection. Dormant ALAC,IMA4,MACE,float descriptions. No encoder,private media or network.",
+  "controls": [
+    {
+      "file": "sowt-64-control.mp4",
+      "frames": 64,
+      "units": 64,
+      "codec": "sowt"
+    },
+    {
+      "file": "sowt-2048-control.mp4",
+      "frames": 2048,
+      "units": 2048,
+      "codec": "sowt"
+    },
+    {
+      "file": "MAC3-72-control.mp4",
+      "frames": 72,
+      "units": 12,
+      "codec": "MAC3"
+    },
+    {
+      "file": "MAC6-72-control.mp4",
+      "frames": 72,
+      "units": 12,
+      "codec": "MAC6"
+    }
+  ],
+  "cases": [
+    {
+      "file": "sowt-64-unused-alac-last.mp4",
+      "control": "sowt-64-control.mp4",
+      "frames": 64,
+      "units": 64,
+      "codec": "sowt",
+      "selected": 1
+    },
+    {
+      "file": "sowt-64-unused-alac-first.mp4",
+      "control": "sowt-64-control.mp4",
+      "frames": 64,
+      "units": 64,
+      "codec": "sowt",
+      "selected": 2
+    },
+    {
+      "file": "sowt-64-unused-ima4-last.mp4",
+      "control": "sowt-64-control.mp4",
+      "frames": 64,
+      "units": 64,
+      "codec": "sowt",
+      "selected": 1
+    },
+    {
+      "file": "sowt-64-unused-ima4-first.mp4",
+      "control": "sowt-64-control.mp4",
+      "frames": 64,
+      "units": 64,
+      "codec": "sowt",
+      "selected": 2
+    },
+    {
+      "file": "sowt-64-unused-MAC3-last.mp4",
+      "control": "sowt-64-control.mp4",
+      "frames": 64,
+      "units": 64,
+      "codec": "sowt",
+      "selected": 1
+    },
+    {
+      "file": "sowt-64-unused-MAC3-first.mp4",
+      "control": "sowt-64-control.mp4",
+      "frames": 64,
+      "units": 64,
+      "codec": "sowt",
+      "selected": 2
+    },
+    {
+      "file": "sowt-64-unused-MAC6-last.mp4",
+      "control": "sowt-64-control.mp4",
+      "frames": 64,
+      "units": 64,
+      "codec": "sowt",
+      "selected": 1
+    },
+    {
+      "file": "sowt-64-unused-MAC6-first.mp4",
+      "control": "sowt-64-control.mp4",
+      "frames": 64,
+      "units": 64,
+      "codec": "sowt",
+      "selected": 2
+    },
+    {
+      "file": "sowt-64-unused-fl32-last.mp4",
+      "control": "sowt-64-control.mp4",
+      "frames": 64,
+      "units": 64,
+      "codec": "sowt",
+      "selected": 1
+    },
+    {
+      "file": "sowt-64-unused-fl32-first.mp4",
+      "control": "sowt-64-control.mp4",
+      "frames": 64,
+      "units": 64,
+      "codec": "sowt",
+      "selected": 2
+    },
+    {
+      "file": "sowt-2048-unused-alac-last.mp4",
+      "control": "sowt-2048-control.mp4",
+      "frames": 2048,
+      "units": 2048,
+      "codec": "sowt",
+      "selected": 1
+    },
+    {
+      "file": "sowt-2048-unused-alac-first.mp4",
+      "control": "sowt-2048-control.mp4",
+      "frames": 2048,
+      "units": 2048,
+      "codec": "sowt",
+      "selected": 2
+    },
+    {
+      "file": "sowt-2048-unused-ima4-last.mp4",
+      "control": "sowt-2048-control.mp4",
+      "frames": 2048,
+      "units": 2048,
+      "codec": "sowt",
+      "selected": 1
+    },
+    {
+      "file": "sowt-2048-unused-ima4-first.mp4",
+      "control": "sowt-2048-control.mp4",
+      "frames": 2048,
+      "units": 2048,
+      "codec": "sowt",
+      "selected": 2
+    },
+    {
+      "file": "sowt-2048-unused-MAC3-last.mp4",
+      "control": "sowt-2048-control.mp4",
+      "frames": 2048,
+      "units": 2048,
+      "codec": "sowt",
+      "selected": 1
+    },
+    {
+      "file": "sowt-2048-unused-MAC3-first.mp4",
+      "control": "sowt-2048-control.mp4",
+      "frames": 2048,
+      "units": 2048,
+      "codec": "sowt",
+      "selected": 2
+    },
+    {
+      "file": "sowt-2048-unused-MAC6-last.mp4",
+      "control": "sowt-2048-control.mp4",
+      "frames": 2048,
+      "units": 2048,
+      "codec": "sowt",
+      "selected": 1
+    },
+    {
+      "file": "sowt-2048-unused-MAC6-first.mp4",
+      "control": "sowt-2048-control.mp4",
+      "frames": 2048,
+      "units": 2048,
+      "codec": "sowt",
+      "selected": 2
+    },
+    {
+      "file": "sowt-2048-unused-fl32-last.mp4",
+      "control": "sowt-2048-control.mp4",
+      "frames": 2048,
+      "units": 2048,
+      "codec": "sowt",
+      "selected": 1
+    },
+    {
+      "file": "sowt-2048-unused-fl32-first.mp4",
+      "control": "sowt-2048-control.mp4",
+      "frames": 2048,
+      "units": 2048,
+      "codec": "sowt",
+      "selected": 2
+    },
+    {
+      "file": "MAC3-72-unused-alac-last.mp4",
+      "control": "MAC3-72-control.mp4",
+      "frames": 72,
+      "units": 12,
+      "codec": "MAC3",
+      "selected": 1
+    },
+    {
+      "file": "MAC3-72-unused-alac-first.mp4",
+      "control": "MAC3-72-control.mp4",
+      "frames": 72,
+      "units": 12,
+      "codec": "MAC3",
+      "selected": 2
+    },
+    {
+      "file": "MAC3-72-unused-ima4-last.mp4",
+      "control": "MAC3-72-control.mp4",
+      "frames": 72,
+      "units": 12,
+      "codec": "MAC3",
+      "selected": 1
+    },
+    {
+      "file": "MAC3-72-unused-ima4-first.mp4",
+      "control": "MAC3-72-control.mp4",
+      "frames": 72,
+      "units": 12,
+      "codec": "MAC3",
+      "selected": 2
+    },
+    {
+      "file": "MAC3-72-unused-MAC3-last.mp4",
+      "control": "MAC3-72-control.mp4",
+      "frames": 72,
+      "units": 12,
+      "codec": "MAC3",
+      "selected": 1
+    },
+    {
+      "file": "MAC3-72-unused-MAC3-first.mp4",
+      "control": "MAC3-72-control.mp4",
+      "frames": 72,
+      "units": 12,
+      "codec": "MAC3",
+      "selected": 2
+    },
+    {
+      "file": "MAC3-72-unused-MAC6-last.mp4",
+      "control": "MAC3-72-control.mp4",
+      "frames": 72,
+      "units": 12,
+      "codec": "MAC3",
+      "selected": 1
+    },
+    {
+      "file": "MAC3-72-unused-MAC6-first.mp4",
+      "control": "MAC3-72-control.mp4",
+      "frames": 72,
+      "units": 12,
+      "codec": "MAC3",
+      "selected": 2
+    },
+    {
+      "file": "MAC3-72-unused-fl32-last.mp4",
+      "control": "MAC3-72-control.mp4",
+      "frames": 72,
+      "units": 12,
+      "codec": "MAC3",
+      "selected": 1
+    },
+    {
+      "file": "MAC3-72-unused-fl32-first.mp4",
+      "control": "MAC3-72-control.mp4",
+      "frames": 72,
+      "units": 12,
+      "codec": "MAC3",
+      "selected": 2
+    },
+    {
+      "file": "MAC6-72-unused-alac-last.mp4",
+      "control": "MAC6-72-control.mp4",
+      "frames": 72,
+      "units": 12,
+      "codec": "MAC6",
+      "selected": 1
+    },
+    {
+      "file": "MAC6-72-unused-alac-first.mp4",
+      "control": "MAC6-72-control.mp4",
+      "frames": 72,
+      "units": 12,
+      "codec": "MAC6",
+      "selected": 2
+    },
+    {
+      "file": "MAC6-72-unused-ima4-last.mp4",
+      "control": "MAC6-72-control.mp4",
+      "frames": 72,
+      "units": 12,
+      "codec": "MAC6",
+      "selected": 1
+    },
+    {
+      "file": "MAC6-72-unused-ima4-first.mp4",
+      "control": "MAC6-72-control.mp4",
+      "frames": 72,
+      "units": 12,
+      "codec": "MAC6",
+      "selected": 2
+    },
+    {
+      "file": "MAC6-72-unused-MAC3-last.mp4",
+      "control": "MAC6-72-control.mp4",
+      "frames": 72,
+      "units": 12,
+      "codec": "MAC6",
+      "selected": 1
+    },
+    {
+      "file": "MAC6-72-unused-MAC3-first.mp4",
+      "control": "MAC6-72-control.mp4",
+      "frames": 72,
+      "units": 12,
+      "codec": "MAC6",
+      "selected": 2
+    },
+    {
+      "file": "MAC6-72-unused-MAC6-last.mp4",
+      "control": "MAC6-72-control.mp4",
+      "frames": 72,
+      "units": 12,
+      "codec": "MAC6",
+      "selected": 1
+    },
+    {
+      "file": "MAC6-72-unused-MAC6-first.mp4",
+      "control": "MAC6-72-control.mp4",
+      "frames": 72,
+      "units": 12,
+      "codec": "MAC6",
+      "selected": 2
+    },
+    {
+      "file": "MAC6-72-unused-fl32-last.mp4",
+      "control": "MAC6-72-control.mp4",
+      "frames": 72,
+      "units": 12,
+      "codec": "MAC6",
+      "selected": 1
+    },
+    {
+      "file": "MAC6-72-unused-fl32-first.mp4",
+      "control": "MAC6-72-control.mp4",
+      "frames": 72,
+      "units": 12,
+      "codec": "MAC6",
+      "selected": 2
+    }
+  ],
+  "bad": [
+    {
+      "file": "bad-zero-description.mp4",
+      "needle": "invalid sample-to-chunk mapping"
+    },
+    {
+      "file": "bad-large-description.mp4",
+      "needle": "invalid sample-to-chunk mapping"
+    },
+    {
+      "file": "bad-mace-partial-block.mp4",
+      "needle": "sample count is not a whole number of blocks"
+    },
+    {
+      "file": "bad-selected-opaque-mace.mp4",
+      "needle": "zero MP4 sample size"
+    }
+  ],
+  "complex": [
+    {
+      "file": "sowt-64-ctts-unused-first.mp4",
+      "control": "sowt-64-ctts-control.mp4",
+      "units": 64
+    },
+    {
+      "file": "MAC3-72-ctts-unused-first.mp4",
+      "control": "MAC3-72-ctts-control.mp4",
+      "units": 12
+    }
+  ]
+}

@@ -2171,6 +2171,24 @@ fn sample_index(
     if timed != count {
         return Err(invalid("decode-time count differs from sample count"));
     }
+    // Index units follow descriptions selected by STSC, not dormant catalog
+    // entries. Resolve only mapping rows here; the ordinary chunk walker still
+    // validates order, coverage, unit divisibility and every byte extent.
+    let mapping = required(stbl, b"stsc")?;
+    version(mapping, 0)?;
+    let mut primary: Option<&SampleDescription> = None;
+    let mut selected_mace = false;
+    let mut changing_units = false;
+    for row in 0..table(mapping, 12, count)? {
+        let description = u32be(mapping, 16 + row * 12)?.checked_sub(1)
+            .and_then(|i| descriptions.get(i as usize))
+            .ok_or_else(|| invalid("invalid sample-to-chunk mapping"))?;
+        let first = primary.get_or_insert(description);
+        changing_units |= description.codec != first.codec || description.channels != first.channels;
+        selected_mace |= is_mace(&description.codec);
+    }
+    let codec = primary.map_or(codec, |description| &description.codec);
+    let channels = primary.map_or(channels, |description| description.channels);
     // MACE's block index does not visit each raw sample size. Compact size
     // entries must still be validated before selecting that representation.
     if compact.is_some() && descriptions.iter().any(|d| is_mace(&d.codec)) {
@@ -2178,8 +2196,8 @@ fn sample_index(
             if size_at(index)? == 0 { return Err(invalid("zero MP4 sample size")); }
         }
     }
-    if count != 0 && descriptions.iter().any(|d| is_mace(&d.codec))
-        && (descriptions.iter().any(|d| d.codec != *codec || d.channels != channels)
+    if count != 0 && selected_mace
+        && (changing_units
             || fragmented || timing.len() != 1 || optional(stbl,b"ctts")?.is_some() || optional(stbl,b"stss")?.is_some())
     {
         return changing_mace_index(stbl, descriptions, count, timing, mdats, limit, size_at).map(Some);
@@ -2219,6 +2237,7 @@ fn sample_index(
     let Some((samples_per_unit, bytes_per_unit)) = unit else {
         return expanded_index(stbl, codec, count, timing, limit, size_at, mdats);
     };
+    if bytes_per_unit == 0 { return Err(invalid("zero MP4 sample size")); }
     if timing.len() == 1 && optional(stbl, b"ctts")?.is_none() && optional(stbl, b"stss")?.is_none()
     {
         let units = match count.checked_div(samples_per_unit) {
