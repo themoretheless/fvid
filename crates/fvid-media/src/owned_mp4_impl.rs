@@ -149,7 +149,10 @@ impl SampleIndex {
                 if uniform.duration == 0 {
                     return 0;
                 }
-                (pts.max(0) as usize / usize::try_from(uniform.duration).unwrap_or(1)).min(last)
+                // Divide in media-tick width before narrowing to a sample index.
+                usize::try_from(pts.max(0) as u64 / u64::from(uniform.duration))
+                    .unwrap_or(usize::MAX)
+                    .min(last)
             }
         }
     }

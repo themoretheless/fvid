@@ -1,0 +1,15 @@
+{
+  "base": "92f56be10a815eab7c96fdc0a4f5411caffb25b8",
+  "actualWasmPointerWidth": 32,
+  "checks": 220,
+  "passed": 193,
+  "failed": 27,
+  "fixtureFailures": 8,
+  "native64TestsPassed": 3,
+  "seekImplEqualsPublishedHead": true,
+  "prerequisite": "The original crate cannot compile for wasm32 due to non-Unix errno selection. The baseline seek execution uses only the platform-diagnostic prerequisite, leaving the original shared seek implementation untouched. That build repair is not a second accepted ID.",
+  "originalBuildLog": "docs/improvements/evidence/mp4-uniform-seek-width/wasm-before-build.log",
+  "originalFixtureAuthoringDiagnostic": "docs/improvements/evidence/mp4-uniform-seek-width/fixture-authoring.stderr",
+  "log": "docs/improvements/evidence/mp4-uniform-seek-width/wasm-final-before.json",
+  "source": "docs/improvements/evidence/mp4-uniform-seek-width/baseline-source.json"
+}

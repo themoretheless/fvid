@@ -1,0 +1,8 @@
+{
+  "sourcePaths": 5614,
+  "fixtureFiles": 6,
+  "regeneratedExactly": true,
+  "referenceInputsMatch": 4,
+  "wasmProbeUsesProductionParser": true,
+  "actualPointerWidth": 32
+}

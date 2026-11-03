@@ -1,0 +1,9 @@
+{
+  "binary": "/opt/homebrew/opt/node@22/bin/node",
+  "nodeVersion": "v22.23.4",
+  "wasmSha256": "c93e50d7d052060e474a5e7cdddeeb890e6fab544f3a37735b68836435c730a9",
+  "actualPointerWidth": 32,
+  "checksPerRun": 220,
+  "scope": "Actual wasm32 execution under Node; not a32-bit physical audio-device or browser-UI claim",
+  "externalMediaToolFreeRepeats": 3
+}

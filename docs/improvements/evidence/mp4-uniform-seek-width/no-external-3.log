@@ -1,0 +1,7 @@
+
+running 3 tests
+test parsed_uniform_and_expanded_indices_seek_on_full_width_media_ticks ... ok
+test uniform_seek_boundaries_match_wide_integer_reference ... ok
+test full_width_raw_seek_preserves_native_playback_and_precise_duration_seek ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.18s

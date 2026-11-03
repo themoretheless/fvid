@@ -56,7 +56,7 @@ fn system_message(code: i32) -> Option<String> {
     )
 }
 
-#[cfg(not(unix))]
+#[cfg(windows)]
 fn system_message(code: i32) -> Option<String> {
     let errno = code.checked_neg()?;
     // The backend's platforms without POSIX strerror_r use its portable errno
@@ -107,6 +107,13 @@ fn system_message(code: i32) -> Option<String> {
     )
 }
 
+// Targets without an OS errno catalog retain tagged diagnostics and the
+// numeric fallback; do not assign them another platform's errno meanings.
+#[cfg(not(any(unix, windows)))]
+fn system_message(_code: i32) -> Option<String> {
+    None
+}
+
 #[cfg(test)]
 mod tests {
     #[test]
@@ -121,6 +128,7 @@ mod tests {
             describe((-1668179713_i32) | (-1668179714_i32)),
             "Input changed"
         );
+        #[cfg(any(unix, windows))]
         assert_eq!(describe(-libc::EINVAL), "Invalid argument");
         assert_eq!(describe(i32::MIN), "Error number -2147483648 occurred");
         assert_eq!(describe(-123456789), "Error number -123456789 occurred");

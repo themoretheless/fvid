@@ -1,8 +1,8 @@
 {
   "target": 1000,
   "counting_rule": "One independently confirmed problem or useful capability; fixture variants and baseline integration repairs are excluded. Only accepted entries count.",
-  "accepted_count": 545,
-  "next_id": "FVID-0546",
+  "accepted_count": 546,
+  "next_id": "FVID-0547",
   "entries": [
     {
       "id": "FVID-0001",
@@ -6185,6 +6185,17 @@
       "result": "Validate the low24 reserved flag bits only for eight interpreted sample-table kinds before index construction. Existing stz2 flags/reserved-field checks and diagnostic stay unchanged; CTTS version1 and defined flags in unrelated headers remain admitted. All81 malformed companions now give the expected typed Invalid/non-unsupported refusal; only72 are newly denied. Twenty-seven zero controls preserve literal full-length PCM and parsed sample timestamps, three decoded VP9 pictures,60ms duration, exact seek from0/1ns/20ms/end/MAX, rewind, EOF and81 software-worker sessions/anchors per stand. Independent ffmpeg-full confirms27/27 full-length literal audio controls. All110 authored files regenerate identically; every malformed companion differs only in1..3 flag bytes, and5601 source/input hashes remain stable. Qualification passes187 Rust executions, two existing device ignores, core/player checks and three external-tool-free repeats, including unchanged compact-size/padding/enablement tests. One missing sample-table header invariant across eight kinds, not per-table/codec/bit IDs. No old tests weakened; no codec, public API, unknown-version, performance or physical-device claim.",
       "status": "accepted",
       "validation": "batch-556-validation.json"
+    },
+    {
+      "id": "FVID-0546",
+      "batch": 557,
+      "title": "Keep full-width media ticks until after uniform MP4 seek division",
+      "source": "crates/fvid-media/src/owned_mp4_impl.rs",
+      "regression": "tests/mp4_uniform_seek_width.rs",
+      "before": "Published92f56be10a casts positive i64 media ticks to usize before dividing by the uniform duration. Actual wasm32 execution of the production parser on four authored60ms PCM/ALAC movies and public index boundaries passes193/220 and fails27, including8 parsed-file requests. A valid PCM seek at4294967296 ticks selects sample0 rather than final sample2; expanded ALAC controls and the64-bit native stand already pass. The full crate initially cannot compile for wasm32 because a non-Unix errno catalog assumes libc constants; that separately recorded platform prerequisite is fixed without assigning a second ID. Baseline seek execution retains the original unmodified shared seek implementation and the same final stand; it is explicitly not called an unmodified full-crate build. An initial fixture-authoring error selected a variable rather than constant size table and is excluded.",
+      "result": "Divide clamped nonnegative ticks by duration in u64, then checked-convert the quotient to usize and clamp to the last sample. Empty indices, zero durations, negatives and expanded behavior remain unchanged. Production Rust wasm32 now passes220/220 checks:44 real parsed-media requests and176 public-index boundaries, including2^32/2^40/i64MAX, large deltas and quotient overflow. Three additional runs with unavailable PATH/media tools pass220 each using the explicit Node runtime. Ordinary native tests require no Node, FFmpeg, fixture generation or network. Four short synthetic videos retain literal full PCM, parsed index shape, decoded VP9, precise Duration/raw seeks, rewind/EOF and12 actual software-worker sessions/anchors per stand; all4 match independent FFmpeg literal PCM. Six authored files regenerate identically and5614 source/input hashes stay stable. Qualification passes177 Rust test executions, two existing device ignores, core/player checks, a Windows media cross-check and unchanged backend diagnostics. A separate locked wasm probe is wired into Linux CI; local wasm execution is proven, remote CI completion is not asserted. The platform prerequisite restricts the existing errno catalog to Windows and keeps the numeric fallback on targets with no OS errno catalog; Unix/Windows branches retain their behavior. One32-bit media-index narrowing defect, not per-case/fixture/CI/build-prerequisite IDs. No public API, codec algorithm, performance, general browser/player or physical32-bit device claim.",
+      "status": "accepted",
+      "validation": "batch-557-validation.json"
     }
   ]
 }

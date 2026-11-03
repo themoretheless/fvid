@@ -1,0 +1,51 @@
+{
+  "binary": "/opt/homebrew/opt/ffmpeg-full/bin/ffmpeg",
+  "version": "ffmpeg version 9.0.2 Copyright (c) 2000-2026 the FFmpeg developers",
+  "command": [
+    "-v",
+    "error",
+    "-i",
+    "<file>",
+    "-map",
+    "0:a:0",
+    "-c:a",
+    "pcm_f32le",
+    "-f",
+    "f32le",
+    "-"
+  ],
+  "cases": [
+    {
+      "file": "pcm-1000.mp4",
+      "inputSha256": "b720bdf82d2019ba597a8ad401fe9db951e27130c5df5a9777ef02463cff76c7",
+      "returncode": 0,
+      "exact": true,
+      "bytes": 1920,
+      "stderr": ""
+    },
+    {
+      "file": "pcm-48000.mp4",
+      "inputSha256": "85be2320fee781f3220e80d5823c461911a81f1c6d055f213b81c8ec97f3c010",
+      "returncode": 0,
+      "exact": true,
+      "bytes": 1920,
+      "stderr": ""
+    },
+    {
+      "file": "alac-1000.mp4",
+      "inputSha256": "fe37897f88e3aca225e88bca23142c1138bd637cd743edf5eaf5553e3b782475",
+      "returncode": 0,
+      "exact": true,
+      "bytes": 1920,
+      "stderr": ""
+    },
+    {
+      "file": "alac-48000.mp4",
+      "inputSha256": "6c532abc5abd7076de676a5f3dced7595a439921f0569c4bf72b540332c678a1",
+      "returncode": 0,
+      "exact": true,
+      "bytes": 1920,
+      "stderr": ""
+    }
+  ]
+}

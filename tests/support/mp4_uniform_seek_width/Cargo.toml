@@ -1,0 +1,10 @@
+[package]
+name = "fvid-mp4-uniform-seek-width-probe"
+version = "0.0.0"
+edition = "2024"
+publish = false
+[workspace]
+[lib]
+crate-type = ["cdylib"]
+[dependencies]
+fvid-media = { path = "../../../crates/fvid-media" }

@@ -1,0 +1,117 @@
+{
+  "status": "accepted",
+  "accepted_ids": [
+    "FVID-0546"
+  ],
+  "count_delta": 1,
+  "accepted_count": 546,
+  "next_id": "FVID-0547",
+  "qualification": [
+    {
+      "name": "final-integration",
+      "log": "docs/improvements/evidence/mp4-uniform-seek-width/final-integration.log",
+      "passed": 33,
+      "ignored": 0
+    },
+    {
+      "name": "final-lib-build",
+      "log": "docs/improvements/evidence/mp4-uniform-seek-width/final-lib-build.log",
+      "passed": true,
+      "ignored": 0
+    },
+    {
+      "name": "root-parser",
+      "log": "docs/improvements/evidence/mp4-uniform-seek-width/root-parser.log",
+      "passed": 17,
+      "ignored": 0
+    },
+    {
+      "name": "root-audio",
+      "log": "docs/improvements/evidence/mp4-uniform-seek-width/root-audio.log",
+      "passed": 15,
+      "ignored": 0
+    },
+    {
+      "name": "root-video",
+      "log": "docs/improvements/evidence/mp4-uniform-seek-width/root-video.log",
+      "passed": 7,
+      "ignored": 0
+    },
+    {
+      "name": "worker",
+      "log": "docs/improvements/evidence/mp4-uniform-seek-width/worker.log",
+      "passed": 39,
+      "ignored": 0
+    },
+    {
+      "name": "cpal",
+      "log": "docs/improvements/evidence/mp4-uniform-seek-width/cpal.log",
+      "passed": 43,
+      "ignored": 2
+    },
+    {
+      "name": "media-audio",
+      "log": "docs/improvements/evidence/mp4-uniform-seek-width/media-audio.log",
+      "passed": 13,
+      "ignored": 0
+    },
+    {
+      "name": "backend-diagnostics",
+      "log": "docs/improvements/evidence/mp4-uniform-seek-width/backend-diagnostics.log",
+      "passed": 1,
+      "ignored": 0
+    },
+    {
+      "name": "windows-media-check",
+      "log": "docs/improvements/evidence/mp4-uniform-seek-width/windows-media-check.log",
+      "passed": true,
+      "ignored": 0
+    },
+    {
+      "name": "final-core-check",
+      "log": "docs/improvements/evidence/mp4-uniform-seek-width/final-core-check.log",
+      "passed": true,
+      "ignored": 0
+    },
+    {
+      "name": "final-player-check",
+      "log": "docs/improvements/evidence/mp4-uniform-seek-width/final-player-check.log",
+      "passed": true,
+      "ignored": 0
+    },
+    {
+      "name": "no-external-1",
+      "log": "docs/improvements/evidence/mp4-uniform-seek-width/no-external-1.log",
+      "passed": 3,
+      "ignored": 0
+    },
+    {
+      "name": "no-external-2",
+      "log": "docs/improvements/evidence/mp4-uniform-seek-width/no-external-2.log",
+      "passed": 3,
+      "ignored": 0
+    },
+    {
+      "name": "no-external-3",
+      "log": "docs/improvements/evidence/mp4-uniform-seek-width/no-external-3.log",
+      "passed": 3,
+      "ignored": 0
+    }
+  ],
+  "rust_executions": 177,
+  "wasm_checks_per_stand": 220,
+  "wasm_successful_stands": 4,
+  "baseline": "docs/improvements/evidence/mp4-uniform-seek-width/baseline.json",
+  "wasm_before": "docs/improvements/evidence/mp4-uniform-seek-width/wasm-final-before.json",
+  "wasm_after": "docs/improvements/evidence/mp4-uniform-seek-width/wasm-after.json",
+  "wasm_runtime": "docs/improvements/evidence/mp4-uniform-seek-width/wasm-runtime.json",
+  "reference": "docs/improvements/evidence/mp4-uniform-seek-width/ffmpeg-reference.json",
+  "reproducibility": "docs/improvements/evidence/mp4-uniform-seek-width/reproducibility.json",
+  "frozen_source": "docs/improvements/evidence/mp4-uniform-seek-width/candidate-source.json",
+  "limitations": [
+    "Actual wasm32 execution is under Node on macOS, not a physical32-bit audio device or browser UI",
+    "Windows is cross-checked, not executed; remote CI completion is not claimed",
+    "The errno catalog selection is a recorded zero-count build prerequisite, not a second accepted ID",
+    "The64-bit native stand already passes before the fix; only actual32-bit baseline failures establish the defect"
+  ]
+}

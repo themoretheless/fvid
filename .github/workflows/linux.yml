@@ -82,3 +82,22 @@ jobs:
           python3 scripts/test_media_reference_policy.py
           python3 scripts/test_klite_reference_policy.py
           python3 scripts/check_native_dependencies.py --offline
+
+  mp4-seek-wasm32:
+    runs-on: ubuntu-latest
+    env:
+      CARGO_BUILD_JOBS: "2"
+      CARGO_TARGET_DIR: target/mp4-seek-wasm32
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: 1.98.1
+          targets: wasm32-unknown-unknown
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Build the real owned MP4 parser for 32-bit pointers
+        run: cargo build --locked --target wasm32-unknown-unknown --manifest-path tests/support/mp4_uniform_seek_width/Cargo.toml
+      - name: Verify wide media ticks in an actual wasm32 runtime
+        run: node scripts/check_mp4_uniform_seek_width.mjs target/mp4-seek-wasm32/wasm32-unknown-unknown/debug/fvid_mp4_uniform_seek_width_probe.wasm

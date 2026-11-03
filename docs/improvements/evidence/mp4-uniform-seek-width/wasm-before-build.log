@@ -1,0 +1,407 @@
+   Compiling proc-macro2 v1.0.107
+   Compiling quote v1.0.47
+   Compiling unicode-ident v1.0.27
+   Compiling serde_core v1.0.229
+   Compiling serde v1.0.229
+   Compiling zmij v1.0.23
+   Compiling serde_json v1.0.154
+   Compiling syn v3.0.9
+   Compiling libc v0.2.191
+   Compiling ttf-parser v0.25.1
+   Compiling adler2 v2.0.1
+   Compiling fvid-control v0.1.0 (/Users/themoretheless/.codex/worktrees/fvid-push-20261029/fvid/crates/fvid-control)
+   Compiling fvid-cpu v0.1.0 (/Users/themoretheless/.codex/worktrees/fvid-push-20261029/fvid/crates/fvid-cpu)
+   Compiling itoa v1.0.18
+   Compiling memchr v2.8.3
+   Compiling fvid-media v0.1.0 (/Users/themoretheless/.codex/worktrees/fvid-push-20261029/fvid/crates/fvid-media)
+   Compiling ab_glyph_rasterizer v0.1.10
+   Compiling fvid-codecs v0.1.0 (/Users/themoretheless/.codex/worktrees/fvid-push-20261029/fvid/crates/fvid-codecs)
+   Compiling serde_derive v1.0.229
+   Compiling owned_ttf_parser v0.25.1
+   Compiling ab_glyph v0.2.32
+   Compiling miniz_oxide v0.8.9
+   Compiling epaint_default_fonts v0.36.2
+   Compiling fvid-opus v0.1.0 (/Users/themoretheless/.codex/worktrees/fvid-push-20261029/fvid/crates/fvid-opus)
+   Compiling fvid-media-info v0.1.0 (/Users/themoretheless/.codex/worktrees/fvid-push-20261029/fvid/crates/fvid-media-info)
+warning: unreachable pattern
+   --> /Users/themoretheless/.codex/worktrees/fvid-push-20261029/fvid/crates/fvid-codecs/src/../../../src/codec/hevc_motion.rs:492:25
+    |
+492 |                         _=>return Err(invalid("unexpected HEVC depth IV merge selection")),
+    |                         ^ no value can reach this
+    |
+note: multiple earlier patterns match some of the same values
+   --> /Users/themoretheless/.codex/worktrees/fvid-push-20261029/fvid/crates/fvid-codecs/src/../../../src/codec/hevc_motion.rs:492:25
+    |
+482 | ...   merge_order::Selection::Initial(i)=>{
+    |       ---------------------------------- matches some of the same values
+...
+486 | ...   merge_order::Selection::ViewSynthesis=>return Ok(Resolved::ViewSynthesis),
+    |       ------------------------------------- matches some of the same values
+487 | ...   merge_order::Selection::Texture=>return Ok(Resolved::Texture),
+    |       ------------------------------- matches some of the same values
+488 | ...   merge_order::Selection::InterView=>{selected_iv=1;(special.inter_view.copied().ok_or_else(||invalid("missing selected HEVC IV...
+    |       --------------------------------- matches some of the same values
+...
+492 | ...   _=>return Err(invalid("unexpected HEVC depth IV merge selection")),
+    |       ^ ...and 3 other patterns collectively make this unreachable
+    = note: `#[warn(unreachable_patterns)]` (part of `#[warn(unused)]`) on by default
+
+warning: function `intra_plane` is never used
+   --> /Users/themoretheless/.codex/worktrees/fvid-push-20261029/fvid/crates/fvid-codecs/src/../../../src/codec/avc_deblock.rs:184:15
+    |
+184 | pub(super) fn intra_plane(
+    |               ^^^^^^^^^^^
+    |
+    = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+warning: function `read_inter_coefficients_422` is never used
+  --> /Users/themoretheless/.codex/worktrees/fvid-push-20261029/fvid/crates/fvid-codecs/src/../../../src/codec/avc_inter_coefficients.rs:34:15
+   |
+34 | pub(super) fn read_inter_coefficients_422(bits:&mut BitReader<'_>,pattern:u8,transform8:bool,neighbours:CoefficientNeighbours,chroma...
+   |               ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `candidates` is never used
+  --> /Users/themoretheless/.codex/worktrees/fvid-push-20261029/fvid/crates/fvid-codecs/src/../../../src/codec/avc_mv.rs:78:4
+   |
+78 | fn candidates(n: Neighbours) -> Result<[Neighbour; 3]> {
+   |    ^^^^^^^^^^
+
+warning: function `inverse2` is never used
+   --> /Users/themoretheless/.codex/worktrees/fvid-push-20261029/fvid/crates/fvid-codecs/src/../../../src/codec/hevc_transform.rs:190:4
+    |
+190 | fn inverse2(input: &[i32], output: &mut [i32]) {
+    |    ^^^^^^^^
+
+warning: function `inverse4` is never used
+   --> /Users/themoretheless/.codex/worktrees/fvid-push-20261029/fvid/crates/fvid-codecs/src/../../../src/codec/hevc_transform.rs:218:15
+    |
+218 | inverse_size!(inverse4, inverse2, 4);
+    |               ^^^^^^^^
+    |
+    = note: this warning originates in the macro `inverse_size` (in Nightly builds, run with -Z macro-backtrace for more info)
+
+warning: function `inverse8` is never used
+   --> /Users/themoretheless/.codex/worktrees/fvid-push-20261029/fvid/crates/fvid-codecs/src/../../../src/codec/hevc_transform.rs:219:15
+    |
+219 | inverse_size!(inverse8, inverse4, 8);
+    |               ^^^^^^^^
+    |
+    = note: this warning originates in the macro `inverse_size` (in Nightly builds, run with -Z macro-backtrace for more info)
+
+warning: function `inverse16` is never used
+   --> /Users/themoretheless/.codex/worktrees/fvid-push-20261029/fvid/crates/fvid-codecs/src/../../../src/codec/hevc_transform.rs:220:15
+    |
+220 | inverse_size!(inverse16, inverse8, 16);
+    |               ^^^^^^^^^
+    |
+    = note: this warning originates in the macro `inverse_size` (in Nightly builds, run with -Z macro-backtrace for more info)
+
+warning: function `inverse32` is never used
+   --> /Users/themoretheless/.codex/worktrees/fvid-push-20261029/fvid/crates/fvid-codecs/src/../../../src/codec/hevc_transform.rs:221:15
+    |
+221 | inverse_size!(inverse32, inverse16, 32);
+    |               ^^^^^^^^^
+    |
+    = note: this warning originates in the macro `inverse_size` (in Nightly builds, run with -Z macro-backtrace for more info)
+
+warning: enum `RunKind` is never used
+   --> /Users/themoretheless/.codex/worktrees/fvid-push-20261029/fvid/crates/fvid-codecs/src/../../../src/codec/hevc_palette.rs:420:17
+    |
+420 | pub(crate) enum RunKind {
+    |                 ^^^^^^^
+
+warning: struct `Run` is never constructed
+   --> /Users/themoretheless/.codex/worktrees/fvid-push-20261029/fvid/crates/fvid-codecs/src/../../../src/codec/hevc_palette.rs:425:19
+    |
+425 | pub(crate) struct Run {
+    |                   ^^^
+
+warning: function `expand_runs` is never used
+   --> /Users/themoretheless/.codex/worktrees/fvid-push-20261029/fvid/crates/fvid-codecs/src/../../../src/codec/hevc_palette.rs:431:15
+    |
+431 | pub(crate) fn expand_runs(size: usize, maximum_index: u8, runs: &[Run]) -> Result<Vec<u8>> {
+    |               ^^^^^^^^^^^
+
+error[E0531]: cannot find unit struct, unit variant or constant `E2BIG` in crate `libc`
+  --> /Users/themoretheless/.codex/worktrees/fvid-push-20261029/fvid/crates/fvid-media/src/owned_backend_error.rs:66:19
+   |
+66 |             libc::E2BIG => "Argument list too long",
+   |                   ^^^^^ not found in `libc`
+
+error[E0531]: cannot find unit struct, unit variant or constant `EACCES` in crate `libc`
+  --> /Users/themoretheless/.codex/worktrees/fvid-push-20261029/fvid/crates/fvid-media/src/owned_backend_error.rs:67:19
+   |
+67 |             libc::EACCES => "Permission denied",
+   |                   ^^^^^^ not found in `libc`
+
+error[E0531]: cannot find unit struct, unit variant or constant `EAGAIN` in crate `libc`
+  --> /Users/themoretheless/.codex/worktrees/fvid-push-20261029/fvid/crates/fvid-media/src/owned_backend_error.rs:68:19
+   |
+68 |             libc::EAGAIN => "Resource temporarily unavailable",
+   |                   ^^^^^^ not found in `libc`
+
+error[E0531]: cannot find unit struct, unit variant or constant `EBADF` in crate `libc`
+  --> /Users/themoretheless/.codex/worktrees/fvid-push-20261029/fvid/crates/fvid-media/src/owned_backend_error.rs:69:19
+   |
+69 |             libc::EBADF => "Bad file descriptor",
+   |                   ^^^^^ not found in `libc`
+
+error[E0531]: cannot find unit struct, unit variant or constant `EBUSY` in crate `libc`
+  --> /Users/themoretheless/.codex/worktrees/fvid-push-20261029/fvid/crates/fvid-media/src/owned_backend_error.rs:70:19
+   |
+70 |             libc::EBUSY => "Device or resource busy",
+   |                   ^^^^^ not found in `libc`
+
+error[E0531]: cannot find unit struct, unit variant or constant `ECHILD` in crate `libc`
+  --> /Users/themoretheless/.codex/worktrees/fvid-push-20261029/fvid/crates/fvid-media/src/owned_backend_error.rs:71:19
+   |
+71 |             libc::ECHILD => "No child processes",
+   |                   ^^^^^^ not found in `libc`
+
+error[E0531]: cannot find unit struct, unit variant or constant `EDEADLK` in crate `libc`
+  --> /Users/themoretheless/.codex/worktrees/fvid-push-20261029/fvid/crates/fvid-media/src/owned_backend_error.rs:72:19
+   |
+72 |             libc::EDEADLK => "Resource deadlock avoided",
+   |                   ^^^^^^^ not found in `libc`
+
+error[E0531]: cannot find unit struct, unit variant or constant `EDOM` in crate `libc`
+  --> /Users/themoretheless/.codex/worktrees/fvid-push-20261029/fvid/crates/fvid-media/src/owned_backend_error.rs:73:19
+   |
+73 |             libc::EDOM => "Numerical argument out of domain",
+   |                   ^^^^ not found in `libc`
+
+error[E0531]: cannot find unit struct, unit variant or constant `EEXIST` in crate `libc`
+  --> /Users/themoretheless/.codex/worktrees/fvid-push-20261029/fvid/crates/fvid-media/src/owned_backend_error.rs:74:19
+   |
+74 |             libc::EEXIST => "File exists",
+   |                   ^^^^^^ not found in `libc`
+
+error[E0531]: cannot find unit struct, unit variant or constant `EFAULT` in crate `libc`
+  --> /Users/themoretheless/.codex/worktrees/fvid-push-20261029/fvid/crates/fvid-media/src/owned_backend_error.rs:75:19
+   |
+75 |             libc::EFAULT => "Bad address",
+   |                   ^^^^^^ not found in `libc`
+
+error[E0531]: cannot find unit struct, unit variant or constant `EFBIG` in crate `libc`
+  --> /Users/themoretheless/.codex/worktrees/fvid-push-20261029/fvid/crates/fvid-media/src/owned_backend_error.rs:76:19
+   |
+76 |             libc::EFBIG => "File too large",
+   |                   ^^^^^ not found in `libc`
+
+error[E0531]: cannot find unit struct, unit variant or constant `EILSEQ` in crate `libc`
+  --> /Users/themoretheless/.codex/worktrees/fvid-push-20261029/fvid/crates/fvid-media/src/owned_backend_error.rs:77:19
+   |
+77 |             libc::EILSEQ => "Illegal byte sequence",
+   |                   ^^^^^^ not found in `libc`
+
+error[E0531]: cannot find unit struct, unit variant or constant `EINTR` in crate `libc`
+  --> /Users/themoretheless/.codex/worktrees/fvid-push-20261029/fvid/crates/fvid-media/src/owned_backend_error.rs:78:19
+   |
+78 |             libc::EINTR => "Interrupted system call",
+   |                   ^^^^^ not found in `libc`
+
+error[E0531]: cannot find unit struct, unit variant or constant `EINVAL` in crate `libc`
+  --> /Users/themoretheless/.codex/worktrees/fvid-push-20261029/fvid/crates/fvid-media/src/owned_backend_error.rs:79:19
+   |
+79 |             libc::EINVAL => "Invalid argument",
+   |                   ^^^^^^ not found in `libc`
+
+error[E0531]: cannot find unit struct, unit variant or constant `EIO` in crate `libc`
+  --> /Users/themoretheless/.codex/worktrees/fvid-push-20261029/fvid/crates/fvid-media/src/owned_backend_error.rs:80:19
+   |
+80 |             libc::EIO => "I/O error",
+   |                   ^^^ not found in `libc`
+
+error[E0531]: cannot find unit struct, unit variant or constant `EISDIR` in crate `libc`
+  --> /Users/themoretheless/.codex/worktrees/fvid-push-20261029/fvid/crates/fvid-media/src/owned_backend_error.rs:81:19
+   |
+81 |             libc::EISDIR => "Is a directory",
+   |                   ^^^^^^ not found in `libc`
+
+error[E0531]: cannot find unit struct, unit variant or constant `EMFILE` in crate `libc`
+  --> /Users/themoretheless/.codex/worktrees/fvid-push-20261029/fvid/crates/fvid-media/src/owned_backend_error.rs:82:19
+   |
+82 |             libc::EMFILE => "Too many open files",
+   |                   ^^^^^^ not found in `libc`
+
+error[E0531]: cannot find unit struct, unit variant or constant `EMLINK` in crate `libc`
+  --> /Users/themoretheless/.codex/worktrees/fvid-push-20261029/fvid/crates/fvid-media/src/owned_backend_error.rs:83:19
+   |
+83 |             libc::EMLINK => "Too many links",
+   |                   ^^^^^^ not found in `libc`
+
+error[E0531]: cannot find unit struct, unit variant or constant `ENAMETOOLONG` in crate `libc`
+  --> /Users/themoretheless/.codex/worktrees/fvid-push-20261029/fvid/crates/fvid-media/src/owned_backend_error.rs:84:19
+   |
+84 |             libc::ENAMETOOLONG => "File name too long",
+   |                   ^^^^^^^^^^^^ not found in `libc`
+
+error[E0531]: cannot find unit struct, unit variant or constant `ENFILE` in crate `libc`
+  --> /Users/themoretheless/.codex/worktrees/fvid-push-20261029/fvid/crates/fvid-media/src/owned_backend_error.rs:85:19
+   |
+85 |             libc::ENFILE => "Too many open files in system",
+   |                   ^^^^^^ not found in `libc`
+
+error[E0531]: cannot find unit struct, unit variant or constant `ENODEV` in crate `libc`
+  --> /Users/themoretheless/.codex/worktrees/fvid-push-20261029/fvid/crates/fvid-media/src/owned_backend_error.rs:86:19
+   |
+86 |             libc::ENODEV => "No such device",
+   |                   ^^^^^^ not found in `libc`
+
+error[E0531]: cannot find unit struct, unit variant or constant `ENOENT` in crate `libc`
+  --> /Users/themoretheless/.codex/worktrees/fvid-push-20261029/fvid/crates/fvid-media/src/owned_backend_error.rs:87:19
+   |
+87 |             libc::ENOENT => "No such file or directory",
+   |                   ^^^^^^ not found in `libc`
+
+error[E0531]: cannot find unit struct, unit variant or constant `ENOEXEC` in crate `libc`
+  --> /Users/themoretheless/.codex/worktrees/fvid-push-20261029/fvid/crates/fvid-media/src/owned_backend_error.rs:88:19
+   |
+88 |             libc::ENOEXEC => "Exec format error",
+   |                   ^^^^^^^ not found in `libc`
+
+error[E0531]: cannot find unit struct, unit variant or constant `ENOLCK` in crate `libc`
+  --> /Users/themoretheless/.codex/worktrees/fvid-push-20261029/fvid/crates/fvid-media/src/owned_backend_error.rs:89:19
+   |
+89 |             libc::ENOLCK => "No locks available",
+   |                   ^^^^^^ not found in `libc`
+
+error[E0531]: cannot find unit struct, unit variant or constant `ENOMEM` in crate `libc`
+  --> /Users/themoretheless/.codex/worktrees/fvid-push-20261029/fvid/crates/fvid-media/src/owned_backend_error.rs:90:19
+   |
+90 |             libc::ENOMEM => "Cannot allocate memory",
+   |                   ^^^^^^ not found in `libc`
+
+error[E0531]: cannot find unit struct, unit variant or constant `ENOSPC` in crate `libc`
+  --> /Users/themoretheless/.codex/worktrees/fvid-push-20261029/fvid/crates/fvid-media/src/owned_backend_error.rs:91:19
+   |
+91 |             libc::ENOSPC => "No space left on device",
+   |                   ^^^^^^ not found in `libc`
+
+error[E0531]: cannot find unit struct, unit variant or constant `ENOSYS` in crate `libc`
+  --> /Users/themoretheless/.codex/worktrees/fvid-push-20261029/fvid/crates/fvid-media/src/owned_backend_error.rs:92:19
+   |
+92 |             libc::ENOSYS => "Function not implemented",
+   |                   ^^^^^^ not found in `libc`
+
+error[E0531]: cannot find unit struct, unit variant or constant `ENOTDIR` in crate `libc`
+  --> /Users/themoretheless/.codex/worktrees/fvid-push-20261029/fvid/crates/fvid-media/src/owned_backend_error.rs:93:19
+   |
+93 |             libc::ENOTDIR => "Not a directory",
+   |                   ^^^^^^^ not found in `libc`
+
+error[E0531]: cannot find unit struct, unit variant or constant `ENOTEMPTY` in crate `libc`
+  --> /Users/themoretheless/.codex/worktrees/fvid-push-20261029/fvid/crates/fvid-media/src/owned_backend_error.rs:94:19
+   |
+94 |             libc::ENOTEMPTY => "Directory not empty",
+   |                   ^^^^^^^^^ not found in `libc`
+
+error[E0531]: cannot find unit struct, unit variant or constant `ENOTTY` in crate `libc`
+  --> /Users/themoretheless/.codex/worktrees/fvid-push-20261029/fvid/crates/fvid-media/src/owned_backend_error.rs:95:19
+   |
+95 |             libc::ENOTTY => "Inappropriate I/O control operation",
+   |                   ^^^^^^ not found in `libc`
+
+error[E0531]: cannot find unit struct, unit variant or constant `ENXIO` in crate `libc`
+  --> /Users/themoretheless/.codex/worktrees/fvid-push-20261029/fvid/crates/fvid-media/src/owned_backend_error.rs:96:19
+   |
+96 |             libc::ENXIO => "No such device or address",
+   |                   ^^^^^ not found in `libc`
+
+error[E0531]: cannot find unit struct, unit variant or constant `EPERM` in crate `libc`
+  --> /Users/themoretheless/.codex/worktrees/fvid-push-20261029/fvid/crates/fvid-media/src/owned_backend_error.rs:97:19
+   |
+97 |             libc::EPERM => "Operation not permitted",
+   |                   ^^^^^ not found in `libc`
+
+error[E0531]: cannot find unit struct, unit variant or constant `EPIPE` in crate `libc`
+  --> /Users/themoretheless/.codex/worktrees/fvid-push-20261029/fvid/crates/fvid-media/src/owned_backend_error.rs:98:19
+   |
+98 |             libc::EPIPE => "Broken pipe",
+   |                   ^^^^^ not found in `libc`
+
+error[E0531]: cannot find unit struct, unit variant or constant `ERANGE` in crate `libc`
+  --> /Users/themoretheless/.codex/worktrees/fvid-push-20261029/fvid/crates/fvid-media/src/owned_backend_error.rs:99:19
+   |
+99 |             libc::ERANGE => "Result too large",
+   |                   ^^^^^^ not found in `libc`
+
+error[E0531]: cannot find unit struct, unit variant or constant `EROFS` in crate `libc`
+   --> /Users/themoretheless/.codex/worktrees/fvid-push-20261029/fvid/crates/fvid-media/src/owned_backend_error.rs:100:19
+    |
+100 |             libc::EROFS => "Read-only file system",
+    |                   ^^^^^ not found in `libc`
+
+error[E0531]: cannot find unit struct, unit variant or constant `ESPIPE` in crate `libc`
+   --> /Users/themoretheless/.codex/worktrees/fvid-push-20261029/fvid/crates/fvid-media/src/owned_backend_error.rs:101:19
+    |
+101 |             libc::ESPIPE => "Illegal seek",
+    |                   ^^^^^^ not found in `libc`
+
+error[E0531]: cannot find unit struct, unit variant or constant `ESRCH` in crate `libc`
+   --> /Users/themoretheless/.codex/worktrees/fvid-push-20261029/fvid/crates/fvid-media/src/owned_backend_error.rs:102:19
+    |
+102 |             libc::ESRCH => "No such process",
+    |                   ^^^^^ not found in `libc`
+
+error[E0531]: cannot find unit struct, unit variant or constant `EXDEV` in crate `libc`
+   --> /Users/themoretheless/.codex/worktrees/fvid-push-20261029/fvid/crates/fvid-media/src/owned_backend_error.rs:103:19
+    |
+103 |             libc::EXDEV => "Cross-device link",
+    |                   ^^^^^ not found in `libc`
+
+warning: `fvid-codecs` (lib) generated 12 warnings
+warning: unused variable: `aspect`
+    --> /Users/themoretheless/.codex/worktrees/fvid-push-20261029/fvid/crates/fvid-media/src/owned_y4m_decode.rs:1128:9
+     |
+1128 |     let aspect = presented_header.pixel_aspect()?;
+     |         ^^^^^^ help: if this is intentional, prefix it with an underscore: `_aspect`
+     |
+     = note: `#[warn(unused_variables)]` (part of `#[warn(unused)]`) on by default
+
+warning: variable does not need to be mutable
+   --> /Users/themoretheless/.codex/worktrees/fvid-push-20261029/fvid/crates/fvid-media/src/owned_adts_export.rs:251:17
+    |
+251 |             let mut builder = std::fs::DirBuilder::new();
+    |                 ----^^^^^^^
+    |                 |
+    |                 help: remove this `mut`
+    |
+    = note: `#[warn(unused_mut)]` (part of `#[warn(unused)]`) on by default
+
+warning: variable does not need to be mutable
+   --> /Users/themoretheless/.codex/worktrees/fvid-push-20261029/fvid/crates/fvid-media/src/owned_xfade.rs:464:5
+    |
+464 |     mut visit: impl FnMut(&GeometryFrame, u64, u64) -> Result<(), String>,
+    |     ----^^^^^
+    |     |
+    |     help: remove this `mut`
+
+warning: variable `pages` is assigned to, but never used
+  --> /Users/themoretheless/.codex/worktrees/fvid-push-20261029/fvid/crates/fvid-media/src/owned_ogg_opus_export.rs:56:9
+   |
+56 |     let mut pages = 0usize;
+   |         ^^^^^^^^^
+   |
+   = note: consider using `_pages` instead
+
+warning: value assigned to `pages` is never read
+  --> /Users/themoretheless/.codex/worktrees/fvid-push-20261029/fvid/crates/fvid-media/src/owned_ogg_opus_export.rs:80:9
+   |
+80 |         pages += 1;
+   |         ^^^^^^^^^^
+   |
+   = help: maybe it is overwritten before being read?
+   = note: `#[warn(unused_assignments)]` (part of `#[warn(unused)]`) on by default
+
+warning: variable does not need to be mutable
+  --> /Users/themoretheless/.codex/worktrees/fvid-push-20261029/fvid/crates/fvid-media/src/owned_video_temporary.rs:22:17
+   |
+22 |             let mut builder = std::fs::DirBuilder::new();
+   |                 ----^^^^^^^
+   |                 |
+   |                 help: remove this `mut`
+
+For more information about this error, try `rustc --explain E0531`.
+warning: `fvid-media` (lib) generated 6 warnings
+error: could not compile `fvid-media` (lib) due to 38 previous errors; 6 warnings emitted

@@ -1,0 +1,25 @@
+{
+  "provenance": "Authored60ms neutral VP9 and8kHz mono PCM/raw ALAC. Uniform PCM and expanded ALAC controls at1000/48000 media clocks. All media stays short; only seek requests cross32-bit tick boundaries. No private source, encoder or network.",
+  "cases": [
+    {
+      "file": "pcm-1000.mp4",
+      "uniform": true,
+      "delta": 20
+    },
+    {
+      "file": "pcm-48000.mp4",
+      "uniform": true,
+      "delta": 960
+    },
+    {
+      "file": "alac-1000.mp4",
+      "uniform": false,
+      "delta": 20
+    },
+    {
+      "file": "alac-48000.mp4",
+      "uniform": false,
+      "delta": 960
+    }
+  ]
+}

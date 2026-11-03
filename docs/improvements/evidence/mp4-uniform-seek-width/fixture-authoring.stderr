@@ -1,0 +1,16 @@
+wasm://wasm/fvid_mp4_uniform_seek_width_probe.wasm-12aec56a:1
+
+
+RuntimeError: unreachable
+    at fvid_mp4_uniform_seek_width_probe.wasm._RNvCs1njKG4L9aB3_7___rustc12___rust_abort (wasm://wasm/fvid_mp4_uniform_seek_width_probe.wasm-12aec56a:wasm-function[2026]:0x75f08)
+    at fvid_mp4_uniform_seek_width_probe.wasm._RNvCs1njKG4L9aB3_7___rustc18___rust_start_panic (wasm://wasm/fvid_mp4_uniform_seek_width_probe.wasm-12aec56a:wasm-function[2009]:0x74516)
+    at fvid_mp4_uniform_seek_width_probe.wasm._RNvCs1njKG4L9aB3_7___rustc10rust_panic (wasm://wasm/fvid_mp4_uniform_seek_width_probe.wasm-12aec56a:wasm-function[2022]:0x74973)
+    at fvid_mp4_uniform_seek_width_probe.wasm._RNvNtCs7L774UPzF0f_3std9panicking15panic_with_hook (wasm://wasm/fvid_mp4_uniform_seek_width_probe.wasm-12aec56a:wasm-function[2020]:0x74957)
+    at fvid_mp4_uniform_seek_width_probe.wasm._RNCNvNtCs7L774UPzF0f_3std9panicking13panic_handler0B5_ (wasm://wasm/fvid_mp4_uniform_seek_width_probe.wasm-12aec56a:wasm-function[2018]:0x7474b)
+    at fvid_mp4_uniform_seek_width_probe.wasm._RINvNtNtCs7L774UPzF0f_3std3sys9backtrace26___rust_end_short_backtraceNCNvNtB6_9panicking13panic_handler0zEB6_ (wasm://wasm/fvid_mp4_uniform_seek_width_probe.wasm-12aec56a:wasm-function[2017]:0x746b3)
+    at fvid_mp4_uniform_seek_width_probe.wasm._RNvCs1njKG4L9aB3_7___rustc17rust_begin_unwind (wasm://wasm/fvid_mp4_uniform_seek_width_probe.wasm-12aec56a:wasm-function[2032]:0x76a95)
+    at fvid_mp4_uniform_seek_width_probe.wasm._RNvNtCsknUcikIyyBm_4core9panicking9panic_fmt (wasm://wasm/fvid_mp4_uniform_seek_width_probe.wasm-12aec56a:wasm-function[2081]:0x78198)
+    at fvid_mp4_uniform_seek_width_probe.wasm._RNvNtCsknUcikIyyBm_4core9panicking19assert_failed_inner (wasm://wasm/fvid_mp4_uniform_seek_width_probe.wasm-12aec56a:wasm-function[2075]:0x77d20)
+    at fvid_mp4_uniform_seek_width_probe.wasm._RINvNtCsknUcikIyyBm_4core9panicking13assert_failedbbECs7L774UPzF0f_3std (wasm://wasm/fvid_mp4_uniform_seek_width_probe.wasm-12aec56a:wasm-function[2010]:0x7455f)
+
+Node.js v22.23.4
