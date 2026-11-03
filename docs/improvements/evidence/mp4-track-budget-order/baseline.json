@@ -1,0 +1,14 @@
+{
+  "base": "9543c674e5283b40ecdd2f1769cc955e2f269f03",
+  "passed": 1,
+  "failed": 1,
+  "falseAdmissions": 18,
+  "uniqueFileBudgetPairs": 9,
+  "validVideoControls": 10,
+  "log": "docs/improvements/evidence/mp4-track-budget-order/before.log",
+  "source": "docs/improvements/evidence/mp4-track-budget-order/baseline-source.json",
+  "authoringDiagnostics": [
+    "frame-oracle-authoring.log",
+    "frame-oracle-authoring-reference.json"
+  ]
+}

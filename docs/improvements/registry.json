@@ -1,8 +1,8 @@
 {
   "target": 1000,
   "counting_rule": "One independently confirmed problem or useful capability; fixture variants and baseline integration repairs are excluded. Only accepted entries count.",
-  "accepted_count": 546,
-  "next_id": "FVID-0547",
+  "accepted_count": 547,
+  "next_id": "FVID-0548",
   "entries": [
     {
       "id": "FVID-0001",
@@ -3889,7 +3889,8 @@
       "before": "In `owned_adts_loudness::validate_header_configuration`, `owned_adts_loudness::validate_packet_budget`, `owned_adts_export::supports`, `owned_adts_export::decode_to_wave_with_rate`, `owned_audio_plan::source_descriptor_for_decode`, `owned_aac_export_routing::router_for_decode`, `owned_aac::stream::decode_adts_pcm`, and `owned_aac::stream::adts_prefix_info`, `StreamReader::open_with_packet_limit` was called with `options.max_packet_bytes` without clamping to `options.max_controlled_bytes` (`options.max_packet_bytes.min(options.max_controlled_bytes.unwrap_or(usize::MAX))`), allowing an explicit-layout ADTS frame (`channels == 0`, PCE in first packet) to allocate its first transport frame payload (`vec![0; configuration.frame_bytes - 7]`) above `max_controlled_bytes` before decoder admission ran. In addition, `owned_wave_loudness::plan_loudness` omitted the standard `encoded packet limit: ...; packet work limit: ...; controlled memory limit: ...; RSS limit: ...` note when non-default `CopyOptions` budgets were supplied, and `owned_wave_plan::plan_trim` (`crates/fvid-media/src/owned_wave_plan.rs:65`) and `owned_wave_remux::trim` (`crates/fvid-media/src/owned_wave_remux.rs:64`) passed `&CopyOptions::default()` instead of `options` to `owned_g711_wave_export::recognizes`.",
       "result": "Clamp `StreamReader::open_with_packet_limit` to `options.max_packet_bytes.min(options.max_controlled_bytes.unwrap_or(usize::MAX))` across `owned_adts_loudness`, `owned_adts_export`, `owned_audio_plan`, `owned_aac_export_routing`, and `owned_aac::stream`, append the standard budget note in `owned_wave_loudness::plan_loudness`, and forward `options` to `owned_g711_wave_export::recognizes` in `owned_wave_plan::plan_trim` and `owned_wave_remux::trim`. Ten integration tests in `mp4_audio_metadata_admission` and eleven in `mp4_metadata_admission` pass.",
       "status": "accepted",
-      "validation": "batch-338-validation.json"
+      "validation": "batch-338-validation.json",
+      "spatial_budget_test_followup": "Zero-count baseline validation: keep the existing early ADTS packet refusal under a one-byte ceiling. The spatial working-set control now uses8192 bytes to reach that later stage; separate one-byte ADTS/MP4/Matroska and explicit-packet/planning controls preserve the tighter bounds. All original assertions remain,8 spatial tests and the original admission unit pass. A tentative production error-context reclassification was rejected by the existing contract and fully reverted. See evidence/spatial-budget-diagnostic/validation.json."
     },
     {
       "id": "FVID-0346",
@@ -6196,6 +6197,17 @@
       "result": "Divide clamped nonnegative ticks by duration in u64, then checked-convert the quotient to usize and clamp to the last sample. Empty indices, zero durations, negatives and expanded behavior remain unchanged. Production Rust wasm32 now passes220/220 checks:44 real parsed-media requests and176 public-index boundaries, including2^32/2^40/i64MAX, large deltas and quotient overflow. Three additional runs with unavailable PATH/media tools pass220 each using the explicit Node runtime. Ordinary native tests require no Node, FFmpeg, fixture generation or network. Four short synthetic videos retain literal full PCM, parsed index shape, decoded VP9, precise Duration/raw seeks, rewind/EOF and12 actual software-worker sessions/anchors per stand; all4 match independent FFmpeg literal PCM. Six authored files regenerate identically and5614 source/input hashes stay stable. Qualification passes177 Rust test executions, two existing device ignores, core/player checks, a Windows media cross-check and unchanged backend diagnostics. A separate locked wasm probe is wired into Linux CI; local and dedicated remote Linux wasm32 execution pass; whole CI remains separately limited by pre-existing integration failures. The platform prerequisite restricts the existing errno catalog to Windows and keeps the numeric fallback on targets with no OS errno catalog; Unix/Windows branches retain their behavior. One32-bit media-index narrowing defect, not per-case/fixture/CI/build-prerequisite IDs. No public API, codec algorithm, performance, general browser/player or physical32-bit device claim.",
       "status": "accepted",
       "validation": "batch-557-validation.json"
+    },
+    {
+      "id": "FVID-0547",
+      "batch": 558,
+      "title": "Count every declared MP4 track against the track limit",
+      "source": "crates/fvid-media/src/owned_mp4_impl.rs",
+      "regression": "tests/mp4_track_budget_order.rs",
+      "before": "Original9543c674e5 checks the number of retained supported tracks before parsing each trak. Unsupported tracks do not consume that counter. With limit1, a valid two-track video+opaque-audio movie is admitted when unsupported audio comes first and rejected in the opposite order; three-track variants also bypass limit2. The unchanged two-test stand passes sufficient-budget playback and reports18 false admissions across root/owned readers for9 distinct file/budget pairs. An initial wrong neutral-frame luma literal is retained only as stand-authoring diagnostics, not project-defect evidence.",
+      "result": "Charge the ordinal of every declared trak before parsing it, independent of support/skip status and order. Opaque unsupported tracks remain skippable within the total budget. Ten authored60ms movies cover video-only, recognized video+PCM and all permutations of video with one/two unsupported sound tracks. All25 below-total budget cases now give the existing typed Invalid/non-unsupported refusal through both readers; exact/ample budgets retain track/refusal counts, packet clocks and full exact software VP9 video. Twenty actual software-video reader sessions per stand preserve seek/rewind/EOF. Independent FFmpeg confirms all10 complete videos; no unsupported-audio playback is claimed. Twelve files regenerate identically and5629 source/input hashes are frozen. Qualification passes215 Rust test executions, two existing device ignores, core/player builds, six external-tool-free native repeats and two220-case actual wasm32 compatibility runs. One total-track resource invariant, not per-reader/order/codec/fixture IDs. No codec algorithm, public signature, packet/sample budget, speedup or hardware/UI claim. A separately verified zero-count spatial-budget test-stage correction retains the original early packet contract and all assertions.",
+      "status": "accepted",
+      "validation": "batch-558-validation.json"
     }
   ]
 }

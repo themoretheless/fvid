@@ -1,0 +1,7 @@
+# AAC spatial budget stages: zero-count baseline correction
+
+Both Linux/Windows CI pass550 library tests and fail the existing spatial controls test: its1-byte controlled limit stops ADTS at encoded-packet admission, correctly producing ADTS packet exceeds budget. The existing owned_adts_export unit explicitly requires this earlier-stage diagnostic, while the spatial test incorrectly expects a decoder-working-set error before the packet can even be admitted. The local probe reproduces every format/budget case without publishing output.
+
+Keep the production contract. A tentative error-context refactor was rejected by that unit and completely reverted across all4 production files. routing-only-probe.log, final.log/final-expanded.log and rejected-reclassification-unit.log are diagnostics of that rejected experiment, not final qualification or new bug counts.
+
+The spatial working-set check now uses8192 bytes, which admits the short encoded packet but is still below every observed decoder/router estimate. Its original assertions, prefix oracle, cancellation and existing-destination checks are retained. A separate1-byte test preserves strict early refusals in ADTS/MP4/Matroska with the correct stage-specific diagnostics and no output. Another test distinguishes explicit packet quotas (with no/large/equal memory ceiling) in execution and planning. All8 tests and the original ADTS unit pass; no fixture, codec or production routing code changed. This completes baseline validation for FVID-0345 without a new accepted ID.

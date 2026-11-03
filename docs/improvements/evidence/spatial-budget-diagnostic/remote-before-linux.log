@@ -1,0 +1,7 @@
+2026-11-03T08:23:49.7907468Z test result: ok. 550 passed; 0 failed; 1 ignored; 0 measured; 0 filtered out; finished in 40.95s
+2026-11-03T08:24:09.7239398Z test spatial_export_controls_preserve_prefixes_and_atomic_publication ... FAILED
+2026-11-03T08:24:20.2329810Z ---- spatial_export_controls_preserve_prefixes_and_atomic_publication stdout ----
+2026-11-03T08:24:20.2331185Z thread 'spatial_export_controls_preserve_prefixes_and_atomic_publication' (5639) panicked at crates/fvid-media/tests/aac_spatial_export.rs:280:13:
+2026-11-03T08:24:20.2332368Z aac/0: ADTS packet exceeds budget
+2026-11-03T08:24:20.2334213Z     spatial_export_controls_preserve_prefixes_and_atomic_publication
+2026-11-03T08:24:20.2334793Z test result: FAILED. 5 passed; 1 failed; 0 ignored; 0 measured; 0 filtered out; finished in 12.46s

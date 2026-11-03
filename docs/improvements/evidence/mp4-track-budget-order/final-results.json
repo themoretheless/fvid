@@ -1,0 +1,110 @@
+[
+  {
+    "name": "core-integration",
+    "log": "docs/improvements/evidence/mp4-track-budget-order/core-integration.log",
+    "passed": 51,
+    "ignored": 0
+  },
+  {
+    "name": "player-integration",
+    "log": "docs/improvements/evidence/mp4-track-budget-order/player-integration.log",
+    "passed": 4,
+    "ignored": 0
+  },
+  {
+    "name": "root-lib-build",
+    "log": "docs/improvements/evidence/mp4-track-budget-order/root-lib-build.log",
+    "passed": true,
+    "ignored": 0
+  },
+  {
+    "name": "root-parser",
+    "log": "docs/improvements/evidence/mp4-track-budget-order/root-parser.log",
+    "passed": 17,
+    "ignored": 0
+  },
+  {
+    "name": "root-audio",
+    "log": "docs/improvements/evidence/mp4-track-budget-order/root-audio.log",
+    "passed": 15,
+    "ignored": 0
+  },
+  {
+    "name": "root-video",
+    "log": "docs/improvements/evidence/mp4-track-budget-order/root-video.log",
+    "passed": 7,
+    "ignored": 0
+  },
+  {
+    "name": "worker",
+    "log": "docs/improvements/evidence/mp4-track-budget-order/worker.log",
+    "passed": 39,
+    "ignored": 0
+  },
+  {
+    "name": "cpal",
+    "log": "docs/improvements/evidence/mp4-track-budget-order/cpal.log",
+    "passed": 43,
+    "ignored": 2
+  },
+  {
+    "name": "media-audio",
+    "log": "docs/improvements/evidence/mp4-track-budget-order/media-audio.log",
+    "passed": 13,
+    "ignored": 0
+  },
+  {
+    "name": "core-check",
+    "log": "docs/improvements/evidence/mp4-track-budget-order/core-check.log",
+    "passed": true,
+    "ignored": 0
+  },
+  {
+    "name": "player-check",
+    "log": "docs/improvements/evidence/mp4-track-budget-order/player-check.log",
+    "passed": true,
+    "ignored": 0
+  },
+  {
+    "name": "wasm-build",
+    "log": "docs/improvements/evidence/mp4-track-budget-order/wasm-build.log",
+    "passed": true,
+    "ignored": 0
+  },
+  {
+    "name": "no-external-0-1",
+    "log": "docs/improvements/evidence/mp4-track-budget-order/no-external-0-1.log",
+    "passed": 2,
+    "ignored": 0
+  },
+  {
+    "name": "no-external-0-2",
+    "log": "docs/improvements/evidence/mp4-track-budget-order/no-external-0-2.log",
+    "passed": 2,
+    "ignored": 0
+  },
+  {
+    "name": "no-external-0-3",
+    "log": "docs/improvements/evidence/mp4-track-budget-order/no-external-0-3.log",
+    "passed": 2,
+    "ignored": 0
+  },
+  {
+    "name": "no-external-1-1",
+    "log": "docs/improvements/evidence/mp4-track-budget-order/no-external-1-1.log",
+    "passed": 2,
+    "ignored": 0
+  },
+  {
+    "name": "no-external-1-2",
+    "log": "docs/improvements/evidence/mp4-track-budget-order/no-external-1-2.log",
+    "passed": 2,
+    "ignored": 0
+  },
+  {
+    "name": "no-external-1-3",
+    "log": "docs/improvements/evidence/mp4-track-budget-order/no-external-1-3.log",
+    "passed": 2,
+    "ignored": 0
+  }
+]

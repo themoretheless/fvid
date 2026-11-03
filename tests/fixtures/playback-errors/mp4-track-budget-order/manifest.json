@@ -1,0 +1,65 @@
+{
+  "provenance": "Authored60ms16x16 neutral VP9 and optional8kHz mono PCM. Opaque z002/z003 descriptions are explicitly unsupported; their common headers, references, IDs and tables remain well formed. Only trak order/count changes; media offsets and payloads stay unchanged. No private media, parameters, encoder or network.",
+  "cases": [
+    {
+      "file": "video-only.mp4",
+      "totalTracks": 1,
+      "supportedTracks": 1,
+      "unsupportedTracks": 0
+    },
+    {
+      "file": "known-av.mp4",
+      "totalTracks": 2,
+      "supportedTracks": 2,
+      "unsupportedTracks": 0
+    },
+    {
+      "file": "order-va.mp4",
+      "totalTracks": 2,
+      "supportedTracks": 1,
+      "unsupportedTracks": 1
+    },
+    {
+      "file": "order-av.mp4",
+      "totalTracks": 2,
+      "supportedTracks": 1,
+      "unsupportedTracks": 1
+    },
+    {
+      "file": "order-vab.mp4",
+      "totalTracks": 3,
+      "supportedTracks": 1,
+      "unsupportedTracks": 2
+    },
+    {
+      "file": "order-vba.mp4",
+      "totalTracks": 3,
+      "supportedTracks": 1,
+      "unsupportedTracks": 2
+    },
+    {
+      "file": "order-avb.mp4",
+      "totalTracks": 3,
+      "supportedTracks": 1,
+      "unsupportedTracks": 2
+    },
+    {
+      "file": "order-abv.mp4",
+      "totalTracks": 3,
+      "supportedTracks": 1,
+      "unsupportedTracks": 2
+    },
+    {
+      "file": "order-bva.mp4",
+      "totalTracks": 3,
+      "supportedTracks": 1,
+      "unsupportedTracks": 2
+    },
+    {
+      "file": "order-bav.mp4",
+      "totalTracks": 3,
+      "supportedTracks": 1,
+      "unsupportedTracks": 2
+    }
+  ]
+}

@@ -261,7 +261,9 @@ fn spatial_export_controls_preserve_prefixes_and_atomic_publication() {
             let captured = cancel.clone();
             let mut options = CopyOptions::default();
             if mode == 0 {
-                options.max_controlled_bytes = Some(1);
+                // Admit the encoded packet first, then test the decoder/router
+                // working set. The one-byte earlier-stage guard is separate.
+                options.max_controlled_bytes = Some(8192);
             }
             if mode == 1 {
                 options.cancel = Some(cancel);
@@ -409,4 +411,56 @@ fn public_aac_tail_padding_matches_spatial_oracle_and_bad_padding_cannot_publish
         "{error}"
     );
     assert!(!out.exists());
+}
+
+#[test]
+fn adts_explicit_packet_quota_keeps_its_distinct_diagnostic() {
+    use fvid_control::CopyOptions;
+    use fvid_media_info::AudioDecodeTransform;
+    let dir = TestDir::new("explicit-packet-budget");
+    let source = root().join("aac-height-normal-ten.aac");
+    for (index, memory) in [None, Some(128 << 20), Some(1)].into_iter().enumerate() {
+        let out = dir.path().join(format!("packet-{index}.wav"));
+        let error = fvid_media::decode_audio_transformed(
+            &source, &out,
+            AudioDecodeTransform { channels: Some(2), ..Default::default() },
+            &CopyOptions { max_packet_bytes: 1, max_controlled_bytes: memory, ..Default::default() },
+        ).unwrap_err();
+        assert!(error.contains("ADTS packet exceeds budget"), "{error}");
+        assert!(!error.contains("controlled memory"), "{error}");
+        let plan_error = fvid_media::plan_decode_audio(
+            &source,
+            &AudioDecodeTransform { channels: Some(2), ..Default::default() },
+            &CopyOptions { max_packet_bytes: 1, max_controlled_bytes: memory, ..Default::default() },
+        ).unwrap_err();
+        assert!(plan_error.contains("ADTS packet exceeds budget"), "{plan_error}");
+        assert!(!plan_error.contains("controlled memory"), "{plan_error}");
+        assert!(!out.exists());
+    }
+}
+
+#[test]
+fn one_byte_spatial_limit_retains_earlier_container_admission_refusals() {
+    use fvid_control::CopyOptions;
+    use fvid_media_info::AudioDecodeTransform;
+    let dir = TestDir::new("one-byte-budget");
+    for (ext, needle) in [
+        ("aac", "ADTS packet exceeds budget"),
+        ("mp4", "MP4 metadata exceeds budget"),
+        ("mkv", "Matroska packet index limit"),
+    ] {
+        let source = if ext == "aac" { root().join("aac-height-normal-ten.aac") }
+            else { root().join(format!("aac-device-layout/normal-ten.{ext}")) };
+        let out = dir.path().join(format!("tiny-{ext}.wav"));
+        let error = fvid_media::decode_audio_transformed(
+            &source, &out,
+            AudioDecodeTransform { channels: Some(2), ..Default::default() },
+            &CopyOptions { max_controlled_bytes: Some(1), ..Default::default() },
+        ).unwrap_err();
+        assert!(error.contains(needle), "{ext}: {error}");
+        assert!(!out.exists());
+        if ext == "aac" {
+            assert!(!error.contains("controlled memory"), "{error}");
+        }
+    }
 }

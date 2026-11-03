@@ -881,8 +881,10 @@ impl<R: Read + Seek> Mp4Reader<R> {
         let mut refused = Vec::new();
         let mut remaining = limits.samples;
         let mut skipped = 0usize;
-        for atom in movie.iter().filter(|a| &a.kind == b"trak") {
-            if tracks.len() >= limits.tracks {
+        // Charge every declared track, including unsupported/skipped codecs.
+        // Admission must not depend on where a supported track appears.
+        for (ordinal, atom) in movie.iter().filter(|a| &a.kind == b"trak").enumerate() {
+            if ordinal >= limits.tracks {
                 return Err(invalid("MP4 track limit exceeded"));
             }
             let Some((track, flags, duration, represented)) = parse_track(atom.data, &mdats, remaining, fragmented, quicktime_brand, &mut refused)?

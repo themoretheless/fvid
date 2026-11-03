@@ -1,0 +1,22 @@
+{
+  "status": "verified",
+  "count_delta": 0,
+  "parent_improvement": "FVID-0345",
+  "reason": "Baseline test-stage correction; production changes were rejected and fully reverted",
+  "originalTests": 6,
+  "finalTests": 8,
+  "allOriginalAssertionLinesRetained": true,
+  "workingSetBudget": 8192,
+  "oneByteBudgetRetainedSeparately": true,
+  "explicitPacketLimitsAndPlanningChecked": true,
+  "originalProductionFilesUnchanged": true,
+  "finalLog": "docs/improvements/evidence/spatial-budget-diagnostic/final-contract.log",
+  "originalUnitContract": "docs/improvements/evidence/spatial-budget-diagnostic/admission-contract.log",
+  "rejectedClassificationExperiment": "docs/improvements/evidence/spatial-budget-diagnostic/rejected-reclassification-unit.log",
+  "remoteBefore": [
+    "https://github.com/themoretheless/fvid/actions/runs/41602444859/job/125804154321",
+    "https://github.com/themoretheless/fvid/actions/runs/41602444856/job/125804154241"
+  ],
+  "beforeTestSha256": "2635c6babcada8cdaf34863394b9c5e9c4f2f91fb7253cf160d43e119dbd745e",
+  "afterTestSha256": "b86c5373b924fd6d8cc5120c0b999cfd044a3397faf29cf196de34baed0b74a6"
+}
