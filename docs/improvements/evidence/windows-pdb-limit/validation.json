@@ -1,0 +1,60 @@
+{
+  "status": "local-qualified-remote-msvc-pending",
+  "count_delta": 0,
+  "profile_artifacts": [
+    {
+      "target": "fvid",
+      "profile": {
+        "opt_level": "0",
+        "debuginfo": 0,
+        "debug_assertions": true,
+        "overflow_checks": true,
+        "test": false
+      }
+    },
+    {
+      "target": "adts_loudness_prefix_sbr_regression",
+      "profile": {
+        "opt_level": "0",
+        "debuginfo": 0,
+        "debug_assertions": true,
+        "overflow_checks": true,
+        "test": true
+      }
+    },
+    {
+      "target": "mp4_subtick_video_edits",
+      "profile": {
+        "opt_level": "0",
+        "debuginfo": 0,
+        "debug_assertions": true,
+        "overflow_checks": true,
+        "test": true
+      }
+    },
+    {
+      "target": "fvid",
+      "profile": {
+        "opt_level": "0",
+        "debuginfo": 0,
+        "debug_assertions": true,
+        "overflow_checks": true,
+        "test": false
+      }
+    },
+    {
+      "target": "fvid",
+      "profile": {
+        "opt_level": "0",
+        "debuginfo": 0,
+        "debug_assertions": true,
+        "overflow_checks": true,
+        "test": true
+      }
+    }
+  ],
+  "runtime_tests_passed": 385,
+  "windows_gnu_rust_cfg_compile": true,
+  "msvc_link_verified": false,
+  "commands_unchanged": "workflow-check.json"
+}

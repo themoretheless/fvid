@@ -1,0 +1,5 @@
+{
+  "changed_path": "tests/mp4_open_ended_edit.rs",
+  "scope": "player-only finite-edit oracle from authored duration/movie_scale; all RGB/EOF/rewind/seek assertions preserved",
+  "production_changes": false
+}

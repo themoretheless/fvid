@@ -8,6 +8,7 @@ pub struct Mp4VideoReader<R> {
     source: Source<R>,
     presentation_end: std::sync::OnceLock<i128>,
     presentation_bound: Option<(u64, u32)>,
+    pub(crate) native_edits: Option<Box<crate::playback_native::ExactVideoEdits>>,
 }
 enum Source<R> {
     Single(Box<SingleLayerMp4VideoReader<R>>),
@@ -289,6 +290,7 @@ impl<R: Read + Seek> Mp4VideoReader<R> {
                     if vpsless || reordered {
                         return Ok(Self {
                             presentation_end: Default::default(),
+                            native_edits: None,
                             presentation_bound,
                             source: Source::Single(Box::new(
                                 SingleLayerMp4VideoReader::from_demuxer_with_hardware(
@@ -328,6 +330,7 @@ impl<R: Read + Seek> Mp4VideoReader<R> {
                     )?;
                     return Ok(Self {
                         presentation_end: Default::default(),
+                            native_edits: None,
                             presentation_bound,
                         source: Source::Layered(Box::new(SingleView {
                             source,
@@ -348,6 +351,7 @@ impl<R: Read + Seek> Mp4VideoReader<R> {
         }
         Ok(Self {
             presentation_end: Default::default(),
+                            native_edits: None,
                             presentation_bound,
             source: Source::Single(Box::new(
                 SingleLayerMp4VideoReader::from_demuxer_with_hardware(

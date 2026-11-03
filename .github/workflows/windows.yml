@@ -14,6 +14,12 @@ on:
 jobs:
   msvc:
     runs-on: windows-latest
+    env:
+      # Keep runtime checks while bounding generated PDB and object-cache size.
+      CARGO_PROFILE_TEST_DEBUG: "0"
+      CARGO_PROFILE_TEST_DEBUG_ASSERTIONS: "true"
+      CARGO_PROFILE_TEST_OVERFLOW_CHECKS: "true"
+      CARGO_INCREMENTAL: "0"
     steps:
       - uses: actions/checkout@v4
       - uses: dtolnay/rust-toolchain@master

@@ -1,0 +1,14 @@
+[
+  {
+    "name": "core",
+    "exit_code": 0,
+    "passed": 400,
+    "ignored": 0
+  },
+  {
+    "name": "player",
+    "exit_code": 101,
+    "passed": 1234,
+    "ignored": 26
+  }
+]

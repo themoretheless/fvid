@@ -1,0 +1,38 @@
+[
+  {
+    "name": "core",
+    "exit_code": 0,
+    "passed": 400,
+    "ignored": 0
+  },
+  {
+    "name": "player",
+    "exit_code": 0,
+    "passed": 1270,
+    "ignored": 26
+  },
+  {
+    "name": "default",
+    "exit_code": 0,
+    "passed": 381,
+    "ignored": 0
+  },
+  {
+    "name": "core-check",
+    "exit_code": 0,
+    "passed": true,
+    "ignored": 0
+  },
+  {
+    "name": "player-check",
+    "exit_code": 0,
+    "passed": true,
+    "ignored": 0
+  },
+  {
+    "name": "wasm-check",
+    "exit_code": 0,
+    "passed": true,
+    "ignored": 0
+  }
+]

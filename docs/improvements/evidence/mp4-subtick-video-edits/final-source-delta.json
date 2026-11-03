@@ -1,0 +1,5 @@
+{
+  "qualified_paths_unchanged": 5699,
+  "additional_ci_only_path": ".github/workflows/windows.yml",
+  "qualification": "windows-pdb-limit/validation.json"
+}

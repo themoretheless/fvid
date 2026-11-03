@@ -1,0 +1,11 @@
+{
+  "production_video_paths_restored_to": "9a71067f85f716f17553bfbd15ce52415d4c7ee8",
+  "restored_paths": [
+    "src/playback/video/native.rs",
+    "src/playback/video/mp4_dispatch.rs"
+  ],
+  "new_exact_module": "present but unreferenced by baseline native.rs",
+  "new_player_test_module": "not built in the core baseline",
+  "independent_adts_test_expectation_repair": "has no production code changes and is not selected by this baseline",
+  "source_paths": 5699
+}

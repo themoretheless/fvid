@@ -1,0 +1,11 @@
+{
+  "parser": "system Ruby YAML",
+  "all_steps_and_commands_unchanged": true,
+  "only_change": "msvc job build environment",
+  "environment": {
+    "CARGO_PROFILE_TEST_DEBUG": "0",
+    "CARGO_PROFILE_TEST_DEBUG_ASSERTIONS": "true",
+    "CARGO_PROFILE_TEST_OVERFLOW_CHECKS": "true",
+    "CARGO_INCREMENTAL": "0"
+  }
+}

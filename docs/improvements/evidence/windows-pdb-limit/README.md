@@ -1,0 +1,5 @@
+# Zero-count Windows PDB/disk CI follow-up
+
+Windows41616962470 on9a71067f85 fails linking integration tests before they run: LNK1318 PDB LIMIT,LNK1140 program-database limit,and LNK1180 insufficient disk space. Retain every test/Clippy/check command and job. The msvc job disables test debug symbols and incremental object caches,while explicitly enabling test debug assertions and overflow checks. Application profiles and local defaults are unchanged. This is a CI resource repair,not an accepted optimization ID. Remote Windows qualification remains pending the next pushed run.
+
+Primary references: https://doc.rust-lang.org/cargo/reference/profiles.html and https://learn.microsoft.com/en-us/cpp/error-messages/tool-errors/linker-tools-error-lnk1140?view=msvc-170 . Symbols govern debug metadata; runtime checks have separate profile controls. Actual Cargo artifact profile records and runtime tests are checked locally; they do not constitute an MSVC linker run. Detailed symbolized CI backtraces are reduced; assertion messages/source locations remain. No tests are skipped or relaxed.

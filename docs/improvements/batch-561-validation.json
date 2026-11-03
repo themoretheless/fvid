@@ -1,0 +1,65 @@
+{
+  "status": "accepted",
+  "accepted_ids": [
+    "FVID-0550"
+  ],
+  "count_delta": 1,
+  "accepted_count": 550,
+  "next_id": "FVID-0551",
+  "baseline": "docs/improvements/evidence/mp4-subtick-video-edits/before-complete.log",
+  "qualification": [
+    {
+      "name": "core",
+      "exit_code": 0,
+      "passed": 400,
+      "ignored": 0
+    },
+    {
+      "name": "player",
+      "exit_code": 0,
+      "passed": 1270,
+      "ignored": 26
+    },
+    {
+      "name": "default",
+      "exit_code": 0,
+      "passed": 381,
+      "ignored": 0
+    },
+    {
+      "name": "core-check",
+      "exit_code": 0,
+      "passed": true,
+      "ignored": 0
+    },
+    {
+      "name": "player-check",
+      "exit_code": 0,
+      "passed": true,
+      "ignored": 0
+    },
+    {
+      "name": "wasm-check",
+      "exit_code": 0,
+      "passed": true,
+      "ignored": 0
+    }
+  ],
+  "source_final": "docs/improvements/evidence/mp4-subtick-video-edits/final-source.json",
+  "source_delta": "docs/improvements/evidence/mp4-subtick-video-edits/final-source-delta.json",
+  "regeneration": "docs/improvements/evidence/mp4-subtick-video-edits/reproducibility.json",
+  "player_playback": {
+    "supported_programs": 15,
+    "log": "docs/improvements/evidence/mp4-subtick-video-edits/player-after.log"
+  },
+  "zero_count_followups": [
+    "docs/improvements/evidence/adts-zero-quota-diagnostic/validation.json",
+    "docs/improvements/evidence/windows-pdb-limit/validation.json"
+  ],
+  "limitations": [
+    "26 existing player ignores",
+    "Below-nanosecond intervals explicitly unsupported",
+    "wasm and Windows GNU compile only; no runtime/hardware claim",
+    "Remote Windows MSVC resource repair awaits CI"
+  ]
+}

@@ -51,23 +51,23 @@ fn adts_loudness_and_loudnorm_negotiate_implicit_sbr_rate_and_enforce_prefix_bud
     };
     let err = fvid_media::plan_loudness(&lc_then_ps, &zero_packets).unwrap_err();
     assert!(
-        err.contains("loudness requires at least one packet"),
+        err == "packet work limit requires at least one packet",
         "expected zero-packet refusal from fvid_media::plan_loudness, got: {err}"
     );
     let err = fvid_media::measure_loudness(&lc_then_ps, &zero_packets).unwrap_err();
     assert!(
-        err.contains("loudness requires at least one packet"),
+        err == "packet work limit requires at least one packet",
         "expected zero-packet refusal from fvid_media::measure_loudness, got: {err}"
     );
     let err = fvid_media::plan_loudnorm(&lc_then_ps, None, false, &zero_packets).unwrap_err();
     assert!(
-        err.contains("loudnorm requires at least one packet"),
+        err == "packet work limit requires at least one packet",
         "expected zero-packet refusal from fvid_media::plan_loudnorm, got: {err}"
     );
     let out_zero = temp.join("zero.wav");
     let err = fvid_media::apply_loudnorm(&lc_then_ps, &out_zero, None, &zero_packets).unwrap_err();
     assert!(
-        err.contains("loudnorm requires at least one packet"),
+        err == "packet work limit requires at least one packet",
         "expected zero-packet refusal from fvid_media::apply_loudnorm, got: {err}"
     );
     assert!(!out_zero.exists());

@@ -1,0 +1,7 @@
+msvc	Test default features	2026-11-03T10:55:03.1963933Z ^[[1m^[[91merror^[[0m: could not compile `fvid` (test "av1_chroma")
+msvc	Test default features	2026-11-03T10:55:03.5897367Z   ^[[1m^[[96m= ^[[0m^[[1m^[[97mnote^[[0m: LINK : fatal error LNK1318: Unexpected PDB error; LIMIT (12) 'D:\a\fvid\fvid\target\debug\deps\library_structure-03c44a420e83e62d.pdb'
+msvc	Test default features	2026-11-03T10:55:03.6874066Z ^[[1m^[[91merror^[[0m: could not compile `fvid` (test "library_structure") due to 1 previous error
+msvc	Test default features	2026-11-03T10:55:06.3226603Z   ^[[1m^[[96m= ^[[0m^[[1m^[[97mnote^[[0m: LINK : fatal error LNK1140: limit exceeded for program database; link with /PDB:NONE
+msvc	Test default features	2026-11-03T10:55:06.3349519Z ^[[1m^[[91merror^[[0m: could not compile `fvid` (test "hevc_component_gate") due to 1 previous error
+msvc	Test default features	2026-11-03T10:55:06.4397194Z   ^[[1m^[[96m= ^[[0m^[[1m^[[97mnote^[[0m: D:\a\fvid\fvid\target\debug\deps\native_adts_library_export-7df6dfead0dbf914.exe : fatal error LNK1180: insufficient disk space to complete link
+msvc	Test default features	2026-11-03T10:55:06.4584838Z ^[[1m^[[91merror^[[0m: could not compile `fvid` (test "native_adts_library_export") due to 1 previous error

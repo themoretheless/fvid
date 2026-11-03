@@ -1,0 +1,10 @@
+{
+  "status": "verified",
+  "count_delta": 0,
+  "before": "before.log",
+  "after": "after.log",
+  "focused_passed": 1,
+  "default_suite_passed": 381,
+  "production_changes": false,
+  "assertions": "Four exact shared-validator diagnostic equalities; all positive SBR and quota checks retained"
+}

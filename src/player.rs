@@ -13279,6 +13279,10 @@ mod track_preroll_regressions;
 mod track_source_lifetime_regressions;
 
 #[cfg(test)]
+#[path = "player_subtick_video_edits_tests.rs"]
+mod subtick_video_edit_regressions;
+
+#[cfg(test)]
 #[path = "player_short_track_clock_tests.rs"]
 mod short_track_clock_regressions;
 

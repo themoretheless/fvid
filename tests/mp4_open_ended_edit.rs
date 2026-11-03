@@ -105,7 +105,19 @@ fn check_native_edits(which: &str) {
         let mut r =
             fvid::playback_native::NativeReader::software(Cursor::new(bytes(n)), 32 << 20).unwrap();
         let end = frames * 20;
-        assert_eq!(r.duration(), Some(Duration::from_millis(end)), "{n}");
+        // Finite edits use the authored movie clock; open edits resolve in
+        // media ticks. Compare exact rational endpoints, not rounded ticks.
+        let movie = u128::from(c["movie_scale"].as_u64().unwrap());
+        let declared = u128::from(c["duration"].as_u64().unwrap());
+        let denominator = 50 * movie;
+        let bound = if declared == 0 { u128::from(frames) * movie } else { declared * 50 };
+        let end_ns = bound * 1_000_000_000 / denominator;
+        assert_eq!(r.duration(), Some(Duration::from_nanos(u64::try_from(end_ns).unwrap())), "{n}");
+        let check_interval = |reader: &fvid::playback_native::NativeReader<Cursor<Vec<u8>>>, i: u128| {
+            let (start, finish, scale) = reader.frame_interval().unwrap();
+            assert_eq!(start * denominator, i * movie * u128::from(scale), "{n}: interval start");
+            assert_eq!(finish * denominator, ((i+1) * movie).min(bound) * u128::from(scale), "{n}: interval end");
+        };
         for i in 0..frames {
             assert_eq!(
                 r.read_frame_raw()
@@ -115,11 +127,7 @@ fn check_native_edits(which: &str) {
                     .unwrap(),
                 vec![130; 16 * 16 * 3]
             );
-            assert_eq!(
-                r.frame_interval(),
-                Some((i as u128, i as u128 + 1, 50)),
-                "{n}"
-            );
+            check_interval(&r,u128::from(i));
         }
         assert!(r.read_frame_raw().unwrap().is_none());
         assert!(r.read_frame_raw().unwrap().is_none());
@@ -134,8 +142,8 @@ fn check_native_edits(which: &str) {
                     .unwrap(),
                 vec![130; 16 * 16 * 3]
             );
-            let i = u128::from(ms.min(end - 1) / 20);
-            assert_eq!(r.frame_interval(), Some((i, i + 1, 50)), "{n}");
+            let i = (u128::from(ms) * 1_000_000).min(end_ns-1) / 20_000_000;
+            check_interval(&r,i);
         }
     }
 }

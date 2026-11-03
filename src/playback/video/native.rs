@@ -13,6 +13,10 @@ use std::{
     time::Duration,
 };
 
+#[path = "mp4_exact_edits.rs"]
+mod exact_edits;
+pub(crate) use exact_edits::ExactVideoEdits;
+
 #[path = "packed.rs"]
 mod packed;
 pub use packed::{PackedPlanar, rgba_to_rgb_on_black};
@@ -27,6 +31,8 @@ pub use fvid_media::owned_video_timeline::PlaybackEdit;
 pub enum NativeReader<R> {
     Webm(crate::playback_webm::WebmVideoReader<R>),
     Y4m(Y4mReader<R>),
+    /// Existing variant fields remain compatible constructor/scratch storage.
+    /// Use the presentation query methods for fractional edit coordinates.
     Avc {
         source: Mp4VideoReader<R>,
         rgb: Vec<u8>,
@@ -206,16 +212,22 @@ impl<R: BufRead + Seek> NativeReader<R> {
             packet_bytes: Limits::default().packet_bytes.min(budget),
             ..Default::default()
         };
-        let source = if allow_hardware {
+        let mut source = if allow_hardware {
             Mp4VideoReader::open(reader, mp4_limits, budget - rgb_budget)?
         } else {
             Mp4VideoReader::open_software(reader, mp4_limits, budget - rgb_budget)?
         };
         let track = source.track();
-        let edits = playback_edits(track, source.movie_timescale())?;
+        let exact = ExactVideoEdits::new(track, source.movie_timescale(), rgb_budget)?;
+        let edits = if exact.is_some() { Vec::new() } else {
+            playback_edits(track, source.movie_timescale())?
+        };
+        let rgb_budget = rgb_budget.checked_sub(exact.as_ref().map_or(0, |clock| clock.bytes()))
+            .ok_or_else(|| invalid("MP4 exact edit clock exceeds playback budget"))?;
         let media_start = edits.first().map_or(0, |edit| edit.media_start);
         let media_end = edits.first().map(|edit| edit.media_end);
         let rotation = track.rotation;
+        source.native_edits = exact.map(Box::new);
         Ok(Self::Avc {
             source,
             rgb: Vec::new(),
@@ -382,6 +394,7 @@ impl<R: BufRead + Seek> NativeReader<R> {
                 if *frames == 0 {
                     return None;
                 }
+                if let Some(clock) = &source.native_edits { return clock.interval(); }
                 Some((
                     *frame_start as u128,
                     *next_pts as u128,
@@ -390,7 +403,8 @@ impl<R: BufRead + Seek> NativeReader<R> {
             }
         }
     }
-    /// Current frame's presentation timestamp in track timescale units.
+    /// Current frame's presentation timestamp and its presentation clock.
+    /// Fractional edits may use a finer grid than the raw media track.
     /// Returns None if no frame has been read yet or for formats without PTS.
     pub fn current_pts(&self) -> Option<(i64, u32)> {
         match self {
@@ -413,6 +427,10 @@ impl<R: BufRead + Seek> NativeReader<R> {
             } => {
                 if *frames == 0 || source.track().timescale == 0 {
                     return None;
+                }
+                if let Some(clock) = &source.native_edits {
+                    let (start, _, scale) = clock.interval()?;
+                    return Some((i64::try_from(start).ok()?, scale));
                 }
                 Some((*frame_start, source.track().timescale))
             }
@@ -453,6 +471,7 @@ impl<R: BufRead + Seek> NativeReader<R> {
     pub fn cache_packets(&self) -> Vec<(u64, u64, Duration, Duration)> {
         match self {
             Self::Avc { source, edits, .. } => {
+                if let Some(clock) = &source.native_edits { return clock.cache_packets(source.track()); }
                 let track = source.track();
                 if track.timescale == 0 {
                     return Vec::new();
@@ -519,6 +538,7 @@ impl<R: BufRead + Seek> NativeReader<R> {
                 edits,
                 ..
             } => {
+                if let Some(clock) = &source.native_edits { return clock.duration(); }
                 let track = source.track();
                 if track.timescale == 0 {
                     return None;
@@ -558,6 +578,7 @@ impl<R: BufRead + Seek> NativeReader<R> {
                 ..
             } => {
                 source.rewind();
+                if let Some(clock) = &mut source.native_edits { clock.reset(); }
                 *edit_index = 0;
                 *media_start = edits.first().map_or(0, |edit| edit.media_start);
                 *media_end = edits.first().map(|edit| edit.media_end);
@@ -645,6 +666,34 @@ impl<R: BufRead + Seek> NativeReader<R> {
         else {
             return Err(invalid("seeking is only implemented for MP4 and Matroska"));
         };
+        if let Some(mut clock) = source.native_edits.take() {
+            let selected = clock.seek(source, target);
+            source.native_edits = Some(clock);
+            let (wanted, starts_at_beginning) = match selected {
+                Ok(value) => value,
+                Err(error) => { self.rewind()?; return Err(error); }
+            };
+            let advance = |reader: &mut Self| -> Result<Option<RawFrame>> {
+                let mut last = None;
+                loop {
+                    let Some(raw) = reader.read_frame_raw()? else { return Ok(last); };
+                    last = Some(raw);
+                    let Self::Avc { source, .. } = reader else { unreachable!() };
+                    if source.native_edits.as_ref().is_some_and(|clock| clock.covers(wanted)) { return Ok(last); }
+                }
+            };
+            let first = advance(self);
+            let missing = match &first {
+                Ok(None) => true,
+                Ok(Some(_)) => matches!(&*self, Self::Avc { source, .. } if source.native_edits.as_ref().is_some_and(|clock| clock.starts_after(wanted))),
+                Err(_) => false,
+            };
+            let result = if !starts_at_beginning && missing {
+                drop(first); self.rewind()?; advance(self)
+            } else { first };
+            if result.is_err() { self.rewind()?; }
+            return result;
+        }
         let timescale = source.track().timescale;
         let nanos =
             i128::try_from(target.as_nanos()).map_err(|_| invalid("seek target overflow"))?;
@@ -799,6 +848,13 @@ impl<R: BufRead + Seek> NativeReader<R> {
         else {
             return Ok(None);
         };
+        let exact = source.native_edits.is_some();
+        let frame = if let Some(mut clock) = source.native_edits.take() {
+            let result = clock.advance(source);
+            source.native_edits = Some(clock);
+            let Some(frame) = result? else { return Ok(None); };
+            frame
+        } else {
         let mut window_finished = false;
         let mut can_retry_window_start = false;
         let mut complete_scan = *frames == 0 && *edit_index == 0 && source.starts_at_first_sample();
@@ -888,7 +944,11 @@ impl<R: BufRead + Seek> NativeReader<R> {
                 "overlapping video presentation timestamps or invalid duration",
             ));
         }
-        let nanos = frame.duration.nanoseconds()?;
+        frame
+        };
+        let nanos = if exact {
+            source.native_edits.as_ref().unwrap().period_nanos()?
+        } else { frame.duration.nanoseconds()? };
         let nanos = u64::try_from(nanos)
             .ok()
             .filter(|n| *n > 0)
@@ -903,12 +963,18 @@ impl<R: BufRead + Seek> NativeReader<R> {
             [w, h]
         };
         *period = Duration::from_nanos(nanos);
+        if exact {
+            let (start, end) = source.native_edits.as_ref().unwrap().legacy_interval()
+                .ok_or_else(|| invalid("video edit timestamp overflow"))?;
+            *frame_start = start; *next_pts = end;
+        } else {
         *frame_start = frame.presentation_time.ticks;
         *next_pts = frame
             .presentation_time
             .ticks
             .checked_add(frame.duration.ticks)
             .ok_or_else(|| invalid("video timestamp overflow"))?;
+        }
         *frames += 1;
         #[cfg(all(target_os = "macos", feature = "videotoolbox"))]
         if let Some(surface) = frame.surface {
