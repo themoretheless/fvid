@@ -1,0 +1,102 @@
+{
+  "status": "accepted",
+  "accepted_ids": [
+    "FVID-0540"
+  ],
+  "count_delta": 1,
+  "accepted_count": 540,
+  "next_id": "FVID-0541",
+  "qualification": [
+    {
+      "name": "final-integration",
+      "log": "docs/improvements/evidence/mp4-unused-expansion-budget/final-integration.log",
+      "passed": 49,
+      "ignored": 0
+    },
+    {
+      "name": "final-lib-build",
+      "log": "docs/improvements/evidence/mp4-unused-expansion-budget/final-lib-build.log",
+      "passed": true
+    },
+    {
+      "name": "root-parser",
+      "log": "docs/improvements/evidence/mp4-unused-expansion-budget/root-parser.log",
+      "passed": 17,
+      "ignored": 0
+    },
+    {
+      "name": "root-audio",
+      "log": "docs/improvements/evidence/mp4-unused-expansion-budget/root-audio.log",
+      "passed": 15,
+      "ignored": 0
+    },
+    {
+      "name": "root-video",
+      "log": "docs/improvements/evidence/mp4-unused-expansion-budget/root-video.log",
+      "passed": 7,
+      "ignored": 0
+    },
+    {
+      "name": "worker",
+      "log": "docs/improvements/evidence/mp4-unused-expansion-budget/worker.log",
+      "passed": 39,
+      "ignored": 0
+    },
+    {
+      "name": "cpal",
+      "log": "docs/improvements/evidence/mp4-unused-expansion-budget/cpal.log",
+      "passed": 43,
+      "ignored": 2
+    },
+    {
+      "name": "media-audio",
+      "log": "docs/improvements/evidence/mp4-unused-expansion-budget/media-audio.log",
+      "passed": 13,
+      "ignored": 0
+    },
+    {
+      "name": "media-mace",
+      "log": "docs/improvements/evidence/mp4-unused-expansion-budget/media-mace.log",
+      "passed": 1,
+      "ignored": 0
+    },
+    {
+      "name": "final-core-check",
+      "log": "docs/improvements/evidence/mp4-unused-expansion-budget/final-core-check.log",
+      "passed": true
+    },
+    {
+      "name": "final-player-check",
+      "log": "docs/improvements/evidence/mp4-unused-expansion-budget/final-player-check.log",
+      "passed": true
+    },
+    {
+      "name": "no-external-1",
+      "log": "docs/improvements/evidence/mp4-unused-expansion-budget/no-external-1.log",
+      "passed": 5,
+      "ignored": 0
+    },
+    {
+      "name": "no-external-2",
+      "log": "docs/improvements/evidence/mp4-unused-expansion-budget/no-external-2.log",
+      "passed": 5,
+      "ignored": 0
+    },
+    {
+      "name": "no-external-3",
+      "log": "docs/improvements/evidence/mp4-unused-expansion-budget/no-external-3.log",
+      "passed": 5,
+      "ignored": 0
+    }
+  ],
+  "rust_executions": 199,
+  "baseline": "docs/improvements/evidence/mp4-unused-expansion-budget/final-baseline.json",
+  "reproducibility": "docs/improvements/evidence/mp4-unused-expansion-budget/reproducibility.json",
+  "frozen_source": "docs/improvements/evidence/mp4-unused-expansion-budget/candidate-source.json",
+  "limitations": [
+    "Retained-payload budget admission only; no process RSS or actual-allocation reduction claim",
+    "Existing factors and all selected MACE reserves preserved",
+    "Elementary MACE comparison validates container packetization; separate existing static codebook test is the codec reference",
+    "No public-interface, physical-device, hardware-video or speed claim"
+  ]
+}

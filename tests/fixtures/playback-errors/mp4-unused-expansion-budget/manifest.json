@@ -1,0 +1,133 @@
+{
+  "provenance": "Authored60ms VP9 plus signed big-endian16-bit mono/stereo PCM ramps. Equal-size two-entry catalogs with identical PCM or unused MACE; all samples retain one selected PCM header. No private media, encoder or network.",
+  "cases": [
+    {
+      "file": "c1-selected1-unused-MAC3.mov",
+      "control": "c1-selected1-pcm-catalog.mov",
+      "oracle": "c1.f32le",
+      "channels": 1,
+      "budget": 49152,
+      "selected": 1
+    },
+    {
+      "file": "c1-selected1-unused-MAC6.mov",
+      "control": "c1-selected1-pcm-catalog.mov",
+      "oracle": "c1.f32le",
+      "channels": 1,
+      "budget": 49152,
+      "selected": 1
+    },
+    {
+      "file": "c1-selected2-unused-MAC3.mov",
+      "control": "c1-selected2-pcm-catalog.mov",
+      "oracle": "c1.f32le",
+      "channels": 1,
+      "budget": 49152,
+      "selected": 2
+    },
+    {
+      "file": "c1-selected2-unused-MAC6.mov",
+      "control": "c1-selected2-pcm-catalog.mov",
+      "oracle": "c1.f32le",
+      "channels": 1,
+      "budget": 49152,
+      "selected": 2
+    },
+    {
+      "file": "c2-selected1-unused-MAC3.mov",
+      "control": "c2-selected1-pcm-catalog.mov",
+      "oracle": "c2.f32le",
+      "channels": 2,
+      "budget": 65536,
+      "selected": 1
+    },
+    {
+      "file": "c2-selected1-unused-MAC6.mov",
+      "control": "c2-selected1-pcm-catalog.mov",
+      "oracle": "c2.f32le",
+      "channels": 2,
+      "budget": 65536,
+      "selected": 1
+    },
+    {
+      "file": "c2-selected2-unused-MAC3.mov",
+      "control": "c2-selected2-pcm-catalog.mov",
+      "oracle": "c2.f32le",
+      "channels": 2,
+      "budget": 65536,
+      "selected": 2
+    },
+    {
+      "file": "c2-selected2-unused-MAC6.mov",
+      "control": "c2-selected2-pcm-catalog.mov",
+      "oracle": "c2.f32le",
+      "channels": 2,
+      "budget": 65536,
+      "selected": 2
+    }
+  ],
+  "controls": [
+    {
+      "file": "c1-selected1-pcm-catalog.mov",
+      "oracle": "c1.f32le",
+      "channels": 1,
+      "budget": 49152
+    },
+    {
+      "file": "c1-selected2-pcm-catalog.mov",
+      "oracle": "c1.f32le",
+      "channels": 1,
+      "budget": 49152
+    },
+    {
+      "file": "c2-selected1-pcm-catalog.mov",
+      "oracle": "c2.f32le",
+      "channels": 2,
+      "budget": 65536
+    },
+    {
+      "file": "c2-selected2-pcm-catalog.mov",
+      "oracle": "c2.f32le",
+      "channels": 2,
+      "budget": 65536
+    }
+  ],
+  "active_mace": [
+    {
+      "file": "active-MAC3-c1.mov",
+      "coded": "active-MAC3-c1.mov.coded",
+      "codec": "MAC3",
+      "channels": 1,
+      "packet_bytes": 1024,
+      "frames": 9216,
+      "budget": 81920
+    },
+    {
+      "file": "active-MAC6-c1.mov",
+      "coded": "active-MAC6-c1.mov.coded",
+      "codec": "MAC6",
+      "channels": 1,
+      "packet_bytes": 512,
+      "frames": 9216,
+      "budget": 57344
+    },
+    {
+      "file": "active-MAC3-c2.mov",
+      "coded": "active-MAC3-c2.mov.coded",
+      "codec": "MAC3",
+      "channels": 2,
+      "packet_bytes": 2048,
+      "frames": 9216,
+      "budget": 147456
+    },
+    {
+      "file": "active-MAC6-c2.mov",
+      "coded": "active-MAC6-c2.mov.coded",
+      "codec": "MAC6",
+      "channels": 2,
+      "packet_bytes": 1024,
+      "frames": 9216,
+      "budget": 81920
+    }
+  ]
+}

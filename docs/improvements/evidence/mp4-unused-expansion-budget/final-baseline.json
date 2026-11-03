@@ -1,0 +1,9 @@
+{
+  "base": "a3094a2f05e7944ac3d4659169a1426da48899be",
+  "passed": 3,
+  "failed": 2,
+  "runtime_sha256": "94ad5026b57485f834f651aa185fc1802713d7f99c80724c5d4f01aebebf8ba7",
+  "test_sha256": "fa098ee8a6c303c912227ee440798e892c41bc0ef2e88c92068df749ed201524",
+  "log": "docs/improvements/evidence/mp4-unused-expansion-budget/final-baseline.log",
+  "reason": "Eight false controlled-memory refusals and public plan refusal; exact/loose, actually selected MACE strict controls and real software playback pass"
+}

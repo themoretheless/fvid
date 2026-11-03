@@ -1,8 +1,8 @@
 {
   "target": 1000,
   "counting_rule": "One independently confirmed problem or useful capability; fixture variants and baseline integration repairs are excluded. Only accepted entries count.",
-  "accepted_count": 539,
-  "next_id": "FVID-0540",
+  "accepted_count": 540,
+  "next_id": "FVID-0541",
   "entries": [
     {
       "id": "FVID-0001",
@@ -6119,6 +6119,17 @@
       "result": "Resolve the first referenced header and retain the cheap equal-catalog condition, otherwise establish constant selected geometry with the existing compact-index-aware traversal. Eighty PCM/ALAC variants cover dormant supported/opaque/duplicate descriptions,8000/1001 movie clocks, v0/v1 early/preroll/repeat/gap/silence edits. The audible prefix now admits400 bytes while valid larger packets still refuse when reached; exact f32/PCM-only f64 output, public plan/raw export, memory/cancellation controls, native duration/PCM/seek/rewind/EOF,240 actual software-worker sessions per stand and exact software video pass. Native occupied-source-sample frontiers and owned cumulative movie-grid policies remain distinct and unchanged, with separate analytic rational oracles; ALAC remains refused by the explicitly PCM-only precise API. Qualification passes197 Rust executions, two existing device ignores, core/player checks and three external-tool-free repeats. All145 authored files regenerate identically and5275 portable source/input hashes remain stable. Incorrect initial tfhd rewriting/output API/oracle assumptions are archived as authoring diagnostics, not counted bugs. One edit admission invariant distinct from selected Track headers and compact-index geometry; no performance, hardware or public-interface claim.",
       "status": "accepted",
       "validation": "batch-550-validation.json"
+    },
+    {
+      "id": "FVID-0540",
+      "batch": 551,
+      "title": "Charge MP4 decoded-packet memory only to admitted decoder descriptions",
+      "source": "crates/fvid-media/src/owned_mp4_audio.rs",
+      "regression": "tests/mp4_unused_expansion_budget.rs",
+      "before": "Published a3094a2f05 reserves packet growth using every stsd codec, including dormant MAC3/MAC6 while all packets select twos PCM. Eight equal-catalog-size mono/stereo/order variants falsely require56422/76902 bytes under predeclared49152/65536-byte caps; duplicate-PCM and generous-budget exact f32/f64 controls pass. Final unchanged five-test stand passes three controls, including actually selected MACE strict reservation and real playback, and fails two admission gates.",
+      "result": "Accumulate the unchanged expansion factors in the existing admitted-decoder loop, preserving all retained catalog/index costs, initial decoder admission and64x MACE growth when MACE is selected. No added scan, allocation or public-interface change. Eight dormant-MACE variants now admit their selected PCM under the original caps with exact480-frame f32/precise f64 output, public planning, controlled-memory/cancellation refusal,60ms native duration, seek/rewind/EOF,24 actual software-worker sessions/anchors per stand and exact software VP9 pictures. Four actually selected fragmented MACE controls still refuse predeclared tight caps before caller output and admit9216 frames at256KiB, matching direct elementary packet/history decoding; the unchanged static authored MACE codebook reference test also passes. Qualification passes199 Rust executions, two existing device ignores, core/player checks and three external-tool-free repeats. All26 synthetic files regenerate identically and5303 portable source/input hashes remain stable. One retained-buffer admission invariant, separate from compact-index and finite-edit prefix defects. Estimates exclude parser temporaries/caller I/O under the existing contract; no RSS, actual-allocation reduction, performance or hardware claim.",
+      "status": "accepted",
+      "validation": "batch-551-validation.json"
     }
   ]
 }

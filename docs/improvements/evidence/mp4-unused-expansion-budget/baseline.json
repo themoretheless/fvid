@@ -1,0 +1,8 @@
+{
+  "base": "a3094a2f05e7944ac3d4659169a1426da48899be",
+  "passed": 1,
+  "failed": 1,
+  "false_memory_refusals": 8,
+  "log": "docs/improvements/evidence/mp4-unused-expansion-budget/before.log",
+  "source": "docs/improvements/evidence/mp4-unused-expansion-budget/baseline-source.json"
+}

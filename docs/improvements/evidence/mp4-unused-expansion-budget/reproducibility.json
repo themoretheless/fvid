@@ -1,0 +1,30 @@
+{
+  "fixture_files": 26,
+  "byte_identical": true,
+  "frozen_paths": 5303,
+  "source_stable": true,
+  "qualified_pcm_cases": 8,
+  "strict_used_mace_controls": 4,
+  "offline_repeats": 3,
+  "external_tools_inaccessible": true,
+  "qualification": [
+    {
+      "name": "no-external-1",
+      "log": "docs/improvements/evidence/mp4-unused-expansion-budget/no-external-1.log",
+      "passed": 5,
+      "ignored": 0
+    },
+    {
+      "name": "no-external-2",
+      "log": "docs/improvements/evidence/mp4-unused-expansion-budget/no-external-2.log",
+      "passed": 5,
+      "ignored": 0
+    },
+    {
+      "name": "no-external-3",
+      "log": "docs/improvements/evidence/mp4-unused-expansion-budget/no-external-3.log",
+      "passed": 5,
+      "ignored": 0
+    }
+  ]
+}

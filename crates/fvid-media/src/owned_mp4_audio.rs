@@ -325,6 +325,7 @@ pub(crate) fn admit_audio_reader_with_interval<R: Read + Seek>(
     let mut decoder = 0usize;
     let mut checkpoint = 0usize;
     let mut configuration = 0usize;
+    let mut expansion = 2usize;
     let initial_description = track.samples.get(0).map(|s| s.description_index);
     for i in 0..track.sample_descriptions.len() {
         // Decoder initialization precedes scheduling even for a silence-only edit.
@@ -332,6 +333,13 @@ pub(crate) fn admit_audio_reader_with_interval<R: Read + Seek>(
             && !(0..active_samples).any(|n| track.samples.get(n).is_some_and(|s| s.description_index as usize == i+1)) { continue; }
         let setup = track.decoder_setup((i+1) as u32)?;
         let state = mp4_decoder_admission(&setup)?;
+        // Charge decoded-packet growth only for admitted decoder setups.
+        // Dormant catalog descriptions are retained metadata, not PCM buffers.
+        expansion = expansion.max(match &setup.codec {
+            b"MAC3" | b"MAC6" => 64,
+            b"alaw" | b"ulaw" | b"raw " | b"sowt" | b"twos" | b"in24" | b"in32" | b"fl32" | b"fl64" | b"ima4" | b"ms\x00\x11" | b"ms\x00\x02" => 10,
+            _ => 2,
+        });
         decoder = decoder.max(state);
         if setup.codec == *b"mp4a" { checkpoint = checkpoint.max(state); }
         configuration = configuration.max(setup.configuration.len());
@@ -409,11 +417,6 @@ pub(crate) fn admit_audio_reader_with_interval<R: Read + Seek>(
     };
     add(records.checked_mul(width).ok_or_else(overflow)?)?;
     // The reusable packet Vec may grow geometrically while reading larger packets.
-    let expansion = track.sample_descriptions.iter().map(|d| match &d.codec {
-        b"MAC3" | b"MAC6" => 64,
-        b"alaw" | b"ulaw" | b"raw " | b"sowt" | b"twos" | b"in24" | b"in32" | b"fl32" | b"fl64" | b"ima4" | b"ms\x00\x11" | b"ms\x00\x02" => 10,
-        _ => 2,
-    }).max().unwrap_or(2);
     add(largest_packet.checked_mul(expansion).ok_or_else(overflow)?)?;
     if !options.metadata_set.is_empty() || !options.metadata_delete.is_empty() {
         let info = crate::owned_wave_metadata::info_for_file_tags(

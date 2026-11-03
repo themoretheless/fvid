@@ -1,0 +1,9 @@
+
+running 5 tests
+test exact_pcm_catalogs_and_loose_budget_controls_are_valid ... ok
+test public_admission_keeps_index_memory_and_cancellation_checks ... ok
+test selected_mace_keeps_its_full_packet_expansion_reservation ... ok
+test unused_mace_cannot_charge_pcm_for_a_decoder_it_never_uses ... ok
+test native_selected_pcm_workers_navigation_and_pictures_are_unchanged ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.36s
