@@ -1,8 +1,8 @@
 {
   "target": 1000,
   "counting_rule": "One independently confirmed problem or useful capability; fixture variants and baseline integration repairs are excluded. Only accepted entries count.",
-  "accepted_count": 533,
-  "next_id": "FVID-0534",
+  "accepted_count": 534,
+  "next_id": "FVID-0535",
   "entries": [
     {
       "id": "FVID-0001",
@@ -6053,6 +6053,17 @@
       "result": "Convert AVI stream start units through the already-validated block clock into a checked native sample origin. Offset packets, seek landing and absolute endpoint duration/EOF; subtract the origin for block selection and clamp earlier targets to the first block. Preserve PCM/G711 record spans, coded bytes, index checks and limits. The 144 authored mono/stereo, original/equivalent-clock, single/grouped/nested/indexed cases cover starts0/1/73/u32MAX, literal PCM, exact native clocks, raw seek/rewind/EOF/MAX and432 actual software-worker sessions per regression run. Typed specific malformed refusals remain strict. Private storage assertions retain only three logical blocks and a small coded file for the maximum start. The native player factory admits18 delayed equivalent-clock controls with exact PCM. Final qualification passes157 Rust executions, two existing physical-device ignores and core/player checks; three4-test repeats run without external tools. All175 files regenerate identically and4392 source/fixture hashes remain stable. One format/timeline capability; no extra IDs for variants, tests or resource assertions. No physical-output, AVI-video, performance or RSS claim.",
       "status": "accepted",
       "validation": "batch-544-validation.json"
+    },
+    {
+      "id": "FVID-0534",
+      "batch": 545,
+      "title": "Play packed QuickTime version-2 LPCM with native high sample rates",
+      "source": "crates/fvid-media/src/owned_mp4_impl.rs",
+      "regression": "tests/mp4_lpcm_v2.rs",
+      "before": "Original ff7cbc8446 omits lpcm descriptions despite existing PCM reconstruction. On the unchanged final five-test stand it passes legacy PCM/neutral-video controls but fails four LPCM acceptance, actual-worker, malformed-header and owned-export gates. The valid authored streams independently decode to exact analytic PCM with FFmpeg.",
+      "result": "Validate the version2 structure extent, marker, rate, channels, flags and constant packet geometry, then normalize supported packed/interleaved signed8/16/24/32, unsigned8 and float32/64 descriptions to existing PCM dispatch without rewriting payloads. Explicit integral rates avoid the legacy16.16 restriction. The112 authored48/96kHz mono/stereo cases cover both byte orders and one/three-frame packets, exact PCM/native clocks, precise seek/rewind/EOF/MAX and336 actual software-worker sessions per stand. Owned full/interval f32/f64 exports preserve low float64 bits;28 legacy controls remain valid. Six malformed headers refuse with typed specific Invalid errors; planar/unpacked/unknown layouts remain skippable. Qualification passes156 Rust executions, two existing device ignores, core/player checks and three external-tool-free repeats. All262 fixture files regenerate identically and4656 source hashes remain stable; independent FFmpeg matches224/224 scalar outputs. Newly admitted Track/SampleDescription codecs normalize to existing PCM identifiers, documented in evidence; no change to existing interfaces or formats. One format capability, no separate IDs for its variants, tests or clock width. No physical-device, broad LPCM-layout, performance or RSS claim.",
+      "status": "accepted",
+      "validation": "batch-545-validation.json"
     }
   ]
 }

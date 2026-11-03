@@ -1,0 +1,290 @@
+[
+  {
+    "file": "u8-le-c1-r48000.mov",
+    "returncode": 0,
+    "pcm_equal": true,
+    "stderr": ""
+  },
+  {
+    "file": "u8-le-c1-r96000.mov",
+    "returncode": 0,
+    "pcm_equal": true,
+    "stderr": ""
+  },
+  {
+    "file": "u8-le-c2-r48000.mov",
+    "returncode": 0,
+    "pcm_equal": true,
+    "stderr": ""
+  },
+  {
+    "file": "u8-le-c2-r96000.mov",
+    "returncode": 0,
+    "pcm_equal": true,
+    "stderr": ""
+  },
+  {
+    "file": "u8-be-c1-r48000.mov",
+    "returncode": 0,
+    "pcm_equal": true,
+    "stderr": ""
+  },
+  {
+    "file": "u8-be-c1-r96000.mov",
+    "returncode": 0,
+    "pcm_equal": true,
+    "stderr": ""
+  },
+  {
+    "file": "u8-be-c2-r48000.mov",
+    "returncode": 0,
+    "pcm_equal": true,
+    "stderr": ""
+  },
+  {
+    "file": "u8-be-c2-r96000.mov",
+    "returncode": 0,
+    "pcm_equal": true,
+    "stderr": ""
+  },
+  {
+    "file": "i16-le-c1-r48000.mov",
+    "returncode": 0,
+    "pcm_equal": true,
+    "stderr": ""
+  },
+  {
+    "file": "i16-le-c1-r96000.mov",
+    "returncode": 0,
+    "pcm_equal": true,
+    "stderr": ""
+  },
+  {
+    "file": "i16-le-c2-r48000.mov",
+    "returncode": 0,
+    "pcm_equal": true,
+    "stderr": ""
+  },
+  {
+    "file": "i16-le-c2-r96000.mov",
+    "returncode": 0,
+    "pcm_equal": true,
+    "stderr": ""
+  },
+  {
+    "file": "i16-be-c1-r48000.mov",
+    "returncode": 0,
+    "pcm_equal": true,
+    "stderr": ""
+  },
+  {
+    "file": "i16-be-c1-r96000.mov",
+    "returncode": 0,
+    "pcm_equal": true,
+    "stderr": ""
+  },
+  {
+    "file": "i16-be-c2-r48000.mov",
+    "returncode": 0,
+    "pcm_equal": true,
+    "stderr": ""
+  },
+  {
+    "file": "i16-be-c2-r96000.mov",
+    "returncode": 0,
+    "pcm_equal": true,
+    "stderr": ""
+  },
+  {
+    "file": "i24-le-c1-r48000.mov",
+    "returncode": 0,
+    "pcm_equal": true,
+    "stderr": ""
+  },
+  {
+    "file": "i24-le-c1-r96000.mov",
+    "returncode": 0,
+    "pcm_equal": true,
+    "stderr": ""
+  },
+  {
+    "file": "i24-le-c2-r48000.mov",
+    "returncode": 0,
+    "pcm_equal": true,
+    "stderr": ""
+  },
+  {
+    "file": "i24-le-c2-r96000.mov",
+    "returncode": 0,
+    "pcm_equal": true,
+    "stderr": ""
+  },
+  {
+    "file": "i24-be-c1-r48000.mov",
+    "returncode": 0,
+    "pcm_equal": true,
+    "stderr": ""
+  },
+  {
+    "file": "i24-be-c1-r96000.mov",
+    "returncode": 0,
+    "pcm_equal": true,
+    "stderr": ""
+  },
+  {
+    "file": "i24-be-c2-r48000.mov",
+    "returncode": 0,
+    "pcm_equal": true,
+    "stderr": ""
+  },
+  {
+    "file": "i24-be-c2-r96000.mov",
+    "returncode": 0,
+    "pcm_equal": true,
+    "stderr": ""
+  },
+  {
+    "file": "i32-le-c1-r48000.mov",
+    "returncode": 0,
+    "pcm_equal": true,
+    "stderr": ""
+  },
+  {
+    "file": "i32-le-c1-r96000.mov",
+    "returncode": 0,
+    "pcm_equal": true,
+    "stderr": ""
+  },
+  {
+    "file": "i32-le-c2-r48000.mov",
+    "returncode": 0,
+    "pcm_equal": true,
+    "stderr": ""
+  },
+  {
+    "file": "i32-le-c2-r96000.mov",
+    "returncode": 0,
+    "pcm_equal": true,
+    "stderr": ""
+  },
+  {
+    "file": "i32-be-c1-r48000.mov",
+    "returncode": 0,
+    "pcm_equal": true,
+    "stderr": ""
+  },
+  {
+    "file": "i32-be-c1-r96000.mov",
+    "returncode": 0,
+    "pcm_equal": true,
+    "stderr": ""
+  },
+  {
+    "file": "i32-be-c2-r48000.mov",
+    "returncode": 0,
+    "pcm_equal": true,
+    "stderr": ""
+  },
+  {
+    "file": "i32-be-c2-r96000.mov",
+    "returncode": 0,
+    "pcm_equal": true,
+    "stderr": ""
+  },
+  {
+    "file": "f32-le-c1-r48000.mov",
+    "returncode": 0,
+    "pcm_equal": true,
+    "stderr": ""
+  },
+  {
+    "file": "f32-le-c1-r96000.mov",
+    "returncode": 0,
+    "pcm_equal": true,
+    "stderr": ""
+  },
+  {
+    "file": "f32-le-c2-r48000.mov",
+    "returncode": 0,
+    "pcm_equal": true,
+    "stderr": ""
+  },
+  {
+    "file": "f32-le-c2-r96000.mov",
+    "returncode": 0,
+    "pcm_equal": true,
+    "stderr": ""
+  },
+  {
+    "file": "f32-be-c1-r48000.mov",
+    "returncode": 0,
+    "pcm_equal": true,
+    "stderr": ""
+  },
+  {
+    "file": "f32-be-c1-r96000.mov",
+    "returncode": 0,
+    "pcm_equal": true,
+    "stderr": ""
+  },
+  {
+    "file": "f32-be-c2-r48000.mov",
+    "returncode": 0,
+    "pcm_equal": true,
+    "stderr": ""
+  },
+  {
+    "file": "f32-be-c2-r96000.mov",
+    "returncode": 0,
+    "pcm_equal": true,
+    "stderr": ""
+  },
+  {
+    "file": "f64-le-c1-r48000.mov",
+    "returncode": 0,
+    "pcm_equal": true,
+    "stderr": ""
+  },
+  {
+    "file": "f64-le-c1-r96000.mov",
+    "returncode": 0,
+    "pcm_equal": true,
+    "stderr": ""
+  },
+  {
+    "file": "f64-le-c2-r48000.mov",
+    "returncode": 0,
+    "pcm_equal": true,
+    "stderr": ""
+  },
+  {
+    "file": "f64-le-c2-r96000.mov",
+    "returncode": 0,
+    "pcm_equal": true,
+    "stderr": ""
+  },
+  {
+    "file": "f64-be-c1-r48000.mov",
+    "returncode": 0,
+    "pcm_equal": true,
+    "stderr": ""
+  },
+  {
+    "file": "f64-be-c1-r96000.mov",
+    "returncode": 0,
+    "pcm_equal": true,
+    "stderr": ""
+  },
+  {
+    "file": "f64-be-c2-r48000.mov",
+    "returncode": 0,
+    "pcm_equal": true,
+    "stderr": ""
+  },
+  {
+    "file": "f64-be-c2-r96000.mov",
+    "returncode": 0,
+    "pcm_equal": true,
+    "stderr": ""
+  }
+]

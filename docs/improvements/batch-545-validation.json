@@ -1,0 +1,86 @@
+{
+  "status": "accepted",
+  "accepted_ids": [
+    "FVID-0534"
+  ],
+  "count_delta": 1,
+  "accepted_count": 534,
+  "next_id": "FVID-0535",
+  "qualification": [
+    {
+      "name": "final-integration",
+      "log": "docs/improvements/evidence/mp4-lpcm-v2/final-integration.log",
+      "passed": 22,
+      "ignored": 0
+    },
+    {
+      "name": "final-acceptance",
+      "log": "docs/improvements/evidence/mp4-lpcm-v2/final-acceptance.log",
+      "passed": 5,
+      "ignored": 0
+    },
+    {
+      "name": "root-parser",
+      "log": "docs/improvements/evidence/mp4-lpcm-v2/root-parser.log",
+      "passed": 17,
+      "ignored": 0
+    },
+    {
+      "name": "root-audio",
+      "log": "docs/improvements/evidence/mp4-lpcm-v2/root-audio.log",
+      "passed": 15,
+      "ignored": 0
+    },
+    {
+      "name": "worker",
+      "log": "docs/improvements/evidence/mp4-lpcm-v2/worker.log",
+      "passed": 39,
+      "ignored": 0
+    },
+    {
+      "name": "cpal",
+      "log": "docs/improvements/evidence/mp4-lpcm-v2/cpal.log",
+      "passed": 43,
+      "ignored": 2
+    },
+    {
+      "name": "no-external-1",
+      "log": "docs/improvements/evidence/mp4-lpcm-v2/no-external-1.log",
+      "passed": 5,
+      "ignored": 0
+    },
+    {
+      "name": "no-external-2",
+      "log": "docs/improvements/evidence/mp4-lpcm-v2/no-external-2.log",
+      "passed": 5,
+      "ignored": 0
+    },
+    {
+      "name": "no-external-3",
+      "log": "docs/improvements/evidence/mp4-lpcm-v2/no-external-3.log",
+      "passed": 5,
+      "ignored": 0
+    },
+    {
+      "name": "final-core-check",
+      "log": "docs/improvements/evidence/mp4-lpcm-v2/final-core-check.log",
+      "passed": true
+    },
+    {
+      "name": "final-player-check",
+      "log": "docs/improvements/evidence/mp4-lpcm-v2/final-player-check.log",
+      "passed": true
+    }
+  ],
+  "rust_executions": 156,
+  "baseline": "docs/improvements/evidence/mp4-lpcm-v2/final-baseline.json",
+  "reference": "docs/improvements/evidence/mp4-lpcm-v2/final-ffmpeg-reference.json",
+  "reproducibility": "docs/improvements/evidence/mp4-lpcm-v2/reproducibility.json",
+  "frozen_source": "docs/improvements/evidence/mp4-lpcm-v2/candidate-source.json",
+  "limitations": [
+    "Packed interleaved supported representations with integral rate; unsupported layouts stay skippable",
+    "Source lpcm fourcc is normalized into existing PCM descriptions",
+    "Software playback workers, not physical output",
+    "No performance claim"
+  ]
+}

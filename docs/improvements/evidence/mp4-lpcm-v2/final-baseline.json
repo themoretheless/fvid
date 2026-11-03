@@ -1,0 +1,20 @@
+{
+  "base": "ff7cbc844604c8653450a37e9ffdba1766d1b46a",
+  "baseline_sha256": "d38378723fb79b13bb18d4d4eb333f0215a3bfe5d485df2d1b90b2df34889490",
+  "candidate_sha256": "6d5fe4f94a883bccc967f0070a153450efd2ab4900fb36ecd31c3b9b4b3280ff",
+  "regression_sha256": "4036dd36b37c7aefa8de36d7c689be52ae1a991db4af04b664c1f08b54eb7ad2",
+  "command": [
+    "cargo",
+    "test",
+    "--locked",
+    "--offline",
+    "--no-default-features",
+    "--features",
+    "player",
+    "--test",
+    "mp4_lpcm_v2",
+    "--",
+    "--test-threads=2"
+  ],
+  "returncode": 101
+}

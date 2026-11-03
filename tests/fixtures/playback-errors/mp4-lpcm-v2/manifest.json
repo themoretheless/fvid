@@ -1,0 +1,1185 @@
+{
+  "provenance": "Authored12-frame binary-exact PCM plus three neutral VP9 keyframes; packed interleaved v2 LPCM and legacy48kHz controls. No external encoder, private media or network.",
+  "spec": "https://developer.apple.com/documentation/quicktime-file-format/sound_sample_description_version_2",
+  "cases": [
+    {
+      "file": "u8-le-c1-r48000.mov",
+      "expected": "u8-le-c1-r48000.f32le",
+      "expected64": "u8-le-c1-r48000.f64le",
+      "rate": 48000,
+      "channels": 1,
+      "frames": 12,
+      "bits": 8,
+      "flags": 8,
+      "control": "u8-le-c1-r48000-legacy.mov"
+    },
+    {
+      "file": "u8-le-c1-r48000-grouped.mov",
+      "expected": "u8-le-c1-r48000.f32le",
+      "expected64": "u8-le-c1-r48000.f64le",
+      "rate": 48000,
+      "channels": 1,
+      "frames": 12,
+      "bits": 8,
+      "flags": 8
+    },
+    {
+      "file": "u8-le-c1-r96000.mov",
+      "expected": "u8-le-c1-r96000.f32le",
+      "expected64": "u8-le-c1-r96000.f64le",
+      "rate": 96000,
+      "channels": 1,
+      "frames": 12,
+      "bits": 8,
+      "flags": 8
+    },
+    {
+      "file": "u8-le-c1-r96000-grouped.mov",
+      "expected": "u8-le-c1-r96000.f32le",
+      "expected64": "u8-le-c1-r96000.f64le",
+      "rate": 96000,
+      "channels": 1,
+      "frames": 12,
+      "bits": 8,
+      "flags": 8
+    },
+    {
+      "file": "u8-le-c2-r48000.mov",
+      "expected": "u8-le-c2-r48000.f32le",
+      "expected64": "u8-le-c2-r48000.f64le",
+      "rate": 48000,
+      "channels": 2,
+      "frames": 12,
+      "bits": 8,
+      "flags": 8,
+      "control": "u8-le-c2-r48000-legacy.mov"
+    },
+    {
+      "file": "u8-le-c2-r48000-grouped.mov",
+      "expected": "u8-le-c2-r48000.f32le",
+      "expected64": "u8-le-c2-r48000.f64le",
+      "rate": 48000,
+      "channels": 2,
+      "frames": 12,
+      "bits": 8,
+      "flags": 8
+    },
+    {
+      "file": "u8-le-c2-r96000.mov",
+      "expected": "u8-le-c2-r96000.f32le",
+      "expected64": "u8-le-c2-r96000.f64le",
+      "rate": 96000,
+      "channels": 2,
+      "frames": 12,
+      "bits": 8,
+      "flags": 8
+    },
+    {
+      "file": "u8-le-c2-r96000-grouped.mov",
+      "expected": "u8-le-c2-r96000.f32le",
+      "expected64": "u8-le-c2-r96000.f64le",
+      "rate": 96000,
+      "channels": 2,
+      "frames": 12,
+      "bits": 8,
+      "flags": 8
+    },
+    {
+      "file": "u8-be-c1-r48000.mov",
+      "expected": "u8-be-c1-r48000.f32le",
+      "expected64": "u8-be-c1-r48000.f64le",
+      "rate": 48000,
+      "channels": 1,
+      "frames": 12,
+      "bits": 8,
+      "flags": 10,
+      "control": "u8-be-c1-r48000-legacy.mov"
+    },
+    {
+      "file": "u8-be-c1-r48000-grouped.mov",
+      "expected": "u8-be-c1-r48000.f32le",
+      "expected64": "u8-be-c1-r48000.f64le",
+      "rate": 48000,
+      "channels": 1,
+      "frames": 12,
+      "bits": 8,
+      "flags": 10
+    },
+    {
+      "file": "u8-be-c1-r96000.mov",
+      "expected": "u8-be-c1-r96000.f32le",
+      "expected64": "u8-be-c1-r96000.f64le",
+      "rate": 96000,
+      "channels": 1,
+      "frames": 12,
+      "bits": 8,
+      "flags": 10
+    },
+    {
+      "file": "u8-be-c1-r96000-grouped.mov",
+      "expected": "u8-be-c1-r96000.f32le",
+      "expected64": "u8-be-c1-r96000.f64le",
+      "rate": 96000,
+      "channels": 1,
+      "frames": 12,
+      "bits": 8,
+      "flags": 10
+    },
+    {
+      "file": "u8-be-c2-r48000.mov",
+      "expected": "u8-be-c2-r48000.f32le",
+      "expected64": "u8-be-c2-r48000.f64le",
+      "rate": 48000,
+      "channels": 2,
+      "frames": 12,
+      "bits": 8,
+      "flags": 10,
+      "control": "u8-be-c2-r48000-legacy.mov"
+    },
+    {
+      "file": "u8-be-c2-r48000-grouped.mov",
+      "expected": "u8-be-c2-r48000.f32le",
+      "expected64": "u8-be-c2-r48000.f64le",
+      "rate": 48000,
+      "channels": 2,
+      "frames": 12,
+      "bits": 8,
+      "flags": 10
+    },
+    {
+      "file": "u8-be-c2-r96000.mov",
+      "expected": "u8-be-c2-r96000.f32le",
+      "expected64": "u8-be-c2-r96000.f64le",
+      "rate": 96000,
+      "channels": 2,
+      "frames": 12,
+      "bits": 8,
+      "flags": 10
+    },
+    {
+      "file": "u8-be-c2-r96000-grouped.mov",
+      "expected": "u8-be-c2-r96000.f32le",
+      "expected64": "u8-be-c2-r96000.f64le",
+      "rate": 96000,
+      "channels": 2,
+      "frames": 12,
+      "bits": 8,
+      "flags": 10
+    },
+    {
+      "file": "i8-le-c1-r48000.mov",
+      "expected": "i8-le-c1-r48000.f32le",
+      "expected64": "i8-le-c1-r48000.f64le",
+      "rate": 48000,
+      "channels": 1,
+      "frames": 12,
+      "bits": 8,
+      "flags": 12,
+      "control": "i8-le-c1-r48000-legacy.mov"
+    },
+    {
+      "file": "i8-le-c1-r48000-grouped.mov",
+      "expected": "i8-le-c1-r48000.f32le",
+      "expected64": "i8-le-c1-r48000.f64le",
+      "rate": 48000,
+      "channels": 1,
+      "frames": 12,
+      "bits": 8,
+      "flags": 12
+    },
+    {
+      "file": "i8-le-c1-r96000.mov",
+      "expected": "i8-le-c1-r96000.f32le",
+      "expected64": "i8-le-c1-r96000.f64le",
+      "rate": 96000,
+      "channels": 1,
+      "frames": 12,
+      "bits": 8,
+      "flags": 12
+    },
+    {
+      "file": "i8-le-c1-r96000-grouped.mov",
+      "expected": "i8-le-c1-r96000.f32le",
+      "expected64": "i8-le-c1-r96000.f64le",
+      "rate": 96000,
+      "channels": 1,
+      "frames": 12,
+      "bits": 8,
+      "flags": 12
+    },
+    {
+      "file": "i8-le-c2-r48000.mov",
+      "expected": "i8-le-c2-r48000.f32le",
+      "expected64": "i8-le-c2-r48000.f64le",
+      "rate": 48000,
+      "channels": 2,
+      "frames": 12,
+      "bits": 8,
+      "flags": 12,
+      "control": "i8-le-c2-r48000-legacy.mov"
+    },
+    {
+      "file": "i8-le-c2-r48000-grouped.mov",
+      "expected": "i8-le-c2-r48000.f32le",
+      "expected64": "i8-le-c2-r48000.f64le",
+      "rate": 48000,
+      "channels": 2,
+      "frames": 12,
+      "bits": 8,
+      "flags": 12
+    },
+    {
+      "file": "i8-le-c2-r96000.mov",
+      "expected": "i8-le-c2-r96000.f32le",
+      "expected64": "i8-le-c2-r96000.f64le",
+      "rate": 96000,
+      "channels": 2,
+      "frames": 12,
+      "bits": 8,
+      "flags": 12
+    },
+    {
+      "file": "i8-le-c2-r96000-grouped.mov",
+      "expected": "i8-le-c2-r96000.f32le",
+      "expected64": "i8-le-c2-r96000.f64le",
+      "rate": 96000,
+      "channels": 2,
+      "frames": 12,
+      "bits": 8,
+      "flags": 12
+    },
+    {
+      "file": "i8-be-c1-r48000.mov",
+      "expected": "i8-be-c1-r48000.f32le",
+      "expected64": "i8-be-c1-r48000.f64le",
+      "rate": 48000,
+      "channels": 1,
+      "frames": 12,
+      "bits": 8,
+      "flags": 14,
+      "control": "i8-be-c1-r48000-legacy.mov"
+    },
+    {
+      "file": "i8-be-c1-r48000-grouped.mov",
+      "expected": "i8-be-c1-r48000.f32le",
+      "expected64": "i8-be-c1-r48000.f64le",
+      "rate": 48000,
+      "channels": 1,
+      "frames": 12,
+      "bits": 8,
+      "flags": 14
+    },
+    {
+      "file": "i8-be-c1-r96000.mov",
+      "expected": "i8-be-c1-r96000.f32le",
+      "expected64": "i8-be-c1-r96000.f64le",
+      "rate": 96000,
+      "channels": 1,
+      "frames": 12,
+      "bits": 8,
+      "flags": 14
+    },
+    {
+      "file": "i8-be-c1-r96000-grouped.mov",
+      "expected": "i8-be-c1-r96000.f32le",
+      "expected64": "i8-be-c1-r96000.f64le",
+      "rate": 96000,
+      "channels": 1,
+      "frames": 12,
+      "bits": 8,
+      "flags": 14
+    },
+    {
+      "file": "i8-be-c2-r48000.mov",
+      "expected": "i8-be-c2-r48000.f32le",
+      "expected64": "i8-be-c2-r48000.f64le",
+      "rate": 48000,
+      "channels": 2,
+      "frames": 12,
+      "bits": 8,
+      "flags": 14,
+      "control": "i8-be-c2-r48000-legacy.mov"
+    },
+    {
+      "file": "i8-be-c2-r48000-grouped.mov",
+      "expected": "i8-be-c2-r48000.f32le",
+      "expected64": "i8-be-c2-r48000.f64le",
+      "rate": 48000,
+      "channels": 2,
+      "frames": 12,
+      "bits": 8,
+      "flags": 14
+    },
+    {
+      "file": "i8-be-c2-r96000.mov",
+      "expected": "i8-be-c2-r96000.f32le",
+      "expected64": "i8-be-c2-r96000.f64le",
+      "rate": 96000,
+      "channels": 2,
+      "frames": 12,
+      "bits": 8,
+      "flags": 14
+    },
+    {
+      "file": "i8-be-c2-r96000-grouped.mov",
+      "expected": "i8-be-c2-r96000.f32le",
+      "expected64": "i8-be-c2-r96000.f64le",
+      "rate": 96000,
+      "channels": 2,
+      "frames": 12,
+      "bits": 8,
+      "flags": 14
+    },
+    {
+      "file": "i16-le-c1-r48000.mov",
+      "expected": "i16-le-c1-r48000.f32le",
+      "expected64": "i16-le-c1-r48000.f64le",
+      "rate": 48000,
+      "channels": 1,
+      "frames": 12,
+      "bits": 16,
+      "flags": 12,
+      "control": "i16-le-c1-r48000-legacy.mov"
+    },
+    {
+      "file": "i16-le-c1-r48000-grouped.mov",
+      "expected": "i16-le-c1-r48000.f32le",
+      "expected64": "i16-le-c1-r48000.f64le",
+      "rate": 48000,
+      "channels": 1,
+      "frames": 12,
+      "bits": 16,
+      "flags": 12
+    },
+    {
+      "file": "i16-le-c1-r96000.mov",
+      "expected": "i16-le-c1-r96000.f32le",
+      "expected64": "i16-le-c1-r96000.f64le",
+      "rate": 96000,
+      "channels": 1,
+      "frames": 12,
+      "bits": 16,
+      "flags": 12
+    },
+    {
+      "file": "i16-le-c1-r96000-grouped.mov",
+      "expected": "i16-le-c1-r96000.f32le",
+      "expected64": "i16-le-c1-r96000.f64le",
+      "rate": 96000,
+      "channels": 1,
+      "frames": 12,
+      "bits": 16,
+      "flags": 12
+    },
+    {
+      "file": "i16-le-c2-r48000.mov",
+      "expected": "i16-le-c2-r48000.f32le",
+      "expected64": "i16-le-c2-r48000.f64le",
+      "rate": 48000,
+      "channels": 2,
+      "frames": 12,
+      "bits": 16,
+      "flags": 12,
+      "control": "i16-le-c2-r48000-legacy.mov"
+    },
+    {
+      "file": "i16-le-c2-r48000-grouped.mov",
+      "expected": "i16-le-c2-r48000.f32le",
+      "expected64": "i16-le-c2-r48000.f64le",
+      "rate": 48000,
+      "channels": 2,
+      "frames": 12,
+      "bits": 16,
+      "flags": 12
+    },
+    {
+      "file": "i16-le-c2-r96000.mov",
+      "expected": "i16-le-c2-r96000.f32le",
+      "expected64": "i16-le-c2-r96000.f64le",
+      "rate": 96000,
+      "channels": 2,
+      "frames": 12,
+      "bits": 16,
+      "flags": 12
+    },
+    {
+      "file": "i16-le-c2-r96000-grouped.mov",
+      "expected": "i16-le-c2-r96000.f32le",
+      "expected64": "i16-le-c2-r96000.f64le",
+      "rate": 96000,
+      "channels": 2,
+      "frames": 12,
+      "bits": 16,
+      "flags": 12
+    },
+    {
+      "file": "i16-be-c1-r48000.mov",
+      "expected": "i16-be-c1-r48000.f32le",
+      "expected64": "i16-be-c1-r48000.f64le",
+      "rate": 48000,
+      "channels": 1,
+      "frames": 12,
+      "bits": 16,
+      "flags": 14,
+      "control": "i16-be-c1-r48000-legacy.mov"
+    },
+    {
+      "file": "i16-be-c1-r48000-grouped.mov",
+      "expected": "i16-be-c1-r48000.f32le",
+      "expected64": "i16-be-c1-r48000.f64le",
+      "rate": 48000,
+      "channels": 1,
+      "frames": 12,
+      "bits": 16,
+      "flags": 14
+    },
+    {
+      "file": "i16-be-c1-r96000.mov",
+      "expected": "i16-be-c1-r96000.f32le",
+      "expected64": "i16-be-c1-r96000.f64le",
+      "rate": 96000,
+      "channels": 1,
+      "frames": 12,
+      "bits": 16,
+      "flags": 14
+    },
+    {
+      "file": "i16-be-c1-r96000-grouped.mov",
+      "expected": "i16-be-c1-r96000.f32le",
+      "expected64": "i16-be-c1-r96000.f64le",
+      "rate": 96000,
+      "channels": 1,
+      "frames": 12,
+      "bits": 16,
+      "flags": 14
+    },
+    {
+      "file": "i16-be-c2-r48000.mov",
+      "expected": "i16-be-c2-r48000.f32le",
+      "expected64": "i16-be-c2-r48000.f64le",
+      "rate": 48000,
+      "channels": 2,
+      "frames": 12,
+      "bits": 16,
+      "flags": 14,
+      "control": "i16-be-c2-r48000-legacy.mov"
+    },
+    {
+      "file": "i16-be-c2-r48000-grouped.mov",
+      "expected": "i16-be-c2-r48000.f32le",
+      "expected64": "i16-be-c2-r48000.f64le",
+      "rate": 48000,
+      "channels": 2,
+      "frames": 12,
+      "bits": 16,
+      "flags": 14
+    },
+    {
+      "file": "i16-be-c2-r96000.mov",
+      "expected": "i16-be-c2-r96000.f32le",
+      "expected64": "i16-be-c2-r96000.f64le",
+      "rate": 96000,
+      "channels": 2,
+      "frames": 12,
+      "bits": 16,
+      "flags": 14
+    },
+    {
+      "file": "i16-be-c2-r96000-grouped.mov",
+      "expected": "i16-be-c2-r96000.f32le",
+      "expected64": "i16-be-c2-r96000.f64le",
+      "rate": 96000,
+      "channels": 2,
+      "frames": 12,
+      "bits": 16,
+      "flags": 14
+    },
+    {
+      "file": "i24-le-c1-r48000.mov",
+      "expected": "i24-le-c1-r48000.f32le",
+      "expected64": "i24-le-c1-r48000.f64le",
+      "rate": 48000,
+      "channels": 1,
+      "frames": 12,
+      "bits": 24,
+      "flags": 12,
+      "control": "i24-le-c1-r48000-legacy.mov"
+    },
+    {
+      "file": "i24-le-c1-r48000-grouped.mov",
+      "expected": "i24-le-c1-r48000.f32le",
+      "expected64": "i24-le-c1-r48000.f64le",
+      "rate": 48000,
+      "channels": 1,
+      "frames": 12,
+      "bits": 24,
+      "flags": 12
+    },
+    {
+      "file": "i24-le-c1-r96000.mov",
+      "expected": "i24-le-c1-r96000.f32le",
+      "expected64": "i24-le-c1-r96000.f64le",
+      "rate": 96000,
+      "channels": 1,
+      "frames": 12,
+      "bits": 24,
+      "flags": 12
+    },
+    {
+      "file": "i24-le-c1-r96000-grouped.mov",
+      "expected": "i24-le-c1-r96000.f32le",
+      "expected64": "i24-le-c1-r96000.f64le",
+      "rate": 96000,
+      "channels": 1,
+      "frames": 12,
+      "bits": 24,
+      "flags": 12
+    },
+    {
+      "file": "i24-le-c2-r48000.mov",
+      "expected": "i24-le-c2-r48000.f32le",
+      "expected64": "i24-le-c2-r48000.f64le",
+      "rate": 48000,
+      "channels": 2,
+      "frames": 12,
+      "bits": 24,
+      "flags": 12,
+      "control": "i24-le-c2-r48000-legacy.mov"
+    },
+    {
+      "file": "i24-le-c2-r48000-grouped.mov",
+      "expected": "i24-le-c2-r48000.f32le",
+      "expected64": "i24-le-c2-r48000.f64le",
+      "rate": 48000,
+      "channels": 2,
+      "frames": 12,
+      "bits": 24,
+      "flags": 12
+    },
+    {
+      "file": "i24-le-c2-r96000.mov",
+      "expected": "i24-le-c2-r96000.f32le",
+      "expected64": "i24-le-c2-r96000.f64le",
+      "rate": 96000,
+      "channels": 2,
+      "frames": 12,
+      "bits": 24,
+      "flags": 12
+    },
+    {
+      "file": "i24-le-c2-r96000-grouped.mov",
+      "expected": "i24-le-c2-r96000.f32le",
+      "expected64": "i24-le-c2-r96000.f64le",
+      "rate": 96000,
+      "channels": 2,
+      "frames": 12,
+      "bits": 24,
+      "flags": 12
+    },
+    {
+      "file": "i24-be-c1-r48000.mov",
+      "expected": "i24-be-c1-r48000.f32le",
+      "expected64": "i24-be-c1-r48000.f64le",
+      "rate": 48000,
+      "channels": 1,
+      "frames": 12,
+      "bits": 24,
+      "flags": 14,
+      "control": "i24-be-c1-r48000-legacy.mov"
+    },
+    {
+      "file": "i24-be-c1-r48000-grouped.mov",
+      "expected": "i24-be-c1-r48000.f32le",
+      "expected64": "i24-be-c1-r48000.f64le",
+      "rate": 48000,
+      "channels": 1,
+      "frames": 12,
+      "bits": 24,
+      "flags": 14
+    },
+    {
+      "file": "i24-be-c1-r96000.mov",
+      "expected": "i24-be-c1-r96000.f32le",
+      "expected64": "i24-be-c1-r96000.f64le",
+      "rate": 96000,
+      "channels": 1,
+      "frames": 12,
+      "bits": 24,
+      "flags": 14
+    },
+    {
+      "file": "i24-be-c1-r96000-grouped.mov",
+      "expected": "i24-be-c1-r96000.f32le",
+      "expected64": "i24-be-c1-r96000.f64le",
+      "rate": 96000,
+      "channels": 1,
+      "frames": 12,
+      "bits": 24,
+      "flags": 14
+    },
+    {
+      "file": "i24-be-c2-r48000.mov",
+      "expected": "i24-be-c2-r48000.f32le",
+      "expected64": "i24-be-c2-r48000.f64le",
+      "rate": 48000,
+      "channels": 2,
+      "frames": 12,
+      "bits": 24,
+      "flags": 14,
+      "control": "i24-be-c2-r48000-legacy.mov"
+    },
+    {
+      "file": "i24-be-c2-r48000-grouped.mov",
+      "expected": "i24-be-c2-r48000.f32le",
+      "expected64": "i24-be-c2-r48000.f64le",
+      "rate": 48000,
+      "channels": 2,
+      "frames": 12,
+      "bits": 24,
+      "flags": 14
+    },
+    {
+      "file": "i24-be-c2-r96000.mov",
+      "expected": "i24-be-c2-r96000.f32le",
+      "expected64": "i24-be-c2-r96000.f64le",
+      "rate": 96000,
+      "channels": 2,
+      "frames": 12,
+      "bits": 24,
+      "flags": 14
+    },
+    {
+      "file": "i24-be-c2-r96000-grouped.mov",
+      "expected": "i24-be-c2-r96000.f32le",
+      "expected64": "i24-be-c2-r96000.f64le",
+      "rate": 96000,
+      "channels": 2,
+      "frames": 12,
+      "bits": 24,
+      "flags": 14
+    },
+    {
+      "file": "i32-le-c1-r48000.mov",
+      "expected": "i32-le-c1-r48000.f32le",
+      "expected64": "i32-le-c1-r48000.f64le",
+      "rate": 48000,
+      "channels": 1,
+      "frames": 12,
+      "bits": 32,
+      "flags": 12,
+      "control": "i32-le-c1-r48000-legacy.mov"
+    },
+    {
+      "file": "i32-le-c1-r48000-grouped.mov",
+      "expected": "i32-le-c1-r48000.f32le",
+      "expected64": "i32-le-c1-r48000.f64le",
+      "rate": 48000,
+      "channels": 1,
+      "frames": 12,
+      "bits": 32,
+      "flags": 12
+    },
+    {
+      "file": "i32-le-c1-r96000.mov",
+      "expected": "i32-le-c1-r96000.f32le",
+      "expected64": "i32-le-c1-r96000.f64le",
+      "rate": 96000,
+      "channels": 1,
+      "frames": 12,
+      "bits": 32,
+      "flags": 12
+    },
+    {
+      "file": "i32-le-c1-r96000-grouped.mov",
+      "expected": "i32-le-c1-r96000.f32le",
+      "expected64": "i32-le-c1-r96000.f64le",
+      "rate": 96000,
+      "channels": 1,
+      "frames": 12,
+      "bits": 32,
+      "flags": 12
+    },
+    {
+      "file": "i32-le-c2-r48000.mov",
+      "expected": "i32-le-c2-r48000.f32le",
+      "expected64": "i32-le-c2-r48000.f64le",
+      "rate": 48000,
+      "channels": 2,
+      "frames": 12,
+      "bits": 32,
+      "flags": 12,
+      "control": "i32-le-c2-r48000-legacy.mov"
+    },
+    {
+      "file": "i32-le-c2-r48000-grouped.mov",
+      "expected": "i32-le-c2-r48000.f32le",
+      "expected64": "i32-le-c2-r48000.f64le",
+      "rate": 48000,
+      "channels": 2,
+      "frames": 12,
+      "bits": 32,
+      "flags": 12
+    },
+    {
+      "file": "i32-le-c2-r96000.mov",
+      "expected": "i32-le-c2-r96000.f32le",
+      "expected64": "i32-le-c2-r96000.f64le",
+      "rate": 96000,
+      "channels": 2,
+      "frames": 12,
+      "bits": 32,
+      "flags": 12
+    },
+    {
+      "file": "i32-le-c2-r96000-grouped.mov",
+      "expected": "i32-le-c2-r96000.f32le",
+      "expected64": "i32-le-c2-r96000.f64le",
+      "rate": 96000,
+      "channels": 2,
+      "frames": 12,
+      "bits": 32,
+      "flags": 12
+    },
+    {
+      "file": "i32-be-c1-r48000.mov",
+      "expected": "i32-be-c1-r48000.f32le",
+      "expected64": "i32-be-c1-r48000.f64le",
+      "rate": 48000,
+      "channels": 1,
+      "frames": 12,
+      "bits": 32,
+      "flags": 14,
+      "control": "i32-be-c1-r48000-legacy.mov"
+    },
+    {
+      "file": "i32-be-c1-r48000-grouped.mov",
+      "expected": "i32-be-c1-r48000.f32le",
+      "expected64": "i32-be-c1-r48000.f64le",
+      "rate": 48000,
+      "channels": 1,
+      "frames": 12,
+      "bits": 32,
+      "flags": 14
+    },
+    {
+      "file": "i32-be-c1-r96000.mov",
+      "expected": "i32-be-c1-r96000.f32le",
+      "expected64": "i32-be-c1-r96000.f64le",
+      "rate": 96000,
+      "channels": 1,
+      "frames": 12,
+      "bits": 32,
+      "flags": 14
+    },
+    {
+      "file": "i32-be-c1-r96000-grouped.mov",
+      "expected": "i32-be-c1-r96000.f32le",
+      "expected64": "i32-be-c1-r96000.f64le",
+      "rate": 96000,
+      "channels": 1,
+      "frames": 12,
+      "bits": 32,
+      "flags": 14
+    },
+    {
+      "file": "i32-be-c2-r48000.mov",
+      "expected": "i32-be-c2-r48000.f32le",
+      "expected64": "i32-be-c2-r48000.f64le",
+      "rate": 48000,
+      "channels": 2,
+      "frames": 12,
+      "bits": 32,
+      "flags": 14,
+      "control": "i32-be-c2-r48000-legacy.mov"
+    },
+    {
+      "file": "i32-be-c2-r48000-grouped.mov",
+      "expected": "i32-be-c2-r48000.f32le",
+      "expected64": "i32-be-c2-r48000.f64le",
+      "rate": 48000,
+      "channels": 2,
+      "frames": 12,
+      "bits": 32,
+      "flags": 14
+    },
+    {
+      "file": "i32-be-c2-r96000.mov",
+      "expected": "i32-be-c2-r96000.f32le",
+      "expected64": "i32-be-c2-r96000.f64le",
+      "rate": 96000,
+      "channels": 2,
+      "frames": 12,
+      "bits": 32,
+      "flags": 14
+    },
+    {
+      "file": "i32-be-c2-r96000-grouped.mov",
+      "expected": "i32-be-c2-r96000.f32le",
+      "expected64": "i32-be-c2-r96000.f64le",
+      "rate": 96000,
+      "channels": 2,
+      "frames": 12,
+      "bits": 32,
+      "flags": 14
+    },
+    {
+      "file": "f32-le-c1-r48000.mov",
+      "expected": "f32-le-c1-r48000.f32le",
+      "expected64": "f32-le-c1-r48000.f64le",
+      "rate": 48000,
+      "channels": 1,
+      "frames": 12,
+      "bits": 32,
+      "flags": 9,
+      "control": "f32-le-c1-r48000-legacy.mov"
+    },
+    {
+      "file": "f32-le-c1-r48000-grouped.mov",
+      "expected": "f32-le-c1-r48000.f32le",
+      "expected64": "f32-le-c1-r48000.f64le",
+      "rate": 48000,
+      "channels": 1,
+      "frames": 12,
+      "bits": 32,
+      "flags": 9
+    },
+    {
+      "file": "f32-le-c1-r96000.mov",
+      "expected": "f32-le-c1-r96000.f32le",
+      "expected64": "f32-le-c1-r96000.f64le",
+      "rate": 96000,
+      "channels": 1,
+      "frames": 12,
+      "bits": 32,
+      "flags": 9
+    },
+    {
+      "file": "f32-le-c1-r96000-grouped.mov",
+      "expected": "f32-le-c1-r96000.f32le",
+      "expected64": "f32-le-c1-r96000.f64le",
+      "rate": 96000,
+      "channels": 1,
+      "frames": 12,
+      "bits": 32,
+      "flags": 9
+    },
+    {
+      "file": "f32-le-c2-r48000.mov",
+      "expected": "f32-le-c2-r48000.f32le",
+      "expected64": "f32-le-c2-r48000.f64le",
+      "rate": 48000,
+      "channels": 2,
+      "frames": 12,
+      "bits": 32,
+      "flags": 9,
+      "control": "f32-le-c2-r48000-legacy.mov"
+    },
+    {
+      "file": "f32-le-c2-r48000-grouped.mov",
+      "expected": "f32-le-c2-r48000.f32le",
+      "expected64": "f32-le-c2-r48000.f64le",
+      "rate": 48000,
+      "channels": 2,
+      "frames": 12,
+      "bits": 32,
+      "flags": 9
+    },
+    {
+      "file": "f32-le-c2-r96000.mov",
+      "expected": "f32-le-c2-r96000.f32le",
+      "expected64": "f32-le-c2-r96000.f64le",
+      "rate": 96000,
+      "channels": 2,
+      "frames": 12,
+      "bits": 32,
+      "flags": 9
+    },
+    {
+      "file": "f32-le-c2-r96000-grouped.mov",
+      "expected": "f32-le-c2-r96000.f32le",
+      "expected64": "f32-le-c2-r96000.f64le",
+      "rate": 96000,
+      "channels": 2,
+      "frames": 12,
+      "bits": 32,
+      "flags": 9
+    },
+    {
+      "file": "f32-be-c1-r48000.mov",
+      "expected": "f32-be-c1-r48000.f32le",
+      "expected64": "f32-be-c1-r48000.f64le",
+      "rate": 48000,
+      "channels": 1,
+      "frames": 12,
+      "bits": 32,
+      "flags": 11,
+      "control": "f32-be-c1-r48000-legacy.mov"
+    },
+    {
+      "file": "f32-be-c1-r48000-grouped.mov",
+      "expected": "f32-be-c1-r48000.f32le",
+      "expected64": "f32-be-c1-r48000.f64le",
+      "rate": 48000,
+      "channels": 1,
+      "frames": 12,
+      "bits": 32,
+      "flags": 11
+    },
+    {
+      "file": "f32-be-c1-r96000.mov",
+      "expected": "f32-be-c1-r96000.f32le",
+      "expected64": "f32-be-c1-r96000.f64le",
+      "rate": 96000,
+      "channels": 1,
+      "frames": 12,
+      "bits": 32,
+      "flags": 11
+    },
+    {
+      "file": "f32-be-c1-r96000-grouped.mov",
+      "expected": "f32-be-c1-r96000.f32le",
+      "expected64": "f32-be-c1-r96000.f64le",
+      "rate": 96000,
+      "channels": 1,
+      "frames": 12,
+      "bits": 32,
+      "flags": 11
+    },
+    {
+      "file": "f32-be-c2-r48000.mov",
+      "expected": "f32-be-c2-r48000.f32le",
+      "expected64": "f32-be-c2-r48000.f64le",
+      "rate": 48000,
+      "channels": 2,
+      "frames": 12,
+      "bits": 32,
+      "flags": 11,
+      "control": "f32-be-c2-r48000-legacy.mov"
+    },
+    {
+      "file": "f32-be-c2-r48000-grouped.mov",
+      "expected": "f32-be-c2-r48000.f32le",
+      "expected64": "f32-be-c2-r48000.f64le",
+      "rate": 48000,
+      "channels": 2,
+      "frames": 12,
+      "bits": 32,
+      "flags": 11
+    },
+    {
+      "file": "f32-be-c2-r96000.mov",
+      "expected": "f32-be-c2-r96000.f32le",
+      "expected64": "f32-be-c2-r96000.f64le",
+      "rate": 96000,
+      "channels": 2,
+      "frames": 12,
+      "bits": 32,
+      "flags": 11
+    },
+    {
+      "file": "f32-be-c2-r96000-grouped.mov",
+      "expected": "f32-be-c2-r96000.f32le",
+      "expected64": "f32-be-c2-r96000.f64le",
+      "rate": 96000,
+      "channels": 2,
+      "frames": 12,
+      "bits": 32,
+      "flags": 11
+    },
+    {
+      "file": "f64-le-c1-r48000.mov",
+      "expected": "f64-le-c1-r48000.f32le",
+      "expected64": "f64-le-c1-r48000.f64le",
+      "rate": 48000,
+      "channels": 1,
+      "frames": 12,
+      "bits": 64,
+      "flags": 9,
+      "control": "f64-le-c1-r48000-legacy.mov"
+    },
+    {
+      "file": "f64-le-c1-r48000-grouped.mov",
+      "expected": "f64-le-c1-r48000.f32le",
+      "expected64": "f64-le-c1-r48000.f64le",
+      "rate": 48000,
+      "channels": 1,
+      "frames": 12,
+      "bits": 64,
+      "flags": 9
+    },
+    {
+      "file": "f64-le-c1-r96000.mov",
+      "expected": "f64-le-c1-r96000.f32le",
+      "expected64": "f64-le-c1-r96000.f64le",
+      "rate": 96000,
+      "channels": 1,
+      "frames": 12,
+      "bits": 64,
+      "flags": 9
+    },
+    {
+      "file": "f64-le-c1-r96000-grouped.mov",
+      "expected": "f64-le-c1-r96000.f32le",
+      "expected64": "f64-le-c1-r96000.f64le",
+      "rate": 96000,
+      "channels": 1,
+      "frames": 12,
+      "bits": 64,
+      "flags": 9
+    },
+    {
+      "file": "f64-le-c2-r48000.mov",
+      "expected": "f64-le-c2-r48000.f32le",
+      "expected64": "f64-le-c2-r48000.f64le",
+      "rate": 48000,
+      "channels": 2,
+      "frames": 12,
+      "bits": 64,
+      "flags": 9,
+      "control": "f64-le-c2-r48000-legacy.mov"
+    },
+    {
+      "file": "f64-le-c2-r48000-grouped.mov",
+      "expected": "f64-le-c2-r48000.f32le",
+      "expected64": "f64-le-c2-r48000.f64le",
+      "rate": 48000,
+      "channels": 2,
+      "frames": 12,
+      "bits": 64,
+      "flags": 9
+    },
+    {
+      "file": "f64-le-c2-r96000.mov",
+      "expected": "f64-le-c2-r96000.f32le",
+      "expected64": "f64-le-c2-r96000.f64le",
+      "rate": 96000,
+      "channels": 2,
+      "frames": 12,
+      "bits": 64,
+      "flags": 9
+    },
+    {
+      "file": "f64-le-c2-r96000-grouped.mov",
+      "expected": "f64-le-c2-r96000.f32le",
+      "expected64": "f64-le-c2-r96000.f64le",
+      "rate": 96000,
+      "channels": 2,
+      "frames": 12,
+      "bits": 64,
+      "flags": 9
+    },
+    {
+      "file": "f64-be-c1-r48000.mov",
+      "expected": "f64-be-c1-r48000.f32le",
+      "expected64": "f64-be-c1-r48000.f64le",
+      "rate": 48000,
+      "channels": 1,
+      "frames": 12,
+      "bits": 64,
+      "flags": 11,
+      "control": "f64-be-c1-r48000-legacy.mov"
+    },
+    {
+      "file": "f64-be-c1-r48000-grouped.mov",
+      "expected": "f64-be-c1-r48000.f32le",
+      "expected64": "f64-be-c1-r48000.f64le",
+      "rate": 48000,
+      "channels": 1,
+      "frames": 12,
+      "bits": 64,
+      "flags": 11
+    },
+    {
+      "file": "f64-be-c1-r96000.mov",
+      "expected": "f64-be-c1-r96000.f32le",
+      "expected64": "f64-be-c1-r96000.f64le",
+      "rate": 96000,
+      "channels": 1,
+      "frames": 12,
+      "bits": 64,
+      "flags": 11
+    },
+    {
+      "file": "f64-be-c1-r96000-grouped.mov",
+      "expected": "f64-be-c1-r96000.f32le",
+      "expected64": "f64-be-c1-r96000.f64le",
+      "rate": 96000,
+      "channels": 1,
+      "frames": 12,
+      "bits": 64,
+      "flags": 11
+    },
+    {
+      "file": "f64-be-c2-r48000.mov",
+      "expected": "f64-be-c2-r48000.f32le",
+      "expected64": "f64-be-c2-r48000.f64le",
+      "rate": 48000,
+      "channels": 2,
+      "frames": 12,
+      "bits": 64,
+      "flags": 11,
+      "control": "f64-be-c2-r48000-legacy.mov"
+    },
+    {
+      "file": "f64-be-c2-r48000-grouped.mov",
+      "expected": "f64-be-c2-r48000.f32le",
+      "expected64": "f64-be-c2-r48000.f64le",
+      "rate": 48000,
+      "channels": 2,
+      "frames": 12,
+      "bits": 64,
+      "flags": 11
+    },
+    {
+      "file": "f64-be-c2-r96000.mov",
+      "expected": "f64-be-c2-r96000.f32le",
+      "expected64": "f64-be-c2-r96000.f64le",
+      "rate": 96000,
+      "channels": 2,
+      "frames": 12,
+      "bits": 64,
+      "flags": 11
+    },
+    {
+      "file": "f64-be-c2-r96000-grouped.mov",
+      "expected": "f64-be-c2-r96000.f32le",
+      "expected64": "f64-be-c2-r96000.f64le",
+      "rate": 96000,
+      "channels": 2,
+      "frames": 12,
+      "bits": 64,
+      "flags": 11
+    }
+  ],
+  "bad": [
+    {
+      "file": "short-structure.mov",
+      "needle": "LPCM structure size"
+    },
+    {
+      "file": "bad-marker.mov",
+      "needle": "LPCM marker"
+    },
+    {
+      "file": "infinite-rate.mov",
+      "needle": "LPCM sample rate"
+    },
+    {
+      "file": "zero-channels.mov",
+      "needle": "LPCM channel count"
+    },
+    {
+      "file": "zero-packet-frames.mov",
+      "needle": "LPCM packet geometry"
+    },
+    {
+      "file": "wrong-packet-bytes.mov",
+      "needle": "LPCM packet geometry"
+    }
+  ],
+  "unsupported": [
+    "planar.mov",
+    "unpacked.mov",
+    "unknown-flags.mov"
+  ]
+}

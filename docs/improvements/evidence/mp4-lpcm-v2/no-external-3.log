@@ -1,0 +1,10 @@
+
+running 5 tests
+test legacy_pcm_and_actual_video_are_valid_controls ... ok
+test malformed_v2_headers_refuse_specifically_and_other_layouts_stay_unsupported ... ok
+test owned_normalized_and_precise_exports_keep_rate_geometry_and_low_float_bits ... ok
+test packed_lpcm_keeps_literal_pcm_native_rate_seek_and_eof ... ok
+test actual_workers_preserve_high_rate_lpcm_navigation ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 4.67s
+

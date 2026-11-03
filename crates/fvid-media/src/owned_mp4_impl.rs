@@ -1475,6 +1475,54 @@ fn wave_record(data: &[u8], at: usize, tag: [u8; 4]) -> Option<Vec<u8>> {
 /// 16.16 fixed-point rate, all at the offsets QuickTime version 0 puts them at.
 /// Version 1 only appends fields after the rate, so they stay put there too;
 /// `false` reports an entry of a version this reader will not guess at.
+/// Normalize packed interleaved QuickTime v2 LPCM to the PCM descriptions
+/// already shared by playback/export. Structure offsets include the atom header.
+fn lpcm_v2_entry(data: &[u8], result: &mut Track) -> Result<Option<usize>> {
+    if u16be(data, 8)? != 2 { return Ok(None); }
+    let structure = usize::try_from(u32be(data, 28)?)
+        .ok().and_then(|n| n.checked_sub(8))
+        .filter(|&n| n >= 64 && n <= data.len())
+        .ok_or_else(|| invalid("invalid LPCM structure size"))?;
+    if u32be(data, 44)? != 0x7f000000 {
+        return Err(invalid("invalid LPCM marker"));
+    }
+    let rate = f64::from_be_bytes(data.get(32..40)
+        .ok_or_else(|| invalid("truncated LPCM sample rate"))?.try_into().unwrap());
+    if !rate.is_finite() || rate < 1.0 || rate > f64::from(u32::MAX) {
+        return Err(invalid("invalid LPCM sample rate"));
+    }
+    let channels = u16::try_from(u32be(data, 40)?)
+        .ok().filter(|&n| n != 0).ok_or_else(|| invalid("invalid LPCM channel count"))?;
+    let bits = u32be(data, 48)?;
+    let flags = u32be(data, 52)?;
+    let bytes = u32be(data, 56)?;
+    let frames = u32be(data, 60)?;
+    if frames == 0 || bytes == 0 { return Err(invalid("invalid LPCM packet geometry")); }
+    // Planar, unpacked, fractional-rate and unknown layouts need distinct
+    // decoding semantics. Keep them skippable, never guess a packed waveform.
+    if flags & !0x5f != 0 || flags & 8 == 0 || rate.fract() != 0.0 {
+        return Ok(None);
+    }
+    let float = flags & 1 != 0;
+    let signed = flags & 4 != 0;
+    let big = flags & 2 != 0;
+    let codec = match (float, signed, bits) {
+        (true, false, 32) => *b"fl32",
+        (true, false, 64) => *b"fl64",
+        (false, false, 8) => *b"raw ",
+        (false, true, 8 | 16 | 24 | 32) => if big { *b"twos" } else { *b"sowt" },
+        _ => return Ok(None),
+    };
+    let expected = u64::from(channels) * u64::from(bits / 8) * u64::from(frames);
+    if expected != u64::from(bytes) { return Err(invalid("invalid LPCM packet geometry")); }
+    result.codec = codec;
+    result.sample_rate = rate as u32;
+    result.channels = channels;
+    result.bit_depth = bits as u16;
+    if float { result.configuration = vec![u8::from(!big)]; }
+    Ok(Some(structure))
+}
+
 fn audio_entry(data: &[u8], result: &mut Track) -> Result<bool> {
     if u16be(data, 8)? > 1 {
         return Ok(false);
@@ -1796,6 +1844,10 @@ fn parse_sample_entry(entry: Atom<'_>, mut result: Track, refused: &mut Vec<Skip
                     _ => unreachable!(),
                 }),
             )
+        }
+        (b"soun", b"lpcm") => {
+            let Some(at) = lpcm_v2_entry(entry.data, &mut result)? else { return Ok(None); };
+            (at, None)
         }
         (b"soun", b"mp4a") => {
             match u16be(entry.data, 8)? {
