@@ -1,0 +1,12 @@
+{
+  "published_commit": "c024f8cb66d771711218312886686ee625463c78",
+  "remote": "https://github.com/themoretheless/fvid.git",
+  "verified_refs": [
+    "c024f8cb66d771711218312886686ee625463c78\trefs/heads/codex/deliver-fvid-20261029",
+    "c024f8cb66d771711218312886686ee625463c78\trefs/heads/main"
+  ],
+  "clean_worktree_at_verification": true,
+  "source_freeze_matches": 3840,
+  "accepted_count": 531,
+  "cleanup": "Removed owned MS ADPCM target directory, temporary guarded-baseline backups and qualification scripts, and owned Python caches. Regression media, full diagnostic reports and evidence retained. Active parallel worktrees, branches and stashes retained."
+}
