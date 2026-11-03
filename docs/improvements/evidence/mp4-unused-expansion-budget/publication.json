@@ -1,0 +1,19 @@
+{
+  "source_commit": "a73ff80ecc6026a2b734b3bd4c7f768f975f3275",
+  "remote_refs": {
+    "refs/heads/codex/deliver-fvid-20261029": "a73ff80ecc6026a2b734b3bd4c7f768f975f3275",
+    "refs/heads/main": "a73ff80ecc6026a2b734b3bd4c7f768f975f3275"
+  },
+  "accepted_count": 540,
+  "next_id": "FVID-0541",
+  "rust_executions": 199,
+  "existing_device_ignores": 2,
+  "owned_target_removed": "/private/tmp/fvid-unused-expansion-target-20261103",
+  "candidate_backup_removed": true,
+  "source_stable": true,
+  "regression_files_preserved": 26,
+  "strict_active_mace_controls_preserved": 4,
+  "parallel_work_preserved": true,
+  "stashes_preserved": 4,
+  "branch_worktree_deletions": 0
+}
