@@ -1,8 +1,8 @@
 {
   "target": 1000,
   "counting_rule": "One independently confirmed problem or useful capability; fixture variants and baseline integration repairs are excluded. Only accepted entries count.",
-  "accepted_count": 529,
-  "next_id": "FVID-0530",
+  "accepted_count": 530,
+  "next_id": "FVID-0531",
   "entries": [
     {
       "id": "FVID-0001",
@@ -6009,6 +6009,17 @@
       "result": "BW64 shares checked size resolution and existing WAVE sample admission, with optional RF64-only sample counts. Reserved dummy words and RF64-only fact replacement do not influence BW64 timing. All 64 PCM cases preserve exact samples, packets, seek and EOF; 256 playback-worker sessions and native factory pass. Specific malformed metadata refusals and bounded large-declaration prefix/EOF checks pass.",
       "status": "accepted",
       "validation": "batch-540-validation.json"
+    },
+    {
+      "id": "FVID-0530",
+      "batch": 541,
+      "title": "Play IMA ADPCM WAVE with whole-block scheduling and exact fact-tail limits",
+      "source": "src/playback/audio/wav.rs",
+      "regression": "tests/wave_ima_playback.rs",
+      "before": "Original a33e7cdafd rejects authored IMA WAVE tag 0x0011 despite existing native IMA reconstruction. The final six-test stand passes the independent PCM/video control and fails five IMA gates.",
+      "result": "Validate mono/stereo four-bit WAVEFORMATEX block geometry and samples-per-block, route complete blocks to the existing owned decoder, bound positive fact tails and retain exact native clocks/seek. Thirty-six RIFF/RF64/Wave64 cases include blocks exceeding 2048 decoded frames, trimmed final blocks and absent fact; 144 playback-worker sessions and native player factory pass. Specific metadata and corrupt-step refusals, exact truncated prefixes and unknown-data/fact EOF checks pass. Final frozen gates pass243 Rust executions plus18 no-external-tool repeats, two pre-existing physical-device ignores, and core/player checks. All89 files regenerate identically and3636 source/fixture hashes remain stable. FFmpeg matches24/24 full/absent-fact cases and libsndfile8/8 RIFF controls; padded-tail disagreements are retained explicitly and never weaken analytic fact expectations. Public Coding enum migration is documented.",
+      "status": "accepted",
+      "validation": "batch-541-validation.json"
     }
   ]
 }

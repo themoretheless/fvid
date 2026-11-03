@@ -1,0 +1,20 @@
+{
+  "base_commit": "a33e7cdafde9af2d530ab507bd8e712ff99f5840",
+  "command": [
+    "cargo",
+    "test",
+    "--locked",
+    "--offline",
+    "--no-default-features",
+    "--features",
+    "player",
+    "--test",
+    "wave_ima_playback",
+    "--",
+    "--test-threads=2"
+  ],
+  "exit_code": 101,
+  "source_sha256": "244556a1bfac2a9dc0f4f78c232a531d7da200d86d6313a7c9108de4541cf273",
+  "candidate_sha256": "4cd8ca27db6da7e508d197013618994d66d2e1852f85e69fd298bfe88148d028",
+  "test_sha256": "c167f971d6704eb89db1705208e19c7fe9b4f54398c9904ed324bdaacedfa9e9"
+}

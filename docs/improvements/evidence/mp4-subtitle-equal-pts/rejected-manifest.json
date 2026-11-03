@@ -1,0 +1,706 @@
+{
+  "provenance": "Authored VP9 pixels and invented tx3g strings; zero/explicit STTS durations, signed CTTS, co-timed groups, no encoder, network or private media.",
+  "cases": [
+    {
+      "file": "positive-50-plain.mp4",
+      "control": "positive-50-plain-explicit-spans.mp4",
+      "control_durations": [
+        250,
+        250,
+        1
+      ],
+      "scale": 50,
+      "pts": [
+        0,
+        0,
+        250
+      ],
+      "durations": [
+        0,
+        0,
+        1
+      ],
+      "texts": [
+        "first co-timed line",
+        "second co-timed line",
+        "distinct later line"
+      ],
+      "identity": false,
+      "mode": "positive",
+      "cues": [
+        {
+          "text": "first co-timed line",
+          "start_ns": 0,
+          "end_ns": 5000000000
+        },
+        {
+          "text": "second co-timed line",
+          "start_ns": 0,
+          "end_ns": 5000000000
+        },
+        {
+          "text": "distinct later line",
+          "start_ns": 5000000000,
+          "end_ns": 5020000000
+        }
+      ]
+    },
+    {
+      "file": "positive-50-identity.mp4",
+      "control": "positive-50-identity-explicit-spans.mp4",
+      "control_durations": [
+        250,
+        250,
+        1
+      ],
+      "scale": 50,
+      "pts": [
+        0,
+        0,
+        250
+      ],
+      "durations": [
+        0,
+        0,
+        1
+      ],
+      "texts": [
+        "first co-timed line",
+        "second co-timed line",
+        "distinct later line"
+      ],
+      "identity": true,
+      "mode": "positive",
+      "cues": [
+        {
+          "text": "first co-timed line",
+          "start_ns": 0,
+          "end_ns": 4000000000
+        },
+        {
+          "text": "second co-timed line",
+          "start_ns": 0,
+          "end_ns": 4000000000
+        }
+      ]
+    },
+    {
+      "file": "negative-50-plain.mp4",
+      "control": "negative-50-plain-explicit-spans.mp4",
+      "control_durations": [
+        153,
+        153,
+        1
+      ],
+      "scale": 50,
+      "pts": [
+        -3,
+        -3,
+        150
+      ],
+      "durations": [
+        0,
+        0,
+        1
+      ],
+      "texts": [
+        "first co-timed line",
+        "second co-timed line",
+        "distinct later line"
+      ],
+      "identity": false,
+      "mode": "negative",
+      "cues": [
+        {
+          "text": "first co-timed line",
+          "start_ns": 0,
+          "end_ns": 3000000000
+        },
+        {
+          "text": "second co-timed line",
+          "start_ns": 0,
+          "end_ns": 3000000000
+        },
+        {
+          "text": "distinct later line",
+          "start_ns": 3000000000,
+          "end_ns": 3020000000
+        }
+      ]
+    },
+    {
+      "file": "negative-50-identity.mp4",
+      "control": "negative-50-identity-explicit-spans.mp4",
+      "control_durations": [
+        153,
+        153,
+        1
+      ],
+      "scale": 50,
+      "pts": [
+        -3,
+        -3,
+        150
+      ],
+      "durations": [
+        0,
+        0,
+        1
+      ],
+      "texts": [
+        "first co-timed line",
+        "second co-timed line",
+        "distinct later line"
+      ],
+      "identity": true,
+      "mode": "negative",
+      "cues": [
+        {
+          "text": "first co-timed line",
+          "start_ns": 0,
+          "end_ns": 3000000000
+        },
+        {
+          "text": "second co-timed line",
+          "start_ns": 0,
+          "end_ns": 3000000000
+        },
+        {
+          "text": "distinct later line",
+          "start_ns": 3000000000,
+          "end_ns": 3020000000
+        }
+      ]
+    },
+    {
+      "file": "explicit-control-50-plain.mp4",
+      "control": "explicit-control-50-plain-explicit-spans.mp4",
+      "control_durations": [
+        1,
+        250,
+        1
+      ],
+      "scale": 50,
+      "pts": [
+        0,
+        0,
+        250
+      ],
+      "durations": [
+        1,
+        0,
+        1
+      ],
+      "texts": [
+        "first co-timed line",
+        "second co-timed line",
+        "distinct later line"
+      ],
+      "identity": false,
+      "mode": "explicit-control",
+      "cues": [
+        {
+          "text": "first co-timed line",
+          "start_ns": 0,
+          "end_ns": 20000000
+        },
+        {
+          "text": "second co-timed line",
+          "start_ns": 0,
+          "end_ns": 5000000000
+        },
+        {
+          "text": "distinct later line",
+          "start_ns": 5000000000,
+          "end_ns": 5020000000
+        }
+      ]
+    },
+    {
+      "file": "explicit-control-50-identity.mp4",
+      "control": "explicit-control-50-identity-explicit-spans.mp4",
+      "control_durations": [
+        1,
+        250,
+        1
+      ],
+      "scale": 50,
+      "pts": [
+        0,
+        0,
+        250
+      ],
+      "durations": [
+        1,
+        0,
+        1
+      ],
+      "texts": [
+        "first co-timed line",
+        "second co-timed line",
+        "distinct later line"
+      ],
+      "identity": true,
+      "mode": "explicit-control",
+      "cues": [
+        {
+          "text": "first co-timed line",
+          "start_ns": 0,
+          "end_ns": 20000000
+        },
+        {
+          "text": "second co-timed line",
+          "start_ns": 0,
+          "end_ns": 4000000000
+        }
+      ]
+    },
+    {
+      "file": "terminal-control-50-plain.mp4",
+      "control": "terminal-control-50-plain-explicit-spans.mp4",
+      "control_durations": [
+        1,
+        100,
+        100
+      ],
+      "scale": 50,
+      "pts": [
+        0,
+        250,
+        250
+      ],
+      "durations": [
+        1,
+        0,
+        0
+      ],
+      "texts": [
+        "first co-timed line",
+        "second co-timed line",
+        "distinct later line"
+      ],
+      "identity": false,
+      "mode": "terminal-control",
+      "cues": [
+        {
+          "text": "first co-timed line",
+          "start_ns": 0,
+          "end_ns": 20000000
+        },
+        {
+          "text": "second co-timed line",
+          "start_ns": 5000000000,
+          "end_ns": 7000000000
+        },
+        {
+          "text": "distinct later line",
+          "start_ns": 5000000000,
+          "end_ns": 7000000000
+        }
+      ]
+    },
+    {
+      "file": "terminal-control-50-identity.mp4",
+      "control": "terminal-control-50-identity-explicit-spans.mp4",
+      "control_durations": [
+        1,
+        100,
+        100
+      ],
+      "scale": 50,
+      "pts": [
+        0,
+        250,
+        250
+      ],
+      "durations": [
+        1,
+        0,
+        0
+      ],
+      "texts": [
+        "first co-timed line",
+        "second co-timed line",
+        "distinct later line"
+      ],
+      "identity": true,
+      "mode": "terminal-control",
+      "cues": [
+        {
+          "text": "first co-timed line",
+          "start_ns": 0,
+          "end_ns": 20000000
+        }
+      ]
+    },
+    {
+      "file": "positive-1001-plain.mp4",
+      "control": "positive-1001-plain-explicit-spans.mp4",
+      "control_durations": [
+        5005,
+        5005,
+        1
+      ],
+      "scale": 1001,
+      "pts": [
+        0,
+        0,
+        5005
+      ],
+      "durations": [
+        0,
+        0,
+        1
+      ],
+      "texts": [
+        "first co-timed line",
+        "second co-timed line",
+        "distinct later line"
+      ],
+      "identity": false,
+      "mode": "positive",
+      "cues": [
+        {
+          "text": "first co-timed line",
+          "start_ns": 0,
+          "end_ns": 5000000000
+        },
+        {
+          "text": "second co-timed line",
+          "start_ns": 0,
+          "end_ns": 5000000000
+        },
+        {
+          "text": "distinct later line",
+          "start_ns": 5000000000,
+          "end_ns": 5000999000
+        }
+      ]
+    },
+    {
+      "file": "positive-1001-identity.mp4",
+      "control": "positive-1001-identity-explicit-spans.mp4",
+      "control_durations": [
+        5005,
+        5005,
+        1
+      ],
+      "scale": 1001,
+      "pts": [
+        0,
+        0,
+        5005
+      ],
+      "durations": [
+        0,
+        0,
+        1
+      ],
+      "texts": [
+        "first co-timed line",
+        "second co-timed line",
+        "distinct later line"
+      ],
+      "identity": true,
+      "mode": "positive",
+      "cues": [
+        {
+          "text": "first co-timed line",
+          "start_ns": 0,
+          "end_ns": 4000000000
+        },
+        {
+          "text": "second co-timed line",
+          "start_ns": 0,
+          "end_ns": 4000000000
+        }
+      ]
+    },
+    {
+      "file": "negative-1001-plain.mp4",
+      "control": "negative-1001-plain-explicit-spans.mp4",
+      "control_durations": [
+        3006,
+        3006,
+        1
+      ],
+      "scale": 1001,
+      "pts": [
+        -3,
+        -3,
+        3003
+      ],
+      "durations": [
+        0,
+        0,
+        1
+      ],
+      "texts": [
+        "first co-timed line",
+        "second co-timed line",
+        "distinct later line"
+      ],
+      "identity": false,
+      "mode": "negative",
+      "cues": [
+        {
+          "text": "first co-timed line",
+          "start_ns": 0,
+          "end_ns": 3000000000
+        },
+        {
+          "text": "second co-timed line",
+          "start_ns": 0,
+          "end_ns": 3000000000
+        },
+        {
+          "text": "distinct later line",
+          "start_ns": 3000000000,
+          "end_ns": 3000999000
+        }
+      ]
+    },
+    {
+      "file": "negative-1001-identity.mp4",
+      "control": "negative-1001-identity-explicit-spans.mp4",
+      "control_durations": [
+        3006,
+        3006,
+        1
+      ],
+      "scale": 1001,
+      "pts": [
+        -3,
+        -3,
+        3003
+      ],
+      "durations": [
+        0,
+        0,
+        1
+      ],
+      "texts": [
+        "first co-timed line",
+        "second co-timed line",
+        "distinct later line"
+      ],
+      "identity": true,
+      "mode": "negative",
+      "cues": [
+        {
+          "text": "first co-timed line",
+          "start_ns": 0,
+          "end_ns": 3000000000
+        },
+        {
+          "text": "second co-timed line",
+          "start_ns": 0,
+          "end_ns": 3000000000
+        },
+        {
+          "text": "distinct later line",
+          "start_ns": 3000000000,
+          "end_ns": 3000999000
+        }
+      ]
+    },
+    {
+      "file": "explicit-control-1001-plain.mp4",
+      "control": "explicit-control-1001-plain-explicit-spans.mp4",
+      "control_durations": [
+        1,
+        5005,
+        1
+      ],
+      "scale": 1001,
+      "pts": [
+        0,
+        0,
+        5005
+      ],
+      "durations": [
+        1,
+        0,
+        1
+      ],
+      "texts": [
+        "first co-timed line",
+        "second co-timed line",
+        "distinct later line"
+      ],
+      "identity": false,
+      "mode": "explicit-control",
+      "cues": [
+        {
+          "text": "first co-timed line",
+          "start_ns": 0,
+          "end_ns": 999000
+        },
+        {
+          "text": "second co-timed line",
+          "start_ns": 0,
+          "end_ns": 5000000000
+        },
+        {
+          "text": "distinct later line",
+          "start_ns": 5000000000,
+          "end_ns": 5000999000
+        }
+      ]
+    },
+    {
+      "file": "explicit-control-1001-identity.mp4",
+      "control": "explicit-control-1001-identity-explicit-spans.mp4",
+      "control_durations": [
+        1,
+        5005,
+        1
+      ],
+      "scale": 1001,
+      "pts": [
+        0,
+        0,
+        5005
+      ],
+      "durations": [
+        1,
+        0,
+        1
+      ],
+      "texts": [
+        "first co-timed line",
+        "second co-timed line",
+        "distinct later line"
+      ],
+      "identity": true,
+      "mode": "explicit-control",
+      "cues": [
+        {
+          "text": "first co-timed line",
+          "start_ns": 0,
+          "end_ns": 999000
+        },
+        {
+          "text": "second co-timed line",
+          "start_ns": 0,
+          "end_ns": 4000000000
+        }
+      ]
+    },
+    {
+      "file": "terminal-control-1001-plain.mp4",
+      "control": "terminal-control-1001-plain-explicit-spans.mp4",
+      "control_durations": [
+        1,
+        2002,
+        2002
+      ],
+      "scale": 1001,
+      "pts": [
+        0,
+        5005,
+        5005
+      ],
+      "durations": [
+        1,
+        0,
+        0
+      ],
+      "texts": [
+        "first co-timed line",
+        "second co-timed line",
+        "distinct later line"
+      ],
+      "identity": false,
+      "mode": "terminal-control",
+      "cues": [
+        {
+          "text": "first co-timed line",
+          "start_ns": 0,
+          "end_ns": 999000
+        },
+        {
+          "text": "second co-timed line",
+          "start_ns": 5000000000,
+          "end_ns": 7000000000
+        },
+        {
+          "text": "distinct later line",
+          "start_ns": 5000000000,
+          "end_ns": 7000000000
+        }
+      ]
+    },
+    {
+      "file": "terminal-control-1001-identity.mp4",
+      "control": "terminal-control-1001-identity-explicit-spans.mp4",
+      "control_durations": [
+        1,
+        2002,
+        2002
+      ],
+      "scale": 1001,
+      "pts": [
+        0,
+        5005,
+        5005
+      ],
+      "durations": [
+        1,
+        0,
+        0
+      ],
+      "texts": [
+        "first co-timed line",
+        "second co-timed line",
+        "distinct later line"
+      ],
+      "identity": true,
+      "mode": "terminal-control",
+      "cues": [
+        {
+          "text": "first co-timed line",
+          "start_ns": 0,
+          "end_ns": 999000
+        }
+      ]
+    }
+  ],
+  "sha256": {
+    "frame-0.yuv16": "b4cc94ff03bd17b32107a79a64ba427cd43b6e49d209bb4d29190f3deb737a11",
+    "frame-1.yuv16": "31d05f629132273f660622387ef2865866de6688c0969265e891ad9d4c936237",
+    "frame-2.yuv16": "2f59155bee83baf25a0d39c17290257f055569e5b1d77ca8b866b1a4b2cee6f7",
+    "positive-50-plain.mp4": "c6a1f4d0ecaf0ccc4cddbececa8061c3252a1b6771aea6d4cc299339259af153",
+    "positive-50-plain-explicit-spans.mp4": "4a5c91c7aa65858f4f4ebcdaeb5bc71cabb237ce5b659e704bea4ec396bf2f95",
+    "positive-50-identity.mp4": "4690982a5956a40f0af235fa4d841b060f67b59872cc5936f60bb6d33a9e7bd6",
+    "positive-50-identity-explicit-spans.mp4": "53537eea2dffb704089bd3f9f0ff15938cb453c9683426edde1800bd7acfd6a0",
+    "negative-50-plain.mp4": "c038834c8bbdbfd9bcea2443dcf6741310ec764a6865583bbee02368e401e109",
+    "negative-50-plain-explicit-spans.mp4": "1cc3bde395243bde4e51903a3ddf3424e54d85e6bbcbd04d46e58fdb3e192276",
+    "negative-50-identity.mp4": "fade51a5709d461ddfdb7411b4b3516b3de17ae512c122784db88de069b35ed0",
+    "negative-50-identity-explicit-spans.mp4": "0b10aed4f27881a1c22259624a99d6ecea6306ca7e34cf34a079e30718857c5b",
+    "explicit-control-50-plain.mp4": "5c5e46a122df206317b6d5ae80cf87662a7ad3effff8fa2e7413609a2bc70a60",
+    "explicit-control-50-plain-explicit-spans.mp4": "bf105715412253b9c19d983dd34e1dcfdd90682a0812f74748415e1074b4f758",
+    "explicit-control-50-identity.mp4": "b1e7611156a5be609d0249a619c07e8719c9b9ee49f48e44be3b7acd1f422a77",
+    "explicit-control-50-identity-explicit-spans.mp4": "65b1bb1cc1a8ebce75cc40739e15879bed28844084f30515922aa1cc0abb4852",
+    "terminal-control-50-plain.mp4": "678378ffb5f3a3a657c4041a84fa97ea905eafacf67e14b829eadb9e1dcc8d9e",
+    "terminal-control-50-plain-explicit-spans.mp4": "ebcdaf1c469e706db37a4ca0c13f88a6041aee82410b2557178d4a2b1546bb8d",
+    "terminal-control-50-identity.mp4": "40d4b328e9b40a8c0a67d11cff420812be4e4bab37b1b7682120ea6eaf233f3a",
+    "terminal-control-50-identity-explicit-spans.mp4": "846ae195936c7b23dc0a9050f57cb4437f09ce30405dcc1e3c3ba2d579d52e2e",
+    "positive-1001-plain.mp4": "39875a9b9a88714a66057c801b858d530cb7661b03b095198cecdbebeb244674",
+    "positive-1001-plain-explicit-spans.mp4": "25fb750d5e7aef5cb2f86175ef0deb60e7e6f19121fbd3bb457174c2f99954ac",
+    "positive-1001-identity.mp4": "5b1f7448fe6b275dd1b4880a517450e361b6e9825151c283cbd0035e52cfc98a",
+    "positive-1001-identity-explicit-spans.mp4": "471871ec89373d0b31d34771638781fc27a7708f29ba475cc14a48f57fda267e",
+    "negative-1001-plain.mp4": "c9deddef5cae7139d61c6688149e079d14e4021ab311aa8d288b5dce178e7387",
+    "negative-1001-plain-explicit-spans.mp4": "38351b05fbdf202e0da43a74c56d86d2e9597c092102c5b3d0a2d95765111853",
+    "negative-1001-identity.mp4": "1b814e41df2f5037735370c9c2855f36d6f90f772d75e9d38263f1637fa646cc",
+    "negative-1001-identity-explicit-spans.mp4": "ea4c5c42a2abc5680f3f75db88c5227c46dd9fa53cabaa4c6558efa1edb2601e",
+    "explicit-control-1001-plain.mp4": "19588caa7ce8250616f65a2133006051fd75e7bf0f53f75c64ce69b5d5833590",
+    "explicit-control-1001-plain-explicit-spans.mp4": "d3c8d5bd79e7c386fbed68f7971a526a0c63a86671b6f767ede23bab67f40240",
+    "explicit-control-1001-identity.mp4": "c811c26d906426f45b5e825f2eaa745cc0f908b0032bc60853467509b7eb0ad2",
+    "explicit-control-1001-identity-explicit-spans.mp4": "cbb052bd3b7c1e72a2030d412f6aeb4210c90a3ba51e54d057cb6144c245784b",
+    "terminal-control-1001-plain.mp4": "51d16f257962bd2804ed2f00ef84f829acd59da2bd1d80d2ef6e71305baaa760",
+    "terminal-control-1001-plain-explicit-spans.mp4": "b9c153e72a560c21e7aaeef8aaadefa3d8ce93ed9222cbb2831ecb22781415ce",
+    "terminal-control-1001-identity.mp4": "a9cb5ecaee5d4b2a133f13e05f20a9a964f083dc167ca85d851de2bae595154c",
+    "terminal-control-1001-identity-explicit-spans.mp4": "628ae40cc3add6d75d5e1a0cb403c544e4bb892292a7fcad5d783d5dacb35db8"
+  }
+}

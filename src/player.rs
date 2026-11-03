@@ -13325,3 +13325,26 @@ mod native_bw64_file_regressions {
         assert_eq!(out, std::fs::read(root.join("classic-t1-b16-c2.f32le")).unwrap());
     }
 }
+
+#[cfg(test)]
+mod native_wave_ima_file_regressions {
+    use super::*;
+    #[test]
+    fn automatic_wave_ima_factory_preserves_trimmed_pcm() {
+        let root = Path::new(env!("CARGO_MANIFEST_DIR")).join("tests/fixtures/playback-errors/wave-ima-playback");
+        for kind in ["riff", "rf64", "wave64"] {
+            let path = root.join(format!("c2-b16-trim-{kind}.wav"));
+            let mut stream = AUDIO_READERS.iter().find_map(|a|a.open(&path,None)).expect("native IMA WAV");
+            assert_eq!(stream.codec(), "adpcm_ima_wav");
+            let mut decoder = stream.make_decoder().unwrap();
+            let mut out = Vec::new();
+            while let Some(p) = stream.next_packet().unwrap() {
+                if let Some(d) = decoder.decode_packet(&p.data,stream.decoder_stamp(&p),p.duration as u64).unwrap() {
+                    if let Some(p) = stream.present_decoded(d.packet,d.source_pts).unwrap() {out.extend(p.data);}
+                }
+            }
+            stream.validate_eof().unwrap();
+            assert_eq!(out,std::fs::read(root.join("c2-b16-trim.f32le")).unwrap(),"{kind}");
+        }
+    }
+}

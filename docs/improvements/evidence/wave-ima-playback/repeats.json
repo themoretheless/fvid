@@ -1,0 +1,29 @@
+[
+  {
+    "repeat": 1,
+    "passed": 6,
+    "exit_code": 0,
+    "binary_sha256": "d664ed0d1774cea065da4105969620cca197b3929113933250e27bef9c4ff93d",
+    "PATH": "/nonexistent",
+    "FFMPEG": "/nonexistent/ffmpeg",
+    "FFPROBE": "/nonexistent/ffprobe"
+  },
+  {
+    "repeat": 2,
+    "passed": 6,
+    "exit_code": 0,
+    "binary_sha256": "d664ed0d1774cea065da4105969620cca197b3929113933250e27bef9c4ff93d",
+    "PATH": "/nonexistent",
+    "FFMPEG": "/nonexistent/ffmpeg",
+    "FFPROBE": "/nonexistent/ffprobe"
+  },
+  {
+    "repeat": 3,
+    "passed": 6,
+    "exit_code": 0,
+    "binary_sha256": "d664ed0d1774cea065da4105969620cca197b3929113933250e27bef9c4ff93d",
+    "PATH": "/nonexistent",
+    "FFMPEG": "/nonexistent/ffmpeg",
+    "FFPROBE": "/nonexistent/ffprobe"
+  }
+]

@@ -1,0 +1,35 @@
+{
+  "status": "rejected_candidate",
+  "accepted_ids": [],
+  "count_delta": 0,
+  "base": "a33e7cdafde9af2d530ab507bd8e712ff99f5840",
+  "reason": "No reachable native subtitle endpoint defect was proved. Witnesses with nonterminal zero STTS runs are rejected by pre-existing parser policy before subtitle extraction. Explicit-duration paired controls passed. Do not change the parser or claim a subtitle fix based on these fixtures.",
+  "result": {
+    "passed": 1,
+    "failed": 4
+  },
+  "source": "crates/fvid-media/src/owned_mp4_impl.rs",
+  "guards": [
+    "sample_index: delta==0 && i+1<runs",
+    "parse_track: nonterminal_zero guard"
+  ],
+  "reproducer_sources": [
+    "rejected-generator.py",
+    "rejected-test.rs",
+    "rejected-manifest.json"
+  ],
+  "production_changes": false,
+  "command": [
+    "cargo",
+    "test",
+    "--locked",
+    "--offline",
+    "--no-default-features",
+    "--features",
+    "player",
+    "--test",
+    "mp4_subtitle_equal_pts",
+    "--",
+    "--test-threads=2"
+  ]
+}

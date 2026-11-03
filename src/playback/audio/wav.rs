@@ -113,6 +113,8 @@ pub enum Coding {
     /// DSP Group TrueSpeech: a 32-byte block that codes 240 samples and states neither its
     /// rate nor its depth anywhere else.
     Truespeech,
+    /// Microsoft IMA blocks: encoded alignment and decoded samples per block.
+    ImaWav { block_bytes: u16, block_frames: u16 },
     /// Apple MACE 3-to-1: a byte's three codes give one sample each, so a channel's block
     /// is two bytes for six samples. It reaches this enum from a container's fourcc, not
     /// from a Wave number - this build's muxer refuses to write the coding into a Wave.
@@ -173,6 +175,7 @@ impl Pcm {
     /// rates several bytes wide.
     pub fn block_align(&self) -> usize {
         match self.coding {
+            Coding::ImaWav { block_bytes, .. } => usize::from(block_bytes),
             Coding::ALaw | Coding::MuLaw => usize::from(self.channels),
             Coding::G722 => usize::from(self.channels),
             Coding::G726(code_size) => usize::from(self.channels) * g726_block(code_size).0,
@@ -197,6 +200,7 @@ impl Pcm {
     /// bytes hold three samples apiece while 6-to-1's one byte interpolates to six.
     pub fn frames_per_block(&self) -> usize {
         match self.coding {
+            Coding::ImaWav { block_frames, .. } => usize::from(block_frames),
             Coding::G722 => 2,
             Coding::G726(code_size) => g726_block(code_size).1,
             Coding::Gsm => GSM_SAMPLES_PER_BLOCK,
@@ -233,7 +237,7 @@ impl Pcm {
     /// bytes came out with `dwAvgBytesPerSec` stating 1 066 and 8 000 alike.
     pub fn derived_byte_rate(&self) -> Option<usize> {
         match self.coding {
-            Coding::G722 | Coding::AdpcmCt | Coding::Truespeech => None,
+            Coding::G722 | Coding::AdpcmCt | Coding::Truespeech | Coding::ImaWav { .. } => None,
             _ => Some(self.coded_bytes_per_second()),
         }
     }
@@ -260,6 +264,7 @@ impl Pcm {
             Coding::G722 => "adpcm_g722",
             Coding::G726(_) => "adpcm_g726",
             Coding::Gsm => "gsm_ms",
+            Coding::ImaWav { .. } => "adpcm_ima_wav",
             Coding::AdpcmCt => "adpcm_ct",
             Coding::Truespeech => "truespeech",
             Coding::Mace3 => "mace3",
@@ -432,7 +437,18 @@ impl Wav {
         }
         validate_pcm_padding(samples, pcm.bits_per_sample, padding_bits)?;
         let blocks = samples.len() / pcm.block_align();
-        let frames = blocks * pcm.frames_per_block();
+        let mut frames = blocks * pcm.frames_per_block();
+        if matches!(pcm.coding, Coding::ImaWav { .. }) {
+            if !samples.len().is_multiple_of(pcm.block_align()) {
+                return Err(invalid("incomplete IMA WAVE block"));
+            }
+            if let Some(stated) = fact.filter(|&n| n > 0) {
+                if declared_bytes <= samples.len() && stated > frames {
+                    return Err(invalid("IMA fact exceeds available decoded frames"));
+                }
+                frames = frames.min(stated);
+            }
+        }
         // Where the byte rate states nothing, the `fact` chunk is the run's remaining
         // redundant statement, and the one the same writers get right. A run shorter
         // than the file claims has no claim to check against: the reader plays the
@@ -443,7 +459,7 @@ impl Wav {
         // this coding decodes. The reader still carries the claim, so the disagreement
         // stays visible as `declared_frames` beside `frames`.
         if pcm.derived_byte_rate().is_none()
-            && pcm.coding != Coding::Truespeech
+            && !matches!(pcm.coding, Coding::Truespeech | Coding::ImaWav { .. })
             && declared_bytes <= samples.len()
             && let Some(stated) = fact
             && stated != frames
@@ -467,7 +483,9 @@ impl Wav {
     /// Packets the sample run is read out as, the last a short one when the run does
     /// not divide evenly.
     pub fn packets(&self) -> usize {
-        self.data.len().div_ceil(self.window_bytes())
+        if matches!(self.pcm.coding, Coding::ImaWav { .. }) {
+            self.frames.div_ceil(self.window_frames())
+        } else { self.data.len().div_ceil(self.window_bytes()) }
     }
 
     /// One packet's bytes, aligned to a block. A tail shorter than a block holds no
@@ -493,7 +511,7 @@ impl Wav {
     /// Bytes of one window: the player's own grain of frames, counted in the blocks
     /// this coding packs those frames into.
     fn window_bytes(&self) -> usize {
-        PACKET_FRAMES / self.pcm.frames_per_block() * self.pcm.block_align()
+        (PACKET_FRAMES / self.pcm.frames_per_block()).max(1) * self.pcm.block_align()
     }
 }
 
@@ -622,6 +640,17 @@ pub(crate) fn parse_fmt(body: &[u8], limits: &Limits) -> Result<(Pcm, Option<u32
         return Err(invalid("sample rate of zero"));
     }
     let kind = match (format, bits) {
+        (0x0011, _) => {
+            if !(1..=2).contains(&channels) { return Err(unsupported("IMA WAVE requires mono or stereo")); }
+            if bits != 4 { return Err(invalid("IMA WAVE requires four-bit codes")); }
+            if body.len() < 20 || u16_at(16) < 2 || usize::from(u16_at(16)) > body.len() - 18 {
+                return Err(invalid("IMA WAVE extension is incomplete"));
+            }
+            let frames = crate::codec::adpcm_decoder::block_frames("adpcm_ima_wav", u64::from(block_align), u64::from(channels), 4)
+                .and_then(|n|u16::try_from(n).ok()).ok_or_else(||invalid("IMA WAVE block geometry is invalid"))?;
+            if frames != u16_at(18) { return Err(invalid("IMA WAVE samples-per-block disagrees with block size")); }
+            Coding::ImaWav { block_bytes: block_align, block_frames: frames }
+        },
         // RIFF PCM8 is unsigned; the existing unsigned decoder preserves its
         // midpoint and numeric boundaries without rewriting encoded samples.
         (PCM, 8) => Coding::Pcm(PcmFormat::Unsigned8),
@@ -776,6 +805,7 @@ pub(crate) fn parse_fmt(body: &[u8], limits: &Limits) -> Result<(Pcm, Option<u32
 /// A Wave file read as an audio track.
 pub struct WavAudioReader {
     wav: Wav,
+    adpcm_setup: [u8; 20],
     packet: usize,
     frame_skip: usize,
     presentation_floor: u64,
@@ -788,8 +818,18 @@ impl WavAudioReader {
         let mut bytes = Vec::new();
         let cap = u64::try_from(limits.file_bytes).unwrap_or(u64::MAX);
         reader.by_ref().take(cap.saturating_add(1)).read_to_end(&mut bytes)?;
+        let wav = Wav::parse(&bytes, &limits)?;
+        let mut adpcm_setup = [0u8; 20];
+        if let Coding::ImaWav { block_bytes, block_frames } = wav.pcm.coding {
+            for (at, value) in [(0,17), (2,wav.pcm.channels), (12,block_bytes), (14,4), (16,2), (18,block_frames)] {
+                adpcm_setup[at..at+2].copy_from_slice(&value.to_le_bytes());
+            }
+            adpcm_setup[4..8].copy_from_slice(&wav.pcm.sample_rate.to_le_bytes());
+            adpcm_setup[8..12].copy_from_slice(&(wav.pcm.coded_bytes_per_second() as u32).to_le_bytes());
+        }
         Ok(Self {
-            wav: Wav::parse(&bytes, &limits)?,
+            wav,
+            adpcm_setup,
             packet: 0,
             frame_skip: 0,
             presentation_floor: 0,
@@ -851,10 +891,15 @@ impl AudioStream for WavAudioReader {
         if let Some((expected, actual, kind)) = self.wav.known_extent && expected > actual as u64 {
             return Err(invalid(&format!("{kind} file extent is truncated")));
         }
+        if matches!(self.wav.pcm.coding, Coding::ImaWav { .. })
+            && self.wav.declared_frames.is_some_and(|n| n > self.wav.frames) {
+            return Err(invalid("IMA fact sample payload is truncated"));
+        }
         Ok(())
     }
 
     fn extra_data(&self) -> &[u8] {
+        if matches!(self.wav.pcm.coding, Coding::ImaWav { .. }) { return &self.adpcm_setup; }
         if self.wav.is_big_endian() && matches!(self.wav.pcm.coding, Coding::Pcm(PcmFormat::Float { .. })) {
             // Existing QuickTime/AIFF float dispatch uses zero for big endian.
             &[0]
@@ -879,10 +924,12 @@ impl AudioStream for WavAudioReader {
         let skip = self.frame_skip;
         let data = self.wav.packet(self.packet)[skip * self.wav.pcm.block_align()..].to_vec();
         self.frame_skip = 0;
+        let pts = (self.packet * self.wav.window_frames() + skip) as i64;
+        let held = data.len() / self.wav.pcm.block_align() * self.wav.pcm.frames_per_block();
+        let duration = if matches!(self.wav.pcm.coding, Coding::ImaWav { .. }) { held.min(self.wav.frames.saturating_sub(pts as usize)) } else { held };
         let packet = EncodedPacket {
-            duration: ((data.len() / self.wav.pcm.block_align()) * self.wav.pcm.frames_per_block())
-                as i64,
-            pts: (self.packet * self.wav.window_frames() + skip) as i64,
+            duration: duration as i64,
+            pts,
             data,
         };
         self.packet += 1;
@@ -898,6 +945,10 @@ impl AudioStream for WavAudioReader {
             .map_err(|_| invalid("decoded audio precedes its source timeline"))?;
         packet.timebase_num = 1;
         packet.timebase_den = self.sample_rate();
+        if matches!(self.wav.pcm.coding, Coding::ImaWav { .. }) {
+            let available = (self.wav.frames as u64).saturating_sub(packet.pts) as usize;
+            packet.data.truncate(packet.data.len().min(available.saturating_mul(stride)));
+        }
         let frames = packet.data.len() / stride;
         let skip = self.presentation_floor.saturating_sub(packet.pts).min(frames as u64) as usize;
         if skip == frames { return Ok(None); }

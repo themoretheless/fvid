@@ -1,0 +1,114 @@
+{
+  "library": "/opt/homebrew/lib/libsndfile.dylib",
+  "version": "libsndfile-1.2.2",
+  "cases": [
+    {
+      "file": "c1-b8-full-riff.wav",
+      "mode": "full",
+      "reported_frames": 2331,
+      "read_frames": 2331,
+      "expected_frames": 2331,
+      "byte_identical": true,
+      "prefix_identical": true
+    },
+    {
+      "file": "c1-b8-trim-riff.wav",
+      "mode": "trim",
+      "reported_frames": 2331,
+      "read_frames": 2331,
+      "expected_frames": 2324,
+      "byte_identical": false,
+      "prefix_identical": true
+    },
+    {
+      "file": "c1-b8-nofact-riff.wav",
+      "mode": "nofact",
+      "reported_frames": 2331,
+      "read_frames": 2331,
+      "expected_frames": 2331,
+      "byte_identical": true,
+      "prefix_identical": true
+    },
+    {
+      "file": "c1-b2048-full-riff.wav",
+      "mode": "full",
+      "reported_frames": 8178,
+      "read_frames": 8178,
+      "expected_frames": 8178,
+      "byte_identical": true,
+      "prefix_identical": true
+    },
+    {
+      "file": "c1-b2048-trim-riff.wav",
+      "mode": "trim",
+      "reported_frames": 8178,
+      "read_frames": 8178,
+      "expected_frames": 8171,
+      "byte_identical": false,
+      "prefix_identical": true
+    },
+    {
+      "file": "c1-b2048-nofact-riff.wav",
+      "mode": "nofact",
+      "reported_frames": 8178,
+      "read_frames": 8178,
+      "expected_frames": 8178,
+      "byte_identical": true,
+      "prefix_identical": true
+    },
+    {
+      "file": "c2-b16-full-riff.wav",
+      "mode": "full",
+      "reported_frames": 2331,
+      "read_frames": 2331,
+      "expected_frames": 2331,
+      "byte_identical": true,
+      "prefix_identical": true
+    },
+    {
+      "file": "c2-b16-trim-riff.wav",
+      "mode": "trim",
+      "reported_frames": 2331,
+      "read_frames": 2331,
+      "expected_frames": 2324,
+      "byte_identical": false,
+      "prefix_identical": true
+    },
+    {
+      "file": "c2-b16-nofact-riff.wav",
+      "mode": "nofact",
+      "reported_frames": 2331,
+      "read_frames": 2331,
+      "expected_frames": 2331,
+      "byte_identical": true,
+      "prefix_identical": true
+    },
+    {
+      "file": "c2-b4096-full-riff.wav",
+      "mode": "full",
+      "reported_frames": 8178,
+      "read_frames": 8178,
+      "expected_frames": 8178,
+      "byte_identical": true,
+      "prefix_identical": true
+    },
+    {
+      "file": "c2-b4096-trim-riff.wav",
+      "mode": "trim",
+      "reported_frames": 8178,
+      "read_frames": 8178,
+      "expected_frames": 8171,
+      "byte_identical": false,
+      "prefix_identical": true
+    },
+    {
+      "file": "c2-b4096-nofact-riff.wav",
+      "mode": "nofact",
+      "reported_frames": 8178,
+      "read_frames": 8178,
+      "expected_frames": 8178,
+      "byte_identical": true,
+      "prefix_identical": true
+    }
+  ]
+}

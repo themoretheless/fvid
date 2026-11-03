@@ -1,7 +1,7 @@
 # Verified improvements
 
-Accepted: **512 / 1000 independent, useful changes**. Only entries marked `accepted` in
-[`registry.json`](registry.json) count. Fixture variants, test cases, documentation
+Target: **1000 independent, useful changes**. The current accepted count is recorded in
+[`registry.json`](registry.json); only entries marked `accepted` count. Fixture variants, test cases, documentation
 and baseline integration repairs do not inflate the count.
 
 ## Batch 001 — correctness and interrupted I/O
