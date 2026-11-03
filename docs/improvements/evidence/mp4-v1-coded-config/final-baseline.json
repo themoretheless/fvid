@@ -1,0 +1,11 @@
+{
+  "base": "a53758a846dc8c38714a441f04f53fd1fb9a63de",
+  "sameFinalStand": true,
+  "testSha256": "6d458457116d2a390822f31316b5a6056cf2745e729a9f45120c9092cb4f84c0",
+  "passed": 1,
+  "failed": 3,
+  "validVersionZeroControls": "passed",
+  "versionOneSpecificFailures": 12,
+  "log": "docs/improvements/evidence/mp4-v1-coded-config/final-baseline.log",
+  "runtimeRestored": true
+}

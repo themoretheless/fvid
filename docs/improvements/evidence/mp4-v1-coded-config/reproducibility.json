@@ -1,0 +1,7 @@
+{
+  "sourcePaths": 5489,
+  "fixtureFiles": 31,
+  "regeneratedExactly": true,
+  "referenceInputsMatch": 14,
+  "fixtureGenerator": "scripts/generate_mp4_v1_coded_config.py"
+}

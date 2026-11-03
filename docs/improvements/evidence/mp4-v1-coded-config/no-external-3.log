@@ -1,0 +1,8 @@
+
+running 4 tests
+test incomplete_version_one_headers_have_specific_invalid_refusals ... ok
+test version_one_configuration_and_every_packet_match_the_valid_control ... ok
+test version_zero_controls_keep_valid_nonzero_pcm_and_video ... ok
+test native_playback_seek_rewind_and_eof_match_exact_control_samples ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.30s

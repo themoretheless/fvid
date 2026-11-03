@@ -1,8 +1,8 @@
 {
   "target": 1000,
   "counting_rule": "One independently confirmed problem or useful capability; fixture variants and baseline integration repairs are excluded. Only accepted entries count.",
-  "accepted_count": 543,
-  "next_id": "FVID-0544",
+  "accepted_count": 544,
+  "next_id": "FVID-0545",
   "entries": [
     {
       "id": "FVID-0001",
@@ -6163,6 +6163,17 @@
       "result": "Read nested enda first, preserving its existing precedence and wave validation, then consult the direct field only if the nested field is absent. Keep the existing0/1 flag validation and duplicate/truncation refusals. Sixty-four valid variants cover four existing PCM tags, mono/stereo, both byte orders,1000/48000 clocks and two child orders; exact literal f32/f64 output retains low int32/float64 bits, parsed configuration,60ms duration, precise seek/rewind/EOF,192 actual software-worker sessions/anchors per stand, public raw export, sample intervals and exact software VP9 pictures. The12 malformed files now produce the same typed Invalid/non-unsupported errors as direct-only controls; resource/cancellation checks remain strict before output. Qualification passes195 Rust executions, two existing device ignores, core/player checks and three external-tool-free repeats. All140 short authored files regenerate identically and5456 source/input hashes stay stable; all64 valid reference input hashes still match. One missing-fallback invariant with successful decode and validation-bypass consequences, not per-tag/variant/refusal IDs. No old tests changed; no new format, public interface, decoder algorithm, conflict policy, performance or hardware claim.",
       "status": "accepted",
       "validation": "batch-554-validation.json"
+    },
+    {
+      "id": "FVID-0544",
+      "batch": 555,
+      "title": "Read ALAC and EAC3 configuration after the QuickTime version-one audio header",
+      "source": "crates/fvid-media/src/owned_mp4_impl.rs",
+      "regression": "tests/mp4_v1_coded_config.rs",
+      "before": "Original a53758a846 accepts sound-description version1 but reads ALAC/EAC3 children at the version0 offset28 instead of44. Valid v0 controls pass;12 of14 authored v1 companions fail:10 cannot open and2 lose their existing dec3 configuration. The final unchanged four-test stand on the original runtime passes the control and fails configuration/packet, malformed-header and native-playback gates. Eight incomplete header companions include one previously admitted short EAC3 file; the other seven were already refused for unrelated reasons. Three stand-authoring diagnostics are explicitly excluded from defect evidence.",
+      "result": "A shared checked version0/1 child offset now skips the16-byte v1 extension and gives typed Invalid refusal for incomplete admitted v1 headers. Fourteen valid companions cover ALAC8000/1000/48000 clocks and EAC3 stereo48000/1000 clocks, specified/unspecified packet fields, and optional dec3 packet-probe controls. Configuration, all coded packets and rational container timestamps match v0 controls; native PCM matches every sample, ALAC matches its literal oracle, and all short synthetic videos decode without error. Exact native seek from0/1ns/20ms/end/MAX, rewind, EOF and42 software audio-worker sessions/anchors pass per stand. Independent ffmpeg-full9.0.2 confirms14/14 full-length v0/v1 pairs;31 fixtures regenerate identically and5489 source/input hashes remain stable. Qualification passes191 Rust executions, two existing device ignores, core/player checks and three external-tool-free repeats. One shared header-offset invariant, not per-codec/fixture IDs. No old tests weakened; no decoder algorithm, public interface, new format, performance or physical-device claim.",
+      "status": "accepted",
+      "validation": "batch-555-validation.json"
     }
   ]
 }

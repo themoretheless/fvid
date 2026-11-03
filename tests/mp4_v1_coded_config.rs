@@ -190,3 +190,88 @@ fn incomplete_version_one_headers_have_specific_invalid_refusals() {
     }
     assert!(failures.is_empty(), "{failures:?}");
 }
+
+#[path = "support/rational_audio_seek.rs"]
+mod rational;
+#[path = "support/audio_transitions.rs"]
+mod transitions;
+#[test]
+fn native_playback_seek_rewind_and_eof_match_exact_control_samples() {
+    use fvid::audio::AudioStream;
+    use std::{
+        sync::{Arc, Mutex},
+        time::Duration,
+    };
+    for c in cases() {
+        let name = c["file"].as_str().unwrap();
+        let open = |n: &str| {
+            fvid::playback_mp4_audio::Mp4AudioReader::open(
+                Cursor::new(bytes(n)),
+                Default::default(),
+            )
+            .unwrap()
+        };
+        let mut control = open(c["control"].as_str().unwrap());
+        let full = rational::collect(&mut control);
+        assert_eq!(
+            full.iter()
+                .flat_map(|p| p.data.iter().copied())
+                .collect::<Vec<_>>(),
+            decode(c["control"].as_str().unwrap())
+        );
+        let end = if name.starts_with("alac-") {
+            (3, 50)
+        } else {
+            (12, 125)
+        };
+        let mut reader = open(name);
+        assert_eq!(
+            reader.duration(),
+            Some(rational::duration(end.0, end.1)),
+            "{name}"
+        );
+        rational::exact(&rational::collect(&mut reader), &full, name);
+        for at in [
+            Duration::ZERO,
+            Duration::from_nanos(1),
+            Duration::from_millis(20),
+            rational::duration(end.0, end.1),
+            Duration::MAX,
+        ] {
+            reader.seek_time(at);
+            rational::exact(
+                &rational::collect(&mut reader),
+                &rational::suffix(&full, at, end),
+                name,
+            );
+        }
+        reader.rewind();
+        rational::exact(&rational::collect(&mut reader), &full, name);
+        reader.validate_eof().unwrap();
+        for at in [Duration::ZERO, Duration::from_millis(20), Duration::MAX] {
+            let raw = Arc::new(Mutex::new(rational::RawTrace::default()));
+            let copy = raw.clone();
+            let trace = Arc::new(Mutex::new(transitions::Trace::default()));
+            let mut worker =
+                fvid::audio_thread::AudioPlayback::start(Box::new(open(name)), move || {
+                    Box::new(rational::RawCapture {
+                        inner: transitions::Capture::new(trace),
+                        raw: copy,
+                    })
+                });
+            worker.seek(at);
+            worker.play();
+            transitions::ended(&worker, worker.generation());
+            let wanted = rational::suffix(&full, at, end);
+            let got = raw.lock().unwrap();
+            rational::exact(&got.packets, &wanted, name);
+            assert_eq!(got.anchors, vec![rational::anchor(&wanted, end)]);
+        }
+        let video = fvid_media::decode_video(&root().join(name)).unwrap();
+        assert_eq!(video.decode_errors, 0);
+        assert_eq!(
+            video.video_frames,
+            if name.starts_with("alac-") { 3 } else { 5 }
+        );
+    }
+}

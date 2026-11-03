@@ -1,0 +1,80 @@
+[
+  {
+    "name": "final-integration",
+    "log": "docs/improvements/evidence/mp4-v1-coded-config/final-integration.log",
+    "passed": 45,
+    "ignored": 0
+  },
+  {
+    "name": "final-lib-build",
+    "log": "docs/improvements/evidence/mp4-v1-coded-config/final-lib-build.log",
+    "passed": true,
+    "ignored": 0
+  },
+  {
+    "name": "root-parser",
+    "log": "docs/improvements/evidence/mp4-v1-coded-config/root-parser.log",
+    "passed": 17,
+    "ignored": 0
+  },
+  {
+    "name": "root-audio",
+    "log": "docs/improvements/evidence/mp4-v1-coded-config/root-audio.log",
+    "passed": 15,
+    "ignored": 0
+  },
+  {
+    "name": "root-video",
+    "log": "docs/improvements/evidence/mp4-v1-coded-config/root-video.log",
+    "passed": 7,
+    "ignored": 0
+  },
+  {
+    "name": "worker",
+    "log": "docs/improvements/evidence/mp4-v1-coded-config/worker.log",
+    "passed": 39,
+    "ignored": 0
+  },
+  {
+    "name": "cpal",
+    "log": "docs/improvements/evidence/mp4-v1-coded-config/cpal.log",
+    "passed": 43,
+    "ignored": 2
+  },
+  {
+    "name": "media-audio",
+    "log": "docs/improvements/evidence/mp4-v1-coded-config/media-audio.log",
+    "passed": 13,
+    "ignored": 0
+  },
+  {
+    "name": "final-core-check",
+    "log": "docs/improvements/evidence/mp4-v1-coded-config/final-core-check.log",
+    "passed": true,
+    "ignored": 0
+  },
+  {
+    "name": "final-player-check",
+    "log": "docs/improvements/evidence/mp4-v1-coded-config/final-player-check.log",
+    "passed": true,
+    "ignored": 0
+  },
+  {
+    "name": "no-external-1",
+    "log": "docs/improvements/evidence/mp4-v1-coded-config/no-external-1.log",
+    "passed": 4,
+    "ignored": 0
+  },
+  {
+    "name": "no-external-2",
+    "log": "docs/improvements/evidence/mp4-v1-coded-config/no-external-2.log",
+    "passed": 4,
+    "ignored": 0
+  },
+  {
+    "name": "no-external-3",
+    "log": "docs/improvements/evidence/mp4-v1-coded-config/no-external-3.log",
+    "passed": 4,
+    "ignored": 0
+  }
+]
