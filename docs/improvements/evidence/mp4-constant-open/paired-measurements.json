@@ -1,0 +1,4790 @@
+[
+  {
+    "pair": 1,
+    "file": "catalog1-selected1.mp4",
+    "order": [
+      "baseline",
+      "candidate"
+    ],
+    "baseline": {
+      "fingerprint": {
+        "retained_payload": 2624,
+        "tracks": [
+          {
+            "bits": 0,
+            "channels": 0,
+            "codec": [
+              118,
+              112,
+              48,
+              57
+            ],
+            "cost": 3,
+            "count": 3,
+            "descriptions": 1,
+            "duration": 3,
+            "points": [
+              [
+                1,
+                32,
+                4142,
+                0,
+                0,
+                1,
+                true
+              ],
+              [
+                1,
+                4174,
+                4142,
+                1,
+                1,
+                1,
+                true
+              ],
+              [
+                1,
+                8316,
+                4142,
+                2,
+                2,
+                1,
+                true
+              ]
+            ],
+            "rate": 0,
+            "scale": 50
+          },
+          {
+            "bits": 16,
+            "channels": 1,
+            "codec": [
+              115,
+              111,
+              119,
+              116
+            ],
+            "cost": 1,
+            "count": 16384,
+            "descriptions": 1,
+            "duration": 16384,
+            "points": [
+              [
+                1,
+                12458,
+                2,
+                0,
+                0,
+                1,
+                true
+              ],
+              [
+                1,
+                28842,
+                2,
+                8192,
+                8192,
+                1,
+                true
+              ],
+              [
+                1,
+                45224,
+                2,
+                16383,
+                16383,
+                1,
+                true
+              ]
+            ],
+            "rate": 48000,
+            "scale": 48000
+          }
+        ]
+      },
+      "iterations": 1024,
+      "median_ns": 1540250,
+      "round_ns": [
+        1536791,
+        1535250,
+        1530334,
+        1539917,
+        1545875,
+        1554667,
+        1565041,
+        1550875,
+        1540250
+      ]
+    },
+    "candidate": {
+      "fingerprint": {
+        "retained_payload": 2624,
+        "tracks": [
+          {
+            "bits": 0,
+            "channels": 0,
+            "codec": [
+              118,
+              112,
+              48,
+              57
+            ],
+            "cost": 3,
+            "count": 3,
+            "descriptions": 1,
+            "duration": 3,
+            "points": [
+              [
+                1,
+                32,
+                4142,
+                0,
+                0,
+                1,
+                true
+              ],
+              [
+                1,
+                4174,
+                4142,
+                1,
+                1,
+                1,
+                true
+              ],
+              [
+                1,
+                8316,
+                4142,
+                2,
+                2,
+                1,
+                true
+              ]
+            ],
+            "rate": 0,
+            "scale": 50
+          },
+          {
+            "bits": 16,
+            "channels": 1,
+            "codec": [
+              115,
+              111,
+              119,
+              116
+            ],
+            "cost": 1,
+            "count": 16384,
+            "descriptions": 1,
+            "duration": 16384,
+            "points": [
+              [
+                1,
+                12458,
+                2,
+                0,
+                0,
+                1,
+                true
+              ],
+              [
+                1,
+                28842,
+                2,
+                8192,
+                8192,
+                1,
+                true
+              ],
+              [
+                1,
+                45224,
+                2,
+                16383,
+                16383,
+                1,
+                true
+              ]
+            ],
+            "rate": 48000,
+            "scale": 48000
+          }
+        ]
+      },
+      "iterations": 1024,
+      "median_ns": 1578459,
+      "round_ns": [
+        1616500,
+        1624125,
+        1555875,
+        1596125,
+        1572583,
+        1578459,
+        1569958,
+        1588958,
+        1573417
+      ]
+    }
+  },
+  {
+    "pair": 1,
+    "file": "catalog32-selected1.mp4",
+    "order": [
+      "baseline",
+      "candidate"
+    ],
+    "baseline": {
+      "fingerprint": {
+        "retained_payload": 6656,
+        "tracks": [
+          {
+            "bits": 0,
+            "channels": 0,
+            "codec": [
+              118,
+              112,
+              48,
+              57
+            ],
+            "cost": 3,
+            "count": 3,
+            "descriptions": 1,
+            "duration": 3,
+            "points": [
+              [
+                1,
+                32,
+                4142,
+                0,
+                0,
+                1,
+                true
+              ],
+              [
+                1,
+                4174,
+                4142,
+                1,
+                1,
+                1,
+                true
+              ],
+              [
+                1,
+                8316,
+                4142,
+                2,
+                2,
+                1,
+                true
+              ]
+            ],
+            "rate": 0,
+            "scale": 50
+          },
+          {
+            "bits": 16,
+            "channels": 1,
+            "codec": [
+              115,
+              111,
+              119,
+              116
+            ],
+            "cost": 1,
+            "count": 16384,
+            "descriptions": 32,
+            "duration": 16384,
+            "points": [
+              [
+                1,
+                12458,
+                2,
+                0,
+                0,
+                1,
+                true
+              ],
+              [
+                1,
+                28842,
+                2,
+                8192,
+                8192,
+                1,
+                true
+              ],
+              [
+                1,
+                45224,
+                2,
+                16383,
+                16383,
+                1,
+                true
+              ]
+            ],
+            "rate": 48000,
+            "scale": 48000
+          }
+        ]
+      },
+      "iterations": 1024,
+      "median_ns": 89256167,
+      "round_ns": [
+        89192625,
+        89256167,
+        88713875,
+        89578583,
+        89040667,
+        89461583,
+        89258500,
+        88828000,
+        89482042
+      ]
+    },
+    "candidate": {
+      "fingerprint": {
+        "retained_payload": 6656,
+        "tracks": [
+          {
+            "bits": 0,
+            "channels": 0,
+            "codec": [
+              118,
+              112,
+              48,
+              57
+            ],
+            "cost": 3,
+            "count": 3,
+            "descriptions": 1,
+            "duration": 3,
+            "points": [
+              [
+                1,
+                32,
+                4142,
+                0,
+                0,
+                1,
+                true
+              ],
+              [
+                1,
+                4174,
+                4142,
+                1,
+                1,
+                1,
+                true
+              ],
+              [
+                1,
+                8316,
+                4142,
+                2,
+                2,
+                1,
+                true
+              ]
+            ],
+            "rate": 0,
+            "scale": 50
+          },
+          {
+            "bits": 16,
+            "channels": 1,
+            "codec": [
+              115,
+              111,
+              119,
+              116
+            ],
+            "cost": 1,
+            "count": 16384,
+            "descriptions": 32,
+            "duration": 16384,
+            "points": [
+              [
+                1,
+                12458,
+                2,
+                0,
+                0,
+                1,
+                true
+              ],
+              [
+                1,
+                28842,
+                2,
+                8192,
+                8192,
+                1,
+                true
+              ],
+              [
+                1,
+                45224,
+                2,
+                16383,
+                16383,
+                1,
+                true
+              ]
+            ],
+            "rate": 48000,
+            "scale": 48000
+          }
+        ]
+      },
+      "iterations": 1024,
+      "median_ns": 3501542,
+      "round_ns": [
+        3568083,
+        3560084,
+        3562084,
+        3401750,
+        3399625,
+        3501542,
+        3509083,
+        3478833,
+        3457375
+      ]
+    }
+  },
+  {
+    "pair": 1,
+    "file": "catalog32-selected32.mp4",
+    "order": [
+      "baseline",
+      "candidate"
+    ],
+    "baseline": {
+      "fingerprint": {
+        "retained_payload": 6656,
+        "tracks": [
+          {
+            "bits": 0,
+            "channels": 0,
+            "codec": [
+              118,
+              112,
+              48,
+              57
+            ],
+            "cost": 3,
+            "count": 3,
+            "descriptions": 1,
+            "duration": 3,
+            "points": [
+              [
+                1,
+                32,
+                4142,
+                0,
+                0,
+                1,
+                true
+              ],
+              [
+                1,
+                4174,
+                4142,
+                1,
+                1,
+                1,
+                true
+              ],
+              [
+                1,
+                8316,
+                4142,
+                2,
+                2,
+                1,
+                true
+              ]
+            ],
+            "rate": 0,
+            "scale": 50
+          },
+          {
+            "bits": 16,
+            "channels": 1,
+            "codec": [
+              115,
+              111,
+              119,
+              116
+            ],
+            "cost": 1,
+            "count": 16384,
+            "descriptions": 32,
+            "duration": 16384,
+            "points": [
+              [
+                32,
+                12458,
+                2,
+                0,
+                0,
+                1,
+                true
+              ],
+              [
+                32,
+                28842,
+                2,
+                8192,
+                8192,
+                1,
+                true
+              ],
+              [
+                32,
+                45224,
+                2,
+                16383,
+                16383,
+                1,
+                true
+              ]
+            ],
+            "rate": 48000,
+            "scale": 48000
+          }
+        ]
+      },
+      "iterations": 1024,
+      "median_ns": 89113834,
+      "round_ns": [
+        88728583,
+        89233292,
+        89342292,
+        88323208,
+        89265459,
+        89188750,
+        89113834,
+        88913625,
+        89045500
+      ]
+    },
+    "candidate": {
+      "fingerprint": {
+        "retained_payload": 6656,
+        "tracks": [
+          {
+            "bits": 0,
+            "channels": 0,
+            "codec": [
+              118,
+              112,
+              48,
+              57
+            ],
+            "cost": 3,
+            "count": 3,
+            "descriptions": 1,
+            "duration": 3,
+            "points": [
+              [
+                1,
+                32,
+                4142,
+                0,
+                0,
+                1,
+                true
+              ],
+              [
+                1,
+                4174,
+                4142,
+                1,
+                1,
+                1,
+                true
+              ],
+              [
+                1,
+                8316,
+                4142,
+                2,
+                2,
+                1,
+                true
+              ]
+            ],
+            "rate": 0,
+            "scale": 50
+          },
+          {
+            "bits": 16,
+            "channels": 1,
+            "codec": [
+              115,
+              111,
+              119,
+              116
+            ],
+            "cost": 1,
+            "count": 16384,
+            "descriptions": 32,
+            "duration": 16384,
+            "points": [
+              [
+                32,
+                12458,
+                2,
+                0,
+                0,
+                1,
+                true
+              ],
+              [
+                32,
+                28842,
+                2,
+                8192,
+                8192,
+                1,
+                true
+              ],
+              [
+                32,
+                45224,
+                2,
+                16383,
+                16383,
+                1,
+                true
+              ]
+            ],
+            "rate": 48000,
+            "scale": 48000
+          }
+        ]
+      },
+      "iterations": 1024,
+      "median_ns": 3515375,
+      "round_ns": [
+        3583375,
+        3710417,
+        3647458,
+        3517208,
+        3469291,
+        3476792,
+        3491334,
+        3515375,
+        3510292
+      ]
+    }
+  },
+  {
+    "pair": 2,
+    "file": "catalog32-selected32.mp4",
+    "order": [
+      "candidate",
+      "baseline"
+    ],
+    "candidate": {
+      "fingerprint": {
+        "retained_payload": 6656,
+        "tracks": [
+          {
+            "bits": 0,
+            "channels": 0,
+            "codec": [
+              118,
+              112,
+              48,
+              57
+            ],
+            "cost": 3,
+            "count": 3,
+            "descriptions": 1,
+            "duration": 3,
+            "points": [
+              [
+                1,
+                32,
+                4142,
+                0,
+                0,
+                1,
+                true
+              ],
+              [
+                1,
+                4174,
+                4142,
+                1,
+                1,
+                1,
+                true
+              ],
+              [
+                1,
+                8316,
+                4142,
+                2,
+                2,
+                1,
+                true
+              ]
+            ],
+            "rate": 0,
+            "scale": 50
+          },
+          {
+            "bits": 16,
+            "channels": 1,
+            "codec": [
+              115,
+              111,
+              119,
+              116
+            ],
+            "cost": 1,
+            "count": 16384,
+            "descriptions": 32,
+            "duration": 16384,
+            "points": [
+              [
+                32,
+                12458,
+                2,
+                0,
+                0,
+                1,
+                true
+              ],
+              [
+                32,
+                28842,
+                2,
+                8192,
+                8192,
+                1,
+                true
+              ],
+              [
+                32,
+                45224,
+                2,
+                16383,
+                16383,
+                1,
+                true
+              ]
+            ],
+            "rate": 48000,
+            "scale": 48000
+          }
+        ]
+      },
+      "iterations": 1024,
+      "median_ns": 3515250,
+      "round_ns": [
+        3498625,
+        3499084,
+        3515250,
+        3581750,
+        3513833,
+        3578833,
+        3528375,
+        3588458,
+        3504750
+      ]
+    },
+    "baseline": {
+      "fingerprint": {
+        "retained_payload": 6656,
+        "tracks": [
+          {
+            "bits": 0,
+            "channels": 0,
+            "codec": [
+              118,
+              112,
+              48,
+              57
+            ],
+            "cost": 3,
+            "count": 3,
+            "descriptions": 1,
+            "duration": 3,
+            "points": [
+              [
+                1,
+                32,
+                4142,
+                0,
+                0,
+                1,
+                true
+              ],
+              [
+                1,
+                4174,
+                4142,
+                1,
+                1,
+                1,
+                true
+              ],
+              [
+                1,
+                8316,
+                4142,
+                2,
+                2,
+                1,
+                true
+              ]
+            ],
+            "rate": 0,
+            "scale": 50
+          },
+          {
+            "bits": 16,
+            "channels": 1,
+            "codec": [
+              115,
+              111,
+              119,
+              116
+            ],
+            "cost": 1,
+            "count": 16384,
+            "descriptions": 32,
+            "duration": 16384,
+            "points": [
+              [
+                32,
+                12458,
+                2,
+                0,
+                0,
+                1,
+                true
+              ],
+              [
+                32,
+                28842,
+                2,
+                8192,
+                8192,
+                1,
+                true
+              ],
+              [
+                32,
+                45224,
+                2,
+                16383,
+                16383,
+                1,
+                true
+              ]
+            ],
+            "rate": 48000,
+            "scale": 48000
+          }
+        ]
+      },
+      "iterations": 1024,
+      "median_ns": 89250459,
+      "round_ns": [
+        89419750,
+        89492708,
+        89615041,
+        88950917,
+        88999416,
+        89077000,
+        88871042,
+        89270000,
+        89250459
+      ]
+    }
+  },
+  {
+    "pair": 2,
+    "file": "catalog32-selected1.mp4",
+    "order": [
+      "candidate",
+      "baseline"
+    ],
+    "candidate": {
+      "fingerprint": {
+        "retained_payload": 6656,
+        "tracks": [
+          {
+            "bits": 0,
+            "channels": 0,
+            "codec": [
+              118,
+              112,
+              48,
+              57
+            ],
+            "cost": 3,
+            "count": 3,
+            "descriptions": 1,
+            "duration": 3,
+            "points": [
+              [
+                1,
+                32,
+                4142,
+                0,
+                0,
+                1,
+                true
+              ],
+              [
+                1,
+                4174,
+                4142,
+                1,
+                1,
+                1,
+                true
+              ],
+              [
+                1,
+                8316,
+                4142,
+                2,
+                2,
+                1,
+                true
+              ]
+            ],
+            "rate": 0,
+            "scale": 50
+          },
+          {
+            "bits": 16,
+            "channels": 1,
+            "codec": [
+              115,
+              111,
+              119,
+              116
+            ],
+            "cost": 1,
+            "count": 16384,
+            "descriptions": 32,
+            "duration": 16384,
+            "points": [
+              [
+                1,
+                12458,
+                2,
+                0,
+                0,
+                1,
+                true
+              ],
+              [
+                1,
+                28842,
+                2,
+                8192,
+                8192,
+                1,
+                true
+              ],
+              [
+                1,
+                45224,
+                2,
+                16383,
+                16383,
+                1,
+                true
+              ]
+            ],
+            "rate": 48000,
+            "scale": 48000
+          }
+        ]
+      },
+      "iterations": 1024,
+      "median_ns": 3535250,
+      "round_ns": [
+        3531167,
+        3538125,
+        3475417,
+        3575500,
+        3498250,
+        3535250,
+        3545875,
+        3541125,
+        3528083
+      ]
+    },
+    "baseline": {
+      "fingerprint": {
+        "retained_payload": 6656,
+        "tracks": [
+          {
+            "bits": 0,
+            "channels": 0,
+            "codec": [
+              118,
+              112,
+              48,
+              57
+            ],
+            "cost": 3,
+            "count": 3,
+            "descriptions": 1,
+            "duration": 3,
+            "points": [
+              [
+                1,
+                32,
+                4142,
+                0,
+                0,
+                1,
+                true
+              ],
+              [
+                1,
+                4174,
+                4142,
+                1,
+                1,
+                1,
+                true
+              ],
+              [
+                1,
+                8316,
+                4142,
+                2,
+                2,
+                1,
+                true
+              ]
+            ],
+            "rate": 0,
+            "scale": 50
+          },
+          {
+            "bits": 16,
+            "channels": 1,
+            "codec": [
+              115,
+              111,
+              119,
+              116
+            ],
+            "cost": 1,
+            "count": 16384,
+            "descriptions": 32,
+            "duration": 16384,
+            "points": [
+              [
+                1,
+                12458,
+                2,
+                0,
+                0,
+                1,
+                true
+              ],
+              [
+                1,
+                28842,
+                2,
+                8192,
+                8192,
+                1,
+                true
+              ],
+              [
+                1,
+                45224,
+                2,
+                16383,
+                16383,
+                1,
+                true
+              ]
+            ],
+            "rate": 48000,
+            "scale": 48000
+          }
+        ]
+      },
+      "iterations": 1024,
+      "median_ns": 89243667,
+      "round_ns": [
+        89351583,
+        89518250,
+        89492042,
+        88995000,
+        89175666,
+        89644000,
+        89243667,
+        88932042,
+        88855958
+      ]
+    }
+  },
+  {
+    "pair": 2,
+    "file": "catalog1-selected1.mp4",
+    "order": [
+      "candidate",
+      "baseline"
+    ],
+    "candidate": {
+      "fingerprint": {
+        "retained_payload": 2624,
+        "tracks": [
+          {
+            "bits": 0,
+            "channels": 0,
+            "codec": [
+              118,
+              112,
+              48,
+              57
+            ],
+            "cost": 3,
+            "count": 3,
+            "descriptions": 1,
+            "duration": 3,
+            "points": [
+              [
+                1,
+                32,
+                4142,
+                0,
+                0,
+                1,
+                true
+              ],
+              [
+                1,
+                4174,
+                4142,
+                1,
+                1,
+                1,
+                true
+              ],
+              [
+                1,
+                8316,
+                4142,
+                2,
+                2,
+                1,
+                true
+              ]
+            ],
+            "rate": 0,
+            "scale": 50
+          },
+          {
+            "bits": 16,
+            "channels": 1,
+            "codec": [
+              115,
+              111,
+              119,
+              116
+            ],
+            "cost": 1,
+            "count": 16384,
+            "descriptions": 1,
+            "duration": 16384,
+            "points": [
+              [
+                1,
+                12458,
+                2,
+                0,
+                0,
+                1,
+                true
+              ],
+              [
+                1,
+                28842,
+                2,
+                8192,
+                8192,
+                1,
+                true
+              ],
+              [
+                1,
+                45224,
+                2,
+                16383,
+                16383,
+                1,
+                true
+              ]
+            ],
+            "rate": 48000,
+            "scale": 48000
+          }
+        ]
+      },
+      "iterations": 1024,
+      "median_ns": 1571334,
+      "round_ns": [
+        1571334,
+        1591833,
+        1576084,
+        1595000,
+        1579292,
+        1544208,
+        1551875,
+        1571042,
+        1561291
+      ]
+    },
+    "baseline": {
+      "fingerprint": {
+        "retained_payload": 2624,
+        "tracks": [
+          {
+            "bits": 0,
+            "channels": 0,
+            "codec": [
+              118,
+              112,
+              48,
+              57
+            ],
+            "cost": 3,
+            "count": 3,
+            "descriptions": 1,
+            "duration": 3,
+            "points": [
+              [
+                1,
+                32,
+                4142,
+                0,
+                0,
+                1,
+                true
+              ],
+              [
+                1,
+                4174,
+                4142,
+                1,
+                1,
+                1,
+                true
+              ],
+              [
+                1,
+                8316,
+                4142,
+                2,
+                2,
+                1,
+                true
+              ]
+            ],
+            "rate": 0,
+            "scale": 50
+          },
+          {
+            "bits": 16,
+            "channels": 1,
+            "codec": [
+              115,
+              111,
+              119,
+              116
+            ],
+            "cost": 1,
+            "count": 16384,
+            "descriptions": 1,
+            "duration": 16384,
+            "points": [
+              [
+                1,
+                12458,
+                2,
+                0,
+                0,
+                1,
+                true
+              ],
+              [
+                1,
+                28842,
+                2,
+                8192,
+                8192,
+                1,
+                true
+              ],
+              [
+                1,
+                45224,
+                2,
+                16383,
+                16383,
+                1,
+                true
+              ]
+            ],
+            "rate": 48000,
+            "scale": 48000
+          }
+        ]
+      },
+      "iterations": 1024,
+      "median_ns": 1564917,
+      "round_ns": [
+        1539375,
+        1529750,
+        1577542,
+        1564917,
+        1549459,
+        1581667,
+        1586916,
+        1594500,
+        1552833
+      ]
+    }
+  },
+  {
+    "pair": 3,
+    "file": "catalog1-selected1.mp4",
+    "order": [
+      "baseline",
+      "candidate"
+    ],
+    "baseline": {
+      "fingerprint": {
+        "retained_payload": 2624,
+        "tracks": [
+          {
+            "bits": 0,
+            "channels": 0,
+            "codec": [
+              118,
+              112,
+              48,
+              57
+            ],
+            "cost": 3,
+            "count": 3,
+            "descriptions": 1,
+            "duration": 3,
+            "points": [
+              [
+                1,
+                32,
+                4142,
+                0,
+                0,
+                1,
+                true
+              ],
+              [
+                1,
+                4174,
+                4142,
+                1,
+                1,
+                1,
+                true
+              ],
+              [
+                1,
+                8316,
+                4142,
+                2,
+                2,
+                1,
+                true
+              ]
+            ],
+            "rate": 0,
+            "scale": 50
+          },
+          {
+            "bits": 16,
+            "channels": 1,
+            "codec": [
+              115,
+              111,
+              119,
+              116
+            ],
+            "cost": 1,
+            "count": 16384,
+            "descriptions": 1,
+            "duration": 16384,
+            "points": [
+              [
+                1,
+                12458,
+                2,
+                0,
+                0,
+                1,
+                true
+              ],
+              [
+                1,
+                28842,
+                2,
+                8192,
+                8192,
+                1,
+                true
+              ],
+              [
+                1,
+                45224,
+                2,
+                16383,
+                16383,
+                1,
+                true
+              ]
+            ],
+            "rate": 48000,
+            "scale": 48000
+          }
+        ]
+      },
+      "iterations": 1024,
+      "median_ns": 1560500,
+      "round_ns": [
+        1560500,
+        1561125,
+        1564791,
+        1586250,
+        1645417,
+        1505833,
+        1509584,
+        1505625,
+        1505375
+      ]
+    },
+    "candidate": {
+      "fingerprint": {
+        "retained_payload": 2624,
+        "tracks": [
+          {
+            "bits": 0,
+            "channels": 0,
+            "codec": [
+              118,
+              112,
+              48,
+              57
+            ],
+            "cost": 3,
+            "count": 3,
+            "descriptions": 1,
+            "duration": 3,
+            "points": [
+              [
+                1,
+                32,
+                4142,
+                0,
+                0,
+                1,
+                true
+              ],
+              [
+                1,
+                4174,
+                4142,
+                1,
+                1,
+                1,
+                true
+              ],
+              [
+                1,
+                8316,
+                4142,
+                2,
+                2,
+                1,
+                true
+              ]
+            ],
+            "rate": 0,
+            "scale": 50
+          },
+          {
+            "bits": 16,
+            "channels": 1,
+            "codec": [
+              115,
+              111,
+              119,
+              116
+            ],
+            "cost": 1,
+            "count": 16384,
+            "descriptions": 1,
+            "duration": 16384,
+            "points": [
+              [
+                1,
+                12458,
+                2,
+                0,
+                0,
+                1,
+                true
+              ],
+              [
+                1,
+                28842,
+                2,
+                8192,
+                8192,
+                1,
+                true
+              ],
+              [
+                1,
+                45224,
+                2,
+                16383,
+                16383,
+                1,
+                true
+              ]
+            ],
+            "rate": 48000,
+            "scale": 48000
+          }
+        ]
+      },
+      "iterations": 1024,
+      "median_ns": 1578083,
+      "round_ns": [
+        1579375,
+        1590709,
+        1613833,
+        1575250,
+        1560667,
+        1561875,
+        1553583,
+        1578083,
+        1588708
+      ]
+    }
+  },
+  {
+    "pair": 3,
+    "file": "catalog32-selected1.mp4",
+    "order": [
+      "baseline",
+      "candidate"
+    ],
+    "baseline": {
+      "fingerprint": {
+        "retained_payload": 6656,
+        "tracks": [
+          {
+            "bits": 0,
+            "channels": 0,
+            "codec": [
+              118,
+              112,
+              48,
+              57
+            ],
+            "cost": 3,
+            "count": 3,
+            "descriptions": 1,
+            "duration": 3,
+            "points": [
+              [
+                1,
+                32,
+                4142,
+                0,
+                0,
+                1,
+                true
+              ],
+              [
+                1,
+                4174,
+                4142,
+                1,
+                1,
+                1,
+                true
+              ],
+              [
+                1,
+                8316,
+                4142,
+                2,
+                2,
+                1,
+                true
+              ]
+            ],
+            "rate": 0,
+            "scale": 50
+          },
+          {
+            "bits": 16,
+            "channels": 1,
+            "codec": [
+              115,
+              111,
+              119,
+              116
+            ],
+            "cost": 1,
+            "count": 16384,
+            "descriptions": 32,
+            "duration": 16384,
+            "points": [
+              [
+                1,
+                12458,
+                2,
+                0,
+                0,
+                1,
+                true
+              ],
+              [
+                1,
+                28842,
+                2,
+                8192,
+                8192,
+                1,
+                true
+              ],
+              [
+                1,
+                45224,
+                2,
+                16383,
+                16383,
+                1,
+                true
+              ]
+            ],
+            "rate": 48000,
+            "scale": 48000
+          }
+        ]
+      },
+      "iterations": 1024,
+      "median_ns": 89415375,
+      "round_ns": [
+        89415375,
+        88525291,
+        89016833,
+        89239042,
+        89557625,
+        89710084,
+        88729208,
+        89639625,
+        89790042
+      ]
+    },
+    "candidate": {
+      "fingerprint": {
+        "retained_payload": 6656,
+        "tracks": [
+          {
+            "bits": 0,
+            "channels": 0,
+            "codec": [
+              118,
+              112,
+              48,
+              57
+            ],
+            "cost": 3,
+            "count": 3,
+            "descriptions": 1,
+            "duration": 3,
+            "points": [
+              [
+                1,
+                32,
+                4142,
+                0,
+                0,
+                1,
+                true
+              ],
+              [
+                1,
+                4174,
+                4142,
+                1,
+                1,
+                1,
+                true
+              ],
+              [
+                1,
+                8316,
+                4142,
+                2,
+                2,
+                1,
+                true
+              ]
+            ],
+            "rate": 0,
+            "scale": 50
+          },
+          {
+            "bits": 16,
+            "channels": 1,
+            "codec": [
+              115,
+              111,
+              119,
+              116
+            ],
+            "cost": 1,
+            "count": 16384,
+            "descriptions": 32,
+            "duration": 16384,
+            "points": [
+              [
+                1,
+                12458,
+                2,
+                0,
+                0,
+                1,
+                true
+              ],
+              [
+                1,
+                28842,
+                2,
+                8192,
+                8192,
+                1,
+                true
+              ],
+              [
+                1,
+                45224,
+                2,
+                16383,
+                16383,
+                1,
+                true
+              ]
+            ],
+            "rate": 48000,
+            "scale": 48000
+          }
+        ]
+      },
+      "iterations": 1024,
+      "median_ns": 3538500,
+      "round_ns": [
+        3550208,
+        3572417,
+        3538500,
+        3694625,
+        3486250,
+        3483875,
+        3560458,
+        3470333,
+        3538500
+      ]
+    }
+  },
+  {
+    "pair": 3,
+    "file": "catalog32-selected32.mp4",
+    "order": [
+      "baseline",
+      "candidate"
+    ],
+    "baseline": {
+      "fingerprint": {
+        "retained_payload": 6656,
+        "tracks": [
+          {
+            "bits": 0,
+            "channels": 0,
+            "codec": [
+              118,
+              112,
+              48,
+              57
+            ],
+            "cost": 3,
+            "count": 3,
+            "descriptions": 1,
+            "duration": 3,
+            "points": [
+              [
+                1,
+                32,
+                4142,
+                0,
+                0,
+                1,
+                true
+              ],
+              [
+                1,
+                4174,
+                4142,
+                1,
+                1,
+                1,
+                true
+              ],
+              [
+                1,
+                8316,
+                4142,
+                2,
+                2,
+                1,
+                true
+              ]
+            ],
+            "rate": 0,
+            "scale": 50
+          },
+          {
+            "bits": 16,
+            "channels": 1,
+            "codec": [
+              115,
+              111,
+              119,
+              116
+            ],
+            "cost": 1,
+            "count": 16384,
+            "descriptions": 32,
+            "duration": 16384,
+            "points": [
+              [
+                32,
+                12458,
+                2,
+                0,
+                0,
+                1,
+                true
+              ],
+              [
+                32,
+                28842,
+                2,
+                8192,
+                8192,
+                1,
+                true
+              ],
+              [
+                32,
+                45224,
+                2,
+                16383,
+                16383,
+                1,
+                true
+              ]
+            ],
+            "rate": 48000,
+            "scale": 48000
+          }
+        ]
+      },
+      "iterations": 1024,
+      "median_ns": 89682041,
+      "round_ns": [
+        89605417,
+        90152333,
+        89827750,
+        90038167,
+        89479250,
+        89703167,
+        89291583,
+        89250125,
+        89682041
+      ]
+    },
+    "candidate": {
+      "fingerprint": {
+        "retained_payload": 6656,
+        "tracks": [
+          {
+            "bits": 0,
+            "channels": 0,
+            "codec": [
+              118,
+              112,
+              48,
+              57
+            ],
+            "cost": 3,
+            "count": 3,
+            "descriptions": 1,
+            "duration": 3,
+            "points": [
+              [
+                1,
+                32,
+                4142,
+                0,
+                0,
+                1,
+                true
+              ],
+              [
+                1,
+                4174,
+                4142,
+                1,
+                1,
+                1,
+                true
+              ],
+              [
+                1,
+                8316,
+                4142,
+                2,
+                2,
+                1,
+                true
+              ]
+            ],
+            "rate": 0,
+            "scale": 50
+          },
+          {
+            "bits": 16,
+            "channels": 1,
+            "codec": [
+              115,
+              111,
+              119,
+              116
+            ],
+            "cost": 1,
+            "count": 16384,
+            "descriptions": 32,
+            "duration": 16384,
+            "points": [
+              [
+                32,
+                12458,
+                2,
+                0,
+                0,
+                1,
+                true
+              ],
+              [
+                32,
+                28842,
+                2,
+                8192,
+                8192,
+                1,
+                true
+              ],
+              [
+                32,
+                45224,
+                2,
+                16383,
+                16383,
+                1,
+                true
+              ]
+            ],
+            "rate": 48000,
+            "scale": 48000
+          }
+        ]
+      },
+      "iterations": 1024,
+      "median_ns": 3565917,
+      "round_ns": [
+        3643375,
+        3614041,
+        3590000,
+        3604666,
+        3550292,
+        3540458,
+        3565917,
+        3553916,
+        3565500
+      ]
+    }
+  },
+  {
+    "pair": 4,
+    "file": "catalog32-selected32.mp4",
+    "order": [
+      "candidate",
+      "baseline"
+    ],
+    "candidate": {
+      "fingerprint": {
+        "retained_payload": 6656,
+        "tracks": [
+          {
+            "bits": 0,
+            "channels": 0,
+            "codec": [
+              118,
+              112,
+              48,
+              57
+            ],
+            "cost": 3,
+            "count": 3,
+            "descriptions": 1,
+            "duration": 3,
+            "points": [
+              [
+                1,
+                32,
+                4142,
+                0,
+                0,
+                1,
+                true
+              ],
+              [
+                1,
+                4174,
+                4142,
+                1,
+                1,
+                1,
+                true
+              ],
+              [
+                1,
+                8316,
+                4142,
+                2,
+                2,
+                1,
+                true
+              ]
+            ],
+            "rate": 0,
+            "scale": 50
+          },
+          {
+            "bits": 16,
+            "channels": 1,
+            "codec": [
+              115,
+              111,
+              119,
+              116
+            ],
+            "cost": 1,
+            "count": 16384,
+            "descriptions": 32,
+            "duration": 16384,
+            "points": [
+              [
+                32,
+                12458,
+                2,
+                0,
+                0,
+                1,
+                true
+              ],
+              [
+                32,
+                28842,
+                2,
+                8192,
+                8192,
+                1,
+                true
+              ],
+              [
+                32,
+                45224,
+                2,
+                16383,
+                16383,
+                1,
+                true
+              ]
+            ],
+            "rate": 48000,
+            "scale": 48000
+          }
+        ]
+      },
+      "iterations": 1024,
+      "median_ns": 3557083,
+      "round_ns": [
+        3580542,
+        3574500,
+        3531500,
+        3606167,
+        3557083,
+        3536791,
+        3574167,
+        3460416,
+        3485708
+      ]
+    },
+    "baseline": {
+      "fingerprint": {
+        "retained_payload": 6656,
+        "tracks": [
+          {
+            "bits": 0,
+            "channels": 0,
+            "codec": [
+              118,
+              112,
+              48,
+              57
+            ],
+            "cost": 3,
+            "count": 3,
+            "descriptions": 1,
+            "duration": 3,
+            "points": [
+              [
+                1,
+                32,
+                4142,
+                0,
+                0,
+                1,
+                true
+              ],
+              [
+                1,
+                4174,
+                4142,
+                1,
+                1,
+                1,
+                true
+              ],
+              [
+                1,
+                8316,
+                4142,
+                2,
+                2,
+                1,
+                true
+              ]
+            ],
+            "rate": 0,
+            "scale": 50
+          },
+          {
+            "bits": 16,
+            "channels": 1,
+            "codec": [
+              115,
+              111,
+              119,
+              116
+            ],
+            "cost": 1,
+            "count": 16384,
+            "descriptions": 32,
+            "duration": 16384,
+            "points": [
+              [
+                32,
+                12458,
+                2,
+                0,
+                0,
+                1,
+                true
+              ],
+              [
+                32,
+                28842,
+                2,
+                8192,
+                8192,
+                1,
+                true
+              ],
+              [
+                32,
+                45224,
+                2,
+                16383,
+                16383,
+                1,
+                true
+              ]
+            ],
+            "rate": 48000,
+            "scale": 48000
+          }
+        ]
+      },
+      "iterations": 1024,
+      "median_ns": 89355708,
+      "round_ns": [
+        89674750,
+        89849416,
+        89713041,
+        88894458,
+        89581125,
+        89219583,
+        89340084,
+        88979417,
+        89355708
+      ]
+    }
+  },
+  {
+    "pair": 4,
+    "file": "catalog32-selected1.mp4",
+    "order": [
+      "candidate",
+      "baseline"
+    ],
+    "candidate": {
+      "fingerprint": {
+        "retained_payload": 6656,
+        "tracks": [
+          {
+            "bits": 0,
+            "channels": 0,
+            "codec": [
+              118,
+              112,
+              48,
+              57
+            ],
+            "cost": 3,
+            "count": 3,
+            "descriptions": 1,
+            "duration": 3,
+            "points": [
+              [
+                1,
+                32,
+                4142,
+                0,
+                0,
+                1,
+                true
+              ],
+              [
+                1,
+                4174,
+                4142,
+                1,
+                1,
+                1,
+                true
+              ],
+              [
+                1,
+                8316,
+                4142,
+                2,
+                2,
+                1,
+                true
+              ]
+            ],
+            "rate": 0,
+            "scale": 50
+          },
+          {
+            "bits": 16,
+            "channels": 1,
+            "codec": [
+              115,
+              111,
+              119,
+              116
+            ],
+            "cost": 1,
+            "count": 16384,
+            "descriptions": 32,
+            "duration": 16384,
+            "points": [
+              [
+                1,
+                12458,
+                2,
+                0,
+                0,
+                1,
+                true
+              ],
+              [
+                1,
+                28842,
+                2,
+                8192,
+                8192,
+                1,
+                true
+              ],
+              [
+                1,
+                45224,
+                2,
+                16383,
+                16383,
+                1,
+                true
+              ]
+            ],
+            "rate": 48000,
+            "scale": 48000
+          }
+        ]
+      },
+      "iterations": 1024,
+      "median_ns": 3541458,
+      "round_ns": [
+        3549250,
+        3622042,
+        3602084,
+        3556917,
+        3541458,
+        3492666,
+        3492625,
+        3524792,
+        3519459
+      ]
+    },
+    "baseline": {
+      "fingerprint": {
+        "retained_payload": 6656,
+        "tracks": [
+          {
+            "bits": 0,
+            "channels": 0,
+            "codec": [
+              118,
+              112,
+              48,
+              57
+            ],
+            "cost": 3,
+            "count": 3,
+            "descriptions": 1,
+            "duration": 3,
+            "points": [
+              [
+                1,
+                32,
+                4142,
+                0,
+                0,
+                1,
+                true
+              ],
+              [
+                1,
+                4174,
+                4142,
+                1,
+                1,
+                1,
+                true
+              ],
+              [
+                1,
+                8316,
+                4142,
+                2,
+                2,
+                1,
+                true
+              ]
+            ],
+            "rate": 0,
+            "scale": 50
+          },
+          {
+            "bits": 16,
+            "channels": 1,
+            "codec": [
+              115,
+              111,
+              119,
+              116
+            ],
+            "cost": 1,
+            "count": 16384,
+            "descriptions": 32,
+            "duration": 16384,
+            "points": [
+              [
+                1,
+                12458,
+                2,
+                0,
+                0,
+                1,
+                true
+              ],
+              [
+                1,
+                28842,
+                2,
+                8192,
+                8192,
+                1,
+                true
+              ],
+              [
+                1,
+                45224,
+                2,
+                16383,
+                16383,
+                1,
+                true
+              ]
+            ],
+            "rate": 48000,
+            "scale": 48000
+          }
+        ]
+      },
+      "iterations": 1024,
+      "median_ns": 89559708,
+      "round_ns": [
+        89570583,
+        89519417,
+        89423375,
+        89717417,
+        89355083,
+        89251292,
+        89559708,
+        89999125,
+        94653000
+      ]
+    }
+  },
+  {
+    "pair": 4,
+    "file": "catalog1-selected1.mp4",
+    "order": [
+      "candidate",
+      "baseline"
+    ],
+    "candidate": {
+      "fingerprint": {
+        "retained_payload": 2624,
+        "tracks": [
+          {
+            "bits": 0,
+            "channels": 0,
+            "codec": [
+              118,
+              112,
+              48,
+              57
+            ],
+            "cost": 3,
+            "count": 3,
+            "descriptions": 1,
+            "duration": 3,
+            "points": [
+              [
+                1,
+                32,
+                4142,
+                0,
+                0,
+                1,
+                true
+              ],
+              [
+                1,
+                4174,
+                4142,
+                1,
+                1,
+                1,
+                true
+              ],
+              [
+                1,
+                8316,
+                4142,
+                2,
+                2,
+                1,
+                true
+              ]
+            ],
+            "rate": 0,
+            "scale": 50
+          },
+          {
+            "bits": 16,
+            "channels": 1,
+            "codec": [
+              115,
+              111,
+              119,
+              116
+            ],
+            "cost": 1,
+            "count": 16384,
+            "descriptions": 1,
+            "duration": 16384,
+            "points": [
+              [
+                1,
+                12458,
+                2,
+                0,
+                0,
+                1,
+                true
+              ],
+              [
+                1,
+                28842,
+                2,
+                8192,
+                8192,
+                1,
+                true
+              ],
+              [
+                1,
+                45224,
+                2,
+                16383,
+                16383,
+                1,
+                true
+              ]
+            ],
+            "rate": 48000,
+            "scale": 48000
+          }
+        ]
+      },
+      "iterations": 1024,
+      "median_ns": 1548458,
+      "round_ns": [
+        1560292,
+        1579625,
+        1540292,
+        1549875,
+        1548458,
+        1540542,
+        1532417,
+        1552042,
+        1528958
+      ]
+    },
+    "baseline": {
+      "fingerprint": {
+        "retained_payload": 2624,
+        "tracks": [
+          {
+            "bits": 0,
+            "channels": 0,
+            "codec": [
+              118,
+              112,
+              48,
+              57
+            ],
+            "cost": 3,
+            "count": 3,
+            "descriptions": 1,
+            "duration": 3,
+            "points": [
+              [
+                1,
+                32,
+                4142,
+                0,
+                0,
+                1,
+                true
+              ],
+              [
+                1,
+                4174,
+                4142,
+                1,
+                1,
+                1,
+                true
+              ],
+              [
+                1,
+                8316,
+                4142,
+                2,
+                2,
+                1,
+                true
+              ]
+            ],
+            "rate": 0,
+            "scale": 50
+          },
+          {
+            "bits": 16,
+            "channels": 1,
+            "codec": [
+              115,
+              111,
+              119,
+              116
+            ],
+            "cost": 1,
+            "count": 16384,
+            "descriptions": 1,
+            "duration": 16384,
+            "points": [
+              [
+                1,
+                12458,
+                2,
+                0,
+                0,
+                1,
+                true
+              ],
+              [
+                1,
+                28842,
+                2,
+                8192,
+                8192,
+                1,
+                true
+              ],
+              [
+                1,
+                45224,
+                2,
+                16383,
+                16383,
+                1,
+                true
+              ]
+            ],
+            "rate": 48000,
+            "scale": 48000
+          }
+        ]
+      },
+      "iterations": 1024,
+      "median_ns": 1553458,
+      "round_ns": [
+        1558750,
+        1556709,
+        1584375,
+        1545667,
+        1553458,
+        1544458,
+        1552334,
+        1577625,
+        1538166
+      ]
+    }
+  },
+  {
+    "pair": 5,
+    "file": "catalog1-selected1.mp4",
+    "order": [
+      "baseline",
+      "candidate"
+    ],
+    "baseline": {
+      "fingerprint": {
+        "retained_payload": 2624,
+        "tracks": [
+          {
+            "bits": 0,
+            "channels": 0,
+            "codec": [
+              118,
+              112,
+              48,
+              57
+            ],
+            "cost": 3,
+            "count": 3,
+            "descriptions": 1,
+            "duration": 3,
+            "points": [
+              [
+                1,
+                32,
+                4142,
+                0,
+                0,
+                1,
+                true
+              ],
+              [
+                1,
+                4174,
+                4142,
+                1,
+                1,
+                1,
+                true
+              ],
+              [
+                1,
+                8316,
+                4142,
+                2,
+                2,
+                1,
+                true
+              ]
+            ],
+            "rate": 0,
+            "scale": 50
+          },
+          {
+            "bits": 16,
+            "channels": 1,
+            "codec": [
+              115,
+              111,
+              119,
+              116
+            ],
+            "cost": 1,
+            "count": 16384,
+            "descriptions": 1,
+            "duration": 16384,
+            "points": [
+              [
+                1,
+                12458,
+                2,
+                0,
+                0,
+                1,
+                true
+              ],
+              [
+                1,
+                28842,
+                2,
+                8192,
+                8192,
+                1,
+                true
+              ],
+              [
+                1,
+                45224,
+                2,
+                16383,
+                16383,
+                1,
+                true
+              ]
+            ],
+            "rate": 48000,
+            "scale": 48000
+          }
+        ]
+      },
+      "iterations": 1024,
+      "median_ns": 1515167,
+      "round_ns": [
+        1539167,
+        1502958,
+        1493292,
+        1507416,
+        1532250,
+        1546583,
+        1515167,
+        1509917,
+        1516250
+      ]
+    },
+    "candidate": {
+      "fingerprint": {
+        "retained_payload": 2624,
+        "tracks": [
+          {
+            "bits": 0,
+            "channels": 0,
+            "codec": [
+              118,
+              112,
+              48,
+              57
+            ],
+            "cost": 3,
+            "count": 3,
+            "descriptions": 1,
+            "duration": 3,
+            "points": [
+              [
+                1,
+                32,
+                4142,
+                0,
+                0,
+                1,
+                true
+              ],
+              [
+                1,
+                4174,
+                4142,
+                1,
+                1,
+                1,
+                true
+              ],
+              [
+                1,
+                8316,
+                4142,
+                2,
+                2,
+                1,
+                true
+              ]
+            ],
+            "rate": 0,
+            "scale": 50
+          },
+          {
+            "bits": 16,
+            "channels": 1,
+            "codec": [
+              115,
+              111,
+              119,
+              116
+            ],
+            "cost": 1,
+            "count": 16384,
+            "descriptions": 1,
+            "duration": 16384,
+            "points": [
+              [
+                1,
+                12458,
+                2,
+                0,
+                0,
+                1,
+                true
+              ],
+              [
+                1,
+                28842,
+                2,
+                8192,
+                8192,
+                1,
+                true
+              ],
+              [
+                1,
+                45224,
+                2,
+                16383,
+                16383,
+                1,
+                true
+              ]
+            ],
+            "rate": 48000,
+            "scale": 48000
+          }
+        ]
+      },
+      "iterations": 1024,
+      "median_ns": 1572833,
+      "round_ns": [
+        1572833,
+        1570166,
+        1554125,
+        1614667,
+        1579584,
+        1572042,
+        1604166,
+        1625333,
+        1560708
+      ]
+    }
+  },
+  {
+    "pair": 5,
+    "file": "catalog32-selected1.mp4",
+    "order": [
+      "baseline",
+      "candidate"
+    ],
+    "baseline": {
+      "fingerprint": {
+        "retained_payload": 6656,
+        "tracks": [
+          {
+            "bits": 0,
+            "channels": 0,
+            "codec": [
+              118,
+              112,
+              48,
+              57
+            ],
+            "cost": 3,
+            "count": 3,
+            "descriptions": 1,
+            "duration": 3,
+            "points": [
+              [
+                1,
+                32,
+                4142,
+                0,
+                0,
+                1,
+                true
+              ],
+              [
+                1,
+                4174,
+                4142,
+                1,
+                1,
+                1,
+                true
+              ],
+              [
+                1,
+                8316,
+                4142,
+                2,
+                2,
+                1,
+                true
+              ]
+            ],
+            "rate": 0,
+            "scale": 50
+          },
+          {
+            "bits": 16,
+            "channels": 1,
+            "codec": [
+              115,
+              111,
+              119,
+              116
+            ],
+            "cost": 1,
+            "count": 16384,
+            "descriptions": 32,
+            "duration": 16384,
+            "points": [
+              [
+                1,
+                12458,
+                2,
+                0,
+                0,
+                1,
+                true
+              ],
+              [
+                1,
+                28842,
+                2,
+                8192,
+                8192,
+                1,
+                true
+              ],
+              [
+                1,
+                45224,
+                2,
+                16383,
+                16383,
+                1,
+                true
+              ]
+            ],
+            "rate": 48000,
+            "scale": 48000
+          }
+        ]
+      },
+      "iterations": 1024,
+      "median_ns": 89392250,
+      "round_ns": [
+        89902000,
+        89139375,
+        89335875,
+        89425708,
+        89392250,
+        89494209,
+        89292750,
+        89150875,
+        89567459
+      ]
+    },
+    "candidate": {
+      "fingerprint": {
+        "retained_payload": 6656,
+        "tracks": [
+          {
+            "bits": 0,
+            "channels": 0,
+            "codec": [
+              118,
+              112,
+              48,
+              57
+            ],
+            "cost": 3,
+            "count": 3,
+            "descriptions": 1,
+            "duration": 3,
+            "points": [
+              [
+                1,
+                32,
+                4142,
+                0,
+                0,
+                1,
+                true
+              ],
+              [
+                1,
+                4174,
+                4142,
+                1,
+                1,
+                1,
+                true
+              ],
+              [
+                1,
+                8316,
+                4142,
+                2,
+                2,
+                1,
+                true
+              ]
+            ],
+            "rate": 0,
+            "scale": 50
+          },
+          {
+            "bits": 16,
+            "channels": 1,
+            "codec": [
+              115,
+              111,
+              119,
+              116
+            ],
+            "cost": 1,
+            "count": 16384,
+            "descriptions": 32,
+            "duration": 16384,
+            "points": [
+              [
+                1,
+                12458,
+                2,
+                0,
+                0,
+                1,
+                true
+              ],
+              [
+                1,
+                28842,
+                2,
+                8192,
+                8192,
+                1,
+                true
+              ],
+              [
+                1,
+                45224,
+                2,
+                16383,
+                16383,
+                1,
+                true
+              ]
+            ],
+            "rate": 48000,
+            "scale": 48000
+          }
+        ]
+      },
+      "iterations": 1024,
+      "median_ns": 3539292,
+      "round_ns": [
+        3526583,
+        3530792,
+        3627167,
+        3584500,
+        3583334,
+        3544167,
+        3539292,
+        3483041,
+        3508458
+      ]
+    }
+  },
+  {
+    "pair": 5,
+    "file": "catalog32-selected32.mp4",
+    "order": [
+      "baseline",
+      "candidate"
+    ],
+    "baseline": {
+      "fingerprint": {
+        "retained_payload": 6656,
+        "tracks": [
+          {
+            "bits": 0,
+            "channels": 0,
+            "codec": [
+              118,
+              112,
+              48,
+              57
+            ],
+            "cost": 3,
+            "count": 3,
+            "descriptions": 1,
+            "duration": 3,
+            "points": [
+              [
+                1,
+                32,
+                4142,
+                0,
+                0,
+                1,
+                true
+              ],
+              [
+                1,
+                4174,
+                4142,
+                1,
+                1,
+                1,
+                true
+              ],
+              [
+                1,
+                8316,
+                4142,
+                2,
+                2,
+                1,
+                true
+              ]
+            ],
+            "rate": 0,
+            "scale": 50
+          },
+          {
+            "bits": 16,
+            "channels": 1,
+            "codec": [
+              115,
+              111,
+              119,
+              116
+            ],
+            "cost": 1,
+            "count": 16384,
+            "descriptions": 32,
+            "duration": 16384,
+            "points": [
+              [
+                32,
+                12458,
+                2,
+                0,
+                0,
+                1,
+                true
+              ],
+              [
+                32,
+                28842,
+                2,
+                8192,
+                8192,
+                1,
+                true
+              ],
+              [
+                32,
+                45224,
+                2,
+                16383,
+                16383,
+                1,
+                true
+              ]
+            ],
+            "rate": 48000,
+            "scale": 48000
+          }
+        ]
+      },
+      "iterations": 1024,
+      "median_ns": 89130416,
+      "round_ns": [
+        89011792,
+        89804417,
+        89040750,
+        89130416,
+        88537292,
+        89476459,
+        89368458,
+        89153708,
+        89039667
+      ]
+    },
+    "candidate": {
+      "fingerprint": {
+        "retained_payload": 6656,
+        "tracks": [
+          {
+            "bits": 0,
+            "channels": 0,
+            "codec": [
+              118,
+              112,
+              48,
+              57
+            ],
+            "cost": 3,
+            "count": 3,
+            "descriptions": 1,
+            "duration": 3,
+            "points": [
+              [
+                1,
+                32,
+                4142,
+                0,
+                0,
+                1,
+                true
+              ],
+              [
+                1,
+                4174,
+                4142,
+                1,
+                1,
+                1,
+                true
+              ],
+              [
+                1,
+                8316,
+                4142,
+                2,
+                2,
+                1,
+                true
+              ]
+            ],
+            "rate": 0,
+            "scale": 50
+          },
+          {
+            "bits": 16,
+            "channels": 1,
+            "codec": [
+              115,
+              111,
+              119,
+              116
+            ],
+            "cost": 1,
+            "count": 16384,
+            "descriptions": 32,
+            "duration": 16384,
+            "points": [
+              [
+                32,
+                12458,
+                2,
+                0,
+                0,
+                1,
+                true
+              ],
+              [
+                32,
+                28842,
+                2,
+                8192,
+                8192,
+                1,
+                true
+              ],
+              [
+                32,
+                45224,
+                2,
+                16383,
+                16383,
+                1,
+                true
+              ]
+            ],
+            "rate": 48000,
+            "scale": 48000
+          }
+        ]
+      },
+      "iterations": 1024,
+      "median_ns": 3522417,
+      "round_ns": [
+        3516000,
+        3516916,
+        3532917,
+        3532125,
+        3522417,
+        3534500,
+        3546791,
+        3436708,
+        3407500
+      ]
+    }
+  },
+  {
+    "pair": 6,
+    "file": "catalog32-selected32.mp4",
+    "order": [
+      "candidate",
+      "baseline"
+    ],
+    "candidate": {
+      "fingerprint": {
+        "retained_payload": 6656,
+        "tracks": [
+          {
+            "bits": 0,
+            "channels": 0,
+            "codec": [
+              118,
+              112,
+              48,
+              57
+            ],
+            "cost": 3,
+            "count": 3,
+            "descriptions": 1,
+            "duration": 3,
+            "points": [
+              [
+                1,
+                32,
+                4142,
+                0,
+                0,
+                1,
+                true
+              ],
+              [
+                1,
+                4174,
+                4142,
+                1,
+                1,
+                1,
+                true
+              ],
+              [
+                1,
+                8316,
+                4142,
+                2,
+                2,
+                1,
+                true
+              ]
+            ],
+            "rate": 0,
+            "scale": 50
+          },
+          {
+            "bits": 16,
+            "channels": 1,
+            "codec": [
+              115,
+              111,
+              119,
+              116
+            ],
+            "cost": 1,
+            "count": 16384,
+            "descriptions": 32,
+            "duration": 16384,
+            "points": [
+              [
+                32,
+                12458,
+                2,
+                0,
+                0,
+                1,
+                true
+              ],
+              [
+                32,
+                28842,
+                2,
+                8192,
+                8192,
+                1,
+                true
+              ],
+              [
+                32,
+                45224,
+                2,
+                16383,
+                16383,
+                1,
+                true
+              ]
+            ],
+            "rate": 48000,
+            "scale": 48000
+          }
+        ]
+      },
+      "iterations": 1024,
+      "median_ns": 3519208,
+      "round_ns": [
+        3558166,
+        3558708,
+        3469333,
+        3519208,
+        3506500,
+        3527959,
+        3553458,
+        3419791,
+        3403041
+      ]
+    },
+    "baseline": {
+      "fingerprint": {
+        "retained_payload": 6656,
+        "tracks": [
+          {
+            "bits": 0,
+            "channels": 0,
+            "codec": [
+              118,
+              112,
+              48,
+              57
+            ],
+            "cost": 3,
+            "count": 3,
+            "descriptions": 1,
+            "duration": 3,
+            "points": [
+              [
+                1,
+                32,
+                4142,
+                0,
+                0,
+                1,
+                true
+              ],
+              [
+                1,
+                4174,
+                4142,
+                1,
+                1,
+                1,
+                true
+              ],
+              [
+                1,
+                8316,
+                4142,
+                2,
+                2,
+                1,
+                true
+              ]
+            ],
+            "rate": 0,
+            "scale": 50
+          },
+          {
+            "bits": 16,
+            "channels": 1,
+            "codec": [
+              115,
+              111,
+              119,
+              116
+            ],
+            "cost": 1,
+            "count": 16384,
+            "descriptions": 32,
+            "duration": 16384,
+            "points": [
+              [
+                32,
+                12458,
+                2,
+                0,
+                0,
+                1,
+                true
+              ],
+              [
+                32,
+                28842,
+                2,
+                8192,
+                8192,
+                1,
+                true
+              ],
+              [
+                32,
+                45224,
+                2,
+                16383,
+                16383,
+                1,
+                true
+              ]
+            ],
+            "rate": 48000,
+            "scale": 48000
+          }
+        ]
+      },
+      "iterations": 1024,
+      "median_ns": 89283958,
+      "round_ns": [
+        89283958,
+        89092458,
+        89420416,
+        88823959,
+        89292667,
+        89355250,
+        89570333,
+        89113417,
+        89083125
+      ]
+    }
+  },
+  {
+    "pair": 6,
+    "file": "catalog32-selected1.mp4",
+    "order": [
+      "candidate",
+      "baseline"
+    ],
+    "candidate": {
+      "fingerprint": {
+        "retained_payload": 6656,
+        "tracks": [
+          {
+            "bits": 0,
+            "channels": 0,
+            "codec": [
+              118,
+              112,
+              48,
+              57
+            ],
+            "cost": 3,
+            "count": 3,
+            "descriptions": 1,
+            "duration": 3,
+            "points": [
+              [
+                1,
+                32,
+                4142,
+                0,
+                0,
+                1,
+                true
+              ],
+              [
+                1,
+                4174,
+                4142,
+                1,
+                1,
+                1,
+                true
+              ],
+              [
+                1,
+                8316,
+                4142,
+                2,
+                2,
+                1,
+                true
+              ]
+            ],
+            "rate": 0,
+            "scale": 50
+          },
+          {
+            "bits": 16,
+            "channels": 1,
+            "codec": [
+              115,
+              111,
+              119,
+              116
+            ],
+            "cost": 1,
+            "count": 16384,
+            "descriptions": 32,
+            "duration": 16384,
+            "points": [
+              [
+                1,
+                12458,
+                2,
+                0,
+                0,
+                1,
+                true
+              ],
+              [
+                1,
+                28842,
+                2,
+                8192,
+                8192,
+                1,
+                true
+              ],
+              [
+                1,
+                45224,
+                2,
+                16383,
+                16383,
+                1,
+                true
+              ]
+            ],
+            "rate": 48000,
+            "scale": 48000
+          }
+        ]
+      },
+      "iterations": 1024,
+      "median_ns": 3535125,
+      "round_ns": [
+        3624083,
+        3598583,
+        3471292,
+        3437416,
+        3545083,
+        3521917,
+        3507792,
+        3535125,
+        3541792
+      ]
+    },
+    "baseline": {
+      "fingerprint": {
+        "retained_payload": 6656,
+        "tracks": [
+          {
+            "bits": 0,
+            "channels": 0,
+            "codec": [
+              118,
+              112,
+              48,
+              57
+            ],
+            "cost": 3,
+            "count": 3,
+            "descriptions": 1,
+            "duration": 3,
+            "points": [
+              [
+                1,
+                32,
+                4142,
+                0,
+                0,
+                1,
+                true
+              ],
+              [
+                1,
+                4174,
+                4142,
+                1,
+                1,
+                1,
+                true
+              ],
+              [
+                1,
+                8316,
+                4142,
+                2,
+                2,
+                1,
+                true
+              ]
+            ],
+            "rate": 0,
+            "scale": 50
+          },
+          {
+            "bits": 16,
+            "channels": 1,
+            "codec": [
+              115,
+              111,
+              119,
+              116
+            ],
+            "cost": 1,
+            "count": 16384,
+            "descriptions": 32,
+            "duration": 16384,
+            "points": [
+              [
+                1,
+                12458,
+                2,
+                0,
+                0,
+                1,
+                true
+              ],
+              [
+                1,
+                28842,
+                2,
+                8192,
+                8192,
+                1,
+                true
+              ],
+              [
+                1,
+                45224,
+                2,
+                16383,
+                16383,
+                1,
+                true
+              ]
+            ],
+            "rate": 48000,
+            "scale": 48000
+          }
+        ]
+      },
+      "iterations": 1024,
+      "median_ns": 89183500,
+      "round_ns": [
+        89009625,
+        89373500,
+        89471667,
+        88687375,
+        88816292,
+        89183500,
+        88310917,
+        89503333,
+        89271292
+      ]
+    }
+  },
+  {
+    "pair": 6,
+    "file": "catalog1-selected1.mp4",
+    "order": [
+      "candidate",
+      "baseline"
+    ],
+    "candidate": {
+      "fingerprint": {
+        "retained_payload": 2624,
+        "tracks": [
+          {
+            "bits": 0,
+            "channels": 0,
+            "codec": [
+              118,
+              112,
+              48,
+              57
+            ],
+            "cost": 3,
+            "count": 3,
+            "descriptions": 1,
+            "duration": 3,
+            "points": [
+              [
+                1,
+                32,
+                4142,
+                0,
+                0,
+                1,
+                true
+              ],
+              [
+                1,
+                4174,
+                4142,
+                1,
+                1,
+                1,
+                true
+              ],
+              [
+                1,
+                8316,
+                4142,
+                2,
+                2,
+                1,
+                true
+              ]
+            ],
+            "rate": 0,
+            "scale": 50
+          },
+          {
+            "bits": 16,
+            "channels": 1,
+            "codec": [
+              115,
+              111,
+              119,
+              116
+            ],
+            "cost": 1,
+            "count": 16384,
+            "descriptions": 1,
+            "duration": 16384,
+            "points": [
+              [
+                1,
+                12458,
+                2,
+                0,
+                0,
+                1,
+                true
+              ],
+              [
+                1,
+                28842,
+                2,
+                8192,
+                8192,
+                1,
+                true
+              ],
+              [
+                1,
+                45224,
+                2,
+                16383,
+                16383,
+                1,
+                true
+              ]
+            ],
+            "rate": 48000,
+            "scale": 48000
+          }
+        ]
+      },
+      "iterations": 1024,
+      "median_ns": 1586208,
+      "round_ns": [
+        1589375,
+        1581625,
+        1567709,
+        1560917,
+        1563459,
+        1615334,
+        1589541,
+        1599458,
+        1586208
+      ]
+    },
+    "baseline": {
+      "fingerprint": {
+        "retained_payload": 2624,
+        "tracks": [
+          {
+            "bits": 0,
+            "channels": 0,
+            "codec": [
+              118,
+              112,
+              48,
+              57
+            ],
+            "cost": 3,
+            "count": 3,
+            "descriptions": 1,
+            "duration": 3,
+            "points": [
+              [
+                1,
+                32,
+                4142,
+                0,
+                0,
+                1,
+                true
+              ],
+              [
+                1,
+                4174,
+                4142,
+                1,
+                1,
+                1,
+                true
+              ],
+              [
+                1,
+                8316,
+                4142,
+                2,
+                2,
+                1,
+                true
+              ]
+            ],
+            "rate": 0,
+            "scale": 50
+          },
+          {
+            "bits": 16,
+            "channels": 1,
+            "codec": [
+              115,
+              111,
+              119,
+              116
+            ],
+            "cost": 1,
+            "count": 16384,
+            "descriptions": 1,
+            "duration": 16384,
+            "points": [
+              [
+                1,
+                12458,
+                2,
+                0,
+                0,
+                1,
+                true
+              ],
+              [
+                1,
+                28842,
+                2,
+                8192,
+                8192,
+                1,
+                true
+              ],
+              [
+                1,
+                45224,
+                2,
+                16383,
+                16383,
+                1,
+                true
+              ]
+            ],
+            "rate": 48000,
+            "scale": 48000
+          }
+        ]
+      },
+      "iterations": 1024,
+      "median_ns": 1556583,
+      "round_ns": [
+        1548083,
+        1543125,
+        1551375,
+        1592958,
+        1544750,
+        1630291,
+        1556583,
+        1558417,
+        1568917
+      ]
+    }
+  },
+  {
+    "pair": 7,
+    "file": "catalog1-selected1.mp4",
+    "order": [
+      "baseline",
+      "candidate"
+    ],
+    "baseline": {
+      "fingerprint": {
+        "retained_payload": 2624,
+        "tracks": [
+          {
+            "bits": 0,
+            "channels": 0,
+            "codec": [
+              118,
+              112,
+              48,
+              57
+            ],
+            "cost": 3,
+            "count": 3,
+            "descriptions": 1,
+            "duration": 3,
+            "points": [
+              [
+                1,
+                32,
+                4142,
+                0,
+                0,
+                1,
+                true
+              ],
+              [
+                1,
+                4174,
+                4142,
+                1,
+                1,
+                1,
+                true
+              ],
+              [
+                1,
+                8316,
+                4142,
+                2,
+                2,
+                1,
+                true
+              ]
+            ],
+            "rate": 0,
+            "scale": 50
+          },
+          {
+            "bits": 16,
+            "channels": 1,
+            "codec": [
+              115,
+              111,
+              119,
+              116
+            ],
+            "cost": 1,
+            "count": 16384,
+            "descriptions": 1,
+            "duration": 16384,
+            "points": [
+              [
+                1,
+                12458,
+                2,
+                0,
+                0,
+                1,
+                true
+              ],
+              [
+                1,
+                28842,
+                2,
+                8192,
+                8192,
+                1,
+                true
+              ],
+              [
+                1,
+                45224,
+                2,
+                16383,
+                16383,
+                1,
+                true
+              ]
+            ],
+            "rate": 48000,
+            "scale": 48000
+          }
+        ]
+      },
+      "iterations": 1024,
+      "median_ns": 1534750,
+      "round_ns": [
+        1567834,
+        1522125,
+        1518375,
+        1564292,
+        1579125,
+        1524209,
+        1532458,
+        1534750,
+        1540875
+      ]
+    },
+    "candidate": {
+      "fingerprint": {
+        "retained_payload": 2624,
+        "tracks": [
+          {
+            "bits": 0,
+            "channels": 0,
+            "codec": [
+              118,
+              112,
+              48,
+              57
+            ],
+            "cost": 3,
+            "count": 3,
+            "descriptions": 1,
+            "duration": 3,
+            "points": [
+              [
+                1,
+                32,
+                4142,
+                0,
+                0,
+                1,
+                true
+              ],
+              [
+                1,
+                4174,
+                4142,
+                1,
+                1,
+                1,
+                true
+              ],
+              [
+                1,
+                8316,
+                4142,
+                2,
+                2,
+                1,
+                true
+              ]
+            ],
+            "rate": 0,
+            "scale": 50
+          },
+          {
+            "bits": 16,
+            "channels": 1,
+            "codec": [
+              115,
+              111,
+              119,
+              116
+            ],
+            "cost": 1,
+            "count": 16384,
+            "descriptions": 1,
+            "duration": 16384,
+            "points": [
+              [
+                1,
+                12458,
+                2,
+                0,
+                0,
+                1,
+                true
+              ],
+              [
+                1,
+                28842,
+                2,
+                8192,
+                8192,
+                1,
+                true
+              ],
+              [
+                1,
+                45224,
+                2,
+                16383,
+                16383,
+                1,
+                true
+              ]
+            ],
+            "rate": 48000,
+            "scale": 48000
+          }
+        ]
+      },
+      "iterations": 1024,
+      "median_ns": 1538208,
+      "round_ns": [
+        1537750,
+        1542917,
+        1532875,
+        1562542,
+        1585541,
+        1569125,
+        1526584,
+        1538208,
+        1524334
+      ]
+    }
+  },
+  {
+    "pair": 7,
+    "file": "catalog32-selected1.mp4",
+    "order": [
+      "baseline",
+      "candidate"
+    ],
+    "baseline": {
+      "fingerprint": {
+        "retained_payload": 6656,
+        "tracks": [
+          {
+            "bits": 0,
+            "channels": 0,
+            "codec": [
+              118,
+              112,
+              48,
+              57
+            ],
+            "cost": 3,
+            "count": 3,
+            "descriptions": 1,
+            "duration": 3,
+            "points": [
+              [
+                1,
+                32,
+                4142,
+                0,
+                0,
+                1,
+                true
+              ],
+              [
+                1,
+                4174,
+                4142,
+                1,
+                1,
+                1,
+                true
+              ],
+              [
+                1,
+                8316,
+                4142,
+                2,
+                2,
+                1,
+                true
+              ]
+            ],
+            "rate": 0,
+            "scale": 50
+          },
+          {
+            "bits": 16,
+            "channels": 1,
+            "codec": [
+              115,
+              111,
+              119,
+              116
+            ],
+            "cost": 1,
+            "count": 16384,
+            "descriptions": 32,
+            "duration": 16384,
+            "points": [
+              [
+                1,
+                12458,
+                2,
+                0,
+                0,
+                1,
+                true
+              ],
+              [
+                1,
+                28842,
+                2,
+                8192,
+                8192,
+                1,
+                true
+              ],
+              [
+                1,
+                45224,
+                2,
+                16383,
+                16383,
+                1,
+                true
+              ]
+            ],
+            "rate": 48000,
+            "scale": 48000
+          }
+        ]
+      },
+      "iterations": 1024,
+      "median_ns": 89384958,
+      "round_ns": [
+        89106833,
+        89438917,
+        88510167,
+        89247791,
+        89384958,
+        89605708,
+        89732000,
+        89942625,
+        89371709
+      ]
+    },
+    "candidate": {
+      "fingerprint": {
+        "retained_payload": 6656,
+        "tracks": [
+          {
+            "bits": 0,
+            "channels": 0,
+            "codec": [
+              118,
+              112,
+              48,
+              57
+            ],
+            "cost": 3,
+            "count": 3,
+            "descriptions": 1,
+            "duration": 3,
+            "points": [
+              [
+                1,
+                32,
+                4142,
+                0,
+                0,
+                1,
+                true
+              ],
+              [
+                1,
+                4174,
+                4142,
+                1,
+                1,
+                1,
+                true
+              ],
+              [
+                1,
+                8316,
+                4142,
+                2,
+                2,
+                1,
+                true
+              ]
+            ],
+            "rate": 0,
+            "scale": 50
+          },
+          {
+            "bits": 16,
+            "channels": 1,
+            "codec": [
+              115,
+              111,
+              119,
+              116
+            ],
+            "cost": 1,
+            "count": 16384,
+            "descriptions": 32,
+            "duration": 16384,
+            "points": [
+              [
+                1,
+                12458,
+                2,
+                0,
+                0,
+                1,
+                true
+              ],
+              [
+                1,
+                28842,
+                2,
+                8192,
+                8192,
+                1,
+                true
+              ],
+              [
+                1,
+                45224,
+                2,
+                16383,
+                16383,
+                1,
+                true
+              ]
+            ],
+            "rate": 48000,
+            "scale": 48000
+          }
+        ]
+      },
+      "iterations": 1024,
+      "median_ns": 3521375,
+      "round_ns": [
+        3547375,
+        3521375,
+        3413625,
+        3543292,
+        3492958,
+        3508083,
+        3524750,
+        3526000,
+        3517417
+      ]
+    }
+  },
+  {
+    "pair": 7,
+    "file": "catalog32-selected32.mp4",
+    "order": [
+      "baseline",
+      "candidate"
+    ],
+    "baseline": {
+      "fingerprint": {
+        "retained_payload": 6656,
+        "tracks": [
+          {
+            "bits": 0,
+            "channels": 0,
+            "codec": [
+              118,
+              112,
+              48,
+              57
+            ],
+            "cost": 3,
+            "count": 3,
+            "descriptions": 1,
+            "duration": 3,
+            "points": [
+              [
+                1,
+                32,
+                4142,
+                0,
+                0,
+                1,
+                true
+              ],
+              [
+                1,
+                4174,
+                4142,
+                1,
+                1,
+                1,
+                true
+              ],
+              [
+                1,
+                8316,
+                4142,
+                2,
+                2,
+                1,
+                true
+              ]
+            ],
+            "rate": 0,
+            "scale": 50
+          },
+          {
+            "bits": 16,
+            "channels": 1,
+            "codec": [
+              115,
+              111,
+              119,
+              116
+            ],
+            "cost": 1,
+            "count": 16384,
+            "descriptions": 32,
+            "duration": 16384,
+            "points": [
+              [
+                32,
+                12458,
+                2,
+                0,
+                0,
+                1,
+                true
+              ],
+              [
+                32,
+                28842,
+                2,
+                8192,
+                8192,
+                1,
+                true
+              ],
+              [
+                32,
+                45224,
+                2,
+                16383,
+                16383,
+                1,
+                true
+              ]
+            ],
+            "rate": 48000,
+            "scale": 48000
+          }
+        ]
+      },
+      "iterations": 1024,
+      "median_ns": 90299209,
+      "round_ns": [
+        88627917,
+        89476417,
+        89200375,
+        90299209,
+        89562750,
+        91805500,
+        176754458,
+        100302959,
+        109450084
+      ]
+    },
+    "candidate": {
+      "fingerprint": {
+        "retained_payload": 6656,
+        "tracks": [
+          {
+            "bits": 0,
+            "channels": 0,
+            "codec": [
+              118,
+              112,
+              48,
+              57
+            ],
+            "cost": 3,
+            "count": 3,
+            "descriptions": 1,
+            "duration": 3,
+            "points": [
+              [
+                1,
+                32,
+                4142,
+                0,
+                0,
+                1,
+                true
+              ],
+              [
+                1,
+                4174,
+                4142,
+                1,
+                1,
+                1,
+                true
+              ],
+              [
+                1,
+                8316,
+                4142,
+                2,
+                2,
+                1,
+                true
+              ]
+            ],
+            "rate": 0,
+            "scale": 50
+          },
+          {
+            "bits": 16,
+            "channels": 1,
+            "codec": [
+              115,
+              111,
+              119,
+              116
+            ],
+            "cost": 1,
+            "count": 16384,
+            "descriptions": 32,
+            "duration": 16384,
+            "points": [
+              [
+                32,
+                12458,
+                2,
+                0,
+                0,
+                1,
+                true
+              ],
+              [
+                32,
+                28842,
+                2,
+                8192,
+                8192,
+                1,
+                true
+              ],
+              [
+                32,
+                45224,
+                2,
+                16383,
+                16383,
+                1,
+                true
+              ]
+            ],
+            "rate": 48000,
+            "scale": 48000
+          }
+        ]
+      },
+      "iterations": 1024,
+      "median_ns": 3521500,
+      "round_ns": [
+        3488750,
+        3490125,
+        3513750,
+        3551333,
+        3530583,
+        3512416,
+        3535250,
+        3521500,
+        8258000
+      ]
+    }
+  }
+]

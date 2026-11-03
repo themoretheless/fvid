@@ -1,0 +1,5 @@
+
+running 1 test
+test container::mp4::constant_guard_equivalence::constant_guard_keeps_scalar_primary_header_semantics_for_compact_and_empty_tracks ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 1229 filtered out; finished in 0.00s

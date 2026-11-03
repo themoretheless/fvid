@@ -1,8 +1,8 @@
 {
   "target": 1000,
   "counting_rule": "One independently confirmed problem or useful capability; fixture variants and baseline integration repairs are excluded. Only accepted entries count.",
-  "accepted_count": 541,
-  "next_id": "FVID-0542",
+  "accepted_count": 542,
+  "next_id": "FVID-0543",
   "entries": [
     {
       "id": "FVID-0001",
@@ -6141,6 +6141,17 @@
       "result": "Add one private compact-index-aware membership query: readable positive hits stop immediately; dense/expanded indexes retain per-sample traversal and malformed/unreadable negative paths fall back. Wire six membership checks without changing public signatures, index representation, catalog contents, packet bytes, clocks, budgets or decoder algorithms. The original scalar predicate agrees at1008 prefix/ID/shape combinations per compiled equivalence test. Seven balanced release process pairs, two warmups and nine16-plan rounds each preserve every captured plan fingerprint:32-description first/last targets fall675.570→101.479us and679.234→100.042us (6.657x/6.790x), each winning7/7 pairs; one-description control93.867→93.461us remains within the predeclared10% bound. Final191 passing Rust executions, two old device ignores, core/player checks and three external-tool-free repeats preserve exact full/prefix f32/f64 PCM, compact cost, packet/memory/cancellation refusals, native seek/rewind/EOF,three actual target-worker sessions/anchors and software VP9 pictures, plus related dynamic/opaque/edit/MACE regressions. All five synthetic files regenerate identically and5312 final source/input hashes stay stable. Initial partial wiring and first qualified runtime are archived; review added early positive exit and requalified the changed final runtime, not a second ID. One planning optimization on this warm-cache local one-chunk workload; no general playback, codec-throughput, allocation, RSS or hardware claim.",
       "status": "accepted",
       "validation": "batch-552-validation.json"
+    },
+    {
+      "id": "FVID-0542",
+      "batch": 553,
+      "title": "Use compact header comparisons when admitting constant MP4 readers",
+      "source": "crates/fvid-media/src/owned_mp4_impl.rs",
+      "regression": "tests/mp4_constant_open_catalog.rs",
+      "before": "Published36cf0d3628 already includes FVID-0541 description-ID membership optimization but constant Mp4Reader::open still independently compares every virtual sample header against representative Track metadata. Original release packet/budget and changed-header refusal tests pass; in the final seven-pair comparison,32-description in-memory opens cost87.290/87.191us versus1.517us for one description.",
+      "result": "Preserve the first selected header versus representative Track comparison, then reuse the existing compact-aware header-change predicate instead of another full virtual-sample scan. Preserve empty-track and0/1-catalog behavior, equivalent aliases, opaque/changing-header refusal, all public signatures, decoder state, bytes, clocks, index/catalog contents and budgets. The exact original scalar guard agrees at168 structural/primary/catalog combinations per compiled property. Seven balanced release process pairs, two warmups and nine1024-open rounds each retain reader/index fingerprints:32-description first/last opens fall87.290→3.452us and87.191→3.439us (25.284x/25.354x), winning7/7 pairs each. One-description control1.517→1.536us is1.25% slower, within the predeclared10% bound, and is not claimed as a speedup. The pilot calibrated1024 iterations before candidate changes or paired measurements; acceptance thresholds were unchanged. Final190 Rust executions, two existing device ignores, core/player checks and three external-tool-free repeats preserve every packet/clocks/description ID through native and owned constant APIs, exact PCM words, compact budget4, typed reconfiguration refusal, native PCM/seek/rewind/EOF/worker anchors/software pictures and related dormant/opaque/MACE/dynamic regressions. Five existing341ms authored fixtures regenerate identically;5314 source/input hashes stay stable. One constant-header admission optimization, distinct from ID-membership planning; no new format/failure, allocation, acquisition, planning, decoder or playback-throughput/hardware claim.",
+      "status": "accepted",
+      "validation": "batch-553-validation.json"
     }
   ]
 }

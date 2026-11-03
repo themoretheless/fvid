@@ -416,7 +416,8 @@ impl Track {
         // inherit an unused known decoder's metadata.
         let primary = SampleDescription::from_track(self);
         let first = &primary;
-        if (0..self.samples.len()).any(|i| self.description_for_sample(i) != Some(first)) {
+        if !self.samples.is_empty() && (self.description_for_sample(0) != Some(first)
+            || self.description_changes_before(self.samples.len())) {
             return Err(unsupported("MP4 sample description changes require decoder reconfiguration"));
         }
         Ok(())
@@ -3214,5 +3215,42 @@ mod selected_membership_equivalence {
             let expected=(0..limit).any(|n|track.samples.get(n).is_some_and(|s|s.description_index==id));
             assert_eq!(track.description_used_before(id,limit),expected);
         }}
+    }
+}
+
+#[cfg(test)]
+mod constant_guard_equivalence {
+    use super::*;
+    #[test]
+    fn constant_guard_keeps_scalar_primary_header_semantics_for_compact_and_empty_tracks() {
+        let input=include_bytes!("../../../tests/fixtures/playback-errors/mp4-admission-catalog/catalog32-selected32.mp4");
+        let reader=Mp4Reader::open_indexed(std::io::Cursor::new(input),Default::default()).unwrap();
+        let base=reader.tracks()[1].clone();
+        let run=|description_index,first,offset,frames|FrameRun{description_index,first,offset,frames};
+        let uniform=|runs,count|SampleIndex::Uniform(UniformIndex{bytes_per_frame:2,duration:1,count,runs});
+        let expanded=|ids:&[u32]|{let mut s=base.samples.get(0).unwrap();SampleIndex::Expanded(ids.iter().map(|&id|{s.description_index=id;s.clone()}).collect())};
+        let shapes=vec![
+            uniform(vec![run(1,0,0,8)],8),
+            uniform(vec![run(2,0,0,8)],8),
+            uniform(vec![run(1,0,0,3),run(32,3,6,5)],8),
+            uniform(vec![run(1,0,0,3),run(2,3,6,5)],8),
+            uniform(vec![run(1,0,0,2),run(32,3,6,5)],8),
+            uniform(vec![run(1,0,0,6),run(32,3,6,5)],8),
+            uniform(vec![run(1,0,u64::MAX-2,8)],8),
+            uniform(vec![run(2,0,0,0),run(1,0,0,8)],8),
+            expanded(&[1,32,1,32,1,32,1,32]),
+            expanded(&[1,2,1,2,1,2,1,2]),
+            expanded(&[2,2,2,2,2,2,2,2]),
+            expanded(&[]),
+            uniform(vec![],0),
+            uniform(vec![run(1,1,2,7)],8),
+        ];
+        for length in [0,1,2,32] {for primary in 0..3 {for samples in &shapes {
+            let mut t=base.clone();t.samples=samples.clone();t.sample_descriptions[1].channels=2;t.sample_descriptions[1].bit_depth=24;t.sample_descriptions.truncate(length);
+            if primary==1 {t.channels=2;t.bit_depth=24;}if primary==2 {t.codec=*b"zzzz";}
+            let expected=if length<=1 {true}else {let header=SampleDescription::from_track(&t);!(0..t.samples.len()).any(|i|t.description_for_sample(i)!=Some(&header))};
+            let result=t.ensure_constant_description();assert_eq!(result.is_ok(),expected,"catalog{length}/primary{primary}/{:?}",t.samples);
+            if let Err(e)=result {assert!(e.to_string().contains("MP4 sample description changes require decoder reconfiguration"));}
+        }}}
     }
 }

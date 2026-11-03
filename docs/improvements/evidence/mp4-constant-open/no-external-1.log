@@ -1,0 +1,13 @@
+
+running 2 tests
+test actually_selected_changed_headers_keep_constant_api_refusals ... ok
+test constant_open_keeps_all_packets_catalogs_and_compact_sample_budget ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.03s
+
+
+running 2 tests
+test prefix_queries_keep_precise_pcm_and_strict_packet_memory_cancellation_controls ... ok
+test actual_compact_pcm_playback_workers_seek_and_software_video_are_exact ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.35s

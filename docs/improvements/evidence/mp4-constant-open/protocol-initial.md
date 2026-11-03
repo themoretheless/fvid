@@ -1,0 +1,5 @@
+# Constant MP4 open latency audit
+
+Candidate FVID-0542 / batch553 is not accepted. Base36cf0d3628 already includes FVID-0541; its public constant-description Mp4Reader::open still performs a separate per-virtual-sample header equality scan. Reuse the authored341ms PCM/VP9 catalog fixtures; this is not another description-ID membership change or another format capability.
+
+Predeclared performance gate: seven balanced release before/after process pairs, two warmup rounds and nine256-open measured rounds, using Cursor<Arc<[u8]>>. Both32-description constant-open targets must win all seven paired medians and improve aggregate median at least2x; the one-description control must not regress over10%. Reader metadata/index fingerprints must agree. Scope: in-memory parser/index/constant-header opening, excluding file acquisition, decoder setup, planning and playback throughput. Ordinary tests must prove exact packet bytes/clocks/budget4, genuine changing-header refusals and scalar-guard equivalence. Core/player and related regression gates required. Reject and revert if inconclusive.

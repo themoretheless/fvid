@@ -1,0 +1,36 @@
+{
+  "accepted": true,
+  "profile": "release; thin LTO; codegen-units1; no default features",
+  "comparison": "Seven balanced process pairs;2 warmups,9 measured rounds,1024 constant-reader opens/round",
+  "scope": "Cursor<Arc<[u8]>> opening on authored one-chunk16384-frame PCM; excludes acquisition/decoder/planning/playback",
+  "binary_sha256": {
+    "baseline": "3c2a949bec1a5586841abe7d68781abc0815cbf8384dc87a65f943e9a43a3338",
+    "candidate": "ffdeda7c47189daf467d3786d3d026f839f98f4e0530d879fb52bf96db6b0eb6"
+  },
+  "summaries": {
+    "catalog1-selected1.mp4": {
+      "before_us_per_open": 1.517048828125,
+      "after_us_per_open": 1.5359697265625,
+      "speedup": 0.9876814639570762,
+      "wins": 1,
+      "pairs": 7,
+      "accepted": true
+    },
+    "catalog32-selected1.mp4": {
+      "before_us_per_open": 87.289998046875,
+      "after_us_per_open": 3.452392578125,
+      "speedup": 25.283914291775687,
+      "wins": 7,
+      "pairs": 7,
+      "accepted": true
+    },
+    "catalog32-selected32.mp4": {
+      "before_us_per_open": 87.191365234375,
+      "after_us_per_open": 3.43896484375,
+      "speedup": 25.353956552605425,
+      "wins": 7,
+      "pairs": 7,
+      "accepted": true
+    }
+  }
+}
