@@ -1,0 +1,15 @@
+
+running 1 test
+VideoToolbox: session creation failed (-12906); using the software VP9 decoder
+
+thread 'player::short_track_clock_regressions::already_ended_replacement_never_rewinds_live_video' (22707425) panicked at src/player_short_track_clock_tests.rs:87:101:
+native track clock timed out
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+test player::short_track_clock_regressions::already_ended_replacement_never_rewinds_live_video ... FAILED
+
+failures:
+
+failures:
+    player::short_track_clock_regressions::already_ended_replacement_never_rewinds_live_video
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 1229 filtered out; finished in 5.31s

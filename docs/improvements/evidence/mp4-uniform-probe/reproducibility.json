@@ -1,0 +1,54 @@
+{
+  "regenerated_exactly": 12,
+  "files": [
+    {
+      "path": "tests/fixtures/playback-errors/mp4-uniform-plan-scan/frames-64.mp4",
+      "sha256": "ea90d98d8a1d90dfd17582ac56965b362fad1ea07ebdfad033ce49b4f51413fb"
+    },
+    {
+      "path": "tests/fixtures/playback-errors/mp4-uniform-plan-scan/frames-262144.mp4",
+      "sha256": "def067a680ac1aba8031a4d69d938ceaeb86895e040d65e7be30c12138250951"
+    },
+    {
+      "path": "tests/fixtures/playback-errors/mp4-uniform-plan-scan/control-alias.mp4",
+      "sha256": "c1a1fd9a6eb5d6aa46b54f88ffc14a9020e1e70460309810daddf588dfa4048d"
+    },
+    {
+      "path": "tests/fixtures/playback-errors/mp4-uniform-plan-scan/control-unused.mp4",
+      "sha256": "5b83786792be1f7246cdae7b1d639fadc1a51cd1bc4f61d58c0f1d56afa1e2e9"
+    },
+    {
+      "path": "tests/fixtures/playback-errors/mp4-uniform-plan-scan/control-endian.mp4",
+      "sha256": "f19ba536aa68abd41e1af509d5180e1a3159359b763842872ff7110dea73cadd"
+    },
+    {
+      "path": "tests/fixtures/playback-errors/mp4-uniform-plan-scan/manifest.json",
+      "sha256": "6d451889eed0bc1e4bf7ee6adf3c9e3c2b9c2e7a55a758a6bcd1a253cf5fc382"
+    },
+    {
+      "path": "tests/fixtures/playback-errors/mp4-uniform-seek-width/pcm-1000.mp4",
+      "sha256": "b720bdf82d2019ba597a8ad401fe9db951e27130c5df5a9777ef02463cff76c7"
+    },
+    {
+      "path": "tests/fixtures/playback-errors/mp4-uniform-seek-width/pcm-48000.mp4",
+      "sha256": "85be2320fee781f3220e80d5823c461911a81f1c6d055f213b81c8ec97f3c010"
+    },
+    {
+      "path": "tests/fixtures/playback-errors/mp4-uniform-seek-width/alac-1000.mp4",
+      "sha256": "fe37897f88e3aca225e88bca23142c1138bd637cd743edf5eaf5553e3b782475"
+    },
+    {
+      "path": "tests/fixtures/playback-errors/mp4-uniform-seek-width/alac-48000.mp4",
+      "sha256": "6c532abc5abd7076de676a5f3dced7595a439921f0569c4bf72b540332c678a1"
+    },
+    {
+      "path": "tests/fixtures/playback-errors/mp4-uniform-seek-width/expected.f32le",
+      "sha256": "fbdb42ac4eb6f259aa4e98001a43a676ba3204e1af62e6d1bb608f781a905189"
+    },
+    {
+      "path": "tests/fixtures/playback-errors/mp4-uniform-seek-width/manifest.json",
+      "sha256": "5623bf086f3a0045590963b3eb6d210f9262f81ee0dec1265f686e66cb367416"
+    }
+  ],
+  "no_private_media_or_external_generation": true
+}

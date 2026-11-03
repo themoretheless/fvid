@@ -1,8 +1,8 @@
 {
   "target": 1000,
   "counting_rule": "One independently confirmed problem or useful capability; fixture variants and baseline integration repairs are excluded. Only accepted entries count.",
-  "accepted_count": 548,
-  "next_id": "FVID-0549",
+  "accepted_count": 549,
+  "next_id": "FVID-0550",
   "entries": [
     {
       "id": "FVID-0001",
@@ -4527,7 +4527,7 @@
       "source": "crates/fvid-media/src/owned_mp4_impl.rs",
       "regression": "tests/mp4_open_ended_edit.rs",
       "before": "In an isolated pre-fix source snapshot, both parsers, probe and native playback refuse valid single rate-one duration-zero fMP4 media edits as unsupported duration. Finite-edit parsing/packets/native controls and existing malformed-input refusals pass. Open-edit target: 3 passed, 3 failed. The witness headers have consistent movie/track durations; versions, clocks, trimming and positive CTS are independently authored.",
-      "result": "Admit only the single fragmented open media edit, retaining raw duration=0. A stack-backed resolved edit view derives the composition endpoint from indexed samples and uses media timescale for the open range, avoiding movie-clock double rounding. Playback, owned decode, probe, shader windows, AAC remux and audio planning/export consume the view. Coarse 25Hz and fractional 1001Hz movie clocks preserve exact 20ms media frames; positive CTS and non-sample-aligned audio endpoints stay exact. Nonzero AAC/PCM/ALAC oracles, public WAVE publication, budgets, seek, rewind and EOF pass.",
+      "result": "Admit only the single fragmented open media edit, retaining raw duration=0. A stack-backed resolved edit view derives the composition endpoint from indexed samples and uses media timescale for the open range, avoiding movie-clock double rounding. Playback, owned decode, probe, shader windows, AAC remux and audio planning/export consume the view. Coarse 25Hz and fractional 1001Hz movie clocks preserve exact 20ms media frames; positive CTS and non-sample-aligned audio endpoints stay exact. Nonzero AAC/PCM/ALAC oracles, public WAVE publication, budgets, seek, rewind and EOF pass. Zero-count CI follow-up: retain rejection when an open edit has no media remaining and assert the exact positive open-tail window; all prior assertions remain. See docs/improvements/evidence/open-edit-unit-contract/validation.json.",
       "status": "accepted",
       "validation": "batch-397-validation.json"
     },
@@ -6219,6 +6219,17 @@
       "result": "Record every nonzero tkhd ID before codec-dependent early returns; preserve existing Invalid duplicate diagnostic and track budget. Eighteen malformed movies now refuse through both readers;20 valid unique-ID controls retain exact packets, clocks, software VP9 video, EOF, raw seeks and rewind. Forty actual software video sessions per stand pass. All20 complete valid videos match independent FFmpeg and40 fixture files regenerate exactly. Qualification passes207 Rust executions with two existing device ignores, core/player checks, six external-tool-free stand repeats and220 actual wasm32 compatibility cases. After a separate zero-count ALAC CI contract repair, current-source core/player MP4 stands pass12 more tests and the complete fvid-media suite passes. All5671 source/input paths are frozen with an explicit five-file ALAC/PCM delta; MP4 candidate and fixtures unchanged. One movie namespace invariant, not per-reader/version/order IDs; unsupported sound is not claimed decoded. No public API, performance, GPU or hardware claim.",
       "status": "accepted",
       "validation": "batch-559-validation.json"
+    },
+    {
+      "id": "FVID-0549",
+      "batch": 560,
+      "title": "Probe compact MP4 metadata without enumerating virtual audio samples",
+      "source": "crates/fvid-media/src/owned_mp4_probe_impl.rs",
+      "regression": "crates/fvid-media/tests/mp4_uniform_probe.rs",
+      "before": "Published52c2ab2a3f retains UniformIndex but the shared probe walks every virtual frame for packet quota, optional working-set quota, earliest PTS and payload bitrate. The baseline two-test oracle already passes: this is a measured opportunity, not a decoding defect. On authored262144-frame PCM, seven paired31-iteration release comparisons give baseline medians763.500us unbounded and1050.959us bounded.",
+      "result": "Use one representative constant-size sample for prefix quota checks and earliest PTS; calculate constant byte/tick ratio from the last readable uniform sample, preserving unavailable terminal timestamps, zero durations and empty-index behavior. Expanded paths, edits, API and all limits remain. Candidate medians29.625us/30.000us reduce probe latency96.12/97.15percent with7/7 pair wins in both large cases; complete metadata matches in every pair. Small64-frame controls remain within predeclared5us noise allowance (+0.166us unbounded,-0.707us bounded). Eight supported authored controls compare start and bitrate to full-sample oracles and preserve prefix/resource gates; the changing-header refusal remains. All12 existing fixture files regenerate exactly and5673 source/input paths are frozen. Complete media suite728 passes(one existing ignore),core424 andplayer1256 pass(26 existing ignores),default library379 passes,core/player checks and2 external-tool-free probe tests pass. Related integrations retain exact PCM, actual video seek/rewind/EOF and full-width time navigation. Two separately evidenced zero-count repairs correct old open-edit and last-sample-versus-exclusive-end test expectations while retaining all assertions and adding endpoint acceptance. One probe pipeline optimization across wrappers; no decode,hardware,UI or broad workload speedup claim.",
+      "status": "accepted",
+      "validation": "batch-560-validation.json"
     }
   ]
 }

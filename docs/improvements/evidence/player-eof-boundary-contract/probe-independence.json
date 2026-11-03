@@ -1,0 +1,202 @@
+[
+  {
+    "fixture": "player-short-track-clock/movie.mp4",
+    "baseline_candidate_probe_metadata_identical": true,
+    "info": {
+      "bit_rate": 188816,
+      "chapters": [],
+      "duration_us": 1500000,
+      "format": "mov,mp4,m4a,3gp,3g2,mj2",
+      "metadata": {},
+      "path": "tests/fixtures/playback-errors/player-short-track-clock/movie.mp4",
+      "start_us": 0,
+      "streams": [
+        {
+          "average_frame_rate": [
+            10,
+            3
+          ],
+          "bit_rate": 1840,
+          "channels": 0,
+          "codec": "vp9",
+          "disposition": 0,
+          "duration": 1500,
+          "extradata_bytes": 12,
+          "height": 16,
+          "index": 0,
+          "level": null,
+          "media_type": "video",
+          "metadata": {},
+          "pixel_format": -1,
+          "profile": null,
+          "sample_rate": 0,
+          "start": 0,
+          "time_base": [
+            1,
+            1000
+          ],
+          "video_delay": 0,
+          "width": 16
+        },
+        {
+          "average_frame_rate": [
+            0,
+            1
+          ],
+          "bit_rate": 128000,
+          "channels": 1,
+          "codec": "pcm_s16le",
+          "disposition": 0,
+          "duration": 12000,
+          "extradata_bytes": 0,
+          "height": 0,
+          "index": 1,
+          "level": null,
+          "media_type": "audio",
+          "metadata": {
+            "title": "authored PCM 0"
+          },
+          "pixel_format": -1,
+          "profile": null,
+          "sample_rate": 8000,
+          "start": 0,
+          "time_base": [
+            1,
+            8000
+          ],
+          "video_delay": 0,
+          "width": 0
+        },
+        {
+          "average_frame_rate": [
+            0,
+            1
+          ],
+          "bit_rate": 128000,
+          "channels": 1,
+          "codec": "pcm_s16le",
+          "disposition": 0,
+          "duration": 4800,
+          "extradata_bytes": 0,
+          "height": 0,
+          "index": 2,
+          "level": null,
+          "media_type": "audio",
+          "metadata": {
+            "title": "authored PCM 1"
+          },
+          "pixel_format": -1,
+          "profile": null,
+          "sample_rate": 8000,
+          "start": 0,
+          "time_base": [
+            1,
+            8000
+          ],
+          "video_delay": 0,
+          "width": 0
+        }
+      ]
+    }
+  },
+  {
+    "fixture": "player-track-clock/movie.mp4",
+    "baseline_candidate_probe_metadata_identical": true,
+    "info": {
+      "bit_rate": 112016,
+      "chapters": [],
+      "duration_us": 1500000,
+      "format": "mov,mp4,m4a,3gp,3g2,mj2",
+      "metadata": {},
+      "path": "tests/fixtures/playback-errors/player-track-clock/movie.mp4",
+      "start_us": 0,
+      "streams": [
+        {
+          "average_frame_rate": [
+            10,
+            3
+          ],
+          "bit_rate": 1840,
+          "channels": 0,
+          "codec": "vp9",
+          "disposition": 0,
+          "duration": 1500,
+          "extradata_bytes": 12,
+          "height": 16,
+          "index": 0,
+          "level": null,
+          "media_type": "video",
+          "metadata": {},
+          "pixel_format": -1,
+          "profile": null,
+          "sample_rate": 0,
+          "start": 0,
+          "time_base": [
+            1,
+            1000
+          ],
+          "video_delay": 0,
+          "width": 16
+        },
+        {
+          "average_frame_rate": [
+            0,
+            1
+          ],
+          "bit_rate": 128000,
+          "channels": 1,
+          "codec": "pcm_s16le",
+          "disposition": 0,
+          "duration": 4800,
+          "extradata_bytes": 0,
+          "height": 0,
+          "index": 1,
+          "level": null,
+          "media_type": "audio",
+          "metadata": {
+            "title": "authored PCM 0"
+          },
+          "pixel_format": -1,
+          "profile": null,
+          "sample_rate": 8000,
+          "start": 0,
+          "time_base": [
+            1,
+            8000
+          ],
+          "video_delay": 0,
+          "width": 0
+        },
+        {
+          "average_frame_rate": [
+            0,
+            1
+          ],
+          "bit_rate": 128000,
+          "channels": 1,
+          "codec": "pcm_s16le",
+          "disposition": 0,
+          "duration": 4800,
+          "extradata_bytes": 0,
+          "height": 0,
+          "index": 2,
+          "level": null,
+          "media_type": "audio",
+          "metadata": {
+            "title": "authored PCM 1"
+          },
+          "pixel_format": -1,
+          "profile": null,
+          "sample_rate": 8000,
+          "start": 0,
+          "time_base": [
+            1,
+            8000
+          ],
+          "video_delay": 0,
+          "width": 0
+        }
+      ]
+    }
+  }
+]

@@ -141,7 +141,7 @@ fn replacing_absent_sound_converts_paused_picture_phase_back_to_audio_phase(){
 #[test]
 fn ended_sound_only_track_keeps_unshifted_source_clock_control(){
     let ctx=egui::Context::default();let(mut p,old_clock,_old)=open(&ctx,75,0);p.playback=None;p.presented=None;p.interval=None;old_clock.store(600_000_000,Ordering::SeqCst);until(||{tick(&mut p,&ctx);p.ended});assert!(p.audio_ended);p.audio_delay_ms=100;
-    let clock=Arc::new(AtomicU64::new(0));let trace=Arc::new(Mutex::new(Trace::default()));p.cycle_audio_track_with_backend(true,factory(clock.clone(),trace.clone()));until(||!trace.lock().unwrap().flushes.is_empty());let targets={trace.lock().unwrap().flushes.clone()};assert_eq!(targets,[Duration::from_nanos(599_875_000)],"sound-only completion must not apply the video delay");assert!(p.ended);assert!(!p.paused);assert_eq!(trace.lock().unwrap().resumes,0);assert_eq!(p.audio_track,1);
+    let clock=Arc::new(AtomicU64::new(0));let trace=Arc::new(Mutex::new(Trace::default()));p.cycle_audio_track_with_backend(true,factory(clock.clone(),trace.clone()));until(||!trace.lock().unwrap().flushes.is_empty());let targets={trace.lock().unwrap().flushes.clone()};assert_eq!(targets,[Duration::from_millis(600)],"sound-only completion must not apply the video delay");assert!(p.ended);assert!(!p.paused);assert_eq!(trace.lock().unwrap().resumes,0);assert_eq!(p.audio_track,1);
 }
 
 #[test]

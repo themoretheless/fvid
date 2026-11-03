@@ -1563,7 +1563,12 @@ mod tests {
         track.edits[0].duration = 1;
         assert_eq!(playback_window(&track, 1000).unwrap(), (1024, Some(1037)));
         track.edits[0].duration = 0;
+        // A single open edit resolves in media ticks against the declared tail.
+        assert_eq!(playback_window(&track, 1000).unwrap(), (1024, Some(6144)));
+        track.duration = 1024;
+        // An open edit with no media remaining is still invalid.
         assert!(playback_window(&track, 1000).is_err());
+        track.duration = 6144;
         track.edits[0].duration = 480;
         track.edits[0].media_time = -1;
         assert!(playback_window(&track, 1000).is_err());

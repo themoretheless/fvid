@@ -1,0 +1,10 @@
+{
+  "relative_to": "candidate-source.json",
+  "changed_paths": [
+    "src/playback/video/native.rs",
+    "src/player_short_track_clock_tests.rs",
+    "src/player_track_clock_tests.rs"
+  ],
+  "scope": "cfg(test) expectations and source endpoint acceptance control only",
+  "benchmark_candidate_code_and_inputs_unchanged": true
+}

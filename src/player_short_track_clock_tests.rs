@@ -93,7 +93,8 @@ fn open(ctx:&egui::Context,phase:u64)->(Player,Arc<AtomicU64>,Arc<Mutex<Trace>>)
     p.seek_time(Duration::from_millis(phase));until(||{tick(&mut p,ctx);!p.seek_preview&&!p.buffering&&p.picture_audio_clock&&p.audio.as_ref().unwrap().position()==Duration::from_millis(phase)});until(||trace.lock().unwrap().resumes>=2);assert_eq!(p.presentation_clock(),Some(Duration::from_millis(phase)));assert!(!p.audio_ended);(p,clock,trace)
 }
 fn replace(p:&mut Player)->(Arc<AtomicU64>,Arc<Mutex<Trace>>){let clock=Arc::new(AtomicU64::new(0));let trace=Arc::new(Mutex::new(Trace::default()));p.cycle_audio_track_with_backend(true,factory(clock.clone(),trace.clone()));assert_eq!(p.audio_track,1);(clock,trace)}
-fn landed_at_short_end(p:&Player){until(||p.audio.as_ref().unwrap().position()==Duration::from_nanos(599_875_000));}
+// The exclusive endpoint is 4800/8000 seconds; 4799/8000 is still audible.
+fn landed_at_short_end(p:&Player){until(||p.audio.as_ref().unwrap().position()==Duration::from_millis(600));}
 fn monotonic_eof(p:&mut Player,ctx:&egui::Context,before:Duration,started:Instant){let mut last=before;until(||{tick(p,ctx);let now=p.presentation_clock().unwrap();assert!(now>=last,"replacement EOF rewound video:{last:?}->{now:?}");assert!(now<=before+started.elapsed()+Duration::from_millis(10),"replacement EOF jumped past elapsed media phase:{now:?}");last=now;p.audio_ended});}
 fn video_end(p:&mut Player,ctx:&egui::Context){until(||{tick(p,ctx);p.ended});assert!(p.error.is_none());assert_eq!(p.interval,Some((1200,1500,1000)));assert_eq!(p.presentation_clock(),Some(Duration::from_millis(1500)));}
 fn source_prefix(trace:&Mutex<Trace>,at:u64){until(||!trace.lock().unwrap().pcm.is_empty());let actual=trace.lock().unwrap().pcm.clone();let expected=bytes("track-1.f32le");let start=at as usize*8*4;assert_eq!(actual,&expected[start..start+actual.len()]);}
@@ -137,4 +138,45 @@ fn silent_paused_picture_keeps_its_phase_when_selected_audio_is_already_over(){
 fn immediate_return_to_long_track_uses_the_preserved_source_phase(){
     let ctx=egui::Context::default();let(mut p,_old,_trace)=open(&ctx,750);let(_short_clock,short)=replace(&mut p);landed_at_short_end(&p);assert!(short.lock().unwrap().pcm.is_empty());
     let clock=Arc::new(AtomicU64::new(0));let trace=Arc::new(Mutex::new(Trace::default()));p.cycle_audio_track_with_backend(false,factory(clock.clone(),trace.clone()));assert_eq!(p.audio_track,0);until(||!trace.lock().unwrap().flushes.is_empty());let targets={trace.lock().unwrap().flushes.clone()};assert_eq!(targets,[Duration::from_millis(750)],"next track inherited the previous source EOF instead of live video phase");until(||!trace.lock().unwrap().pcm.is_empty());let actual=trace.lock().unwrap().pcm.clone();let expected=bytes("track-0.f32le");assert_eq!(actual,&expected[24000..24000+actual.len()]);clock.store(1_500_000_000,Ordering::SeqCst);video_end(&mut p,&ctx);
+}
+
+#[test]
+fn source_seek_endpoint_is_the_exclusive_pcm_boundary_not_the_last_sample() {
+    use crate::audio::AudioStream;
+    let mut source = crate::playback_mp4_audio::Mp4AudioReader::open_at(
+        Cursor::new(bytes("movie.mp4")), Default::default(), 1,
+    ).unwrap();
+    assert_eq!((source.sample_rate(), source.timescale()), (8000, 8000));
+    assert_eq!(bytes("track-1.f32le").len() / 4, 4800);
+    assert_eq!(source.duration(), Some(Duration::from_millis(600)));
+    fn audible(source: &mut crate::playback_mp4_audio::Mp4AudioReader<Cursor<Vec<u8>>>) -> Vec<u8> {
+        let mut decoder = source.make_decoder().unwrap();
+        let mut pcm = Vec::new();
+        let mut steps = 0;
+        while let Some(step) = source.next_step().unwrap() {
+            steps += 1;
+            assert!(steps <= 2, "unexpected preroll for constant PCM");
+            match step {
+                crate::audio::AudioStep::Encoded(packet) => {
+                    let stamp = source.decoder_stamp(&packet);
+                    if let Some(frame) = decoder.decode_packet(&packet.data, stamp, packet.duration as u64).unwrap() {
+                        if let Some(packet) = source.present_decoded(frame.packet, frame.source_pts).unwrap() {
+                            pcm.extend(packet.data);
+                        }
+                    }
+                }
+                crate::audio::AudioStep::Pcm(packet) => pcm.extend(packet.data),
+                _ => panic!("unexpected PCM configuration change"),
+            }
+        }
+        source.validate_eof().unwrap();
+        pcm
+    }
+    for target in [600, 750, 10_000] {
+        assert_eq!(source.seek_time(Duration::from_millis(target)), 4800);
+        assert!(audible(&mut source).is_empty(), "past-end seek replayed PCM");
+    }
+    assert_eq!(source.seek_time(Duration::from_nanos(599_875_000)), 4799);
+    let expected = bytes("track-1.f32le");
+    assert_eq!(audible(&mut source), expected[expected.len()-4..], "last real sample was lost");
 }

@@ -138,7 +138,15 @@ pub(crate) fn try_mp4_with_options(
         usize::try_from(max).unwrap_or(usize::MAX)
     });
     for track in reader.tracks() {
-        if (0..track.samples.len().min(max_samples)).any(|i| {
+        // A compact index has one size for every virtual sample. Preserve the
+        // prefix limit while checking that constant size only once.
+        let checked_samples = track.samples.len().min(max_samples);
+        let checked_samples = if track.samples.expanded().is_none() {
+            checked_samples.min(1)
+        } else {
+            checked_samples
+        };
+        if (0..checked_samples).any(|i| {
             track.samples.get(i).is_some_and(|sample| {
                 usize::try_from(sample.size).unwrap_or(usize::MAX) > options.max_packet_bytes
             })
@@ -146,7 +154,7 @@ pub(crate) fn try_mp4_with_options(
             return Err("MP4 packet exceeds budget".into());
         }
         if let Some(mem_limit) = options.max_controlled_bytes
-            && (0..track.samples.len().min(max_samples)).any(|i| {
+            && (0..checked_samples).any(|i| {
                 track.samples.get(i).is_some_and(|sample| {
                     index_bytes
                         .saturating_add(usize::try_from(sample.size).unwrap_or(usize::MAX))
@@ -187,9 +195,13 @@ pub(crate) fn try_mp4_with_options(
         let start = if edited {
             Some(0)
         } else {
-            (0..track.samples.len())
-                .filter_map(|i| track.samples.get(i).map(|s| s.pts))
-                .min()
+            // Compact PTS starts at zero and increases by the fixed duration.
+            let count = if track.samples.expanded().is_none() {
+                track.samples.len().min(1)
+            } else {
+                track.samples.len()
+            };
+            (0..count).filter_map(|i| track.samples.get(i).map(|s| s.pts)).min()
         };
         if let Some(start) = start {
             let us = i64::try_from(i128::from(start) * 1_000_000 / i128::from(scale))
@@ -277,11 +289,20 @@ pub(crate) fn try_mp4_with_options(
             time_base: [1, scale],
             start,
             duration: Some(duration),
-            bit_rate: mp4_payload_rate(
-                (0..track.samples.len())
-                    .map(|i| track.samples.get(i).map(|s| (s.size, s.duration))),
-                track.timescale,
-            ),
+            bit_rate: if track.samples.expanded().is_none() {
+                // The equal sample count cancels from bytes/ticks. Query the
+                // last virtual sample to preserve None when its timestamp
+                // cannot be represented by the sample API, as in the full walk.
+                let sample = track.samples.len().checked_sub(1)
+                    .and_then(|i| track.samples.get(i));
+                mp4_payload_rate(std::iter::once(sample.map(|s| (s.size, s.duration))), track.timescale)
+            } else {
+                mp4_payload_rate(
+                    (0..track.samples.len())
+                        .map(|i| track.samples.get(i).map(|s| (s.size, s.duration))),
+                    track.timescale,
+                )
+            },
             average_frame_rate: if track.handler == *b"vide" {
                 mp4_average_rate(
                     (0..track.samples.len()).map(|i| track.samples.get(i).map(|s| s.duration)),

@@ -1,0 +1,12 @@
+{
+  "rustc": "rustc 1.98.1 (48a229cea 2026-09-01)",
+  "machine": "arm64",
+  "macos": "26.7.2",
+  "build_jobs": 4,
+  "before_binary_sha256": "ffe120b72583130c5d02bc27df7acc2f9bcd220516f9673a15cb23c6343f610b",
+  "after_binary_sha256": "095a7efe1e540d3b6f4a1629b20670a4694fd76124bcbce38a63bcbd38eaf485",
+  "baseline_source": "baseline-source.json",
+  "candidate_source": "candidate-source.json",
+  "final_source": "final-source.json",
+  "cpu": "Apple M4 Max"
+}

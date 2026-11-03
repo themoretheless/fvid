@@ -1,0 +1,68 @@
+{
+  "status": "accepted",
+  "accepted_ids": [
+    "FVID-0549"
+  ],
+  "count_delta": 1,
+  "accepted_count": 549,
+  "next_id": "FVID-0550",
+  "baseline": "docs/improvements/evidence/mp4-uniform-probe/baseline.log",
+  "initial_candidate_test": "docs/improvements/evidence/mp4-uniform-probe/after.log",
+  "measurement_plan": "docs/improvements/evidence/mp4-uniform-probe/measurement-plan.json",
+  "measurements": "docs/improvements/evidence/mp4-uniform-probe/paired-measurements.json",
+  "measurement_summary": "docs/improvements/evidence/mp4-uniform-probe/measurement-summary.json",
+  "measurement_environment": "docs/improvements/evidence/mp4-uniform-probe/measurement-environment.json",
+  "source_before": "docs/improvements/evidence/mp4-uniform-probe/baseline-source.json",
+  "source_candidate": "docs/improvements/evidence/mp4-uniform-probe/candidate-source.json",
+  "source_final": "docs/improvements/evidence/mp4-uniform-probe/final-source.json",
+  "source_final_delta": "docs/improvements/evidence/mp4-uniform-probe/final-source-delta.json",
+  "regeneration": "docs/improvements/evidence/mp4-uniform-probe/reproducibility.json",
+  "media_full_suite": {
+    "passed": 728,
+    "failed": 0,
+    "ignored": 1,
+    "log": "docs/improvements/evidence/mp4-uniform-probe/media-final.log"
+  },
+  "qualification": [
+    {
+      "name": "core",
+      "passed": 424,
+      "ignored": 0
+    },
+    {
+      "name": "player",
+      "passed": 1256,
+      "ignored": 26
+    },
+    {
+      "name": "core-check",
+      "passed": true,
+      "ignored": 0
+    },
+    {
+      "name": "player-check",
+      "passed": true,
+      "ignored": 0
+    }
+  ],
+  "default_lib": {
+    "passed": 379,
+    "failed": 0,
+    "log": "docs/improvements/evidence/open-edit-unit-contract/default-after.log"
+  },
+  "external_tool_free_probe": {
+    "passed": 2,
+    "log": "docs/improvements/evidence/mp4-uniform-probe/no-external.log"
+  },
+  "zero_count_followups": [
+    "docs/improvements/evidence/open-edit-unit-contract/validation.json",
+    "docs/improvements/evidence/player-eof-boundary-contract/validation.json"
+  ],
+  "limitations": [
+    "Performance measured on Apple M4 Max for64/262144-frame authored local fixtures; no general decode/GPU/UI speedup claim",
+    "The unbounded64-frame control is0.166us slower; bounded control0.707us faster, within predeclared noise allowance",
+    "No new media failure is claimed; existing synthetic fixtures and their generators are reused",
+    "Twenty-six existing player ignores and one media ignore remain; no claim that those paths are qualified",
+    "New remote Linux/Windows CI must be observed after publication"
+  ]
+}

@@ -1,0 +1,17 @@
+{
+  "status": "accepted",
+  "count_delta": 0,
+  "related_accepted_id": "FVID-0403",
+  "baseline": {
+    "ci_run": 41612553749,
+    "ci_root_default_passed": 378,
+    "ci_root_default_failed": 1,
+    "local_focused_failed": 1
+  },
+  "focused_after_passed": 1,
+  "default_lib_after_passed": 379,
+  "core_and_player": "../mp4-uniform-probe/qualification-results.json",
+  "production_edit_semantics_changed": false,
+  "all_original_assertions_retained": true,
+  "fixture_acceptance": "tests/mp4_open_edit_tail.rs"
+}

@@ -1,0 +1,41 @@
+{
+  "status": "meets-predeclared-gates",
+  "cases": [
+    {
+      "frames": 64,
+      "bounded": false,
+      "before_ns": 29667,
+      "after_ns": 29833,
+      "reduction": -0.0055954427478341895,
+      "pairs_won": 4,
+      "accepted": true
+    },
+    {
+      "frames": 64,
+      "bounded": true,
+      "before_ns": 29791,
+      "after_ns": 29084,
+      "reduction": 0.023731999597193743,
+      "pairs_won": 4,
+      "accepted": true
+    },
+    {
+      "frames": 262144,
+      "bounded": false,
+      "before_ns": 763500,
+      "after_ns": 29625,
+      "reduction": 0.9611984282907662,
+      "pairs_won": 7,
+      "accepted": true
+    },
+    {
+      "frames": 262144,
+      "bounded": true,
+      "before_ns": 1050959,
+      "after_ns": 30000,
+      "reduction": 0.9714546428547641,
+      "pairs_won": 7,
+      "accepted": true
+    }
+  ]
+}

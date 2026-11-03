@@ -1,0 +1,28 @@
+{
+  "status": "accepted",
+  "count_delta": 0,
+  "before": {
+    "passed": 1197,
+    "failed": 7,
+    "ignored": 26,
+    "log": "player-before.log"
+  },
+  "after": {
+    "lib_passed": 1205,
+    "lib_failed": 0,
+    "existing_ignored": 26,
+    "broader_player_passed": 1256,
+    "log": "../mp4-uniform-probe/player.log"
+  },
+  "independent_source_acceptance_before_expectation_update": "source-control.log",
+  "production_audio_seek_changed": false,
+  "all_original_player_assertions_retained": true,
+  "new_test": "source_seek_endpoint_is_the_exclusive_pcm_boundary_not_the_last_sample",
+  "expected_exclusive_endpoint_ms": 600,
+  "last_audible_sample_ns": 599875000,
+  "source_oracle_frames": 4800,
+  "sample_rate": 8000,
+  "no_emitted_pcm_at_endpoint": true,
+  "last_sample_exact_pcm_preserved": true,
+  "probe_independence": "probe-independence.json"
+}

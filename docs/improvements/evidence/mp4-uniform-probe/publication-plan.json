@@ -1,0 +1,13 @@
+{
+  "status": "ready-after-local-qualification",
+  "remote": "https://github.com/themoretheless/fvid.git",
+  "base": "52c2ab2a3fb2cc97df406429cc26641e323a58ac",
+  "atomic_targets": [
+    "main",
+    "codex/deliver-fvid-20261029"
+  ],
+  "accepted_count": 549,
+  "preserved": "Other worktrees, historical branches and four stashes untouched",
+  "cleanup": "Owned temporary benchmark binaries/build target/logs/scripts only after every job is terminal",
+  "ci": "Observe next main Linux/Windows runs; previous source CI default-unit failure is locally reproduced and repaired"
+}

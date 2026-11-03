@@ -1,0 +1,22 @@
+[
+  {
+    "name": "core",
+    "passed": 424,
+    "ignored": 0
+  },
+  {
+    "name": "player",
+    "passed": 1256,
+    "ignored": 26
+  },
+  {
+    "name": "core-check",
+    "passed": true,
+    "ignored": 0
+  },
+  {
+    "name": "player-check",
+    "passed": true,
+    "ignored": 0
+  }
+]

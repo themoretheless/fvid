@@ -1,0 +1,28 @@
+{
+  "status": "declared-before-paired-candidate-measurements",
+  "pairs": 7,
+  "iterations_per_process": 31,
+  "warmups_per_process": 3,
+  "alternation": "baseline-first for even pair indexes, candidate-first for odd",
+  "cases": {
+    "large": [
+      262144,
+      false,
+      true
+    ],
+    "control": [
+      64,
+      false,
+      true
+    ]
+  },
+  "acceptance": {
+    "large_median_reduction_at_least": 0.2,
+    "large_pairs_won_at_least": 6,
+    "control_max_relative_slowdown": 0.1,
+    "control_absolute_noise_allowance_ns": 5000
+  },
+  "full_metadata_equality_required": true,
+  "build": "cargo build --locked --offline --release -p fvid-media --example bench_mp4_uniform_probe",
+  "no_algorithm_or_public_api_change": true
+}

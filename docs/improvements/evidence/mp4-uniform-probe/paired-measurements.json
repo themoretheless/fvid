@@ -1,0 +1,5854 @@
+[
+  {
+    "frames": 64,
+    "bounded": false,
+    "pair": 0,
+    "results": {
+      "before": {
+        "bounded": false,
+        "elapsed_ns": [
+          32208,
+          32000,
+          34375,
+          33875,
+          31875,
+          32042,
+          31417,
+          30834,
+          30083,
+          29833,
+          29916,
+          29334,
+          29125,
+          31916,
+          29833,
+          29250,
+          29083,
+          29209,
+          28959,
+          29083,
+          28875,
+          30250,
+          29750,
+          28916,
+          28917,
+          28833,
+          29042,
+          31416,
+          30708,
+          29625,
+          29375
+        ],
+        "info": {
+          "bit_rate": 1811200,
+          "chapters": [],
+          "duration_us": 60000,
+          "format": "mov,mp4,m4a,3gp,3g2,mj2",
+          "metadata": {},
+          "path": "tests/fixtures/playback-errors/mp4-uniform-plan-scan/frames-64.mp4",
+          "start_us": 0,
+          "streams": [
+            {
+              "average_frame_rate": [
+                50,
+                1
+              ],
+              "bit_rate": 1656800,
+              "channels": 0,
+              "codec": "vp9",
+              "disposition": 0,
+              "duration": 3,
+              "extradata_bytes": 12,
+              "height": 16,
+              "index": 0,
+              "level": null,
+              "media_type": "video",
+              "metadata": {},
+              "pixel_format": -1,
+              "profile": null,
+              "sample_rate": 0,
+              "start": 0,
+              "time_base": [
+                1,
+                50
+              ],
+              "video_delay": 0,
+              "width": 16
+            },
+            {
+              "average_frame_rate": [
+                0,
+                1
+              ],
+              "bit_rate": 768000,
+              "channels": 1,
+              "codec": "pcm_s16le",
+              "disposition": 0,
+              "duration": 64,
+              "extradata_bytes": 0,
+              "height": 0,
+              "index": 1,
+              "level": null,
+              "media_type": "audio",
+              "metadata": {},
+              "pixel_format": -1,
+              "profile": null,
+              "sample_rate": 48000,
+              "start": 0,
+              "time_base": [
+                1,
+                48000
+              ],
+              "video_delay": 0,
+              "width": 0
+            }
+          ]
+        }
+      },
+      "after": {
+        "bounded": false,
+        "elapsed_ns": [
+          33292,
+          33541,
+          45250,
+          35250,
+          31208,
+          31708,
+          31917,
+          30375,
+          30083,
+          33250,
+          29666,
+          29375,
+          31000,
+          32458,
+          30166,
+          31750,
+          29542,
+          29166,
+          33833,
+          33458,
+          33917,
+          31667,
+          32208,
+          31250,
+          29541,
+          29250,
+          32375,
+          34334,
+          34208,
+          31000,
+          29292
+        ],
+        "info": {
+          "bit_rate": 1811200,
+          "chapters": [],
+          "duration_us": 60000,
+          "format": "mov,mp4,m4a,3gp,3g2,mj2",
+          "metadata": {},
+          "path": "tests/fixtures/playback-errors/mp4-uniform-plan-scan/frames-64.mp4",
+          "start_us": 0,
+          "streams": [
+            {
+              "average_frame_rate": [
+                50,
+                1
+              ],
+              "bit_rate": 1656800,
+              "channels": 0,
+              "codec": "vp9",
+              "disposition": 0,
+              "duration": 3,
+              "extradata_bytes": 12,
+              "height": 16,
+              "index": 0,
+              "level": null,
+              "media_type": "video",
+              "metadata": {},
+              "pixel_format": -1,
+              "profile": null,
+              "sample_rate": 0,
+              "start": 0,
+              "time_base": [
+                1,
+                50
+              ],
+              "video_delay": 0,
+              "width": 16
+            },
+            {
+              "average_frame_rate": [
+                0,
+                1
+              ],
+              "bit_rate": 768000,
+              "channels": 1,
+              "codec": "pcm_s16le",
+              "disposition": 0,
+              "duration": 64,
+              "extradata_bytes": 0,
+              "height": 0,
+              "index": 1,
+              "level": null,
+              "media_type": "audio",
+              "metadata": {},
+              "pixel_format": -1,
+              "profile": null,
+              "sample_rate": 48000,
+              "start": 0,
+              "time_base": [
+                1,
+                48000
+              ],
+              "video_delay": 0,
+              "width": 0
+            }
+          ]
+        }
+      }
+    }
+  },
+  {
+    "frames": 64,
+    "bounded": false,
+    "pair": 1,
+    "results": {
+      "after": {
+        "bounded": false,
+        "elapsed_ns": [
+          31541,
+          33667,
+          33541,
+          32875,
+          30000,
+          31375,
+          30917,
+          29625,
+          29542,
+          28958,
+          29042,
+          28916,
+          29334,
+          30500,
+          29750,
+          29084,
+          32167,
+          29708,
+          30083,
+          29542,
+          31084,
+          31500,
+          31833,
+          30250,
+          29875,
+          29792,
+          31166,
+          33875,
+          29834,
+          29792,
+          29500
+        ],
+        "info": {
+          "bit_rate": 1811200,
+          "chapters": [],
+          "duration_us": 60000,
+          "format": "mov,mp4,m4a,3gp,3g2,mj2",
+          "metadata": {},
+          "path": "tests/fixtures/playback-errors/mp4-uniform-plan-scan/frames-64.mp4",
+          "start_us": 0,
+          "streams": [
+            {
+              "average_frame_rate": [
+                50,
+                1
+              ],
+              "bit_rate": 1656800,
+              "channels": 0,
+              "codec": "vp9",
+              "disposition": 0,
+              "duration": 3,
+              "extradata_bytes": 12,
+              "height": 16,
+              "index": 0,
+              "level": null,
+              "media_type": "video",
+              "metadata": {},
+              "pixel_format": -1,
+              "profile": null,
+              "sample_rate": 0,
+              "start": 0,
+              "time_base": [
+                1,
+                50
+              ],
+              "video_delay": 0,
+              "width": 16
+            },
+            {
+              "average_frame_rate": [
+                0,
+                1
+              ],
+              "bit_rate": 768000,
+              "channels": 1,
+              "codec": "pcm_s16le",
+              "disposition": 0,
+              "duration": 64,
+              "extradata_bytes": 0,
+              "height": 0,
+              "index": 1,
+              "level": null,
+              "media_type": "audio",
+              "metadata": {},
+              "pixel_format": -1,
+              "profile": null,
+              "sample_rate": 48000,
+              "start": 0,
+              "time_base": [
+                1,
+                48000
+              ],
+              "video_delay": 0,
+              "width": 0
+            }
+          ]
+        }
+      },
+      "before": {
+        "bounded": false,
+        "elapsed_ns": [
+          28750,
+          28250,
+          31084,
+          30208,
+          28458,
+          27042,
+          26959,
+          26125,
+          26042,
+          25750,
+          27958,
+          28583,
+          29792,
+          28208,
+          27750,
+          27875,
+          28000,
+          29500,
+          28708,
+          28166,
+          28542,
+          29333,
+          29417,
+          28625,
+          28208,
+          25209,
+          24875,
+          27625,
+          28125,
+          28875,
+          28959
+        ],
+        "info": {
+          "bit_rate": 1811200,
+          "chapters": [],
+          "duration_us": 60000,
+          "format": "mov,mp4,m4a,3gp,3g2,mj2",
+          "metadata": {},
+          "path": "tests/fixtures/playback-errors/mp4-uniform-plan-scan/frames-64.mp4",
+          "start_us": 0,
+          "streams": [
+            {
+              "average_frame_rate": [
+                50,
+                1
+              ],
+              "bit_rate": 1656800,
+              "channels": 0,
+              "codec": "vp9",
+              "disposition": 0,
+              "duration": 3,
+              "extradata_bytes": 12,
+              "height": 16,
+              "index": 0,
+              "level": null,
+              "media_type": "video",
+              "metadata": {},
+              "pixel_format": -1,
+              "profile": null,
+              "sample_rate": 0,
+              "start": 0,
+              "time_base": [
+                1,
+                50
+              ],
+              "video_delay": 0,
+              "width": 16
+            },
+            {
+              "average_frame_rate": [
+                0,
+                1
+              ],
+              "bit_rate": 768000,
+              "channels": 1,
+              "codec": "pcm_s16le",
+              "disposition": 0,
+              "duration": 64,
+              "extradata_bytes": 0,
+              "height": 0,
+              "index": 1,
+              "level": null,
+              "media_type": "audio",
+              "metadata": {},
+              "pixel_format": -1,
+              "profile": null,
+              "sample_rate": 48000,
+              "start": 0,
+              "time_base": [
+                1,
+                48000
+              ],
+              "video_delay": 0,
+              "width": 0
+            }
+          ]
+        }
+      }
+    }
+  },
+  {
+    "frames": 64,
+    "bounded": false,
+    "pair": 2,
+    "results": {
+      "before": {
+        "bounded": false,
+        "elapsed_ns": [
+          30500,
+          36333,
+          32000,
+          32459,
+          32083,
+          31125,
+          33875,
+          29875,
+          29958,
+          30000,
+          29333,
+          29125,
+          30542,
+          29625,
+          29083,
+          30542,
+          32875,
+          30166,
+          29292,
+          29167,
+          29083,
+          30541,
+          29375,
+          28917,
+          29000,
+          28792,
+          29167,
+          28958,
+          30917,
+          29750,
+          29083
+        ],
+        "info": {
+          "bit_rate": 1811200,
+          "chapters": [],
+          "duration_us": 60000,
+          "format": "mov,mp4,m4a,3gp,3g2,mj2",
+          "metadata": {},
+          "path": "tests/fixtures/playback-errors/mp4-uniform-plan-scan/frames-64.mp4",
+          "start_us": 0,
+          "streams": [
+            {
+              "average_frame_rate": [
+                50,
+                1
+              ],
+              "bit_rate": 1656800,
+              "channels": 0,
+              "codec": "vp9",
+              "disposition": 0,
+              "duration": 3,
+              "extradata_bytes": 12,
+              "height": 16,
+              "index": 0,
+              "level": null,
+              "media_type": "video",
+              "metadata": {},
+              "pixel_format": -1,
+              "profile": null,
+              "sample_rate": 0,
+              "start": 0,
+              "time_base": [
+                1,
+                50
+              ],
+              "video_delay": 0,
+              "width": 16
+            },
+            {
+              "average_frame_rate": [
+                0,
+                1
+              ],
+              "bit_rate": 768000,
+              "channels": 1,
+              "codec": "pcm_s16le",
+              "disposition": 0,
+              "duration": 64,
+              "extradata_bytes": 0,
+              "height": 0,
+              "index": 1,
+              "level": null,
+              "media_type": "audio",
+              "metadata": {},
+              "pixel_format": -1,
+              "profile": null,
+              "sample_rate": 48000,
+              "start": 0,
+              "time_base": [
+                1,
+                48000
+              ],
+              "video_delay": 0,
+              "width": 0
+            }
+          ]
+        }
+      },
+      "after": {
+        "bounded": false,
+        "elapsed_ns": [
+          31333,
+          31542,
+          32583,
+          34292,
+          30125,
+          31209,
+          32917,
+          31000,
+          30125,
+          30375,
+          33500,
+          30125,
+          30958,
+          30417,
+          92000,
+          43208,
+          27125,
+          26666,
+          31375,
+          27459,
+          26542,
+          25625,
+          26542,
+          26667,
+          27375,
+          32917,
+          29458,
+          26375,
+          27083,
+          25708,
+          26125
+        ],
+        "info": {
+          "bit_rate": 1811200,
+          "chapters": [],
+          "duration_us": 60000,
+          "format": "mov,mp4,m4a,3gp,3g2,mj2",
+          "metadata": {},
+          "path": "tests/fixtures/playback-errors/mp4-uniform-plan-scan/frames-64.mp4",
+          "start_us": 0,
+          "streams": [
+            {
+              "average_frame_rate": [
+                50,
+                1
+              ],
+              "bit_rate": 1656800,
+              "channels": 0,
+              "codec": "vp9",
+              "disposition": 0,
+              "duration": 3,
+              "extradata_bytes": 12,
+              "height": 16,
+              "index": 0,
+              "level": null,
+              "media_type": "video",
+              "metadata": {},
+              "pixel_format": -1,
+              "profile": null,
+              "sample_rate": 0,
+              "start": 0,
+              "time_base": [
+                1,
+                50
+              ],
+              "video_delay": 0,
+              "width": 16
+            },
+            {
+              "average_frame_rate": [
+                0,
+                1
+              ],
+              "bit_rate": 768000,
+              "channels": 1,
+              "codec": "pcm_s16le",
+              "disposition": 0,
+              "duration": 64,
+              "extradata_bytes": 0,
+              "height": 0,
+              "index": 1,
+              "level": null,
+              "media_type": "audio",
+              "metadata": {},
+              "pixel_format": -1,
+              "profile": null,
+              "sample_rate": 48000,
+              "start": 0,
+              "time_base": [
+                1,
+                48000
+              ],
+              "video_delay": 0,
+              "width": 0
+            }
+          ]
+        }
+      }
+    }
+  },
+  {
+    "frames": 64,
+    "bounded": false,
+    "pair": 3,
+    "results": {
+      "after": {
+        "bounded": false,
+        "elapsed_ns": [
+          31750,
+          30875,
+          31291,
+          32625,
+          31250,
+          31750,
+          30875,
+          29375,
+          29042,
+          29125,
+          29000,
+          28875,
+          28750,
+          29958,
+          35625,
+          30666,
+          28791,
+          28666,
+          29125,
+          28500,
+          28583,
+          28375,
+          32667,
+          30334,
+          28708,
+          28500,
+          29792,
+          28833,
+          28584,
+          30000,
+          28958
+        ],
+        "info": {
+          "bit_rate": 1811200,
+          "chapters": [],
+          "duration_us": 60000,
+          "format": "mov,mp4,m4a,3gp,3g2,mj2",
+          "metadata": {},
+          "path": "tests/fixtures/playback-errors/mp4-uniform-plan-scan/frames-64.mp4",
+          "start_us": 0,
+          "streams": [
+            {
+              "average_frame_rate": [
+                50,
+                1
+              ],
+              "bit_rate": 1656800,
+              "channels": 0,
+              "codec": "vp9",
+              "disposition": 0,
+              "duration": 3,
+              "extradata_bytes": 12,
+              "height": 16,
+              "index": 0,
+              "level": null,
+              "media_type": "video",
+              "metadata": {},
+              "pixel_format": -1,
+              "profile": null,
+              "sample_rate": 0,
+              "start": 0,
+              "time_base": [
+                1,
+                50
+              ],
+              "video_delay": 0,
+              "width": 16
+            },
+            {
+              "average_frame_rate": [
+                0,
+                1
+              ],
+              "bit_rate": 768000,
+              "channels": 1,
+              "codec": "pcm_s16le",
+              "disposition": 0,
+              "duration": 64,
+              "extradata_bytes": 0,
+              "height": 0,
+              "index": 1,
+              "level": null,
+              "media_type": "audio",
+              "metadata": {},
+              "pixel_format": -1,
+              "profile": null,
+              "sample_rate": 48000,
+              "start": 0,
+              "time_base": [
+                1,
+                48000
+              ],
+              "video_delay": 0,
+              "width": 0
+            }
+          ]
+        }
+      },
+      "before": {
+        "bounded": false,
+        "elapsed_ns": [
+          31250,
+          30750,
+          32042,
+          32916,
+          30208,
+          31792,
+          30875,
+          29667,
+          29084,
+          31459,
+          32042,
+          29417,
+          30375,
+          29417,
+          28959,
+          29292,
+          29042,
+          30500,
+          29667,
+          29042,
+          29000,
+          30375,
+          30417,
+          29458,
+          28834,
+          28792,
+          28792,
+          29959,
+          30042,
+          29208,
+          29042
+        ],
+        "info": {
+          "bit_rate": 1811200,
+          "chapters": [],
+          "duration_us": 60000,
+          "format": "mov,mp4,m4a,3gp,3g2,mj2",
+          "metadata": {},
+          "path": "tests/fixtures/playback-errors/mp4-uniform-plan-scan/frames-64.mp4",
+          "start_us": 0,
+          "streams": [
+            {
+              "average_frame_rate": [
+                50,
+                1
+              ],
+              "bit_rate": 1656800,
+              "channels": 0,
+              "codec": "vp9",
+              "disposition": 0,
+              "duration": 3,
+              "extradata_bytes": 12,
+              "height": 16,
+              "index": 0,
+              "level": null,
+              "media_type": "video",
+              "metadata": {},
+              "pixel_format": -1,
+              "profile": null,
+              "sample_rate": 0,
+              "start": 0,
+              "time_base": [
+                1,
+                50
+              ],
+              "video_delay": 0,
+              "width": 16
+            },
+            {
+              "average_frame_rate": [
+                0,
+                1
+              ],
+              "bit_rate": 768000,
+              "channels": 1,
+              "codec": "pcm_s16le",
+              "disposition": 0,
+              "duration": 64,
+              "extradata_bytes": 0,
+              "height": 0,
+              "index": 1,
+              "level": null,
+              "media_type": "audio",
+              "metadata": {},
+              "pixel_format": -1,
+              "profile": null,
+              "sample_rate": 48000,
+              "start": 0,
+              "time_base": [
+                1,
+                48000
+              ],
+              "video_delay": 0,
+              "width": 0
+            }
+          ]
+        }
+      }
+    }
+  },
+  {
+    "frames": 64,
+    "bounded": false,
+    "pair": 4,
+    "results": {
+      "before": {
+        "bounded": false,
+        "elapsed_ns": [
+          31250,
+          30167,
+          33333,
+          31417,
+          29291,
+          33417,
+          31833,
+          30041,
+          35250,
+          29125,
+          28708,
+          28625,
+          29792,
+          30083,
+          28500,
+          28625,
+          28417,
+          28750,
+          30167,
+          29000,
+          28625,
+          29833,
+          30125,
+          29000,
+          28750,
+          28375,
+          28417,
+          29667,
+          29917,
+          28750,
+          28417
+        ],
+        "info": {
+          "bit_rate": 1811200,
+          "chapters": [],
+          "duration_us": 60000,
+          "format": "mov,mp4,m4a,3gp,3g2,mj2",
+          "metadata": {},
+          "path": "tests/fixtures/playback-errors/mp4-uniform-plan-scan/frames-64.mp4",
+          "start_us": 0,
+          "streams": [
+            {
+              "average_frame_rate": [
+                50,
+                1
+              ],
+              "bit_rate": 1656800,
+              "channels": 0,
+              "codec": "vp9",
+              "disposition": 0,
+              "duration": 3,
+              "extradata_bytes": 12,
+              "height": 16,
+              "index": 0,
+              "level": null,
+              "media_type": "video",
+              "metadata": {},
+              "pixel_format": -1,
+              "profile": null,
+              "sample_rate": 0,
+              "start": 0,
+              "time_base": [
+                1,
+                50
+              ],
+              "video_delay": 0,
+              "width": 16
+            },
+            {
+              "average_frame_rate": [
+                0,
+                1
+              ],
+              "bit_rate": 768000,
+              "channels": 1,
+              "codec": "pcm_s16le",
+              "disposition": 0,
+              "duration": 64,
+              "extradata_bytes": 0,
+              "height": 0,
+              "index": 1,
+              "level": null,
+              "media_type": "audio",
+              "metadata": {},
+              "pixel_format": -1,
+              "profile": null,
+              "sample_rate": 48000,
+              "start": 0,
+              "time_base": [
+                1,
+                48000
+              ],
+              "video_delay": 0,
+              "width": 0
+            }
+          ]
+        }
+      },
+      "after": {
+        "bounded": false,
+        "elapsed_ns": [
+          31125,
+          33750,
+          32166,
+          31291,
+          29917,
+          30875,
+          33667,
+          29084,
+          28917,
+          28584,
+          29416,
+          29250,
+          32792,
+          29417,
+          28375,
+          28375,
+          28209,
+          28583,
+          28416,
+          28667,
+          28167,
+          28458,
+          30167,
+          28875,
+          28625,
+          28333,
+          29709,
+          28958,
+          29708,
+          28708,
+          28375
+        ],
+        "info": {
+          "bit_rate": 1811200,
+          "chapters": [],
+          "duration_us": 60000,
+          "format": "mov,mp4,m4a,3gp,3g2,mj2",
+          "metadata": {},
+          "path": "tests/fixtures/playback-errors/mp4-uniform-plan-scan/frames-64.mp4",
+          "start_us": 0,
+          "streams": [
+            {
+              "average_frame_rate": [
+                50,
+                1
+              ],
+              "bit_rate": 1656800,
+              "channels": 0,
+              "codec": "vp9",
+              "disposition": 0,
+              "duration": 3,
+              "extradata_bytes": 12,
+              "height": 16,
+              "index": 0,
+              "level": null,
+              "media_type": "video",
+              "metadata": {},
+              "pixel_format": -1,
+              "profile": null,
+              "sample_rate": 0,
+              "start": 0,
+              "time_base": [
+                1,
+                50
+              ],
+              "video_delay": 0,
+              "width": 16
+            },
+            {
+              "average_frame_rate": [
+                0,
+                1
+              ],
+              "bit_rate": 768000,
+              "channels": 1,
+              "codec": "pcm_s16le",
+              "disposition": 0,
+              "duration": 64,
+              "extradata_bytes": 0,
+              "height": 0,
+              "index": 1,
+              "level": null,
+              "media_type": "audio",
+              "metadata": {},
+              "pixel_format": -1,
+              "profile": null,
+              "sample_rate": 48000,
+              "start": 0,
+              "time_base": [
+                1,
+                48000
+              ],
+              "video_delay": 0,
+              "width": 0
+            }
+          ]
+        }
+      }
+    }
+  },
+  {
+    "frames": 64,
+    "bounded": false,
+    "pair": 5,
+    "results": {
+      "after": {
+        "bounded": false,
+        "elapsed_ns": [
+          31458,
+          30250,
+          32791,
+          31750,
+          31083,
+          30833,
+          30292,
+          29334,
+          29041,
+          28917,
+          29959,
+          30292,
+          30208,
+          28917,
+          28833,
+          28667,
+          28500,
+          28583,
+          29000,
+          28375,
+          28583,
+          30250,
+          28791,
+          28583,
+          28708,
+          31125,
+          29833,
+          30875,
+          29625,
+          32000,
+          32041
+        ],
+        "info": {
+          "bit_rate": 1811200,
+          "chapters": [],
+          "duration_us": 60000,
+          "format": "mov,mp4,m4a,3gp,3g2,mj2",
+          "metadata": {},
+          "path": "tests/fixtures/playback-errors/mp4-uniform-plan-scan/frames-64.mp4",
+          "start_us": 0,
+          "streams": [
+            {
+              "average_frame_rate": [
+                50,
+                1
+              ],
+              "bit_rate": 1656800,
+              "channels": 0,
+              "codec": "vp9",
+              "disposition": 0,
+              "duration": 3,
+              "extradata_bytes": 12,
+              "height": 16,
+              "index": 0,
+              "level": null,
+              "media_type": "video",
+              "metadata": {},
+              "pixel_format": -1,
+              "profile": null,
+              "sample_rate": 0,
+              "start": 0,
+              "time_base": [
+                1,
+                50
+              ],
+              "video_delay": 0,
+              "width": 16
+            },
+            {
+              "average_frame_rate": [
+                0,
+                1
+              ],
+              "bit_rate": 768000,
+              "channels": 1,
+              "codec": "pcm_s16le",
+              "disposition": 0,
+              "duration": 64,
+              "extradata_bytes": 0,
+              "height": 0,
+              "index": 1,
+              "level": null,
+              "media_type": "audio",
+              "metadata": {},
+              "pixel_format": -1,
+              "profile": null,
+              "sample_rate": 48000,
+              "start": 0,
+              "time_base": [
+                1,
+                48000
+              ],
+              "video_delay": 0,
+              "width": 0
+            }
+          ]
+        }
+      },
+      "before": {
+        "bounded": false,
+        "elapsed_ns": [
+          32084,
+          32708,
+          36500,
+          36417,
+          30708,
+          31375,
+          30542,
+          30417,
+          32125,
+          29625,
+          30000,
+          29083,
+          30208,
+          29542,
+          28875,
+          28833,
+          28625,
+          28917,
+          33667,
+          64041,
+          117792,
+          38333,
+          33083,
+          31958,
+          76083,
+          63042,
+          32667,
+          31291,
+          31292,
+          116792,
+          31083
+        ],
+        "info": {
+          "bit_rate": 1811200,
+          "chapters": [],
+          "duration_us": 60000,
+          "format": "mov,mp4,m4a,3gp,3g2,mj2",
+          "metadata": {},
+          "path": "tests/fixtures/playback-errors/mp4-uniform-plan-scan/frames-64.mp4",
+          "start_us": 0,
+          "streams": [
+            {
+              "average_frame_rate": [
+                50,
+                1
+              ],
+              "bit_rate": 1656800,
+              "channels": 0,
+              "codec": "vp9",
+              "disposition": 0,
+              "duration": 3,
+              "extradata_bytes": 12,
+              "height": 16,
+              "index": 0,
+              "level": null,
+              "media_type": "video",
+              "metadata": {},
+              "pixel_format": -1,
+              "profile": null,
+              "sample_rate": 0,
+              "start": 0,
+              "time_base": [
+                1,
+                50
+              ],
+              "video_delay": 0,
+              "width": 16
+            },
+            {
+              "average_frame_rate": [
+                0,
+                1
+              ],
+              "bit_rate": 768000,
+              "channels": 1,
+              "codec": "pcm_s16le",
+              "disposition": 0,
+              "duration": 64,
+              "extradata_bytes": 0,
+              "height": 0,
+              "index": 1,
+              "level": null,
+              "media_type": "audio",
+              "metadata": {},
+              "pixel_format": -1,
+              "profile": null,
+              "sample_rate": 48000,
+              "start": 0,
+              "time_base": [
+                1,
+                48000
+              ],
+              "video_delay": 0,
+              "width": 0
+            }
+          ]
+        }
+      }
+    }
+  },
+  {
+    "frames": 64,
+    "bounded": false,
+    "pair": 6,
+    "results": {
+      "before": {
+        "bounded": false,
+        "elapsed_ns": [
+          73417,
+          29666,
+          31417,
+          32000,
+          31000,
+          31000,
+          30959,
+          29417,
+          28792,
+          29834,
+          29042,
+          31833,
+          29375,
+          29500,
+          28709,
+          28500,
+          28625,
+          28292,
+          31167,
+          28958,
+          32833,
+          29875,
+          28625,
+          31167,
+          29250,
+          28375,
+          28084,
+          29291,
+          28875,
+          29542,
+          28500
+        ],
+        "info": {
+          "bit_rate": 1811200,
+          "chapters": [],
+          "duration_us": 60000,
+          "format": "mov,mp4,m4a,3gp,3g2,mj2",
+          "metadata": {},
+          "path": "tests/fixtures/playback-errors/mp4-uniform-plan-scan/frames-64.mp4",
+          "start_us": 0,
+          "streams": [
+            {
+              "average_frame_rate": [
+                50,
+                1
+              ],
+              "bit_rate": 1656800,
+              "channels": 0,
+              "codec": "vp9",
+              "disposition": 0,
+              "duration": 3,
+              "extradata_bytes": 12,
+              "height": 16,
+              "index": 0,
+              "level": null,
+              "media_type": "video",
+              "metadata": {},
+              "pixel_format": -1,
+              "profile": null,
+              "sample_rate": 0,
+              "start": 0,
+              "time_base": [
+                1,
+                50
+              ],
+              "video_delay": 0,
+              "width": 16
+            },
+            {
+              "average_frame_rate": [
+                0,
+                1
+              ],
+              "bit_rate": 768000,
+              "channels": 1,
+              "codec": "pcm_s16le",
+              "disposition": 0,
+              "duration": 64,
+              "extradata_bytes": 0,
+              "height": 0,
+              "index": 1,
+              "level": null,
+              "media_type": "audio",
+              "metadata": {},
+              "pixel_format": -1,
+              "profile": null,
+              "sample_rate": 48000,
+              "start": 0,
+              "time_base": [
+                1,
+                48000
+              ],
+              "video_delay": 0,
+              "width": 0
+            }
+          ]
+        }
+      },
+      "after": {
+        "bounded": false,
+        "elapsed_ns": [
+          27625,
+          27833,
+          37584,
+          44375,
+          38125,
+          31041,
+          29541,
+          28958,
+          28375,
+          29000,
+          36333,
+          29791,
+          31250,
+          26125,
+          28417,
+          30666,
+          27708,
+          27709,
+          27791,
+          28250,
+          27625,
+          28750,
+          27834,
+          27750,
+          27625,
+          27541,
+          28667,
+          28250,
+          27500,
+          27792,
+          27583
+        ],
+        "info": {
+          "bit_rate": 1811200,
+          "chapters": [],
+          "duration_us": 60000,
+          "format": "mov,mp4,m4a,3gp,3g2,mj2",
+          "metadata": {},
+          "path": "tests/fixtures/playback-errors/mp4-uniform-plan-scan/frames-64.mp4",
+          "start_us": 0,
+          "streams": [
+            {
+              "average_frame_rate": [
+                50,
+                1
+              ],
+              "bit_rate": 1656800,
+              "channels": 0,
+              "codec": "vp9",
+              "disposition": 0,
+              "duration": 3,
+              "extradata_bytes": 12,
+              "height": 16,
+              "index": 0,
+              "level": null,
+              "media_type": "video",
+              "metadata": {},
+              "pixel_format": -1,
+              "profile": null,
+              "sample_rate": 0,
+              "start": 0,
+              "time_base": [
+                1,
+                50
+              ],
+              "video_delay": 0,
+              "width": 16
+            },
+            {
+              "average_frame_rate": [
+                0,
+                1
+              ],
+              "bit_rate": 768000,
+              "channels": 1,
+              "codec": "pcm_s16le",
+              "disposition": 0,
+              "duration": 64,
+              "extradata_bytes": 0,
+              "height": 0,
+              "index": 1,
+              "level": null,
+              "media_type": "audio",
+              "metadata": {},
+              "pixel_format": -1,
+              "profile": null,
+              "sample_rate": 48000,
+              "start": 0,
+              "time_base": [
+                1,
+                48000
+              ],
+              "video_delay": 0,
+              "width": 0
+            }
+          ]
+        }
+      }
+    }
+  },
+  {
+    "frames": 64,
+    "bounded": true,
+    "pair": 0,
+    "results": {
+      "before": {
+        "bounded": true,
+        "elapsed_ns": [
+          31042,
+          30541,
+          31750,
+          31916,
+          30667,
+          31416,
+          30416,
+          29291,
+          29250,
+          29042,
+          28750,
+          28750,
+          30125,
+          29042,
+          28750,
+          28500,
+          28666,
+          28667,
+          29916,
+          29125,
+          28709,
+          28666,
+          30709,
+          29208,
+          28875,
+          28667,
+          28708,
+          28417,
+          28291,
+          29667,
+          28875
+        ],
+        "info": {
+          "bit_rate": 1811200,
+          "chapters": [],
+          "duration_us": 60000,
+          "format": "mov,mp4,m4a,3gp,3g2,mj2",
+          "metadata": {},
+          "path": "tests/fixtures/playback-errors/mp4-uniform-plan-scan/frames-64.mp4",
+          "start_us": 0,
+          "streams": [
+            {
+              "average_frame_rate": [
+                50,
+                1
+              ],
+              "bit_rate": 1656800,
+              "channels": 0,
+              "codec": "vp9",
+              "disposition": 0,
+              "duration": 3,
+              "extradata_bytes": 12,
+              "height": 16,
+              "index": 0,
+              "level": null,
+              "media_type": "video",
+              "metadata": {},
+              "pixel_format": -1,
+              "profile": null,
+              "sample_rate": 0,
+              "start": 0,
+              "time_base": [
+                1,
+                50
+              ],
+              "video_delay": 0,
+              "width": 16
+            },
+            {
+              "average_frame_rate": [
+                0,
+                1
+              ],
+              "bit_rate": 768000,
+              "channels": 1,
+              "codec": "pcm_s16le",
+              "disposition": 0,
+              "duration": 64,
+              "extradata_bytes": 0,
+              "height": 0,
+              "index": 1,
+              "level": null,
+              "media_type": "audio",
+              "metadata": {},
+              "pixel_format": -1,
+              "profile": null,
+              "sample_rate": 48000,
+              "start": 0,
+              "time_base": [
+                1,
+                48000
+              ],
+              "video_delay": 0,
+              "width": 0
+            }
+          ]
+        }
+      },
+      "after": {
+        "bounded": true,
+        "elapsed_ns": [
+          30292,
+          31250,
+          32916,
+          31042,
+          29792,
+          31500,
+          31041,
+          29708,
+          30000,
+          29584,
+          29542,
+          28916,
+          30250,
+          30625,
+          29250,
+          28833,
+          28542,
+          29041,
+          28833,
+          28542,
+          28459,
+          28625,
+          30459,
+          29667,
+          29000,
+          28417,
+          29833,
+          28917,
+          28916,
+          28292,
+          28583
+        ],
+        "info": {
+          "bit_rate": 1811200,
+          "chapters": [],
+          "duration_us": 60000,
+          "format": "mov,mp4,m4a,3gp,3g2,mj2",
+          "metadata": {},
+          "path": "tests/fixtures/playback-errors/mp4-uniform-plan-scan/frames-64.mp4",
+          "start_us": 0,
+          "streams": [
+            {
+              "average_frame_rate": [
+                50,
+                1
+              ],
+              "bit_rate": 1656800,
+              "channels": 0,
+              "codec": "vp9",
+              "disposition": 0,
+              "duration": 3,
+              "extradata_bytes": 12,
+              "height": 16,
+              "index": 0,
+              "level": null,
+              "media_type": "video",
+              "metadata": {},
+              "pixel_format": -1,
+              "profile": null,
+              "sample_rate": 0,
+              "start": 0,
+              "time_base": [
+                1,
+                50
+              ],
+              "video_delay": 0,
+              "width": 16
+            },
+            {
+              "average_frame_rate": [
+                0,
+                1
+              ],
+              "bit_rate": 768000,
+              "channels": 1,
+              "codec": "pcm_s16le",
+              "disposition": 0,
+              "duration": 64,
+              "extradata_bytes": 0,
+              "height": 0,
+              "index": 1,
+              "level": null,
+              "media_type": "audio",
+              "metadata": {},
+              "pixel_format": -1,
+              "profile": null,
+              "sample_rate": 48000,
+              "start": 0,
+              "time_base": [
+                1,
+                48000
+              ],
+              "video_delay": 0,
+              "width": 0
+            }
+          ]
+        }
+      }
+    }
+  },
+  {
+    "frames": 64,
+    "bounded": true,
+    "pair": 1,
+    "results": {
+      "after": {
+        "bounded": true,
+        "elapsed_ns": [
+          30417,
+          30500,
+          32417,
+          31250,
+          30042,
+          36666,
+          33834,
+          29958,
+          29583,
+          29792,
+          31666,
+          29292,
+          30500,
+          30583,
+          29458,
+          28833,
+          28625,
+          28584,
+          28541,
+          28625,
+          28417,
+          29875,
+          29667,
+          33042,
+          30958,
+          35542,
+          34667,
+          51292,
+          36458,
+          28250,
+          26875
+        ],
+        "info": {
+          "bit_rate": 1811200,
+          "chapters": [],
+          "duration_us": 60000,
+          "format": "mov,mp4,m4a,3gp,3g2,mj2",
+          "metadata": {},
+          "path": "tests/fixtures/playback-errors/mp4-uniform-plan-scan/frames-64.mp4",
+          "start_us": 0,
+          "streams": [
+            {
+              "average_frame_rate": [
+                50,
+                1
+              ],
+              "bit_rate": 1656800,
+              "channels": 0,
+              "codec": "vp9",
+              "disposition": 0,
+              "duration": 3,
+              "extradata_bytes": 12,
+              "height": 16,
+              "index": 0,
+              "level": null,
+              "media_type": "video",
+              "metadata": {},
+              "pixel_format": -1,
+              "profile": null,
+              "sample_rate": 0,
+              "start": 0,
+              "time_base": [
+                1,
+                50
+              ],
+              "video_delay": 0,
+              "width": 16
+            },
+            {
+              "average_frame_rate": [
+                0,
+                1
+              ],
+              "bit_rate": 768000,
+              "channels": 1,
+              "codec": "pcm_s16le",
+              "disposition": 0,
+              "duration": 64,
+              "extradata_bytes": 0,
+              "height": 0,
+              "index": 1,
+              "level": null,
+              "media_type": "audio",
+              "metadata": {},
+              "pixel_format": -1,
+              "profile": null,
+              "sample_rate": 48000,
+              "start": 0,
+              "time_base": [
+                1,
+                48000
+              ],
+              "video_delay": 0,
+              "width": 0
+            }
+          ]
+        }
+      },
+      "before": {
+        "bounded": true,
+        "elapsed_ns": [
+          31625,
+          31125,
+          31958,
+          32083,
+          30167,
+          32083,
+          31750,
+          29792,
+          29209,
+          29333,
+          30542,
+          30041,
+          34375,
+          30042,
+          29500,
+          29167,
+          31541,
+          30083,
+          28750,
+          28791,
+          29834,
+          29625,
+          29042,
+          28958,
+          28584,
+          28667,
+          28791,
+          30041,
+          29625,
+          28792,
+          28625
+        ],
+        "info": {
+          "bit_rate": 1811200,
+          "chapters": [],
+          "duration_us": 60000,
+          "format": "mov,mp4,m4a,3gp,3g2,mj2",
+          "metadata": {},
+          "path": "tests/fixtures/playback-errors/mp4-uniform-plan-scan/frames-64.mp4",
+          "start_us": 0,
+          "streams": [
+            {
+              "average_frame_rate": [
+                50,
+                1
+              ],
+              "bit_rate": 1656800,
+              "channels": 0,
+              "codec": "vp9",
+              "disposition": 0,
+              "duration": 3,
+              "extradata_bytes": 12,
+              "height": 16,
+              "index": 0,
+              "level": null,
+              "media_type": "video",
+              "metadata": {},
+              "pixel_format": -1,
+              "profile": null,
+              "sample_rate": 0,
+              "start": 0,
+              "time_base": [
+                1,
+                50
+              ],
+              "video_delay": 0,
+              "width": 16
+            },
+            {
+              "average_frame_rate": [
+                0,
+                1
+              ],
+              "bit_rate": 768000,
+              "channels": 1,
+              "codec": "pcm_s16le",
+              "disposition": 0,
+              "duration": 64,
+              "extradata_bytes": 0,
+              "height": 0,
+              "index": 1,
+              "level": null,
+              "media_type": "audio",
+              "metadata": {},
+              "pixel_format": -1,
+              "profile": null,
+              "sample_rate": 48000,
+              "start": 0,
+              "time_base": [
+                1,
+                48000
+              ],
+              "video_delay": 0,
+              "width": 0
+            }
+          ]
+        }
+      }
+    }
+  },
+  {
+    "frames": 64,
+    "bounded": true,
+    "pair": 2,
+    "results": {
+      "before": {
+        "bounded": true,
+        "elapsed_ns": [
+          32083,
+          33875,
+          31666,
+          31875,
+          29833,
+          32125,
+          30625,
+          29417,
+          29583,
+          29042,
+          28958,
+          28500,
+          30291,
+          32250,
+          28792,
+          28709,
+          28666,
+          35083,
+          29250,
+          28959,
+          28750,
+          28291,
+          30750,
+          29333,
+          28792,
+          28542,
+          68959,
+          46208,
+          33000,
+          39500,
+          33167
+        ],
+        "info": {
+          "bit_rate": 1811200,
+          "chapters": [],
+          "duration_us": 60000,
+          "format": "mov,mp4,m4a,3gp,3g2,mj2",
+          "metadata": {},
+          "path": "tests/fixtures/playback-errors/mp4-uniform-plan-scan/frames-64.mp4",
+          "start_us": 0,
+          "streams": [
+            {
+              "average_frame_rate": [
+                50,
+                1
+              ],
+              "bit_rate": 1656800,
+              "channels": 0,
+              "codec": "vp9",
+              "disposition": 0,
+              "duration": 3,
+              "extradata_bytes": 12,
+              "height": 16,
+              "index": 0,
+              "level": null,
+              "media_type": "video",
+              "metadata": {},
+              "pixel_format": -1,
+              "profile": null,
+              "sample_rate": 0,
+              "start": 0,
+              "time_base": [
+                1,
+                50
+              ],
+              "video_delay": 0,
+              "width": 16
+            },
+            {
+              "average_frame_rate": [
+                0,
+                1
+              ],
+              "bit_rate": 768000,
+              "channels": 1,
+              "codec": "pcm_s16le",
+              "disposition": 0,
+              "duration": 64,
+              "extradata_bytes": 0,
+              "height": 0,
+              "index": 1,
+              "level": null,
+              "media_type": "audio",
+              "metadata": {},
+              "pixel_format": -1,
+              "profile": null,
+              "sample_rate": 48000,
+              "start": 0,
+              "time_base": [
+                1,
+                48000
+              ],
+              "video_delay": 0,
+              "width": 0
+            }
+          ]
+        }
+      },
+      "after": {
+        "bounded": true,
+        "elapsed_ns": [
+          30959,
+          30416,
+          31666,
+          30625,
+          30167,
+          30458,
+          29916,
+          29541,
+          31041,
+          29083,
+          28958,
+          28250,
+          30042,
+          29791,
+          31250,
+          28625,
+          28708,
+          28209,
+          28167,
+          28083,
+          28250,
+          27958,
+          30500,
+          29083,
+          28750,
+          28292,
+          28083,
+          28333,
+          28208,
+          29250,
+          28542
+        ],
+        "info": {
+          "bit_rate": 1811200,
+          "chapters": [],
+          "duration_us": 60000,
+          "format": "mov,mp4,m4a,3gp,3g2,mj2",
+          "metadata": {},
+          "path": "tests/fixtures/playback-errors/mp4-uniform-plan-scan/frames-64.mp4",
+          "start_us": 0,
+          "streams": [
+            {
+              "average_frame_rate": [
+                50,
+                1
+              ],
+              "bit_rate": 1656800,
+              "channels": 0,
+              "codec": "vp9",
+              "disposition": 0,
+              "duration": 3,
+              "extradata_bytes": 12,
+              "height": 16,
+              "index": 0,
+              "level": null,
+              "media_type": "video",
+              "metadata": {},
+              "pixel_format": -1,
+              "profile": null,
+              "sample_rate": 0,
+              "start": 0,
+              "time_base": [
+                1,
+                50
+              ],
+              "video_delay": 0,
+              "width": 16
+            },
+            {
+              "average_frame_rate": [
+                0,
+                1
+              ],
+              "bit_rate": 768000,
+              "channels": 1,
+              "codec": "pcm_s16le",
+              "disposition": 0,
+              "duration": 64,
+              "extradata_bytes": 0,
+              "height": 0,
+              "index": 1,
+              "level": null,
+              "media_type": "audio",
+              "metadata": {},
+              "pixel_format": -1,
+              "profile": null,
+              "sample_rate": 48000,
+              "start": 0,
+              "time_base": [
+                1,
+                48000
+              ],
+              "video_delay": 0,
+              "width": 0
+            }
+          ]
+        }
+      }
+    }
+  },
+  {
+    "frames": 64,
+    "bounded": true,
+    "pair": 3,
+    "results": {
+      "after": {
+        "bounded": true,
+        "elapsed_ns": [
+          31750,
+          31250,
+          33541,
+          36375,
+          31750,
+          31458,
+          31208,
+          30083,
+          29792,
+          30500,
+          29667,
+          29500,
+          29084,
+          30000,
+          29417,
+          28959,
+          28541,
+          28625,
+          28584,
+          28292,
+          28333,
+          28625,
+          31875,
+          28875,
+          28416,
+          28709,
+          28000,
+          28000,
+          27917,
+          27750,
+          27791
+        ],
+        "info": {
+          "bit_rate": 1811200,
+          "chapters": [],
+          "duration_us": 60000,
+          "format": "mov,mp4,m4a,3gp,3g2,mj2",
+          "metadata": {},
+          "path": "tests/fixtures/playback-errors/mp4-uniform-plan-scan/frames-64.mp4",
+          "start_us": 0,
+          "streams": [
+            {
+              "average_frame_rate": [
+                50,
+                1
+              ],
+              "bit_rate": 1656800,
+              "channels": 0,
+              "codec": "vp9",
+              "disposition": 0,
+              "duration": 3,
+              "extradata_bytes": 12,
+              "height": 16,
+              "index": 0,
+              "level": null,
+              "media_type": "video",
+              "metadata": {},
+              "pixel_format": -1,
+              "profile": null,
+              "sample_rate": 0,
+              "start": 0,
+              "time_base": [
+                1,
+                50
+              ],
+              "video_delay": 0,
+              "width": 16
+            },
+            {
+              "average_frame_rate": [
+                0,
+                1
+              ],
+              "bit_rate": 768000,
+              "channels": 1,
+              "codec": "pcm_s16le",
+              "disposition": 0,
+              "duration": 64,
+              "extradata_bytes": 0,
+              "height": 0,
+              "index": 1,
+              "level": null,
+              "media_type": "audio",
+              "metadata": {},
+              "pixel_format": -1,
+              "profile": null,
+              "sample_rate": 48000,
+              "start": 0,
+              "time_base": [
+                1,
+                48000
+              ],
+              "video_delay": 0,
+              "width": 0
+            }
+          ]
+        }
+      },
+      "before": {
+        "bounded": true,
+        "elapsed_ns": [
+          30416,
+          30334,
+          34125,
+          30875,
+          29375,
+          30541,
+          33500,
+          30042,
+          29417,
+          28917,
+          28375,
+          28208,
+          29583,
+          29083,
+          28791,
+          30209,
+          29208,
+          28792,
+          28458,
+          28333,
+          28125,
+          28166,
+          29167,
+          28333,
+          28083,
+          28333,
+          28000,
+          30042,
+          28750,
+          29792,
+          28541
+        ],
+        "info": {
+          "bit_rate": 1811200,
+          "chapters": [],
+          "duration_us": 60000,
+          "format": "mov,mp4,m4a,3gp,3g2,mj2",
+          "metadata": {},
+          "path": "tests/fixtures/playback-errors/mp4-uniform-plan-scan/frames-64.mp4",
+          "start_us": 0,
+          "streams": [
+            {
+              "average_frame_rate": [
+                50,
+                1
+              ],
+              "bit_rate": 1656800,
+              "channels": 0,
+              "codec": "vp9",
+              "disposition": 0,
+              "duration": 3,
+              "extradata_bytes": 12,
+              "height": 16,
+              "index": 0,
+              "level": null,
+              "media_type": "video",
+              "metadata": {},
+              "pixel_format": -1,
+              "profile": null,
+              "sample_rate": 0,
+              "start": 0,
+              "time_base": [
+                1,
+                50
+              ],
+              "video_delay": 0,
+              "width": 16
+            },
+            {
+              "average_frame_rate": [
+                0,
+                1
+              ],
+              "bit_rate": 768000,
+              "channels": 1,
+              "codec": "pcm_s16le",
+              "disposition": 0,
+              "duration": 64,
+              "extradata_bytes": 0,
+              "height": 0,
+              "index": 1,
+              "level": null,
+              "media_type": "audio",
+              "metadata": {},
+              "pixel_format": -1,
+              "profile": null,
+              "sample_rate": 48000,
+              "start": 0,
+              "time_base": [
+                1,
+                48000
+              ],
+              "video_delay": 0,
+              "width": 0
+            }
+          ]
+        }
+      }
+    }
+  },
+  {
+    "frames": 64,
+    "bounded": true,
+    "pair": 4,
+    "results": {
+      "before": {
+        "bounded": true,
+        "elapsed_ns": [
+          30875,
+          31041,
+          32958,
+          32333,
+          31750,
+          32458,
+          31458,
+          30083,
+          29333,
+          29667,
+          29375,
+          29292,
+          30917,
+          49208,
+          50250,
+          35250,
+          32416,
+          34041,
+          31291,
+          30875,
+          29583,
+          32333,
+          31458,
+          29583,
+          32000,
+          29208,
+          46375,
+          51333,
+          36750,
+          33709,
+          32875
+        ],
+        "info": {
+          "bit_rate": 1811200,
+          "chapters": [],
+          "duration_us": 60000,
+          "format": "mov,mp4,m4a,3gp,3g2,mj2",
+          "metadata": {},
+          "path": "tests/fixtures/playback-errors/mp4-uniform-plan-scan/frames-64.mp4",
+          "start_us": 0,
+          "streams": [
+            {
+              "average_frame_rate": [
+                50,
+                1
+              ],
+              "bit_rate": 1656800,
+              "channels": 0,
+              "codec": "vp9",
+              "disposition": 0,
+              "duration": 3,
+              "extradata_bytes": 12,
+              "height": 16,
+              "index": 0,
+              "level": null,
+              "media_type": "video",
+              "metadata": {},
+              "pixel_format": -1,
+              "profile": null,
+              "sample_rate": 0,
+              "start": 0,
+              "time_base": [
+                1,
+                50
+              ],
+              "video_delay": 0,
+              "width": 16
+            },
+            {
+              "average_frame_rate": [
+                0,
+                1
+              ],
+              "bit_rate": 768000,
+              "channels": 1,
+              "codec": "pcm_s16le",
+              "disposition": 0,
+              "duration": 64,
+              "extradata_bytes": 0,
+              "height": 0,
+              "index": 1,
+              "level": null,
+              "media_type": "audio",
+              "metadata": {},
+              "pixel_format": -1,
+              "profile": null,
+              "sample_rate": 48000,
+              "start": 0,
+              "time_base": [
+                1,
+                48000
+              ],
+              "video_delay": 0,
+              "width": 0
+            }
+          ]
+        }
+      },
+      "after": {
+        "bounded": true,
+        "elapsed_ns": [
+          31292,
+          30041,
+          32125,
+          31125,
+          29583,
+          30666,
+          30291,
+          29041,
+          28750,
+          28583,
+          28875,
+          28458,
+          29792,
+          30375,
+          29125,
+          29500,
+          28208,
+          31417,
+          28583,
+          33583,
+          29125,
+          31500,
+          30583,
+          31084,
+          28041,
+          27750,
+          29083,
+          28667,
+          28458,
+          28417,
+          28083
+        ],
+        "info": {
+          "bit_rate": 1811200,
+          "chapters": [],
+          "duration_us": 60000,
+          "format": "mov,mp4,m4a,3gp,3g2,mj2",
+          "metadata": {},
+          "path": "tests/fixtures/playback-errors/mp4-uniform-plan-scan/frames-64.mp4",
+          "start_us": 0,
+          "streams": [
+            {
+              "average_frame_rate": [
+                50,
+                1
+              ],
+              "bit_rate": 1656800,
+              "channels": 0,
+              "codec": "vp9",
+              "disposition": 0,
+              "duration": 3,
+              "extradata_bytes": 12,
+              "height": 16,
+              "index": 0,
+              "level": null,
+              "media_type": "video",
+              "metadata": {},
+              "pixel_format": -1,
+              "profile": null,
+              "sample_rate": 0,
+              "start": 0,
+              "time_base": [
+                1,
+                50
+              ],
+              "video_delay": 0,
+              "width": 16
+            },
+            {
+              "average_frame_rate": [
+                0,
+                1
+              ],
+              "bit_rate": 768000,
+              "channels": 1,
+              "codec": "pcm_s16le",
+              "disposition": 0,
+              "duration": 64,
+              "extradata_bytes": 0,
+              "height": 0,
+              "index": 1,
+              "level": null,
+              "media_type": "audio",
+              "metadata": {},
+              "pixel_format": -1,
+              "profile": null,
+              "sample_rate": 48000,
+              "start": 0,
+              "time_base": [
+                1,
+                48000
+              ],
+              "video_delay": 0,
+              "width": 0
+            }
+          ]
+        }
+      }
+    }
+  },
+  {
+    "frames": 64,
+    "bounded": true,
+    "pair": 5,
+    "results": {
+      "after": {
+        "bounded": true,
+        "elapsed_ns": [
+          27708,
+          27542,
+          28792,
+          28208,
+          26625,
+          27292,
+          27333,
+          26125,
+          25542,
+          25917,
+          26042,
+          25959,
+          28000,
+          29292,
+          28750,
+          28250,
+          28417,
+          29458,
+          26250,
+          25375,
+          25458,
+          26917,
+          30083,
+          31833,
+          28334,
+          25541,
+          27750,
+          28583,
+          28000,
+          27750,
+          27833
+        ],
+        "info": {
+          "bit_rate": 1811200,
+          "chapters": [],
+          "duration_us": 60000,
+          "format": "mov,mp4,m4a,3gp,3g2,mj2",
+          "metadata": {},
+          "path": "tests/fixtures/playback-errors/mp4-uniform-plan-scan/frames-64.mp4",
+          "start_us": 0,
+          "streams": [
+            {
+              "average_frame_rate": [
+                50,
+                1
+              ],
+              "bit_rate": 1656800,
+              "channels": 0,
+              "codec": "vp9",
+              "disposition": 0,
+              "duration": 3,
+              "extradata_bytes": 12,
+              "height": 16,
+              "index": 0,
+              "level": null,
+              "media_type": "video",
+              "metadata": {},
+              "pixel_format": -1,
+              "profile": null,
+              "sample_rate": 0,
+              "start": 0,
+              "time_base": [
+                1,
+                50
+              ],
+              "video_delay": 0,
+              "width": 16
+            },
+            {
+              "average_frame_rate": [
+                0,
+                1
+              ],
+              "bit_rate": 768000,
+              "channels": 1,
+              "codec": "pcm_s16le",
+              "disposition": 0,
+              "duration": 64,
+              "extradata_bytes": 0,
+              "height": 0,
+              "index": 1,
+              "level": null,
+              "media_type": "audio",
+              "metadata": {},
+              "pixel_format": -1,
+              "profile": null,
+              "sample_rate": 48000,
+              "start": 0,
+              "time_base": [
+                1,
+                48000
+              ],
+              "video_delay": 0,
+              "width": 0
+            }
+          ]
+        }
+      },
+      "before": {
+        "bounded": true,
+        "elapsed_ns": [
+          30666,
+          30083,
+          31292,
+          31209,
+          30709,
+          30667,
+          30250,
+          29041,
+          28542,
+          28584,
+          28500,
+          28833,
+          29959,
+          28834,
+          28500,
+          28709,
+          28791,
+          29667,
+          29584,
+          28667,
+          28542,
+          29791,
+          29875,
+          31042,
+          28667,
+          36292,
+          31958,
+          30542,
+          29667,
+          30292,
+          31666
+        ],
+        "info": {
+          "bit_rate": 1811200,
+          "chapters": [],
+          "duration_us": 60000,
+          "format": "mov,mp4,m4a,3gp,3g2,mj2",
+          "metadata": {},
+          "path": "tests/fixtures/playback-errors/mp4-uniform-plan-scan/frames-64.mp4",
+          "start_us": 0,
+          "streams": [
+            {
+              "average_frame_rate": [
+                50,
+                1
+              ],
+              "bit_rate": 1656800,
+              "channels": 0,
+              "codec": "vp9",
+              "disposition": 0,
+              "duration": 3,
+              "extradata_bytes": 12,
+              "height": 16,
+              "index": 0,
+              "level": null,
+              "media_type": "video",
+              "metadata": {},
+              "pixel_format": -1,
+              "profile": null,
+              "sample_rate": 0,
+              "start": 0,
+              "time_base": [
+                1,
+                50
+              ],
+              "video_delay": 0,
+              "width": 16
+            },
+            {
+              "average_frame_rate": [
+                0,
+                1
+              ],
+              "bit_rate": 768000,
+              "channels": 1,
+              "codec": "pcm_s16le",
+              "disposition": 0,
+              "duration": 64,
+              "extradata_bytes": 0,
+              "height": 0,
+              "index": 1,
+              "level": null,
+              "media_type": "audio",
+              "metadata": {},
+              "pixel_format": -1,
+              "profile": null,
+              "sample_rate": 48000,
+              "start": 0,
+              "time_base": [
+                1,
+                48000
+              ],
+              "video_delay": 0,
+              "width": 0
+            }
+          ]
+        }
+      }
+    }
+  },
+  {
+    "frames": 64,
+    "bounded": true,
+    "pair": 6,
+    "results": {
+      "before": {
+        "bounded": true,
+        "elapsed_ns": [
+          30708,
+          29750,
+          31083,
+          31292,
+          30834,
+          30750,
+          30417,
+          29292,
+          28583,
+          29000,
+          28417,
+          30875,
+          30667,
+          28833,
+          30833,
+          30000,
+          34959,
+          29959,
+          29291,
+          28583,
+          28500,
+          30125,
+          28959,
+          28750,
+          28292,
+          28333,
+          28166,
+          32542,
+          30500,
+          29083,
+          28791
+        ],
+        "info": {
+          "bit_rate": 1811200,
+          "chapters": [],
+          "duration_us": 60000,
+          "format": "mov,mp4,m4a,3gp,3g2,mj2",
+          "metadata": {},
+          "path": "tests/fixtures/playback-errors/mp4-uniform-plan-scan/frames-64.mp4",
+          "start_us": 0,
+          "streams": [
+            {
+              "average_frame_rate": [
+                50,
+                1
+              ],
+              "bit_rate": 1656800,
+              "channels": 0,
+              "codec": "vp9",
+              "disposition": 0,
+              "duration": 3,
+              "extradata_bytes": 12,
+              "height": 16,
+              "index": 0,
+              "level": null,
+              "media_type": "video",
+              "metadata": {},
+              "pixel_format": -1,
+              "profile": null,
+              "sample_rate": 0,
+              "start": 0,
+              "time_base": [
+                1,
+                50
+              ],
+              "video_delay": 0,
+              "width": 16
+            },
+            {
+              "average_frame_rate": [
+                0,
+                1
+              ],
+              "bit_rate": 768000,
+              "channels": 1,
+              "codec": "pcm_s16le",
+              "disposition": 0,
+              "duration": 64,
+              "extradata_bytes": 0,
+              "height": 0,
+              "index": 1,
+              "level": null,
+              "media_type": "audio",
+              "metadata": {},
+              "pixel_format": -1,
+              "profile": null,
+              "sample_rate": 48000,
+              "start": 0,
+              "time_base": [
+                1,
+                48000
+              ],
+              "video_delay": 0,
+              "width": 0
+            }
+          ]
+        }
+      },
+      "after": {
+        "bounded": true,
+        "elapsed_ns": [
+          31041,
+          29917,
+          31459,
+          30917,
+          30250,
+          29041,
+          27375,
+          27917,
+          28709,
+          28708,
+          28583,
+          28208,
+          28250,
+          29500,
+          29583,
+          29334,
+          28416,
+          28041,
+          28125,
+          28000,
+          28333,
+          28333,
+          30500,
+          26125,
+          28084,
+          28209,
+          28041,
+          27708,
+          27917,
+          29000,
+          28208
+        ],
+        "info": {
+          "bit_rate": 1811200,
+          "chapters": [],
+          "duration_us": 60000,
+          "format": "mov,mp4,m4a,3gp,3g2,mj2",
+          "metadata": {},
+          "path": "tests/fixtures/playback-errors/mp4-uniform-plan-scan/frames-64.mp4",
+          "start_us": 0,
+          "streams": [
+            {
+              "average_frame_rate": [
+                50,
+                1
+              ],
+              "bit_rate": 1656800,
+              "channels": 0,
+              "codec": "vp9",
+              "disposition": 0,
+              "duration": 3,
+              "extradata_bytes": 12,
+              "height": 16,
+              "index": 0,
+              "level": null,
+              "media_type": "video",
+              "metadata": {},
+              "pixel_format": -1,
+              "profile": null,
+              "sample_rate": 0,
+              "start": 0,
+              "time_base": [
+                1,
+                50
+              ],
+              "video_delay": 0,
+              "width": 16
+            },
+            {
+              "average_frame_rate": [
+                0,
+                1
+              ],
+              "bit_rate": 768000,
+              "channels": 1,
+              "codec": "pcm_s16le",
+              "disposition": 0,
+              "duration": 64,
+              "extradata_bytes": 0,
+              "height": 0,
+              "index": 1,
+              "level": null,
+              "media_type": "audio",
+              "metadata": {},
+              "pixel_format": -1,
+              "profile": null,
+              "sample_rate": 48000,
+              "start": 0,
+              "time_base": [
+                1,
+                48000
+              ],
+              "video_delay": 0,
+              "width": 0
+            }
+          ]
+        }
+      }
+    }
+  },
+  {
+    "frames": 262144,
+    "bounded": false,
+    "pair": 0,
+    "results": {
+      "before": {
+        "bounded": false,
+        "elapsed_ns": [
+          876000,
+          827834,
+          813750,
+          780458,
+          773667,
+          760042,
+          762833,
+          762250,
+          766708,
+          828792,
+          801000,
+          769500,
+          811750,
+          883041,
+          681000,
+          736083,
+          737792,
+          748542,
+          744209,
+          743292,
+          799125,
+          745708,
+          784083,
+          806916,
+          770666,
+          825583,
+          802584,
+          768084,
+          759000,
+          764292,
+          760583
+        ],
+        "info": {
+          "bit_rate": 787710,
+          "chapters": [],
+          "duration_us": 5461333,
+          "format": "mov,mp4,m4a,3gp,3g2,mj2",
+          "metadata": {},
+          "path": "tests/fixtures/playback-errors/mp4-uniform-plan-scan/frames-262144.mp4",
+          "start_us": 0,
+          "streams": [
+            {
+              "average_frame_rate": [
+                50,
+                1
+              ],
+              "bit_rate": 1656800,
+              "channels": 0,
+              "codec": "vp9",
+              "disposition": 0,
+              "duration": 3,
+              "extradata_bytes": 12,
+              "height": 16,
+              "index": 0,
+              "level": null,
+              "media_type": "video",
+              "metadata": {},
+              "pixel_format": -1,
+              "profile": null,
+              "sample_rate": 0,
+              "start": 0,
+              "time_base": [
+                1,
+                50
+              ],
+              "video_delay": 0,
+              "width": 16
+            },
+            {
+              "average_frame_rate": [
+                0,
+                1
+              ],
+              "bit_rate": 768000,
+              "channels": 1,
+              "codec": "pcm_s16le",
+              "disposition": 0,
+              "duration": 262144,
+              "extradata_bytes": 0,
+              "height": 0,
+              "index": 1,
+              "level": null,
+              "media_type": "audio",
+              "metadata": {},
+              "pixel_format": -1,
+              "profile": null,
+              "sample_rate": 48000,
+              "start": 0,
+              "time_base": [
+                1,
+                48000
+              ],
+              "video_delay": 0,
+              "width": 0
+            }
+          ]
+        }
+      },
+      "after": {
+        "bounded": false,
+        "elapsed_ns": [
+          32583,
+          33833,
+          33417,
+          31916,
+          31333,
+          31375,
+          31125,
+          29917,
+          29583,
+          29500,
+          29458,
+          28791,
+          28750,
+          30375,
+          29125,
+          28834,
+          28625,
+          28834,
+          28542,
+          28708,
+          28458,
+          28750,
+          31083,
+          29584,
+          28750,
+          28375,
+          29083,
+          31125,
+          29125,
+          28708,
+          31750
+        ],
+        "info": {
+          "bit_rate": 787710,
+          "chapters": [],
+          "duration_us": 5461333,
+          "format": "mov,mp4,m4a,3gp,3g2,mj2",
+          "metadata": {},
+          "path": "tests/fixtures/playback-errors/mp4-uniform-plan-scan/frames-262144.mp4",
+          "start_us": 0,
+          "streams": [
+            {
+              "average_frame_rate": [
+                50,
+                1
+              ],
+              "bit_rate": 1656800,
+              "channels": 0,
+              "codec": "vp9",
+              "disposition": 0,
+              "duration": 3,
+              "extradata_bytes": 12,
+              "height": 16,
+              "index": 0,
+              "level": null,
+              "media_type": "video",
+              "metadata": {},
+              "pixel_format": -1,
+              "profile": null,
+              "sample_rate": 0,
+              "start": 0,
+              "time_base": [
+                1,
+                50
+              ],
+              "video_delay": 0,
+              "width": 16
+            },
+            {
+              "average_frame_rate": [
+                0,
+                1
+              ],
+              "bit_rate": 768000,
+              "channels": 1,
+              "codec": "pcm_s16le",
+              "disposition": 0,
+              "duration": 262144,
+              "extradata_bytes": 0,
+              "height": 0,
+              "index": 1,
+              "level": null,
+              "media_type": "audio",
+              "metadata": {},
+              "pixel_format": -1,
+              "profile": null,
+              "sample_rate": 48000,
+              "start": 0,
+              "time_base": [
+                1,
+                48000
+              ],
+              "video_delay": 0,
+              "width": 0
+            }
+          ]
+        }
+      }
+    }
+  },
+  {
+    "frames": 262144,
+    "bounded": false,
+    "pair": 1,
+    "results": {
+      "after": {
+        "bounded": false,
+        "elapsed_ns": [
+          34791,
+          31125,
+          32708,
+          31875,
+          32750,
+          34542,
+          35834,
+          35375,
+          29916,
+          29125,
+          32500,
+          29667,
+          29834,
+          30459,
+          33167,
+          32333,
+          37375,
+          32500,
+          32542,
+          32792,
+          30166,
+          31209,
+          33625,
+          37333,
+          30417,
+          31708,
+          30833,
+          33750,
+          32333,
+          31833,
+          64791
+        ],
+        "info": {
+          "bit_rate": 787710,
+          "chapters": [],
+          "duration_us": 5461333,
+          "format": "mov,mp4,m4a,3gp,3g2,mj2",
+          "metadata": {},
+          "path": "tests/fixtures/playback-errors/mp4-uniform-plan-scan/frames-262144.mp4",
+          "start_us": 0,
+          "streams": [
+            {
+              "average_frame_rate": [
+                50,
+                1
+              ],
+              "bit_rate": 1656800,
+              "channels": 0,
+              "codec": "vp9",
+              "disposition": 0,
+              "duration": 3,
+              "extradata_bytes": 12,
+              "height": 16,
+              "index": 0,
+              "level": null,
+              "media_type": "video",
+              "metadata": {},
+              "pixel_format": -1,
+              "profile": null,
+              "sample_rate": 0,
+              "start": 0,
+              "time_base": [
+                1,
+                50
+              ],
+              "video_delay": 0,
+              "width": 16
+            },
+            {
+              "average_frame_rate": [
+                0,
+                1
+              ],
+              "bit_rate": 768000,
+              "channels": 1,
+              "codec": "pcm_s16le",
+              "disposition": 0,
+              "duration": 262144,
+              "extradata_bytes": 0,
+              "height": 0,
+              "index": 1,
+              "level": null,
+              "media_type": "audio",
+              "metadata": {},
+              "pixel_format": -1,
+              "profile": null,
+              "sample_rate": 48000,
+              "start": 0,
+              "time_base": [
+                1,
+                48000
+              ],
+              "video_delay": 0,
+              "width": 0
+            }
+          ]
+        }
+      },
+      "before": {
+        "bounded": false,
+        "elapsed_ns": [
+          772208,
+          760750,
+          765167,
+          773750,
+          764625,
+          787416,
+          782083,
+          754000,
+          861542,
+          782709,
+          749875,
+          859792,
+          784334,
+          766583,
+          759958,
+          744000,
+          746084,
+          746208,
+          756958,
+          793208,
+          750334,
+          756000,
+          749917,
+          754041,
+          759959,
+          760416,
+          739875,
+          758084,
+          756167,
+          761166,
+          741958
+        ],
+        "info": {
+          "bit_rate": 787710,
+          "chapters": [],
+          "duration_us": 5461333,
+          "format": "mov,mp4,m4a,3gp,3g2,mj2",
+          "metadata": {},
+          "path": "tests/fixtures/playback-errors/mp4-uniform-plan-scan/frames-262144.mp4",
+          "start_us": 0,
+          "streams": [
+            {
+              "average_frame_rate": [
+                50,
+                1
+              ],
+              "bit_rate": 1656800,
+              "channels": 0,
+              "codec": "vp9",
+              "disposition": 0,
+              "duration": 3,
+              "extradata_bytes": 12,
+              "height": 16,
+              "index": 0,
+              "level": null,
+              "media_type": "video",
+              "metadata": {},
+              "pixel_format": -1,
+              "profile": null,
+              "sample_rate": 0,
+              "start": 0,
+              "time_base": [
+                1,
+                50
+              ],
+              "video_delay": 0,
+              "width": 16
+            },
+            {
+              "average_frame_rate": [
+                0,
+                1
+              ],
+              "bit_rate": 768000,
+              "channels": 1,
+              "codec": "pcm_s16le",
+              "disposition": 0,
+              "duration": 262144,
+              "extradata_bytes": 0,
+              "height": 0,
+              "index": 1,
+              "level": null,
+              "media_type": "audio",
+              "metadata": {},
+              "pixel_format": -1,
+              "profile": null,
+              "sample_rate": 48000,
+              "start": 0,
+              "time_base": [
+                1,
+                48000
+              ],
+              "video_delay": 0,
+              "width": 0
+            }
+          ]
+        }
+      }
+    }
+  },
+  {
+    "frames": 262144,
+    "bounded": false,
+    "pair": 2,
+    "results": {
+      "before": {
+        "bounded": false,
+        "elapsed_ns": [
+          782333,
+          780333,
+          798125,
+          790458,
+          774792,
+          768125,
+          762166,
+          776791,
+          759541,
+          766959,
+          812625,
+          775792,
+          820416,
+          797375,
+          768541,
+          764875,
+          769333,
+          768458,
+          765000,
+          763500,
+          763416,
+          774625,
+          762667,
+          760208,
+          763125,
+          768250,
+          764625,
+          766042,
+          772500,
+          772959,
+          755958
+        ],
+        "info": {
+          "bit_rate": 787710,
+          "chapters": [],
+          "duration_us": 5461333,
+          "format": "mov,mp4,m4a,3gp,3g2,mj2",
+          "metadata": {},
+          "path": "tests/fixtures/playback-errors/mp4-uniform-plan-scan/frames-262144.mp4",
+          "start_us": 0,
+          "streams": [
+            {
+              "average_frame_rate": [
+                50,
+                1
+              ],
+              "bit_rate": 1656800,
+              "channels": 0,
+              "codec": "vp9",
+              "disposition": 0,
+              "duration": 3,
+              "extradata_bytes": 12,
+              "height": 16,
+              "index": 0,
+              "level": null,
+              "media_type": "video",
+              "metadata": {},
+              "pixel_format": -1,
+              "profile": null,
+              "sample_rate": 0,
+              "start": 0,
+              "time_base": [
+                1,
+                50
+              ],
+              "video_delay": 0,
+              "width": 16
+            },
+            {
+              "average_frame_rate": [
+                0,
+                1
+              ],
+              "bit_rate": 768000,
+              "channels": 1,
+              "codec": "pcm_s16le",
+              "disposition": 0,
+              "duration": 262144,
+              "extradata_bytes": 0,
+              "height": 0,
+              "index": 1,
+              "level": null,
+              "media_type": "audio",
+              "metadata": {},
+              "pixel_format": -1,
+              "profile": null,
+              "sample_rate": 48000,
+              "start": 0,
+              "time_base": [
+                1,
+                48000
+              ],
+              "video_delay": 0,
+              "width": 0
+            }
+          ]
+        }
+      },
+      "after": {
+        "bounded": false,
+        "elapsed_ns": [
+          31041,
+          72042,
+          36541,
+          32500,
+          36334,
+          34666,
+          33250,
+          31000,
+          33458,
+          32833,
+          28875,
+          28917,
+          31542,
+          30291,
+          29000,
+          28750,
+          28666,
+          28750,
+          31625,
+          29250,
+          28792,
+          29958,
+          32042,
+          29500,
+          28792,
+          28750,
+          28542,
+          28334,
+          28333,
+          29625,
+          28958
+        ],
+        "info": {
+          "bit_rate": 787710,
+          "chapters": [],
+          "duration_us": 5461333,
+          "format": "mov,mp4,m4a,3gp,3g2,mj2",
+          "metadata": {},
+          "path": "tests/fixtures/playback-errors/mp4-uniform-plan-scan/frames-262144.mp4",
+          "start_us": 0,
+          "streams": [
+            {
+              "average_frame_rate": [
+                50,
+                1
+              ],
+              "bit_rate": 1656800,
+              "channels": 0,
+              "codec": "vp9",
+              "disposition": 0,
+              "duration": 3,
+              "extradata_bytes": 12,
+              "height": 16,
+              "index": 0,
+              "level": null,
+              "media_type": "video",
+              "metadata": {},
+              "pixel_format": -1,
+              "profile": null,
+              "sample_rate": 0,
+              "start": 0,
+              "time_base": [
+                1,
+                50
+              ],
+              "video_delay": 0,
+              "width": 16
+            },
+            {
+              "average_frame_rate": [
+                0,
+                1
+              ],
+              "bit_rate": 768000,
+              "channels": 1,
+              "codec": "pcm_s16le",
+              "disposition": 0,
+              "duration": 262144,
+              "extradata_bytes": 0,
+              "height": 0,
+              "index": 1,
+              "level": null,
+              "media_type": "audio",
+              "metadata": {},
+              "pixel_format": -1,
+              "profile": null,
+              "sample_rate": 48000,
+              "start": 0,
+              "time_base": [
+                1,
+                48000
+              ],
+              "video_delay": 0,
+              "width": 0
+            }
+          ]
+        }
+      }
+    }
+  },
+  {
+    "frames": 262144,
+    "bounded": false,
+    "pair": 3,
+    "results": {
+      "after": {
+        "bounded": false,
+        "elapsed_ns": [
+          31000,
+          30667,
+          34084,
+          31292,
+          34958,
+          30959,
+          31083,
+          29375,
+          28667,
+          28542,
+          28416,
+          28250,
+          30375,
+          29209,
+          28458,
+          28416,
+          28250,
+          28041,
+          28500,
+          28083,
+          30917,
+          28875,
+          28625,
+          28584,
+          28375,
+          27959,
+          27958,
+          28250,
+          27708,
+          29250,
+          28292
+        ],
+        "info": {
+          "bit_rate": 787710,
+          "chapters": [],
+          "duration_us": 5461333,
+          "format": "mov,mp4,m4a,3gp,3g2,mj2",
+          "metadata": {},
+          "path": "tests/fixtures/playback-errors/mp4-uniform-plan-scan/frames-262144.mp4",
+          "start_us": 0,
+          "streams": [
+            {
+              "average_frame_rate": [
+                50,
+                1
+              ],
+              "bit_rate": 1656800,
+              "channels": 0,
+              "codec": "vp9",
+              "disposition": 0,
+              "duration": 3,
+              "extradata_bytes": 12,
+              "height": 16,
+              "index": 0,
+              "level": null,
+              "media_type": "video",
+              "metadata": {},
+              "pixel_format": -1,
+              "profile": null,
+              "sample_rate": 0,
+              "start": 0,
+              "time_base": [
+                1,
+                50
+              ],
+              "video_delay": 0,
+              "width": 16
+            },
+            {
+              "average_frame_rate": [
+                0,
+                1
+              ],
+              "bit_rate": 768000,
+              "channels": 1,
+              "codec": "pcm_s16le",
+              "disposition": 0,
+              "duration": 262144,
+              "extradata_bytes": 0,
+              "height": 0,
+              "index": 1,
+              "level": null,
+              "media_type": "audio",
+              "metadata": {},
+              "pixel_format": -1,
+              "profile": null,
+              "sample_rate": 48000,
+              "start": 0,
+              "time_base": [
+                1,
+                48000
+              ],
+              "video_delay": 0,
+              "width": 0
+            }
+          ]
+        }
+      },
+      "before": {
+        "bounded": false,
+        "elapsed_ns": [
+          770500,
+          770875,
+          772834,
+          772208,
+          787041,
+          833208,
+          754542,
+          731375,
+          754417,
+          765458,
+          734333,
+          732292,
+          754500,
+          733166,
+          730167,
+          736292,
+          743708,
+          745583,
+          744084,
+          742583,
+          742583,
+          746292,
+          727583,
+          732209,
+          720084,
+          705875,
+          716000,
+          720250,
+          735250,
+          717458,
+          715667
+        ],
+        "info": {
+          "bit_rate": 787710,
+          "chapters": [],
+          "duration_us": 5461333,
+          "format": "mov,mp4,m4a,3gp,3g2,mj2",
+          "metadata": {},
+          "path": "tests/fixtures/playback-errors/mp4-uniform-plan-scan/frames-262144.mp4",
+          "start_us": 0,
+          "streams": [
+            {
+              "average_frame_rate": [
+                50,
+                1
+              ],
+              "bit_rate": 1656800,
+              "channels": 0,
+              "codec": "vp9",
+              "disposition": 0,
+              "duration": 3,
+              "extradata_bytes": 12,
+              "height": 16,
+              "index": 0,
+              "level": null,
+              "media_type": "video",
+              "metadata": {},
+              "pixel_format": -1,
+              "profile": null,
+              "sample_rate": 0,
+              "start": 0,
+              "time_base": [
+                1,
+                50
+              ],
+              "video_delay": 0,
+              "width": 16
+            },
+            {
+              "average_frame_rate": [
+                0,
+                1
+              ],
+              "bit_rate": 768000,
+              "channels": 1,
+              "codec": "pcm_s16le",
+              "disposition": 0,
+              "duration": 262144,
+              "extradata_bytes": 0,
+              "height": 0,
+              "index": 1,
+              "level": null,
+              "media_type": "audio",
+              "metadata": {},
+              "pixel_format": -1,
+              "profile": null,
+              "sample_rate": 48000,
+              "start": 0,
+              "time_base": [
+                1,
+                48000
+              ],
+              "video_delay": 0,
+              "width": 0
+            }
+          ]
+        }
+      }
+    }
+  },
+  {
+    "frames": 262144,
+    "bounded": false,
+    "pair": 4,
+    "results": {
+      "before": {
+        "bounded": false,
+        "elapsed_ns": [
+          775541,
+          766625,
+          766833,
+          767125,
+          767292,
+          767167,
+          772750,
+          778792,
+          765292,
+          770292,
+          791333,
+          780041,
+          771750,
+          787084,
+          769167,
+          777083,
+          762208,
+          764125,
+          766958,
+          773375,
+          784583,
+          785250,
+          774791,
+          786500,
+          795875,
+          769542,
+          771583,
+          822833,
+          816250,
+          795708,
+          775167
+        ],
+        "info": {
+          "bit_rate": 787710,
+          "chapters": [],
+          "duration_us": 5461333,
+          "format": "mov,mp4,m4a,3gp,3g2,mj2",
+          "metadata": {},
+          "path": "tests/fixtures/playback-errors/mp4-uniform-plan-scan/frames-262144.mp4",
+          "start_us": 0,
+          "streams": [
+            {
+              "average_frame_rate": [
+                50,
+                1
+              ],
+              "bit_rate": 1656800,
+              "channels": 0,
+              "codec": "vp9",
+              "disposition": 0,
+              "duration": 3,
+              "extradata_bytes": 12,
+              "height": 16,
+              "index": 0,
+              "level": null,
+              "media_type": "video",
+              "metadata": {},
+              "pixel_format": -1,
+              "profile": null,
+              "sample_rate": 0,
+              "start": 0,
+              "time_base": [
+                1,
+                50
+              ],
+              "video_delay": 0,
+              "width": 16
+            },
+            {
+              "average_frame_rate": [
+                0,
+                1
+              ],
+              "bit_rate": 768000,
+              "channels": 1,
+              "codec": "pcm_s16le",
+              "disposition": 0,
+              "duration": 262144,
+              "extradata_bytes": 0,
+              "height": 0,
+              "index": 1,
+              "level": null,
+              "media_type": "audio",
+              "metadata": {},
+              "pixel_format": -1,
+              "profile": null,
+              "sample_rate": 48000,
+              "start": 0,
+              "time_base": [
+                1,
+                48000
+              ],
+              "video_delay": 0,
+              "width": 0
+            }
+          ]
+        }
+      },
+      "after": {
+        "bounded": false,
+        "elapsed_ns": [
+          30917,
+          31541,
+          33625,
+          32625,
+          30125,
+          31250,
+          30625,
+          29667,
+          29375,
+          29333,
+          32291,
+          36750,
+          38084,
+          31792,
+          29084,
+          31583,
+          29375,
+          30167,
+          29500,
+          28917,
+          28750,
+          29625,
+          31125,
+          29208,
+          28750,
+          28333,
+          30167,
+          29500,
+          29916,
+          29000,
+          29125
+        ],
+        "info": {
+          "bit_rate": 787710,
+          "chapters": [],
+          "duration_us": 5461333,
+          "format": "mov,mp4,m4a,3gp,3g2,mj2",
+          "metadata": {},
+          "path": "tests/fixtures/playback-errors/mp4-uniform-plan-scan/frames-262144.mp4",
+          "start_us": 0,
+          "streams": [
+            {
+              "average_frame_rate": [
+                50,
+                1
+              ],
+              "bit_rate": 1656800,
+              "channels": 0,
+              "codec": "vp9",
+              "disposition": 0,
+              "duration": 3,
+              "extradata_bytes": 12,
+              "height": 16,
+              "index": 0,
+              "level": null,
+              "media_type": "video",
+              "metadata": {},
+              "pixel_format": -1,
+              "profile": null,
+              "sample_rate": 0,
+              "start": 0,
+              "time_base": [
+                1,
+                50
+              ],
+              "video_delay": 0,
+              "width": 16
+            },
+            {
+              "average_frame_rate": [
+                0,
+                1
+              ],
+              "bit_rate": 768000,
+              "channels": 1,
+              "codec": "pcm_s16le",
+              "disposition": 0,
+              "duration": 262144,
+              "extradata_bytes": 0,
+              "height": 0,
+              "index": 1,
+              "level": null,
+              "media_type": "audio",
+              "metadata": {},
+              "pixel_format": -1,
+              "profile": null,
+              "sample_rate": 48000,
+              "start": 0,
+              "time_base": [
+                1,
+                48000
+              ],
+              "video_delay": 0,
+              "width": 0
+            }
+          ]
+        }
+      }
+    }
+  },
+  {
+    "frames": 262144,
+    "bounded": false,
+    "pair": 5,
+    "results": {
+      "after": {
+        "bounded": false,
+        "elapsed_ns": [
+          31084,
+          30625,
+          33041,
+          32416,
+          30500,
+          31292,
+          30709,
+          30292,
+          29625,
+          29959,
+          29084,
+          28917,
+          29125,
+          30625,
+          30250,
+          29416,
+          29250,
+          29250,
+          29208,
+          29542,
+          30041,
+          30667,
+          30917,
+          35917,
+          31667,
+          29292,
+          30500,
+          30042,
+          30833,
+          28500,
+          28334
+        ],
+        "info": {
+          "bit_rate": 787710,
+          "chapters": [],
+          "duration_us": 5461333,
+          "format": "mov,mp4,m4a,3gp,3g2,mj2",
+          "metadata": {},
+          "path": "tests/fixtures/playback-errors/mp4-uniform-plan-scan/frames-262144.mp4",
+          "start_us": 0,
+          "streams": [
+            {
+              "average_frame_rate": [
+                50,
+                1
+              ],
+              "bit_rate": 1656800,
+              "channels": 0,
+              "codec": "vp9",
+              "disposition": 0,
+              "duration": 3,
+              "extradata_bytes": 12,
+              "height": 16,
+              "index": 0,
+              "level": null,
+              "media_type": "video",
+              "metadata": {},
+              "pixel_format": -1,
+              "profile": null,
+              "sample_rate": 0,
+              "start": 0,
+              "time_base": [
+                1,
+                50
+              ],
+              "video_delay": 0,
+              "width": 16
+            },
+            {
+              "average_frame_rate": [
+                0,
+                1
+              ],
+              "bit_rate": 768000,
+              "channels": 1,
+              "codec": "pcm_s16le",
+              "disposition": 0,
+              "duration": 262144,
+              "extradata_bytes": 0,
+              "height": 0,
+              "index": 1,
+              "level": null,
+              "media_type": "audio",
+              "metadata": {},
+              "pixel_format": -1,
+              "profile": null,
+              "sample_rate": 48000,
+              "start": 0,
+              "time_base": [
+                1,
+                48000
+              ],
+              "video_delay": 0,
+              "width": 0
+            }
+          ]
+        }
+      },
+      "before": {
+        "bounded": false,
+        "elapsed_ns": [
+          761333,
+          760333,
+          768000,
+          766291,
+          769541,
+          768791,
+          765792,
+          778083,
+          781708,
+          780917,
+          797750,
+          786166,
+          781334,
+          753500,
+          745458,
+          736875,
+          772291,
+          761958,
+          744541,
+          753042,
+          743625,
+          764375,
+          755041,
+          760125,
+          770334,
+          762417,
+          773500,
+          748958,
+          740333,
+          721209,
+          727208
+        ],
+        "info": {
+          "bit_rate": 787710,
+          "chapters": [],
+          "duration_us": 5461333,
+          "format": "mov,mp4,m4a,3gp,3g2,mj2",
+          "metadata": {},
+          "path": "tests/fixtures/playback-errors/mp4-uniform-plan-scan/frames-262144.mp4",
+          "start_us": 0,
+          "streams": [
+            {
+              "average_frame_rate": [
+                50,
+                1
+              ],
+              "bit_rate": 1656800,
+              "channels": 0,
+              "codec": "vp9",
+              "disposition": 0,
+              "duration": 3,
+              "extradata_bytes": 12,
+              "height": 16,
+              "index": 0,
+              "level": null,
+              "media_type": "video",
+              "metadata": {},
+              "pixel_format": -1,
+              "profile": null,
+              "sample_rate": 0,
+              "start": 0,
+              "time_base": [
+                1,
+                50
+              ],
+              "video_delay": 0,
+              "width": 16
+            },
+            {
+              "average_frame_rate": [
+                0,
+                1
+              ],
+              "bit_rate": 768000,
+              "channels": 1,
+              "codec": "pcm_s16le",
+              "disposition": 0,
+              "duration": 262144,
+              "extradata_bytes": 0,
+              "height": 0,
+              "index": 1,
+              "level": null,
+              "media_type": "audio",
+              "metadata": {},
+              "pixel_format": -1,
+              "profile": null,
+              "sample_rate": 48000,
+              "start": 0,
+              "time_base": [
+                1,
+                48000
+              ],
+              "video_delay": 0,
+              "width": 0
+            }
+          ]
+        }
+      }
+    }
+  },
+  {
+    "frames": 262144,
+    "bounded": false,
+    "pair": 6,
+    "results": {
+      "before": {
+        "bounded": false,
+        "elapsed_ns": [
+          763000,
+          761250,
+          765667,
+          763416,
+          761958,
+          765542,
+          761750,
+          764041,
+          766708,
+          769459,
+          770834,
+          763500,
+          766125,
+          761167,
+          760667,
+          759958,
+          759667,
+          764167,
+          762667,
+          762375,
+          766459,
+          775417,
+          765417,
+          760209,
+          765458,
+          762250,
+          759875,
+          767583,
+          761375,
+          838250,
+          791333
+        ],
+        "info": {
+          "bit_rate": 787710,
+          "chapters": [],
+          "duration_us": 5461333,
+          "format": "mov,mp4,m4a,3gp,3g2,mj2",
+          "metadata": {},
+          "path": "tests/fixtures/playback-errors/mp4-uniform-plan-scan/frames-262144.mp4",
+          "start_us": 0,
+          "streams": [
+            {
+              "average_frame_rate": [
+                50,
+                1
+              ],
+              "bit_rate": 1656800,
+              "channels": 0,
+              "codec": "vp9",
+              "disposition": 0,
+              "duration": 3,
+              "extradata_bytes": 12,
+              "height": 16,
+              "index": 0,
+              "level": null,
+              "media_type": "video",
+              "metadata": {},
+              "pixel_format": -1,
+              "profile": null,
+              "sample_rate": 0,
+              "start": 0,
+              "time_base": [
+                1,
+                50
+              ],
+              "video_delay": 0,
+              "width": 16
+            },
+            {
+              "average_frame_rate": [
+                0,
+                1
+              ],
+              "bit_rate": 768000,
+              "channels": 1,
+              "codec": "pcm_s16le",
+              "disposition": 0,
+              "duration": 262144,
+              "extradata_bytes": 0,
+              "height": 0,
+              "index": 1,
+              "level": null,
+              "media_type": "audio",
+              "metadata": {},
+              "pixel_format": -1,
+              "profile": null,
+              "sample_rate": 48000,
+              "start": 0,
+              "time_base": [
+                1,
+                48000
+              ],
+              "video_delay": 0,
+              "width": 0
+            }
+          ]
+        }
+      },
+      "after": {
+        "bounded": false,
+        "elapsed_ns": [
+          30875,
+          31083,
+          32584,
+          30875,
+          30958,
+          30667,
+          30333,
+          29625,
+          28916,
+          30375,
+          28792,
+          28875,
+          30833,
+          29375,
+          29500,
+          29000,
+          29208,
+          28917,
+          28875,
+          28708,
+          29125,
+          29750,
+          29166,
+          29083,
+          29042,
+          28875,
+          29917,
+          29458,
+          29250,
+          28750,
+          28916
+        ],
+        "info": {
+          "bit_rate": 787710,
+          "chapters": [],
+          "duration_us": 5461333,
+          "format": "mov,mp4,m4a,3gp,3g2,mj2",
+          "metadata": {},
+          "path": "tests/fixtures/playback-errors/mp4-uniform-plan-scan/frames-262144.mp4",
+          "start_us": 0,
+          "streams": [
+            {
+              "average_frame_rate": [
+                50,
+                1
+              ],
+              "bit_rate": 1656800,
+              "channels": 0,
+              "codec": "vp9",
+              "disposition": 0,
+              "duration": 3,
+              "extradata_bytes": 12,
+              "height": 16,
+              "index": 0,
+              "level": null,
+              "media_type": "video",
+              "metadata": {},
+              "pixel_format": -1,
+              "profile": null,
+              "sample_rate": 0,
+              "start": 0,
+              "time_base": [
+                1,
+                50
+              ],
+              "video_delay": 0,
+              "width": 16
+            },
+            {
+              "average_frame_rate": [
+                0,
+                1
+              ],
+              "bit_rate": 768000,
+              "channels": 1,
+              "codec": "pcm_s16le",
+              "disposition": 0,
+              "duration": 262144,
+              "extradata_bytes": 0,
+              "height": 0,
+              "index": 1,
+              "level": null,
+              "media_type": "audio",
+              "metadata": {},
+              "pixel_format": -1,
+              "profile": null,
+              "sample_rate": 48000,
+              "start": 0,
+              "time_base": [
+                1,
+                48000
+              ],
+              "video_delay": 0,
+              "width": 0
+            }
+          ]
+        }
+      }
+    }
+  },
+  {
+    "frames": 262144,
+    "bounded": true,
+    "pair": 0,
+    "results": {
+      "before": {
+        "bounded": true,
+        "elapsed_ns": [
+          1036333,
+          1048000,
+          1046541,
+          1112375,
+          1123292,
+          1042208,
+          1057417,
+          1065708,
+          1042333,
+          1039167,
+          1036750,
+          1041125,
+          1043792,
+          1045583,
+          1055500,
+          1044500,
+          1037125,
+          1031750,
+          1041458,
+          1045166,
+          1035458,
+          1041917,
+          1026334,
+          1006209,
+          1013417,
+          1015250,
+          1011125,
+          1020500,
+          1013833,
+          1026709,
+          1010750
+        ],
+        "info": {
+          "bit_rate": 787710,
+          "chapters": [],
+          "duration_us": 5461333,
+          "format": "mov,mp4,m4a,3gp,3g2,mj2",
+          "metadata": {},
+          "path": "tests/fixtures/playback-errors/mp4-uniform-plan-scan/frames-262144.mp4",
+          "start_us": 0,
+          "streams": [
+            {
+              "average_frame_rate": [
+                50,
+                1
+              ],
+              "bit_rate": 1656800,
+              "channels": 0,
+              "codec": "vp9",
+              "disposition": 0,
+              "duration": 3,
+              "extradata_bytes": 12,
+              "height": 16,
+              "index": 0,
+              "level": null,
+              "media_type": "video",
+              "metadata": {},
+              "pixel_format": -1,
+              "profile": null,
+              "sample_rate": 0,
+              "start": 0,
+              "time_base": [
+                1,
+                50
+              ],
+              "video_delay": 0,
+              "width": 16
+            },
+            {
+              "average_frame_rate": [
+                0,
+                1
+              ],
+              "bit_rate": 768000,
+              "channels": 1,
+              "codec": "pcm_s16le",
+              "disposition": 0,
+              "duration": 262144,
+              "extradata_bytes": 0,
+              "height": 0,
+              "index": 1,
+              "level": null,
+              "media_type": "audio",
+              "metadata": {},
+              "pixel_format": -1,
+              "profile": null,
+              "sample_rate": 48000,
+              "start": 0,
+              "time_base": [
+                1,
+                48000
+              ],
+              "video_delay": 0,
+              "width": 0
+            }
+          ]
+        }
+      },
+      "after": {
+        "bounded": true,
+        "elapsed_ns": [
+          31125,
+          31042,
+          32541,
+          32000,
+          30000,
+          31250,
+          30625,
+          29666,
+          29250,
+          29500,
+          29417,
+          33209,
+          32083,
+          33125,
+          30041,
+          29084,
+          29000,
+          28833,
+          29000,
+          29041,
+          28833,
+          30500,
+          30792,
+          29667,
+          29625,
+          28833,
+          30084,
+          30333,
+          30750,
+          29042,
+          28917
+        ],
+        "info": {
+          "bit_rate": 787710,
+          "chapters": [],
+          "duration_us": 5461333,
+          "format": "mov,mp4,m4a,3gp,3g2,mj2",
+          "metadata": {},
+          "path": "tests/fixtures/playback-errors/mp4-uniform-plan-scan/frames-262144.mp4",
+          "start_us": 0,
+          "streams": [
+            {
+              "average_frame_rate": [
+                50,
+                1
+              ],
+              "bit_rate": 1656800,
+              "channels": 0,
+              "codec": "vp9",
+              "disposition": 0,
+              "duration": 3,
+              "extradata_bytes": 12,
+              "height": 16,
+              "index": 0,
+              "level": null,
+              "media_type": "video",
+              "metadata": {},
+              "pixel_format": -1,
+              "profile": null,
+              "sample_rate": 0,
+              "start": 0,
+              "time_base": [
+                1,
+                50
+              ],
+              "video_delay": 0,
+              "width": 16
+            },
+            {
+              "average_frame_rate": [
+                0,
+                1
+              ],
+              "bit_rate": 768000,
+              "channels": 1,
+              "codec": "pcm_s16le",
+              "disposition": 0,
+              "duration": 262144,
+              "extradata_bytes": 0,
+              "height": 0,
+              "index": 1,
+              "level": null,
+              "media_type": "audio",
+              "metadata": {},
+              "pixel_format": -1,
+              "profile": null,
+              "sample_rate": 48000,
+              "start": 0,
+              "time_base": [
+                1,
+                48000
+              ],
+              "video_delay": 0,
+              "width": 0
+            }
+          ]
+        }
+      }
+    }
+  },
+  {
+    "frames": 262144,
+    "bounded": true,
+    "pair": 1,
+    "results": {
+      "after": {
+        "bounded": true,
+        "elapsed_ns": [
+          30833,
+          35084,
+          31958,
+          31083,
+          30000,
+          31583,
+          31083,
+          29958,
+          29666,
+          29250,
+          29708,
+          30667,
+          31125,
+          29667,
+          29583,
+          28833,
+          28959,
+          35542,
+          28833,
+          28125,
+          28333,
+          28292,
+          30208,
+          30417,
+          30125,
+          28541,
+          29375,
+          28792,
+          28375,
+          28250,
+          28500
+        ],
+        "info": {
+          "bit_rate": 787710,
+          "chapters": [],
+          "duration_us": 5461333,
+          "format": "mov,mp4,m4a,3gp,3g2,mj2",
+          "metadata": {},
+          "path": "tests/fixtures/playback-errors/mp4-uniform-plan-scan/frames-262144.mp4",
+          "start_us": 0,
+          "streams": [
+            {
+              "average_frame_rate": [
+                50,
+                1
+              ],
+              "bit_rate": 1656800,
+              "channels": 0,
+              "codec": "vp9",
+              "disposition": 0,
+              "duration": 3,
+              "extradata_bytes": 12,
+              "height": 16,
+              "index": 0,
+              "level": null,
+              "media_type": "video",
+              "metadata": {},
+              "pixel_format": -1,
+              "profile": null,
+              "sample_rate": 0,
+              "start": 0,
+              "time_base": [
+                1,
+                50
+              ],
+              "video_delay": 0,
+              "width": 16
+            },
+            {
+              "average_frame_rate": [
+                0,
+                1
+              ],
+              "bit_rate": 768000,
+              "channels": 1,
+              "codec": "pcm_s16le",
+              "disposition": 0,
+              "duration": 262144,
+              "extradata_bytes": 0,
+              "height": 0,
+              "index": 1,
+              "level": null,
+              "media_type": "audio",
+              "metadata": {},
+              "pixel_format": -1,
+              "profile": null,
+              "sample_rate": 48000,
+              "start": 0,
+              "time_base": [
+                1,
+                48000
+              ],
+              "video_delay": 0,
+              "width": 0
+            }
+          ]
+        }
+      },
+      "before": {
+        "bounded": true,
+        "elapsed_ns": [
+          1087166,
+          1029917,
+          1011500,
+          1008708,
+          1005417,
+          1034792,
+          1090167,
+          1047625,
+          1154208,
+          1092417,
+          1025916,
+          1023708,
+          1017667,
+          1032042,
+          1022000,
+          1080042,
+          1206542,
+          1074542,
+          1043375,
+          1035916,
+          1033917,
+          1031292,
+          1032667,
+          1074666,
+          1057333,
+          1099625,
+          1034000,
+          1025792,
+          1030875,
+          1022667,
+          1047959
+        ],
+        "info": {
+          "bit_rate": 787710,
+          "chapters": [],
+          "duration_us": 5461333,
+          "format": "mov,mp4,m4a,3gp,3g2,mj2",
+          "metadata": {},
+          "path": "tests/fixtures/playback-errors/mp4-uniform-plan-scan/frames-262144.mp4",
+          "start_us": 0,
+          "streams": [
+            {
+              "average_frame_rate": [
+                50,
+                1
+              ],
+              "bit_rate": 1656800,
+              "channels": 0,
+              "codec": "vp9",
+              "disposition": 0,
+              "duration": 3,
+              "extradata_bytes": 12,
+              "height": 16,
+              "index": 0,
+              "level": null,
+              "media_type": "video",
+              "metadata": {},
+              "pixel_format": -1,
+              "profile": null,
+              "sample_rate": 0,
+              "start": 0,
+              "time_base": [
+                1,
+                50
+              ],
+              "video_delay": 0,
+              "width": 16
+            },
+            {
+              "average_frame_rate": [
+                0,
+                1
+              ],
+              "bit_rate": 768000,
+              "channels": 1,
+              "codec": "pcm_s16le",
+              "disposition": 0,
+              "duration": 262144,
+              "extradata_bytes": 0,
+              "height": 0,
+              "index": 1,
+              "level": null,
+              "media_type": "audio",
+              "metadata": {},
+              "pixel_format": -1,
+              "profile": null,
+              "sample_rate": 48000,
+              "start": 0,
+              "time_base": [
+                1,
+                48000
+              ],
+              "video_delay": 0,
+              "width": 0
+            }
+          ]
+        }
+      }
+    }
+  },
+  {
+    "frames": 262144,
+    "bounded": true,
+    "pair": 2,
+    "results": {
+      "before": {
+        "bounded": true,
+        "elapsed_ns": [
+          985250,
+          982666,
+          1016750,
+          1009708,
+          1014125,
+          1017791,
+          1029333,
+          1030333,
+          1014000,
+          1020500,
+          1052250,
+          1023834,
+          1024500,
+          1013667,
+          1016125,
+          1027791,
+          1163750,
+          1030833,
+          1048625,
+          1066541,
+          1056709,
+          1052791,
+          1030583,
+          1035750,
+          1023042,
+          1049833,
+          1132875,
+          1034417,
+          1063000,
+          1130625,
+          1015084
+        ],
+        "info": {
+          "bit_rate": 787710,
+          "chapters": [],
+          "duration_us": 5461333,
+          "format": "mov,mp4,m4a,3gp,3g2,mj2",
+          "metadata": {},
+          "path": "tests/fixtures/playback-errors/mp4-uniform-plan-scan/frames-262144.mp4",
+          "start_us": 0,
+          "streams": [
+            {
+              "average_frame_rate": [
+                50,
+                1
+              ],
+              "bit_rate": 1656800,
+              "channels": 0,
+              "codec": "vp9",
+              "disposition": 0,
+              "duration": 3,
+              "extradata_bytes": 12,
+              "height": 16,
+              "index": 0,
+              "level": null,
+              "media_type": "video",
+              "metadata": {},
+              "pixel_format": -1,
+              "profile": null,
+              "sample_rate": 0,
+              "start": 0,
+              "time_base": [
+                1,
+                50
+              ],
+              "video_delay": 0,
+              "width": 16
+            },
+            {
+              "average_frame_rate": [
+                0,
+                1
+              ],
+              "bit_rate": 768000,
+              "channels": 1,
+              "codec": "pcm_s16le",
+              "disposition": 0,
+              "duration": 262144,
+              "extradata_bytes": 0,
+              "height": 0,
+              "index": 1,
+              "level": null,
+              "media_type": "audio",
+              "metadata": {},
+              "pixel_format": -1,
+              "profile": null,
+              "sample_rate": 48000,
+              "start": 0,
+              "time_base": [
+                1,
+                48000
+              ],
+              "video_delay": 0,
+              "width": 0
+            }
+          ]
+        }
+      },
+      "after": {
+        "bounded": true,
+        "elapsed_ns": [
+          47250,
+          35458,
+          33959,
+          32584,
+          31833,
+          34667,
+          36584,
+          41000,
+          39292,
+          31208,
+          30833,
+          37959,
+          33542,
+          29708,
+          33166,
+          29292,
+          30500,
+          33250,
+          31666,
+          28750,
+          28709,
+          29958,
+          28792,
+          28541,
+          28459,
+          28541,
+          28209,
+          28375,
+          31750,
+          28750,
+          29125
+        ],
+        "info": {
+          "bit_rate": 787710,
+          "chapters": [],
+          "duration_us": 5461333,
+          "format": "mov,mp4,m4a,3gp,3g2,mj2",
+          "metadata": {},
+          "path": "tests/fixtures/playback-errors/mp4-uniform-plan-scan/frames-262144.mp4",
+          "start_us": 0,
+          "streams": [
+            {
+              "average_frame_rate": [
+                50,
+                1
+              ],
+              "bit_rate": 1656800,
+              "channels": 0,
+              "codec": "vp9",
+              "disposition": 0,
+              "duration": 3,
+              "extradata_bytes": 12,
+              "height": 16,
+              "index": 0,
+              "level": null,
+              "media_type": "video",
+              "metadata": {},
+              "pixel_format": -1,
+              "profile": null,
+              "sample_rate": 0,
+              "start": 0,
+              "time_base": [
+                1,
+                50
+              ],
+              "video_delay": 0,
+              "width": 16
+            },
+            {
+              "average_frame_rate": [
+                0,
+                1
+              ],
+              "bit_rate": 768000,
+              "channels": 1,
+              "codec": "pcm_s16le",
+              "disposition": 0,
+              "duration": 262144,
+              "extradata_bytes": 0,
+              "height": 0,
+              "index": 1,
+              "level": null,
+              "media_type": "audio",
+              "metadata": {},
+              "pixel_format": -1,
+              "profile": null,
+              "sample_rate": 48000,
+              "start": 0,
+              "time_base": [
+                1,
+                48000
+              ],
+              "video_delay": 0,
+              "width": 0
+            }
+          ]
+        }
+      }
+    }
+  },
+  {
+    "frames": 262144,
+    "bounded": true,
+    "pair": 3,
+    "results": {
+      "after": {
+        "bounded": true,
+        "elapsed_ns": [
+          30834,
+          30333,
+          31791,
+          31083,
+          29833,
+          31916,
+          31208,
+          33167,
+          29708,
+          28916,
+          28750,
+          48208,
+          34042,
+          29584,
+          34083,
+          29666,
+          28792,
+          28958,
+          30625,
+          30167,
+          29583,
+          29750,
+          31583,
+          29583,
+          28667,
+          29125,
+          35000,
+          37917,
+          32333,
+          28417,
+          28208
+        ],
+        "info": {
+          "bit_rate": 787710,
+          "chapters": [],
+          "duration_us": 5461333,
+          "format": "mov,mp4,m4a,3gp,3g2,mj2",
+          "metadata": {},
+          "path": "tests/fixtures/playback-errors/mp4-uniform-plan-scan/frames-262144.mp4",
+          "start_us": 0,
+          "streams": [
+            {
+              "average_frame_rate": [
+                50,
+                1
+              ],
+              "bit_rate": 1656800,
+              "channels": 0,
+              "codec": "vp9",
+              "disposition": 0,
+              "duration": 3,
+              "extradata_bytes": 12,
+              "height": 16,
+              "index": 0,
+              "level": null,
+              "media_type": "video",
+              "metadata": {},
+              "pixel_format": -1,
+              "profile": null,
+              "sample_rate": 0,
+              "start": 0,
+              "time_base": [
+                1,
+                50
+              ],
+              "video_delay": 0,
+              "width": 16
+            },
+            {
+              "average_frame_rate": [
+                0,
+                1
+              ],
+              "bit_rate": 768000,
+              "channels": 1,
+              "codec": "pcm_s16le",
+              "disposition": 0,
+              "duration": 262144,
+              "extradata_bytes": 0,
+              "height": 0,
+              "index": 1,
+              "level": null,
+              "media_type": "audio",
+              "metadata": {},
+              "pixel_format": -1,
+              "profile": null,
+              "sample_rate": 48000,
+              "start": 0,
+              "time_base": [
+                1,
+                48000
+              ],
+              "video_delay": 0,
+              "width": 0
+            }
+          ]
+        }
+      },
+      "before": {
+        "bounded": true,
+        "elapsed_ns": [
+          1012000,
+          1017250,
+          1018166,
+          1008833,
+          1023042,
+          1078833,
+          1159292,
+          1069916,
+          1066084,
+          1079208,
+          1068667,
+          1063875,
+          1100083,
+          1071459,
+          1069292,
+          1055375,
+          1056166,
+          1056916,
+          1073459,
+          1112333,
+          1081000,
+          1080875,
+          1098375,
+          1176708,
+          1155709,
+          1080000,
+          1039500,
+          1045166,
+          1114083,
+          1090708,
+          1092833
+        ],
+        "info": {
+          "bit_rate": 787710,
+          "chapters": [],
+          "duration_us": 5461333,
+          "format": "mov,mp4,m4a,3gp,3g2,mj2",
+          "metadata": {},
+          "path": "tests/fixtures/playback-errors/mp4-uniform-plan-scan/frames-262144.mp4",
+          "start_us": 0,
+          "streams": [
+            {
+              "average_frame_rate": [
+                50,
+                1
+              ],
+              "bit_rate": 1656800,
+              "channels": 0,
+              "codec": "vp9",
+              "disposition": 0,
+              "duration": 3,
+              "extradata_bytes": 12,
+              "height": 16,
+              "index": 0,
+              "level": null,
+              "media_type": "video",
+              "metadata": {},
+              "pixel_format": -1,
+              "profile": null,
+              "sample_rate": 0,
+              "start": 0,
+              "time_base": [
+                1,
+                50
+              ],
+              "video_delay": 0,
+              "width": 16
+            },
+            {
+              "average_frame_rate": [
+                0,
+                1
+              ],
+              "bit_rate": 768000,
+              "channels": 1,
+              "codec": "pcm_s16le",
+              "disposition": 0,
+              "duration": 262144,
+              "extradata_bytes": 0,
+              "height": 0,
+              "index": 1,
+              "level": null,
+              "media_type": "audio",
+              "metadata": {},
+              "pixel_format": -1,
+              "profile": null,
+              "sample_rate": 48000,
+              "start": 0,
+              "time_base": [
+                1,
+                48000
+              ],
+              "video_delay": 0,
+              "width": 0
+            }
+          ]
+        }
+      }
+    }
+  },
+  {
+    "frames": 262144,
+    "bounded": true,
+    "pair": 4,
+    "results": {
+      "before": {
+        "bounded": true,
+        "elapsed_ns": [
+          1031000,
+          1039625,
+          1031458,
+          1035958,
+          1030833,
+          1095125,
+          1146500,
+          1047791,
+          1047541,
+          1212000,
+          1232292,
+          1140791,
+          1183791,
+          1088375,
+          1210709,
+          1249042,
+          1178583,
+          1150375,
+          1004625,
+          1008500,
+          1006958,
+          1013375,
+          1012500,
+          1055875,
+          1102542,
+          1066208,
+          1106333,
+          1090375,
+          1174792,
+          1077750,
+          1046625
+        ],
+        "info": {
+          "bit_rate": 787710,
+          "chapters": [],
+          "duration_us": 5461333,
+          "format": "mov,mp4,m4a,3gp,3g2,mj2",
+          "metadata": {},
+          "path": "tests/fixtures/playback-errors/mp4-uniform-plan-scan/frames-262144.mp4",
+          "start_us": 0,
+          "streams": [
+            {
+              "average_frame_rate": [
+                50,
+                1
+              ],
+              "bit_rate": 1656800,
+              "channels": 0,
+              "codec": "vp9",
+              "disposition": 0,
+              "duration": 3,
+              "extradata_bytes": 12,
+              "height": 16,
+              "index": 0,
+              "level": null,
+              "media_type": "video",
+              "metadata": {},
+              "pixel_format": -1,
+              "profile": null,
+              "sample_rate": 0,
+              "start": 0,
+              "time_base": [
+                1,
+                50
+              ],
+              "video_delay": 0,
+              "width": 16
+            },
+            {
+              "average_frame_rate": [
+                0,
+                1
+              ],
+              "bit_rate": 768000,
+              "channels": 1,
+              "codec": "pcm_s16le",
+              "disposition": 0,
+              "duration": 262144,
+              "extradata_bytes": 0,
+              "height": 0,
+              "index": 1,
+              "level": null,
+              "media_type": "audio",
+              "metadata": {},
+              "pixel_format": -1,
+              "profile": null,
+              "sample_rate": 48000,
+              "start": 0,
+              "time_base": [
+                1,
+                48000
+              ],
+              "video_delay": 0,
+              "width": 0
+            }
+          ]
+        }
+      },
+      "after": {
+        "bounded": true,
+        "elapsed_ns": [
+          31583,
+          35375,
+          34084,
+          36750,
+          30291,
+          36334,
+          31584,
+          29667,
+          28708,
+          30209,
+          30625,
+          29417,
+          28959,
+          30125,
+          30917,
+          30375,
+          29417,
+          29166,
+          30750,
+          30166,
+          28792,
+          30000,
+          30583,
+          29000,
+          28417,
+          28333,
+          29709,
+          29500,
+          28333,
+          28125,
+          28125
+        ],
+        "info": {
+          "bit_rate": 787710,
+          "chapters": [],
+          "duration_us": 5461333,
+          "format": "mov,mp4,m4a,3gp,3g2,mj2",
+          "metadata": {},
+          "path": "tests/fixtures/playback-errors/mp4-uniform-plan-scan/frames-262144.mp4",
+          "start_us": 0,
+          "streams": [
+            {
+              "average_frame_rate": [
+                50,
+                1
+              ],
+              "bit_rate": 1656800,
+              "channels": 0,
+              "codec": "vp9",
+              "disposition": 0,
+              "duration": 3,
+              "extradata_bytes": 12,
+              "height": 16,
+              "index": 0,
+              "level": null,
+              "media_type": "video",
+              "metadata": {},
+              "pixel_format": -1,
+              "profile": null,
+              "sample_rate": 0,
+              "start": 0,
+              "time_base": [
+                1,
+                50
+              ],
+              "video_delay": 0,
+              "width": 16
+            },
+            {
+              "average_frame_rate": [
+                0,
+                1
+              ],
+              "bit_rate": 768000,
+              "channels": 1,
+              "codec": "pcm_s16le",
+              "disposition": 0,
+              "duration": 262144,
+              "extradata_bytes": 0,
+              "height": 0,
+              "index": 1,
+              "level": null,
+              "media_type": "audio",
+              "metadata": {},
+              "pixel_format": -1,
+              "profile": null,
+              "sample_rate": 48000,
+              "start": 0,
+              "time_base": [
+                1,
+                48000
+              ],
+              "video_delay": 0,
+              "width": 0
+            }
+          ]
+        }
+      }
+    }
+  },
+  {
+    "frames": 262144,
+    "bounded": true,
+    "pair": 5,
+    "results": {
+      "after": {
+        "bounded": true,
+        "elapsed_ns": [
+          30667,
+          31250,
+          33000,
+          32792,
+          31625,
+          34291,
+          31000,
+          29667,
+          59000,
+          53875,
+          36833,
+          33541,
+          37292,
+          33833,
+          30875,
+          30083,
+          30833,
+          32208,
+          30208,
+          29334,
+          29583,
+          31125,
+          104292,
+          31250,
+          28958,
+          28792,
+          27291,
+          26625,
+          25750,
+          31917,
+          26625
+        ],
+        "info": {
+          "bit_rate": 787710,
+          "chapters": [],
+          "duration_us": 5461333,
+          "format": "mov,mp4,m4a,3gp,3g2,mj2",
+          "metadata": {},
+          "path": "tests/fixtures/playback-errors/mp4-uniform-plan-scan/frames-262144.mp4",
+          "start_us": 0,
+          "streams": [
+            {
+              "average_frame_rate": [
+                50,
+                1
+              ],
+              "bit_rate": 1656800,
+              "channels": 0,
+              "codec": "vp9",
+              "disposition": 0,
+              "duration": 3,
+              "extradata_bytes": 12,
+              "height": 16,
+              "index": 0,
+              "level": null,
+              "media_type": "video",
+              "metadata": {},
+              "pixel_format": -1,
+              "profile": null,
+              "sample_rate": 0,
+              "start": 0,
+              "time_base": [
+                1,
+                50
+              ],
+              "video_delay": 0,
+              "width": 16
+            },
+            {
+              "average_frame_rate": [
+                0,
+                1
+              ],
+              "bit_rate": 768000,
+              "channels": 1,
+              "codec": "pcm_s16le",
+              "disposition": 0,
+              "duration": 262144,
+              "extradata_bytes": 0,
+              "height": 0,
+              "index": 1,
+              "level": null,
+              "media_type": "audio",
+              "metadata": {},
+              "pixel_format": -1,
+              "profile": null,
+              "sample_rate": 48000,
+              "start": 0,
+              "time_base": [
+                1,
+                48000
+              ],
+              "video_delay": 0,
+              "width": 0
+            }
+          ]
+        }
+      },
+      "before": {
+        "bounded": true,
+        "elapsed_ns": [
+          1053125,
+          1041625,
+          1069750,
+          1033625,
+          1018000,
+          1229333,
+          1040958,
+          1032792,
+          1036208,
+          1050959,
+          1020250,
+          1023375,
+          1151667,
+          1086333,
+          1047292,
+          1053000,
+          1051042,
+          1118416,
+          1069750,
+          1074459,
+          1045959,
+          1070375,
+          1034375,
+          1137958,
+          1109625,
+          1078167,
+          1123958,
+          1015167,
+          1025791,
+          1030792,
+          1008708
+        ],
+        "info": {
+          "bit_rate": 787710,
+          "chapters": [],
+          "duration_us": 5461333,
+          "format": "mov,mp4,m4a,3gp,3g2,mj2",
+          "metadata": {},
+          "path": "tests/fixtures/playback-errors/mp4-uniform-plan-scan/frames-262144.mp4",
+          "start_us": 0,
+          "streams": [
+            {
+              "average_frame_rate": [
+                50,
+                1
+              ],
+              "bit_rate": 1656800,
+              "channels": 0,
+              "codec": "vp9",
+              "disposition": 0,
+              "duration": 3,
+              "extradata_bytes": 12,
+              "height": 16,
+              "index": 0,
+              "level": null,
+              "media_type": "video",
+              "metadata": {},
+              "pixel_format": -1,
+              "profile": null,
+              "sample_rate": 0,
+              "start": 0,
+              "time_base": [
+                1,
+                50
+              ],
+              "video_delay": 0,
+              "width": 16
+            },
+            {
+              "average_frame_rate": [
+                0,
+                1
+              ],
+              "bit_rate": 768000,
+              "channels": 1,
+              "codec": "pcm_s16le",
+              "disposition": 0,
+              "duration": 262144,
+              "extradata_bytes": 0,
+              "height": 0,
+              "index": 1,
+              "level": null,
+              "media_type": "audio",
+              "metadata": {},
+              "pixel_format": -1,
+              "profile": null,
+              "sample_rate": 48000,
+              "start": 0,
+              "time_base": [
+                1,
+                48000
+              ],
+              "video_delay": 0,
+              "width": 0
+            }
+          ]
+        }
+      }
+    }
+  },
+  {
+    "frames": 262144,
+    "bounded": true,
+    "pair": 6,
+    "results": {
+      "before": {
+        "bounded": true,
+        "elapsed_ns": [
+          1085375,
+          1073583,
+          1066875,
+          1109250,
+          1232084,
+          1121500,
+          1081500,
+          1149375,
+          1066541,
+          1052500,
+          1050458,
+          1041167,
+          1053833,
+          1043417,
+          1057667,
+          1032375,
+          1037917,
+          1024625,
+          1023500,
+          1022334,
+          1029875,
+          1027042,
+          1023750,
+          1064917,
+          1098666,
+          1087750,
+          1118833,
+          1057958,
+          1105334,
+          1038417,
+          1052709
+        ],
+        "info": {
+          "bit_rate": 787710,
+          "chapters": [],
+          "duration_us": 5461333,
+          "format": "mov,mp4,m4a,3gp,3g2,mj2",
+          "metadata": {},
+          "path": "tests/fixtures/playback-errors/mp4-uniform-plan-scan/frames-262144.mp4",
+          "start_us": 0,
+          "streams": [
+            {
+              "average_frame_rate": [
+                50,
+                1
+              ],
+              "bit_rate": 1656800,
+              "channels": 0,
+              "codec": "vp9",
+              "disposition": 0,
+              "duration": 3,
+              "extradata_bytes": 12,
+              "height": 16,
+              "index": 0,
+              "level": null,
+              "media_type": "video",
+              "metadata": {},
+              "pixel_format": -1,
+              "profile": null,
+              "sample_rate": 0,
+              "start": 0,
+              "time_base": [
+                1,
+                50
+              ],
+              "video_delay": 0,
+              "width": 16
+            },
+            {
+              "average_frame_rate": [
+                0,
+                1
+              ],
+              "bit_rate": 768000,
+              "channels": 1,
+              "codec": "pcm_s16le",
+              "disposition": 0,
+              "duration": 262144,
+              "extradata_bytes": 0,
+              "height": 0,
+              "index": 1,
+              "level": null,
+              "media_type": "audio",
+              "metadata": {},
+              "pixel_format": -1,
+              "profile": null,
+              "sample_rate": 48000,
+              "start": 0,
+              "time_base": [
+                1,
+                48000
+              ],
+              "video_delay": 0,
+              "width": 0
+            }
+          ]
+        }
+      },
+      "after": {
+        "bounded": true,
+        "elapsed_ns": [
+          31417,
+          31208,
+          36458,
+          37625,
+          32625,
+          33875,
+          31875,
+          33083,
+          31959,
+          29333,
+          30125,
+          29958,
+          35500,
+          29667,
+          29750,
+          28416,
+          28334,
+          29583,
+          28958,
+          29166,
+          29792,
+          32958,
+          31000,
+          33250,
+          30000,
+          29375,
+          30375,
+          29458,
+          29334,
+          29667,
+          29750
+        ],
+        "info": {
+          "bit_rate": 787710,
+          "chapters": [],
+          "duration_us": 5461333,
+          "format": "mov,mp4,m4a,3gp,3g2,mj2",
+          "metadata": {},
+          "path": "tests/fixtures/playback-errors/mp4-uniform-plan-scan/frames-262144.mp4",
+          "start_us": 0,
+          "streams": [
+            {
+              "average_frame_rate": [
+                50,
+                1
+              ],
+              "bit_rate": 1656800,
+              "channels": 0,
+              "codec": "vp9",
+              "disposition": 0,
+              "duration": 3,
+              "extradata_bytes": 12,
+              "height": 16,
+              "index": 0,
+              "level": null,
+              "media_type": "video",
+              "metadata": {},
+              "pixel_format": -1,
+              "profile": null,
+              "sample_rate": 0,
+              "start": 0,
+              "time_base": [
+                1,
+                50
+              ],
+              "video_delay": 0,
+              "width": 16
+            },
+            {
+              "average_frame_rate": [
+                0,
+                1
+              ],
+              "bit_rate": 768000,
+              "channels": 1,
+              "codec": "pcm_s16le",
+              "disposition": 0,
+              "duration": 262144,
+              "extradata_bytes": 0,
+              "height": 0,
+              "index": 1,
+              "level": null,
+              "media_type": "audio",
+              "metadata": {},
+              "pixel_format": -1,
+              "profile": null,
+              "sample_rate": 48000,
+              "start": 0,
+              "time_base": [
+                1,
+                48000
+              ],
+              "video_delay": 0,
+              "width": 0
+            }
+          ]
+        }
+      }
+    }
+  }
+]
