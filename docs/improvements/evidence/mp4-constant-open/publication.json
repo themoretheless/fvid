@@ -1,0 +1,20 @@
+{
+  "source_commit": "1552b23dfa4408361506352108067c99fdf4dd58",
+  "remote_refs": {
+    "refs/heads/codex/deliver-fvid-20261029": "1552b23dfa4408361506352108067c99fdf4dd58",
+    "refs/heads/main": "1552b23dfa4408361506352108067c99fdf4dd58"
+  },
+  "accepted_count": 542,
+  "next_id": "FVID-0543",
+  "rust_executions": 190,
+  "existing_device_ignores": 2,
+  "performance_comparison": "comparison.json",
+  "source_stable": true,
+  "owned_target_removed": "/private/tmp/fvid-constant-open-target-20261103",
+  "measured_binaries_removed": true,
+  "measured_binary_hashes_preserved": true,
+  "reused_synthetic_files_preserved": 5,
+  "parallel_work_preserved": true,
+  "stashes_preserved": 4,
+  "branch_worktree_deletions": 0
+}
