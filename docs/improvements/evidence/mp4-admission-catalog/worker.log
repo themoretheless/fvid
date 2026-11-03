@@ -1,0 +1,43 @@
+
+running 39 tests
+test audio_thread::adts_seek_tests::adts_seek_and_rewind_preserve_continuous_decoder_samples ... ok
+test audio_thread::checkpoint_seek_tests::warmed_aac_seek_skips_source_prefix_without_changing_pcm ... ok
+test audio_thread::duration_publication_guards::completion_publication_preserves_known_length_on_unknown_or_invalid_eof ... ok
+test audio_thread::exact_seek_clock_regressions::duration_to_seek_ticks_preserves_the_stored_matroska_boundary ... ok
+test audio_thread::flush_failure_regressions::failed_navigation_flush_cannot_mix_new_decoding_into_old_device_queue ... ok
+test audio_thread::matroska_aac_seek_tests::matroska_aac_seek_preserves_pcm_and_nanosecond_timestamps ... ok
+test audio_thread::mp4_edit_scheduler_tests::gap_and_repeat_playback_matches_owned_pcm_export ... ok
+test audio_thread::checkpoint_seek_tests::warmed_adts_and_matroska_seek_restore_exact_pcm_tails ... ok
+test audio_thread::no_edit_seek_tests::no_edit_aac_seek_matches_continuous_pcm ... ok
+test audio_thread::ogg_opus_configuration_tests::ogg_opus_worker_reconfigures_mapping_and_gain_after_boundaries_and_navigation ... ok
+test audio_thread::mp4_edit_scheduler_tests::nonzero_media_range_repeats_restore_aac_overlap_before_seek ... ok
+test audio_thread::pause_failure_regressions::pause_failure_reports_terminal_error_and_stops_device_after_valid_pcm ... ok
+test audio_thread::preroll_control_tests::pause_and_stop_interrupt_preroll_between_access_units ... ok
+test audio_thread::ogg_opus_output_layout_tests::ogg_opus_channel_changes_preserve_pcm_without_restarting_the_backend ... ok
+test audio_thread::presentation_window_tests::worker_queues_container_window_after_consuming_complete_aac_packet ... ok
+test audio_thread::ps_edit_worker_tests::core_clock_ps_mp4_uses_asc_output_rate_for_pcm_edits_seek_and_rewind ... ok
+test audio_thread::ps_edit_worker_tests::factory_ps_worker_accepts_silence_repeated_ranges_eof_seek_and_rewind ... ok
+test audio_thread::ps_edit_worker_tests::source_gap_is_rejected_after_pending_ps_pcm_is_drained ... ok
+test audio_thread::ps_eof_tests::ps_and_lc_trait_checkpoints_reject_wrong_codec_and_restore_pending_source_metadata ... ok
+test audio_thread::ps_eof_tests::ps_worker_uses_original_unequal_windows_and_queues_eof_before_ended ... ok
+test audio_thread::ps_matroska_preroll_tests::original_ps_matroska_preroll_is_trimmed_and_eof_seek_rewind_keep_stereo_history ... ok
+test audio_thread::sample_seek_clock_regressions::inverse_seek_recovers_floored_sample_boundaries_and_keeps_other_targets_floored ... ok
+test audio_thread::scheduling_step_tests::silence_and_reset_preserve_queued_pcm_and_timestamps ... ok
+test audio_thread::seek_resume_regressions::authored_video_and_continuous_pcm_controls ... ok
+test audio_thread::seek_resume_regressions::coalesced_rewind_and_play_resume_from_zero ... ok
+test audio_thread::seek_resume_regressions::coalesced_seek_and_play_resume_only_after_selected_clock_is_installed ... ok
+test audio_thread::seek_resume_regressions::final_pause_in_seek_burst_does_not_start_the_device ... ok
+test audio_thread::seek_resume_regressions::queued_play_seek_play_uses_only_the_final_navigation_clock ... ok
+test audio_thread::seek_resume_regressions::real_audio_thread_resumes_at_the_selected_sample_after_queued_seek ... ok
+test audio_thread::seek_resume_regressions::separate_seek_and_play_commands_resume_at_selected_sample ... ok
+test audio_thread::tests::level_and_rate_reach_the_device ... ok
+test audio_thread::tests::pacing_holds_the_decoder_at_the_lead ... ok
+test audio_thread::tests::rewind_anchors_the_clock_at_zero ... ok
+test audio_thread::tests::seek_counts_ticks_in_the_stream_timescale ... ok
+test audio_thread::tests::the_track_waits_for_a_play_command ... ok
+test audio_thread::ps_edit_worker_tests::implicit_ps_mono_metadata_edits_seek_and_rewind_use_negotiated_stereo_stride ... ok
+test audio_thread::vorbis_worker_tests::ogg_vorbis_channel_changes_keep_backend_geometry_through_seek_and_rewind ... ok
+test audio_thread::vorbis_worker_tests::ogg_vorbis_rate_changes_keep_backend_clock_through_seek_and_rewind ... ok
+test audio_thread::vorbis_worker_tests::ogg_codec_changes_keep_backend_pcm_clock_through_navigation ... ok
+
+test result: ok. 39 passed; 0 failed; 0 ignored; 0 measured; 1190 filtered out; finished in 5.46s

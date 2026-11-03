@@ -1,0 +1,36 @@
+{
+  "accepted": true,
+  "profile": "release; thin LTO; codegen-units1; no default features",
+  "comparison": "Seven balanced process pairs;2 warmups,9 measured rounds,16 plans/round",
+  "scope": "Warm-cache owned plan_decode_audio on authored one-chunk16384-frame PCM; not playback/decoder/RSS",
+  "binary_sha256": {
+    "baseline": "aa749cd2ee394a8b57e204a5deade9fbb4326e15dedb70368c8dc673c4736f8a",
+    "candidate": "d8351bb1d9c8253e8b52ebba6d875a445e857eb10abe93857906cb72a5b28fb6"
+  },
+  "summaries": {
+    "catalog1-selected1.mp4": {
+      "before_us_per_plan": 93.8671875,
+      "after_us_per_plan": 93.4609375,
+      "speedup": 1.00434673576862,
+      "wins": 4,
+      "pairs": 7,
+      "accepted": true
+    },
+    "catalog32-selected1.mp4": {
+      "before_us_per_plan": 675.5703125,
+      "after_us_per_plan": 101.479125,
+      "speedup": 6.657234308041186,
+      "wins": 7,
+      "pairs": 7,
+      "accepted": true
+    },
+    "catalog32-selected32.mp4": {
+      "before_us_per_plan": 679.234375,
+      "after_us_per_plan": 100.0416875,
+      "speedup": 6.789513371613209,
+      "wins": 7,
+      "pairs": 7,
+      "accepted": true
+    }
+  }
+}

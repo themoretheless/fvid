@@ -346,6 +346,36 @@ impl Track {
         self.sample_descriptions.get(selected)
     }
 
+    /// Test a selected description ID without expanding compact PCM chunks.
+    pub(crate) fn description_used_before(&self, description: u32, limit: usize) -> bool {
+        let scan = || (0..limit).any(|n| self.samples.get(n)
+            .is_some_and(|s| s.description_index == description));
+        let SampleIndex::Uniform(index) = &self.samples else { return scan(); };
+        if limit > index.count || index.runs.len().saturating_mul(2) >= limit {
+            return scan();
+        }
+        let mut covered = 0;
+        let mut found = false;
+        for run in index.runs.iter().take_while(|run| run.first < limit) {
+            if run.frames == 0 { continue; }
+            if run.first != covered { return scan(); }
+            let Some(end) = run.first.checked_add(run.frames) else { return scan(); };
+            let end = end.min(limit);
+            let first_sample = self.samples.get(run.first);
+            // As with a per-sample `any`, a readable hit settles a positive query.
+            if first_sample.as_ref().is_some_and(|s| s.description_index == description) {
+                return true;
+            }
+            // Preserve per-sample behavior for unreadable or overlapping affine runs.
+            if !first_sample.is_some_and(|s| s.description_index == run.description_index)
+                || !self.samples.get(end-1).is_some_and(|s| s.description_index == run.description_index)
+            { return scan(); }
+            found |= run.description_index == description;
+            covered = end;
+        }
+        if covered == limit { found } else { scan() }
+    }
+
     /// Compare the selected headers over a prefix without expanding a compact
     /// PCM index into one lookup per virtual sample. Header equality, rather
     /// than description-number equality, preserves duplicate-entry semantics.
@@ -3150,4 +3180,39 @@ fn chunk_runs_with_units(
         return Err(invalid("overlapping or non-increasing MP4 chunk offsets"));
     }
     Ok(walked)
+}
+
+#[cfg(test)]
+mod selected_membership_equivalence {
+    use super::*;
+    #[test]
+    fn compact_membership_matches_virtual_samples_at_prefix_boundaries_and_fallbacks() {
+        let input = include_bytes!("../../../tests/fixtures/playback-errors/mp4-admission-catalog/catalog32-selected32.mp4");
+        let reader = Mp4Reader::open_indexed(std::io::Cursor::new(input), Default::default()).unwrap();
+        let mut track = reader.tracks()[1].clone();
+        let row = |description_index,first,offset,frames| FrameRun { description_index,first,offset,frames };
+        let shapes = vec![
+            vec![row(1,0,0,8)],
+            vec![row(1,0,0,3),row(32,3,6,5)],
+            vec![row(1,0,0,3),row(2,3,6,0),row(32,3,6,5)],
+            vec![row(1,0,0,2),row(32,3,6,5)],
+            vec![row(1,0,0,6),row(32,3,6,5)],
+            vec![row(1,0,u64::MAX-2,8)],
+            vec![],
+        ];
+        for runs in shapes {
+            track.samples = SampleIndex::Uniform(UniformIndex {bytes_per_frame:2,duration:1,count:8,runs});
+            for limit in 0..=17 { for id in [0,1,2,3,32,33,u32::MAX] {
+                let expected=(0..limit).any(|n|track.samples.get(n).is_some_and(|s|s.description_index==id));
+                assert_eq!(track.description_used_before(id,limit),expected,"{limit}:{id}:{:?}",track.samples);
+            }}
+        }
+        let mut sample=reader.tracks()[1].samples.get(0).unwrap();
+        let mut samples=Vec::new();for id in [1,1,32,2,32,3,3,1] {sample.description_index=id;samples.push(sample.clone());}
+        track.samples=SampleIndex::Expanded(samples);
+        for limit in 0..=17 {for id in [0,1,2,3,32,33,u32::MAX] {
+            let expected=(0..limit).any(|n|track.samples.get(n).is_some_and(|s|s.description_index==id));
+            assert_eq!(track.description_used_before(id,limit),expected);
+        }}
+    }
 }

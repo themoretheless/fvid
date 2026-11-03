@@ -139,7 +139,7 @@ pub(crate) fn decode_mp4_audio_reader_targeted<R: std::io::Read + std::io::Seek>
     // Probe each used configuration independently; never feed packets from a
     // different setup into an AAC entropy/history state.
     for (i, flag) in ps.iter_mut().enumerate() {
-        if (0..active_samples).any(|n| track.samples.get(n).is_some_and(|s| s.description_index as usize == i+1)) {
+        if track.description_used_before((i+1) as u32, active_samples) {
             *flag = negotiate_mp4_description_ps_with_interval(&mut reader, index, (i+1) as u32, interval, max_packets, || control.check())?;
         }
     }
@@ -469,7 +469,7 @@ pub(crate) fn mp4_normalized_geometry_controlled_with_interval<R:std::io::Read+s
     for i in 0..reader.tracks()[index].sample_descriptions.len() {
         check()?;
         let track=&reader.tracks()[index];
-        if !(0..active_samples).any(|n|track.samples.get(n).is_some_and(|s|s.description_index as usize==i+1)) {continue;}
+        if !track.description_used_before((i+1) as u32, active_samples) {continue;}
         let setup=track.decoder_setup((i+1)as u32)?;
         let ps=negotiate_mp4_description_ps_with_interval(reader,index,(i+1)as u32,interval,max_packets,&mut check)?;
         let next=if ps {Mp4TimelineDecoder::with_in_band_ps(&setup)?}else{Mp4TimelineDecoder::new(&setup)?};

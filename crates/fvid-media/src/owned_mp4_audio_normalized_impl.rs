@@ -172,7 +172,7 @@ fn decode_mp4_audio_normalized<R: std::io::Read + std::io::Seek>(
             let positions=mp4_opaque_positions(&first.configuration).map_err(|e|invalid(&e))?;
             opaque_identity=positions.as_ref().is_some_and(|p|p.len()==usize::from(channels));
             for i in 0..track.sample_descriptions.len() {
-                if !(0..active_samples).any(|n|track.samples.get(n).is_some_and(|s|s.description_index as usize==i+1)) {continue;}
+                if !track.description_used_before((i+1) as u32, active_samples) {continue;}
                 let setup=track.decoder_setup((i+1)as u32)?;
                 if setup.codec!=*b"mp4a" || setup.channels!=channels || mp4_opaque_positions(&setup.configuration).map_err(|e|invalid(&e))?!=positions {opaque_identity=false;break;}
             }
@@ -217,12 +217,7 @@ fn decode_mp4_audio_normalized<R: std::io::Read + std::io::Seek>(
     };
     for i in 0..track.sample_descriptions.len() {
         control.check()?;
-        if (0..active_samples).any(|n| {
-            track
-                .samples
-                .get(n)
-                .is_some_and(|s| s.description_index as usize == i + 1)
-        }) {
+        if track.description_used_before((i+1) as u32, active_samples) {
             matrix_for((i + 1) as u32, &make_decoder((i + 1) as u32)?)?;
         }
     }

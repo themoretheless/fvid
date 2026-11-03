@@ -1,0 +1,28 @@
+{
+  "fixture_files": 5,
+  "byte_identical": true,
+  "frozen_paths": 5312,
+  "source_stable": true,
+  "offline_repeats": 3,
+  "external_tools_inaccessible": true,
+  "qualification": [
+    {
+      "name": "no-external-1",
+      "log": "docs/improvements/evidence/mp4-admission-catalog/no-external-1.log",
+      "passed": 3,
+      "ignored": 0
+    },
+    {
+      "name": "no-external-2",
+      "log": "docs/improvements/evidence/mp4-admission-catalog/no-external-2.log",
+      "passed": 3,
+      "ignored": 0
+    },
+    {
+      "name": "no-external-3",
+      "log": "docs/improvements/evidence/mp4-admission-catalog/no-external-3.log",
+      "passed": 3,
+      "ignored": 0
+    }
+  ]
+}

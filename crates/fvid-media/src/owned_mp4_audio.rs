@@ -330,7 +330,7 @@ pub(crate) fn admit_audio_reader_with_interval<R: Read + Seek>(
     for i in 0..track.sample_descriptions.len() {
         // Decoder initialization precedes scheduling even for a silence-only edit.
         if initial_description != Some((i+1) as u32)
-            && !(0..active_samples).any(|n| track.samples.get(n).is_some_and(|s| s.description_index as usize == i+1)) { continue; }
+            && !track.description_used_before((i+1) as u32, active_samples) { continue; }
         let setup = track.decoder_setup((i+1) as u32)?;
         let state = mp4_decoder_admission(&setup)?;
         // Charge decoded-packet growth only for admitted decoder setups.
@@ -367,7 +367,7 @@ pub(crate) fn admit_audio_reader_with_interval<R: Read + Seek>(
         let output_channels=usize::from(target.map_or(first.channels.max(2),|t|t.1));
         let mut normalization=0usize;
         for (i, description) in track.sample_descriptions.iter().enumerate() {
-            if !(0..active_samples).any(|n| track.samples.get(n).is_some_and(|s| s.description_index as usize == i + 1)) {
+            if !track.description_used_before((i+1) as u32, active_samples) {
                 continue;
             }
             if description.sample_rate==0 || output_rate==0 {return Err(invalid("zero MP4 normalization clock"));}

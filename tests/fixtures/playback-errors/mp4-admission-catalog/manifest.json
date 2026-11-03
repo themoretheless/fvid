@@ -1,0 +1,26 @@
+{
+  "provenance": "Authored341.334ms mono PCM constant and three neutral VP9 pictures; identical stsd catalogs with one compact PCM chunk. No encoder,private media or network.",
+  "cases": [
+    {
+      "file": "catalog1-selected1.mp4",
+      "descriptions": 1,
+      "selected": 1,
+      "frames": 16384,
+      "rate": 48000
+    },
+    {
+      "file": "catalog32-selected1.mp4",
+      "descriptions": 32,
+      "selected": 1,
+      "frames": 16384,
+      "rate": 48000
+    },
+    {
+      "file": "catalog32-selected32.mp4",
+      "descriptions": 32,
+      "selected": 32,
+      "frames": 16384,
+      "rate": 48000
+    }
+  ]
+}

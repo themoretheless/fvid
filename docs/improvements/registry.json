@@ -1,8 +1,8 @@
 {
   "target": 1000,
   "counting_rule": "One independently confirmed problem or useful capability; fixture variants and baseline integration repairs are excluded. Only accepted entries count.",
-  "accepted_count": 540,
-  "next_id": "FVID-0541",
+  "accepted_count": 541,
+  "next_id": "FVID-0542",
   "entries": [
     {
       "id": "FVID-0001",
@@ -6130,6 +6130,17 @@
       "result": "Accumulate the unchanged expansion factors in the existing admitted-decoder loop, preserving all retained catalog/index costs, initial decoder admission and64x MACE growth when MACE is selected. No added scan, allocation or public-interface change. Eight dormant-MACE variants now admit their selected PCM under the original caps with exact480-frame f32/precise f64 output, public planning, controlled-memory/cancellation refusal,60ms native duration, seek/rewind/EOF,24 actual software-worker sessions/anchors per stand and exact software VP9 pictures. Four actually selected fragmented MACE controls still refuse predeclared tight caps before caller output and admit9216 frames at256KiB, matching direct elementary packet/history decoding; the unchanged static authored MACE codebook reference test also passes. Qualification passes199 Rust executions, two existing device ignores, core/player checks and three external-tool-free repeats. All26 synthetic files regenerate identically and5303 portable source/input hashes remain stable. One retained-buffer admission invariant, separate from compact-index and finite-edit prefix defects. Estimates exclude parser temporaries/caller I/O under the existing contract; no RSS, actual-allocation reduction, performance or hardware claim.",
       "status": "accepted",
       "validation": "batch-551-validation.json"
+    },
+    {
+      "id": "FVID-0541",
+      "batch": 552,
+      "title": "Use compact MP4 chunks when checking selected audio description IDs",
+      "source": "crates/fvid-media/src/owned_mp4_impl.rs",
+      "regression": "tests/mp4_admission_catalog.rs",
+      "before": "Published e5acc7552f checks used description IDs by visiting virtual samples in six admission/PS/routing loops even when PCM retains one compact chunk. Release baseline on three authored341ms movies preserves exact16384-frame PCM and index budget4 but32-description planning takes675.570/679.234us per call in the final paired comparison, against93.867us for one description. This is a measured planning opportunity, not a new decoding failure.",
+      "result": "Add one private compact-index-aware membership query: readable positive hits stop immediately; dense/expanded indexes retain per-sample traversal and malformed/unreadable negative paths fall back. Wire six membership checks without changing public signatures, index representation, catalog contents, packet bytes, clocks, budgets or decoder algorithms. The original scalar predicate agrees at1008 prefix/ID/shape combinations per compiled equivalence test. Seven balanced release process pairs, two warmups and nine16-plan rounds each preserve every captured plan fingerprint:32-description first/last targets fall675.570→101.479us and679.234→100.042us (6.657x/6.790x), each winning7/7 pairs; one-description control93.867→93.461us remains within the predeclared10% bound. Final191 passing Rust executions, two old device ignores, core/player checks and three external-tool-free repeats preserve exact full/prefix f32/f64 PCM, compact cost, packet/memory/cancellation refusals, native seek/rewind/EOF,three actual target-worker sessions/anchors and software VP9 pictures, plus related dynamic/opaque/edit/MACE regressions. All five synthetic files regenerate identically and5312 final source/input hashes stay stable. Initial partial wiring and first qualified runtime are archived; review added early positive exit and requalified the changed final runtime, not a second ID. One planning optimization on this warm-cache local one-chunk workload; no general playback, codec-throughput, allocation, RSS or hardware claim.",
+      "status": "accepted",
+      "validation": "batch-552-validation.json"
     }
   ]
 }

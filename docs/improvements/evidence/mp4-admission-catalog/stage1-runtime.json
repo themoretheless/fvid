@@ -1,0 +1,9 @@
+{
+  "base": "e5acc7552f42fa62f1c66ef322955e00fe6ca5e8",
+  "patch": "candidate-stage1.patch.gz",
+  "uncompressed_sha256": "6afce0d2b3a948150a2ec71672470f1ecccd219afa75d93cf7182397f4b01579",
+  "source": "candidate-source-stage1.json",
+  "timed_source": "timed-source-stage1.json",
+  "comparison": "comparison-stage1.json",
+  "qualification": "stage1-validation/final-results.json"
+}
