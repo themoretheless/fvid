@@ -1,0 +1,20 @@
+{
+  "source_commit": "0a5c1355810152b957a9ef40c33e8ed9526ec7aa",
+  "remote_refs": {
+    "refs/heads/codex/deliver-fvid-20261029": "0a5c1355810152b957a9ef40c33e8ed9526ec7aa",
+    "refs/heads/main": "0a5c1355810152b957a9ef40c33e8ed9526ec7aa"
+  },
+  "accepted_count": 543,
+  "next_id": "FVID-0544",
+  "rust_executions": 195,
+  "existing_device_ignores": 2,
+  "independent_exact_reference_cases": 64,
+  "native_worker_sessions_per_stand": 192,
+  "source_stable": true,
+  "owned_target_removed": "/private/tmp/fvid-enda-wave-target-20261103",
+  "candidate_backup_removed": true,
+  "synthetic_files_preserved": 140,
+  "parallel_work_preserved": true,
+  "stashes_preserved": 4,
+  "branch_worktree_deletions": 0
+}
