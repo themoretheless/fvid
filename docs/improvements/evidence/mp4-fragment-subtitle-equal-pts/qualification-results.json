@@ -1,0 +1,47 @@
+[
+  {
+    "name": "related",
+    "command": [
+      "cargo",
+      "test",
+      "--locked",
+      "--offline",
+      "--no-default-features",
+      "--features",
+      "player",
+      "--test",
+      "mp4_fragment_subtitle_equal_pts",
+      "--test",
+      "mp4_subtitle_inferred_clock",
+      "--test",
+      "mp4_subtitle_negative_clock",
+      "--test",
+      "mp4_subtitle_edits",
+      "--test",
+      "mp4_subtick_video_edits",
+      "--",
+      "--test-threads=2"
+    ],
+    "exit_code": 0,
+    "passed": 21,
+    "ignored": 0
+  },
+  {
+    "name": "player-lib",
+    "command": [
+      "cargo",
+      "test",
+      "--locked",
+      "--offline",
+      "--no-default-features",
+      "--features",
+      "player",
+      "--lib",
+      "--",
+      "--test-threads=2"
+    ],
+    "exit_code": 0,
+    "passed": 1207,
+    "ignored": 26
+  }
+]

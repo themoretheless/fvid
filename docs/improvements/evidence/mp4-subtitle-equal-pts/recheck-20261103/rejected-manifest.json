@@ -1,0 +1,380 @@
+{
+  "provenance": "Pure authored three-color16x16 VP9 with scalar YUV16 and three UTF-8 tx3g packets. Equal, signed-negative, distinct, explicit and terminal subtitle endpoints at50/1001Hz. No private media,encoder,FFmpeg or network.",
+  "cases": [
+    {
+      "file": "equal-50.mp4",
+      "scale": 50,
+      "pts": [
+        1,
+        0,
+        0
+      ],
+      "durations": [
+        1,
+        0,
+        0
+      ],
+      "texts": [
+        "first simultaneous",
+        "second simultaneous",
+        "later cue"
+      ],
+      "cues": [
+        {
+          "text": "second simultaneous",
+          "start_ns": 0,
+          "end_ns": 20000000
+        },
+        {
+          "text": "later cue",
+          "start_ns": 0,
+          "end_ns": 20000000
+        },
+        {
+          "text": "first simultaneous",
+          "start_ns": 20000000,
+          "end_ns": 40000000
+        }
+      ]
+    },
+    {
+      "file": "negative-50.mp4",
+      "scale": 50,
+      "pts": [
+        1,
+        -1,
+        -1
+      ],
+      "durations": [
+        1,
+        0,
+        0
+      ],
+      "texts": [
+        "first simultaneous",
+        "second simultaneous",
+        "later cue"
+      ],
+      "cues": [
+        {
+          "text": "second simultaneous",
+          "start_ns": 0,
+          "end_ns": 20000000
+        },
+        {
+          "text": "later cue",
+          "start_ns": 0,
+          "end_ns": 20000000
+        },
+        {
+          "text": "first simultaneous",
+          "start_ns": 20000000,
+          "end_ns": 40000000
+        }
+      ]
+    },
+    {
+      "file": "terminal-50.mp4",
+      "scale": 50,
+      "pts": [
+        0,
+        1,
+        1
+      ],
+      "durations": [
+        1,
+        0,
+        0
+      ],
+      "texts": [
+        "first simultaneous",
+        "second simultaneous",
+        "later cue"
+      ],
+      "cues": [
+        {
+          "text": "first simultaneous",
+          "start_ns": 0,
+          "end_ns": 20000000
+        },
+        {
+          "text": "second simultaneous",
+          "start_ns": 20000000,
+          "end_ns": 2020000000
+        },
+        {
+          "text": "later cue",
+          "start_ns": 20000000,
+          "end_ns": 2020000000
+        }
+      ]
+    },
+    {
+      "file": "explicit-50.mp4",
+      "scale": 50,
+      "pts": [
+        0,
+        0,
+        1
+      ],
+      "durations": [
+        1,
+        1,
+        1
+      ],
+      "texts": [
+        "first simultaneous",
+        "second simultaneous",
+        "later cue"
+      ],
+      "cues": [
+        {
+          "text": "first simultaneous",
+          "start_ns": 0,
+          "end_ns": 20000000
+        },
+        {
+          "text": "second simultaneous",
+          "start_ns": 0,
+          "end_ns": 20000000
+        },
+        {
+          "text": "later cue",
+          "start_ns": 20000000,
+          "end_ns": 40000000
+        }
+      ]
+    },
+    {
+      "file": "distinct-50.mp4",
+      "scale": 50,
+      "pts": [
+        0,
+        1,
+        2
+      ],
+      "durations": [
+        1,
+        0,
+        0
+      ],
+      "texts": [
+        "first simultaneous",
+        "second simultaneous",
+        "later cue"
+      ],
+      "cues": [
+        {
+          "text": "first simultaneous",
+          "start_ns": 0,
+          "end_ns": 20000000
+        },
+        {
+          "text": "second simultaneous",
+          "start_ns": 20000000,
+          "end_ns": 40000000
+        },
+        {
+          "text": "later cue",
+          "start_ns": 40000000,
+          "end_ns": 2040000000
+        }
+      ]
+    },
+    {
+      "file": "equal-1001.mp4",
+      "scale": 1001,
+      "pts": [
+        1,
+        0,
+        0
+      ],
+      "durations": [
+        1,
+        0,
+        0
+      ],
+      "texts": [
+        "first simultaneous",
+        "second simultaneous",
+        "later cue"
+      ],
+      "cues": [
+        {
+          "text": "second simultaneous",
+          "start_ns": 0,
+          "end_ns": 999000
+        },
+        {
+          "text": "later cue",
+          "start_ns": 0,
+          "end_ns": 999000
+        },
+        {
+          "text": "first simultaneous",
+          "start_ns": 999000,
+          "end_ns": 1998001
+        }
+      ]
+    },
+    {
+      "file": "negative-1001.mp4",
+      "scale": 1001,
+      "pts": [
+        1,
+        -1,
+        -1
+      ],
+      "durations": [
+        1,
+        0,
+        0
+      ],
+      "texts": [
+        "first simultaneous",
+        "second simultaneous",
+        "later cue"
+      ],
+      "cues": [
+        {
+          "text": "second simultaneous",
+          "start_ns": 0,
+          "end_ns": 999000
+        },
+        {
+          "text": "later cue",
+          "start_ns": 0,
+          "end_ns": 999000
+        },
+        {
+          "text": "first simultaneous",
+          "start_ns": 999000,
+          "end_ns": 1998001
+        }
+      ]
+    },
+    {
+      "file": "terminal-1001.mp4",
+      "scale": 1001,
+      "pts": [
+        0,
+        1,
+        1
+      ],
+      "durations": [
+        1,
+        0,
+        0
+      ],
+      "texts": [
+        "first simultaneous",
+        "second simultaneous",
+        "later cue"
+      ],
+      "cues": [
+        {
+          "text": "first simultaneous",
+          "start_ns": 0,
+          "end_ns": 999000
+        },
+        {
+          "text": "second simultaneous",
+          "start_ns": 999000,
+          "end_ns": 2000999000
+        },
+        {
+          "text": "later cue",
+          "start_ns": 999000,
+          "end_ns": 2000999000
+        }
+      ]
+    },
+    {
+      "file": "explicit-1001.mp4",
+      "scale": 1001,
+      "pts": [
+        0,
+        0,
+        1
+      ],
+      "durations": [
+        1,
+        1,
+        1
+      ],
+      "texts": [
+        "first simultaneous",
+        "second simultaneous",
+        "later cue"
+      ],
+      "cues": [
+        {
+          "text": "first simultaneous",
+          "start_ns": 0,
+          "end_ns": 999000
+        },
+        {
+          "text": "second simultaneous",
+          "start_ns": 0,
+          "end_ns": 999000
+        },
+        {
+          "text": "later cue",
+          "start_ns": 999000,
+          "end_ns": 1998001
+        }
+      ]
+    },
+    {
+      "file": "distinct-1001.mp4",
+      "scale": 1001,
+      "pts": [
+        0,
+        1,
+        2
+      ],
+      "durations": [
+        1,
+        0,
+        0
+      ],
+      "texts": [
+        "first simultaneous",
+        "second simultaneous",
+        "later cue"
+      ],
+      "cues": [
+        {
+          "text": "first simultaneous",
+          "start_ns": 0,
+          "end_ns": 999000
+        },
+        {
+          "text": "second simultaneous",
+          "start_ns": 999000,
+          "end_ns": 1998001
+        },
+        {
+          "text": "later cue",
+          "start_ns": 1998001,
+          "end_ns": 2001998001
+        }
+      ]
+    }
+  ],
+  "sha256": {
+    "frame-0.yuv16": "b4cc94ff03bd17b32107a79a64ba427cd43b6e49d209bb4d29190f3deb737a11",
+    "frame-1.yuv16": "31d05f629132273f660622387ef2865866de6688c0969265e891ad9d4c936237",
+    "frame-2.yuv16": "2f59155bee83baf25a0d39c17290257f055569e5b1d77ca8b866b1a4b2cee6f7",
+    "equal-50.mp4": "0644273e230fa6e6e3268a71ade35449316938cad98190a4b647d892825008af",
+    "negative-50.mp4": "5985afea38059328d0e3a611208839e22e44f7f74ad959170d617e4ddbbb3278",
+    "terminal-50.mp4": "da72fc0f32599c27a71eb3b72ba9d8a06d067d62cf99d2c312f7d9e5868d4aa3",
+    "explicit-50.mp4": "83c0b276f702bec0f81027f2271ed0da6288ba861a2aa9f48b0bd20e049b91d7",
+    "distinct-50.mp4": "29dd9115dcaf42daa6c8a486131621468047d1329c5a6e13b62ff85dbe2fe427",
+    "equal-1001.mp4": "82cc9e6c2880fa6beb059708d740811f4acfe3954bccbf20e6840d3affe3c6d3",
+    "negative-1001.mp4": "dbcd28db5af911f3cc034c9ba6a8606359d354120ac594fb9d5cc259b1380987",
+    "terminal-1001.mp4": "31aaafa81ee88181cb1482d0c0f28f785fdde070a1977a2ea2c2c3eef0cf1787",
+    "explicit-1001.mp4": "6fff7212f8e51522e48eb68a53345bdeb90c6204df1fbe7fc9c8bb842d08adc6",
+    "distinct-1001.mp4": "8adcfd2bf11eeceb40848b2158d57c8271f7e96e62ec0cc3e7e9281b339d91f7"
+  }
+}

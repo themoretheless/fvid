@@ -1,0 +1,9 @@
+# Accepted FVID-0551: infer fragmented subtitle ends at the next PTS group
+
+Base fff2fbe159157aee80a61a7b4abc47cd7bd9c768. Baseline full stand:1 passes,2 fail. Both MP4 readers accept all10 movies and preserve exact subtitle packets, signed PTS/durations and three independently known colored VP9 pictures. Four equal/negative cases incorrectly keep the first subtitle until about2seconds instead of20ms (50Hz) or999000ns (1001Hz), obscuring the next cue after actual video seeks. Explicit-duration, distinct-PTS and terminal-fallback controls retain their expected behavior.
+
+Use partition_point on the existing sorted source index to choose the next strictly greater PTS for an unspecified end. Preserve signed endpoint composition, edit mapping, all parser validation/resource policies and public signatures. The classic multi-zero-duration hypothesis remains a rejected audit in the sibling directory; its parser refusal was not relaxed. Fragment runs already admit this reachable case. This is an equal-group successor selection defect; FVID-0519 corrected signed clipping at a different stage.
+
+The strengthened stand retains all prior assertions and adds repeat extraction plus exact RGB/frame interval comparisons after every real NativeReader seek. Final baseline still1pass2fail; candidate3pass. Related subtitle/edit/fractional-video suites21pass and complete player library1207pass with26 existing ignores. Commands run locked/offline with the native executable runner PATH=/nonexistent. All14 authored fixture files regenerate byte-identically from the separate pure generator. No private media, FFmpeg, encoder or network.
+
+No export, hardware, GUI styling or performance claim. The broad CPU audit and remote Linux/Windows jobs are still running and are not represented as completed qualification here.

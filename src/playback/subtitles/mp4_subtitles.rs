@@ -143,7 +143,7 @@ impl<R: Read + Seek> Mp4SubtitleReader<R> {
         let mut cues = Vec::new();
         cues.try_reserve(lines.len().min(self.cue_limit))
             .map_err(|_| invalid("MP4 subtitle cue allocation failed"))?;
-        for (position, (pts, duration, index)) in lines.iter().enumerate() {
+        for (pts, duration, index) in &lines {
             self.demuxer.read_packet(track_index, *index, &mut packet)?;
             let Some(text) = sample_text(&packet) else {
                 continue;
@@ -154,10 +154,12 @@ impl<R: Read + Seek> Mp4SubtitleReader<R> {
             let raw_end = if *duration != 0 {
                 raw_start + i128::from(*duration)
             } else {
+                // Simultaneous cues share their next distinct presentation
+                // boundary; an equal-PTS neighbor is not a terminal fallback.
+                let next = lines.partition_point(|(p, _, _)| p <= pts);
                 lines
-                    .get(position + 1)
+                    .get(next)
                     .map(|(p, _, _)| i128::from(*p))
-                    .filter(|next| *next > raw_start)
                     .unwrap_or(raw_start + 2 * i128::from(timescale))
             };
             if edits.is_empty() && origin == 0 {

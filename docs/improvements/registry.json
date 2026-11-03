@@ -1,8 +1,8 @@
 {
   "target": 1000,
   "counting_rule": "One independently confirmed problem or useful capability; fixture variants and baseline integration repairs are excluded. Only accepted entries count.",
-  "accepted_count": 550,
-  "next_id": "FVID-0551",
+  "accepted_count": 551,
+  "next_id": "FVID-0552",
   "entries": [
     {
       "id": "FVID-0001",
@@ -6241,6 +6241,17 @@
       "result": "Private rational edit program preserves movie duration, clipped frame periods, PTS, seek, EOF, rewind and cache time ranges without changing public constructors. Fifteen supported edited programs include prime movie clocks, negative/reordered CTTS and wide-origin fMP4; separate subnanosecond Unsupported refusal and indexed late-seek IO gate remain strict. Five regression tests and actual Player playback for all15 programs pass;22 files regenerate identically. Qualification core400/player1270(26 existing ignores)/default381, core/player/wasm library checks and5699 stable hashes. Related finite-edit oracle now uses exact movie time with every pixel/seek/EOF assertion retained. ADTS diagnostic and Windows CI resource settings are separate zero-count repairs; remote MSVC verification pending. One timing defect, not per-case IDs; no GPU/hardware/browser or general speedup claim.",
       "status": "accepted",
       "validation": "batch-561-validation.json"
+    },
+    {
+      "id": "FVID-0551",
+      "batch": 562,
+      "title": "Infer fragmented MP4 subtitle endpoints at the next distinct PTS group",
+      "source": "src/playback/subtitles/mp4_subtitles.rs",
+      "regression": "tests/mp4_fragment_subtitle_equal_pts.rs",
+      "before": "Publishedfff2fbe159 infers zero-duration subtitle endpoints from only the immediate sorted neighbor. Existing fragment admission permits simultaneous zero-duration cues; an equal neighbor wrongly triggers2seconds fallback despite a later distinct PTS. Ten authored movies validate both parsers/packets and exact software VP9 pictures; final baseline1pass2fail. Four equal/negative cases obscure the next cue after actual seeks. The classic nonterminal-zero hypothesis remains rejected and its parser guard is unchanged.",
+      "result": "Find the next strictly greater PTS group logarithmically in the existing sorted index before signed clipping/edit mapping. Preserve explicit durations, terminal fallback, admission, quotas and public API. Candidate3pass; exact source YUV, RGB/intervals after real native seeks, repeated cue extraction and boundary lookups pass. Related integrations21pass; full player library1207pass with26 existing ignores. Fourteen files regenerate exactly without FFmpeg/network; relevant source hashes and stand extension recorded. One successor-selection defect, distinct from FVID-0519 signed endpoint clipping; no per-case IDs, performance/export/hardware/GUI styling claim. Broader CPU and remote platform checks remain separately in progress.",
+      "status": "accepted",
+      "validation": "batch-562-validation.json"
     }
   ]
 }

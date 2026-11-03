@@ -1,0 +1,8 @@
+{
+  "changed_path": "tests/mp4_fragment_subtitle_equal_pts.rs",
+  "initial_baseline_hash": "e5135a63965f6f5e07334ba171a26af3f6afb1e9510de8f9838c580dfcf569f7",
+  "final_stand_hash": "399f936f6342f5b545f9e75ab797b47fef03b87c34f295c77eab2c4cc193ed72",
+  "changes": "Repeat extraction and exact RGB/frame interval verification after every real seek; original cue and parser assertions retained",
+  "final_baseline_log": "before-final.log",
+  "production_baseline": "fff2fbe159157aee80a61a7b4abc47cd7bd9c768"
+}

@@ -1,0 +1,9 @@
+{
+  "changed_paths": [
+    "src/playback/subtitles/mp4_subtitles.rs",
+    "tests/mp4_fragment_subtitle_equal_pts.rs"
+  ],
+  "stand_extension": "stand-extension.json",
+  "production_change": "Select next strictly greater PTS via partition_point over the existing sorted subtitle index",
+  "parser_admission_unchanged": true
+}

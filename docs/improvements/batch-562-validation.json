@@ -1,0 +1,60 @@
+{
+  "status": "accepted",
+  "accepted_ids": [
+    "FVID-0551"
+  ],
+  "count_delta": 1,
+  "accepted_count": 551,
+  "next_id": "FVID-0552",
+  "validation": "docs/improvements/evidence/mp4-fragment-subtitle-equal-pts/validation.json",
+  "qualification": [
+    {
+      "name": "related",
+      "command": [
+        "cargo",
+        "test",
+        "--locked",
+        "--offline",
+        "--no-default-features",
+        "--features",
+        "player",
+        "--test",
+        "mp4_fragment_subtitle_equal_pts",
+        "--test",
+        "mp4_subtitle_inferred_clock",
+        "--test",
+        "mp4_subtitle_negative_clock",
+        "--test",
+        "mp4_subtitle_edits",
+        "--test",
+        "mp4_subtick_video_edits",
+        "--",
+        "--test-threads=2"
+      ],
+      "exit_code": 0,
+      "passed": 21,
+      "ignored": 0
+    },
+    {
+      "name": "player-lib",
+      "command": [
+        "cargo",
+        "test",
+        "--locked",
+        "--offline",
+        "--no-default-features",
+        "--features",
+        "player",
+        "--lib",
+        "--",
+        "--test-threads=2"
+      ],
+      "exit_code": 0,
+      "passed": 1207,
+      "ignored": 26
+    }
+  ],
+  "baseline": "docs/improvements/evidence/mp4-fragment-subtitle-equal-pts/before-final.log",
+  "regeneration": "docs/improvements/evidence/mp4-fragment-subtitle-equal-pts/regeneration.json",
+  "rejected_recheck": "docs/improvements/evidence/mp4-subtitle-equal-pts/recheck-20261103/validation.json"
+}

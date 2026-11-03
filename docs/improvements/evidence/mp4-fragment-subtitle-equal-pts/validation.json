@@ -1,0 +1,66 @@
+{
+  "status": "accepted",
+  "accepted_id": "FVID-0551",
+  "count_delta": 1,
+  "baseline": {
+    "passed": 1,
+    "failed": 2,
+    "exit_code": 101,
+    "log": "before-final.log"
+  },
+  "qualification": [
+    {
+      "name": "related",
+      "command": [
+        "cargo",
+        "test",
+        "--locked",
+        "--offline",
+        "--no-default-features",
+        "--features",
+        "player",
+        "--test",
+        "mp4_fragment_subtitle_equal_pts",
+        "--test",
+        "mp4_subtitle_inferred_clock",
+        "--test",
+        "mp4_subtitle_negative_clock",
+        "--test",
+        "mp4_subtitle_edits",
+        "--test",
+        "mp4_subtick_video_edits",
+        "--",
+        "--test-threads=2"
+      ],
+      "exit_code": 0,
+      "passed": 21,
+      "ignored": 0
+    },
+    {
+      "name": "player-lib",
+      "command": [
+        "cargo",
+        "test",
+        "--locked",
+        "--offline",
+        "--no-default-features",
+        "--features",
+        "player",
+        "--lib",
+        "--",
+        "--test-threads=2"
+      ],
+      "exit_code": 0,
+      "passed": 1207,
+      "ignored": 26
+    }
+  ],
+  "fixtures": 14,
+  "regeneration": "regeneration.json",
+  "source": "candidate-source.json",
+  "limits": [
+    "26 existing player device/network ignores",
+    "No hardware, GUI styling, export or performance claim",
+    "Full CPU audit and remote CI remain in progress"
+  ]
+}

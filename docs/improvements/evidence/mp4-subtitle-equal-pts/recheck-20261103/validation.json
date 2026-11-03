@@ -1,0 +1,11 @@
+{
+  "status": "rejected",
+  "count_delta": 0,
+  "source": "fff2fbe159157aee80a61a7b4abc47cd7bd9c768",
+  "reason": "The existing nonterminal_zero admission guard rejects multiple zero-duration samples. The hypothesized immediate-successor branch is unreachable for this corpus. Already covered by the earlier rejected audit in the parent directory. No production edit and no new improvement.",
+  "test_result": {
+    "passed": 0,
+    "failed": 3,
+    "exit_code": 101
+  }
+}
