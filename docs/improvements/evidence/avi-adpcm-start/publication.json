@@ -1,0 +1,13 @@
+{
+  "source_and_qualification_commit": "f2e48de48585761ef393b09c3757fcfb44de4aec",
+  "remote": [
+    "f2e48de48585761ef393b09c3757fcfb44de4aec\trefs/heads/codex/deliver-fvid-20261029",
+    "f2e48de48585761ef393b09c3757fcfb44de4aec\trefs/heads/main"
+  ],
+  "accepted_count": 533,
+  "next_id": "FVID-0534",
+  "owned_build_removed": true,
+  "followup_mp4_tests_passed": 20,
+  "followup_mp4_new_ids": 0,
+  "parallel_worktrees_and_stashes_preserved": true
+}
