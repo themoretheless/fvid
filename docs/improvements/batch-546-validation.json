@@ -1,0 +1,91 @@
+{
+  "status": "accepted",
+  "accepted_ids": [
+    "FVID-0535"
+  ],
+  "count_delta": 1,
+  "accepted_count": 535,
+  "next_id": "FVID-0536",
+  "qualification": [
+    {
+      "name": "final-integration",
+      "log": "docs/improvements/evidence/mp4-constant-selected-description/final-integration.log",
+      "passed": 29,
+      "ignored": 0
+    },
+    {
+      "name": "final-acceptance",
+      "log": "docs/improvements/evidence/mp4-constant-selected-description/final-acceptance.log",
+      "passed": 5,
+      "ignored": 0
+    },
+    {
+      "name": "root-parser",
+      "log": "docs/improvements/evidence/mp4-constant-selected-description/root-parser.log",
+      "passed": 17,
+      "ignored": 0
+    },
+    {
+      "name": "root-audio",
+      "log": "docs/improvements/evidence/mp4-constant-selected-description/root-audio.log",
+      "passed": 15,
+      "ignored": 0
+    },
+    {
+      "name": "root-video",
+      "log": "docs/improvements/evidence/mp4-constant-selected-description/root-video.log",
+      "passed": 7,
+      "ignored": 0
+    },
+    {
+      "name": "worker",
+      "log": "docs/improvements/evidence/mp4-constant-selected-description/worker.log",
+      "passed": 39,
+      "ignored": 0
+    },
+    {
+      "name": "cpal",
+      "log": "docs/improvements/evidence/mp4-constant-selected-description/cpal.log",
+      "passed": 43,
+      "ignored": 2
+    },
+    {
+      "name": "no-external-1",
+      "log": "docs/improvements/evidence/mp4-constant-selected-description/no-external-1.log",
+      "passed": 5,
+      "ignored": 0
+    },
+    {
+      "name": "no-external-2",
+      "log": "docs/improvements/evidence/mp4-constant-selected-description/no-external-2.log",
+      "passed": 5,
+      "ignored": 0
+    },
+    {
+      "name": "no-external-3",
+      "log": "docs/improvements/evidence/mp4-constant-selected-description/no-external-3.log",
+      "passed": 5,
+      "ignored": 0
+    },
+    {
+      "name": "final-core-check",
+      "log": "docs/improvements/evidence/mp4-constant-selected-description/final-core-check.log",
+      "passed": true
+    },
+    {
+      "name": "final-player-check",
+      "log": "docs/improvements/evidence/mp4-constant-selected-description/final-player-check.log",
+      "passed": true
+    }
+  ],
+  "rust_executions": 170,
+  "baseline": "docs/improvements/evidence/mp4-constant-selected-description/final-baseline.json",
+  "reproducibility": "docs/improvements/evidence/mp4-constant-selected-description/reproducibility.json",
+  "frozen_source": "docs/improvements/evidence/mp4-constant-selected-description/candidate-source.json",
+  "limitations": [
+    "Representative Track metadata follows the first selected recognized setup; indexed consumers still inspect each sample",
+    "Unknown selected descriptions are refusal tests, not playback acceptance",
+    "Software workers/software video; no physical or hardware output claim",
+    "No performance or RSS claim"
+  ]
+}

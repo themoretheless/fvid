@@ -381,11 +381,11 @@ impl Track {
         if self.sample_descriptions.len() <= 1 {
             return Ok(());
         }
-        // Text metadata already identifies the first recognized setup. An
-        // unused opaque entry before it is not a decoder reconfiguration.
-        // Keep the existing catalog-entry guard for audio/video consumers.
-        let primary = text_handler(&self.handler).then(|| SampleDescription::from_track(self));
-        let first = primary.as_ref().unwrap_or(&self.sample_descriptions[0]);
+        // The legacy header is the first selected represented setup, not
+        // necessarily catalog entry 1. Opaque selected entries must never
+        // inherit an unused known decoder's metadata.
+        let primary = SampleDescription::from_track(self);
+        let first = &primary;
         if (0..self.samples.len()).any(|i| self.description_for_sample(i) != Some(first)) {
             return Err(unsupported("MP4 sample description changes require decoder reconfiguration"));
         }
@@ -843,6 +843,7 @@ impl<R: Read + Seek> Mp4Reader<R> {
         let mut tracks = Vec::new();
         let mut track_header_flags = Vec::new();
         let mut track_header_durations = Vec::new();
+        let mut represented_descriptions = Vec::new();
         let mut refused = Vec::new();
         let mut remaining = limits.samples;
         let mut skipped = 0usize;
@@ -850,7 +851,7 @@ impl<R: Read + Seek> Mp4Reader<R> {
             if tracks.len() >= limits.tracks {
                 return Err(invalid("MP4 track limit exceeded"));
             }
-            let Some((track, flags, duration)) = parse_track(atom.data, &mdats, remaining, fragmented, quicktime_brand, &mut refused)?
+            let Some((track, flags, duration, represented)) = parse_track(atom.data, &mdats, remaining, fragmented, quicktime_brand, &mut refused)?
             else {
                 skipped += 1;
                 continue;
@@ -862,6 +863,7 @@ impl<R: Read + Seek> Mp4Reader<R> {
             tracks.push(track);
             track_header_flags.push(flags);
             track_header_durations.push(duration);
+            represented_descriptions.push(represented);
         }
         if fragmented {
             index_fragments(
@@ -871,6 +873,27 @@ impl<R: Read + Seek> Mp4Reader<R> {
                 &mut tracks,
                 &mut remaining,
             )?;
+        }
+        // Fragments can supply the first selected description after an empty
+        // init table. Retain parser recognition separately from header values:
+        // zero placeholders and opaque same-fourcc versions are not setups.
+        for (track, represented) in tracks.iter_mut().zip(represented_descriptions) {
+            let Some(first) = track.samples.get(0) else { continue; };
+            let index = first.description_index.checked_sub(1)
+                .ok_or_else(|| invalid("invalid initial MP4 description"))? as usize;
+            if represented.get(index) != Some(&true) { continue; }
+            let description = track.sample_descriptions.get(index)
+                .ok_or_else(|| invalid("invalid initial MP4 description"))?.clone();
+            track.codec = description.codec;
+            track.width = description.width;
+            track.height = description.height;
+            track.channels = description.channels;
+            track.sample_rate = description.sample_rate;
+            track.bit_depth = description.bit_depth;
+            track.configuration = description.configuration;
+            track.pixel_aspect = description.pixel_aspect;
+            track.colour = description.colour;
+            track.hdr = description.hdr;
         }
         // Only referenced text descriptions determine whether the stream can
         // be represented. Fragments can select entries absent from classic
@@ -1616,7 +1639,7 @@ fn parse_track(
     fragmented: bool,
     quicktime: bool,
     refused: &mut Vec<SkippedTrack>,
-) -> Result<Option<(Track, u32, Option<u64>)>> {
+) -> Result<Option<(Track, u32, Option<u64>, Vec<bool>)>> {
     let track = atoms(data)?;
     let tkhd = required(&track, b"tkhd")?;
     let narrow = version(tkhd, 1)? == 0;
@@ -1717,12 +1740,16 @@ fn parse_track(
     let language = std::mem::take(&mut result.language);
     let template = result.clone();
     let mut descriptions = Vec::new();
+    let mut represented = Vec::new();
+    represented.try_reserve_exact(entries.len())
+        .map_err(|_| invalid("MP4 description recognition allocation failed"))?;
     let mut supported = false;
     let mut unknown_codec = None;
     for entry in entries {
         let mut rejected = Vec::new();
         if let Some(parsed) = parse_sample_entry(entry, template.clone(), &mut rejected, drawn, rotation, references.len())? {
             descriptions.push(SampleDescription::from_track(&parsed));
+            represented.push(true);
             if !supported { result = parsed; supported = true; }
         } else if handler == *b"vide" || handler == *b"soun" || text_handler(&handler) {
             // An unreferenced SampleEntry must not hide the supported entries.
@@ -1732,6 +1759,7 @@ fn parse_track(
             let mut opaque = template.clone();
             opaque.codec = entry.kind;
             descriptions.push(SampleDescription::from_track(&opaque));
+            represented.push(false);
         } else {
             refused.extend(rejected);
             return Ok(None);
@@ -1804,7 +1832,7 @@ fn parse_track(
             });
         }
     }
-    Ok(Some((result, flags, header_duration)))
+    Ok(Some((result, flags, header_duration, represented)))
 }
 
 fn text_handler(handler: &[u8; 4]) -> bool {

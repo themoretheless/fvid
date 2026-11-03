@@ -1,0 +1,28 @@
+{
+  "base": "5d5f9a6472db11f0d0b3c59d8373e05a4bdae2b7",
+  "files": {
+    "crates/fvid-media/src/owned_mp4_impl.rs": {
+      "original": "6d5fe4f94a883bccc967f0070a153450efd2ab4900fb36ecd31c3b9b4b3280ff",
+      "candidate": "29ed023a4b4a956bd92030e65149a1fd226f15ce3b5440c5837534208e1ee49f"
+    },
+    "src/playback/audio/mp4_audio.rs": {
+      "original": "855b04e191e68ca69576f7d6f83a1e35498c769af206e193bc267c436866ebfc",
+      "candidate": "3bfb7381cb269909b0f9983119bba59e1827b754bb3788bbb75f10b9c1985a5d"
+    }
+  },
+  "regression_sha256": "61e27a67cbb4380efd2b56d925b3840d84bfa0c775d20d9fd6377d7572c06dcd",
+  "command": [
+    "cargo",
+    "test",
+    "--locked",
+    "--offline",
+    "--no-default-features",
+    "--features",
+    "player",
+    "--test",
+    "mp4_constant_selected_description",
+    "--",
+    "--test-threads=2"
+  ],
+  "returncode": 101
+}

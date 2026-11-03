@@ -363,6 +363,8 @@ impl<R: Read + Seek> Mp4AudioReader<R> {
         // A failed optional probe may have left an underlying reader between
         // packets. Always re-seek the selected first packet on real playback.
         demuxer.invalidate_position();
+        let active_description = demuxer.tracks()[index].samples.get(0)
+            .map_or(0, |sample| sample.description_index as usize - 1);
         Ok(Self {
             presentation_end_ticks: std::sync::OnceLock::new(),
             pts_nondecreasing: std::sync::OnceLock::new(),
@@ -372,7 +374,7 @@ impl<R: Read + Seek> Mp4AudioReader<R> {
             navigation_error:None,
             clock:None,clock_mode:std::cell::Cell::new(false),clock_floor:std::cell::Cell::new(EditTime::ZERO),clock_anchor:std::cell::Cell::new(None),
             variable_edits: None, opening_sample_index: 0,
-            changing: false, active_description: 0, configuration_pending: false, description_states: Vec::new(),
+            changing: false, active_description, configuration_pending: false, description_states: Vec::new(),
             dolby_mask,
             dolby_channels,
             dolby_rate:selected_geometry.as_ref().map(|g|g.0),

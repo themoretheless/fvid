@@ -1,0 +1,10 @@
+
+running 5 tests
+test constant_api_uses_the_actual_header_and_keeps_coded_bytes ... ok
+test indexed_controls_retain_selected_headers_and_exact_packets ... ok
+test owned_constant_api_preserves_the_same_admission_and_primary_metadata ... ok
+test selected_opaque_descriptions_are_not_constant_playback_acceptance ... ok
+test actual_audio_workers_and_video_seek_keep_the_selected_content ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.46s
+

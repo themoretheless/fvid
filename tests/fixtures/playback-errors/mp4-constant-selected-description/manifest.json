@@ -1,0 +1,159 @@
+{
+  "provenance": "Authored64-frame constant PCM and three distinct VP9 pictures. Unused supported/opaque stsd entries; whole-run explicit stsc selection. No encoder,private media or network.",
+  "cases": [
+    {
+      "file": "audio-supported-first.mp4",
+      "kind": "audio",
+      "control": "audio-control.mp4",
+      "selected": 2,
+      "frames": 64,
+      "expected": "audio.f32le"
+    },
+    {
+      "file": "audio-opaque-first.mp4",
+      "kind": "audio",
+      "control": "audio-control.mp4",
+      "selected": 2,
+      "frames": 64,
+      "expected": "audio.f32le"
+    },
+    {
+      "file": "audio-both-first.mp4",
+      "kind": "audio",
+      "control": "audio-control.mp4",
+      "selected": 3,
+      "frames": 64,
+      "expected": "audio.f32le"
+    },
+    {
+      "file": "audio-actual-first.mp4",
+      "kind": "audio",
+      "control": "audio-control.mp4",
+      "selected": 1,
+      "frames": 64,
+      "expected": "audio.f32le"
+    },
+    {
+      "file": "audio-version-first.mp4",
+      "kind": "audio",
+      "control": "audio-control.mp4",
+      "selected": 2,
+      "frames": 64,
+      "expected": "audio.f32le"
+    },
+    {
+      "file": "video-supported-first.mp4",
+      "kind": "video",
+      "control": "video-control.mp4",
+      "selected": 2,
+      "frames": 3,
+      "expected": null
+    },
+    {
+      "file": "video-opaque-first.mp4",
+      "kind": "video",
+      "control": "video-control.mp4",
+      "selected": 2,
+      "frames": 3,
+      "expected": null
+    },
+    {
+      "file": "video-both-first.mp4",
+      "kind": "video",
+      "control": "video-control.mp4",
+      "selected": 3,
+      "frames": 3,
+      "expected": null
+    },
+    {
+      "file": "video-actual-first.mp4",
+      "kind": "video",
+      "control": "video-control.mp4",
+      "selected": 1,
+      "frames": 3,
+      "expected": null
+    },
+    {
+      "file": "audio-fragmented-supported-first.mp4",
+      "kind": "audio",
+      "control": "audio-fragmented-control.mp4",
+      "selected": 2,
+      "frames": 5760,
+      "expected": "audio-fragmented.f32le"
+    },
+    {
+      "file": "audio-fragmented-opaque-first.mp4",
+      "kind": "audio",
+      "control": "audio-fragmented-control.mp4",
+      "selected": 2,
+      "frames": 5760,
+      "expected": "audio-fragmented.f32le"
+    },
+    {
+      "file": "audio-fragmented-both-first.mp4",
+      "kind": "audio",
+      "control": "audio-fragmented-control.mp4",
+      "selected": 3,
+      "frames": 5760,
+      "expected": "audio-fragmented.f32le"
+    },
+    {
+      "file": "audio-fragmented-actual-first.mp4",
+      "kind": "audio",
+      "control": "audio-fragmented-control.mp4",
+      "selected": 1,
+      "frames": 5760,
+      "expected": "audio-fragmented.f32le"
+    },
+    {
+      "file": "audio-fragmented-version-first.mp4",
+      "kind": "audio",
+      "control": "audio-fragmented-control.mp4",
+      "selected": 2,
+      "frames": 5760,
+      "expected": "audio-fragmented.f32le"
+    }
+  ],
+  "refusals": [
+    {
+      "file": "audio-opaque-active.mp4",
+      "kind": "audio",
+      "control": "audio-control.mp4",
+      "selected": 1,
+      "frames": 64,
+      "expected": "audio.f32le"
+    },
+    {
+      "file": "audio-version-active.mp4",
+      "kind": "audio",
+      "control": "audio-control.mp4",
+      "selected": 1,
+      "frames": 64,
+      "expected": "audio.f32le"
+    },
+    {
+      "file": "video-opaque-active.mp4",
+      "kind": "video",
+      "control": "video-control.mp4",
+      "selected": 1,
+      "frames": 3,
+      "expected": null
+    },
+    {
+      "file": "audio-fragmented-opaque-active.mp4",
+      "kind": "audio",
+      "control": "audio-fragmented-control.mp4",
+      "selected": 1,
+      "frames": 5760,
+      "expected": "audio-fragmented.f32le"
+    },
+    {
+      "file": "audio-fragmented-version-active.mp4",
+      "kind": "audio",
+      "control": "audio-fragmented-control.mp4",
+      "selected": 1,
+      "frames": 5760,
+      "expected": "audio-fragmented.f32le"
+    }
+  ]
+}

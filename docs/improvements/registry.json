@@ -1,8 +1,8 @@
 {
   "target": 1000,
   "counting_rule": "One independently confirmed problem or useful capability; fixture variants and baseline integration repairs are excluded. Only accepted entries count.",
-  "accepted_count": 534,
-  "next_id": "FVID-0535",
+  "accepted_count": 535,
+  "next_id": "FVID-0536",
   "entries": [
     {
       "id": "FVID-0001",
@@ -6064,6 +6064,17 @@
       "result": "Validate the version2 structure extent, marker, rate, channels, flags and constant packet geometry, then normalize supported packed/interleaved signed8/16/24/32, unsigned8 and float32/64 descriptions to existing PCM dispatch without rewriting payloads. Explicit integral rates avoid the legacy16.16 restriction. The112 authored48/96kHz mono/stereo cases cover both byte orders and one/three-frame packets, exact PCM/native clocks, precise seek/rewind/EOF/MAX and336 actual software-worker sessions per stand. Owned full/interval f32/f64 exports preserve low float64 bits;28 legacy controls remain valid. Six malformed headers refuse with typed specific Invalid errors; planar/unpacked/unknown layouts remain skippable. Qualification passes156 Rust executions, two existing device ignores, core/player checks and three external-tool-free repeats. All262 fixture files regenerate identically and4656 source hashes remain stable; independent FFmpeg matches224/224 scalar outputs. Newly admitted Track/SampleDescription codecs normalize to existing PCM identifiers, documented in evidence; no change to existing interfaces or formats. One format capability, no separate IDs for its variants, tests or clock width. No physical-device, broad LPCM-layout, performance or RSS claim.",
       "status": "accepted",
       "validation": "batch-545-validation.json"
+    },
+    {
+      "id": "FVID-0535",
+      "batch": 546,
+      "title": "Validate constant MP4 streams against their selected decoder header instead of catalog entry one",
+      "source": "crates/fvid-media/src/owned_mp4_impl.rs",
+      "regression": "tests/mp4_constant_selected_description.rs",
+      "before": "Original 5d5f9a6472 rejects a constant known setup selected behind unused supported/opaque entries, yet accepts an entirely selected opaque first entry with unused recognized decoder metadata. The unchanged final five-test stand passes raw indexed controls and actual indexed playback, then fails constant acceptance, unknown-selection refusal and owned constant API checks (2 passes/3 failures).",
+      "result": "Retain temporary per-description parser recognition through fragment indexing, publish the initial selected recognized header in Track metadata, and compare used descriptions to that representative header in the constant guard. Preserve the complete catalog, packet bytes and indexes; never promote opaque versions by FourCC or placeholder geometry. Initialize the now-admitted constant audio fast path from the first sample description rather than slot0. Fourteen positive variants and five unsupported-selection controls cover compact64-frame PCM, six-fragment120ms PCM and three distinct VP9 frames, unused supported/opaque/known-FourCC-unknown-version descriptions, root and owned APIs, exact geometry/configuration/bytes, PCM duration, rewind/seek/EOF,30 actual software-worker sessions and exact software-video seek suffixes. Genuine three-setup PCM remains refused by both constant APIs. Qualification passes170 Rust executions, two old device ignores, core/player checks and three external-tool-free5-test repeats. All28 generated files are byte-identical and4687 source/input hashes remain stable. An incomplete candidate fast-path failure and an authoring error are retained separately and not counted. One selected-header invariant with both rejection and admission consequences; no separate IDs for variants or compatibility fixes. Public signatures/struct fields remain unchanged; indexed consumers still select per packet. No performance, RSS, physical-device or hardware-video claim.",
+      "status": "accepted",
+      "validation": "batch-546-validation.json"
     }
   ]
 }
