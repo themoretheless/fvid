@@ -1,0 +1,20 @@
+# Legacy QuickTime float storage width — qualification
+
+Base:7ceb944b818f60bfc3931830ff91fce562a8c736.
+
+QuickTime fl32/fl64 identify floating storage widths. A pre-existing authored FFmpeg sine fixture and an independent local muxer audit have v1 sample_size16 for these formats. existing-authored-header.json records only generic header fields, no copied media. Relevant primary references:
+https://developer.apple.com/documentation/quicktime-file-format/sound_sample_descriptions
+https://developer.apple.com/documentation/quicktime-file-format/sound_sample_description_version_1/bytes_per_sample
+
+The decoder already obtains32/64 from FourCC, and the existing each_pcm_tag unit explicitly requires retaining the stated16 metadata. Coded-frame counting and two seek/frontier strides instead use that16 as storage width. The first exactly aligned-clock stand passes (aligned-before.log); it is not a reproduced playback defect. Qualified quantized101/1001-clock files expose the mismatch: the original final stand passes native-width/video/refusal controls, but fails coded-frame counts, native duration/PTS/seek, actual workers and owned export. final-baseline.log/json record the unchanged six-test stand, original/candidate hashes and guarded restoration. The final uncompressed header uses compressionID0, matching the existing authored fixture; prior packet-header logs are explicitly intermediate stages.
+
+Add pcm_frame_bytes to the existing coded-frame helper module. Floating tags resolve physical32/64 width; other PCM uses the caller's resolved width as before. Use it in coded-frame counting and both live PCM seek/frontier calculations. Keep raw Track/SampleDescription/AudioStream bit metadata, byte order, payloads, public signatures and the existing stated16 unit assertion unchanged. The new helper is an additive API; no migration is required.
+
+The pure offline generator authors280 short files with96 qualified legacy/native-width case pairs: float32/64, mono/stereo, both byte orders, direct/nested enda and clocks101/1000/1001/48000/1000000; sixteen pairs include an independently specified delay/trim/silence/repeat edit. Analytic f32/f64 oracles preserve low float64 bits. Tests cover native PCM, raw declared metadata, duration, precise seek/rewind/EOF/MAX,288 actual software-worker sessions per stand, full/interval owned exports and real exact VP9 video controls. Four half-physical-frame inputs and the coded-count primitive verify specific incomplete-frame refusals.
+
+Two qualification limits are preserved rather than hidden:
+
+- Initially attempted65ms edits over60ms source fail even for native-width controls. unsupported-tail-authoring.log retains that failed acceptance assumption. Sixteen such legacy/control pairs are now explicit existing refusal tests (root and owned), never successful-playback evidence or a new accepted capability.
+- Duration1 tables at clock47 diverge in FFmpeg: it reads three PCM samples rather than the explicit grouped stsz payload. ffmpeg-reference.json and ffmpeg-coarse-diagnostic.json retain that initial audit; sixteen diagnostic pairs remain in the generator/manifest with an unqualified label, outside accepted playback cases. They are not used to claim correctness against an unresolved table-interpretation oracle. The qualified reference separately matches160/160 bare f32/f64 outputs; edits use analytic cuts and independent native-width controls.
+
+No network or external encoder is used in generation or ordinary tests. FFmpeg is a separate optional reference only. No performance, physical-device, universal duration1-PCM dialect, past-source-edit acceptance or hardware-video claim. Accepted as FVID-0537 in batch548:167 passing candidate Rust test executions, two existing physical-device ignores, core/player checks and three6-test repeats without external tools. All280 files regenerate byte-identically and5024 source/input hashes remain stable. Qualified reference:160/160 exact scalar outputs. See docs/improvements/batch-548-validation.json.

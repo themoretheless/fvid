@@ -1,0 +1,86 @@
+{
+  "status": "accepted",
+  "accepted_ids": [
+    "FVID-0537"
+  ],
+  "count_delta": 1,
+  "accepted_count": 537,
+  "next_id": "FVID-0538",
+  "qualification": [
+    {
+      "name": "final-integration",
+      "log": "docs/improvements/evidence/mp4-float-legacy-width/final-integration.log",
+      "passed": 28,
+      "ignored": 0
+    },
+    {
+      "name": "root-parser",
+      "log": "docs/improvements/evidence/mp4-float-legacy-width/root-parser.log",
+      "passed": 17,
+      "ignored": 0
+    },
+    {
+      "name": "root-audio",
+      "log": "docs/improvements/evidence/mp4-float-legacy-width/root-audio.log",
+      "passed": 15,
+      "ignored": 0
+    },
+    {
+      "name": "root-video",
+      "log": "docs/improvements/evidence/mp4-float-legacy-width/root-video.log",
+      "passed": 7,
+      "ignored": 0
+    },
+    {
+      "name": "worker",
+      "log": "docs/improvements/evidence/mp4-float-legacy-width/worker.log",
+      "passed": 39,
+      "ignored": 0
+    },
+    {
+      "name": "cpal",
+      "log": "docs/improvements/evidence/mp4-float-legacy-width/cpal.log",
+      "passed": 43,
+      "ignored": 2
+    },
+    {
+      "name": "no-external-1",
+      "log": "docs/improvements/evidence/mp4-float-legacy-width/no-external-1.log",
+      "passed": 6,
+      "ignored": 0
+    },
+    {
+      "name": "no-external-2",
+      "log": "docs/improvements/evidence/mp4-float-legacy-width/no-external-2.log",
+      "passed": 6,
+      "ignored": 0
+    },
+    {
+      "name": "no-external-3",
+      "log": "docs/improvements/evidence/mp4-float-legacy-width/no-external-3.log",
+      "passed": 6,
+      "ignored": 0
+    },
+    {
+      "name": "final-core-check",
+      "log": "docs/improvements/evidence/mp4-float-legacy-width/final-core-check.log",
+      "passed": true
+    },
+    {
+      "name": "final-player-check",
+      "log": "docs/improvements/evidence/mp4-float-legacy-width/final-player-check.log",
+      "passed": true
+    }
+  ],
+  "rust_executions": 167,
+  "baseline": "docs/improvements/evidence/mp4-float-legacy-width/final-baseline.json",
+  "reference": "docs/improvements/evidence/mp4-float-legacy-width/qualified-ffmpeg-reference.json",
+  "reproducibility": "docs/improvements/evidence/mp4-float-legacy-width/reproducibility.json",
+  "frozen_source": "docs/improvements/evidence/mp4-float-legacy-width/candidate-source.json",
+  "limitations": [
+    "Raw declared16 metadata preserved; physical float width comes from FourCC",
+    "Clock47 duration1 interpretation remains explicitly unqualified diagnostic data",
+    "Past-source edits remain explicit refusals, not acceptance",
+    "Software playback/owned exports, no physical-device, hardware-video or performance claim"
+  ]
+}

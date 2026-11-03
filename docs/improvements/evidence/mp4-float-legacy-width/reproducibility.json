@@ -1,0 +1,11 @@
+{
+  "fixture_files": 280,
+  "byte_identical": true,
+  "frozen_paths": 5024,
+  "source_stable": true,
+  "offline_repeats": 3,
+  "external_tools_inaccessible": true,
+  "qualified_case_pairs": 96,
+  "refusal_pairs": 16,
+  "unqualified_diagnostic_pairs": 16
+}

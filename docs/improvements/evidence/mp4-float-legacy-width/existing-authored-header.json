@@ -1,0 +1,13 @@
+{
+  "provenance": "Generic description fields only from the pre-existing authored FFmpeg sine fixture. No media or private codec parameters copied.",
+  "source": "tests/fixtures/audio/pcm-tags.mov",
+  "version": 1,
+  "sample_size": 16,
+  "compression_id": 0,
+  "v1_packet_fields": [
+    1,
+    4,
+    8,
+    2
+  ]
+}

@@ -1,4 +1,20 @@
 //! Coded frame counts without PCM allocation; decoder validation remains authoritative.
+/// Physical PCM channel-frame width. Float FourCCs define storage independently
+/// of a legacy QuickTime sample_size (commonly16). Other PCM keeps its width.
+pub fn pcm_frame_bytes(codec: &[u8; 4], channels: u16, bits: u16) -> Result<usize, String> {
+    let bits = match codec {
+        b"fl32" => 32,
+        b"fl64" => 64,
+        b"raw " | b"sowt" | b"twos" | b"in24" | b"in32" => bits,
+        _ => return Err("unsupported MP4 PCM storage codec".into()),
+    };
+    if channels == 0 { return Err("zero MP4 coded channels".into()); }
+    let stride = usize::from(channels).checked_mul(usize::from(bits).div_ceil(8))
+        .ok_or("MP4 PCM stride overflow")?;
+    if stride == 0 { return Err("incomplete MP4 coded audio block".into()); }
+    Ok(stride)
+}
+
 pub fn frames(
     codec: &[u8; 4],
     configuration: &[u8],
@@ -43,8 +59,7 @@ pub fn frames(
         .map(|n| n as u64)
         .map_err(|e| e.to_string()),
         b"raw " | b"sowt" | b"twos" | b"in24" | b"in32" | b"fl32" | b"fl64" => blocks(
-            ch.checked_mul(usize::from(bits).div_ceil(8))
-                .ok_or("MP4 PCM stride overflow")?,
+            pcm_frame_bytes(codec, channels, bits)?,
             1,
         ),
         b"alaw" | b"ulaw" => blocks(ch, 1),

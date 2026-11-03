@@ -1,0 +1,11 @@
+
+running 6 tests
+test coded_frame_count_agrees_with_float_storage_not_legacy_metadata ... ok
+test incomplete_physical_float_frames_refuse_instead_of_becoming_legacy_words ... ok
+test legacy_sample_size_preserves_native_clock_pcm_seek_and_eof ... ok
+test native_width_pcm_and_video_controls_are_independent_and_valid ... ok
+test owned_float_exports_preserve_exact_scalar_data_and_interval_endpoints ... ok
+test actual_workers_use_float_width_for_legacy_v1_navigation ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 6.37s
+

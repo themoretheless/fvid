@@ -482,7 +482,7 @@ impl<R: Read + Seek> Mp4AudioReader<R> {
                     sample.size as usize,None).map_err(|error|invalid(&error))?;
                 i128::from(coded).min(EditTime::ticks(u64::from(sample.duration),self.track().timescale)?.ceil_frames(rate)?)
             }else{
-                let stride=usize::from(setup.bit_depth).div_ceil(8).checked_mul(usize::from(setup.channels)).filter(|n|*n>0).ok_or_else(||invalid("invalid PCM seek geometry"))?;
+                let stride=fvid_media::owned_mp4_audio_packet_frames::pcm_frame_bytes(&setup.codec,setup.channels,setup.bit_depth).map_err(|error|invalid(&error))?;
                 if !(sample.size as usize).is_multiple_of(stride) {return Err(invalid("unaligned PCM seek packet"));}
                 let coded=(sample.size as usize/stride) as i128;
                 coded.min(EditTime::ticks(u64::from(sample.duration),self.track().timescale)?.ceil_frames(rate)?)
@@ -830,8 +830,8 @@ impl<R: Read + Seek> Mp4AudioReader<R> {
                 self.configure_description(sample.description_index as usize-1)?;
                 let rate=self.negotiated_rate();
                 let native_frames=if let Some(clock)=&self.clock {clock.frames(self.track(),frontier)? as i128}else if matches!(&self.setup().codec,b"sowt"|b"twos"|b"raw "|b"in24"|b"in32"|b"fl32"|b"fl64") {
-                    let bits=usize::from(self.setup().bit_depth);let channels=usize::from(self.setup().channels);
-                    let stride=bits.div_ceil(8).checked_mul(channels).filter(|n|*n>0).ok_or_else(||invalid("invalid PCM edit frontier geometry"))?;
+                    let setup=self.setup();
+                    let stride=fvid_media::owned_mp4_audio_packet_frames::pcm_frame_bytes(&setup.codec,setup.channels,setup.bit_depth).map_err(|error|invalid(&error))?;
                     if !(sample.size as usize).is_multiple_of(stride) {return Err(invalid("unaligned PCM edit frontier"));}
                     i128::from(sample.size)/stride as i128
                 } else { i128::from(sample.duration)*i128::from(rate)/i128::from(self.track().timescale) };

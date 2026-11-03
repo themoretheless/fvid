@@ -1,0 +1,1327 @@
+{
+  "provenance": "Authored60ms float32/float64 ramps with binary-exact samples and low float64 bits, v1 sample_size16 versus native-width controls, direct/nested enda,five qualified clocks plus a separately unqualified duration1-clock diagnostic,repeat edits,explicit past-source refusals and neutral colored VP9. No encoder,private media or network.",
+  "cases": [
+    {
+      "file": "f32-c1-le-t101-direct-stated16.mov",
+      "control": "f32-c1-le-t101-direct-stated32.mov",
+      "expected": "f32-c1.f32le",
+      "expected64": "f32-c1.f64le",
+      "bits": 32,
+      "channels": 1,
+      "rate": 48000,
+      "clock": 101,
+      "frames": 2880
+    },
+    {
+      "file": "f32-c1-le-t101-wave-stated16.mov",
+      "control": "f32-c1-le-t101-wave-stated32.mov",
+      "expected": "f32-c1.f32le",
+      "expected64": "f32-c1.f64le",
+      "bits": 32,
+      "channels": 1,
+      "rate": 48000,
+      "clock": 101,
+      "frames": 2880
+    },
+    {
+      "file": "f32-c1-le-t1000-direct-stated16.mov",
+      "control": "f32-c1-le-t1000-direct-stated32.mov",
+      "expected": "f32-c1.f32le",
+      "expected64": "f32-c1.f64le",
+      "bits": 32,
+      "channels": 1,
+      "rate": 48000,
+      "clock": 1000,
+      "frames": 2880
+    },
+    {
+      "file": "f32-c1-le-t1000-wave-stated16.mov",
+      "control": "f32-c1-le-t1000-wave-stated32.mov",
+      "expected": "f32-c1.f32le",
+      "expected64": "f32-c1.f64le",
+      "bits": 32,
+      "channels": 1,
+      "rate": 48000,
+      "clock": 1000,
+      "frames": 2880
+    },
+    {
+      "file": "f32-c1-le-t1001-direct-stated16.mov",
+      "control": "f32-c1-le-t1001-direct-stated32.mov",
+      "expected": "f32-c1.f32le",
+      "expected64": "f32-c1.f64le",
+      "bits": 32,
+      "channels": 1,
+      "rate": 48000,
+      "clock": 1001,
+      "frames": 2880
+    },
+    {
+      "file": "f32-c1-le-t1001-wave-stated16.mov",
+      "control": "f32-c1-le-t1001-wave-stated32.mov",
+      "expected": "f32-c1.f32le",
+      "expected64": "f32-c1.f64le",
+      "bits": 32,
+      "channels": 1,
+      "rate": 48000,
+      "clock": 1001,
+      "frames": 2880
+    },
+    {
+      "file": "f32-c1-le-t48000-direct-stated16.mov",
+      "control": "f32-c1-le-t48000-direct-stated32.mov",
+      "expected": "f32-c1.f32le",
+      "expected64": "f32-c1.f64le",
+      "bits": 32,
+      "channels": 1,
+      "rate": 48000,
+      "clock": 48000,
+      "frames": 2880
+    },
+    {
+      "file": "f32-c1-le-t48000-wave-stated16.mov",
+      "control": "f32-c1-le-t48000-wave-stated32.mov",
+      "expected": "f32-c1.f32le",
+      "expected64": "f32-c1.f64le",
+      "bits": 32,
+      "channels": 1,
+      "rate": 48000,
+      "clock": 48000,
+      "frames": 2880
+    },
+    {
+      "file": "f32-c1-le-t1000000-direct-stated16.mov",
+      "control": "f32-c1-le-t1000000-direct-stated32.mov",
+      "expected": "f32-c1.f32le",
+      "expected64": "f32-c1.f64le",
+      "bits": 32,
+      "channels": 1,
+      "rate": 48000,
+      "clock": 1000000,
+      "frames": 2880
+    },
+    {
+      "file": "f32-c1-le-t1000000-wave-stated16.mov",
+      "control": "f32-c1-le-t1000000-wave-stated32.mov",
+      "expected": "f32-c1.f32le",
+      "expected64": "f32-c1.f64le",
+      "bits": 32,
+      "channels": 1,
+      "rate": 48000,
+      "clock": 1000000,
+      "frames": 2880
+    },
+    {
+      "file": "f32-c1-be-t101-direct-stated16.mov",
+      "control": "f32-c1-be-t101-direct-stated32.mov",
+      "expected": "f32-c1.f32le",
+      "expected64": "f32-c1.f64le",
+      "bits": 32,
+      "channels": 1,
+      "rate": 48000,
+      "clock": 101,
+      "frames": 2880
+    },
+    {
+      "file": "f32-c1-be-t101-wave-stated16.mov",
+      "control": "f32-c1-be-t101-wave-stated32.mov",
+      "expected": "f32-c1.f32le",
+      "expected64": "f32-c1.f64le",
+      "bits": 32,
+      "channels": 1,
+      "rate": 48000,
+      "clock": 101,
+      "frames": 2880
+    },
+    {
+      "file": "f32-c1-be-t1000-direct-stated16.mov",
+      "control": "f32-c1-be-t1000-direct-stated32.mov",
+      "expected": "f32-c1.f32le",
+      "expected64": "f32-c1.f64le",
+      "bits": 32,
+      "channels": 1,
+      "rate": 48000,
+      "clock": 1000,
+      "frames": 2880
+    },
+    {
+      "file": "f32-c1-be-t1000-wave-stated16.mov",
+      "control": "f32-c1-be-t1000-wave-stated32.mov",
+      "expected": "f32-c1.f32le",
+      "expected64": "f32-c1.f64le",
+      "bits": 32,
+      "channels": 1,
+      "rate": 48000,
+      "clock": 1000,
+      "frames": 2880
+    },
+    {
+      "file": "f32-c1-be-t1001-direct-stated16.mov",
+      "control": "f32-c1-be-t1001-direct-stated32.mov",
+      "expected": "f32-c1.f32le",
+      "expected64": "f32-c1.f64le",
+      "bits": 32,
+      "channels": 1,
+      "rate": 48000,
+      "clock": 1001,
+      "frames": 2880
+    },
+    {
+      "file": "f32-c1-be-t1001-wave-stated16.mov",
+      "control": "f32-c1-be-t1001-wave-stated32.mov",
+      "expected": "f32-c1.f32le",
+      "expected64": "f32-c1.f64le",
+      "bits": 32,
+      "channels": 1,
+      "rate": 48000,
+      "clock": 1001,
+      "frames": 2880
+    },
+    {
+      "file": "f32-c1-be-t48000-direct-stated16.mov",
+      "control": "f32-c1-be-t48000-direct-stated32.mov",
+      "expected": "f32-c1.f32le",
+      "expected64": "f32-c1.f64le",
+      "bits": 32,
+      "channels": 1,
+      "rate": 48000,
+      "clock": 48000,
+      "frames": 2880
+    },
+    {
+      "file": "f32-c1-be-t48000-wave-stated16.mov",
+      "control": "f32-c1-be-t48000-wave-stated32.mov",
+      "expected": "f32-c1.f32le",
+      "expected64": "f32-c1.f64le",
+      "bits": 32,
+      "channels": 1,
+      "rate": 48000,
+      "clock": 48000,
+      "frames": 2880
+    },
+    {
+      "file": "f32-c1-be-t1000000-direct-stated16.mov",
+      "control": "f32-c1-be-t1000000-direct-stated32.mov",
+      "expected": "f32-c1.f32le",
+      "expected64": "f32-c1.f64le",
+      "bits": 32,
+      "channels": 1,
+      "rate": 48000,
+      "clock": 1000000,
+      "frames": 2880
+    },
+    {
+      "file": "f32-c1-be-t1000000-wave-stated16.mov",
+      "control": "f32-c1-be-t1000000-wave-stated32.mov",
+      "expected": "f32-c1.f32le",
+      "expected64": "f32-c1.f64le",
+      "bits": 32,
+      "channels": 1,
+      "rate": 48000,
+      "clock": 1000000,
+      "frames": 2880
+    },
+    {
+      "file": "f32-c2-le-t101-direct-stated16.mov",
+      "control": "f32-c2-le-t101-direct-stated32.mov",
+      "expected": "f32-c2.f32le",
+      "expected64": "f32-c2.f64le",
+      "bits": 32,
+      "channels": 2,
+      "rate": 48000,
+      "clock": 101,
+      "frames": 2880
+    },
+    {
+      "file": "f32-c2-le-t101-wave-stated16.mov",
+      "control": "f32-c2-le-t101-wave-stated32.mov",
+      "expected": "f32-c2.f32le",
+      "expected64": "f32-c2.f64le",
+      "bits": 32,
+      "channels": 2,
+      "rate": 48000,
+      "clock": 101,
+      "frames": 2880
+    },
+    {
+      "file": "f32-c2-le-t1000-direct-stated16.mov",
+      "control": "f32-c2-le-t1000-direct-stated32.mov",
+      "expected": "f32-c2.f32le",
+      "expected64": "f32-c2.f64le",
+      "bits": 32,
+      "channels": 2,
+      "rate": 48000,
+      "clock": 1000,
+      "frames": 2880
+    },
+    {
+      "file": "f32-c2-le-t1000-wave-stated16.mov",
+      "control": "f32-c2-le-t1000-wave-stated32.mov",
+      "expected": "f32-c2.f32le",
+      "expected64": "f32-c2.f64le",
+      "bits": 32,
+      "channels": 2,
+      "rate": 48000,
+      "clock": 1000,
+      "frames": 2880
+    },
+    {
+      "file": "f32-c2-le-t1001-direct-stated16.mov",
+      "control": "f32-c2-le-t1001-direct-stated32.mov",
+      "expected": "f32-c2.f32le",
+      "expected64": "f32-c2.f64le",
+      "bits": 32,
+      "channels": 2,
+      "rate": 48000,
+      "clock": 1001,
+      "frames": 2880
+    },
+    {
+      "file": "f32-c2-le-t1001-wave-stated16.mov",
+      "control": "f32-c2-le-t1001-wave-stated32.mov",
+      "expected": "f32-c2.f32le",
+      "expected64": "f32-c2.f64le",
+      "bits": 32,
+      "channels": 2,
+      "rate": 48000,
+      "clock": 1001,
+      "frames": 2880
+    },
+    {
+      "file": "f32-c2-le-t48000-direct-stated16.mov",
+      "control": "f32-c2-le-t48000-direct-stated32.mov",
+      "expected": "f32-c2.f32le",
+      "expected64": "f32-c2.f64le",
+      "bits": 32,
+      "channels": 2,
+      "rate": 48000,
+      "clock": 48000,
+      "frames": 2880
+    },
+    {
+      "file": "f32-c2-le-t48000-wave-stated16.mov",
+      "control": "f32-c2-le-t48000-wave-stated32.mov",
+      "expected": "f32-c2.f32le",
+      "expected64": "f32-c2.f64le",
+      "bits": 32,
+      "channels": 2,
+      "rate": 48000,
+      "clock": 48000,
+      "frames": 2880
+    },
+    {
+      "file": "f32-c2-le-t1000000-direct-stated16.mov",
+      "control": "f32-c2-le-t1000000-direct-stated32.mov",
+      "expected": "f32-c2.f32le",
+      "expected64": "f32-c2.f64le",
+      "bits": 32,
+      "channels": 2,
+      "rate": 48000,
+      "clock": 1000000,
+      "frames": 2880
+    },
+    {
+      "file": "f32-c2-le-t1000000-wave-stated16.mov",
+      "control": "f32-c2-le-t1000000-wave-stated32.mov",
+      "expected": "f32-c2.f32le",
+      "expected64": "f32-c2.f64le",
+      "bits": 32,
+      "channels": 2,
+      "rate": 48000,
+      "clock": 1000000,
+      "frames": 2880
+    },
+    {
+      "file": "f32-c2-be-t101-direct-stated16.mov",
+      "control": "f32-c2-be-t101-direct-stated32.mov",
+      "expected": "f32-c2.f32le",
+      "expected64": "f32-c2.f64le",
+      "bits": 32,
+      "channels": 2,
+      "rate": 48000,
+      "clock": 101,
+      "frames": 2880
+    },
+    {
+      "file": "f32-c2-be-t101-wave-stated16.mov",
+      "control": "f32-c2-be-t101-wave-stated32.mov",
+      "expected": "f32-c2.f32le",
+      "expected64": "f32-c2.f64le",
+      "bits": 32,
+      "channels": 2,
+      "rate": 48000,
+      "clock": 101,
+      "frames": 2880
+    },
+    {
+      "file": "f32-c2-be-t1000-direct-stated16.mov",
+      "control": "f32-c2-be-t1000-direct-stated32.mov",
+      "expected": "f32-c2.f32le",
+      "expected64": "f32-c2.f64le",
+      "bits": 32,
+      "channels": 2,
+      "rate": 48000,
+      "clock": 1000,
+      "frames": 2880
+    },
+    {
+      "file": "f32-c2-be-t1000-wave-stated16.mov",
+      "control": "f32-c2-be-t1000-wave-stated32.mov",
+      "expected": "f32-c2.f32le",
+      "expected64": "f32-c2.f64le",
+      "bits": 32,
+      "channels": 2,
+      "rate": 48000,
+      "clock": 1000,
+      "frames": 2880
+    },
+    {
+      "file": "f32-c2-be-t1001-direct-stated16.mov",
+      "control": "f32-c2-be-t1001-direct-stated32.mov",
+      "expected": "f32-c2.f32le",
+      "expected64": "f32-c2.f64le",
+      "bits": 32,
+      "channels": 2,
+      "rate": 48000,
+      "clock": 1001,
+      "frames": 2880
+    },
+    {
+      "file": "f32-c2-be-t1001-wave-stated16.mov",
+      "control": "f32-c2-be-t1001-wave-stated32.mov",
+      "expected": "f32-c2.f32le",
+      "expected64": "f32-c2.f64le",
+      "bits": 32,
+      "channels": 2,
+      "rate": 48000,
+      "clock": 1001,
+      "frames": 2880
+    },
+    {
+      "file": "f32-c2-be-t48000-direct-stated16.mov",
+      "control": "f32-c2-be-t48000-direct-stated32.mov",
+      "expected": "f32-c2.f32le",
+      "expected64": "f32-c2.f64le",
+      "bits": 32,
+      "channels": 2,
+      "rate": 48000,
+      "clock": 48000,
+      "frames": 2880
+    },
+    {
+      "file": "f32-c2-be-t48000-wave-stated16.mov",
+      "control": "f32-c2-be-t48000-wave-stated32.mov",
+      "expected": "f32-c2.f32le",
+      "expected64": "f32-c2.f64le",
+      "bits": 32,
+      "channels": 2,
+      "rate": 48000,
+      "clock": 48000,
+      "frames": 2880
+    },
+    {
+      "file": "f32-c2-be-t1000000-direct-stated16.mov",
+      "control": "f32-c2-be-t1000000-direct-stated32.mov",
+      "expected": "f32-c2.f32le",
+      "expected64": "f32-c2.f64le",
+      "bits": 32,
+      "channels": 2,
+      "rate": 48000,
+      "clock": 1000000,
+      "frames": 2880
+    },
+    {
+      "file": "f32-c2-be-t1000000-wave-stated16.mov",
+      "control": "f32-c2-be-t1000000-wave-stated32.mov",
+      "expected": "f32-c2.f32le",
+      "expected64": "f32-c2.f64le",
+      "bits": 32,
+      "channels": 2,
+      "rate": 48000,
+      "clock": 1000000,
+      "frames": 2880
+    },
+    {
+      "file": "f64-c1-le-t101-direct-stated16.mov",
+      "control": "f64-c1-le-t101-direct-stated64.mov",
+      "expected": "f64-c1.f32le",
+      "expected64": "f64-c1.f64le",
+      "bits": 64,
+      "channels": 1,
+      "rate": 48000,
+      "clock": 101,
+      "frames": 2880
+    },
+    {
+      "file": "f64-c1-le-t101-wave-stated16.mov",
+      "control": "f64-c1-le-t101-wave-stated64.mov",
+      "expected": "f64-c1.f32le",
+      "expected64": "f64-c1.f64le",
+      "bits": 64,
+      "channels": 1,
+      "rate": 48000,
+      "clock": 101,
+      "frames": 2880
+    },
+    {
+      "file": "f64-c1-le-t1000-direct-stated16.mov",
+      "control": "f64-c1-le-t1000-direct-stated64.mov",
+      "expected": "f64-c1.f32le",
+      "expected64": "f64-c1.f64le",
+      "bits": 64,
+      "channels": 1,
+      "rate": 48000,
+      "clock": 1000,
+      "frames": 2880
+    },
+    {
+      "file": "f64-c1-le-t1000-wave-stated16.mov",
+      "control": "f64-c1-le-t1000-wave-stated64.mov",
+      "expected": "f64-c1.f32le",
+      "expected64": "f64-c1.f64le",
+      "bits": 64,
+      "channels": 1,
+      "rate": 48000,
+      "clock": 1000,
+      "frames": 2880
+    },
+    {
+      "file": "f64-c1-le-t1001-direct-stated16.mov",
+      "control": "f64-c1-le-t1001-direct-stated64.mov",
+      "expected": "f64-c1.f32le",
+      "expected64": "f64-c1.f64le",
+      "bits": 64,
+      "channels": 1,
+      "rate": 48000,
+      "clock": 1001,
+      "frames": 2880
+    },
+    {
+      "file": "f64-c1-le-t1001-wave-stated16.mov",
+      "control": "f64-c1-le-t1001-wave-stated64.mov",
+      "expected": "f64-c1.f32le",
+      "expected64": "f64-c1.f64le",
+      "bits": 64,
+      "channels": 1,
+      "rate": 48000,
+      "clock": 1001,
+      "frames": 2880
+    },
+    {
+      "file": "f64-c1-le-t48000-direct-stated16.mov",
+      "control": "f64-c1-le-t48000-direct-stated64.mov",
+      "expected": "f64-c1.f32le",
+      "expected64": "f64-c1.f64le",
+      "bits": 64,
+      "channels": 1,
+      "rate": 48000,
+      "clock": 48000,
+      "frames": 2880
+    },
+    {
+      "file": "f64-c1-le-t48000-wave-stated16.mov",
+      "control": "f64-c1-le-t48000-wave-stated64.mov",
+      "expected": "f64-c1.f32le",
+      "expected64": "f64-c1.f64le",
+      "bits": 64,
+      "channels": 1,
+      "rate": 48000,
+      "clock": 48000,
+      "frames": 2880
+    },
+    {
+      "file": "f64-c1-le-t1000000-direct-stated16.mov",
+      "control": "f64-c1-le-t1000000-direct-stated64.mov",
+      "expected": "f64-c1.f32le",
+      "expected64": "f64-c1.f64le",
+      "bits": 64,
+      "channels": 1,
+      "rate": 48000,
+      "clock": 1000000,
+      "frames": 2880
+    },
+    {
+      "file": "f64-c1-le-t1000000-wave-stated16.mov",
+      "control": "f64-c1-le-t1000000-wave-stated64.mov",
+      "expected": "f64-c1.f32le",
+      "expected64": "f64-c1.f64le",
+      "bits": 64,
+      "channels": 1,
+      "rate": 48000,
+      "clock": 1000000,
+      "frames": 2880
+    },
+    {
+      "file": "f64-c1-be-t101-direct-stated16.mov",
+      "control": "f64-c1-be-t101-direct-stated64.mov",
+      "expected": "f64-c1.f32le",
+      "expected64": "f64-c1.f64le",
+      "bits": 64,
+      "channels": 1,
+      "rate": 48000,
+      "clock": 101,
+      "frames": 2880
+    },
+    {
+      "file": "f64-c1-be-t101-wave-stated16.mov",
+      "control": "f64-c1-be-t101-wave-stated64.mov",
+      "expected": "f64-c1.f32le",
+      "expected64": "f64-c1.f64le",
+      "bits": 64,
+      "channels": 1,
+      "rate": 48000,
+      "clock": 101,
+      "frames": 2880
+    },
+    {
+      "file": "f64-c1-be-t1000-direct-stated16.mov",
+      "control": "f64-c1-be-t1000-direct-stated64.mov",
+      "expected": "f64-c1.f32le",
+      "expected64": "f64-c1.f64le",
+      "bits": 64,
+      "channels": 1,
+      "rate": 48000,
+      "clock": 1000,
+      "frames": 2880
+    },
+    {
+      "file": "f64-c1-be-t1000-wave-stated16.mov",
+      "control": "f64-c1-be-t1000-wave-stated64.mov",
+      "expected": "f64-c1.f32le",
+      "expected64": "f64-c1.f64le",
+      "bits": 64,
+      "channels": 1,
+      "rate": 48000,
+      "clock": 1000,
+      "frames": 2880
+    },
+    {
+      "file": "f64-c1-be-t1001-direct-stated16.mov",
+      "control": "f64-c1-be-t1001-direct-stated64.mov",
+      "expected": "f64-c1.f32le",
+      "expected64": "f64-c1.f64le",
+      "bits": 64,
+      "channels": 1,
+      "rate": 48000,
+      "clock": 1001,
+      "frames": 2880
+    },
+    {
+      "file": "f64-c1-be-t1001-wave-stated16.mov",
+      "control": "f64-c1-be-t1001-wave-stated64.mov",
+      "expected": "f64-c1.f32le",
+      "expected64": "f64-c1.f64le",
+      "bits": 64,
+      "channels": 1,
+      "rate": 48000,
+      "clock": 1001,
+      "frames": 2880
+    },
+    {
+      "file": "f64-c1-be-t48000-direct-stated16.mov",
+      "control": "f64-c1-be-t48000-direct-stated64.mov",
+      "expected": "f64-c1.f32le",
+      "expected64": "f64-c1.f64le",
+      "bits": 64,
+      "channels": 1,
+      "rate": 48000,
+      "clock": 48000,
+      "frames": 2880
+    },
+    {
+      "file": "f64-c1-be-t48000-wave-stated16.mov",
+      "control": "f64-c1-be-t48000-wave-stated64.mov",
+      "expected": "f64-c1.f32le",
+      "expected64": "f64-c1.f64le",
+      "bits": 64,
+      "channels": 1,
+      "rate": 48000,
+      "clock": 48000,
+      "frames": 2880
+    },
+    {
+      "file": "f64-c1-be-t1000000-direct-stated16.mov",
+      "control": "f64-c1-be-t1000000-direct-stated64.mov",
+      "expected": "f64-c1.f32le",
+      "expected64": "f64-c1.f64le",
+      "bits": 64,
+      "channels": 1,
+      "rate": 48000,
+      "clock": 1000000,
+      "frames": 2880
+    },
+    {
+      "file": "f64-c1-be-t1000000-wave-stated16.mov",
+      "control": "f64-c1-be-t1000000-wave-stated64.mov",
+      "expected": "f64-c1.f32le",
+      "expected64": "f64-c1.f64le",
+      "bits": 64,
+      "channels": 1,
+      "rate": 48000,
+      "clock": 1000000,
+      "frames": 2880
+    },
+    {
+      "file": "f64-c2-le-t101-direct-stated16.mov",
+      "control": "f64-c2-le-t101-direct-stated64.mov",
+      "expected": "f64-c2.f32le",
+      "expected64": "f64-c2.f64le",
+      "bits": 64,
+      "channels": 2,
+      "rate": 48000,
+      "clock": 101,
+      "frames": 2880
+    },
+    {
+      "file": "f64-c2-le-t101-wave-stated16.mov",
+      "control": "f64-c2-le-t101-wave-stated64.mov",
+      "expected": "f64-c2.f32le",
+      "expected64": "f64-c2.f64le",
+      "bits": 64,
+      "channels": 2,
+      "rate": 48000,
+      "clock": 101,
+      "frames": 2880
+    },
+    {
+      "file": "f64-c2-le-t1000-direct-stated16.mov",
+      "control": "f64-c2-le-t1000-direct-stated64.mov",
+      "expected": "f64-c2.f32le",
+      "expected64": "f64-c2.f64le",
+      "bits": 64,
+      "channels": 2,
+      "rate": 48000,
+      "clock": 1000,
+      "frames": 2880
+    },
+    {
+      "file": "f64-c2-le-t1000-wave-stated16.mov",
+      "control": "f64-c2-le-t1000-wave-stated64.mov",
+      "expected": "f64-c2.f32le",
+      "expected64": "f64-c2.f64le",
+      "bits": 64,
+      "channels": 2,
+      "rate": 48000,
+      "clock": 1000,
+      "frames": 2880
+    },
+    {
+      "file": "f64-c2-le-t1001-direct-stated16.mov",
+      "control": "f64-c2-le-t1001-direct-stated64.mov",
+      "expected": "f64-c2.f32le",
+      "expected64": "f64-c2.f64le",
+      "bits": 64,
+      "channels": 2,
+      "rate": 48000,
+      "clock": 1001,
+      "frames": 2880
+    },
+    {
+      "file": "f64-c2-le-t1001-wave-stated16.mov",
+      "control": "f64-c2-le-t1001-wave-stated64.mov",
+      "expected": "f64-c2.f32le",
+      "expected64": "f64-c2.f64le",
+      "bits": 64,
+      "channels": 2,
+      "rate": 48000,
+      "clock": 1001,
+      "frames": 2880
+    },
+    {
+      "file": "f64-c2-le-t48000-direct-stated16.mov",
+      "control": "f64-c2-le-t48000-direct-stated64.mov",
+      "expected": "f64-c2.f32le",
+      "expected64": "f64-c2.f64le",
+      "bits": 64,
+      "channels": 2,
+      "rate": 48000,
+      "clock": 48000,
+      "frames": 2880
+    },
+    {
+      "file": "f64-c2-le-t48000-wave-stated16.mov",
+      "control": "f64-c2-le-t48000-wave-stated64.mov",
+      "expected": "f64-c2.f32le",
+      "expected64": "f64-c2.f64le",
+      "bits": 64,
+      "channels": 2,
+      "rate": 48000,
+      "clock": 48000,
+      "frames": 2880
+    },
+    {
+      "file": "f64-c2-le-t1000000-direct-stated16.mov",
+      "control": "f64-c2-le-t1000000-direct-stated64.mov",
+      "expected": "f64-c2.f32le",
+      "expected64": "f64-c2.f64le",
+      "bits": 64,
+      "channels": 2,
+      "rate": 48000,
+      "clock": 1000000,
+      "frames": 2880
+    },
+    {
+      "file": "f64-c2-le-t1000000-wave-stated16.mov",
+      "control": "f64-c2-le-t1000000-wave-stated64.mov",
+      "expected": "f64-c2.f32le",
+      "expected64": "f64-c2.f64le",
+      "bits": 64,
+      "channels": 2,
+      "rate": 48000,
+      "clock": 1000000,
+      "frames": 2880
+    },
+    {
+      "file": "f64-c2-be-t101-direct-stated16.mov",
+      "control": "f64-c2-be-t101-direct-stated64.mov",
+      "expected": "f64-c2.f32le",
+      "expected64": "f64-c2.f64le",
+      "bits": 64,
+      "channels": 2,
+      "rate": 48000,
+      "clock": 101,
+      "frames": 2880
+    },
+    {
+      "file": "f64-c2-be-t101-wave-stated16.mov",
+      "control": "f64-c2-be-t101-wave-stated64.mov",
+      "expected": "f64-c2.f32le",
+      "expected64": "f64-c2.f64le",
+      "bits": 64,
+      "channels": 2,
+      "rate": 48000,
+      "clock": 101,
+      "frames": 2880
+    },
+    {
+      "file": "f64-c2-be-t1000-direct-stated16.mov",
+      "control": "f64-c2-be-t1000-direct-stated64.mov",
+      "expected": "f64-c2.f32le",
+      "expected64": "f64-c2.f64le",
+      "bits": 64,
+      "channels": 2,
+      "rate": 48000,
+      "clock": 1000,
+      "frames": 2880
+    },
+    {
+      "file": "f64-c2-be-t1000-wave-stated16.mov",
+      "control": "f64-c2-be-t1000-wave-stated64.mov",
+      "expected": "f64-c2.f32le",
+      "expected64": "f64-c2.f64le",
+      "bits": 64,
+      "channels": 2,
+      "rate": 48000,
+      "clock": 1000,
+      "frames": 2880
+    },
+    {
+      "file": "f64-c2-be-t1001-direct-stated16.mov",
+      "control": "f64-c2-be-t1001-direct-stated64.mov",
+      "expected": "f64-c2.f32le",
+      "expected64": "f64-c2.f64le",
+      "bits": 64,
+      "channels": 2,
+      "rate": 48000,
+      "clock": 1001,
+      "frames": 2880
+    },
+    {
+      "file": "f64-c2-be-t1001-wave-stated16.mov",
+      "control": "f64-c2-be-t1001-wave-stated64.mov",
+      "expected": "f64-c2.f32le",
+      "expected64": "f64-c2.f64le",
+      "bits": 64,
+      "channels": 2,
+      "rate": 48000,
+      "clock": 1001,
+      "frames": 2880
+    },
+    {
+      "file": "f64-c2-be-t48000-direct-stated16.mov",
+      "control": "f64-c2-be-t48000-direct-stated64.mov",
+      "expected": "f64-c2.f32le",
+      "expected64": "f64-c2.f64le",
+      "bits": 64,
+      "channels": 2,
+      "rate": 48000,
+      "clock": 48000,
+      "frames": 2880
+    },
+    {
+      "file": "f64-c2-be-t48000-wave-stated16.mov",
+      "control": "f64-c2-be-t48000-wave-stated64.mov",
+      "expected": "f64-c2.f32le",
+      "expected64": "f64-c2.f64le",
+      "bits": 64,
+      "channels": 2,
+      "rate": 48000,
+      "clock": 48000,
+      "frames": 2880
+    },
+    {
+      "file": "f64-c2-be-t1000000-direct-stated16.mov",
+      "control": "f64-c2-be-t1000000-direct-stated64.mov",
+      "expected": "f64-c2.f32le",
+      "expected64": "f64-c2.f64le",
+      "bits": 64,
+      "channels": 2,
+      "rate": 48000,
+      "clock": 1000000,
+      "frames": 2880
+    },
+    {
+      "file": "f64-c2-be-t1000000-wave-stated16.mov",
+      "control": "f64-c2-be-t1000000-wave-stated64.mov",
+      "expected": "f64-c2.f32le",
+      "expected64": "f64-c2.f64le",
+      "bits": 64,
+      "channels": 2,
+      "rate": 48000,
+      "clock": 1000000,
+      "frames": 2880
+    },
+    {
+      "file": "f32-c1-le-t48000-direct-stated16-repeat-edit.mov",
+      "control": "f32-c1-le-t48000-direct-stated32-repeat-edit.mov",
+      "expected": "f32-c1-repeat.f32le",
+      "expected64": "f32-c1-repeat.f64le",
+      "bits": 32,
+      "channels": 1,
+      "rate": 48000,
+      "clock": 48000,
+      "frames": 2880
+    },
+    {
+      "file": "f32-c1-le-t48000-wave-stated16-repeat-edit.mov",
+      "control": "f32-c1-le-t48000-wave-stated32-repeat-edit.mov",
+      "expected": "f32-c1-repeat.f32le",
+      "expected64": "f32-c1-repeat.f64le",
+      "bits": 32,
+      "channels": 1,
+      "rate": 48000,
+      "clock": 48000,
+      "frames": 2880
+    },
+    {
+      "file": "f32-c1-be-t48000-direct-stated16-repeat-edit.mov",
+      "control": "f32-c1-be-t48000-direct-stated32-repeat-edit.mov",
+      "expected": "f32-c1-repeat.f32le",
+      "expected64": "f32-c1-repeat.f64le",
+      "bits": 32,
+      "channels": 1,
+      "rate": 48000,
+      "clock": 48000,
+      "frames": 2880
+    },
+    {
+      "file": "f32-c1-be-t48000-wave-stated16-repeat-edit.mov",
+      "control": "f32-c1-be-t48000-wave-stated32-repeat-edit.mov",
+      "expected": "f32-c1-repeat.f32le",
+      "expected64": "f32-c1-repeat.f64le",
+      "bits": 32,
+      "channels": 1,
+      "rate": 48000,
+      "clock": 48000,
+      "frames": 2880
+    },
+    {
+      "file": "f32-c2-le-t48000-direct-stated16-repeat-edit.mov",
+      "control": "f32-c2-le-t48000-direct-stated32-repeat-edit.mov",
+      "expected": "f32-c2-repeat.f32le",
+      "expected64": "f32-c2-repeat.f64le",
+      "bits": 32,
+      "channels": 2,
+      "rate": 48000,
+      "clock": 48000,
+      "frames": 2880
+    },
+    {
+      "file": "f32-c2-le-t48000-wave-stated16-repeat-edit.mov",
+      "control": "f32-c2-le-t48000-wave-stated32-repeat-edit.mov",
+      "expected": "f32-c2-repeat.f32le",
+      "expected64": "f32-c2-repeat.f64le",
+      "bits": 32,
+      "channels": 2,
+      "rate": 48000,
+      "clock": 48000,
+      "frames": 2880
+    },
+    {
+      "file": "f32-c2-be-t48000-direct-stated16-repeat-edit.mov",
+      "control": "f32-c2-be-t48000-direct-stated32-repeat-edit.mov",
+      "expected": "f32-c2-repeat.f32le",
+      "expected64": "f32-c2-repeat.f64le",
+      "bits": 32,
+      "channels": 2,
+      "rate": 48000,
+      "clock": 48000,
+      "frames": 2880
+    },
+    {
+      "file": "f32-c2-be-t48000-wave-stated16-repeat-edit.mov",
+      "control": "f32-c2-be-t48000-wave-stated32-repeat-edit.mov",
+      "expected": "f32-c2-repeat.f32le",
+      "expected64": "f32-c2-repeat.f64le",
+      "bits": 32,
+      "channels": 2,
+      "rate": 48000,
+      "clock": 48000,
+      "frames": 2880
+    },
+    {
+      "file": "f64-c1-le-t48000-direct-stated16-repeat-edit.mov",
+      "control": "f64-c1-le-t48000-direct-stated64-repeat-edit.mov",
+      "expected": "f64-c1-repeat.f32le",
+      "expected64": "f64-c1-repeat.f64le",
+      "bits": 64,
+      "channels": 1,
+      "rate": 48000,
+      "clock": 48000,
+      "frames": 2880
+    },
+    {
+      "file": "f64-c1-le-t48000-wave-stated16-repeat-edit.mov",
+      "control": "f64-c1-le-t48000-wave-stated64-repeat-edit.mov",
+      "expected": "f64-c1-repeat.f32le",
+      "expected64": "f64-c1-repeat.f64le",
+      "bits": 64,
+      "channels": 1,
+      "rate": 48000,
+      "clock": 48000,
+      "frames": 2880
+    },
+    {
+      "file": "f64-c1-be-t48000-direct-stated16-repeat-edit.mov",
+      "control": "f64-c1-be-t48000-direct-stated64-repeat-edit.mov",
+      "expected": "f64-c1-repeat.f32le",
+      "expected64": "f64-c1-repeat.f64le",
+      "bits": 64,
+      "channels": 1,
+      "rate": 48000,
+      "clock": 48000,
+      "frames": 2880
+    },
+    {
+      "file": "f64-c1-be-t48000-wave-stated16-repeat-edit.mov",
+      "control": "f64-c1-be-t48000-wave-stated64-repeat-edit.mov",
+      "expected": "f64-c1-repeat.f32le",
+      "expected64": "f64-c1-repeat.f64le",
+      "bits": 64,
+      "channels": 1,
+      "rate": 48000,
+      "clock": 48000,
+      "frames": 2880
+    },
+    {
+      "file": "f64-c2-le-t48000-direct-stated16-repeat-edit.mov",
+      "control": "f64-c2-le-t48000-direct-stated64-repeat-edit.mov",
+      "expected": "f64-c2-repeat.f32le",
+      "expected64": "f64-c2-repeat.f64le",
+      "bits": 64,
+      "channels": 2,
+      "rate": 48000,
+      "clock": 48000,
+      "frames": 2880
+    },
+    {
+      "file": "f64-c2-le-t48000-wave-stated16-repeat-edit.mov",
+      "control": "f64-c2-le-t48000-wave-stated64-repeat-edit.mov",
+      "expected": "f64-c2-repeat.f32le",
+      "expected64": "f64-c2-repeat.f64le",
+      "bits": 64,
+      "channels": 2,
+      "rate": 48000,
+      "clock": 48000,
+      "frames": 2880
+    },
+    {
+      "file": "f64-c2-be-t48000-direct-stated16-repeat-edit.mov",
+      "control": "f64-c2-be-t48000-direct-stated64-repeat-edit.mov",
+      "expected": "f64-c2-repeat.f32le",
+      "expected64": "f64-c2-repeat.f64le",
+      "bits": 64,
+      "channels": 2,
+      "rate": 48000,
+      "clock": 48000,
+      "frames": 2880
+    },
+    {
+      "file": "f64-c2-be-t48000-wave-stated16-repeat-edit.mov",
+      "control": "f64-c2-be-t48000-wave-stated64-repeat-edit.mov",
+      "expected": "f64-c2-repeat.f32le",
+      "expected64": "f64-c2-repeat.f64le",
+      "bits": 64,
+      "channels": 2,
+      "rate": 48000,
+      "clock": 48000,
+      "frames": 2880
+    }
+  ],
+  "bad": [
+    "bad-f32-c1-partial.mov",
+    "bad-f32-c2-partial.mov",
+    "bad-f64-c1-partial.mov",
+    "bad-f64-c2-partial.mov"
+  ],
+  "refusals": [
+    {
+      "file": "f32-c1-le-t48000-direct-stated16-tail-edit.mov",
+      "control": "f32-c1-le-t48000-direct-stated32-tail-edit.mov"
+    },
+    {
+      "file": "f32-c1-le-t48000-wave-stated16-tail-edit.mov",
+      "control": "f32-c1-le-t48000-wave-stated32-tail-edit.mov"
+    },
+    {
+      "file": "f32-c1-be-t48000-direct-stated16-tail-edit.mov",
+      "control": "f32-c1-be-t48000-direct-stated32-tail-edit.mov"
+    },
+    {
+      "file": "f32-c1-be-t48000-wave-stated16-tail-edit.mov",
+      "control": "f32-c1-be-t48000-wave-stated32-tail-edit.mov"
+    },
+    {
+      "file": "f32-c2-le-t48000-direct-stated16-tail-edit.mov",
+      "control": "f32-c2-le-t48000-direct-stated32-tail-edit.mov"
+    },
+    {
+      "file": "f32-c2-le-t48000-wave-stated16-tail-edit.mov",
+      "control": "f32-c2-le-t48000-wave-stated32-tail-edit.mov"
+    },
+    {
+      "file": "f32-c2-be-t48000-direct-stated16-tail-edit.mov",
+      "control": "f32-c2-be-t48000-direct-stated32-tail-edit.mov"
+    },
+    {
+      "file": "f32-c2-be-t48000-wave-stated16-tail-edit.mov",
+      "control": "f32-c2-be-t48000-wave-stated32-tail-edit.mov"
+    },
+    {
+      "file": "f64-c1-le-t48000-direct-stated16-tail-edit.mov",
+      "control": "f64-c1-le-t48000-direct-stated64-tail-edit.mov"
+    },
+    {
+      "file": "f64-c1-le-t48000-wave-stated16-tail-edit.mov",
+      "control": "f64-c1-le-t48000-wave-stated64-tail-edit.mov"
+    },
+    {
+      "file": "f64-c1-be-t48000-direct-stated16-tail-edit.mov",
+      "control": "f64-c1-be-t48000-direct-stated64-tail-edit.mov"
+    },
+    {
+      "file": "f64-c1-be-t48000-wave-stated16-tail-edit.mov",
+      "control": "f64-c1-be-t48000-wave-stated64-tail-edit.mov"
+    },
+    {
+      "file": "f64-c2-le-t48000-direct-stated16-tail-edit.mov",
+      "control": "f64-c2-le-t48000-direct-stated64-tail-edit.mov"
+    },
+    {
+      "file": "f64-c2-le-t48000-wave-stated16-tail-edit.mov",
+      "control": "f64-c2-le-t48000-wave-stated64-tail-edit.mov"
+    },
+    {
+      "file": "f64-c2-be-t48000-direct-stated16-tail-edit.mov",
+      "control": "f64-c2-be-t48000-direct-stated64-tail-edit.mov"
+    },
+    {
+      "file": "f64-c2-be-t48000-wave-stated16-tail-edit.mov",
+      "control": "f64-c2-be-t48000-wave-stated64-tail-edit.mov"
+    }
+  ],
+  "diagnostics": [
+    {
+      "file": "f32-c1-le-t47-direct-stated16.mov",
+      "control": "f32-c1-le-t47-direct-stated32.mov",
+      "expected": "f32-c1.f32le",
+      "expected64": "f32-c1.f64le",
+      "bits": 32,
+      "channels": 1,
+      "rate": 48000,
+      "clock": 47,
+      "frames": 2880,
+      "qualification": "Unqualified: FFmpeg interprets duration1 PCM tables differently"
+    },
+    {
+      "file": "f32-c1-le-t47-wave-stated16.mov",
+      "control": "f32-c1-le-t47-wave-stated32.mov",
+      "expected": "f32-c1.f32le",
+      "expected64": "f32-c1.f64le",
+      "bits": 32,
+      "channels": 1,
+      "rate": 48000,
+      "clock": 47,
+      "frames": 2880,
+      "qualification": "Unqualified: FFmpeg interprets duration1 PCM tables differently"
+    },
+    {
+      "file": "f32-c1-be-t47-direct-stated16.mov",
+      "control": "f32-c1-be-t47-direct-stated32.mov",
+      "expected": "f32-c1.f32le",
+      "expected64": "f32-c1.f64le",
+      "bits": 32,
+      "channels": 1,
+      "rate": 48000,
+      "clock": 47,
+      "frames": 2880,
+      "qualification": "Unqualified: FFmpeg interprets duration1 PCM tables differently"
+    },
+    {
+      "file": "f32-c1-be-t47-wave-stated16.mov",
+      "control": "f32-c1-be-t47-wave-stated32.mov",
+      "expected": "f32-c1.f32le",
+      "expected64": "f32-c1.f64le",
+      "bits": 32,
+      "channels": 1,
+      "rate": 48000,
+      "clock": 47,
+      "frames": 2880,
+      "qualification": "Unqualified: FFmpeg interprets duration1 PCM tables differently"
+    },
+    {
+      "file": "f32-c2-le-t47-direct-stated16.mov",
+      "control": "f32-c2-le-t47-direct-stated32.mov",
+      "expected": "f32-c2.f32le",
+      "expected64": "f32-c2.f64le",
+      "bits": 32,
+      "channels": 2,
+      "rate": 48000,
+      "clock": 47,
+      "frames": 2880,
+      "qualification": "Unqualified: FFmpeg interprets duration1 PCM tables differently"
+    },
+    {
+      "file": "f32-c2-le-t47-wave-stated16.mov",
+      "control": "f32-c2-le-t47-wave-stated32.mov",
+      "expected": "f32-c2.f32le",
+      "expected64": "f32-c2.f64le",
+      "bits": 32,
+      "channels": 2,
+      "rate": 48000,
+      "clock": 47,
+      "frames": 2880,
+      "qualification": "Unqualified: FFmpeg interprets duration1 PCM tables differently"
+    },
+    {
+      "file": "f32-c2-be-t47-direct-stated16.mov",
+      "control": "f32-c2-be-t47-direct-stated32.mov",
+      "expected": "f32-c2.f32le",
+      "expected64": "f32-c2.f64le",
+      "bits": 32,
+      "channels": 2,
+      "rate": 48000,
+      "clock": 47,
+      "frames": 2880,
+      "qualification": "Unqualified: FFmpeg interprets duration1 PCM tables differently"
+    },
+    {
+      "file": "f32-c2-be-t47-wave-stated16.mov",
+      "control": "f32-c2-be-t47-wave-stated32.mov",
+      "expected": "f32-c2.f32le",
+      "expected64": "f32-c2.f64le",
+      "bits": 32,
+      "channels": 2,
+      "rate": 48000,
+      "clock": 47,
+      "frames": 2880,
+      "qualification": "Unqualified: FFmpeg interprets duration1 PCM tables differently"
+    },
+    {
+      "file": "f64-c1-le-t47-direct-stated16.mov",
+      "control": "f64-c1-le-t47-direct-stated64.mov",
+      "expected": "f64-c1.f32le",
+      "expected64": "f64-c1.f64le",
+      "bits": 64,
+      "channels": 1,
+      "rate": 48000,
+      "clock": 47,
+      "frames": 2880,
+      "qualification": "Unqualified: FFmpeg interprets duration1 PCM tables differently"
+    },
+    {
+      "file": "f64-c1-le-t47-wave-stated16.mov",
+      "control": "f64-c1-le-t47-wave-stated64.mov",
+      "expected": "f64-c1.f32le",
+      "expected64": "f64-c1.f64le",
+      "bits": 64,
+      "channels": 1,
+      "rate": 48000,
+      "clock": 47,
+      "frames": 2880,
+      "qualification": "Unqualified: FFmpeg interprets duration1 PCM tables differently"
+    },
+    {
+      "file": "f64-c1-be-t47-direct-stated16.mov",
+      "control": "f64-c1-be-t47-direct-stated64.mov",
+      "expected": "f64-c1.f32le",
+      "expected64": "f64-c1.f64le",
+      "bits": 64,
+      "channels": 1,
+      "rate": 48000,
+      "clock": 47,
+      "frames": 2880,
+      "qualification": "Unqualified: FFmpeg interprets duration1 PCM tables differently"
+    },
+    {
+      "file": "f64-c1-be-t47-wave-stated16.mov",
+      "control": "f64-c1-be-t47-wave-stated64.mov",
+      "expected": "f64-c1.f32le",
+      "expected64": "f64-c1.f64le",
+      "bits": 64,
+      "channels": 1,
+      "rate": 48000,
+      "clock": 47,
+      "frames": 2880,
+      "qualification": "Unqualified: FFmpeg interprets duration1 PCM tables differently"
+    },
+    {
+      "file": "f64-c2-le-t47-direct-stated16.mov",
+      "control": "f64-c2-le-t47-direct-stated64.mov",
+      "expected": "f64-c2.f32le",
+      "expected64": "f64-c2.f64le",
+      "bits": 64,
+      "channels": 2,
+      "rate": 48000,
+      "clock": 47,
+      "frames": 2880,
+      "qualification": "Unqualified: FFmpeg interprets duration1 PCM tables differently"
+    },
+    {
+      "file": "f64-c2-le-t47-wave-stated16.mov",
+      "control": "f64-c2-le-t47-wave-stated64.mov",
+      "expected": "f64-c2.f32le",
+      "expected64": "f64-c2.f64le",
+      "bits": 64,
+      "channels": 2,
+      "rate": 48000,
+      "clock": 47,
+      "frames": 2880,
+      "qualification": "Unqualified: FFmpeg interprets duration1 PCM tables differently"
+    },
+    {
+      "file": "f64-c2-be-t47-direct-stated16.mov",
+      "control": "f64-c2-be-t47-direct-stated64.mov",
+      "expected": "f64-c2.f32le",
+      "expected64": "f64-c2.f64le",
+      "bits": 64,
+      "channels": 2,
+      "rate": 48000,
+      "clock": 47,
+      "frames": 2880,
+      "qualification": "Unqualified: FFmpeg interprets duration1 PCM tables differently"
+    },
+    {
+      "file": "f64-c2-be-t47-wave-stated16.mov",
+      "control": "f64-c2-be-t47-wave-stated64.mov",
+      "expected": "f64-c2.f32le",
+      "expected64": "f64-c2.f64le",
+      "bits": 64,
+      "channels": 2,
+      "rate": 48000,
+      "clock": 47,
+      "frames": 2880,
+      "qualification": "Unqualified: FFmpeg interprets duration1 PCM tables differently"
+    }
+  ]
+}

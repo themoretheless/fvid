@@ -1,0 +1,1461 @@
+{
+  "version": "ffmpeg version 9.0.2 Copyright (c) 2000-2026 the FFmpeg developers",
+  "scope": "Final uncompressed compressionID0 headers, bare qualified clocks101/1000/1001/48000/1000000; no edited/duration1-clock claim",
+  "command_template": [
+    "/opt/homebrew/opt/ffmpeg-full/bin/ffmpeg",
+    "-v",
+    "error",
+    "-nostdin",
+    "-i",
+    "<fixture>",
+    "-map",
+    "0:a:0",
+    "-f",
+    "<f32le|f64le>",
+    "-acodec",
+    "<pcm_f32le|pcm_f64le>",
+    "-"
+  ],
+  "results": [
+    {
+      "file": "f32-c1-le-t101-direct-stated16.mov",
+      "input_sha256": "4d4654da5e626ec7e9fc3df4c6c8cf4c4acc9c8a3a10e1028972a9153946d56f",
+      "scalar": "f32",
+      "returncode": 0,
+      "exact": true,
+      "output_sha256": "68841ad9d0cb2f4e3b90ec6fbdb0809c6da72040bc1607e27598dc6e548283c8",
+      "stderr": ""
+    },
+    {
+      "file": "f32-c1-le-t101-direct-stated16.mov",
+      "input_sha256": "4d4654da5e626ec7e9fc3df4c6c8cf4c4acc9c8a3a10e1028972a9153946d56f",
+      "scalar": "f64",
+      "returncode": 0,
+      "exact": true,
+      "output_sha256": "9a25397efc211787b1b87cae39c8c29551d38ecfc646d573c369c05f1589ce5c",
+      "stderr": ""
+    },
+    {
+      "file": "f32-c1-le-t101-wave-stated16.mov",
+      "input_sha256": "ddc3242e39c2c3aacc22dd71e952d0a3278d65d2760c1a2c72a44d6eb1e65606",
+      "scalar": "f32",
+      "returncode": 0,
+      "exact": true,
+      "output_sha256": "68841ad9d0cb2f4e3b90ec6fbdb0809c6da72040bc1607e27598dc6e548283c8",
+      "stderr": ""
+    },
+    {
+      "file": "f32-c1-le-t101-wave-stated16.mov",
+      "input_sha256": "ddc3242e39c2c3aacc22dd71e952d0a3278d65d2760c1a2c72a44d6eb1e65606",
+      "scalar": "f64",
+      "returncode": 0,
+      "exact": true,
+      "output_sha256": "9a25397efc211787b1b87cae39c8c29551d38ecfc646d573c369c05f1589ce5c",
+      "stderr": ""
+    },
+    {
+      "file": "f32-c1-le-t1000-direct-stated16.mov",
+      "input_sha256": "61fc658c06905feea5b2ac285991706dd540b7495a6e91c0775274ac921eba9a",
+      "scalar": "f32",
+      "returncode": 0,
+      "exact": true,
+      "output_sha256": "68841ad9d0cb2f4e3b90ec6fbdb0809c6da72040bc1607e27598dc6e548283c8",
+      "stderr": ""
+    },
+    {
+      "file": "f32-c1-le-t1000-direct-stated16.mov",
+      "input_sha256": "61fc658c06905feea5b2ac285991706dd540b7495a6e91c0775274ac921eba9a",
+      "scalar": "f64",
+      "returncode": 0,
+      "exact": true,
+      "output_sha256": "9a25397efc211787b1b87cae39c8c29551d38ecfc646d573c369c05f1589ce5c",
+      "stderr": ""
+    },
+    {
+      "file": "f32-c1-le-t1000-wave-stated16.mov",
+      "input_sha256": "dda662f3fa46940dbe995b7199da6b7b700316b57948d5b54745722ea8aa37df",
+      "scalar": "f32",
+      "returncode": 0,
+      "exact": true,
+      "output_sha256": "68841ad9d0cb2f4e3b90ec6fbdb0809c6da72040bc1607e27598dc6e548283c8",
+      "stderr": ""
+    },
+    {
+      "file": "f32-c1-le-t1000-wave-stated16.mov",
+      "input_sha256": "dda662f3fa46940dbe995b7199da6b7b700316b57948d5b54745722ea8aa37df",
+      "scalar": "f64",
+      "returncode": 0,
+      "exact": true,
+      "output_sha256": "9a25397efc211787b1b87cae39c8c29551d38ecfc646d573c369c05f1589ce5c",
+      "stderr": ""
+    },
+    {
+      "file": "f32-c1-le-t1001-direct-stated16.mov",
+      "input_sha256": "eefc6cf955b7226b9ad15306e4585f7bd85bba096775fd202c09c2e556bb8f96",
+      "scalar": "f32",
+      "returncode": 0,
+      "exact": true,
+      "output_sha256": "68841ad9d0cb2f4e3b90ec6fbdb0809c6da72040bc1607e27598dc6e548283c8",
+      "stderr": ""
+    },
+    {
+      "file": "f32-c1-le-t1001-direct-stated16.mov",
+      "input_sha256": "eefc6cf955b7226b9ad15306e4585f7bd85bba096775fd202c09c2e556bb8f96",
+      "scalar": "f64",
+      "returncode": 0,
+      "exact": true,
+      "output_sha256": "9a25397efc211787b1b87cae39c8c29551d38ecfc646d573c369c05f1589ce5c",
+      "stderr": ""
+    },
+    {
+      "file": "f32-c1-le-t1001-wave-stated16.mov",
+      "input_sha256": "11653e277dced816ee470210eb3c72e8c368ba7388ff2fbf203881cf938a0ff5",
+      "scalar": "f32",
+      "returncode": 0,
+      "exact": true,
+      "output_sha256": "68841ad9d0cb2f4e3b90ec6fbdb0809c6da72040bc1607e27598dc6e548283c8",
+      "stderr": ""
+    },
+    {
+      "file": "f32-c1-le-t1001-wave-stated16.mov",
+      "input_sha256": "11653e277dced816ee470210eb3c72e8c368ba7388ff2fbf203881cf938a0ff5",
+      "scalar": "f64",
+      "returncode": 0,
+      "exact": true,
+      "output_sha256": "9a25397efc211787b1b87cae39c8c29551d38ecfc646d573c369c05f1589ce5c",
+      "stderr": ""
+    },
+    {
+      "file": "f32-c1-le-t48000-direct-stated16.mov",
+      "input_sha256": "2fab38e3a45d6fac9388c29a535df68909ce27e4af02ae64d2499c3d430c304e",
+      "scalar": "f32",
+      "returncode": 0,
+      "exact": true,
+      "output_sha256": "68841ad9d0cb2f4e3b90ec6fbdb0809c6da72040bc1607e27598dc6e548283c8",
+      "stderr": ""
+    },
+    {
+      "file": "f32-c1-le-t48000-direct-stated16.mov",
+      "input_sha256": "2fab38e3a45d6fac9388c29a535df68909ce27e4af02ae64d2499c3d430c304e",
+      "scalar": "f64",
+      "returncode": 0,
+      "exact": true,
+      "output_sha256": "9a25397efc211787b1b87cae39c8c29551d38ecfc646d573c369c05f1589ce5c",
+      "stderr": ""
+    },
+    {
+      "file": "f32-c1-le-t48000-wave-stated16.mov",
+      "input_sha256": "6eb63b9f76df5817642d195014d52530780268b44b72d215935634779a0ee428",
+      "scalar": "f32",
+      "returncode": 0,
+      "exact": true,
+      "output_sha256": "68841ad9d0cb2f4e3b90ec6fbdb0809c6da72040bc1607e27598dc6e548283c8",
+      "stderr": ""
+    },
+    {
+      "file": "f32-c1-le-t48000-wave-stated16.mov",
+      "input_sha256": "6eb63b9f76df5817642d195014d52530780268b44b72d215935634779a0ee428",
+      "scalar": "f64",
+      "returncode": 0,
+      "exact": true,
+      "output_sha256": "9a25397efc211787b1b87cae39c8c29551d38ecfc646d573c369c05f1589ce5c",
+      "stderr": ""
+    },
+    {
+      "file": "f32-c1-le-t1000000-direct-stated16.mov",
+      "input_sha256": "9bb3b484b12d89ef76ad4df10d1106acb9b713ca7fef431802d2f9699878a2d8",
+      "scalar": "f32",
+      "returncode": 0,
+      "exact": true,
+      "output_sha256": "68841ad9d0cb2f4e3b90ec6fbdb0809c6da72040bc1607e27598dc6e548283c8",
+      "stderr": ""
+    },
+    {
+      "file": "f32-c1-le-t1000000-direct-stated16.mov",
+      "input_sha256": "9bb3b484b12d89ef76ad4df10d1106acb9b713ca7fef431802d2f9699878a2d8",
+      "scalar": "f64",
+      "returncode": 0,
+      "exact": true,
+      "output_sha256": "9a25397efc211787b1b87cae39c8c29551d38ecfc646d573c369c05f1589ce5c",
+      "stderr": ""
+    },
+    {
+      "file": "f32-c1-le-t1000000-wave-stated16.mov",
+      "input_sha256": "007f766fb1aef75b5c891c9e17154e180b82da8b548fef1310b1f1a42d1034f3",
+      "scalar": "f32",
+      "returncode": 0,
+      "exact": true,
+      "output_sha256": "68841ad9d0cb2f4e3b90ec6fbdb0809c6da72040bc1607e27598dc6e548283c8",
+      "stderr": ""
+    },
+    {
+      "file": "f32-c1-le-t1000000-wave-stated16.mov",
+      "input_sha256": "007f766fb1aef75b5c891c9e17154e180b82da8b548fef1310b1f1a42d1034f3",
+      "scalar": "f64",
+      "returncode": 0,
+      "exact": true,
+      "output_sha256": "9a25397efc211787b1b87cae39c8c29551d38ecfc646d573c369c05f1589ce5c",
+      "stderr": ""
+    },
+    {
+      "file": "f32-c1-be-t101-direct-stated16.mov",
+      "input_sha256": "d926c2b698839aafb7d4d58a6c0d8bb54b7756204d316715a73863540dca1da8",
+      "scalar": "f32",
+      "returncode": 0,
+      "exact": true,
+      "output_sha256": "68841ad9d0cb2f4e3b90ec6fbdb0809c6da72040bc1607e27598dc6e548283c8",
+      "stderr": ""
+    },
+    {
+      "file": "f32-c1-be-t101-direct-stated16.mov",
+      "input_sha256": "d926c2b698839aafb7d4d58a6c0d8bb54b7756204d316715a73863540dca1da8",
+      "scalar": "f64",
+      "returncode": 0,
+      "exact": true,
+      "output_sha256": "9a25397efc211787b1b87cae39c8c29551d38ecfc646d573c369c05f1589ce5c",
+      "stderr": ""
+    },
+    {
+      "file": "f32-c1-be-t101-wave-stated16.mov",
+      "input_sha256": "a6480071db12f67e6bc3777261596ce99a5716ac64362b78cb081b837c31fc6a",
+      "scalar": "f32",
+      "returncode": 0,
+      "exact": true,
+      "output_sha256": "68841ad9d0cb2f4e3b90ec6fbdb0809c6da72040bc1607e27598dc6e548283c8",
+      "stderr": ""
+    },
+    {
+      "file": "f32-c1-be-t101-wave-stated16.mov",
+      "input_sha256": "a6480071db12f67e6bc3777261596ce99a5716ac64362b78cb081b837c31fc6a",
+      "scalar": "f64",
+      "returncode": 0,
+      "exact": true,
+      "output_sha256": "9a25397efc211787b1b87cae39c8c29551d38ecfc646d573c369c05f1589ce5c",
+      "stderr": ""
+    },
+    {
+      "file": "f32-c1-be-t1000-direct-stated16.mov",
+      "input_sha256": "6fa03411d5ea918d0907772cb0a238a9444932e04a76cf249a22521652ca137f",
+      "scalar": "f32",
+      "returncode": 0,
+      "exact": true,
+      "output_sha256": "68841ad9d0cb2f4e3b90ec6fbdb0809c6da72040bc1607e27598dc6e548283c8",
+      "stderr": ""
+    },
+    {
+      "file": "f32-c1-be-t1000-direct-stated16.mov",
+      "input_sha256": "6fa03411d5ea918d0907772cb0a238a9444932e04a76cf249a22521652ca137f",
+      "scalar": "f64",
+      "returncode": 0,
+      "exact": true,
+      "output_sha256": "9a25397efc211787b1b87cae39c8c29551d38ecfc646d573c369c05f1589ce5c",
+      "stderr": ""
+    },
+    {
+      "file": "f32-c1-be-t1000-wave-stated16.mov",
+      "input_sha256": "9af9409049c387a73b6cc84b6c47d2b589c400401db89fd247e394e27a32c7e1",
+      "scalar": "f32",
+      "returncode": 0,
+      "exact": true,
+      "output_sha256": "68841ad9d0cb2f4e3b90ec6fbdb0809c6da72040bc1607e27598dc6e548283c8",
+      "stderr": ""
+    },
+    {
+      "file": "f32-c1-be-t1000-wave-stated16.mov",
+      "input_sha256": "9af9409049c387a73b6cc84b6c47d2b589c400401db89fd247e394e27a32c7e1",
+      "scalar": "f64",
+      "returncode": 0,
+      "exact": true,
+      "output_sha256": "9a25397efc211787b1b87cae39c8c29551d38ecfc646d573c369c05f1589ce5c",
+      "stderr": ""
+    },
+    {
+      "file": "f32-c1-be-t1001-direct-stated16.mov",
+      "input_sha256": "579aa7ce7d2175885140b6f1f8470ddf16942e78f4e8c47d0221c256737231eb",
+      "scalar": "f32",
+      "returncode": 0,
+      "exact": true,
+      "output_sha256": "68841ad9d0cb2f4e3b90ec6fbdb0809c6da72040bc1607e27598dc6e548283c8",
+      "stderr": ""
+    },
+    {
+      "file": "f32-c1-be-t1001-direct-stated16.mov",
+      "input_sha256": "579aa7ce7d2175885140b6f1f8470ddf16942e78f4e8c47d0221c256737231eb",
+      "scalar": "f64",
+      "returncode": 0,
+      "exact": true,
+      "output_sha256": "9a25397efc211787b1b87cae39c8c29551d38ecfc646d573c369c05f1589ce5c",
+      "stderr": ""
+    },
+    {
+      "file": "f32-c1-be-t1001-wave-stated16.mov",
+      "input_sha256": "e29a8b6b34592d0f018bfa1a2932789a6cc706cadef3755645040b015583bc0f",
+      "scalar": "f32",
+      "returncode": 0,
+      "exact": true,
+      "output_sha256": "68841ad9d0cb2f4e3b90ec6fbdb0809c6da72040bc1607e27598dc6e548283c8",
+      "stderr": ""
+    },
+    {
+      "file": "f32-c1-be-t1001-wave-stated16.mov",
+      "input_sha256": "e29a8b6b34592d0f018bfa1a2932789a6cc706cadef3755645040b015583bc0f",
+      "scalar": "f64",
+      "returncode": 0,
+      "exact": true,
+      "output_sha256": "9a25397efc211787b1b87cae39c8c29551d38ecfc646d573c369c05f1589ce5c",
+      "stderr": ""
+    },
+    {
+      "file": "f32-c1-be-t48000-direct-stated16.mov",
+      "input_sha256": "e8bcd615b1bb52c3303e64c89b2004dfe702f163c31d1c87fc1cacb979f46cd4",
+      "scalar": "f32",
+      "returncode": 0,
+      "exact": true,
+      "output_sha256": "68841ad9d0cb2f4e3b90ec6fbdb0809c6da72040bc1607e27598dc6e548283c8",
+      "stderr": ""
+    },
+    {
+      "file": "f32-c1-be-t48000-direct-stated16.mov",
+      "input_sha256": "e8bcd615b1bb52c3303e64c89b2004dfe702f163c31d1c87fc1cacb979f46cd4",
+      "scalar": "f64",
+      "returncode": 0,
+      "exact": true,
+      "output_sha256": "9a25397efc211787b1b87cae39c8c29551d38ecfc646d573c369c05f1589ce5c",
+      "stderr": ""
+    },
+    {
+      "file": "f32-c1-be-t48000-wave-stated16.mov",
+      "input_sha256": "1349b97291b427ebb7fb033607045109c06a9fae4887b098322f3a82ff4b7138",
+      "scalar": "f32",
+      "returncode": 0,
+      "exact": true,
+      "output_sha256": "68841ad9d0cb2f4e3b90ec6fbdb0809c6da72040bc1607e27598dc6e548283c8",
+      "stderr": ""
+    },
+    {
+      "file": "f32-c1-be-t48000-wave-stated16.mov",
+      "input_sha256": "1349b97291b427ebb7fb033607045109c06a9fae4887b098322f3a82ff4b7138",
+      "scalar": "f64",
+      "returncode": 0,
+      "exact": true,
+      "output_sha256": "9a25397efc211787b1b87cae39c8c29551d38ecfc646d573c369c05f1589ce5c",
+      "stderr": ""
+    },
+    {
+      "file": "f32-c1-be-t1000000-direct-stated16.mov",
+      "input_sha256": "7b1ce119a6a79c2ebb0feae6f77820b025a80a7420b6e1312dc2fd25c6b7b66c",
+      "scalar": "f32",
+      "returncode": 0,
+      "exact": true,
+      "output_sha256": "68841ad9d0cb2f4e3b90ec6fbdb0809c6da72040bc1607e27598dc6e548283c8",
+      "stderr": ""
+    },
+    {
+      "file": "f32-c1-be-t1000000-direct-stated16.mov",
+      "input_sha256": "7b1ce119a6a79c2ebb0feae6f77820b025a80a7420b6e1312dc2fd25c6b7b66c",
+      "scalar": "f64",
+      "returncode": 0,
+      "exact": true,
+      "output_sha256": "9a25397efc211787b1b87cae39c8c29551d38ecfc646d573c369c05f1589ce5c",
+      "stderr": ""
+    },
+    {
+      "file": "f32-c1-be-t1000000-wave-stated16.mov",
+      "input_sha256": "30f2c06e84370fc998cf57bd3093dbb9ed9b24afcb5c1d5840d3a37cd5866b30",
+      "scalar": "f32",
+      "returncode": 0,
+      "exact": true,
+      "output_sha256": "68841ad9d0cb2f4e3b90ec6fbdb0809c6da72040bc1607e27598dc6e548283c8",
+      "stderr": ""
+    },
+    {
+      "file": "f32-c1-be-t1000000-wave-stated16.mov",
+      "input_sha256": "30f2c06e84370fc998cf57bd3093dbb9ed9b24afcb5c1d5840d3a37cd5866b30",
+      "scalar": "f64",
+      "returncode": 0,
+      "exact": true,
+      "output_sha256": "9a25397efc211787b1b87cae39c8c29551d38ecfc646d573c369c05f1589ce5c",
+      "stderr": ""
+    },
+    {
+      "file": "f32-c2-le-t101-direct-stated16.mov",
+      "input_sha256": "53c8c1df0700518033687fa87f78d14fcfc686ca35d5f5ccea4a23a29fd2dfb3",
+      "scalar": "f32",
+      "returncode": 0,
+      "exact": true,
+      "output_sha256": "40e4003bb893818536f0ee2fcef7a79fdef1e418a111b4df09823e12fb2a971f",
+      "stderr": ""
+    },
+    {
+      "file": "f32-c2-le-t101-direct-stated16.mov",
+      "input_sha256": "53c8c1df0700518033687fa87f78d14fcfc686ca35d5f5ccea4a23a29fd2dfb3",
+      "scalar": "f64",
+      "returncode": 0,
+      "exact": true,
+      "output_sha256": "d09c6cfbe7f752222a006eabf36bc0a7eb5cf19fae865f9e12407a1c1604d6e2",
+      "stderr": ""
+    },
+    {
+      "file": "f32-c2-le-t101-wave-stated16.mov",
+      "input_sha256": "80c2d9e35f92d0ff333c38dc7be79b3cd7304209782cb9106a4af72d333fb9a2",
+      "scalar": "f32",
+      "returncode": 0,
+      "exact": true,
+      "output_sha256": "40e4003bb893818536f0ee2fcef7a79fdef1e418a111b4df09823e12fb2a971f",
+      "stderr": ""
+    },
+    {
+      "file": "f32-c2-le-t101-wave-stated16.mov",
+      "input_sha256": "80c2d9e35f92d0ff333c38dc7be79b3cd7304209782cb9106a4af72d333fb9a2",
+      "scalar": "f64",
+      "returncode": 0,
+      "exact": true,
+      "output_sha256": "d09c6cfbe7f752222a006eabf36bc0a7eb5cf19fae865f9e12407a1c1604d6e2",
+      "stderr": ""
+    },
+    {
+      "file": "f32-c2-le-t1000-direct-stated16.mov",
+      "input_sha256": "057772c5f0d5c37d7d7de67561e6ce09f16665cb9a8cdc49dbaab4ddd042d5f9",
+      "scalar": "f32",
+      "returncode": 0,
+      "exact": true,
+      "output_sha256": "40e4003bb893818536f0ee2fcef7a79fdef1e418a111b4df09823e12fb2a971f",
+      "stderr": ""
+    },
+    {
+      "file": "f32-c2-le-t1000-direct-stated16.mov",
+      "input_sha256": "057772c5f0d5c37d7d7de67561e6ce09f16665cb9a8cdc49dbaab4ddd042d5f9",
+      "scalar": "f64",
+      "returncode": 0,
+      "exact": true,
+      "output_sha256": "d09c6cfbe7f752222a006eabf36bc0a7eb5cf19fae865f9e12407a1c1604d6e2",
+      "stderr": ""
+    },
+    {
+      "file": "f32-c2-le-t1000-wave-stated16.mov",
+      "input_sha256": "f9be6de02465254734f901f81194b2610b04805e1a4a9c6fbe7da419eda1210d",
+      "scalar": "f32",
+      "returncode": 0,
+      "exact": true,
+      "output_sha256": "40e4003bb893818536f0ee2fcef7a79fdef1e418a111b4df09823e12fb2a971f",
+      "stderr": ""
+    },
+    {
+      "file": "f32-c2-le-t1000-wave-stated16.mov",
+      "input_sha256": "f9be6de02465254734f901f81194b2610b04805e1a4a9c6fbe7da419eda1210d",
+      "scalar": "f64",
+      "returncode": 0,
+      "exact": true,
+      "output_sha256": "d09c6cfbe7f752222a006eabf36bc0a7eb5cf19fae865f9e12407a1c1604d6e2",
+      "stderr": ""
+    },
+    {
+      "file": "f32-c2-le-t1001-direct-stated16.mov",
+      "input_sha256": "91536af0c509f309b0ae13f8f3296cc3213419642f99001258f6783494017e4d",
+      "scalar": "f32",
+      "returncode": 0,
+      "exact": true,
+      "output_sha256": "40e4003bb893818536f0ee2fcef7a79fdef1e418a111b4df09823e12fb2a971f",
+      "stderr": ""
+    },
+    {
+      "file": "f32-c2-le-t1001-direct-stated16.mov",
+      "input_sha256": "91536af0c509f309b0ae13f8f3296cc3213419642f99001258f6783494017e4d",
+      "scalar": "f64",
+      "returncode": 0,
+      "exact": true,
+      "output_sha256": "d09c6cfbe7f752222a006eabf36bc0a7eb5cf19fae865f9e12407a1c1604d6e2",
+      "stderr": ""
+    },
+    {
+      "file": "f32-c2-le-t1001-wave-stated16.mov",
+      "input_sha256": "79049e6ac86e8c4ca8a8527b9743e15f15b11cc33b19796b9a4485051ae82d24",
+      "scalar": "f32",
+      "returncode": 0,
+      "exact": true,
+      "output_sha256": "40e4003bb893818536f0ee2fcef7a79fdef1e418a111b4df09823e12fb2a971f",
+      "stderr": ""
+    },
+    {
+      "file": "f32-c2-le-t1001-wave-stated16.mov",
+      "input_sha256": "79049e6ac86e8c4ca8a8527b9743e15f15b11cc33b19796b9a4485051ae82d24",
+      "scalar": "f64",
+      "returncode": 0,
+      "exact": true,
+      "output_sha256": "d09c6cfbe7f752222a006eabf36bc0a7eb5cf19fae865f9e12407a1c1604d6e2",
+      "stderr": ""
+    },
+    {
+      "file": "f32-c2-le-t48000-direct-stated16.mov",
+      "input_sha256": "304afeadced2bef14d1b993517b1b106308d21d425d7499e86ebf7231f872b27",
+      "scalar": "f32",
+      "returncode": 0,
+      "exact": true,
+      "output_sha256": "40e4003bb893818536f0ee2fcef7a79fdef1e418a111b4df09823e12fb2a971f",
+      "stderr": ""
+    },
+    {
+      "file": "f32-c2-le-t48000-direct-stated16.mov",
+      "input_sha256": "304afeadced2bef14d1b993517b1b106308d21d425d7499e86ebf7231f872b27",
+      "scalar": "f64",
+      "returncode": 0,
+      "exact": true,
+      "output_sha256": "d09c6cfbe7f752222a006eabf36bc0a7eb5cf19fae865f9e12407a1c1604d6e2",
+      "stderr": ""
+    },
+    {
+      "file": "f32-c2-le-t48000-wave-stated16.mov",
+      "input_sha256": "cf650e9179ceec575bcf41795a253aa1a9bda0432ba0af08685a5faaea32cd9d",
+      "scalar": "f32",
+      "returncode": 0,
+      "exact": true,
+      "output_sha256": "40e4003bb893818536f0ee2fcef7a79fdef1e418a111b4df09823e12fb2a971f",
+      "stderr": ""
+    },
+    {
+      "file": "f32-c2-le-t48000-wave-stated16.mov",
+      "input_sha256": "cf650e9179ceec575bcf41795a253aa1a9bda0432ba0af08685a5faaea32cd9d",
+      "scalar": "f64",
+      "returncode": 0,
+      "exact": true,
+      "output_sha256": "d09c6cfbe7f752222a006eabf36bc0a7eb5cf19fae865f9e12407a1c1604d6e2",
+      "stderr": ""
+    },
+    {
+      "file": "f32-c2-le-t1000000-direct-stated16.mov",
+      "input_sha256": "0d918e0765c13cb90cd38aadda4bc9446443ce29fce65ad9ecd0ce56235f6897",
+      "scalar": "f32",
+      "returncode": 0,
+      "exact": true,
+      "output_sha256": "40e4003bb893818536f0ee2fcef7a79fdef1e418a111b4df09823e12fb2a971f",
+      "stderr": ""
+    },
+    {
+      "file": "f32-c2-le-t1000000-direct-stated16.mov",
+      "input_sha256": "0d918e0765c13cb90cd38aadda4bc9446443ce29fce65ad9ecd0ce56235f6897",
+      "scalar": "f64",
+      "returncode": 0,
+      "exact": true,
+      "output_sha256": "d09c6cfbe7f752222a006eabf36bc0a7eb5cf19fae865f9e12407a1c1604d6e2",
+      "stderr": ""
+    },
+    {
+      "file": "f32-c2-le-t1000000-wave-stated16.mov",
+      "input_sha256": "75d2368957acb08b5513337d39d3b12c47e2a0741c62828ebb60bbd4bcbe3a44",
+      "scalar": "f32",
+      "returncode": 0,
+      "exact": true,
+      "output_sha256": "40e4003bb893818536f0ee2fcef7a79fdef1e418a111b4df09823e12fb2a971f",
+      "stderr": ""
+    },
+    {
+      "file": "f32-c2-le-t1000000-wave-stated16.mov",
+      "input_sha256": "75d2368957acb08b5513337d39d3b12c47e2a0741c62828ebb60bbd4bcbe3a44",
+      "scalar": "f64",
+      "returncode": 0,
+      "exact": true,
+      "output_sha256": "d09c6cfbe7f752222a006eabf36bc0a7eb5cf19fae865f9e12407a1c1604d6e2",
+      "stderr": ""
+    },
+    {
+      "file": "f32-c2-be-t101-direct-stated16.mov",
+      "input_sha256": "a20317107c1ad7dfcf17791b99c6ea66a49c3f186ba5fddae7d4bc7aedad4692",
+      "scalar": "f32",
+      "returncode": 0,
+      "exact": true,
+      "output_sha256": "40e4003bb893818536f0ee2fcef7a79fdef1e418a111b4df09823e12fb2a971f",
+      "stderr": ""
+    },
+    {
+      "file": "f32-c2-be-t101-direct-stated16.mov",
+      "input_sha256": "a20317107c1ad7dfcf17791b99c6ea66a49c3f186ba5fddae7d4bc7aedad4692",
+      "scalar": "f64",
+      "returncode": 0,
+      "exact": true,
+      "output_sha256": "d09c6cfbe7f752222a006eabf36bc0a7eb5cf19fae865f9e12407a1c1604d6e2",
+      "stderr": ""
+    },
+    {
+      "file": "f32-c2-be-t101-wave-stated16.mov",
+      "input_sha256": "6b644efa4e0494583f964a324822d55536e349ea2a799474932c9bf6b7807a04",
+      "scalar": "f32",
+      "returncode": 0,
+      "exact": true,
+      "output_sha256": "40e4003bb893818536f0ee2fcef7a79fdef1e418a111b4df09823e12fb2a971f",
+      "stderr": ""
+    },
+    {
+      "file": "f32-c2-be-t101-wave-stated16.mov",
+      "input_sha256": "6b644efa4e0494583f964a324822d55536e349ea2a799474932c9bf6b7807a04",
+      "scalar": "f64",
+      "returncode": 0,
+      "exact": true,
+      "output_sha256": "d09c6cfbe7f752222a006eabf36bc0a7eb5cf19fae865f9e12407a1c1604d6e2",
+      "stderr": ""
+    },
+    {
+      "file": "f32-c2-be-t1000-direct-stated16.mov",
+      "input_sha256": "f395e88df5b09b60b091be55aa26f1487ece4c3640269d1506c40a282dda28ef",
+      "scalar": "f32",
+      "returncode": 0,
+      "exact": true,
+      "output_sha256": "40e4003bb893818536f0ee2fcef7a79fdef1e418a111b4df09823e12fb2a971f",
+      "stderr": ""
+    },
+    {
+      "file": "f32-c2-be-t1000-direct-stated16.mov",
+      "input_sha256": "f395e88df5b09b60b091be55aa26f1487ece4c3640269d1506c40a282dda28ef",
+      "scalar": "f64",
+      "returncode": 0,
+      "exact": true,
+      "output_sha256": "d09c6cfbe7f752222a006eabf36bc0a7eb5cf19fae865f9e12407a1c1604d6e2",
+      "stderr": ""
+    },
+    {
+      "file": "f32-c2-be-t1000-wave-stated16.mov",
+      "input_sha256": "98d807669f9c42e57853e1b74bdb40a5c065767ac251c8abfb6916c04f3833d1",
+      "scalar": "f32",
+      "returncode": 0,
+      "exact": true,
+      "output_sha256": "40e4003bb893818536f0ee2fcef7a79fdef1e418a111b4df09823e12fb2a971f",
+      "stderr": ""
+    },
+    {
+      "file": "f32-c2-be-t1000-wave-stated16.mov",
+      "input_sha256": "98d807669f9c42e57853e1b74bdb40a5c065767ac251c8abfb6916c04f3833d1",
+      "scalar": "f64",
+      "returncode": 0,
+      "exact": true,
+      "output_sha256": "d09c6cfbe7f752222a006eabf36bc0a7eb5cf19fae865f9e12407a1c1604d6e2",
+      "stderr": ""
+    },
+    {
+      "file": "f32-c2-be-t1001-direct-stated16.mov",
+      "input_sha256": "a16ba1cfedd3621de3a30831509f4cbb810e852ce87f4eedb711be7eb6b90417",
+      "scalar": "f32",
+      "returncode": 0,
+      "exact": true,
+      "output_sha256": "40e4003bb893818536f0ee2fcef7a79fdef1e418a111b4df09823e12fb2a971f",
+      "stderr": ""
+    },
+    {
+      "file": "f32-c2-be-t1001-direct-stated16.mov",
+      "input_sha256": "a16ba1cfedd3621de3a30831509f4cbb810e852ce87f4eedb711be7eb6b90417",
+      "scalar": "f64",
+      "returncode": 0,
+      "exact": true,
+      "output_sha256": "d09c6cfbe7f752222a006eabf36bc0a7eb5cf19fae865f9e12407a1c1604d6e2",
+      "stderr": ""
+    },
+    {
+      "file": "f32-c2-be-t1001-wave-stated16.mov",
+      "input_sha256": "9c0e0fd06a422f3bd9fa1646cf5c29facd7df5dee9edb64e3a8e8498edb8663d",
+      "scalar": "f32",
+      "returncode": 0,
+      "exact": true,
+      "output_sha256": "40e4003bb893818536f0ee2fcef7a79fdef1e418a111b4df09823e12fb2a971f",
+      "stderr": ""
+    },
+    {
+      "file": "f32-c2-be-t1001-wave-stated16.mov",
+      "input_sha256": "9c0e0fd06a422f3bd9fa1646cf5c29facd7df5dee9edb64e3a8e8498edb8663d",
+      "scalar": "f64",
+      "returncode": 0,
+      "exact": true,
+      "output_sha256": "d09c6cfbe7f752222a006eabf36bc0a7eb5cf19fae865f9e12407a1c1604d6e2",
+      "stderr": ""
+    },
+    {
+      "file": "f32-c2-be-t48000-direct-stated16.mov",
+      "input_sha256": "0c399d9e9cab888f12670f49c9a76b0dc5ab25a53184cc1f557d9e9ebf6332e7",
+      "scalar": "f32",
+      "returncode": 0,
+      "exact": true,
+      "output_sha256": "40e4003bb893818536f0ee2fcef7a79fdef1e418a111b4df09823e12fb2a971f",
+      "stderr": ""
+    },
+    {
+      "file": "f32-c2-be-t48000-direct-stated16.mov",
+      "input_sha256": "0c399d9e9cab888f12670f49c9a76b0dc5ab25a53184cc1f557d9e9ebf6332e7",
+      "scalar": "f64",
+      "returncode": 0,
+      "exact": true,
+      "output_sha256": "d09c6cfbe7f752222a006eabf36bc0a7eb5cf19fae865f9e12407a1c1604d6e2",
+      "stderr": ""
+    },
+    {
+      "file": "f32-c2-be-t48000-wave-stated16.mov",
+      "input_sha256": "5340a884023d3093750d40dd319bdbcc8f5953b2fff2f0c5a07f20a4479ec2fd",
+      "scalar": "f32",
+      "returncode": 0,
+      "exact": true,
+      "output_sha256": "40e4003bb893818536f0ee2fcef7a79fdef1e418a111b4df09823e12fb2a971f",
+      "stderr": ""
+    },
+    {
+      "file": "f32-c2-be-t48000-wave-stated16.mov",
+      "input_sha256": "5340a884023d3093750d40dd319bdbcc8f5953b2fff2f0c5a07f20a4479ec2fd",
+      "scalar": "f64",
+      "returncode": 0,
+      "exact": true,
+      "output_sha256": "d09c6cfbe7f752222a006eabf36bc0a7eb5cf19fae865f9e12407a1c1604d6e2",
+      "stderr": ""
+    },
+    {
+      "file": "f32-c2-be-t1000000-direct-stated16.mov",
+      "input_sha256": "c09d99c9164b9c6567755374dbdf5d063f8f6f15c0140ca3d13cde662c54155a",
+      "scalar": "f32",
+      "returncode": 0,
+      "exact": true,
+      "output_sha256": "40e4003bb893818536f0ee2fcef7a79fdef1e418a111b4df09823e12fb2a971f",
+      "stderr": ""
+    },
+    {
+      "file": "f32-c2-be-t1000000-direct-stated16.mov",
+      "input_sha256": "c09d99c9164b9c6567755374dbdf5d063f8f6f15c0140ca3d13cde662c54155a",
+      "scalar": "f64",
+      "returncode": 0,
+      "exact": true,
+      "output_sha256": "d09c6cfbe7f752222a006eabf36bc0a7eb5cf19fae865f9e12407a1c1604d6e2",
+      "stderr": ""
+    },
+    {
+      "file": "f32-c2-be-t1000000-wave-stated16.mov",
+      "input_sha256": "41d96f5c96535a3049cf4e0fbd7536200392d04481fac00e95f6198ba195ca68",
+      "scalar": "f32",
+      "returncode": 0,
+      "exact": true,
+      "output_sha256": "40e4003bb893818536f0ee2fcef7a79fdef1e418a111b4df09823e12fb2a971f",
+      "stderr": ""
+    },
+    {
+      "file": "f32-c2-be-t1000000-wave-stated16.mov",
+      "input_sha256": "41d96f5c96535a3049cf4e0fbd7536200392d04481fac00e95f6198ba195ca68",
+      "scalar": "f64",
+      "returncode": 0,
+      "exact": true,
+      "output_sha256": "d09c6cfbe7f752222a006eabf36bc0a7eb5cf19fae865f9e12407a1c1604d6e2",
+      "stderr": ""
+    },
+    {
+      "file": "f64-c1-le-t101-direct-stated16.mov",
+      "input_sha256": "097c5482e22d41de8e9f8ce2ea64755ed6fae152b20dce2dd995136fa8c06d97",
+      "scalar": "f32",
+      "returncode": 0,
+      "exact": true,
+      "output_sha256": "8e3645afff1cdec7f8b8197907230f75ae5cab342d9c5fcaf01f01b79be0c6ce",
+      "stderr": ""
+    },
+    {
+      "file": "f64-c1-le-t101-direct-stated16.mov",
+      "input_sha256": "097c5482e22d41de8e9f8ce2ea64755ed6fae152b20dce2dd995136fa8c06d97",
+      "scalar": "f64",
+      "returncode": 0,
+      "exact": true,
+      "output_sha256": "800a691974b951c033902cd00de133b6845b60e223edf38674114a88794eb4b9",
+      "stderr": ""
+    },
+    {
+      "file": "f64-c1-le-t101-wave-stated16.mov",
+      "input_sha256": "46b45e29df3e6675fd463080b2b8def4930195c61a823da677cbd8f8177071b3",
+      "scalar": "f32",
+      "returncode": 0,
+      "exact": true,
+      "output_sha256": "8e3645afff1cdec7f8b8197907230f75ae5cab342d9c5fcaf01f01b79be0c6ce",
+      "stderr": ""
+    },
+    {
+      "file": "f64-c1-le-t101-wave-stated16.mov",
+      "input_sha256": "46b45e29df3e6675fd463080b2b8def4930195c61a823da677cbd8f8177071b3",
+      "scalar": "f64",
+      "returncode": 0,
+      "exact": true,
+      "output_sha256": "800a691974b951c033902cd00de133b6845b60e223edf38674114a88794eb4b9",
+      "stderr": ""
+    },
+    {
+      "file": "f64-c1-le-t1000-direct-stated16.mov",
+      "input_sha256": "b3ef8230d6e628cbd1d31b5ed02a92183a3c84a7dc883880ab2d5ab1b0183be0",
+      "scalar": "f32",
+      "returncode": 0,
+      "exact": true,
+      "output_sha256": "8e3645afff1cdec7f8b8197907230f75ae5cab342d9c5fcaf01f01b79be0c6ce",
+      "stderr": ""
+    },
+    {
+      "file": "f64-c1-le-t1000-direct-stated16.mov",
+      "input_sha256": "b3ef8230d6e628cbd1d31b5ed02a92183a3c84a7dc883880ab2d5ab1b0183be0",
+      "scalar": "f64",
+      "returncode": 0,
+      "exact": true,
+      "output_sha256": "800a691974b951c033902cd00de133b6845b60e223edf38674114a88794eb4b9",
+      "stderr": ""
+    },
+    {
+      "file": "f64-c1-le-t1000-wave-stated16.mov",
+      "input_sha256": "d74f1446cf129bd0e3dca8d892ed68a2d2ea18858b3514cc989a7d09bbacd5c9",
+      "scalar": "f32",
+      "returncode": 0,
+      "exact": true,
+      "output_sha256": "8e3645afff1cdec7f8b8197907230f75ae5cab342d9c5fcaf01f01b79be0c6ce",
+      "stderr": ""
+    },
+    {
+      "file": "f64-c1-le-t1000-wave-stated16.mov",
+      "input_sha256": "d74f1446cf129bd0e3dca8d892ed68a2d2ea18858b3514cc989a7d09bbacd5c9",
+      "scalar": "f64",
+      "returncode": 0,
+      "exact": true,
+      "output_sha256": "800a691974b951c033902cd00de133b6845b60e223edf38674114a88794eb4b9",
+      "stderr": ""
+    },
+    {
+      "file": "f64-c1-le-t1001-direct-stated16.mov",
+      "input_sha256": "fcfda1060ce4f01874453cabe45eb0a65f7e4d4b7dc36f5083135456cc1d4c5a",
+      "scalar": "f32",
+      "returncode": 0,
+      "exact": true,
+      "output_sha256": "8e3645afff1cdec7f8b8197907230f75ae5cab342d9c5fcaf01f01b79be0c6ce",
+      "stderr": ""
+    },
+    {
+      "file": "f64-c1-le-t1001-direct-stated16.mov",
+      "input_sha256": "fcfda1060ce4f01874453cabe45eb0a65f7e4d4b7dc36f5083135456cc1d4c5a",
+      "scalar": "f64",
+      "returncode": 0,
+      "exact": true,
+      "output_sha256": "800a691974b951c033902cd00de133b6845b60e223edf38674114a88794eb4b9",
+      "stderr": ""
+    },
+    {
+      "file": "f64-c1-le-t1001-wave-stated16.mov",
+      "input_sha256": "3fee79480d078fded702937be1d0b8bb9c783dc832539f2208dd97f967ce5901",
+      "scalar": "f32",
+      "returncode": 0,
+      "exact": true,
+      "output_sha256": "8e3645afff1cdec7f8b8197907230f75ae5cab342d9c5fcaf01f01b79be0c6ce",
+      "stderr": ""
+    },
+    {
+      "file": "f64-c1-le-t1001-wave-stated16.mov",
+      "input_sha256": "3fee79480d078fded702937be1d0b8bb9c783dc832539f2208dd97f967ce5901",
+      "scalar": "f64",
+      "returncode": 0,
+      "exact": true,
+      "output_sha256": "800a691974b951c033902cd00de133b6845b60e223edf38674114a88794eb4b9",
+      "stderr": ""
+    },
+    {
+      "file": "f64-c1-le-t48000-direct-stated16.mov",
+      "input_sha256": "127cb34fa7bf44af0c58460f4ef7f0fd21c969fe8048f6b3b4e4341b424f2b92",
+      "scalar": "f32",
+      "returncode": 0,
+      "exact": true,
+      "output_sha256": "8e3645afff1cdec7f8b8197907230f75ae5cab342d9c5fcaf01f01b79be0c6ce",
+      "stderr": ""
+    },
+    {
+      "file": "f64-c1-le-t48000-direct-stated16.mov",
+      "input_sha256": "127cb34fa7bf44af0c58460f4ef7f0fd21c969fe8048f6b3b4e4341b424f2b92",
+      "scalar": "f64",
+      "returncode": 0,
+      "exact": true,
+      "output_sha256": "800a691974b951c033902cd00de133b6845b60e223edf38674114a88794eb4b9",
+      "stderr": ""
+    },
+    {
+      "file": "f64-c1-le-t48000-wave-stated16.mov",
+      "input_sha256": "6ec5852c9a672dd59536ff153ea974991c9ba0eae0b49abcc8f59fe6b5ccf293",
+      "scalar": "f32",
+      "returncode": 0,
+      "exact": true,
+      "output_sha256": "8e3645afff1cdec7f8b8197907230f75ae5cab342d9c5fcaf01f01b79be0c6ce",
+      "stderr": ""
+    },
+    {
+      "file": "f64-c1-le-t48000-wave-stated16.mov",
+      "input_sha256": "6ec5852c9a672dd59536ff153ea974991c9ba0eae0b49abcc8f59fe6b5ccf293",
+      "scalar": "f64",
+      "returncode": 0,
+      "exact": true,
+      "output_sha256": "800a691974b951c033902cd00de133b6845b60e223edf38674114a88794eb4b9",
+      "stderr": ""
+    },
+    {
+      "file": "f64-c1-le-t1000000-direct-stated16.mov",
+      "input_sha256": "9ad3113ab6c6aac322aa13cb12feace10eb14889b7131a91dbc1dafc94a41630",
+      "scalar": "f32",
+      "returncode": 0,
+      "exact": true,
+      "output_sha256": "8e3645afff1cdec7f8b8197907230f75ae5cab342d9c5fcaf01f01b79be0c6ce",
+      "stderr": ""
+    },
+    {
+      "file": "f64-c1-le-t1000000-direct-stated16.mov",
+      "input_sha256": "9ad3113ab6c6aac322aa13cb12feace10eb14889b7131a91dbc1dafc94a41630",
+      "scalar": "f64",
+      "returncode": 0,
+      "exact": true,
+      "output_sha256": "800a691974b951c033902cd00de133b6845b60e223edf38674114a88794eb4b9",
+      "stderr": ""
+    },
+    {
+      "file": "f64-c1-le-t1000000-wave-stated16.mov",
+      "input_sha256": "f72bc4a5e063c0a16b683483e76721a0df3fbd3b657225c91e104783c9efbdf3",
+      "scalar": "f32",
+      "returncode": 0,
+      "exact": true,
+      "output_sha256": "8e3645afff1cdec7f8b8197907230f75ae5cab342d9c5fcaf01f01b79be0c6ce",
+      "stderr": ""
+    },
+    {
+      "file": "f64-c1-le-t1000000-wave-stated16.mov",
+      "input_sha256": "f72bc4a5e063c0a16b683483e76721a0df3fbd3b657225c91e104783c9efbdf3",
+      "scalar": "f64",
+      "returncode": 0,
+      "exact": true,
+      "output_sha256": "800a691974b951c033902cd00de133b6845b60e223edf38674114a88794eb4b9",
+      "stderr": ""
+    },
+    {
+      "file": "f64-c1-be-t101-direct-stated16.mov",
+      "input_sha256": "bcb89a0c849df1ef54595dc85ca0b8431c4cb6eb4bacbb9a472dd4afe55397f2",
+      "scalar": "f32",
+      "returncode": 0,
+      "exact": true,
+      "output_sha256": "8e3645afff1cdec7f8b8197907230f75ae5cab342d9c5fcaf01f01b79be0c6ce",
+      "stderr": ""
+    },
+    {
+      "file": "f64-c1-be-t101-direct-stated16.mov",
+      "input_sha256": "bcb89a0c849df1ef54595dc85ca0b8431c4cb6eb4bacbb9a472dd4afe55397f2",
+      "scalar": "f64",
+      "returncode": 0,
+      "exact": true,
+      "output_sha256": "800a691974b951c033902cd00de133b6845b60e223edf38674114a88794eb4b9",
+      "stderr": ""
+    },
+    {
+      "file": "f64-c1-be-t101-wave-stated16.mov",
+      "input_sha256": "0bcff740abf8a873736168b570c33fc496b91ee36cc6e8d9fbac80e627fbd009",
+      "scalar": "f32",
+      "returncode": 0,
+      "exact": true,
+      "output_sha256": "8e3645afff1cdec7f8b8197907230f75ae5cab342d9c5fcaf01f01b79be0c6ce",
+      "stderr": ""
+    },
+    {
+      "file": "f64-c1-be-t101-wave-stated16.mov",
+      "input_sha256": "0bcff740abf8a873736168b570c33fc496b91ee36cc6e8d9fbac80e627fbd009",
+      "scalar": "f64",
+      "returncode": 0,
+      "exact": true,
+      "output_sha256": "800a691974b951c033902cd00de133b6845b60e223edf38674114a88794eb4b9",
+      "stderr": ""
+    },
+    {
+      "file": "f64-c1-be-t1000-direct-stated16.mov",
+      "input_sha256": "ec5987e4431fe9a6e4f71601e2e4b00f14f089cc1bc6339bdea8b9ea5f7812d8",
+      "scalar": "f32",
+      "returncode": 0,
+      "exact": true,
+      "output_sha256": "8e3645afff1cdec7f8b8197907230f75ae5cab342d9c5fcaf01f01b79be0c6ce",
+      "stderr": ""
+    },
+    {
+      "file": "f64-c1-be-t1000-direct-stated16.mov",
+      "input_sha256": "ec5987e4431fe9a6e4f71601e2e4b00f14f089cc1bc6339bdea8b9ea5f7812d8",
+      "scalar": "f64",
+      "returncode": 0,
+      "exact": true,
+      "output_sha256": "800a691974b951c033902cd00de133b6845b60e223edf38674114a88794eb4b9",
+      "stderr": ""
+    },
+    {
+      "file": "f64-c1-be-t1000-wave-stated16.mov",
+      "input_sha256": "b313dadebe2cc779cfb8346d0e55715b69f12239c06b2e99dd78afa5d762d82c",
+      "scalar": "f32",
+      "returncode": 0,
+      "exact": true,
+      "output_sha256": "8e3645afff1cdec7f8b8197907230f75ae5cab342d9c5fcaf01f01b79be0c6ce",
+      "stderr": ""
+    },
+    {
+      "file": "f64-c1-be-t1000-wave-stated16.mov",
+      "input_sha256": "b313dadebe2cc779cfb8346d0e55715b69f12239c06b2e99dd78afa5d762d82c",
+      "scalar": "f64",
+      "returncode": 0,
+      "exact": true,
+      "output_sha256": "800a691974b951c033902cd00de133b6845b60e223edf38674114a88794eb4b9",
+      "stderr": ""
+    },
+    {
+      "file": "f64-c1-be-t1001-direct-stated16.mov",
+      "input_sha256": "df4c038c7cba2d77e0189c1fa11b86808985ac231fcc17509d83baac75aaa21f",
+      "scalar": "f32",
+      "returncode": 0,
+      "exact": true,
+      "output_sha256": "8e3645afff1cdec7f8b8197907230f75ae5cab342d9c5fcaf01f01b79be0c6ce",
+      "stderr": ""
+    },
+    {
+      "file": "f64-c1-be-t1001-direct-stated16.mov",
+      "input_sha256": "df4c038c7cba2d77e0189c1fa11b86808985ac231fcc17509d83baac75aaa21f",
+      "scalar": "f64",
+      "returncode": 0,
+      "exact": true,
+      "output_sha256": "800a691974b951c033902cd00de133b6845b60e223edf38674114a88794eb4b9",
+      "stderr": ""
+    },
+    {
+      "file": "f64-c1-be-t1001-wave-stated16.mov",
+      "input_sha256": "1bc9b974e557660b788a8cd6f6cae641dbf9f8fd44a981f6416f5ed6916884e2",
+      "scalar": "f32",
+      "returncode": 0,
+      "exact": true,
+      "output_sha256": "8e3645afff1cdec7f8b8197907230f75ae5cab342d9c5fcaf01f01b79be0c6ce",
+      "stderr": ""
+    },
+    {
+      "file": "f64-c1-be-t1001-wave-stated16.mov",
+      "input_sha256": "1bc9b974e557660b788a8cd6f6cae641dbf9f8fd44a981f6416f5ed6916884e2",
+      "scalar": "f64",
+      "returncode": 0,
+      "exact": true,
+      "output_sha256": "800a691974b951c033902cd00de133b6845b60e223edf38674114a88794eb4b9",
+      "stderr": ""
+    },
+    {
+      "file": "f64-c1-be-t48000-direct-stated16.mov",
+      "input_sha256": "eb00b9bbaf0c03f07f2f5421f5f95c41a3aa12df915bc82d0d21715909a5a194",
+      "scalar": "f32",
+      "returncode": 0,
+      "exact": true,
+      "output_sha256": "8e3645afff1cdec7f8b8197907230f75ae5cab342d9c5fcaf01f01b79be0c6ce",
+      "stderr": ""
+    },
+    {
+      "file": "f64-c1-be-t48000-direct-stated16.mov",
+      "input_sha256": "eb00b9bbaf0c03f07f2f5421f5f95c41a3aa12df915bc82d0d21715909a5a194",
+      "scalar": "f64",
+      "returncode": 0,
+      "exact": true,
+      "output_sha256": "800a691974b951c033902cd00de133b6845b60e223edf38674114a88794eb4b9",
+      "stderr": ""
+    },
+    {
+      "file": "f64-c1-be-t48000-wave-stated16.mov",
+      "input_sha256": "33e29b91376d975d0c6fba14860fe99c47ec9e7dc846dedfca8c75d4e9dcea10",
+      "scalar": "f32",
+      "returncode": 0,
+      "exact": true,
+      "output_sha256": "8e3645afff1cdec7f8b8197907230f75ae5cab342d9c5fcaf01f01b79be0c6ce",
+      "stderr": ""
+    },
+    {
+      "file": "f64-c1-be-t48000-wave-stated16.mov",
+      "input_sha256": "33e29b91376d975d0c6fba14860fe99c47ec9e7dc846dedfca8c75d4e9dcea10",
+      "scalar": "f64",
+      "returncode": 0,
+      "exact": true,
+      "output_sha256": "800a691974b951c033902cd00de133b6845b60e223edf38674114a88794eb4b9",
+      "stderr": ""
+    },
+    {
+      "file": "f64-c1-be-t1000000-direct-stated16.mov",
+      "input_sha256": "c55c8540a2c34506bac81b20c97d18e6cde2e18b7bed20092e6c7f833e67d623",
+      "scalar": "f32",
+      "returncode": 0,
+      "exact": true,
+      "output_sha256": "8e3645afff1cdec7f8b8197907230f75ae5cab342d9c5fcaf01f01b79be0c6ce",
+      "stderr": ""
+    },
+    {
+      "file": "f64-c1-be-t1000000-direct-stated16.mov",
+      "input_sha256": "c55c8540a2c34506bac81b20c97d18e6cde2e18b7bed20092e6c7f833e67d623",
+      "scalar": "f64",
+      "returncode": 0,
+      "exact": true,
+      "output_sha256": "800a691974b951c033902cd00de133b6845b60e223edf38674114a88794eb4b9",
+      "stderr": ""
+    },
+    {
+      "file": "f64-c1-be-t1000000-wave-stated16.mov",
+      "input_sha256": "32b12856250aee634b689406331c329359bffad354ab49b1dfaea0be1a107a26",
+      "scalar": "f32",
+      "returncode": 0,
+      "exact": true,
+      "output_sha256": "8e3645afff1cdec7f8b8197907230f75ae5cab342d9c5fcaf01f01b79be0c6ce",
+      "stderr": ""
+    },
+    {
+      "file": "f64-c1-be-t1000000-wave-stated16.mov",
+      "input_sha256": "32b12856250aee634b689406331c329359bffad354ab49b1dfaea0be1a107a26",
+      "scalar": "f64",
+      "returncode": 0,
+      "exact": true,
+      "output_sha256": "800a691974b951c033902cd00de133b6845b60e223edf38674114a88794eb4b9",
+      "stderr": ""
+    },
+    {
+      "file": "f64-c2-le-t101-direct-stated16.mov",
+      "input_sha256": "b6abcdab9aa77d0d464d39a3050e3b0a6207e7d49504d9822f3afc38caed4b60",
+      "scalar": "f32",
+      "returncode": 0,
+      "exact": true,
+      "output_sha256": "b307ba8052a30ea4d27127eba313334706e047cb3580981fe13462234c43f111",
+      "stderr": ""
+    },
+    {
+      "file": "f64-c2-le-t101-direct-stated16.mov",
+      "input_sha256": "b6abcdab9aa77d0d464d39a3050e3b0a6207e7d49504d9822f3afc38caed4b60",
+      "scalar": "f64",
+      "returncode": 0,
+      "exact": true,
+      "output_sha256": "1ddf559c6036279596e3e8a8876c75c8ff4efef473ce9c3e0bdafe858b2b5c16",
+      "stderr": ""
+    },
+    {
+      "file": "f64-c2-le-t101-wave-stated16.mov",
+      "input_sha256": "ccb06a8fea1ca61e405cd340729afaa9512aba9324a39c919e6cb74b8a00dd65",
+      "scalar": "f32",
+      "returncode": 0,
+      "exact": true,
+      "output_sha256": "b307ba8052a30ea4d27127eba313334706e047cb3580981fe13462234c43f111",
+      "stderr": ""
+    },
+    {
+      "file": "f64-c2-le-t101-wave-stated16.mov",
+      "input_sha256": "ccb06a8fea1ca61e405cd340729afaa9512aba9324a39c919e6cb74b8a00dd65",
+      "scalar": "f64",
+      "returncode": 0,
+      "exact": true,
+      "output_sha256": "1ddf559c6036279596e3e8a8876c75c8ff4efef473ce9c3e0bdafe858b2b5c16",
+      "stderr": ""
+    },
+    {
+      "file": "f64-c2-le-t1000-direct-stated16.mov",
+      "input_sha256": "2bb40bbf2e4c2af4fb5600812c012eedca2fbf535e2ebc16edf863d2afe1ae5f",
+      "scalar": "f32",
+      "returncode": 0,
+      "exact": true,
+      "output_sha256": "b307ba8052a30ea4d27127eba313334706e047cb3580981fe13462234c43f111",
+      "stderr": ""
+    },
+    {
+      "file": "f64-c2-le-t1000-direct-stated16.mov",
+      "input_sha256": "2bb40bbf2e4c2af4fb5600812c012eedca2fbf535e2ebc16edf863d2afe1ae5f",
+      "scalar": "f64",
+      "returncode": 0,
+      "exact": true,
+      "output_sha256": "1ddf559c6036279596e3e8a8876c75c8ff4efef473ce9c3e0bdafe858b2b5c16",
+      "stderr": ""
+    },
+    {
+      "file": "f64-c2-le-t1000-wave-stated16.mov",
+      "input_sha256": "eabfec3de178a27ab2933da1243819d83ebe33145543c799b5bc87d0faa9e90e",
+      "scalar": "f32",
+      "returncode": 0,
+      "exact": true,
+      "output_sha256": "b307ba8052a30ea4d27127eba313334706e047cb3580981fe13462234c43f111",
+      "stderr": ""
+    },
+    {
+      "file": "f64-c2-le-t1000-wave-stated16.mov",
+      "input_sha256": "eabfec3de178a27ab2933da1243819d83ebe33145543c799b5bc87d0faa9e90e",
+      "scalar": "f64",
+      "returncode": 0,
+      "exact": true,
+      "output_sha256": "1ddf559c6036279596e3e8a8876c75c8ff4efef473ce9c3e0bdafe858b2b5c16",
+      "stderr": ""
+    },
+    {
+      "file": "f64-c2-le-t1001-direct-stated16.mov",
+      "input_sha256": "7538992c0bd68d10a3d0406809b2f4c444de633971f6f4c8dd40fddcef428f34",
+      "scalar": "f32",
+      "returncode": 0,
+      "exact": true,
+      "output_sha256": "b307ba8052a30ea4d27127eba313334706e047cb3580981fe13462234c43f111",
+      "stderr": ""
+    },
+    {
+      "file": "f64-c2-le-t1001-direct-stated16.mov",
+      "input_sha256": "7538992c0bd68d10a3d0406809b2f4c444de633971f6f4c8dd40fddcef428f34",
+      "scalar": "f64",
+      "returncode": 0,
+      "exact": true,
+      "output_sha256": "1ddf559c6036279596e3e8a8876c75c8ff4efef473ce9c3e0bdafe858b2b5c16",
+      "stderr": ""
+    },
+    {
+      "file": "f64-c2-le-t1001-wave-stated16.mov",
+      "input_sha256": "b8ab83f8ec77ed4231871d9e66a6765516dd6f72f68a69860c2b25a3e3a21e08",
+      "scalar": "f32",
+      "returncode": 0,
+      "exact": true,
+      "output_sha256": "b307ba8052a30ea4d27127eba313334706e047cb3580981fe13462234c43f111",
+      "stderr": ""
+    },
+    {
+      "file": "f64-c2-le-t1001-wave-stated16.mov",
+      "input_sha256": "b8ab83f8ec77ed4231871d9e66a6765516dd6f72f68a69860c2b25a3e3a21e08",
+      "scalar": "f64",
+      "returncode": 0,
+      "exact": true,
+      "output_sha256": "1ddf559c6036279596e3e8a8876c75c8ff4efef473ce9c3e0bdafe858b2b5c16",
+      "stderr": ""
+    },
+    {
+      "file": "f64-c2-le-t48000-direct-stated16.mov",
+      "input_sha256": "6e00001bfa83ac48b26d74d936e92d9837ff47aeb961f2a53c0a320174ad42c0",
+      "scalar": "f32",
+      "returncode": 0,
+      "exact": true,
+      "output_sha256": "b307ba8052a30ea4d27127eba313334706e047cb3580981fe13462234c43f111",
+      "stderr": ""
+    },
+    {
+      "file": "f64-c2-le-t48000-direct-stated16.mov",
+      "input_sha256": "6e00001bfa83ac48b26d74d936e92d9837ff47aeb961f2a53c0a320174ad42c0",
+      "scalar": "f64",
+      "returncode": 0,
+      "exact": true,
+      "output_sha256": "1ddf559c6036279596e3e8a8876c75c8ff4efef473ce9c3e0bdafe858b2b5c16",
+      "stderr": ""
+    },
+    {
+      "file": "f64-c2-le-t48000-wave-stated16.mov",
+      "input_sha256": "26c53baa55a434f327c3113f5bf98754741ae64730e4808f1c8fd01b481a793d",
+      "scalar": "f32",
+      "returncode": 0,
+      "exact": true,
+      "output_sha256": "b307ba8052a30ea4d27127eba313334706e047cb3580981fe13462234c43f111",
+      "stderr": ""
+    },
+    {
+      "file": "f64-c2-le-t48000-wave-stated16.mov",
+      "input_sha256": "26c53baa55a434f327c3113f5bf98754741ae64730e4808f1c8fd01b481a793d",
+      "scalar": "f64",
+      "returncode": 0,
+      "exact": true,
+      "output_sha256": "1ddf559c6036279596e3e8a8876c75c8ff4efef473ce9c3e0bdafe858b2b5c16",
+      "stderr": ""
+    },
+    {
+      "file": "f64-c2-le-t1000000-direct-stated16.mov",
+      "input_sha256": "02bbfff4b7b8acd6befaf8debfa03832df1e217e2686b8010137970eefdff2e8",
+      "scalar": "f32",
+      "returncode": 0,
+      "exact": true,
+      "output_sha256": "b307ba8052a30ea4d27127eba313334706e047cb3580981fe13462234c43f111",
+      "stderr": ""
+    },
+    {
+      "file": "f64-c2-le-t1000000-direct-stated16.mov",
+      "input_sha256": "02bbfff4b7b8acd6befaf8debfa03832df1e217e2686b8010137970eefdff2e8",
+      "scalar": "f64",
+      "returncode": 0,
+      "exact": true,
+      "output_sha256": "1ddf559c6036279596e3e8a8876c75c8ff4efef473ce9c3e0bdafe858b2b5c16",
+      "stderr": ""
+    },
+    {
+      "file": "f64-c2-le-t1000000-wave-stated16.mov",
+      "input_sha256": "f2f1926d48b60f417fe1c914b539c2373df1ad610650f09f8386c913d0adde24",
+      "scalar": "f32",
+      "returncode": 0,
+      "exact": true,
+      "output_sha256": "b307ba8052a30ea4d27127eba313334706e047cb3580981fe13462234c43f111",
+      "stderr": ""
+    },
+    {
+      "file": "f64-c2-le-t1000000-wave-stated16.mov",
+      "input_sha256": "f2f1926d48b60f417fe1c914b539c2373df1ad610650f09f8386c913d0adde24",
+      "scalar": "f64",
+      "returncode": 0,
+      "exact": true,
+      "output_sha256": "1ddf559c6036279596e3e8a8876c75c8ff4efef473ce9c3e0bdafe858b2b5c16",
+      "stderr": ""
+    },
+    {
+      "file": "f64-c2-be-t101-direct-stated16.mov",
+      "input_sha256": "85bf77787045187486b1b2522654b3b1255d87ce07ff03973c475f9e1db92262",
+      "scalar": "f32",
+      "returncode": 0,
+      "exact": true,
+      "output_sha256": "b307ba8052a30ea4d27127eba313334706e047cb3580981fe13462234c43f111",
+      "stderr": ""
+    },
+    {
+      "file": "f64-c2-be-t101-direct-stated16.mov",
+      "input_sha256": "85bf77787045187486b1b2522654b3b1255d87ce07ff03973c475f9e1db92262",
+      "scalar": "f64",
+      "returncode": 0,
+      "exact": true,
+      "output_sha256": "1ddf559c6036279596e3e8a8876c75c8ff4efef473ce9c3e0bdafe858b2b5c16",
+      "stderr": ""
+    },
+    {
+      "file": "f64-c2-be-t101-wave-stated16.mov",
+      "input_sha256": "8ee5ff73ad9824f77912ba7e3af2cdcd7722ae94256bea28eb4c112dbdf95643",
+      "scalar": "f32",
+      "returncode": 0,
+      "exact": true,
+      "output_sha256": "b307ba8052a30ea4d27127eba313334706e047cb3580981fe13462234c43f111",
+      "stderr": ""
+    },
+    {
+      "file": "f64-c2-be-t101-wave-stated16.mov",
+      "input_sha256": "8ee5ff73ad9824f77912ba7e3af2cdcd7722ae94256bea28eb4c112dbdf95643",
+      "scalar": "f64",
+      "returncode": 0,
+      "exact": true,
+      "output_sha256": "1ddf559c6036279596e3e8a8876c75c8ff4efef473ce9c3e0bdafe858b2b5c16",
+      "stderr": ""
+    },
+    {
+      "file": "f64-c2-be-t1000-direct-stated16.mov",
+      "input_sha256": "fb9e69d1e8c993c82e29bd5e67be5a2292cc06394e870aa405fe18491d997490",
+      "scalar": "f32",
+      "returncode": 0,
+      "exact": true,
+      "output_sha256": "b307ba8052a30ea4d27127eba313334706e047cb3580981fe13462234c43f111",
+      "stderr": ""
+    },
+    {
+      "file": "f64-c2-be-t1000-direct-stated16.mov",
+      "input_sha256": "fb9e69d1e8c993c82e29bd5e67be5a2292cc06394e870aa405fe18491d997490",
+      "scalar": "f64",
+      "returncode": 0,
+      "exact": true,
+      "output_sha256": "1ddf559c6036279596e3e8a8876c75c8ff4efef473ce9c3e0bdafe858b2b5c16",
+      "stderr": ""
+    },
+    {
+      "file": "f64-c2-be-t1000-wave-stated16.mov",
+      "input_sha256": "dbfcef9669a6e81e7eff1d693b3b52a397047cd87f22e1299e3e5b8cc3ab92c9",
+      "scalar": "f32",
+      "returncode": 0,
+      "exact": true,
+      "output_sha256": "b307ba8052a30ea4d27127eba313334706e047cb3580981fe13462234c43f111",
+      "stderr": ""
+    },
+    {
+      "file": "f64-c2-be-t1000-wave-stated16.mov",
+      "input_sha256": "dbfcef9669a6e81e7eff1d693b3b52a397047cd87f22e1299e3e5b8cc3ab92c9",
+      "scalar": "f64",
+      "returncode": 0,
+      "exact": true,
+      "output_sha256": "1ddf559c6036279596e3e8a8876c75c8ff4efef473ce9c3e0bdafe858b2b5c16",
+      "stderr": ""
+    },
+    {
+      "file": "f64-c2-be-t1001-direct-stated16.mov",
+      "input_sha256": "86dbfd6fcc8f3ff6174715c2b26e3c3bb6af4b9070e677707112d25ddf4cfe0b",
+      "scalar": "f32",
+      "returncode": 0,
+      "exact": true,
+      "output_sha256": "b307ba8052a30ea4d27127eba313334706e047cb3580981fe13462234c43f111",
+      "stderr": ""
+    },
+    {
+      "file": "f64-c2-be-t1001-direct-stated16.mov",
+      "input_sha256": "86dbfd6fcc8f3ff6174715c2b26e3c3bb6af4b9070e677707112d25ddf4cfe0b",
+      "scalar": "f64",
+      "returncode": 0,
+      "exact": true,
+      "output_sha256": "1ddf559c6036279596e3e8a8876c75c8ff4efef473ce9c3e0bdafe858b2b5c16",
+      "stderr": ""
+    },
+    {
+      "file": "f64-c2-be-t1001-wave-stated16.mov",
+      "input_sha256": "7a6dc9af44c8a536adf9a171823264eaef503c503f6bc39f19943a62c96ad3e2",
+      "scalar": "f32",
+      "returncode": 0,
+      "exact": true,
+      "output_sha256": "b307ba8052a30ea4d27127eba313334706e047cb3580981fe13462234c43f111",
+      "stderr": ""
+    },
+    {
+      "file": "f64-c2-be-t1001-wave-stated16.mov",
+      "input_sha256": "7a6dc9af44c8a536adf9a171823264eaef503c503f6bc39f19943a62c96ad3e2",
+      "scalar": "f64",
+      "returncode": 0,
+      "exact": true,
+      "output_sha256": "1ddf559c6036279596e3e8a8876c75c8ff4efef473ce9c3e0bdafe858b2b5c16",
+      "stderr": ""
+    },
+    {
+      "file": "f64-c2-be-t48000-direct-stated16.mov",
+      "input_sha256": "68f8d9e2ed138a126c539320b380f7af27594c9f4aebd0f332225062f378b577",
+      "scalar": "f32",
+      "returncode": 0,
+      "exact": true,
+      "output_sha256": "b307ba8052a30ea4d27127eba313334706e047cb3580981fe13462234c43f111",
+      "stderr": ""
+    },
+    {
+      "file": "f64-c2-be-t48000-direct-stated16.mov",
+      "input_sha256": "68f8d9e2ed138a126c539320b380f7af27594c9f4aebd0f332225062f378b577",
+      "scalar": "f64",
+      "returncode": 0,
+      "exact": true,
+      "output_sha256": "1ddf559c6036279596e3e8a8876c75c8ff4efef473ce9c3e0bdafe858b2b5c16",
+      "stderr": ""
+    },
+    {
+      "file": "f64-c2-be-t48000-wave-stated16.mov",
+      "input_sha256": "d0165c109547c7a143bcb2c9f49d4234b46a42d63143f3d7310d332d7a04d570",
+      "scalar": "f32",
+      "returncode": 0,
+      "exact": true,
+      "output_sha256": "b307ba8052a30ea4d27127eba313334706e047cb3580981fe13462234c43f111",
+      "stderr": ""
+    },
+    {
+      "file": "f64-c2-be-t48000-wave-stated16.mov",
+      "input_sha256": "d0165c109547c7a143bcb2c9f49d4234b46a42d63143f3d7310d332d7a04d570",
+      "scalar": "f64",
+      "returncode": 0,
+      "exact": true,
+      "output_sha256": "1ddf559c6036279596e3e8a8876c75c8ff4efef473ce9c3e0bdafe858b2b5c16",
+      "stderr": ""
+    },
+    {
+      "file": "f64-c2-be-t1000000-direct-stated16.mov",
+      "input_sha256": "7566d5b880020f845686b536721ce3409e7412e98d5228d1f89b0c037461f130",
+      "scalar": "f32",
+      "returncode": 0,
+      "exact": true,
+      "output_sha256": "b307ba8052a30ea4d27127eba313334706e047cb3580981fe13462234c43f111",
+      "stderr": ""
+    },
+    {
+      "file": "f64-c2-be-t1000000-direct-stated16.mov",
+      "input_sha256": "7566d5b880020f845686b536721ce3409e7412e98d5228d1f89b0c037461f130",
+      "scalar": "f64",
+      "returncode": 0,
+      "exact": true,
+      "output_sha256": "1ddf559c6036279596e3e8a8876c75c8ff4efef473ce9c3e0bdafe858b2b5c16",
+      "stderr": ""
+    },
+    {
+      "file": "f64-c2-be-t1000000-wave-stated16.mov",
+      "input_sha256": "1f52857dc27302dc0a2dc709d3493b2cd143428d869ec589ab6cfaf20c0f7520",
+      "scalar": "f32",
+      "returncode": 0,
+      "exact": true,
+      "output_sha256": "b307ba8052a30ea4d27127eba313334706e047cb3580981fe13462234c43f111",
+      "stderr": ""
+    },
+    {
+      "file": "f64-c2-be-t1000000-wave-stated16.mov",
+      "input_sha256": "1f52857dc27302dc0a2dc709d3493b2cd143428d869ec589ab6cfaf20c0f7520",
+      "scalar": "f64",
+      "returncode": 0,
+      "exact": true,
+      "output_sha256": "1ddf559c6036279596e3e8a8876c75c8ff4efef473ce9c3e0bdafe858b2b5c16",
+      "stderr": ""
+    }
+  ]
+}

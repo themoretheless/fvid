@@ -1,0 +1,68 @@
+[
+  {
+    "file": "f32-c1-le-t47-direct-stated16.mov",
+    "returncode": 0,
+    "stderr": "",
+    "actual_bytes": 12,
+    "expected_bytes": 11520,
+    "matching_prefix_bytes": 12,
+    "first_samples": [
+      -0.75,
+      -0.5,
+      -0.125
+    ],
+    "probe": {
+      "packets": [
+        {
+          "pts": 0,
+          "duration": 3,
+          "size": "12"
+        }
+      ],
+      "programs": [],
+      "stream_groups": [],
+      "streams": [
+        {
+          "codec_name": "pcm_f32le",
+          "sample_rate": "48000",
+          "time_base": "1/47",
+          "duration": "0.063830",
+          "nb_frames": "3"
+        }
+      ]
+    }
+  },
+  {
+    "file": "f64-c1-le-t47-direct-stated16.mov",
+    "returncode": 0,
+    "stderr": "",
+    "actual_bytes": 12,
+    "expected_bytes": 11520,
+    "matching_prefix_bytes": 12,
+    "first_samples": [
+      -0.75,
+      -0.5,
+      -0.125
+    ],
+    "probe": {
+      "packets": [
+        {
+          "pts": 0,
+          "duration": 3,
+          "size": "24"
+        }
+      ],
+      "programs": [],
+      "stream_groups": [],
+      "streams": [
+        {
+          "codec_name": "pcm_f64le",
+          "sample_rate": "48000",
+          "time_base": "1/47",
+          "duration": "0.063830",
+          "nb_frames": "3"
+        }
+      ]
+    }
+  }
+]

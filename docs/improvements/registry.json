@@ -1,8 +1,8 @@
 {
   "target": 1000,
   "counting_rule": "One independently confirmed problem or useful capability; fixture variants and baseline integration repairs are excluded. Only accepted entries count.",
-  "accepted_count": 536,
-  "next_id": "FVID-0537",
+  "accepted_count": 537,
+  "next_id": "FVID-0538",
   "entries": [
     {
       "id": "FVID-0001",
@@ -6086,6 +6086,17 @@
       "result": "Resolve the primary codec/channels and MACE-unit changes from STSC-selected descriptions before choosing the index representation. Preserve ordinary chunk-order/coverage/divisibility/extent/overlap checks and compact-size validation; refuse zero-byte units before publishing a uniform index. Forty authored variants cover mono PCM64/2048 frames, MACE3/6 with72 decoded samples and dormant ALAC/IMA4/MACE/float entries in either order. Root/owned APIs retain one audio chunk under the original limit4, exact logical units, every coded packet and raw clock; native PCM/MACE, owned PCM export, precise seek/rewind/EOF/MAX and120 actual software-worker sessions per stand pass. Four malformed controls keep specific typed refusals, exhausted budgets do not admit audio, and two positive-CTTS companions remain expanded and cannot bypass limits. Qualification passes178 Rust executions, two old device ignores, core/player checks and three external-tool-free repeats. All53 generated files are byte-identical and4742 source/input hashes remain stable. Three same-core-profile before/after metric repeats preserve packet checks:32 retained-index costs fall12/64/2048 to1 and eight remain unchanged; largest reported whole-reader index payload estimate84536 to2648 bytes. This supports a functional budget-admission fix, not a separate optimization ID or an RSS/speed claim. Distinct from FVID-0535 representative-header selection: this failure occurs while constructing the index. No public signature/struct change, physical-device or hardware-video claim.",
       "status": "accepted",
       "validation": "batch-547-validation.json"
+    },
+    {
+      "id": "FVID-0537",
+      "batch": 548,
+      "title": "Use physical QuickTime float width for native frame clocks and seek while retaining declared metadata",
+      "source": "crates/fvid-media/src/owned_mp4_audio_packet_frames.rs",
+      "regression": "tests/mp4_float_legacy_width.rs",
+      "before": "Original7ceb944b81 decodes fl32/fl64 by FourCC but counts physical frames and two seek/frontier strides using the legacy sample_size16 field. An aligned-clock stand passes; qualified101/1001 clocks expose2x/4x coded-frame overcounts, wrong native duration/PTS/worker navigation and owned-export alignment refusal. The final unchanged six-test stand passes native-width/video and refusal controls, then fails four float-clock gates. Existing authored v1 metadata and a local independent muxer confirm the legacy16 convention.",
+      "result": "Add a shared physical PCM channel-frame byte helper: fl32/fl64 use32/64-bit storage and other PCM retains its resolved width. Use it in coded-frame counting and both live PCM seek/frontier calculations. Preserve raw Track/SampleDescription/AudioStream bits and the unchanged each_pcm_tag stated16 assertion; no decoder algorithm, payload or existing signature changes. Ninety-six qualified legacy/native-width pairs cover mono/stereo, both byte orders, direct/nested enda, five qualified clocks and16 independently sliced delay/trim/silence/repeat edits. Exact native PCM/time/duration, precise seek/rewind/EOF/MAX,288 actual software-worker sessions per stand and full/interval owned f32/f64 exports with low float64 bits pass. Half-physical-frame inputs keep specific incomplete-frame refusals;16 past-source pairs remain explicit existing refusals, not successful playback. Qualification passes167 Rust executions, two old device ignores, core/player checks and three external-tool-free repeats. All280 generated files are identical on regeneration and5024 source/input hashes stable. Qualified FFmpeg reference matches160/160 scalar outputs;16 clock47 duration1 pairs remain labeled unqualified with retained divergence diagnostics, outside accepted playback evidence. Early aligned, packet-header and unsupported-tail authoring stages are retained and not counted. One physical-width invariant, no extra IDs for timestamps, export, variants or refusals; no performance, physical-device or hardware-video claim.",
+      "status": "accepted",
+      "validation": "batch-548-validation.json"
     }
   ]
 }
