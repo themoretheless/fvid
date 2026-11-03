@@ -1,0 +1,13 @@
+{
+  "commit": "daebfafe872516429f333bdebfec606c2174c067",
+  "remote": [
+    "daebfafe872516429f333bdebfec606c2174c067\trefs/heads/codex/deliver-fvid-20261029",
+    "daebfafe872516429f333bdebfec606c2174c067\trefs/heads/main"
+  ],
+  "accepted_count": 535,
+  "next_id": "FVID-0536",
+  "owned_target_removed": true,
+  "candidate_backup_removed": true,
+  "parallel_work_preserved": true,
+  "final_source_hashes_stable": true
+}
