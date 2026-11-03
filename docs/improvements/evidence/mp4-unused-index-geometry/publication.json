@@ -1,0 +1,13 @@
+{
+  "commit": "ed0f691b54d005db118b73e73580b629336a31a3",
+  "remote": [
+    "ed0f691b54d005db118b73e73580b629336a31a3\trefs/heads/codex/deliver-fvid-20261029",
+    "ed0f691b54d005db118b73e73580b629336a31a3\trefs/heads/main"
+  ],
+  "accepted_count": 536,
+  "next_id": "FVID-0537",
+  "owned_target_removed": true,
+  "candidate_backup_removed": true,
+  "parallel_work_preserved": true,
+  "final_source_hashes_stable": true
+}
