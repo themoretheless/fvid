@@ -1,0 +1,13 @@
+{
+  "status": "ready-after-local-qualification",
+  "remote": "https://github.com/themoretheless/fvid.git",
+  "remote_base": "6878bfe685153bca42cbbdf757c7874038bec5c0",
+  "atomic_targets": [
+    "main",
+    "codex/deliver-fvid-20261029"
+  ],
+  "accepted_count": 548,
+  "preserved": "Active AAC/AV1 worktrees, historical snapshots and four stashes; no branches/worktrees deleted",
+  "cleanup": "Owned qualification build target and temporary logs/scripts after terminal jobs; authored fixtures and evidence retained",
+  "ci": "New Linux/Windows runs must be observed after push"
+}

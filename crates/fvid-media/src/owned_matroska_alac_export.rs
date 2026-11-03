@@ -48,9 +48,7 @@ pub(crate) fn supports(
         target == i32::from(channels)
             || (((channels <= 2 && (1..=8).contains(&target))
                 || (channels <= 8 && matches!(target, 1 | 2)))
-                && ((channels <= 2 && mask == 0)
-                    || (mask != 0
-                        && crate::owned_pcm_channels::rematrix_layout_supported(channels, mask))))
+                && crate::owned_pcm_channels::rematrix_layout_supported(channels, mask))
     });
     if !target_ok {
         return false;

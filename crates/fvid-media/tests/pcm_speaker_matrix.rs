@@ -48,8 +48,8 @@ fn every_named_speaker_has_a_defined_stereo_fold_in_both_precisions() {
     }
 }
 #[test]
-fn partial_masks_ignore_unassigned_channels_and_preserve_fragmented_frames() {
-    for (mask, expected) in [(3, [1f64, 2.]), (0, [0., 0.])] {
+fn partial_masks_ignore_excess_channels_and_directout_folds_all_fragmented_channels() {
+    for (mask, expected) in [(3, [1f64, 2.]), (0, [75.75, 75.75])] {
         let mut out = Vec::new();
         let mut mix =
             fvid_media::owned_pcm_gain_f64::PcmGain::with_mask(&mut out, 1., 4, 2, mask).unwrap();
@@ -91,7 +91,7 @@ fn expansion_routes_matching_speakers_and_folds_only_missing_positions() {
     }
 }
 #[test]
-fn explicit_directout_zero_is_distinct_from_classic_wave_implicit_mono() {
+fn explicit_directout_zero_retains_its_mask_and_renders_mono_without_silencing() {
     use std::{
         io::{Read, Seek, SeekFrom},
         path::PathBuf,
@@ -122,7 +122,7 @@ fn explicit_directout_zero_is_distinct_from_classic_wave_implicit_mono() {
     explicit.extend_from_slice(&0.25f32.to_le_bytes());
     for (label, source, wanted, declared) in [
         ("classic", classic, [0.25f32, 0.25], false),
-        ("explicit", explicit, [0., 0.], true),
+        ("explicit", explicit, [0.25, 0.25], true),
     ] {
         let input = dir.join(format!("{label}-input.wav"));
         let output = dir.join(format!("{label}-output.wav"));
@@ -133,6 +133,7 @@ fn explicit_directout_zero_is_distinct_from_classic_wave_implicit_mono() {
         )
         .unwrap();
         assert_eq!(info.channel_mask_explicit, declared);
+        assert_eq!(info.effective_channel_mask(), if declared { 0 } else { 4 });
         fvid_media::decode_audio_transformed(
             &input,
             &output,

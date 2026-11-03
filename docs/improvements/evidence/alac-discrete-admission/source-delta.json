@@ -1,0 +1,12 @@
+{
+  "relative_to": "../mp4-opaque-track-ids/candidate-source.json",
+  "changed": [
+    "crates/fvid-media/src/owned_audio_export.rs",
+    "crates/fvid-media/src/owned_audio_plan.rs",
+    "crates/fvid-media/src/owned_matroska_alac_export.rs",
+    "crates/fvid-media/tests/alac_multichannel.rs",
+    "crates/fvid-media/tests/pcm_speaker_matrix.rs"
+  ],
+  "paths": 5671,
+  "mp4_candidate_code_and_fixtures_unchanged": true
+}

@@ -1,0 +1,5 @@
+{
+  "crates/fvid-media/src/owned_pcm_channels.rs": "1a57d1dece2c347d10c2eb8a8b06558114b861c3d76edcd60b8c181be4af7dec",
+  "crates/fvid-media/src/owned_pcm_gain.rs": "3915db15d446eca40c859f9d60d72530bb9fc3c5d0513acaf159c3d55d293d90",
+  "crates/fvid-media/src/owned_pcm_gain_f64.rs": "dd9014b30bd597e4e3c9af84aa019d3e9fc5d04c804cd59f972f00edfa3adcce"
+}

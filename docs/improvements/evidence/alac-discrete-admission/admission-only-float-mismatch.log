@@ -1,0 +1,16 @@
+
+running 1 test
+
+thread 'discrete_alac_downmix_averages_all_unlabelled_channels_without_silencing_them' (22421667) panicked at crates/fvid-media/tests/alac_multichannel.rs:130:17:
+assertion `left == right` failed
+  left: [171, 170, 6, 59, 85, 85, 11, 59, 0, 0, 16, 59, 171, 170, 20, 59, 85, 85, 25, 59, 0, 0, 30, 59, 171, 170, 34, 59, 85, 85, 39, 59, 0, 0, 44, 59, 171, 170, 48, 59, 85, 85, 53, 59, 0, 0, 58, 59, 171, 170, 62, 59, 85, 85, 67, 59, 0, 0, 72, 59, 171, 170, 76, 59, 85, 85, 81, 59, 0, 0, 86, 59, 171, 170, 90, 59, 85, 85, 95, 59, 0, 0, 100, 59, 171, 170, 104, 59, 85, 85, 109, 59, 0, 0, 114, 59, 171, 170, 118, 59, 85, 85, 123, 59, 0, 0, 128, 59, 85, 85, 130, 59, 171, 170, 132, 59, 0, 0, 135, 59, 85, 85, 137, 59, 171, 170, 139, 59]
+ right: [170, 170, 6, 59, 85, 85, 11, 59, 1, 0, 16, 59, 170, 170, 20, 59, 85, 85, 25, 59, 1, 0, 30, 59, 170, 170, 34, 59, 85, 85, 39, 59, 1, 0, 44, 59, 170, 170, 48, 59, 85, 85, 53, 59, 1, 0, 58, 59, 170, 170, 62, 59, 86, 85, 67, 59, 1, 0, 72, 59, 171, 170, 76, 59, 86, 85, 81, 59, 1, 0, 86, 59, 171, 170, 90, 59, 86, 85, 95, 59, 1, 0, 100, 59, 171, 170, 104, 59, 86, 85, 109, 59, 1, 0, 114, 59, 171, 170, 118, 59, 86, 85, 123, 59, 0, 0, 128, 59, 85, 85, 130, 59, 171, 170, 132, 59, 0, 0, 135, 59, 85, 85, 137, 59, 171, 170, 139, 59]
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+test discrete_alac_downmix_averages_all_unlabelled_channels_without_silencing_them ... FAILED
+
+failures:
+
+failures:
+    discrete_alac_downmix_averages_all_unlabelled_channels_without_silencing_them
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 1 filtered out; finished in 0.01s

@@ -1,0 +1,44 @@
+{
+  "status": "accepted",
+  "count_delta": 0,
+  "base": "50d5536625b0ad869759fee068c699f6f1c7feb4",
+  "media_full_suite": {
+    "command": "cargo test --locked --offline --manifest-path crates/fvid-media/Cargo.toml --no-default-features --no-fail-fast",
+    "exit_code": 0,
+    "passed": 726,
+    "ignored": 1,
+    "test_result_groups": 37,
+    "log": "media-final.log"
+  },
+  "post_mp4": [
+    {
+      "name": "mp4-core",
+      "passed": 4,
+      "ignored": 0
+    },
+    {
+      "name": "mp4-player",
+      "passed": 8,
+      "ignored": 0
+    }
+  ],
+  "no_external_tools": [
+    {
+      "name": "alac-no-external",
+      "passed": 1
+    },
+    {
+      "name": "matrix-no-external",
+      "passed": 4
+    }
+  ],
+  "frozen_source": "final-source.json",
+  "source_delta": "source-delta.json",
+  "unchanged_mixer": "unchanged-mixing-core.json",
+  "baseline": "before.log",
+  "limitations": [
+    "No physical audio device or GPU qualification",
+    "Existing ALAC capability and obsolete oracle repair; no extra ID",
+    "New main CI must be observed after publication"
+  ]
+}

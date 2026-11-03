@@ -137,12 +137,10 @@ pub(crate) fn supports(
             || (info.channels <= 8 && matches!(channels, 1 | 2))
             || (matches!(info.channels, 1 | 2) && (1..=8).contains(&channels));
         let layout = !changes_channels
-            || (info.channels <= 2 && info.channel_mask == 0)
-            || (info.channel_mask != 0
-                && crate::owned_pcm_channels::rematrix_layout_supported(
-                    info.channels,
-                    info.channel_mask,
-                ));
+            || crate::owned_pcm_channels::rematrix_layout_supported(
+                info.channels,
+                info.effective_channel_mask(),
+            );
         conversion && layout
     })
 }
@@ -368,12 +366,10 @@ pub fn decode_audio_transformed(
         let mut file = std::fs::File::open(source).map_err(|e| e.to_string())?;
         let info = crate::owned_wave_inspect::inspect(&mut file, options.cancel.as_ref())
             .map_err(|e| e.to_string())?;
-        if !(info.channels <= 2 && info.channel_mask == 0)
-            && !(info.channel_mask != 0
-                && crate::owned_pcm_channels::rematrix_layout_supported(
-                    info.channels,
-                    info.channel_mask,
-                ))
+        if !crate::owned_pcm_channels::rematrix_layout_supported(
+            info.channels,
+            info.effective_channel_mask(),
+        )
         {
             return Err("owned rematrix requires a standard explicit speaker layout".into());
         }

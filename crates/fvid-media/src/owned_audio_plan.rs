@@ -390,9 +390,7 @@ pub fn plan_decode_audio(
         {
             return Err("unsupported channel conversion".into());
         }
-        if !(channels <= 2 && mask == 0)
-            && !(mask != 0 && crate::owned_pcm_channels::rematrix_layout_supported(channels, mask))
-        {
+        if !crate::owned_pcm_channels::rematrix_layout_supported(channels, mask) {
             return Err("unsupported speaker layout".into());
         }
     }

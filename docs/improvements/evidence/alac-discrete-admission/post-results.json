@@ -1,0 +1,12 @@
+[
+  {
+    "name": "mp4-core",
+    "passed": 4,
+    "ignored": 0
+  },
+  {
+    "name": "mp4-player",
+    "passed": 8,
+    "ignored": 0
+  }
+]

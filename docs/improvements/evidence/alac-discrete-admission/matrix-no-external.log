@@ -1,0 +1,8 @@
+
+running 4 tests
+test expansion_routes_matching_speakers_and_folds_only_missing_positions ... ok
+test every_named_speaker_has_a_defined_stereo_fold_in_both_precisions ... ok
+test partial_masks_ignore_excess_channels_and_directout_folds_all_fragmented_channels ... ok
+test explicit_directout_zero_retains_its_mask_and_renders_mono_without_silencing ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s

@@ -1,8 +1,8 @@
 {
   "target": 1000,
   "counting_rule": "One independently confirmed problem or useful capability; fixture variants and baseline integration repairs are excluded. Only accepted entries count.",
-  "accepted_count": 547,
-  "next_id": "FVID-0548",
+  "accepted_count": 548,
+  "next_id": "FVID-0549",
   "entries": [
     {
       "id": "FVID-0001",
@@ -6208,6 +6208,17 @@
       "result": "Charge the ordinal of every declared trak before parsing it, independent of support/skip status and order. Opaque unsupported tracks remain skippable within the total budget. Ten authored60ms movies cover video-only, recognized video+PCM and all permutations of video with one/two unsupported sound tracks. All25 below-total budget cases now give the existing typed Invalid/non-unsupported refusal through both readers; exact/ample budgets retain track/refusal counts, packet clocks and full exact software VP9 video. Twenty actual software-video reader sessions per stand preserve seek/rewind/EOF. Independent FFmpeg confirms all10 complete videos; no unsupported-audio playback is claimed. Twelve files regenerate identically and5629 source/input hashes are frozen. Qualification passes215 Rust test executions, two existing device ignores, core/player builds, six external-tool-free native repeats and two220-case actual wasm32 compatibility runs. One total-track resource invariant, not per-reader/order/codec/fixture IDs. No codec algorithm, public signature, packet/sample budget, speedup or hardware/UI claim. A separately verified zero-count spatial-budget test-stage correction retains the original early packet contract and all assertions.",
       "status": "accepted",
       "validation": "batch-558-validation.json"
+    },
+    {
+      "id": "FVID-0548",
+      "batch": 559,
+      "title": "Validate MP4 track ID uniqueness before unsupported-codec skips",
+      "source": "crates/fvid-media/src/owned_mp4_impl.rs",
+      "regression": "tests/mp4_opaque_track_ids.rs",
+      "before": "Original6878bfe685 checks duplicate track IDs only among retained supported tracks. Sixteen authored movies with unsupported sound tracks bypass movie-wide uniqueness through root and owned readers (32 false admissions). The same stand passes20 valid controls and rejects two already-strict known-codec duplicate controls. Both tkhd versions and all video/opaque-track orders are covered.",
+      "result": "Record every nonzero tkhd ID before codec-dependent early returns; preserve existing Invalid duplicate diagnostic and track budget. Eighteen malformed movies now refuse through both readers;20 valid unique-ID controls retain exact packets, clocks, software VP9 video, EOF, raw seeks and rewind. Forty actual software video sessions per stand pass. All20 complete valid videos match independent FFmpeg and40 fixture files regenerate exactly. Qualification passes207 Rust executions with two existing device ignores, core/player checks, six external-tool-free stand repeats and220 actual wasm32 compatibility cases. After a separate zero-count ALAC CI contract repair, current-source core/player MP4 stands pass12 more tests and the complete fvid-media suite passes. All5671 source/input paths are frozen with an explicit five-file ALAC/PCM delta; MP4 candidate and fixtures unchanged. One movie namespace invariant, not per-reader/version/order IDs; unsupported sound is not claimed decoded. No public API, performance, GPU or hardware claim.",
+      "status": "accepted",
+      "validation": "batch-559-validation.json"
     }
   ]
 }

@@ -107,6 +107,7 @@ fn discrete_alac_downmix_averages_all_unlabelled_channels_without_silencing_them
                     channels: Some(channels),
                     ..Default::default()
                 };
+                fvid_media::plan_decode_audio(&source, &transform, &Default::default()).unwrap();
                 fvid_media::decode_audio_transformed(&source, &out, transform, &Default::default())
                     .unwrap();
                 let mut f = std::fs::File::open(out).unwrap();
@@ -117,16 +118,25 @@ fn discrete_alac_downmix_averages_all_unlabelled_channels_without_silencing_them
                 f.read_exact(&mut actual).unwrap();
                 let mut expected = Vec::new();
                 for n in 0..32 {
-                    let mut average = 0.;
+                    // MP4 exports through the precise float64 spool; Matroska
+                    // uses float32. Preserve exact comparisons for both paths.
+                    let mut sum = 0i64;
+                    let mut float32_average = 0f32;
                     for ch in 0..3 {
                         let v = ((ch + 1) * 101 + n * 7) as i32 * if ch % 2 == 0 { 1 } else { -1 };
-                        average += (v as f32 / (1u64 << (depth - 1)) as f32) * (1. / 3.);
+                        sum += i64::from(v);
+                        float32_average += (v as f32 / (1u64 << (depth - 1)) as f32) * (1. / 3.);
                     }
+                    let average = if extension == "m4a" {
+                        (sum as f64 / 3. / (1u64 << (depth - 1)) as f64) as f32
+                    } else {
+                        float32_average
+                    };
                     for _ in 0..channels {
                         expected.extend(average.to_le_bytes());
                     }
                 }
-                assert_eq!(actual, expected);
+                assert_eq!(actual, expected, "{depth}/{extension}/{channels}");
             }
         }
     }
