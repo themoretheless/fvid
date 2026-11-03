@@ -1,0 +1,13 @@
+{
+  "accepted": false,
+  "registryAccepted": 543,
+  "targetedTestsPassed": 26,
+  "playerCheck": "passed",
+  "activeResearchSnapshot": "cf4c2f5ffad736ec53ff233ed2ce871e2053fe63",
+  "preservedStashes": 4,
+  "activeBranchesNotMerged": [
+    "codex/aac-eld-ld-sbr-20261026",
+    "codex/aac-ep-srcpc-20261028"
+  ],
+  "qualificationRemaining": "native playback worker and final candidate qualification"
+}

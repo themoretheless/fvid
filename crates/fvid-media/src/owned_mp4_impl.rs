@@ -1577,6 +1577,15 @@ fn lpcm_v2_entry(data: &[u8], result: &mut Track) -> Result<Option<usize>> {
     Ok(Some(structure))
 }
 
+// Called only after audio_entry has admitted the version0/1 common fields.
+fn audio_extensions_at(data: &[u8]) -> Result<usize> {
+    let at = 28 + usize::from(u16be(data, 8)? == 1) * 16;
+    if data.len() < at {
+        return Err(invalid("truncated version-1 MP4 audio sample description"));
+    }
+    Ok(at)
+}
+
 fn audio_entry(data: &[u8], result: &mut Track) -> Result<bool> {
     if u16be(data, 8)? > 1 {
         return Ok(false);
@@ -2020,14 +2029,15 @@ fn parse_sample_entry(entry: Atom<'_>, mut result: Track, refused: &mut Vec<Skip
             if !audio_entry(entry.data, &mut result)? {
                 return Ok(None);
             }
-            (28, Some(b"alac"))
+            (audio_extensions_at(entry.data)?, Some(b"alac"))
         }
         // E-AC-3 dec3 carries a stable per-programme union of dependent
         // speaker locations. Retain it even when packet zero uses fewer roles.
         // Older writers without dec3 retain packet-probed playback.
         (b"soun", b"ec-3") => {
             if !audio_entry(entry.data, &mut result)? { return Ok(None); }
-            let children = atoms(entry.data.get(28..).unwrap_or_default())?;
+            let at = audio_extensions_at(entry.data)?;
+            let children = atoms(&entry.data[at..])?;
             if let Some(config) = optional(&children, b"dec3")? {
                 result.configuration = config.to_vec();
             }

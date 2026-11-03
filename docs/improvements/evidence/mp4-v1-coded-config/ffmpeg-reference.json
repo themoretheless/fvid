@@ -1,0 +1,160 @@
+{
+  "version": "ffmpeg version 9.0.2 Copyright (c) 2000-2026 the FFmpeg developers",
+  "binary": "/opt/homebrew/opt/ffmpeg-full/bin/ffmpeg",
+  "cases": [
+    {
+      "file": "alac-t8000-v1-packet-fields.mov",
+      "control": "alac-t8000-v0.mov",
+      "input_sha256": "154c97344c705d2238ed258e2c4aa82d6dfacec999e207af61ea09d05c6dbb08",
+      "returncode": 0,
+      "control_returncode": 0,
+      "exact": true,
+      "bytes": 1920,
+      "expected_bytes": 1920,
+      "stderr": ""
+    },
+    {
+      "file": "alac-t8000-v1-unspecified-fields.mov",
+      "control": "alac-t8000-v0.mov",
+      "input_sha256": "851f2c75237b85d899c57aa4f0291cbaeb006003fd0c9b62bdc0e9e7d69ae5b0",
+      "returncode": 0,
+      "control_returncode": 0,
+      "exact": true,
+      "bytes": 1920,
+      "expected_bytes": 1920,
+      "stderr": ""
+    },
+    {
+      "file": "alac-t1000-v1-packet-fields.mov",
+      "control": "alac-t1000-v0.mov",
+      "input_sha256": "be9df80100ffc7595da548b226fd617ff3ae7f6a205e5874e0fbf7a03b1690da",
+      "returncode": 0,
+      "control_returncode": 0,
+      "exact": true,
+      "bytes": 1920,
+      "expected_bytes": 1920,
+      "stderr": ""
+    },
+    {
+      "file": "alac-t1000-v1-unspecified-fields.mov",
+      "control": "alac-t1000-v0.mov",
+      "input_sha256": "751fd4e7f38bd25b49c3f9097bdfc407564bfe07bc9f97a73d49f94f847a8ae0",
+      "returncode": 0,
+      "control_returncode": 0,
+      "exact": true,
+      "bytes": 1920,
+      "expected_bytes": 1920,
+      "stderr": ""
+    },
+    {
+      "file": "alac-t48000-v1-packet-fields.mov",
+      "control": "alac-t48000-v0.mov",
+      "input_sha256": "a27f31193384bcbea281763f9bec376b207f14ac254ad9179b67914bbca4cc56",
+      "returncode": 0,
+      "control_returncode": 0,
+      "exact": true,
+      "bytes": 1920,
+      "expected_bytes": 1920,
+      "stderr": ""
+    },
+    {
+      "file": "alac-t48000-v1-unspecified-fields.mov",
+      "control": "alac-t48000-v0.mov",
+      "input_sha256": "1c5498968b7df81439797605f6a22b094cb921f1612278b9ecc51f93a04dac3b",
+      "returncode": 0,
+      "control_returncode": 0,
+      "exact": true,
+      "bytes": 1920,
+      "expected_bytes": 1920,
+      "stderr": ""
+    },
+    {
+      "file": "ec3-t48000-dec3-v1-packet-fields.mov",
+      "control": "ec3-t48000-dec3-v0.mov",
+      "input_sha256": "11b88dff46b09f36122a6db01a8064add8faefaa5e0bcaa0afb904810a921f15",
+      "returncode": 0,
+      "control_returncode": 0,
+      "exact": true,
+      "bytes": 36864,
+      "expected_bytes": 36864,
+      "stderr": ""
+    },
+    {
+      "file": "ec3-t48000-dec3-v1-unspecified-fields.mov",
+      "control": "ec3-t48000-dec3-v0.mov",
+      "input_sha256": "bb193372d2eb2fa80b227f846c3aa27dba859879e916a483eb3cf5aa28160cd3",
+      "returncode": 0,
+      "control_returncode": 0,
+      "exact": true,
+      "bytes": 36864,
+      "expected_bytes": 36864,
+      "stderr": ""
+    },
+    {
+      "file": "ec3-t48000-packet-probe-v1-packet-fields.mov",
+      "control": "ec3-t48000-packet-probe-v0.mov",
+      "input_sha256": "05422bdb0da6d7651119ff1153fa2e2f20ae68b37ed0237506f2b2a9dfcd7068",
+      "returncode": 0,
+      "control_returncode": 0,
+      "exact": true,
+      "bytes": 36864,
+      "expected_bytes": 36864,
+      "stderr": ""
+    },
+    {
+      "file": "ec3-t48000-packet-probe-v1-unspecified-fields.mov",
+      "control": "ec3-t48000-packet-probe-v0.mov",
+      "input_sha256": "eb6e9d88cf7f37f557b742919708a57e3207cab8565f5204fc6d7cf430383123",
+      "returncode": 0,
+      "control_returncode": 0,
+      "exact": true,
+      "bytes": 36864,
+      "expected_bytes": 36864,
+      "stderr": ""
+    },
+    {
+      "file": "ec3-t1000-dec3-v1-packet-fields.mov",
+      "control": "ec3-t1000-dec3-v0.mov",
+      "input_sha256": "5b5be6bc8c0ad6d7822ed03f2ec6fcec4428179e4f92d766ed675fc1c86498b7",
+      "returncode": 0,
+      "control_returncode": 0,
+      "exact": true,
+      "bytes": 36864,
+      "expected_bytes": 36864,
+      "stderr": ""
+    },
+    {
+      "file": "ec3-t1000-dec3-v1-unspecified-fields.mov",
+      "control": "ec3-t1000-dec3-v0.mov",
+      "input_sha256": "c3a7acba725e77b4e386df0181f92c2ecab9636869ab3b337d4f704504baa4e1",
+      "returncode": 0,
+      "control_returncode": 0,
+      "exact": true,
+      "bytes": 36864,
+      "expected_bytes": 36864,
+      "stderr": ""
+    },
+    {
+      "file": "ec3-t1000-packet-probe-v1-packet-fields.mov",
+      "control": "ec3-t1000-packet-probe-v0.mov",
+      "input_sha256": "89e7a0c9d5188e9c7866b8b40d957a232cee77bafe985759b03ac355aa8428b9",
+      "returncode": 0,
+      "control_returncode": 0,
+      "exact": true,
+      "bytes": 36864,
+      "expected_bytes": 36864,
+      "stderr": ""
+    },
+    {
+      "file": "ec3-t1000-packet-probe-v1-unspecified-fields.mov",
+      "control": "ec3-t1000-packet-probe-v0.mov",
+      "input_sha256": "24d1a3d4803577efdce6f6ae00c2d3de9cf6c676d3ba8753a756e3f7b48dbfe8",
+      "returncode": 0,
+      "control_returncode": 0,
+      "exact": true,
+      "bytes": 36864,
+      "expected_bytes": 36864,
+      "stderr": ""
+    }
+  ]
+}

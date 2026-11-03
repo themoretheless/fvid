@@ -1,0 +1,16 @@
+{
+  "base": "a53758a846dc8c38714a441f04f53fd1fb9a63de",
+  "passed": 1,
+  "failed": 2,
+  "version1_failures": 12,
+  "open_failures": 10,
+  "missing_dec3": 2,
+  "newly_rejected_short_files": 1,
+  "log": "docs/improvements/evidence/mp4-v1-coded-config/before.log",
+  "source": "docs/improvements/evidence/mp4-v1-coded-config/baseline-source.json",
+  "authoring_diagnostics": [
+    "api-authoring.log",
+    "factory-authoring.log",
+    "raw-priming-authoring.log"
+  ]
+}

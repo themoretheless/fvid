@@ -1,0 +1,192 @@
+{
+  "provenance": "Authored60ms mono raw-ALAC ramps and96ms stereo EAC3 spectra with three coded packets, neutral VP9 pictures, QT brand, v0/v1 header-only companions. Correct configuration bytes unchanged after the required16-byte version1 extension. No private media, encoder or network.",
+  "cases": [
+    {
+      "file": "alac-t8000-v1-packet-fields.mov",
+      "control": "alac-t8000-v0.mov",
+      "codec": "alac",
+      "frames": 480,
+      "rate": 8000,
+      "channels": 1,
+      "config": "alac"
+    },
+    {
+      "file": "alac-t8000-v1-unspecified-fields.mov",
+      "control": "alac-t8000-v0.mov",
+      "codec": "alac",
+      "frames": 480,
+      "rate": 8000,
+      "channels": 1,
+      "config": "alac"
+    },
+    {
+      "file": "alac-t1000-v1-packet-fields.mov",
+      "control": "alac-t1000-v0.mov",
+      "codec": "alac",
+      "frames": 480,
+      "rate": 8000,
+      "channels": 1,
+      "config": "alac"
+    },
+    {
+      "file": "alac-t1000-v1-unspecified-fields.mov",
+      "control": "alac-t1000-v0.mov",
+      "codec": "alac",
+      "frames": 480,
+      "rate": 8000,
+      "channels": 1,
+      "config": "alac"
+    },
+    {
+      "file": "alac-t48000-v1-packet-fields.mov",
+      "control": "alac-t48000-v0.mov",
+      "codec": "alac",
+      "frames": 480,
+      "rate": 8000,
+      "channels": 1,
+      "config": "alac"
+    },
+    {
+      "file": "alac-t48000-v1-unspecified-fields.mov",
+      "control": "alac-t48000-v0.mov",
+      "codec": "alac",
+      "frames": 480,
+      "rate": 8000,
+      "channels": 1,
+      "config": "alac"
+    },
+    {
+      "file": "ec3-t48000-dec3-v1-packet-fields.mov",
+      "control": "ec3-t48000-dec3-v0.mov",
+      "codec": "ec-3",
+      "frames": 4608,
+      "rate": 48000,
+      "channels": 2,
+      "config": "dec3"
+    },
+    {
+      "file": "ec3-t48000-dec3-v1-unspecified-fields.mov",
+      "control": "ec3-t48000-dec3-v0.mov",
+      "codec": "ec-3",
+      "frames": 4608,
+      "rate": 48000,
+      "channels": 2,
+      "config": "dec3"
+    },
+    {
+      "file": "ec3-t48000-packet-probe-v1-packet-fields.mov",
+      "control": "ec3-t48000-packet-probe-v0.mov",
+      "codec": "ec-3",
+      "frames": 4608,
+      "rate": 48000,
+      "channels": 2,
+      "config": "none"
+    },
+    {
+      "file": "ec3-t48000-packet-probe-v1-unspecified-fields.mov",
+      "control": "ec3-t48000-packet-probe-v0.mov",
+      "codec": "ec-3",
+      "frames": 4608,
+      "rate": 48000,
+      "channels": 2,
+      "config": "none"
+    },
+    {
+      "file": "ec3-t1000-dec3-v1-packet-fields.mov",
+      "control": "ec3-t1000-dec3-v0.mov",
+      "codec": "ec-3",
+      "frames": 4608,
+      "rate": 48000,
+      "channels": 2,
+      "config": "dec3"
+    },
+    {
+      "file": "ec3-t1000-dec3-v1-unspecified-fields.mov",
+      "control": "ec3-t1000-dec3-v0.mov",
+      "codec": "ec-3",
+      "frames": 4608,
+      "rate": 48000,
+      "channels": 2,
+      "config": "dec3"
+    },
+    {
+      "file": "ec3-t1000-packet-probe-v1-packet-fields.mov",
+      "control": "ec3-t1000-packet-probe-v0.mov",
+      "codec": "ec-3",
+      "frames": 4608,
+      "rate": 48000,
+      "channels": 2,
+      "config": "none"
+    },
+    {
+      "file": "ec3-t1000-packet-probe-v1-unspecified-fields.mov",
+      "control": "ec3-t1000-packet-probe-v0.mov",
+      "codec": "ec-3",
+      "frames": 4608,
+      "rate": 48000,
+      "channels": 2,
+      "config": "none"
+    }
+  ],
+  "controls": [
+    {
+      "file": "alac-t8000-v0.mov",
+      "codec": "alac",
+      "frames": 480,
+      "rate": 8000,
+      "channels": 1
+    },
+    {
+      "file": "alac-t1000-v0.mov",
+      "codec": "alac",
+      "frames": 480,
+      "rate": 8000,
+      "channels": 1
+    },
+    {
+      "file": "alac-t48000-v0.mov",
+      "codec": "alac",
+      "frames": 480,
+      "rate": 8000,
+      "channels": 1
+    },
+    {
+      "file": "ec3-t48000-dec3-v0.mov",
+      "codec": "ec-3",
+      "frames": 4608,
+      "rate": 48000,
+      "channels": 2
+    },
+    {
+      "file": "ec3-t48000-packet-probe-v0.mov",
+      "codec": "ec-3",
+      "frames": 4608,
+      "rate": 48000,
+      "channels": 2
+    },
+    {
+      "file": "ec3-t1000-dec3-v0.mov",
+      "codec": "ec-3",
+      "frames": 4608,
+      "rate": 48000,
+      "channels": 2
+    },
+    {
+      "file": "ec3-t1000-packet-probe-v0.mov",
+      "codec": "ec-3",
+      "frames": 4608,
+      "rate": 48000,
+      "channels": 2
+    }
+  ],
+  "bad": [
+    "alac-t8000-short28.mov",
+    "alac-t8000-short32.mov",
+    "alac-t8000-short40.mov",
+    "alac-t8000-short43.mov",
+    "ec3-t48000-dec3-short28.mov",
+    "ec3-t48000-dec3-short32.mov",
+    "ec3-t48000-dec3-short40.mov",
+    "ec3-t48000-dec3-short43.mov"
+  ]
+}
