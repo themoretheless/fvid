@@ -110,8 +110,13 @@
   "frozen_source": "docs/improvements/evidence/mp4-uniform-seek-width/candidate-source.json",
   "limitations": [
     "Actual wasm32 execution is under Node on macOS, not a physical32-bit audio device or browser UI",
-    "Windows is cross-checked, not executed; remote CI completion is not claimed",
+    "Windows is cross-checked, not executed; whole CI completion is not claimed; the dedicated remote wasm32 job passed",
     "The errno catalog selection is a recorded zero-count build prerequisite, not a second accepted ID",
     "The64-bit native stand already passes before the fix; only actual32-bit baseline failures establish the defect"
+  ],
+  "remote_wasm_ci": "docs/improvements/evidence/mp4-uniform-seek-width/remote-ci.json",
+  "zero_count_integration_followups": [
+    "docs/improvements/evidence/camera-locked-graph/validation.json",
+    "docs/improvements/evidence/aac-main-ps-feature-guard/validation.json"
   ]
 }

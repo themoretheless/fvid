@@ -117,7 +117,7 @@ fn ssr_ps_native_and_bridge_preserve_two_delays_signed_timing_and_replay() {
         let n = case["container_frame_samples"].as_u64().unwrap();
         let mut native = NativePsAacDecoder::new(&asc).unwrap();
         let mut bridge =
-            PsAacDecoder::new(&fvid::playback_aac::esds_for(&asc).unwrap(), rate, 2).unwrap();
+            PsAacDecoder::new(&fvid::container::adts::esds_for(&asc).unwrap(), rate, 2).unwrap();
         let mut pcm = vec![];
         for (i, packet) in packets(case).iter().enumerate() {
             let saved = native.checkpoint();
@@ -196,8 +196,12 @@ fn ssr_ps_native_and_bridge_preserve_two_delays_signed_timing_and_replay() {
 
 #[test]
 fn ssr_ps_mp4_matroska_adts_ranges_rewind_seek_and_both_eof_frames_accept() {
+    #[cfg(feature = "player")]
     use fvid::audio::AudioStream;
-    use std::{io::Cursor, time::Duration};
+    #[cfg(feature = "player")]
+    use std::io::Cursor;
+    use std::time::Duration;
+    #[cfg(feature = "player")]
     fn play(stream: &mut dyn AudioStream) -> Vec<u8> {
         let mut decoder = stream.make_decoder().unwrap();
         let mut out = vec![];
@@ -211,7 +215,18 @@ fn ssr_ps_mp4_matroska_adts_ranges_rewind_seek_and_both_eof_frames_accept() {
                     out.extend(p.data);
                     continue;
                 }
-                Some(AudioStep::ReconfigureDecoder) => panic!("unexpected configuration change in constant-setup fixture"),
+                Some(AudioStep::ReconfigureDecoder) => {
+                    let setup = (stream.codec().to_owned(), stream.sample_rate(), stream.channels(), stream.extra_data().to_vec());
+                    while let Some(frame) = decoder.finish_packet().unwrap() {
+                        if let Some(pcm) = stream.present_decoded(frame.packet, frame.source_pts).unwrap() {
+                            out.extend(pcm.data);
+                        }
+                    }
+                    stream.advance_configuration().unwrap();
+                    assert_eq!(setup, (stream.codec().to_owned(), stream.sample_rate(), stream.channels(), stream.extra_data().to_vec()), "edit boundary changed the constant codec setup");
+                    decoder = stream.make_decoder().unwrap();
+                    continue;
+                },
                 Some(AudioStep::ResetDecoder) => {
                     decoder.reset();
                     continue;
@@ -255,14 +270,17 @@ fn ssr_ps_mp4_matroska_adts_ranges_rewind_seek_and_both_eof_frames_accept() {
             fvid::native_media::decode_mp4_aac_pcm_interval(&bytes, &mut range, interval).unwrap();
             assert_eq!(range, full[a..b]);
         }
-        let mut stream =
-            fvid::playback_mp4_audio::Mp4AudioReader::open(Cursor::new(&bytes), Default::default())
-                .unwrap();
-        assert_eq!(play(&mut stream), full);
-        stream.rewind();
-        assert_eq!(play(&mut stream), full);
-        let landed = stream.seek_to((rate / 10) as i64);
-        assert_eq!(play(&mut stream), full[landed as usize * 8..]);
+        #[cfg(feature = "player")]
+        {
+            let mut stream =
+                fvid::playback_mp4_audio::Mp4AudioReader::open(Cursor::new(&bytes), Default::default())
+                    .unwrap();
+            assert_eq!(play(&mut stream), full);
+            stream.rewind();
+            assert_eq!(play(&mut stream), full);
+            let landed = stream.seek_to((rate / 10) as i64);
+            assert_eq!(play(&mut stream), full[landed as usize * 8..]);
+        }
         let edited = artifact(case["edited"].as_str().unwrap());
         let silence = vec![0u8; rate as usize / 30 * 8];
         let from = rate as usize / 50 * 8;
@@ -277,16 +295,19 @@ fn ssr_ps_mp4_matroska_adts_ranges_rewind_seek_and_both_eof_frames_accept() {
         let mut decoded = vec![];
         fvid::native_media::decode_mp4_aac_pcm(&edited, &mut decoded).unwrap();
         assert_eq!(decoded, expected);
-        let mut stream = fvid::playback_mp4_audio::Mp4AudioReader::open(
-            Cursor::new(&edited),
-            Default::default(),
-        )
-        .unwrap();
-        assert_eq!(play(&mut stream), expected);
-        stream.rewind();
-        assert_eq!(play(&mut stream), expected);
-        let landed = stream.seek_to((rate / 10) as i64);
-        assert_eq!(play(&mut stream), expected[landed as usize * 8..]);
+        #[cfg(feature = "player")]
+        {
+            let mut stream = fvid::playback_mp4_audio::Mp4AudioReader::open(
+                Cursor::new(&edited),
+                Default::default(),
+            )
+            .unwrap();
+            assert_eq!(play(&mut stream), expected);
+            stream.rewind();
+            assert_eq!(play(&mut stream), expected);
+            let landed = stream.seek_to((rate / 10) as i64);
+            assert_eq!(play(&mut stream), expected[landed as usize * 8..]);
+        }
         let mka = artifact(case["matroska"].as_str().unwrap());
         let mut decoded = vec![];
         fvid::native_media::decode_matroska_aac_pcm_interval(&mka, &mut decoded, None).unwrap();
@@ -308,12 +329,15 @@ fn ssr_ps_mp4_matroska_adts_ranges_rewind_seek_and_both_eof_frames_accept() {
         let mut decoded = vec![];
         fvid::native_media::decode_aac_pcm(&bytes, &mut decoded, &Default::default()).unwrap();
         assert_eq!(decoded, full);
-        let mut stream =
-            fvid::playback_aac::AacAudioReader::open(Cursor::new(&bytes), Default::default())
-                .unwrap();
-        assert_eq!((stream.sample_rate(), stream.channels()), (48000, 2));
-        assert_eq!(play(&mut stream), full);
-        stream.rewind();
-        assert_eq!(play(&mut stream), full);
+        #[cfg(feature = "player")]
+        {
+            let mut stream =
+                fvid::playback_aac::AacAudioReader::open(Cursor::new(&bytes), Default::default())
+                    .unwrap();
+            assert_eq!((stream.sample_rate(), stream.channels()), (48000, 2));
+            assert_eq!(play(&mut stream), full);
+            stream.rewind();
+            assert_eq!(play(&mut stream), full);
+        }
     }
 }

@@ -106,7 +106,9 @@ fn hcr_public_mp4_acceptance_matches_owned_pcm() {
     }
 }
 
+#[cfg(feature = "player")]
 use fvid::audio::AudioStream;
+#[cfg(feature = "player")]
 fn play(reader: &mut dyn AudioStream) -> Vec<u8> {
     let mut decoder = reader.make_decoder().unwrap();
     let mut output = Vec::new();
@@ -137,7 +139,9 @@ fn play(reader: &mut dyn AudioStream) -> Vec<u8> {
 
 #[test]
 fn hcr_player_ranges_rewind_seek_preserve_pcm_and_channels() {
-    use std::{io::Cursor, time::Duration};
+    #[cfg(feature = "player")]
+    use std::io::Cursor;
+    use std::time::Duration;
     for c in manifest()["cases"].as_array().unwrap() {
         let data = bytes(c["video"]["file"].as_str().unwrap());
         let mut full = vec![];
@@ -156,19 +160,22 @@ fn hcr_player_ranges_rewind_seek_preserve_pcm_and_channels() {
                 full[from as usize * 24 * stride..to as usize * 24 * stride]
             );
         }
-        let mut reader =
-            fvid::playback_mp4_audio::Mp4AudioReader::open(Cursor::new(&data), Default::default())
-                .unwrap();
-        assert_eq!(
-            (reader.channels(), reader.sample_rate()),
-            (c["channels"].as_u64().unwrap() as u16, 24000)
-        );
-        assert_eq!(play(&mut reader), full);
-        reader.rewind();
-        assert_eq!(play(&mut reader), full);
-        for target in [1100, 5800, 9000, (full.len() / stride) as i64] {
-            let landed = reader.seek_to(target);
-            assert_eq!(play(&mut reader), full[landed as usize * stride..]);
+        #[cfg(feature = "player")]
+        {
+            let mut reader =
+                fvid::playback_mp4_audio::Mp4AudioReader::open(Cursor::new(&data), Default::default())
+                    .unwrap();
+            assert_eq!(
+                (reader.channels(), reader.sample_rate()),
+                (c["channels"].as_u64().unwrap() as u16, 24000)
+            );
+            assert_eq!(play(&mut reader), full);
+            reader.rewind();
+            assert_eq!(play(&mut reader), full);
+            for target in [1100, 5800, 9000, (full.len() / stride) as i64] {
+                let landed = reader.seek_to(target);
+                assert_eq!(play(&mut reader), full[landed as usize * stride..]);
+            }
         }
     }
 }

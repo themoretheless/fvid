@@ -1,0 +1,243 @@
+{
+  "files": [
+    {
+      "file": "tests/aac_er_lc.rs",
+      "tests": 5,
+      "assertionLines": 19,
+      "beforeSha256": "d45ea99b7526905238d09bf60a6784a955ca7c5b46c6831ededb2eb853ce23ee",
+      "afterSha256": "7a0321a8e5d8dfa9e04a691e008cc3e848b56816a5422ccc1e4de8a4dc101846",
+      "additionalAssertionLines": 0
+    },
+    {
+      "file": "tests/aac_er_ltp.rs",
+      "tests": 5,
+      "assertionLines": 25,
+      "beforeSha256": "c4ca7c222ba5dddc0649c5a6a3ce62572613c8f5e3573180482a2dc5639b48be",
+      "afterSha256": "692f4bd95f3922317a087c4badab1f694f6b44b56d22d3e7929a6b6816f6ec7c",
+      "additionalAssertionLines": 0
+    },
+    {
+      "file": "tests/aac_er_ltp_resilient.rs",
+      "tests": 6,
+      "assertionLines": 44,
+      "beforeSha256": "2b4d10f095f3aa8c4c193925fecbf61d80164f9eff065cbc351868806da9688c",
+      "afterSha256": "91eeb42a9fd7f047c37e1c180cb9c6eeff79d106ff3e9793e26b439982d3f82b",
+      "additionalAssertionLines": 0
+    },
+    {
+      "file": "tests/aac_er_ps.rs",
+      "tests": 1,
+      "assertionLines": 18,
+      "beforeSha256": "7953a1ca060773bec243656df484e61c8a2da38e98513b273faace04b8c1db45",
+      "afterSha256": "a599384891b229d64eab0dfee8afc3627da5949a130416df7f1cb5b0f78d5978",
+      "additionalAssertionLines": 0
+    },
+    {
+      "file": "tests/aac_er_sections.rs",
+      "tests": 4,
+      "assertionLines": 20,
+      "beforeSha256": "cb2b344250517110da97b77d88d1c4fae705b771d80d6c55a2c2cee3995db7b8",
+      "afterSha256": "48d472cd879f7719c9ca12938519214514c4b3ade1d9fecaa209c2f03ef2bd31",
+      "additionalAssertionLines": 0
+    },
+    {
+      "file": "tests/aac_hcr.rs",
+      "tests": 5,
+      "assertionLines": 27,
+      "beforeSha256": "26482a6b24c3d24f278dccbd4a088e80187fa090392bde99737988a526cd36a5",
+      "afterSha256": "7aa13a8a34fe295e73be27e7d5bfece009302689f1d38f337cf7eda16c596b3f",
+      "additionalAssertionLines": 0
+    },
+    {
+      "file": "tests/aac_ltp_ps_960.rs",
+      "tests": 4,
+      "assertionLines": 22,
+      "beforeSha256": "bcf6780f579a702a26a867235b9f30df88e19e0118b7628834ef9576c6a01493",
+      "afterSha256": "7b2c7bd3452aba564d7f3326d4a993de3482109698ca0a9384d91cd996ab1c87",
+      "additionalAssertionLines": 0
+    },
+    {
+      "file": "tests/aac_ltp_ps_adts_player.rs",
+      "tests": 2,
+      "assertionLines": 5,
+      "beforeSha256": "23192cbd574d87080c7ff77277f794ae070fc4a3fb71b5ef27a37d62c00c4d32",
+      "afterSha256": "f81f1434ae3623f63f91315530465105150530eb759969f5af11f8e23c552ded",
+      "additionalAssertionLines": 0
+    },
+    {
+      "file": "tests/aac_ltp_ps_independent.rs",
+      "tests": 6,
+      "assertionLines": 23,
+      "beforeSha256": "c6ea0d730f88e11387e4565abb6a34e1e5154eb9e9b1899e56f8f30e1ff7c304",
+      "afterSha256": "902d3937786bdbd4a4dc0adbdbcb1ce374b98fc7c56e22ed056f70d9497022c4",
+      "additionalAssertionLines": 0
+    },
+    {
+      "file": "tests/aac_main_ps.rs",
+      "tests": 3,
+      "assertionLines": 15,
+      "beforeSha256": "653de876e29f31b14c27c9dbea1807ff752b7a125827f36fec64ddf1d16c4a4f",
+      "afterSha256": "be14ce6208ec52002ac30bbc5ad35b2079656537c3d26d1ff7db94c0c052427e",
+      "additionalAssertionLines": 0
+    },
+    {
+      "file": "tests/aac_main_ps_adts.rs",
+      "tests": 3,
+      "assertionLines": 15,
+      "beforeSha256": "783e1b1cc23dfc75c11ab71c7ba371fdfe736f433dde4399ff8bb002cd7cbff0",
+      "afterSha256": "64b7a3694d33a0ca330ac821daba5408b812174b12b71755982fd049fa73ff4b",
+      "additionalAssertionLines": 0
+    },
+    {
+      "file": "tests/aac_main_ps_cce.rs",
+      "tests": 5,
+      "assertionLines": 20,
+      "beforeSha256": "3cc37eee1445e3f0b08bf87c385711c4d913d7691559e12dcc5b8abc5ebcdf97",
+      "afterSha256": "6e7a0b2b900f371107599900622e87d878c96ac22d609b28ddf2e8655bfac1c8",
+      "additionalAssertionLines": 0
+    },
+    {
+      "file": "tests/aac_main_ps_dependent_pns.rs",
+      "tests": 4,
+      "assertionLines": 18,
+      "beforeSha256": "bf411eafc98ec7ed5001bea3e89b7671a35955da1e071462f6e878709c89870d",
+      "afterSha256": "8b79fd8fe44ec65944312749332414ebed29eabd7ea4de032e90261ab6b8ae96",
+      "additionalAssertionLines": 0
+    },
+    {
+      "file": "tests/aac_main_ps_dependent_pns_absence.rs",
+      "tests": 4,
+      "assertionLines": 18,
+      "beforeSha256": "48b1942bddadc590fa6c4bc246616c81426c288ae1085e4e172f7a1b496297b8",
+      "afterSha256": "9bbb6480a5614aa005b4bc73ce4233c94d2325a50d57725ed2de2b69c3245949",
+      "additionalAssertionLines": 0
+    },
+    {
+      "file": "tests/aac_main_ps_dependent_pns_all_groups.rs",
+      "tests": 4,
+      "assertionLines": 18,
+      "beforeSha256": "6332cb6b7ae1cc23464ae6151655b5bab785e96a3f41679e3d40460fa1de584c",
+      "afterSha256": "fe0d04f089c8fdbccce7cda581e9092d22127e7ad0a99c27bf625328a36a4cc8",
+      "additionalAssertionLines": 0
+    },
+    {
+      "file": "tests/aac_main_ps_dependent_pns_grouped.rs",
+      "tests": 4,
+      "assertionLines": 18,
+      "beforeSha256": "aa9a5b12d82782eb7552fb4ab88ce1a363b0236237ab5d775c13737d5724230d",
+      "afterSha256": "a8f59f03567531d9c077a0f1ebd4d519e595826721de45e15c7e3adfb36eeef3",
+      "additionalAssertionLines": 0
+    },
+    {
+      "file": "tests/aac_main_ps_dependent_pns_short.rs",
+      "tests": 4,
+      "assertionLines": 18,
+      "beforeSha256": "b76922f0668f3c3ec57f8d7f436a474fee874bc7d37a48bc3bd3bb157601e637",
+      "afterSha256": "f875880094ea6773c7cd5ede7821ffe674c25052569512dc86d6e00bebb6737d",
+      "additionalAssertionLines": 0
+    },
+    {
+      "file": "tests/aac_main_ps_dependent_pns_short_tns.rs",
+      "tests": 4,
+      "assertionLines": 18,
+      "beforeSha256": "966d2afe430d561fec2d5361e5a96ffc08e8988bf38b5d5df5db43bd46da473d",
+      "afterSha256": "b5104f8d2f77a72fdc41fc99f655f2ba7a2da672b828a87e2c83d940962207f8",
+      "additionalAssertionLines": 0
+    },
+    {
+      "file": "tests/aac_main_ps_dependent_pns_tns_orders.rs",
+      "tests": 5,
+      "assertionLines": 25,
+      "beforeSha256": "315d6d6cbf27468ff97a7c17dddded96e13adc1fd0215af51f1253cb1e913d5e",
+      "afterSha256": "8bb718a73f372dc0a653982c4b97c8994bfcc0cc2c53795303b922a9604913d3",
+      "additionalAssertionLines": 0
+    },
+    {
+      "file": "tests/aac_main_ps_independent.rs",
+      "tests": 6,
+      "assertionLines": 23,
+      "beforeSha256": "77b6d7ea79e839adfd741845882c42162f24aaa57f77b70d7972f0c8988370b0",
+      "afterSha256": "5864e0d1eec74bca410860342a4b25c74009c363f7547ad2b093e0a2006777a4",
+      "additionalAssertionLines": 0
+    },
+    {
+      "file": "tests/aac_main_ps_independent_tns.rs",
+      "tests": 7,
+      "assertionLines": 25,
+      "beforeSha256": "278241d313a0566a37ba887c58db78a173b1f50e3602a8b35341b24ec8ab92c6",
+      "afterSha256": "e1eb4ce12f440c49c87c6ed5928f02b8dca09d1cf393306e2d1405471e8a0850",
+      "additionalAssertionLines": 0
+    },
+    {
+      "file": "tests/aac_main_ps_pns.rs",
+      "tests": 6,
+      "assertionLines": 23,
+      "beforeSha256": "ef7c3bd175feb1870906bca0adfc5b69f0ba9f408282d252c67c0980b782745c",
+      "afterSha256": "d32c047afb471bb5975ddb9a0e6e12f79c3ad0a8a7a2cd786b5d16277781a24c",
+      "additionalAssertionLines": 0
+    },
+    {
+      "file": "tests/aac_main_ps_pns_short.rs",
+      "tests": 6,
+      "assertionLines": 23,
+      "beforeSha256": "52a5e89e0ecfd3cf9132bbdda500d4af8c5e49b286ac391307f6aaa412af4902",
+      "afterSha256": "dbf7f0a6ccfd63d46e566b53f7def2db98c8a96551f4e9f8dbc3663a69ce1a3c",
+      "additionalAssertionLines": 0
+    },
+    {
+      "file": "tests/aac_pce_roster.rs",
+      "tests": 4,
+      "assertionLines": 22,
+      "beforeSha256": "3152bff4a4274b1e32f61d54ac2534fa35865c1ad9cfb0690a0b60dccd59ce5c",
+      "afterSha256": "6e77b197b0786d66561e412aa2ceed3aa8227f3265dd4ae91a3caeb37660bfec",
+      "additionalAssertionLines": 0
+    },
+    {
+      "file": "tests/aac_pce_roster_sbr.rs",
+      "tests": 4,
+      "assertionLines": 18,
+      "beforeSha256": "d9025043272a25d91d67332d6afbeff94f56d21fe53c58e13430202a9e26b699",
+      "afterSha256": "58deaf1b8833e09417a7bc77fada66218205c9a7048420aca62263ac8e1489ef",
+      "additionalAssertionLines": 0
+    },
+    {
+      "file": "tests/aac_rvlc.rs",
+      "tests": 4,
+      "assertionLines": 19,
+      "beforeSha256": "ac319d066c1fb2faa9f41f86ededaa478c82f6c877a4e372f225456ad294462a",
+      "afterSha256": "b8b6b5cefd9dd271a99dfdf3b9e0034a4109bfae3a827e60e6d33470cd1e8fc3",
+      "additionalAssertionLines": 0
+    },
+    {
+      "file": "tests/aac_ssr_ps.rs",
+      "tests": 5,
+      "assertionLines": 47,
+      "beforeSha256": "be9355bb2c36c8b92f55d2fa9197626ca786b4eacd1ab59ce73afb33a9efe27e",
+      "afterSha256": "feb03030cb17360055fb4391bee50cb93802159f2346ccd56428f108210bceee",
+      "additionalAssertionLines": 1
+    },
+    {
+      "file": "tests/aac_ssr_ps_coupling.rs",
+      "tests": 8,
+      "assertionLines": 37,
+      "beforeSha256": "5f57aa5ec9c56c23c8e185f19e3c878dfa05e26053e686811065feccf54139a5",
+      "afterSha256": "ce310a080b8ba69d428b9b83a77c40cb834267a19afc401dfe6536224dc68430",
+      "additionalAssertionLines": 0
+    },
+    {
+      "file": "tests/hevc_topology_transitions.rs",
+      "tests": 4,
+      "assertionLines": 26,
+      "beforeSha256": "cb76c2894a16b9f33edc3e4fcbf51d13b47ff6189fcf694bce5cd3443c03a1ec",
+      "afterSha256": "b4b45f3c3a2cbd009f30375db912dc187b9f00fd6786e201cf33ed1ae63597f7",
+      "additionalAssertionLines": 0
+    }
+  ],
+  "totalFiles": 29,
+  "totalTests": 132,
+  "allAssertionLinesRetained": true,
+  "noTestFunctionRemoved": true,
+  "noWholeTestCfgGatesAdded": true,
+  "noNewIgnoredTests": true,
+  "additionalAssertionLines": 1
+}

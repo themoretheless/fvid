@@ -187,6 +187,7 @@ fn automatic_entries_keep_the_owned_layered_owner_for_the_entire_source() {
             !mkv.hardware_accelerated(),
             "{name} Matroska topology needs the owned decoder"
         );
+        #[cfg(all(target_os = "macos", feature = "videotoolbox"))]
         assert!(!mp4.enable_shared_surfaces().unwrap());
         for layer in case["layers"].as_array().unwrap() {
             let layer = layer.as_u64().unwrap() as u8;

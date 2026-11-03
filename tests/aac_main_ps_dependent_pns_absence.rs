@@ -159,9 +159,13 @@ fn main_ps_distinct_cce_predictors_and_windows_acceptance() {
 
 #[test]
 fn main_ps_cce_probe_ranges_rewind_seek_keep_per_tag_prediction() {
+    #[cfg(feature = "player")]
     use fvid::audio::AudioStream;
     use fvid_media::owned_aac::aac_ps_native::InBandPsProbe;
-    use std::{io::Cursor, time::Duration};
+    #[cfg(feature = "player")]
+    use std::io::Cursor;
+    use std::time::Duration;
+    #[cfg(feature = "player")]
     fn play(s: &mut dyn AudioStream) -> Vec<u8> {
         let mut d = s.make_decoder().unwrap();
         let mut pcm = vec![];
@@ -207,14 +211,17 @@ fn main_ps_cce_probe_ranges_rewind_seek_keep_per_tag_prediction() {
         )
         .unwrap();
         assert_eq!(range, full[rate / 100 * 8..rate * 2 / 5 * 8]);
-        let mut s =
-            fvid::playback_mp4_audio::Mp4AudioReader::open(Cursor::new(data), Default::default())
-                .unwrap();
-        assert_eq!(play(&mut s), full);
-        s.rewind();
-        assert_eq!(play(&mut s), full);
-        let landed = s.seek_to((rate / 10) as i64);
-        assert_eq!(play(&mut s), full[landed as usize * 8..]);
+        #[cfg(feature = "player")]
+        {
+            let mut s =
+                fvid::playback_mp4_audio::Mp4AudioReader::open(Cursor::new(data), Default::default())
+                    .unwrap();
+            assert_eq!(play(&mut s), full);
+            s.rewind();
+            assert_eq!(play(&mut s), full);
+            let landed = s.seek_to((rate / 10) as i64);
+            assert_eq!(play(&mut s), full[landed as usize * 8..]);
+        }
     }
 }
 

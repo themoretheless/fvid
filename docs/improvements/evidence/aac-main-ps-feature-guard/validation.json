@@ -1,0 +1,72 @@
+{
+  "status": "verified",
+  "count_delta": 0,
+  "reason": "Baseline integration/test feature-matrix repairs, excluded by registry counting rule",
+  "matrix": {
+    "files": [
+      "tests/aac_er_lc.rs",
+      "tests/aac_er_ltp.rs",
+      "tests/aac_er_ltp_resilient.rs",
+      "tests/aac_er_ps.rs",
+      "tests/aac_er_sections.rs",
+      "tests/aac_hcr.rs",
+      "tests/aac_ltp_ps_960.rs",
+      "tests/aac_ltp_ps_adts_player.rs",
+      "tests/aac_ltp_ps_independent.rs",
+      "tests/aac_main_ps.rs",
+      "tests/aac_main_ps_adts.rs",
+      "tests/aac_main_ps_cce.rs",
+      "tests/aac_main_ps_dependent_pns.rs",
+      "tests/aac_main_ps_dependent_pns_absence.rs",
+      "tests/aac_main_ps_dependent_pns_all_groups.rs",
+      "tests/aac_main_ps_dependent_pns_grouped.rs",
+      "tests/aac_main_ps_dependent_pns_short.rs",
+      "tests/aac_main_ps_dependent_pns_short_tns.rs",
+      "tests/aac_main_ps_dependent_pns_tns_orders.rs",
+      "tests/aac_main_ps_independent.rs",
+      "tests/aac_main_ps_independent_tns.rs",
+      "tests/aac_main_ps_pns.rs",
+      "tests/aac_main_ps_pns_short.rs",
+      "tests/aac_pce_roster.rs",
+      "tests/aac_pce_roster_sbr.rs",
+      "tests/aac_rvlc.rs",
+      "tests/aac_ssr_ps.rs",
+      "tests/aac_ssr_ps_coupling.rs",
+      "tests/hevc_topology_transitions.rs"
+    ],
+    "core": {
+      "binaries": 29,
+      "passed": 132,
+      "ignored": 0,
+      "log": "docs/improvements/evidence/aac-main-ps-feature-guard/core-matrix.log"
+    },
+    "player": {
+      "binaries": 29,
+      "passed": 132,
+      "ignored": 0,
+      "unchangedSuccessfulBinaries": 26,
+      "partialLog": "docs/improvements/evidence/aac-main-ps-feature-guard/player-matrix.log",
+      "correctedAndRemainingBinaries": 3,
+      "resumeLog": "docs/improvements/evidence/aac-main-ps-feature-guard/player-matrix-resume.log"
+    },
+    "isolatedExecutions": 59,
+    "successfulFinalMatrixExecutions": 58,
+    "oldHelperFailureRetained": true,
+    "core_all_targets": "docs/improvements/evidence/aac-main-ps-feature-guard/core-all-targets-final.log",
+    "player_all_targets": "docs/improvements/evidence/aac-main-ps-feature-guard/player-all-targets.log"
+  },
+  "assertion_preservation": "docs/improvements/evidence/aac-main-ps-feature-guard/all-assertions-preserved.json",
+  "frozen_source": "docs/improvements/evidence/aac-main-ps-feature-guard/candidate-source.json",
+  "original_player_helper_failure": "docs/improvements/evidence/aac-main-ps-feature-guard/ssr-original-player.log",
+  "corrected_player_helper": "docs/improvements/evidence/aac-main-ps-feature-guard/ssr-edit-protocol.log",
+  "notes": [
+    "All132 test functions and original assertion lines retained; no new ignore or whole-test feature gate",
+    "One new assertion checks constant codec/rate/channels/configuration across natural edit signals",
+    "The failing helper is reproduced in original HEAD; exact PCM, both delayed tails, rewind and seek expectations remain unchanged",
+    "The26 unchanged successful player binaries are retained; corrected SSR and remaining2 binaries are requalified separately",
+    "All264 final mode-specific tests run through the recorded no-external-media-tool runner"
+  ],
+  "limitations": [
+    "Local matrix is macOS core/player; full remote Linux/Windows CI must be observed on the follow-up commit"
+  ]
+}

@@ -1,0 +1,19 @@
+{
+  "qualificationCommit": "34f931ca6f0b210ba0462f6f8ec0196f008a65a9",
+  "verifiedRemoteRefs": [
+    "34f931ca6f0b210ba0462f6f8ec0196f008a65a9\trefs/heads/codex/deliver-fvid-20261029",
+    "34f931ca6f0b210ba0462f6f8ec0196f008a65a9\trefs/heads/main"
+  ],
+  "wasmCiJob": "https://github.com/themoretheless/fvid/actions/runs/41595722878/job/125782497881",
+  "wasmCiConclusion": "success",
+  "acceptedCount": 546,
+  "nextId": "FVID-0547",
+  "zeroCountFollowups": [
+    "camera locked graph",
+    "core/player/platform test matrix"
+  ],
+  "followupModeSpecificTestsPassed": 264,
+  "ownedTargetsRemoved": true,
+  "regressionsAndEvidenceRetained": true,
+  "parallelWorkAndFourStashesUntouched": true
+}

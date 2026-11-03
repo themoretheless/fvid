@@ -1,0 +1,20 @@
+{
+  "base": "34f931ca6f0b210ba0462f6f8ec0196f008a65a9",
+  "beforeSha256": "9b0cf1cde5da54f3a1ccdc8e8d8ddb508451f9ec7e3a84f4456ae08b5a6a0185",
+  "afterSha256": "e43c068f510bd4da7458ab1ab6b371ad644e310ff920b377d94f35118618ac34",
+  "existingPackagesUnchanged": 25,
+  "added": [
+    [
+      "adler2",
+      "2.0.1"
+    ],
+    [
+      "miniz_oxide",
+      "0.8.9"
+    ]
+  ],
+  "changedDependencyEdge": "fvid-media -> miniz_oxide",
+  "existingVersionsAndChecksumsPreserved": true,
+  "lockedCiGateUnchanged": true,
+  "remoteBeforeJob": "https://github.com/themoretheless/fvid/actions/runs/41594038994/job/125777099657"
+}

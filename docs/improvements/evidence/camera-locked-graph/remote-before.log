@@ -1,0 +1,3 @@
+2026-11-03T07:07:36.7257207Z ##[group]Run cargo check --locked --manifest-path crates/fvid-camera-ffi/Cargo.toml
+2026-11-03T07:07:37.0066369Z error: cannot update the lock file /home/runner/work/fvid/fvid/crates/fvid-camera-ffi/Cargo.lock because --locked was passed to prevent this
+2026-11-03T07:07:37.0092997Z ##[error]Process completed with exit code 101.

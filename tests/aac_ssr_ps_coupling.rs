@@ -290,8 +290,12 @@ fn invalid_ssr_ps_cce_packets_reproduce_exact_errors_and_preserve_queued_pcm() {
 
 #[test]
 fn ssr_ps_cce_ranges_rewind_seek_and_doubly_delayed_eof_preserve_pcm() {
+    #[cfg(feature = "player")]
     use fvid::audio::AudioStream;
-    use std::{io::Cursor, time::Duration};
+    #[cfg(feature = "player")]
+    use std::io::Cursor;
+    use std::time::Duration;
+    #[cfg(feature = "player")]
     fn play(stream: &mut dyn AudioStream) -> Vec<u8> {
         let mut d = stream.make_decoder().unwrap();
         let mut pcm = vec![];
@@ -326,14 +330,17 @@ fn ssr_ps_cce_ranges_rewind_seek_and_doubly_delayed_eof_preserve_pcm() {
             fvid::native_media::decode_mp4_aac_pcm_interval(&data, &mut range, interval).unwrap();
             assert_eq!(range, full[rate as usize / 100 * 8..rate as usize / 5 * 8]);
         }
-        let mut stream =
-            fvid::playback_mp4_audio::Mp4AudioReader::open(Cursor::new(&data), Default::default())
-                .unwrap();
-        assert_eq!(play(&mut stream), full);
-        stream.rewind();
-        assert_eq!(play(&mut stream), full);
-        let landed = stream.seek_to((rate / 10) as i64);
-        assert_eq!(play(&mut stream), full[landed as usize * 8..]);
+        #[cfg(feature = "player")]
+        {
+            let mut stream =
+                fvid::playback_mp4_audio::Mp4AudioReader::open(Cursor::new(&data), Default::default())
+                    .unwrap();
+            assert_eq!(play(&mut stream), full);
+            stream.rewind();
+            assert_eq!(play(&mut stream), full);
+            let landed = stream.seek_to((rate / 10) as i64);
+            assert_eq!(play(&mut stream), full[landed as usize * 8..]);
+        }
     }
 }
 

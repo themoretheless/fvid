@@ -72,8 +72,12 @@ fn reference_stereo(c: &Value, core_file: &str) -> Vec<f32> {
 
 #[test]
 fn er_aac_ps_native_mp4_and_matroska_acceptance() {
+    #[cfg(feature = "player")]
     use fvid::audio::AudioStream;
-    use std::{io::Cursor, time::Duration};
+    #[cfg(feature = "player")]
+    use std::io::Cursor;
+    use std::time::Duration;
+    #[cfg(feature = "player")]
     fn play(stream: &mut dyn AudioStream) -> Vec<u8> {
         let mut decoder = stream.make_decoder().unwrap();
         let mut out = vec![];
@@ -195,16 +199,19 @@ fn er_aac_ps_native_mp4_and_matroska_acceptance() {
         );
         assert!(rejected.is_empty());
 
-        let mut stream = fvid::playback_mp4_audio::Mp4AudioReader::open(
-            Cursor::new(&mp4_bytes),
-            Default::default(),
-        )
-        .unwrap();
-        assert_eq!(play(&mut stream), mp4_pcm);
-        stream.rewind();
-        assert_eq!(play(&mut stream), mp4_pcm);
-        let landed = stream.seek_to((rate / 10) as i64);
-        assert_eq!(play(&mut stream), mp4_pcm[landed as usize * 8..]);
+        #[cfg(feature = "player")]
+        {
+            let mut stream = fvid::playback_mp4_audio::Mp4AudioReader::open(
+                Cursor::new(&mp4_bytes),
+                Default::default(),
+            )
+            .unwrap();
+            assert_eq!(play(&mut stream), mp4_pcm);
+            stream.rewind();
+            assert_eq!(play(&mut stream), mp4_pcm);
+            let landed = stream.seek_to((rate / 10) as i64);
+            assert_eq!(play(&mut stream), mp4_pcm[landed as usize * 8..]);
+        }
 
         let mka_bytes = bytes(c["matroska"].as_str().unwrap());
         let mut mka_pcm = vec![];

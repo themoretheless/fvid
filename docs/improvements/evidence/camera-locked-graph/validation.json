@@ -1,0 +1,21 @@
+{
+  "status": "verified",
+  "count_delta": 0,
+  "reason": "Baseline integration/CI repair; excluded by the registry counting rule",
+  "source": "crates/fvid-camera-ffi/Cargo.lock",
+  "regression": ".github/workflows/linux.yml",
+  "before": "docs/improvements/evidence/camera-locked-graph/before.log",
+  "remote_before": "docs/improvements/evidence/camera-locked-graph/remote-before.log",
+  "after": "docs/improvements/evidence/camera-locked-graph/after.log",
+  "unit_tests": 4,
+  "doctests": 1,
+  "test_log": "docs/improvements/evidence/camera-locked-graph/camera-tests.log",
+  "windows_cross_check": "docs/improvements/evidence/camera-locked-graph/windows-check.log",
+  "repeat": "docs/improvements/evidence/camera-locked-graph/repeat.log",
+  "graph_delta": "docs/improvements/evidence/camera-locked-graph/graph-delta.json",
+  "frozen_source": "docs/improvements/evidence/camera-locked-graph/candidate-source.json",
+  "limitations": [
+    "The Windows bridge is cross-checked, not executed",
+    "Whole Linux/Windows CI completion is not established by the focused bridge check"
+  ]
+}

@@ -1,0 +1,11 @@
+{
+  "base": "34f931ca6f0b210ba0462f6f8ec0196f008a65a9",
+  "beforeSha256": "966d2afe430d561fec2d5361e5a96ffc08e8988bf38b5d5df5db43bd46da473d",
+  "afterSha256": "b5104f8d2f77a72fdc41fc99f655f2ba7a2da672b828a87e2c83d940962207f8",
+  "testFunctionsBefore": 4,
+  "testFunctionsAfter": 4,
+  "allAssertionLinesRetained": true,
+  "coreProbeAndIntervalChecksRemainUnconditional": true,
+  "playerAssertionsRetainedUnderRequiredFeature": true,
+  "sourcePaths": 5615
+}

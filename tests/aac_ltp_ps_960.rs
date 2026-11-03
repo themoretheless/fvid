@@ -167,7 +167,9 @@ fn native_ltp_ps_960_transitions_match_scalar_core_composition() {
 }
 #[test]
 fn ltp_ps_960_player_rewind_seek_and_delayed_eof_preserve_two_channels() {
+    #[cfg(feature = "player")]
     use fvid::audio::AudioStream;
+    #[cfg(feature = "player")]
     fn play(reader: &mut dyn AudioStream) -> Vec<u8> {
         let mut decoder = reader.make_decoder().unwrap();
         let mut output = Vec::new();
@@ -198,16 +200,19 @@ fn ltp_ps_960_player_rewind_seek_and_delayed_eof_preserve_two_channels() {
         let data = bytes(c["video"]["file"].as_str().unwrap());
         let mut expected = Vec::new();
         fvid::native_media::decode_mp4_aac_pcm(&data, &mut expected).unwrap();
-        let mut reader =
-            fvid::playback_mp4_audio::Mp4AudioReader::open(Cursor::new(&data), Default::default())
-                .unwrap();
-        assert_eq!(reader.channels(), 2);
-        assert_eq!(play(&mut reader), expected);
-        reader.rewind();
-        assert_eq!(play(&mut reader), expected);
-        for target in [1100, 5800, 9000, c["samples"].as_u64().unwrap() as i64] {
-            let landed = reader.seek_to(target);
-            assert_eq!(play(&mut reader), expected[landed as usize * 8..]);
+        #[cfg(feature = "player")]
+        {
+            let mut reader =
+                fvid::playback_mp4_audio::Mp4AudioReader::open(Cursor::new(&data), Default::default())
+                    .unwrap();
+            assert_eq!(reader.channels(), 2);
+            assert_eq!(play(&mut reader), expected);
+            reader.rewind();
+            assert_eq!(play(&mut reader), expected);
+            for target in [1100, 5800, 9000, c["samples"].as_u64().unwrap() as i64] {
+                let landed = reader.seek_to(target);
+                assert_eq!(play(&mut reader), expected[landed as usize * 8..]);
+            }
         }
     }
 }

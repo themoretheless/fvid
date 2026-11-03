@@ -1,3 +1,4 @@
+#[cfg(feature = "player")]
 use fvid::audio::AudioStream;
 use std::{io::Cursor, path::Path, time::Duration};
 fn bytes(name: &str) -> Vec<u8> {
@@ -14,6 +15,7 @@ fn manifest() -> serde_json::Value {
     ))
     .unwrap()
 }
+#[cfg(feature = "player")]
 fn play(reader: &mut dyn AudioStream) -> Vec<u8> {
     let mut decoder = reader.make_decoder().unwrap();
     let mut output = Vec::new();
@@ -88,16 +90,19 @@ fn main_ps_adts_player_rewind_seek_and_eof_preserve_stereo() {
             &mut expected,
         )
         .unwrap();
-        let mut reader =
-            fvid::playback_aac::AacAudioReader::open(Cursor::new(&data), Default::default())
-                .unwrap();
-        assert_eq!((reader.channels(), reader.sample_rate()), (2, 48000));
-        assert_eq!(play(&mut reader), expected);
-        reader.rewind();
-        assert_eq!(play(&mut reader), expected);
-        for target in [1100, 5800, 9000, (expected.len() / 8) as i64] {
-            let landed = reader.seek_to(target);
-            assert_eq!(play(&mut reader), expected[landed as usize * 8..]);
+        #[cfg(feature = "player")]
+        {
+            let mut reader =
+                fvid::playback_aac::AacAudioReader::open(Cursor::new(&data), Default::default())
+                    .unwrap();
+            assert_eq!((reader.channels(), reader.sample_rate()), (2, 48000));
+            assert_eq!(play(&mut reader), expected);
+            reader.rewind();
+            assert_eq!(play(&mut reader), expected);
+            for target in [1100, 5800, 9000, (expected.len() / 8) as i64] {
+                let landed = reader.seek_to(target);
+                assert_eq!(play(&mut reader), expected[landed as usize * 8..]);
+            }
         }
     }
 }

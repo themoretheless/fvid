@@ -1,0 +1,2 @@
+error: cannot update the lock file /Users/themoretheless/.codex/worktrees/fvid-push-20261029/fvid/crates/fvid-camera-ffi/Cargo.lock because --locked was passed to prevent this
+help: to generate the lock file without accessing the network, remove the --locked flag and use --offline instead.

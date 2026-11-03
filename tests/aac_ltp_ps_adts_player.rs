@@ -1,3 +1,4 @@
+#[cfg(feature = "player")]
 use fvid::audio::AudioStream;
 use std::{io::Cursor, path::Path};
 fn bytes(name: &str) -> Vec<u8> {
@@ -8,6 +9,7 @@ fn bytes(name: &str) -> Vec<u8> {
     )
     .unwrap()
 }
+#[cfg(feature = "player")]
 fn play(reader: &mut dyn AudioStream) -> Vec<u8> {
     let mut decoder = reader.make_decoder().unwrap();
     let mut output = Vec::new();
@@ -46,24 +48,27 @@ fn check(file: &str, channels: u16) {
         &Default::default(),
     )
     .unwrap();
-    let mut reader =
-        fvid::playback_aac::AacAudioReader::open(Cursor::new(&data), Default::default()).unwrap();
-    assert_eq!(
-        (reader.channels(), reader.sample_rate(), reader.timescale()),
-        (channels, 48000, 48000),
-        "{file}"
-    );
-    assert_eq!(play(&mut reader), expected, "{file}");
-    reader.rewind();
-    assert_eq!(play(&mut reader), expected, "rewind {file}");
-    let stride = channels as usize * 4;
-    for target in [1100, 5800, 9000, (expected.len() / stride) as i64] {
-        let landed = reader.seek_to(target);
+    #[cfg(feature = "player")]
+    {
+        let mut reader =
+            fvid::playback_aac::AacAudioReader::open(Cursor::new(&data), Default::default()).unwrap();
         assert_eq!(
-            play(&mut reader),
-            expected[landed as usize * stride..],
-            "seek {file} {target}"
+            (reader.channels(), reader.sample_rate(), reader.timescale()),
+            (channels, 48000, 48000),
+            "{file}"
         );
+        assert_eq!(play(&mut reader), expected, "{file}");
+        reader.rewind();
+        assert_eq!(play(&mut reader), expected, "rewind {file}");
+        let stride = channels as usize * 4;
+        for target in [1100, 5800, 9000, (expected.len() / stride) as i64] {
+            let landed = reader.seek_to(target);
+            assert_eq!(
+                play(&mut reader),
+                expected[landed as usize * stride..],
+                "seek {file} {target}"
+            );
+        }
     }
 }
 #[test]
