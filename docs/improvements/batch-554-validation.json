@@ -1,0 +1,96 @@
+{
+  "status": "accepted",
+  "accepted_ids": [
+    "FVID-0543"
+  ],
+  "count_delta": 1,
+  "accepted_count": 543,
+  "next_id": "FVID-0544",
+  "qualification": [
+    {
+      "name": "final-integration",
+      "log": "docs/improvements/evidence/mp4-enda-wave-fallback/final-integration.log",
+      "passed": 46,
+      "ignored": 0
+    },
+    {
+      "name": "final-lib-build",
+      "log": "docs/improvements/evidence/mp4-enda-wave-fallback/final-lib-build.log",
+      "passed": true
+    },
+    {
+      "name": "root-parser",
+      "log": "docs/improvements/evidence/mp4-enda-wave-fallback/root-parser.log",
+      "passed": 17,
+      "ignored": 0
+    },
+    {
+      "name": "root-audio",
+      "log": "docs/improvements/evidence/mp4-enda-wave-fallback/root-audio.log",
+      "passed": 15,
+      "ignored": 0
+    },
+    {
+      "name": "root-video",
+      "log": "docs/improvements/evidence/mp4-enda-wave-fallback/root-video.log",
+      "passed": 7,
+      "ignored": 0
+    },
+    {
+      "name": "worker",
+      "log": "docs/improvements/evidence/mp4-enda-wave-fallback/worker.log",
+      "passed": 39,
+      "ignored": 0
+    },
+    {
+      "name": "cpal",
+      "log": "docs/improvements/evidence/mp4-enda-wave-fallback/cpal.log",
+      "passed": 43,
+      "ignored": 2
+    },
+    {
+      "name": "media-audio",
+      "log": "docs/improvements/evidence/mp4-enda-wave-fallback/media-audio.log",
+      "passed": 13,
+      "ignored": 0
+    },
+    {
+      "name": "final-core-check",
+      "log": "docs/improvements/evidence/mp4-enda-wave-fallback/final-core-check.log",
+      "passed": true
+    },
+    {
+      "name": "final-player-check",
+      "log": "docs/improvements/evidence/mp4-enda-wave-fallback/final-player-check.log",
+      "passed": true
+    },
+    {
+      "name": "no-external-1",
+      "log": "docs/improvements/evidence/mp4-enda-wave-fallback/no-external-1.log",
+      "passed": 5,
+      "ignored": 0
+    },
+    {
+      "name": "no-external-2",
+      "log": "docs/improvements/evidence/mp4-enda-wave-fallback/no-external-2.log",
+      "passed": 5,
+      "ignored": 0
+    },
+    {
+      "name": "no-external-3",
+      "log": "docs/improvements/evidence/mp4-enda-wave-fallback/no-external-3.log",
+      "passed": 5,
+      "ignored": 0
+    }
+  ],
+  "rust_executions": 195,
+  "baseline": "docs/improvements/evidence/mp4-enda-wave-fallback/final-baseline.json",
+  "reference": "docs/improvements/evidence/mp4-enda-wave-fallback/ffmpeg-reference.json",
+  "reproducibility": "docs/improvements/evidence/mp4-enda-wave-fallback/reproducibility.json",
+  "frozen_source": "docs/improvements/evidence/mp4-enda-wave-fallback/candidate-source.json",
+  "limitations": [
+    "Existing nested enda precedence remains when that field is present; no new conflict-resolution policy",
+    "Strict failures compare with direct-only controls; independent FFmpeg reference covers valid successful playback only",
+    "No codec algorithm, public signature, performance, physical-device or hardware-video claim"
+  ]
+}

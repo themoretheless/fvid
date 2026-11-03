@@ -1,0 +1,9 @@
+
+running 5 tests
+test direct_enda_and_big_endian_wave_controls_have_independent_exact_pcm ... ok
+test malformed_direct_enda_cannot_bypass_existing_strict_refusals ... ok
+test public_exports_intervals_and_resource_refusals_keep_exact_pcm ... ok
+test unrelated_wave_must_not_hide_the_explicit_direct_pcm_byte_order ... ok
+test actual_playback_preserves_pcm_byte_order_clocks_seek_and_video ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 3.65s

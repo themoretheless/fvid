@@ -1,8 +1,8 @@
 {
   "target": 1000,
   "counting_rule": "One independently confirmed problem or useful capability; fixture variants and baseline integration repairs are excluded. Only accepted entries count.",
-  "accepted_count": 542,
-  "next_id": "FVID-0543",
+  "accepted_count": 543,
+  "next_id": "FVID-0544",
   "entries": [
     {
       "id": "FVID-0001",
@@ -6152,6 +6152,17 @@
       "result": "Preserve the first selected header versus representative Track comparison, then reuse the existing compact-aware header-change predicate instead of another full virtual-sample scan. Preserve empty-track and0/1-catalog behavior, equivalent aliases, opaque/changing-header refusal, all public signatures, decoder state, bytes, clocks, index/catalog contents and budgets. The exact original scalar guard agrees at168 structural/primary/catalog combinations per compiled property. Seven balanced release process pairs, two warmups and nine1024-open rounds each retain reader/index fingerprints:32-description first/last opens fall87.290→3.452us and87.191→3.439us (25.284x/25.354x), winning7/7 pairs each. One-description control1.517→1.536us is1.25% slower, within the predeclared10% bound, and is not claimed as a speedup. The pilot calibrated1024 iterations before candidate changes or paired measurements; acceptance thresholds were unchanged. Final190 Rust executions, two existing device ignores, core/player checks and three external-tool-free repeats preserve every packet/clocks/description ID through native and owned constant APIs, exact PCM words, compact budget4, typed reconfiguration refusal, native PCM/seek/rewind/EOF/worker anchors/software pictures and related dormant/opaque/MACE/dynamic regressions. Five existing341ms authored fixtures regenerate identically;5314 source/input hashes stay stable. One constant-header admission optimization, distinct from ID-membership planning; no new format/failure, allocation, acquisition, planning, decoder or playback-throughput/hardware claim.",
       "status": "accepted",
       "validation": "batch-553-validation.json"
+    },
+    {
+      "id": "FVID-0543",
+      "batch": 554,
+      "title": "Preserve direct QuickTime PCM byte order beside unrelated wave metadata",
+      "source": "crates/fvid-media/src/owned_mp4_impl.rs",
+      "regression": "tests/mp4_enda_wave_fallback.rs",
+      "before": "Published0a9cccc7f6 treats any wave as the exclusive enda location. An unrelated wave/frma hides an explicit outer endian field:32 authored little-endian in24/in32/fl32/fl64 variants decode wrong f32/f64 PCM while direct and big-endian controls pass. Twelve invalid/short/duplicate direct enda descriptions are admitted through both root and owned parsers despite strict direct-only controls. Original three-test stand passes one control and fails two gates; the final unchanged five-test stand passes controls and fails four byte-order/strict-field/export/actual-playback gates. Independent ffmpeg-full9.0.2 confirms64/64 valid files byte-exactly.",
+      "result": "Read nested enda first, preserving its existing precedence and wave validation, then consult the direct field only if the nested field is absent. Keep the existing0/1 flag validation and duplicate/truncation refusals. Sixty-four valid variants cover four existing PCM tags, mono/stereo, both byte orders,1000/48000 clocks and two child orders; exact literal f32/f64 output retains low int32/float64 bits, parsed configuration,60ms duration, precise seek/rewind/EOF,192 actual software-worker sessions/anchors per stand, public raw export, sample intervals and exact software VP9 pictures. The12 malformed files now produce the same typed Invalid/non-unsupported errors as direct-only controls; resource/cancellation checks remain strict before output. Qualification passes195 Rust executions, two existing device ignores, core/player checks and three external-tool-free repeats. All140 short authored files regenerate identically and5456 source/input hashes stay stable; all64 valid reference input hashes still match. One missing-fallback invariant with successful decode and validation-bypass consequences, not per-tag/variant/refusal IDs. No old tests changed; no new format, public interface, decoder algorithm, conflict policy, performance or hardware claim.",
+      "status": "accepted",
+      "validation": "batch-554-validation.json"
     }
   ]
 }

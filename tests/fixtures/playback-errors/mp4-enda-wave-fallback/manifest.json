@@ -1,0 +1,873 @@
+{
+  "provenance": "Authored60ms signed integer24/32 and float32/64 ramps with low precision bits, mono/stereo, both endian orders, direct enda versus unrelated wave/frma, two clocks and two child orders, three exact VP9 pictures. No encoder,private media or network.",
+  "cases": [
+    {
+      "file": "in24-c1-be-t1000-wave-before.mov",
+      "control": "in24-c1-be-t1000-control.mov",
+      "expected": "in24-c1.f32le",
+      "expected64": "in24-c1.f64le",
+      "codec": "in24",
+      "bits": 24,
+      "channels": 1,
+      "rate": 48000,
+      "frames": 2880,
+      "little": false
+    },
+    {
+      "file": "in24-c1-be-t1000-wave-after.mov",
+      "control": "in24-c1-be-t1000-control.mov",
+      "expected": "in24-c1.f32le",
+      "expected64": "in24-c1.f64le",
+      "codec": "in24",
+      "bits": 24,
+      "channels": 1,
+      "rate": 48000,
+      "frames": 2880,
+      "little": false
+    },
+    {
+      "file": "in24-c1-be-t48000-wave-before.mov",
+      "control": "in24-c1-be-t48000-control.mov",
+      "expected": "in24-c1.f32le",
+      "expected64": "in24-c1.f64le",
+      "codec": "in24",
+      "bits": 24,
+      "channels": 1,
+      "rate": 48000,
+      "frames": 2880,
+      "little": false
+    },
+    {
+      "file": "in24-c1-be-t48000-wave-after.mov",
+      "control": "in24-c1-be-t48000-control.mov",
+      "expected": "in24-c1.f32le",
+      "expected64": "in24-c1.f64le",
+      "codec": "in24",
+      "bits": 24,
+      "channels": 1,
+      "rate": 48000,
+      "frames": 2880,
+      "little": false
+    },
+    {
+      "file": "in24-c1-le-t1000-wave-before.mov",
+      "control": "in24-c1-le-t1000-control.mov",
+      "expected": "in24-c1.f32le",
+      "expected64": "in24-c1.f64le",
+      "codec": "in24",
+      "bits": 24,
+      "channels": 1,
+      "rate": 48000,
+      "frames": 2880,
+      "little": true
+    },
+    {
+      "file": "in24-c1-le-t1000-wave-after.mov",
+      "control": "in24-c1-le-t1000-control.mov",
+      "expected": "in24-c1.f32le",
+      "expected64": "in24-c1.f64le",
+      "codec": "in24",
+      "bits": 24,
+      "channels": 1,
+      "rate": 48000,
+      "frames": 2880,
+      "little": true
+    },
+    {
+      "file": "in24-c1-le-t48000-wave-before.mov",
+      "control": "in24-c1-le-t48000-control.mov",
+      "expected": "in24-c1.f32le",
+      "expected64": "in24-c1.f64le",
+      "codec": "in24",
+      "bits": 24,
+      "channels": 1,
+      "rate": 48000,
+      "frames": 2880,
+      "little": true
+    },
+    {
+      "file": "in24-c1-le-t48000-wave-after.mov",
+      "control": "in24-c1-le-t48000-control.mov",
+      "expected": "in24-c1.f32le",
+      "expected64": "in24-c1.f64le",
+      "codec": "in24",
+      "bits": 24,
+      "channels": 1,
+      "rate": 48000,
+      "frames": 2880,
+      "little": true
+    },
+    {
+      "file": "in24-c2-be-t1000-wave-before.mov",
+      "control": "in24-c2-be-t1000-control.mov",
+      "expected": "in24-c2.f32le",
+      "expected64": "in24-c2.f64le",
+      "codec": "in24",
+      "bits": 24,
+      "channels": 2,
+      "rate": 48000,
+      "frames": 2880,
+      "little": false
+    },
+    {
+      "file": "in24-c2-be-t1000-wave-after.mov",
+      "control": "in24-c2-be-t1000-control.mov",
+      "expected": "in24-c2.f32le",
+      "expected64": "in24-c2.f64le",
+      "codec": "in24",
+      "bits": 24,
+      "channels": 2,
+      "rate": 48000,
+      "frames": 2880,
+      "little": false
+    },
+    {
+      "file": "in24-c2-be-t48000-wave-before.mov",
+      "control": "in24-c2-be-t48000-control.mov",
+      "expected": "in24-c2.f32le",
+      "expected64": "in24-c2.f64le",
+      "codec": "in24",
+      "bits": 24,
+      "channels": 2,
+      "rate": 48000,
+      "frames": 2880,
+      "little": false
+    },
+    {
+      "file": "in24-c2-be-t48000-wave-after.mov",
+      "control": "in24-c2-be-t48000-control.mov",
+      "expected": "in24-c2.f32le",
+      "expected64": "in24-c2.f64le",
+      "codec": "in24",
+      "bits": 24,
+      "channels": 2,
+      "rate": 48000,
+      "frames": 2880,
+      "little": false
+    },
+    {
+      "file": "in24-c2-le-t1000-wave-before.mov",
+      "control": "in24-c2-le-t1000-control.mov",
+      "expected": "in24-c2.f32le",
+      "expected64": "in24-c2.f64le",
+      "codec": "in24",
+      "bits": 24,
+      "channels": 2,
+      "rate": 48000,
+      "frames": 2880,
+      "little": true
+    },
+    {
+      "file": "in24-c2-le-t1000-wave-after.mov",
+      "control": "in24-c2-le-t1000-control.mov",
+      "expected": "in24-c2.f32le",
+      "expected64": "in24-c2.f64le",
+      "codec": "in24",
+      "bits": 24,
+      "channels": 2,
+      "rate": 48000,
+      "frames": 2880,
+      "little": true
+    },
+    {
+      "file": "in24-c2-le-t48000-wave-before.mov",
+      "control": "in24-c2-le-t48000-control.mov",
+      "expected": "in24-c2.f32le",
+      "expected64": "in24-c2.f64le",
+      "codec": "in24",
+      "bits": 24,
+      "channels": 2,
+      "rate": 48000,
+      "frames": 2880,
+      "little": true
+    },
+    {
+      "file": "in24-c2-le-t48000-wave-after.mov",
+      "control": "in24-c2-le-t48000-control.mov",
+      "expected": "in24-c2.f32le",
+      "expected64": "in24-c2.f64le",
+      "codec": "in24",
+      "bits": 24,
+      "channels": 2,
+      "rate": 48000,
+      "frames": 2880,
+      "little": true
+    },
+    {
+      "file": "in32-c1-be-t1000-wave-before.mov",
+      "control": "in32-c1-be-t1000-control.mov",
+      "expected": "in32-c1.f32le",
+      "expected64": "in32-c1.f64le",
+      "codec": "in32",
+      "bits": 32,
+      "channels": 1,
+      "rate": 48000,
+      "frames": 2880,
+      "little": false
+    },
+    {
+      "file": "in32-c1-be-t1000-wave-after.mov",
+      "control": "in32-c1-be-t1000-control.mov",
+      "expected": "in32-c1.f32le",
+      "expected64": "in32-c1.f64le",
+      "codec": "in32",
+      "bits": 32,
+      "channels": 1,
+      "rate": 48000,
+      "frames": 2880,
+      "little": false
+    },
+    {
+      "file": "in32-c1-be-t48000-wave-before.mov",
+      "control": "in32-c1-be-t48000-control.mov",
+      "expected": "in32-c1.f32le",
+      "expected64": "in32-c1.f64le",
+      "codec": "in32",
+      "bits": 32,
+      "channels": 1,
+      "rate": 48000,
+      "frames": 2880,
+      "little": false
+    },
+    {
+      "file": "in32-c1-be-t48000-wave-after.mov",
+      "control": "in32-c1-be-t48000-control.mov",
+      "expected": "in32-c1.f32le",
+      "expected64": "in32-c1.f64le",
+      "codec": "in32",
+      "bits": 32,
+      "channels": 1,
+      "rate": 48000,
+      "frames": 2880,
+      "little": false
+    },
+    {
+      "file": "in32-c1-le-t1000-wave-before.mov",
+      "control": "in32-c1-le-t1000-control.mov",
+      "expected": "in32-c1.f32le",
+      "expected64": "in32-c1.f64le",
+      "codec": "in32",
+      "bits": 32,
+      "channels": 1,
+      "rate": 48000,
+      "frames": 2880,
+      "little": true
+    },
+    {
+      "file": "in32-c1-le-t1000-wave-after.mov",
+      "control": "in32-c1-le-t1000-control.mov",
+      "expected": "in32-c1.f32le",
+      "expected64": "in32-c1.f64le",
+      "codec": "in32",
+      "bits": 32,
+      "channels": 1,
+      "rate": 48000,
+      "frames": 2880,
+      "little": true
+    },
+    {
+      "file": "in32-c1-le-t48000-wave-before.mov",
+      "control": "in32-c1-le-t48000-control.mov",
+      "expected": "in32-c1.f32le",
+      "expected64": "in32-c1.f64le",
+      "codec": "in32",
+      "bits": 32,
+      "channels": 1,
+      "rate": 48000,
+      "frames": 2880,
+      "little": true
+    },
+    {
+      "file": "in32-c1-le-t48000-wave-after.mov",
+      "control": "in32-c1-le-t48000-control.mov",
+      "expected": "in32-c1.f32le",
+      "expected64": "in32-c1.f64le",
+      "codec": "in32",
+      "bits": 32,
+      "channels": 1,
+      "rate": 48000,
+      "frames": 2880,
+      "little": true
+    },
+    {
+      "file": "in32-c2-be-t1000-wave-before.mov",
+      "control": "in32-c2-be-t1000-control.mov",
+      "expected": "in32-c2.f32le",
+      "expected64": "in32-c2.f64le",
+      "codec": "in32",
+      "bits": 32,
+      "channels": 2,
+      "rate": 48000,
+      "frames": 2880,
+      "little": false
+    },
+    {
+      "file": "in32-c2-be-t1000-wave-after.mov",
+      "control": "in32-c2-be-t1000-control.mov",
+      "expected": "in32-c2.f32le",
+      "expected64": "in32-c2.f64le",
+      "codec": "in32",
+      "bits": 32,
+      "channels": 2,
+      "rate": 48000,
+      "frames": 2880,
+      "little": false
+    },
+    {
+      "file": "in32-c2-be-t48000-wave-before.mov",
+      "control": "in32-c2-be-t48000-control.mov",
+      "expected": "in32-c2.f32le",
+      "expected64": "in32-c2.f64le",
+      "codec": "in32",
+      "bits": 32,
+      "channels": 2,
+      "rate": 48000,
+      "frames": 2880,
+      "little": false
+    },
+    {
+      "file": "in32-c2-be-t48000-wave-after.mov",
+      "control": "in32-c2-be-t48000-control.mov",
+      "expected": "in32-c2.f32le",
+      "expected64": "in32-c2.f64le",
+      "codec": "in32",
+      "bits": 32,
+      "channels": 2,
+      "rate": 48000,
+      "frames": 2880,
+      "little": false
+    },
+    {
+      "file": "in32-c2-le-t1000-wave-before.mov",
+      "control": "in32-c2-le-t1000-control.mov",
+      "expected": "in32-c2.f32le",
+      "expected64": "in32-c2.f64le",
+      "codec": "in32",
+      "bits": 32,
+      "channels": 2,
+      "rate": 48000,
+      "frames": 2880,
+      "little": true
+    },
+    {
+      "file": "in32-c2-le-t1000-wave-after.mov",
+      "control": "in32-c2-le-t1000-control.mov",
+      "expected": "in32-c2.f32le",
+      "expected64": "in32-c2.f64le",
+      "codec": "in32",
+      "bits": 32,
+      "channels": 2,
+      "rate": 48000,
+      "frames": 2880,
+      "little": true
+    },
+    {
+      "file": "in32-c2-le-t48000-wave-before.mov",
+      "control": "in32-c2-le-t48000-control.mov",
+      "expected": "in32-c2.f32le",
+      "expected64": "in32-c2.f64le",
+      "codec": "in32",
+      "bits": 32,
+      "channels": 2,
+      "rate": 48000,
+      "frames": 2880,
+      "little": true
+    },
+    {
+      "file": "in32-c2-le-t48000-wave-after.mov",
+      "control": "in32-c2-le-t48000-control.mov",
+      "expected": "in32-c2.f32le",
+      "expected64": "in32-c2.f64le",
+      "codec": "in32",
+      "bits": 32,
+      "channels": 2,
+      "rate": 48000,
+      "frames": 2880,
+      "little": true
+    },
+    {
+      "file": "fl32-c1-be-t1000-wave-before.mov",
+      "control": "fl32-c1-be-t1000-control.mov",
+      "expected": "fl32-c1.f32le",
+      "expected64": "fl32-c1.f64le",
+      "codec": "fl32",
+      "bits": 32,
+      "channels": 1,
+      "rate": 48000,
+      "frames": 2880,
+      "little": false
+    },
+    {
+      "file": "fl32-c1-be-t1000-wave-after.mov",
+      "control": "fl32-c1-be-t1000-control.mov",
+      "expected": "fl32-c1.f32le",
+      "expected64": "fl32-c1.f64le",
+      "codec": "fl32",
+      "bits": 32,
+      "channels": 1,
+      "rate": 48000,
+      "frames": 2880,
+      "little": false
+    },
+    {
+      "file": "fl32-c1-be-t48000-wave-before.mov",
+      "control": "fl32-c1-be-t48000-control.mov",
+      "expected": "fl32-c1.f32le",
+      "expected64": "fl32-c1.f64le",
+      "codec": "fl32",
+      "bits": 32,
+      "channels": 1,
+      "rate": 48000,
+      "frames": 2880,
+      "little": false
+    },
+    {
+      "file": "fl32-c1-be-t48000-wave-after.mov",
+      "control": "fl32-c1-be-t48000-control.mov",
+      "expected": "fl32-c1.f32le",
+      "expected64": "fl32-c1.f64le",
+      "codec": "fl32",
+      "bits": 32,
+      "channels": 1,
+      "rate": 48000,
+      "frames": 2880,
+      "little": false
+    },
+    {
+      "file": "fl32-c1-le-t1000-wave-before.mov",
+      "control": "fl32-c1-le-t1000-control.mov",
+      "expected": "fl32-c1.f32le",
+      "expected64": "fl32-c1.f64le",
+      "codec": "fl32",
+      "bits": 32,
+      "channels": 1,
+      "rate": 48000,
+      "frames": 2880,
+      "little": true
+    },
+    {
+      "file": "fl32-c1-le-t1000-wave-after.mov",
+      "control": "fl32-c1-le-t1000-control.mov",
+      "expected": "fl32-c1.f32le",
+      "expected64": "fl32-c1.f64le",
+      "codec": "fl32",
+      "bits": 32,
+      "channels": 1,
+      "rate": 48000,
+      "frames": 2880,
+      "little": true
+    },
+    {
+      "file": "fl32-c1-le-t48000-wave-before.mov",
+      "control": "fl32-c1-le-t48000-control.mov",
+      "expected": "fl32-c1.f32le",
+      "expected64": "fl32-c1.f64le",
+      "codec": "fl32",
+      "bits": 32,
+      "channels": 1,
+      "rate": 48000,
+      "frames": 2880,
+      "little": true
+    },
+    {
+      "file": "fl32-c1-le-t48000-wave-after.mov",
+      "control": "fl32-c1-le-t48000-control.mov",
+      "expected": "fl32-c1.f32le",
+      "expected64": "fl32-c1.f64le",
+      "codec": "fl32",
+      "bits": 32,
+      "channels": 1,
+      "rate": 48000,
+      "frames": 2880,
+      "little": true
+    },
+    {
+      "file": "fl32-c2-be-t1000-wave-before.mov",
+      "control": "fl32-c2-be-t1000-control.mov",
+      "expected": "fl32-c2.f32le",
+      "expected64": "fl32-c2.f64le",
+      "codec": "fl32",
+      "bits": 32,
+      "channels": 2,
+      "rate": 48000,
+      "frames": 2880,
+      "little": false
+    },
+    {
+      "file": "fl32-c2-be-t1000-wave-after.mov",
+      "control": "fl32-c2-be-t1000-control.mov",
+      "expected": "fl32-c2.f32le",
+      "expected64": "fl32-c2.f64le",
+      "codec": "fl32",
+      "bits": 32,
+      "channels": 2,
+      "rate": 48000,
+      "frames": 2880,
+      "little": false
+    },
+    {
+      "file": "fl32-c2-be-t48000-wave-before.mov",
+      "control": "fl32-c2-be-t48000-control.mov",
+      "expected": "fl32-c2.f32le",
+      "expected64": "fl32-c2.f64le",
+      "codec": "fl32",
+      "bits": 32,
+      "channels": 2,
+      "rate": 48000,
+      "frames": 2880,
+      "little": false
+    },
+    {
+      "file": "fl32-c2-be-t48000-wave-after.mov",
+      "control": "fl32-c2-be-t48000-control.mov",
+      "expected": "fl32-c2.f32le",
+      "expected64": "fl32-c2.f64le",
+      "codec": "fl32",
+      "bits": 32,
+      "channels": 2,
+      "rate": 48000,
+      "frames": 2880,
+      "little": false
+    },
+    {
+      "file": "fl32-c2-le-t1000-wave-before.mov",
+      "control": "fl32-c2-le-t1000-control.mov",
+      "expected": "fl32-c2.f32le",
+      "expected64": "fl32-c2.f64le",
+      "codec": "fl32",
+      "bits": 32,
+      "channels": 2,
+      "rate": 48000,
+      "frames": 2880,
+      "little": true
+    },
+    {
+      "file": "fl32-c2-le-t1000-wave-after.mov",
+      "control": "fl32-c2-le-t1000-control.mov",
+      "expected": "fl32-c2.f32le",
+      "expected64": "fl32-c2.f64le",
+      "codec": "fl32",
+      "bits": 32,
+      "channels": 2,
+      "rate": 48000,
+      "frames": 2880,
+      "little": true
+    },
+    {
+      "file": "fl32-c2-le-t48000-wave-before.mov",
+      "control": "fl32-c2-le-t48000-control.mov",
+      "expected": "fl32-c2.f32le",
+      "expected64": "fl32-c2.f64le",
+      "codec": "fl32",
+      "bits": 32,
+      "channels": 2,
+      "rate": 48000,
+      "frames": 2880,
+      "little": true
+    },
+    {
+      "file": "fl32-c2-le-t48000-wave-after.mov",
+      "control": "fl32-c2-le-t48000-control.mov",
+      "expected": "fl32-c2.f32le",
+      "expected64": "fl32-c2.f64le",
+      "codec": "fl32",
+      "bits": 32,
+      "channels": 2,
+      "rate": 48000,
+      "frames": 2880,
+      "little": true
+    },
+    {
+      "file": "fl64-c1-be-t1000-wave-before.mov",
+      "control": "fl64-c1-be-t1000-control.mov",
+      "expected": "fl64-c1.f32le",
+      "expected64": "fl64-c1.f64le",
+      "codec": "fl64",
+      "bits": 64,
+      "channels": 1,
+      "rate": 48000,
+      "frames": 2880,
+      "little": false
+    },
+    {
+      "file": "fl64-c1-be-t1000-wave-after.mov",
+      "control": "fl64-c1-be-t1000-control.mov",
+      "expected": "fl64-c1.f32le",
+      "expected64": "fl64-c1.f64le",
+      "codec": "fl64",
+      "bits": 64,
+      "channels": 1,
+      "rate": 48000,
+      "frames": 2880,
+      "little": false
+    },
+    {
+      "file": "fl64-c1-be-t48000-wave-before.mov",
+      "control": "fl64-c1-be-t48000-control.mov",
+      "expected": "fl64-c1.f32le",
+      "expected64": "fl64-c1.f64le",
+      "codec": "fl64",
+      "bits": 64,
+      "channels": 1,
+      "rate": 48000,
+      "frames": 2880,
+      "little": false
+    },
+    {
+      "file": "fl64-c1-be-t48000-wave-after.mov",
+      "control": "fl64-c1-be-t48000-control.mov",
+      "expected": "fl64-c1.f32le",
+      "expected64": "fl64-c1.f64le",
+      "codec": "fl64",
+      "bits": 64,
+      "channels": 1,
+      "rate": 48000,
+      "frames": 2880,
+      "little": false
+    },
+    {
+      "file": "fl64-c1-le-t1000-wave-before.mov",
+      "control": "fl64-c1-le-t1000-control.mov",
+      "expected": "fl64-c1.f32le",
+      "expected64": "fl64-c1.f64le",
+      "codec": "fl64",
+      "bits": 64,
+      "channels": 1,
+      "rate": 48000,
+      "frames": 2880,
+      "little": true
+    },
+    {
+      "file": "fl64-c1-le-t1000-wave-after.mov",
+      "control": "fl64-c1-le-t1000-control.mov",
+      "expected": "fl64-c1.f32le",
+      "expected64": "fl64-c1.f64le",
+      "codec": "fl64",
+      "bits": 64,
+      "channels": 1,
+      "rate": 48000,
+      "frames": 2880,
+      "little": true
+    },
+    {
+      "file": "fl64-c1-le-t48000-wave-before.mov",
+      "control": "fl64-c1-le-t48000-control.mov",
+      "expected": "fl64-c1.f32le",
+      "expected64": "fl64-c1.f64le",
+      "codec": "fl64",
+      "bits": 64,
+      "channels": 1,
+      "rate": 48000,
+      "frames": 2880,
+      "little": true
+    },
+    {
+      "file": "fl64-c1-le-t48000-wave-after.mov",
+      "control": "fl64-c1-le-t48000-control.mov",
+      "expected": "fl64-c1.f32le",
+      "expected64": "fl64-c1.f64le",
+      "codec": "fl64",
+      "bits": 64,
+      "channels": 1,
+      "rate": 48000,
+      "frames": 2880,
+      "little": true
+    },
+    {
+      "file": "fl64-c2-be-t1000-wave-before.mov",
+      "control": "fl64-c2-be-t1000-control.mov",
+      "expected": "fl64-c2.f32le",
+      "expected64": "fl64-c2.f64le",
+      "codec": "fl64",
+      "bits": 64,
+      "channels": 2,
+      "rate": 48000,
+      "frames": 2880,
+      "little": false
+    },
+    {
+      "file": "fl64-c2-be-t1000-wave-after.mov",
+      "control": "fl64-c2-be-t1000-control.mov",
+      "expected": "fl64-c2.f32le",
+      "expected64": "fl64-c2.f64le",
+      "codec": "fl64",
+      "bits": 64,
+      "channels": 2,
+      "rate": 48000,
+      "frames": 2880,
+      "little": false
+    },
+    {
+      "file": "fl64-c2-be-t48000-wave-before.mov",
+      "control": "fl64-c2-be-t48000-control.mov",
+      "expected": "fl64-c2.f32le",
+      "expected64": "fl64-c2.f64le",
+      "codec": "fl64",
+      "bits": 64,
+      "channels": 2,
+      "rate": 48000,
+      "frames": 2880,
+      "little": false
+    },
+    {
+      "file": "fl64-c2-be-t48000-wave-after.mov",
+      "control": "fl64-c2-be-t48000-control.mov",
+      "expected": "fl64-c2.f32le",
+      "expected64": "fl64-c2.f64le",
+      "codec": "fl64",
+      "bits": 64,
+      "channels": 2,
+      "rate": 48000,
+      "frames": 2880,
+      "little": false
+    },
+    {
+      "file": "fl64-c2-le-t1000-wave-before.mov",
+      "control": "fl64-c2-le-t1000-control.mov",
+      "expected": "fl64-c2.f32le",
+      "expected64": "fl64-c2.f64le",
+      "codec": "fl64",
+      "bits": 64,
+      "channels": 2,
+      "rate": 48000,
+      "frames": 2880,
+      "little": true
+    },
+    {
+      "file": "fl64-c2-le-t1000-wave-after.mov",
+      "control": "fl64-c2-le-t1000-control.mov",
+      "expected": "fl64-c2.f32le",
+      "expected64": "fl64-c2.f64le",
+      "codec": "fl64",
+      "bits": 64,
+      "channels": 2,
+      "rate": 48000,
+      "frames": 2880,
+      "little": true
+    },
+    {
+      "file": "fl64-c2-le-t48000-wave-before.mov",
+      "control": "fl64-c2-le-t48000-control.mov",
+      "expected": "fl64-c2.f32le",
+      "expected64": "fl64-c2.f64le",
+      "codec": "fl64",
+      "bits": 64,
+      "channels": 2,
+      "rate": 48000,
+      "frames": 2880,
+      "little": true
+    },
+    {
+      "file": "fl64-c2-le-t48000-wave-after.mov",
+      "control": "fl64-c2-le-t48000-control.mov",
+      "expected": "fl64-c2.f32le",
+      "expected64": "fl64-c2.f64le",
+      "codec": "fl64",
+      "bits": 64,
+      "channels": 2,
+      "rate": 48000,
+      "frames": 2880,
+      "little": true
+    }
+  ],
+  "bad": [
+    {
+      "file": "bad-in24-invalid-flag.mov",
+      "mode": "invalid-flag"
+    },
+    {
+      "file": "bad-in24-short-flag.mov",
+      "mode": "short-flag"
+    },
+    {
+      "file": "bad-in24-duplicate.mov",
+      "mode": "duplicate"
+    },
+    {
+      "file": "bad-in32-invalid-flag.mov",
+      "mode": "invalid-flag"
+    },
+    {
+      "file": "bad-in32-short-flag.mov",
+      "mode": "short-flag"
+    },
+    {
+      "file": "bad-in32-duplicate.mov",
+      "mode": "duplicate"
+    },
+    {
+      "file": "bad-fl32-invalid-flag.mov",
+      "mode": "invalid-flag"
+    },
+    {
+      "file": "bad-fl32-short-flag.mov",
+      "mode": "short-flag"
+    },
+    {
+      "file": "bad-fl32-duplicate.mov",
+      "mode": "duplicate"
+    },
+    {
+      "file": "bad-fl64-invalid-flag.mov",
+      "mode": "invalid-flag"
+    },
+    {
+      "file": "bad-fl64-short-flag.mov",
+      "mode": "short-flag"
+    },
+    {
+      "file": "bad-fl64-duplicate.mov",
+      "mode": "duplicate"
+    }
+  ],
+  "bad_controls": [
+    {
+      "file": "control-bad-in24-invalid-flag.mov",
+      "mode": "invalid-flag"
+    },
+    {
+      "file": "control-bad-in24-short-flag.mov",
+      "mode": "short-flag"
+    },
+    {
+      "file": "control-bad-in24-duplicate.mov",
+      "mode": "duplicate"
+    },
+    {
+      "file": "control-bad-in32-invalid-flag.mov",
+      "mode": "invalid-flag"
+    },
+    {
+      "file": "control-bad-in32-short-flag.mov",
+      "mode": "short-flag"
+    },
+    {
+      "file": "control-bad-in32-duplicate.mov",
+      "mode": "duplicate"
+    },
+    {
+      "file": "control-bad-fl32-invalid-flag.mov",
+      "mode": "invalid-flag"
+    },
+    {
+      "file": "control-bad-fl32-short-flag.mov",
+      "mode": "short-flag"
+    },
+    {
+      "file": "control-bad-fl32-duplicate.mov",
+      "mode": "duplicate"
+    },
+    {
+      "file": "control-bad-fl64-invalid-flag.mov",
+      "mode": "invalid-flag"
+    },
+    {
+      "file": "control-bad-fl64-short-flag.mov",
+      "mode": "short-flag"
+    },
+    {
+      "file": "control-bad-fl64-duplicate.mov",
+      "mode": "duplicate"
+    }
+  ]
+}

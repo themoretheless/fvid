@@ -1,0 +1,597 @@
+{
+  "version": "ffmpeg version 9.0.2 Copyright (c) 2000-2026 the FFmpeg developers",
+  "cases": [
+    {
+      "file": "in24-c1-be-t1000-wave-before.mov",
+      "input_sha256": "db69fd0d4318b03f915b4ccd28ca8bb7632f65602d93dac1f5b05a78339a20a3",
+      "returncode": 0,
+      "exact": true,
+      "bytes": 23040,
+      "expected_bytes": 23040,
+      "stderr": ""
+    },
+    {
+      "file": "in24-c1-be-t1000-wave-after.mov",
+      "input_sha256": "62a39fb5127d0bfdbe924b18a8b91a2e8f81d5c4db968e9a49a192ba95edf4af",
+      "returncode": 0,
+      "exact": true,
+      "bytes": 23040,
+      "expected_bytes": 23040,
+      "stderr": ""
+    },
+    {
+      "file": "in24-c1-be-t48000-wave-before.mov",
+      "input_sha256": "02be294ddac813cd51c663a10fc09ea814d934536db24c55f6bbce281e57e5b1",
+      "returncode": 0,
+      "exact": true,
+      "bytes": 23040,
+      "expected_bytes": 23040,
+      "stderr": ""
+    },
+    {
+      "file": "in24-c1-be-t48000-wave-after.mov",
+      "input_sha256": "25d3cc318da76d65900708a88f18db1127dd943bd9ba27f32362ba829732db77",
+      "returncode": 0,
+      "exact": true,
+      "bytes": 23040,
+      "expected_bytes": 23040,
+      "stderr": ""
+    },
+    {
+      "file": "in24-c1-le-t1000-wave-before.mov",
+      "input_sha256": "8fdfb19733f10f8f41cffd8df4512716372a4f2ccc1a71bf651da638177f08f3",
+      "returncode": 0,
+      "exact": true,
+      "bytes": 23040,
+      "expected_bytes": 23040,
+      "stderr": ""
+    },
+    {
+      "file": "in24-c1-le-t1000-wave-after.mov",
+      "input_sha256": "8c0e366798126d1295c0f28fc330d5ffea2f9255a4151a907a5e75e2f43fa55f",
+      "returncode": 0,
+      "exact": true,
+      "bytes": 23040,
+      "expected_bytes": 23040,
+      "stderr": ""
+    },
+    {
+      "file": "in24-c1-le-t48000-wave-before.mov",
+      "input_sha256": "abfa3a3894c72059f2e6d5f867e037addd55a4233fec447c93dcea40d45f0c11",
+      "returncode": 0,
+      "exact": true,
+      "bytes": 23040,
+      "expected_bytes": 23040,
+      "stderr": ""
+    },
+    {
+      "file": "in24-c1-le-t48000-wave-after.mov",
+      "input_sha256": "06a527b5b17a6166548435c0623fbc5211f4f95d3388925b36488b969b898715",
+      "returncode": 0,
+      "exact": true,
+      "bytes": 23040,
+      "expected_bytes": 23040,
+      "stderr": ""
+    },
+    {
+      "file": "in24-c2-be-t1000-wave-before.mov",
+      "input_sha256": "18dcde2a97967b645d1302a4ad86fa4b6fb3161583d02d03d6fba8d5e19e1268",
+      "returncode": 0,
+      "exact": true,
+      "bytes": 46080,
+      "expected_bytes": 46080,
+      "stderr": ""
+    },
+    {
+      "file": "in24-c2-be-t1000-wave-after.mov",
+      "input_sha256": "b9bae727e592c5eaa9eab6e8e96a3f7626c27045733e5da754a34c75c0b674c9",
+      "returncode": 0,
+      "exact": true,
+      "bytes": 46080,
+      "expected_bytes": 46080,
+      "stderr": ""
+    },
+    {
+      "file": "in24-c2-be-t48000-wave-before.mov",
+      "input_sha256": "f1674a6d4920cb19151e4d7807f58eb6029966c123caa28a6f3e6d35006d90d0",
+      "returncode": 0,
+      "exact": true,
+      "bytes": 46080,
+      "expected_bytes": 46080,
+      "stderr": ""
+    },
+    {
+      "file": "in24-c2-be-t48000-wave-after.mov",
+      "input_sha256": "ef2b854cb63c58f2a49a1f2f251fa175e2c7df543d79229127b8d4339e21b25a",
+      "returncode": 0,
+      "exact": true,
+      "bytes": 46080,
+      "expected_bytes": 46080,
+      "stderr": ""
+    },
+    {
+      "file": "in24-c2-le-t1000-wave-before.mov",
+      "input_sha256": "d9ffc65e399c24be346d970c7d80128cee39a04a7764a5744f44d32dd80e652d",
+      "returncode": 0,
+      "exact": true,
+      "bytes": 46080,
+      "expected_bytes": 46080,
+      "stderr": ""
+    },
+    {
+      "file": "in24-c2-le-t1000-wave-after.mov",
+      "input_sha256": "7e6bca22dfc44a9a27a9b1ba7d5f47fa34aa8461afab14c828a614abee043b1c",
+      "returncode": 0,
+      "exact": true,
+      "bytes": 46080,
+      "expected_bytes": 46080,
+      "stderr": ""
+    },
+    {
+      "file": "in24-c2-le-t48000-wave-before.mov",
+      "input_sha256": "e3b9bf7a3a7bd07cfe36cc480263ddb970c47b203073a61a06a745bc8e71554c",
+      "returncode": 0,
+      "exact": true,
+      "bytes": 46080,
+      "expected_bytes": 46080,
+      "stderr": ""
+    },
+    {
+      "file": "in24-c2-le-t48000-wave-after.mov",
+      "input_sha256": "3e925a639cb4123db2b2633812e5856c571bf193182aac0962d4b3d4e59711b4",
+      "returncode": 0,
+      "exact": true,
+      "bytes": 46080,
+      "expected_bytes": 46080,
+      "stderr": ""
+    },
+    {
+      "file": "in32-c1-be-t1000-wave-before.mov",
+      "input_sha256": "efed78a2173ba435072bd7e8dbc5f788ca4bdedae4a3926ded54be4b33621214",
+      "returncode": 0,
+      "exact": true,
+      "bytes": 23040,
+      "expected_bytes": 23040,
+      "stderr": ""
+    },
+    {
+      "file": "in32-c1-be-t1000-wave-after.mov",
+      "input_sha256": "2a28cccea43f75963da00967605044d7c9d56091f651423fccdfbb0639569fbb",
+      "returncode": 0,
+      "exact": true,
+      "bytes": 23040,
+      "expected_bytes": 23040,
+      "stderr": ""
+    },
+    {
+      "file": "in32-c1-be-t48000-wave-before.mov",
+      "input_sha256": "cf6f9bbc3b15ab7ab6a174fac5c41e582fe803409c7e65f3302ec6fa9dc860fe",
+      "returncode": 0,
+      "exact": true,
+      "bytes": 23040,
+      "expected_bytes": 23040,
+      "stderr": ""
+    },
+    {
+      "file": "in32-c1-be-t48000-wave-after.mov",
+      "input_sha256": "6a8c4730f168276b77dc991a3a5a9382a7c73dc6d57986a5b66f41fe5f189994",
+      "returncode": 0,
+      "exact": true,
+      "bytes": 23040,
+      "expected_bytes": 23040,
+      "stderr": ""
+    },
+    {
+      "file": "in32-c1-le-t1000-wave-before.mov",
+      "input_sha256": "53a5b177676cb584fa30a0bb07bd471f3a4a74d3d3fb81b97009533e4837969d",
+      "returncode": 0,
+      "exact": true,
+      "bytes": 23040,
+      "expected_bytes": 23040,
+      "stderr": ""
+    },
+    {
+      "file": "in32-c1-le-t1000-wave-after.mov",
+      "input_sha256": "94918a9f03a11e9f341de0ba9547856b7d4e85556d4283b94c6db62d98f3bef0",
+      "returncode": 0,
+      "exact": true,
+      "bytes": 23040,
+      "expected_bytes": 23040,
+      "stderr": ""
+    },
+    {
+      "file": "in32-c1-le-t48000-wave-before.mov",
+      "input_sha256": "4f5511695d6ce37842d844496d12a42a6a625f511c2bfaa380c8ec3cdac35d8b",
+      "returncode": 0,
+      "exact": true,
+      "bytes": 23040,
+      "expected_bytes": 23040,
+      "stderr": ""
+    },
+    {
+      "file": "in32-c1-le-t48000-wave-after.mov",
+      "input_sha256": "fbb6bcc9d33882138546dd02690da5e1643fe551af837da4c6fd0f9355f48c10",
+      "returncode": 0,
+      "exact": true,
+      "bytes": 23040,
+      "expected_bytes": 23040,
+      "stderr": ""
+    },
+    {
+      "file": "in32-c2-be-t1000-wave-before.mov",
+      "input_sha256": "17e720b8d98966fed283ba2e72ae66b0fb007b674c46b77e2adbd7d9c7bbc4ee",
+      "returncode": 0,
+      "exact": true,
+      "bytes": 46080,
+      "expected_bytes": 46080,
+      "stderr": ""
+    },
+    {
+      "file": "in32-c2-be-t1000-wave-after.mov",
+      "input_sha256": "0806bebd004ff9c5c15c2871849d1dca1e4e95267f3c8d779e28fe576ca1c4f1",
+      "returncode": 0,
+      "exact": true,
+      "bytes": 46080,
+      "expected_bytes": 46080,
+      "stderr": ""
+    },
+    {
+      "file": "in32-c2-be-t48000-wave-before.mov",
+      "input_sha256": "c6322ba01e9f5907a04a2c32028f94936b19f1fb30efade7182d09fcc1f5161f",
+      "returncode": 0,
+      "exact": true,
+      "bytes": 46080,
+      "expected_bytes": 46080,
+      "stderr": ""
+    },
+    {
+      "file": "in32-c2-be-t48000-wave-after.mov",
+      "input_sha256": "44097ecabfc581a6ac4305681b872011235f25636a4a150ebfd86e1db0124256",
+      "returncode": 0,
+      "exact": true,
+      "bytes": 46080,
+      "expected_bytes": 46080,
+      "stderr": ""
+    },
+    {
+      "file": "in32-c2-le-t1000-wave-before.mov",
+      "input_sha256": "36664139ee27190e075c33f12cfb01fdbe444fa1b515675c5acfb73d3f4f7806",
+      "returncode": 0,
+      "exact": true,
+      "bytes": 46080,
+      "expected_bytes": 46080,
+      "stderr": ""
+    },
+    {
+      "file": "in32-c2-le-t1000-wave-after.mov",
+      "input_sha256": "b94f08cdfdc87649fe01062b796c17c62f69c725b544774ea9fa7104fa7f0135",
+      "returncode": 0,
+      "exact": true,
+      "bytes": 46080,
+      "expected_bytes": 46080,
+      "stderr": ""
+    },
+    {
+      "file": "in32-c2-le-t48000-wave-before.mov",
+      "input_sha256": "02b1c23430afedab709f86dd127b79c490a9e4ba21b42804b56ccd4fd19ab8a7",
+      "returncode": 0,
+      "exact": true,
+      "bytes": 46080,
+      "expected_bytes": 46080,
+      "stderr": ""
+    },
+    {
+      "file": "in32-c2-le-t48000-wave-after.mov",
+      "input_sha256": "213140d3bb3cdf82e4acfb577b63ed50fb71ad57b298d453e50e2e3325e89ace",
+      "returncode": 0,
+      "exact": true,
+      "bytes": 46080,
+      "expected_bytes": 46080,
+      "stderr": ""
+    },
+    {
+      "file": "fl32-c1-be-t1000-wave-before.mov",
+      "input_sha256": "381f512ed1bc79876ac15bef856b52a117895384d5b7207804bf44fd7e43b998",
+      "returncode": 0,
+      "exact": true,
+      "bytes": 23040,
+      "expected_bytes": 23040,
+      "stderr": ""
+    },
+    {
+      "file": "fl32-c1-be-t1000-wave-after.mov",
+      "input_sha256": "3efec6375a90d3cf9d70217919a900965a23e2dc6bd076188e6c33a12e60d078",
+      "returncode": 0,
+      "exact": true,
+      "bytes": 23040,
+      "expected_bytes": 23040,
+      "stderr": ""
+    },
+    {
+      "file": "fl32-c1-be-t48000-wave-before.mov",
+      "input_sha256": "badecc7efca14e16a56cdc5d821d10a3d4c63e5d4bc53d970ac0d4e72257ede6",
+      "returncode": 0,
+      "exact": true,
+      "bytes": 23040,
+      "expected_bytes": 23040,
+      "stderr": ""
+    },
+    {
+      "file": "fl32-c1-be-t48000-wave-after.mov",
+      "input_sha256": "b1345e9abf08f18caaa0a442bed0362494d018c0aa06bb1422bd6b50f50e9620",
+      "returncode": 0,
+      "exact": true,
+      "bytes": 23040,
+      "expected_bytes": 23040,
+      "stderr": ""
+    },
+    {
+      "file": "fl32-c1-le-t1000-wave-before.mov",
+      "input_sha256": "cbd4c1b9e2fe57b8dd1cf3d2babe73f4328bcd7fd111f40da8f132875eaef5be",
+      "returncode": 0,
+      "exact": true,
+      "bytes": 23040,
+      "expected_bytes": 23040,
+      "stderr": ""
+    },
+    {
+      "file": "fl32-c1-le-t1000-wave-after.mov",
+      "input_sha256": "ca5e8be6f8fd189188e5d38854cb5670e38fb6d5d999bd2535f954415ad28721",
+      "returncode": 0,
+      "exact": true,
+      "bytes": 23040,
+      "expected_bytes": 23040,
+      "stderr": ""
+    },
+    {
+      "file": "fl32-c1-le-t48000-wave-before.mov",
+      "input_sha256": "beb7048338584d62b6c6e126165e68e6c9e47e761724a8374fc76cb5d5da2912",
+      "returncode": 0,
+      "exact": true,
+      "bytes": 23040,
+      "expected_bytes": 23040,
+      "stderr": ""
+    },
+    {
+      "file": "fl32-c1-le-t48000-wave-after.mov",
+      "input_sha256": "02d219f670e108d1a6ff44703201823d51ea380ba90f4dba784e6041aea6b22f",
+      "returncode": 0,
+      "exact": true,
+      "bytes": 23040,
+      "expected_bytes": 23040,
+      "stderr": ""
+    },
+    {
+      "file": "fl32-c2-be-t1000-wave-before.mov",
+      "input_sha256": "02215d3a0621e126a761b858a8b15c9d04f57e3eb6212d6bd9541e5b75ebc97c",
+      "returncode": 0,
+      "exact": true,
+      "bytes": 46080,
+      "expected_bytes": 46080,
+      "stderr": ""
+    },
+    {
+      "file": "fl32-c2-be-t1000-wave-after.mov",
+      "input_sha256": "2b2397c9b20c1ce3218b635656d9b5c7ea4e653d3f49890bd50bccebd8024555",
+      "returncode": 0,
+      "exact": true,
+      "bytes": 46080,
+      "expected_bytes": 46080,
+      "stderr": ""
+    },
+    {
+      "file": "fl32-c2-be-t48000-wave-before.mov",
+      "input_sha256": "2abd165b5d478fd1081477cf71a5784fc9b38459562c17286075c4b189eac1fa",
+      "returncode": 0,
+      "exact": true,
+      "bytes": 46080,
+      "expected_bytes": 46080,
+      "stderr": ""
+    },
+    {
+      "file": "fl32-c2-be-t48000-wave-after.mov",
+      "input_sha256": "54e559198cee8ec34e78a307d01e2edb33d54ea1e25934449948b3f84398dd04",
+      "returncode": 0,
+      "exact": true,
+      "bytes": 46080,
+      "expected_bytes": 46080,
+      "stderr": ""
+    },
+    {
+      "file": "fl32-c2-le-t1000-wave-before.mov",
+      "input_sha256": "57da1c15dba2412579113d25e8ff9b5b10541c5fdfa73757f065bd35cdc4d62c",
+      "returncode": 0,
+      "exact": true,
+      "bytes": 46080,
+      "expected_bytes": 46080,
+      "stderr": ""
+    },
+    {
+      "file": "fl32-c2-le-t1000-wave-after.mov",
+      "input_sha256": "2b8570bc7fd33bb6de4bf8ec44f43cf1bb98adedc89c92cdbf92d6322696ff7c",
+      "returncode": 0,
+      "exact": true,
+      "bytes": 46080,
+      "expected_bytes": 46080,
+      "stderr": ""
+    },
+    {
+      "file": "fl32-c2-le-t48000-wave-before.mov",
+      "input_sha256": "691d2434740f2a9155967c23152a360552f6645637823c3cd748a49b8170b533",
+      "returncode": 0,
+      "exact": true,
+      "bytes": 46080,
+      "expected_bytes": 46080,
+      "stderr": ""
+    },
+    {
+      "file": "fl32-c2-le-t48000-wave-after.mov",
+      "input_sha256": "6d4e265d0d96bdd4830cc2b5a68b82b1af128a60421077f0915a1163e90b5e06",
+      "returncode": 0,
+      "exact": true,
+      "bytes": 46080,
+      "expected_bytes": 46080,
+      "stderr": ""
+    },
+    {
+      "file": "fl64-c1-be-t1000-wave-before.mov",
+      "input_sha256": "7681a830259d7c3d0d30c2bda7f3eceaa9648dde7a4298c657015a18146501e7",
+      "returncode": 0,
+      "exact": true,
+      "bytes": 23040,
+      "expected_bytes": 23040,
+      "stderr": ""
+    },
+    {
+      "file": "fl64-c1-be-t1000-wave-after.mov",
+      "input_sha256": "32d253017637b928753dda9e07fbf594591e3ae87e62d70ff33e49b0ff73ae62",
+      "returncode": 0,
+      "exact": true,
+      "bytes": 23040,
+      "expected_bytes": 23040,
+      "stderr": ""
+    },
+    {
+      "file": "fl64-c1-be-t48000-wave-before.mov",
+      "input_sha256": "899370907ff72e05702664125d30552d39c76bdfbd4ba9ee8572ca89a1eb9825",
+      "returncode": 0,
+      "exact": true,
+      "bytes": 23040,
+      "expected_bytes": 23040,
+      "stderr": ""
+    },
+    {
+      "file": "fl64-c1-be-t48000-wave-after.mov",
+      "input_sha256": "b18242b0abf47e0875d450963c22c14ab4af978630764d08df4c0a4870afc6f2",
+      "returncode": 0,
+      "exact": true,
+      "bytes": 23040,
+      "expected_bytes": 23040,
+      "stderr": ""
+    },
+    {
+      "file": "fl64-c1-le-t1000-wave-before.mov",
+      "input_sha256": "f3552c2e11ce042acbb8da078e57259951f65f488f787190054a71ee9b8e6fd1",
+      "returncode": 0,
+      "exact": true,
+      "bytes": 23040,
+      "expected_bytes": 23040,
+      "stderr": ""
+    },
+    {
+      "file": "fl64-c1-le-t1000-wave-after.mov",
+      "input_sha256": "ddeba0e0a98b94975b00b9248e2fd423a2cc521a32b181d0df32203213b85f4b",
+      "returncode": 0,
+      "exact": true,
+      "bytes": 23040,
+      "expected_bytes": 23040,
+      "stderr": ""
+    },
+    {
+      "file": "fl64-c1-le-t48000-wave-before.mov",
+      "input_sha256": "0816a9faa11e207b5b3fca57838b79dbe89e68b8e79b2d87346ed44aa8983b25",
+      "returncode": 0,
+      "exact": true,
+      "bytes": 23040,
+      "expected_bytes": 23040,
+      "stderr": ""
+    },
+    {
+      "file": "fl64-c1-le-t48000-wave-after.mov",
+      "input_sha256": "d143ef66b4ae620bdbb42dccfe569eb81fd08382fe8d17204294d14f3a415299",
+      "returncode": 0,
+      "exact": true,
+      "bytes": 23040,
+      "expected_bytes": 23040,
+      "stderr": ""
+    },
+    {
+      "file": "fl64-c2-be-t1000-wave-before.mov",
+      "input_sha256": "756f6cbedd1600365e9a0502ceeaa1676528800c9818c17548da073a37a7f9a8",
+      "returncode": 0,
+      "exact": true,
+      "bytes": 46080,
+      "expected_bytes": 46080,
+      "stderr": ""
+    },
+    {
+      "file": "fl64-c2-be-t1000-wave-after.mov",
+      "input_sha256": "37007dda7d348bb066d1105e6ec1ac3ebfb55435681b1eb973092b726739ce90",
+      "returncode": 0,
+      "exact": true,
+      "bytes": 46080,
+      "expected_bytes": 46080,
+      "stderr": ""
+    },
+    {
+      "file": "fl64-c2-be-t48000-wave-before.mov",
+      "input_sha256": "8373add8ec111efee3cff9ae8e45c1da71e7b1e31f4b941d35e66ba0a9e44cdb",
+      "returncode": 0,
+      "exact": true,
+      "bytes": 46080,
+      "expected_bytes": 46080,
+      "stderr": ""
+    },
+    {
+      "file": "fl64-c2-be-t48000-wave-after.mov",
+      "input_sha256": "102ebe070e0e6157e9f644b8b0d7bbe74a5d873554a382b31e652d5ce6c5c984",
+      "returncode": 0,
+      "exact": true,
+      "bytes": 46080,
+      "expected_bytes": 46080,
+      "stderr": ""
+    },
+    {
+      "file": "fl64-c2-le-t1000-wave-before.mov",
+      "input_sha256": "bf33aed5c4f102a7abf80886039c8c0e67d50d82bb8828845f7c02889899bd0a",
+      "returncode": 0,
+      "exact": true,
+      "bytes": 46080,
+      "expected_bytes": 46080,
+      "stderr": ""
+    },
+    {
+      "file": "fl64-c2-le-t1000-wave-after.mov",
+      "input_sha256": "73fca638f3ea61a6f1a759f8e4a734337c474469f65d3b5b9d2a957b79fb7cd2",
+      "returncode": 0,
+      "exact": true,
+      "bytes": 46080,
+      "expected_bytes": 46080,
+      "stderr": ""
+    },
+    {
+      "file": "fl64-c2-le-t48000-wave-before.mov",
+      "input_sha256": "fa53db3878cdc5ca2aab2e77fa40ca3cbedaf531ed8a14e1cba002b277e3aed6",
+      "returncode": 0,
+      "exact": true,
+      "bytes": 46080,
+      "expected_bytes": 46080,
+      "stderr": ""
+    },
+    {
+      "file": "fl64-c2-le-t48000-wave-after.mov",
+      "input_sha256": "421adbb573e68c8d48411cb96f2b0375515dd6226eac970614159fd82d042683",
+      "returncode": 0,
+      "exact": true,
+      "bytes": 46080,
+      "expected_bytes": 46080,
+      "stderr": ""
+    }
+  ],
+  "binary": "/opt/homebrew/opt/ffmpeg-full/bin/ffmpeg",
+  "command_template": [
+    "/opt/homebrew/opt/ffmpeg-full/bin/ffmpeg",
+    "-v",
+    "error",
+    "-nostdin",
+    "-i",
+    "<fixture>",
+    "-map",
+    "0:a:0",
+    "-f",
+    "f64le",
+    "-acodec",
+    "pcm_f64le",
+    "-"
+  ]
+}

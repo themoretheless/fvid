@@ -1,0 +1,9 @@
+{
+  "base": "0a9cccc7f604d804246d546d86aa1eaf9e3aa15b",
+  "passed": 1,
+  "failed": 4,
+  "runtime_sha256": "d9c9f156548ee3893c92aab65bd6f05e57ff156cc44685f477fd08a329341573",
+  "test_sha256": "d2991a71cfe85fc8c940b6d3cde915a8b01825e2b896cb8c6ea01a508b13f9f8",
+  "log": "docs/improvements/evidence/mp4-enda-wave-fallback/final-baseline.log",
+  "reason": "Direct/big-endian controls pass; explicit LE, strict malformed-field, public export and actual-worker gates fail on the unchanged final stand"
+}

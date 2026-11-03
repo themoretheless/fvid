@@ -1,0 +1,19 @@
+
+running 15 tests
+test playback_mp4_audio::clock_recovery::description_usage_tests::mp4_compact_description_usage_preserves_virtual_lookup_semantics ... ok
+test playback_mp4_audio::edit_clock::tests::comparing_and_scaling_large_fractions_does_not_multiply_denominators ... ok
+test playback_mp4_audio::edit_clock::tests::normalization_origins_keep_signed_fractional_output_phase ... ok
+test playback_mp4_audio::edit_clock::tests::source_phase_and_signed_preroll_survive_fractional_container_clocks ... ok
+test playback_mp4_audio::edit_seek_tests::seek_anchor_applies_priming_offset_once ... ok
+test playback_mp4_audio::tests::a_named_file_lists_its_audio_tracks_by_what_it_says ... ok
+test playback_mp4_audio::eac3_header_scan_tests::selected_description_role_scan_reads_only_sixteen_byte_audio_headers ... ok
+test playback_mp4_audio::tests::a_pcm_track_indexes_as_runs_of_chunks ... ok
+test playback_mp4_audio::tests::a_pcm_track_over_the_sample_budget_leaves_the_picture ... ok
+test playback_mp4_audio::tests::a_pcm_track_decodes_sample_by_sample ... ok
+test playback_mp4_audio::tests::both_audio_tracks_are_listed_and_openable ... ok
+test playback_mp4_audio::tests::each_pcm_tag_is_read_at_its_own_width_and_order ... ok
+test playback_mp4_audio::tests::each_track_states_its_own_length ... ok
+test playback_mp4_audio::tests::aac_duration_counts_leading_silence_and_repeated_ranges ... ok
+test playback_mp4_audio::tests::the_second_track_decodes_at_its_own_rate ... ok
+
+test result: ok. 15 passed; 0 failed; 0 ignored; 0 measured; 1215 filtered out; finished in 0.16s

@@ -1963,9 +1963,15 @@ fn parse_sample_entry(entry: Atom<'_>, mut result: Track, refused: &mut Vec<Skip
             if matches!(codec, b"in24" | b"in32" | b"fl32" | b"fl64") {
                 let at = usize::from(u16be(entry.data, 8)? != 0) * 16 + 28;
                 let children = atoms(entry.data.get(at..).ok_or_else(|| invalid("short PCM description"))?)?;
-                let enda = if let Some(wave) = optional(&children,b"wave")? {
+                let nested_enda = if let Some(wave) = optional(&children,b"wave")? {
                     optional(&atoms(wave)?,b"enda")?
-                } else { optional(&children,b"enda")? };
+                } else { None };
+                // An unrelated wave extension must not hide the direct byte order.
+                // Keep the existing nested precedence when that field is present.
+                let enda = match nested_enda {
+                    Some(data) => Some(data),
+                    None => optional(&children,b"enda")?,
+                };
                 let little = match enda {Some(data) => u16be(data,0)?, None => 0};
                 if little > 1 {return Err(invalid("invalid PCM enda byte order"));}
                 result.configuration = vec![little as u8];
