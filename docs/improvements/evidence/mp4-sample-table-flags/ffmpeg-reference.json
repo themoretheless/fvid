@@ -1,0 +1,262 @@
+{
+  "binary": "/opt/homebrew/opt/ffmpeg-full/bin/ffmpeg",
+  "version": "ffmpeg version 9.0.2 Copyright (c) 2000-2026 the FFmpeg developers",
+  "command": [
+    "-v",
+    "error",
+    "-i",
+    "<file>",
+    "-map",
+    "0:a:0",
+    "-c:a",
+    "pcm_f32le",
+    "-f",
+    "f32le",
+    "-"
+  ],
+  "cases": [
+    {
+      "file": "video-stsd-zero.mp4",
+      "inputSha256": "0315e937c4680085e78cbe5ae8188b6a4d48b0ff2e8860015ca8abce81d08f87",
+      "returncode": 0,
+      "bytes": 1920,
+      "expectedBytes": 1920,
+      "exact": true,
+      "stderr": ""
+    },
+    {
+      "file": "video-stts-zero.mp4",
+      "inputSha256": "0315e937c4680085e78cbe5ae8188b6a4d48b0ff2e8860015ca8abce81d08f87",
+      "returncode": 0,
+      "bytes": 1920,
+      "expectedBytes": 1920,
+      "exact": true,
+      "stderr": ""
+    },
+    {
+      "file": "video-ctts-zero.mp4",
+      "inputSha256": "2d0f1702dc8b995312d88ba84bbc4d229371eb5f2fb62dc4b5801691dccebf00",
+      "returncode": 0,
+      "bytes": 1920,
+      "expectedBytes": 1920,
+      "exact": true,
+      "stderr": ""
+    },
+    {
+      "file": "video-stsc-zero.mp4",
+      "inputSha256": "0315e937c4680085e78cbe5ae8188b6a4d48b0ff2e8860015ca8abce81d08f87",
+      "returncode": 0,
+      "bytes": 1920,
+      "expectedBytes": 1920,
+      "exact": true,
+      "stderr": ""
+    },
+    {
+      "file": "video-stsz-zero.mp4",
+      "inputSha256": "0315e937c4680085e78cbe5ae8188b6a4d48b0ff2e8860015ca8abce81d08f87",
+      "returncode": 0,
+      "bytes": 1920,
+      "expectedBytes": 1920,
+      "exact": true,
+      "stderr": ""
+    },
+    {
+      "file": "video-stz2-zero.mp4",
+      "inputSha256": "351f65779070da36f34f8ece681250c8b0fc0da704aa2ecdcacaa0c22088d120",
+      "returncode": 0,
+      "bytes": 1920,
+      "expectedBytes": 1920,
+      "exact": true,
+      "stderr": ""
+    },
+    {
+      "file": "video-stco-zero.mp4",
+      "inputSha256": "0315e937c4680085e78cbe5ae8188b6a4d48b0ff2e8860015ca8abce81d08f87",
+      "returncode": 0,
+      "bytes": 1920,
+      "expectedBytes": 1920,
+      "exact": true,
+      "stderr": ""
+    },
+    {
+      "file": "video-co64-zero.mp4",
+      "inputSha256": "9a8f115ac3f762c9d91250794ef97a183f491ae0a9e14ffb26169555db1ed4d5",
+      "returncode": 0,
+      "bytes": 1920,
+      "expectedBytes": 1920,
+      "exact": true,
+      "stderr": ""
+    },
+    {
+      "file": "video-stss-zero.mp4",
+      "inputSha256": "0315e937c4680085e78cbe5ae8188b6a4d48b0ff2e8860015ca8abce81d08f87",
+      "returncode": 0,
+      "bytes": 1920,
+      "expectedBytes": 1920,
+      "exact": true,
+      "stderr": ""
+    },
+    {
+      "file": "pcm-stsd-zero.mp4",
+      "inputSha256": "0315e937c4680085e78cbe5ae8188b6a4d48b0ff2e8860015ca8abce81d08f87",
+      "returncode": 0,
+      "bytes": 1920,
+      "expectedBytes": 1920,
+      "exact": true,
+      "stderr": ""
+    },
+    {
+      "file": "pcm-stts-zero.mp4",
+      "inputSha256": "0315e937c4680085e78cbe5ae8188b6a4d48b0ff2e8860015ca8abce81d08f87",
+      "returncode": 0,
+      "bytes": 1920,
+      "expectedBytes": 1920,
+      "exact": true,
+      "stderr": ""
+    },
+    {
+      "file": "pcm-ctts-zero.mp4",
+      "inputSha256": "8cf4f9675ce20f1660d4e4a7574afdbe488d90676edcfc51cc8cd14bc49aa68f",
+      "returncode": 0,
+      "bytes": 1920,
+      "expectedBytes": 1920,
+      "exact": true,
+      "stderr": ""
+    },
+    {
+      "file": "pcm-stsc-zero.mp4",
+      "inputSha256": "0315e937c4680085e78cbe5ae8188b6a4d48b0ff2e8860015ca8abce81d08f87",
+      "returncode": 0,
+      "bytes": 1920,
+      "expectedBytes": 1920,
+      "exact": true,
+      "stderr": ""
+    },
+    {
+      "file": "pcm-stsz-zero.mp4",
+      "inputSha256": "0315e937c4680085e78cbe5ae8188b6a4d48b0ff2e8860015ca8abce81d08f87",
+      "returncode": 0,
+      "bytes": 1920,
+      "expectedBytes": 1920,
+      "exact": true,
+      "stderr": ""
+    },
+    {
+      "file": "pcm-stz2-zero.mp4",
+      "inputSha256": "b20db2899433be1feb6d01a04e6b22aab07c9d3ccd0633e2f173d9661d03f885",
+      "returncode": 0,
+      "bytes": 1920,
+      "expectedBytes": 1920,
+      "exact": true,
+      "stderr": ""
+    },
+    {
+      "file": "pcm-stco-zero.mp4",
+      "inputSha256": "0315e937c4680085e78cbe5ae8188b6a4d48b0ff2e8860015ca8abce81d08f87",
+      "returncode": 0,
+      "bytes": 1920,
+      "expectedBytes": 1920,
+      "exact": true,
+      "stderr": ""
+    },
+    {
+      "file": "pcm-co64-zero.mp4",
+      "inputSha256": "be39fd048737595a0ff0dcef6db6d19cae65b8210d0f26d7f437da5b60a25c93",
+      "returncode": 0,
+      "bytes": 1920,
+      "expectedBytes": 1920,
+      "exact": true,
+      "stderr": ""
+    },
+    {
+      "file": "pcm-stss-zero.mp4",
+      "inputSha256": "fa4d027eda1c60ebc3e03879a99ee49f39746e3674ba348e1b355c2762b5a7e3",
+      "returncode": 0,
+      "bytes": 1920,
+      "expectedBytes": 1920,
+      "exact": true,
+      "stderr": ""
+    },
+    {
+      "file": "alac-stsd-zero.mp4",
+      "inputSha256": "fe37897f88e3aca225e88bca23142c1138bd637cd743edf5eaf5553e3b782475",
+      "returncode": 0,
+      "bytes": 1920,
+      "expectedBytes": 1920,
+      "exact": true,
+      "stderr": ""
+    },
+    {
+      "file": "alac-stts-zero.mp4",
+      "inputSha256": "fe37897f88e3aca225e88bca23142c1138bd637cd743edf5eaf5553e3b782475",
+      "returncode": 0,
+      "bytes": 1920,
+      "expectedBytes": 1920,
+      "exact": true,
+      "stderr": ""
+    },
+    {
+      "file": "alac-ctts-zero.mp4",
+      "inputSha256": "443ab75a86f17ccbe681ac4e3a83fb4f72f2e8524fe2b5f62778e38aa1edc21e",
+      "returncode": 0,
+      "bytes": 1920,
+      "expectedBytes": 1920,
+      "exact": true,
+      "stderr": ""
+    },
+    {
+      "file": "alac-stsc-zero.mp4",
+      "inputSha256": "fe37897f88e3aca225e88bca23142c1138bd637cd743edf5eaf5553e3b782475",
+      "returncode": 0,
+      "bytes": 1920,
+      "expectedBytes": 1920,
+      "exact": true,
+      "stderr": ""
+    },
+    {
+      "file": "alac-stsz-zero.mp4",
+      "inputSha256": "fe37897f88e3aca225e88bca23142c1138bd637cd743edf5eaf5553e3b782475",
+      "returncode": 0,
+      "bytes": 1920,
+      "expectedBytes": 1920,
+      "exact": true,
+      "stderr": ""
+    },
+    {
+      "file": "alac-stz2-zero.mp4",
+      "inputSha256": "d1f08866df7b29d79d517277f6890f536a0dc90220d8df52f917fa97c2e96706",
+      "returncode": 0,
+      "bytes": 1920,
+      "expectedBytes": 1920,
+      "exact": true,
+      "stderr": ""
+    },
+    {
+      "file": "alac-stco-zero.mp4",
+      "inputSha256": "fe37897f88e3aca225e88bca23142c1138bd637cd743edf5eaf5553e3b782475",
+      "returncode": 0,
+      "bytes": 1920,
+      "expectedBytes": 1920,
+      "exact": true,
+      "stderr": ""
+    },
+    {
+      "file": "alac-co64-zero.mp4",
+      "inputSha256": "34443a59943db2313a463a927eafd471ea00d79ae1b4177d068b642751c4be24",
+      "returncode": 0,
+      "bytes": 1920,
+      "expectedBytes": 1920,
+      "exact": true,
+      "stderr": ""
+    },
+    {
+      "file": "alac-stss-zero.mp4",
+      "inputSha256": "83d3015d49f9cb48698e7ebd6faf272ae15e15cbe035cf3c2ac2914e7ea224bc",
+      "returncode": 0,
+      "bytes": 1920,
+      "expectedBytes": 1920,
+      "exact": true,
+      "stderr": ""
+    }
+  ]
+}

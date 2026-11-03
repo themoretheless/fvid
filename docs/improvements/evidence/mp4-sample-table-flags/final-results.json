@@ -1,0 +1,80 @@
+[
+  {
+    "name": "final-integration",
+    "log": "docs/improvements/evidence/mp4-sample-table-flags/final-integration.log",
+    "passed": 44,
+    "ignored": 0
+  },
+  {
+    "name": "final-lib-build",
+    "log": "docs/improvements/evidence/mp4-sample-table-flags/final-lib-build.log",
+    "passed": true,
+    "ignored": 0
+  },
+  {
+    "name": "root-parser",
+    "log": "docs/improvements/evidence/mp4-sample-table-flags/root-parser.log",
+    "passed": 17,
+    "ignored": 0
+  },
+  {
+    "name": "root-audio",
+    "log": "docs/improvements/evidence/mp4-sample-table-flags/root-audio.log",
+    "passed": 15,
+    "ignored": 0
+  },
+  {
+    "name": "root-video",
+    "log": "docs/improvements/evidence/mp4-sample-table-flags/root-video.log",
+    "passed": 7,
+    "ignored": 0
+  },
+  {
+    "name": "worker",
+    "log": "docs/improvements/evidence/mp4-sample-table-flags/worker.log",
+    "passed": 39,
+    "ignored": 0
+  },
+  {
+    "name": "cpal",
+    "log": "docs/improvements/evidence/mp4-sample-table-flags/cpal.log",
+    "passed": 43,
+    "ignored": 2
+  },
+  {
+    "name": "media-audio",
+    "log": "docs/improvements/evidence/mp4-sample-table-flags/media-audio.log",
+    "passed": 13,
+    "ignored": 0
+  },
+  {
+    "name": "final-core-check",
+    "log": "docs/improvements/evidence/mp4-sample-table-flags/final-core-check.log",
+    "passed": true,
+    "ignored": 0
+  },
+  {
+    "name": "final-player-check",
+    "log": "docs/improvements/evidence/mp4-sample-table-flags/final-player-check.log",
+    "passed": true,
+    "ignored": 0
+  },
+  {
+    "name": "no-external-1",
+    "log": "docs/improvements/evidence/mp4-sample-table-flags/no-external-1.log",
+    "passed": 3,
+    "ignored": 0
+  },
+  {
+    "name": "no-external-2",
+    "log": "docs/improvements/evidence/mp4-sample-table-flags/no-external-2.log",
+    "passed": 3,
+    "ignored": 0
+  },
+  {
+    "name": "no-external-3",
+    "log": "docs/improvements/evidence/mp4-sample-table-flags/no-external-3.log",
+    "passed": 3,
+    "ignored": 0
+  }
+]

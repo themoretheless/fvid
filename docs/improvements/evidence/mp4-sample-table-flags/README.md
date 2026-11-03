@@ -1,0 +1,7 @@
+# FVID-0545: reserved MP4 sample-table flags
+
+Accepted as one sample-table header invariant. Apple requires unspecified full-atom flags to be zero: https://developer.apple.com/documentation/quicktime-file-format/atoms . The low24 flag bits are distinct from the version; valid CTTS version1 is preserved. No blanket flag restriction applies to tkhd, tfhd, trun, dref/url or elst.
+
+Original cd65765213 admits72 malformed files through both readers (144 false admissions). The same final stand passes valid decode/playback controls and fails the reserved-table gate (2 pass/1 fail); the fixed stand passes all3. The nine existing strict stz2 variants retain their earlier checks and diagnostic and are not new fixes. initial-flag-expectation-authoring.log records only a corrected stand diagnostic expectation, not a second defect.
+
+Twenty-seven authored60ms VP9+PCM/ALAC zero controls cover nine table types, including stz2. Full literal PCM, parsed clocks, video decode, precise seek/rewind/EOF and81 real software-worker sessions/anchors pass per stand. Independent FFmpeg confirms27 full-length literal controls. Eighty-one malformed companions differ solely in1..3 reserved flag bytes. All110 files regenerate exactly without encoders/network;5601 source/input hashes remain stable. Correct refusal and successful playback are separate gates. See batch-556-validation.json for checks and scope limits.

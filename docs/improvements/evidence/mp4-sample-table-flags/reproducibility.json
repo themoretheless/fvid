@@ -1,0 +1,8 @@
+{
+  "sourcePaths": 5601,
+  "fixtureFiles": 110,
+  "regeneratedExactly": true,
+  "reservedFlagCompanions": 81,
+  "eachDiffersOnlyInOneToThreePreviouslyZeroFlagBytes": true,
+  "referenceInputsMatch": 27
+}

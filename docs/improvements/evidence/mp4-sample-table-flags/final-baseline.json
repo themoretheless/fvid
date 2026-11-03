@@ -1,0 +1,12 @@
+{
+  "base": "cd657652133847e39af71e587b3bfea9f92007d8",
+  "sameFinalStand": true,
+  "testSha256": "ceb5b977bea5fca56b29d31ed10e24498343a9369ce6b8cb02ffdcf5dee49413",
+  "passed": 2,
+  "failed": 1,
+  "falseAdmissions": 144,
+  "newlyRejectedFiles": 72,
+  "existingStrictControls": 9,
+  "validControlFiles": 27,
+  "log": "docs/improvements/evidence/mp4-sample-table-flags/final-baseline.log"
+}

@@ -1,0 +1,709 @@
+{
+  "provenance": "Authored60ms16x16 VP9 plus8kHz mono integer PCM/raw ALAC. Full sample-table records and media are retained in zero-flag controls; only the explicitly authored reserved flags differ. No private media, encoder, random audit or network.",
+  "cases": [
+    {
+      "file": "video-stsd-zero.mp4",
+      "family": "video",
+      "tag": "stsd"
+    },
+    {
+      "file": "video-stts-zero.mp4",
+      "family": "video",
+      "tag": "stts"
+    },
+    {
+      "file": "video-ctts-zero.mp4",
+      "family": "video",
+      "tag": "ctts"
+    },
+    {
+      "file": "video-stsc-zero.mp4",
+      "family": "video",
+      "tag": "stsc"
+    },
+    {
+      "file": "video-stsz-zero.mp4",
+      "family": "video",
+      "tag": "stsz"
+    },
+    {
+      "file": "video-stz2-zero.mp4",
+      "family": "video",
+      "tag": "stz2"
+    },
+    {
+      "file": "video-stco-zero.mp4",
+      "family": "video",
+      "tag": "stco"
+    },
+    {
+      "file": "video-co64-zero.mp4",
+      "family": "video",
+      "tag": "co64"
+    },
+    {
+      "file": "video-stss-zero.mp4",
+      "family": "video",
+      "tag": "stss"
+    },
+    {
+      "file": "pcm-stsd-zero.mp4",
+      "family": "pcm",
+      "tag": "stsd"
+    },
+    {
+      "file": "pcm-stts-zero.mp4",
+      "family": "pcm",
+      "tag": "stts"
+    },
+    {
+      "file": "pcm-ctts-zero.mp4",
+      "family": "pcm",
+      "tag": "ctts"
+    },
+    {
+      "file": "pcm-stsc-zero.mp4",
+      "family": "pcm",
+      "tag": "stsc"
+    },
+    {
+      "file": "pcm-stsz-zero.mp4",
+      "family": "pcm",
+      "tag": "stsz"
+    },
+    {
+      "file": "pcm-stz2-zero.mp4",
+      "family": "pcm",
+      "tag": "stz2"
+    },
+    {
+      "file": "pcm-stco-zero.mp4",
+      "family": "pcm",
+      "tag": "stco"
+    },
+    {
+      "file": "pcm-co64-zero.mp4",
+      "family": "pcm",
+      "tag": "co64"
+    },
+    {
+      "file": "pcm-stss-zero.mp4",
+      "family": "pcm",
+      "tag": "stss"
+    },
+    {
+      "file": "alac-stsd-zero.mp4",
+      "family": "alac",
+      "tag": "stsd"
+    },
+    {
+      "file": "alac-stts-zero.mp4",
+      "family": "alac",
+      "tag": "stts"
+    },
+    {
+      "file": "alac-ctts-zero.mp4",
+      "family": "alac",
+      "tag": "ctts"
+    },
+    {
+      "file": "alac-stsc-zero.mp4",
+      "family": "alac",
+      "tag": "stsc"
+    },
+    {
+      "file": "alac-stsz-zero.mp4",
+      "family": "alac",
+      "tag": "stsz"
+    },
+    {
+      "file": "alac-stz2-zero.mp4",
+      "family": "alac",
+      "tag": "stz2"
+    },
+    {
+      "file": "alac-stco-zero.mp4",
+      "family": "alac",
+      "tag": "stco"
+    },
+    {
+      "file": "alac-co64-zero.mp4",
+      "family": "alac",
+      "tag": "co64"
+    },
+    {
+      "file": "alac-stss-zero.mp4",
+      "family": "alac",
+      "tag": "stss"
+    }
+  ],
+  "bad": [
+    {
+      "file": "video-stsd-000001.mp4",
+      "control": "video-stsd-zero.mp4",
+      "family": "video",
+      "tag": "stsd",
+      "flags": 1
+    },
+    {
+      "file": "video-stsd-800000.mp4",
+      "control": "video-stsd-zero.mp4",
+      "family": "video",
+      "tag": "stsd",
+      "flags": 8388608
+    },
+    {
+      "file": "video-stsd-ffffff.mp4",
+      "control": "video-stsd-zero.mp4",
+      "family": "video",
+      "tag": "stsd",
+      "flags": 16777215
+    },
+    {
+      "file": "video-stts-000001.mp4",
+      "control": "video-stts-zero.mp4",
+      "family": "video",
+      "tag": "stts",
+      "flags": 1
+    },
+    {
+      "file": "video-stts-800000.mp4",
+      "control": "video-stts-zero.mp4",
+      "family": "video",
+      "tag": "stts",
+      "flags": 8388608
+    },
+    {
+      "file": "video-stts-ffffff.mp4",
+      "control": "video-stts-zero.mp4",
+      "family": "video",
+      "tag": "stts",
+      "flags": 16777215
+    },
+    {
+      "file": "video-ctts-000001.mp4",
+      "control": "video-ctts-zero.mp4",
+      "family": "video",
+      "tag": "ctts",
+      "flags": 1
+    },
+    {
+      "file": "video-ctts-800000.mp4",
+      "control": "video-ctts-zero.mp4",
+      "family": "video",
+      "tag": "ctts",
+      "flags": 8388608
+    },
+    {
+      "file": "video-ctts-ffffff.mp4",
+      "control": "video-ctts-zero.mp4",
+      "family": "video",
+      "tag": "ctts",
+      "flags": 16777215
+    },
+    {
+      "file": "video-stsc-000001.mp4",
+      "control": "video-stsc-zero.mp4",
+      "family": "video",
+      "tag": "stsc",
+      "flags": 1
+    },
+    {
+      "file": "video-stsc-800000.mp4",
+      "control": "video-stsc-zero.mp4",
+      "family": "video",
+      "tag": "stsc",
+      "flags": 8388608
+    },
+    {
+      "file": "video-stsc-ffffff.mp4",
+      "control": "video-stsc-zero.mp4",
+      "family": "video",
+      "tag": "stsc",
+      "flags": 16777215
+    },
+    {
+      "file": "video-stsz-000001.mp4",
+      "control": "video-stsz-zero.mp4",
+      "family": "video",
+      "tag": "stsz",
+      "flags": 1
+    },
+    {
+      "file": "video-stsz-800000.mp4",
+      "control": "video-stsz-zero.mp4",
+      "family": "video",
+      "tag": "stsz",
+      "flags": 8388608
+    },
+    {
+      "file": "video-stsz-ffffff.mp4",
+      "control": "video-stsz-zero.mp4",
+      "family": "video",
+      "tag": "stsz",
+      "flags": 16777215
+    },
+    {
+      "file": "video-stz2-000001.mp4",
+      "control": "video-stz2-zero.mp4",
+      "family": "video",
+      "tag": "stz2",
+      "flags": 1
+    },
+    {
+      "file": "video-stz2-800000.mp4",
+      "control": "video-stz2-zero.mp4",
+      "family": "video",
+      "tag": "stz2",
+      "flags": 8388608
+    },
+    {
+      "file": "video-stz2-ffffff.mp4",
+      "control": "video-stz2-zero.mp4",
+      "family": "video",
+      "tag": "stz2",
+      "flags": 16777215
+    },
+    {
+      "file": "video-stco-000001.mp4",
+      "control": "video-stco-zero.mp4",
+      "family": "video",
+      "tag": "stco",
+      "flags": 1
+    },
+    {
+      "file": "video-stco-800000.mp4",
+      "control": "video-stco-zero.mp4",
+      "family": "video",
+      "tag": "stco",
+      "flags": 8388608
+    },
+    {
+      "file": "video-stco-ffffff.mp4",
+      "control": "video-stco-zero.mp4",
+      "family": "video",
+      "tag": "stco",
+      "flags": 16777215
+    },
+    {
+      "file": "video-co64-000001.mp4",
+      "control": "video-co64-zero.mp4",
+      "family": "video",
+      "tag": "co64",
+      "flags": 1
+    },
+    {
+      "file": "video-co64-800000.mp4",
+      "control": "video-co64-zero.mp4",
+      "family": "video",
+      "tag": "co64",
+      "flags": 8388608
+    },
+    {
+      "file": "video-co64-ffffff.mp4",
+      "control": "video-co64-zero.mp4",
+      "family": "video",
+      "tag": "co64",
+      "flags": 16777215
+    },
+    {
+      "file": "video-stss-000001.mp4",
+      "control": "video-stss-zero.mp4",
+      "family": "video",
+      "tag": "stss",
+      "flags": 1
+    },
+    {
+      "file": "video-stss-800000.mp4",
+      "control": "video-stss-zero.mp4",
+      "family": "video",
+      "tag": "stss",
+      "flags": 8388608
+    },
+    {
+      "file": "video-stss-ffffff.mp4",
+      "control": "video-stss-zero.mp4",
+      "family": "video",
+      "tag": "stss",
+      "flags": 16777215
+    },
+    {
+      "file": "pcm-stsd-000001.mp4",
+      "control": "pcm-stsd-zero.mp4",
+      "family": "pcm",
+      "tag": "stsd",
+      "flags": 1
+    },
+    {
+      "file": "pcm-stsd-800000.mp4",
+      "control": "pcm-stsd-zero.mp4",
+      "family": "pcm",
+      "tag": "stsd",
+      "flags": 8388608
+    },
+    {
+      "file": "pcm-stsd-ffffff.mp4",
+      "control": "pcm-stsd-zero.mp4",
+      "family": "pcm",
+      "tag": "stsd",
+      "flags": 16777215
+    },
+    {
+      "file": "pcm-stts-000001.mp4",
+      "control": "pcm-stts-zero.mp4",
+      "family": "pcm",
+      "tag": "stts",
+      "flags": 1
+    },
+    {
+      "file": "pcm-stts-800000.mp4",
+      "control": "pcm-stts-zero.mp4",
+      "family": "pcm",
+      "tag": "stts",
+      "flags": 8388608
+    },
+    {
+      "file": "pcm-stts-ffffff.mp4",
+      "control": "pcm-stts-zero.mp4",
+      "family": "pcm",
+      "tag": "stts",
+      "flags": 16777215
+    },
+    {
+      "file": "pcm-ctts-000001.mp4",
+      "control": "pcm-ctts-zero.mp4",
+      "family": "pcm",
+      "tag": "ctts",
+      "flags": 1
+    },
+    {
+      "file": "pcm-ctts-800000.mp4",
+      "control": "pcm-ctts-zero.mp4",
+      "family": "pcm",
+      "tag": "ctts",
+      "flags": 8388608
+    },
+    {
+      "file": "pcm-ctts-ffffff.mp4",
+      "control": "pcm-ctts-zero.mp4",
+      "family": "pcm",
+      "tag": "ctts",
+      "flags": 16777215
+    },
+    {
+      "file": "pcm-stsc-000001.mp4",
+      "control": "pcm-stsc-zero.mp4",
+      "family": "pcm",
+      "tag": "stsc",
+      "flags": 1
+    },
+    {
+      "file": "pcm-stsc-800000.mp4",
+      "control": "pcm-stsc-zero.mp4",
+      "family": "pcm",
+      "tag": "stsc",
+      "flags": 8388608
+    },
+    {
+      "file": "pcm-stsc-ffffff.mp4",
+      "control": "pcm-stsc-zero.mp4",
+      "family": "pcm",
+      "tag": "stsc",
+      "flags": 16777215
+    },
+    {
+      "file": "pcm-stsz-000001.mp4",
+      "control": "pcm-stsz-zero.mp4",
+      "family": "pcm",
+      "tag": "stsz",
+      "flags": 1
+    },
+    {
+      "file": "pcm-stsz-800000.mp4",
+      "control": "pcm-stsz-zero.mp4",
+      "family": "pcm",
+      "tag": "stsz",
+      "flags": 8388608
+    },
+    {
+      "file": "pcm-stsz-ffffff.mp4",
+      "control": "pcm-stsz-zero.mp4",
+      "family": "pcm",
+      "tag": "stsz",
+      "flags": 16777215
+    },
+    {
+      "file": "pcm-stz2-000001.mp4",
+      "control": "pcm-stz2-zero.mp4",
+      "family": "pcm",
+      "tag": "stz2",
+      "flags": 1
+    },
+    {
+      "file": "pcm-stz2-800000.mp4",
+      "control": "pcm-stz2-zero.mp4",
+      "family": "pcm",
+      "tag": "stz2",
+      "flags": 8388608
+    },
+    {
+      "file": "pcm-stz2-ffffff.mp4",
+      "control": "pcm-stz2-zero.mp4",
+      "family": "pcm",
+      "tag": "stz2",
+      "flags": 16777215
+    },
+    {
+      "file": "pcm-stco-000001.mp4",
+      "control": "pcm-stco-zero.mp4",
+      "family": "pcm",
+      "tag": "stco",
+      "flags": 1
+    },
+    {
+      "file": "pcm-stco-800000.mp4",
+      "control": "pcm-stco-zero.mp4",
+      "family": "pcm",
+      "tag": "stco",
+      "flags": 8388608
+    },
+    {
+      "file": "pcm-stco-ffffff.mp4",
+      "control": "pcm-stco-zero.mp4",
+      "family": "pcm",
+      "tag": "stco",
+      "flags": 16777215
+    },
+    {
+      "file": "pcm-co64-000001.mp4",
+      "control": "pcm-co64-zero.mp4",
+      "family": "pcm",
+      "tag": "co64",
+      "flags": 1
+    },
+    {
+      "file": "pcm-co64-800000.mp4",
+      "control": "pcm-co64-zero.mp4",
+      "family": "pcm",
+      "tag": "co64",
+      "flags": 8388608
+    },
+    {
+      "file": "pcm-co64-ffffff.mp4",
+      "control": "pcm-co64-zero.mp4",
+      "family": "pcm",
+      "tag": "co64",
+      "flags": 16777215
+    },
+    {
+      "file": "pcm-stss-000001.mp4",
+      "control": "pcm-stss-zero.mp4",
+      "family": "pcm",
+      "tag": "stss",
+      "flags": 1
+    },
+    {
+      "file": "pcm-stss-800000.mp4",
+      "control": "pcm-stss-zero.mp4",
+      "family": "pcm",
+      "tag": "stss",
+      "flags": 8388608
+    },
+    {
+      "file": "pcm-stss-ffffff.mp4",
+      "control": "pcm-stss-zero.mp4",
+      "family": "pcm",
+      "tag": "stss",
+      "flags": 16777215
+    },
+    {
+      "file": "alac-stsd-000001.mp4",
+      "control": "alac-stsd-zero.mp4",
+      "family": "alac",
+      "tag": "stsd",
+      "flags": 1
+    },
+    {
+      "file": "alac-stsd-800000.mp4",
+      "control": "alac-stsd-zero.mp4",
+      "family": "alac",
+      "tag": "stsd",
+      "flags": 8388608
+    },
+    {
+      "file": "alac-stsd-ffffff.mp4",
+      "control": "alac-stsd-zero.mp4",
+      "family": "alac",
+      "tag": "stsd",
+      "flags": 16777215
+    },
+    {
+      "file": "alac-stts-000001.mp4",
+      "control": "alac-stts-zero.mp4",
+      "family": "alac",
+      "tag": "stts",
+      "flags": 1
+    },
+    {
+      "file": "alac-stts-800000.mp4",
+      "control": "alac-stts-zero.mp4",
+      "family": "alac",
+      "tag": "stts",
+      "flags": 8388608
+    },
+    {
+      "file": "alac-stts-ffffff.mp4",
+      "control": "alac-stts-zero.mp4",
+      "family": "alac",
+      "tag": "stts",
+      "flags": 16777215
+    },
+    {
+      "file": "alac-ctts-000001.mp4",
+      "control": "alac-ctts-zero.mp4",
+      "family": "alac",
+      "tag": "ctts",
+      "flags": 1
+    },
+    {
+      "file": "alac-ctts-800000.mp4",
+      "control": "alac-ctts-zero.mp4",
+      "family": "alac",
+      "tag": "ctts",
+      "flags": 8388608
+    },
+    {
+      "file": "alac-ctts-ffffff.mp4",
+      "control": "alac-ctts-zero.mp4",
+      "family": "alac",
+      "tag": "ctts",
+      "flags": 16777215
+    },
+    {
+      "file": "alac-stsc-000001.mp4",
+      "control": "alac-stsc-zero.mp4",
+      "family": "alac",
+      "tag": "stsc",
+      "flags": 1
+    },
+    {
+      "file": "alac-stsc-800000.mp4",
+      "control": "alac-stsc-zero.mp4",
+      "family": "alac",
+      "tag": "stsc",
+      "flags": 8388608
+    },
+    {
+      "file": "alac-stsc-ffffff.mp4",
+      "control": "alac-stsc-zero.mp4",
+      "family": "alac",
+      "tag": "stsc",
+      "flags": 16777215
+    },
+    {
+      "file": "alac-stsz-000001.mp4",
+      "control": "alac-stsz-zero.mp4",
+      "family": "alac",
+      "tag": "stsz",
+      "flags": 1
+    },
+    {
+      "file": "alac-stsz-800000.mp4",
+      "control": "alac-stsz-zero.mp4",
+      "family": "alac",
+      "tag": "stsz",
+      "flags": 8388608
+    },
+    {
+      "file": "alac-stsz-ffffff.mp4",
+      "control": "alac-stsz-zero.mp4",
+      "family": "alac",
+      "tag": "stsz",
+      "flags": 16777215
+    },
+    {
+      "file": "alac-stz2-000001.mp4",
+      "control": "alac-stz2-zero.mp4",
+      "family": "alac",
+      "tag": "stz2",
+      "flags": 1
+    },
+    {
+      "file": "alac-stz2-800000.mp4",
+      "control": "alac-stz2-zero.mp4",
+      "family": "alac",
+      "tag": "stz2",
+      "flags": 8388608
+    },
+    {
+      "file": "alac-stz2-ffffff.mp4",
+      "control": "alac-stz2-zero.mp4",
+      "family": "alac",
+      "tag": "stz2",
+      "flags": 16777215
+    },
+    {
+      "file": "alac-stco-000001.mp4",
+      "control": "alac-stco-zero.mp4",
+      "family": "alac",
+      "tag": "stco",
+      "flags": 1
+    },
+    {
+      "file": "alac-stco-800000.mp4",
+      "control": "alac-stco-zero.mp4",
+      "family": "alac",
+      "tag": "stco",
+      "flags": 8388608
+    },
+    {
+      "file": "alac-stco-ffffff.mp4",
+      "control": "alac-stco-zero.mp4",
+      "family": "alac",
+      "tag": "stco",
+      "flags": 16777215
+    },
+    {
+      "file": "alac-co64-000001.mp4",
+      "control": "alac-co64-zero.mp4",
+      "family": "alac",
+      "tag": "co64",
+      "flags": 1
+    },
+    {
+      "file": "alac-co64-800000.mp4",
+      "control": "alac-co64-zero.mp4",
+      "family": "alac",
+      "tag": "co64",
+      "flags": 8388608
+    },
+    {
+      "file": "alac-co64-ffffff.mp4",
+      "control": "alac-co64-zero.mp4",
+      "family": "alac",
+      "tag": "co64",
+      "flags": 16777215
+    },
+    {
+      "file": "alac-stss-000001.mp4",
+      "control": "alac-stss-zero.mp4",
+      "family": "alac",
+      "tag": "stss",
+      "flags": 1
+    },
+    {
+      "file": "alac-stss-800000.mp4",
+      "control": "alac-stss-zero.mp4",
+      "family": "alac",
+      "tag": "stss",
+      "flags": 8388608
+    },
+    {
+      "file": "alac-stss-ffffff.mp4",
+      "control": "alac-stss-zero.mp4",
+      "family": "alac",
+      "tag": "stss",
+      "flags": 16777215
+    }
+  ]
+}

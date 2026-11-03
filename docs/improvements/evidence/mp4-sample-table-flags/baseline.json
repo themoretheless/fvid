@@ -1,0 +1,11 @@
+{
+  "base": "cd657652133847e39af71e587b3bfea9f92007d8",
+  "passed": 1,
+  "failed": 1,
+  "newlyAdmittedMalformedFiles": 72,
+  "readerAdmissions": 144,
+  "existingStrictStz2Files": 9,
+  "validControlFiles": 27,
+  "log": "docs/improvements/evidence/mp4-sample-table-flags/before.log",
+  "initialAuthoringDiagnostic": "initial-flag-expectation-authoring.log"
+}

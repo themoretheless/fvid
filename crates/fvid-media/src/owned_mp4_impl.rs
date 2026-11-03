@@ -2156,6 +2156,16 @@ fn sample_index(
     limit: usize,
     fragmented: bool,
 ) -> Result<Option<SampleIndex>> {
+    // Only interpreted sample tables have these reserved flag fields. Keep
+    // stz2's existing combined flags/reserved-field validation and diagnostic.
+    for atom in stbl {
+        if matches!(&atom.kind, b"stsd" | b"stts" | b"ctts" | b"stsc"
+            | b"stsz" | b"stco" | b"co64" | b"stss")
+            && u32be(atom.data, 0)? & 0x00ff_ffff != 0
+        {
+            return Err(invalid("reserved MP4 sample-table flags"));
+        }
+    }
     let regular = optional(stbl, b"stsz")?;
     let compact = optional(stbl, b"stz2")?;
     let sizes = match (regular, compact) {

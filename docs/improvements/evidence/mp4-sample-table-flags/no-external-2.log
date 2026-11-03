@@ -1,0 +1,7 @@
+
+running 3 tests
+test reserved_sample_table_flags_have_specific_invalid_refusals ... ok
+test zero_flag_controls_keep_complete_valid_video_audio_and_clocks ... ok
+test zero_flag_controls_keep_actual_playback_precise_seek_rewind_and_eof ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.16s

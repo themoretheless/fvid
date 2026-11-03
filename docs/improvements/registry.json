@@ -1,8 +1,8 @@
 {
   "target": 1000,
   "counting_rule": "One independently confirmed problem or useful capability; fixture variants and baseline integration repairs are excluded. Only accepted entries count.",
-  "accepted_count": 544,
-  "next_id": "FVID-0545",
+  "accepted_count": 545,
+  "next_id": "FVID-0546",
   "entries": [
     {
       "id": "FVID-0001",
@@ -6174,6 +6174,17 @@
       "result": "A shared checked version0/1 child offset now skips the16-byte v1 extension and gives typed Invalid refusal for incomplete admitted v1 headers. Fourteen valid companions cover ALAC8000/1000/48000 clocks and EAC3 stereo48000/1000 clocks, specified/unspecified packet fields, and optional dec3 packet-probe controls. Configuration, all coded packets and rational container timestamps match v0 controls; native PCM matches every sample, ALAC matches its literal oracle, and all short synthetic videos decode without error. Exact native seek from0/1ns/20ms/end/MAX, rewind, EOF and42 software audio-worker sessions/anchors pass per stand. Independent ffmpeg-full9.0.2 confirms14/14 full-length v0/v1 pairs;31 fixtures regenerate identically and5489 source/input hashes remain stable. Qualification passes191 Rust executions, two existing device ignores, core/player checks and three external-tool-free repeats. One shared header-offset invariant, not per-codec/fixture IDs. No old tests weakened; no decoder algorithm, public interface, new format, performance or physical-device claim.",
       "status": "accepted",
       "validation": "batch-555-validation.json"
+    },
+    {
+      "id": "FVID-0545",
+      "batch": 556,
+      "title": "Reject reserved flags before interpreting MP4 sample tables",
+      "source": "crates/fvid-media/src/owned_mp4_impl.rs",
+      "regression": "tests/mp4_sample_table_flags.rs",
+      "before": "Original cd65765213 silently interprets stsd/stts/ctts/stsc/stsz/stco/co64/stss with nonzero reserved flags. Seventy-two authored60ms movies on video/PCM/ALAC produce144 false admissions across root and owned readers, while27 zero-flag audiovisual controls and9 existing strict stz2 files pass. The same final three-test stand passes both decode/playback controls and fails only the reserved-table gate. The initial stand expectation incorrectly generalized the already-strict stz2 diagnostic; that authoring log is excluded from new-defect evidence.",
+      "result": "Validate the low24 reserved flag bits only for eight interpreted sample-table kinds before index construction. Existing stz2 flags/reserved-field checks and diagnostic stay unchanged; CTTS version1 and defined flags in unrelated headers remain admitted. All81 malformed companions now give the expected typed Invalid/non-unsupported refusal; only72 are newly denied. Twenty-seven zero controls preserve literal full-length PCM and parsed sample timestamps, three decoded VP9 pictures,60ms duration, exact seek from0/1ns/20ms/end/MAX, rewind, EOF and81 software-worker sessions/anchors per stand. Independent ffmpeg-full confirms27/27 full-length literal audio controls. All110 authored files regenerate identically; every malformed companion differs only in1..3 flag bytes, and5601 source/input hashes remain stable. Qualification passes187 Rust executions, two existing device ignores, core/player checks and three external-tool-free repeats, including unchanged compact-size/padding/enablement tests. One missing sample-table header invariant across eight kinds, not per-table/codec/bit IDs. No old tests weakened; no codec, public API, unknown-version, performance or physical-device claim.",
+      "status": "accepted",
+      "validation": "batch-556-validation.json"
     }
   ]
 }
