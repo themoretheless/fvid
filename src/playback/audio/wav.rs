@@ -29,6 +29,8 @@
 mod rf64;
 #[path = "wav_wave64.rs"]
 mod wave64;
+#[path = "wav_ms_adpcm.rs"]
+mod ms_adpcm;
 
 use crate::audio::{AudioStream, AudioTrack, EncodedPacket};
 use crate::codec::pcm_decoder::PcmFormat;
@@ -115,6 +117,8 @@ pub enum Coding {
     Truespeech,
     /// Microsoft IMA blocks: encoded alignment and decoded samples per block.
     ImaWav { block_bytes: u16, block_frames: u16 },
+    /// Microsoft ADPCM blocks; the file retains its bounded coefficient setup.
+    MsAdpcm { block_bytes: u16, block_frames: u16 },
     /// Apple MACE 3-to-1: a byte's three codes give one sample each, so a channel's block
     /// is two bytes for six samples. It reaches this enum from a container's fourcc, not
     /// from a Wave number - this build's muxer refuses to write the coding into a Wave.
@@ -122,6 +126,12 @@ pub enum Coding {
     /// Apple MACE 6-to-1: the same three codes interpolated into two samples each, so a
     /// channel's block is one byte and still codes six samples.
     Mace6,
+}
+
+impl Coding {
+    fn wave_block_name(self) -> Option<&'static str> {
+        match self { Self::ImaWav { .. } => Some("IMA"), Self::MsAdpcm { .. } => Some("MS ADPCM"), _ => None }
+    }
 }
 
 /// A TrueSpeech block: 256 bits of filter, offsets and pulses, which the reconstruction
@@ -175,7 +185,7 @@ impl Pcm {
     /// rates several bytes wide.
     pub fn block_align(&self) -> usize {
         match self.coding {
-            Coding::ImaWav { block_bytes, .. } => usize::from(block_bytes),
+            Coding::ImaWav { block_bytes, .. } | Coding::MsAdpcm { block_bytes, .. } => usize::from(block_bytes),
             Coding::ALaw | Coding::MuLaw => usize::from(self.channels),
             Coding::G722 => usize::from(self.channels),
             Coding::G726(code_size) => usize::from(self.channels) * g726_block(code_size).0,
@@ -200,7 +210,7 @@ impl Pcm {
     /// bytes hold three samples apiece while 6-to-1's one byte interpolates to six.
     pub fn frames_per_block(&self) -> usize {
         match self.coding {
-            Coding::ImaWav { block_frames, .. } => usize::from(block_frames),
+            Coding::ImaWav { block_frames, .. } | Coding::MsAdpcm { block_frames, .. } => usize::from(block_frames),
             Coding::G722 => 2,
             Coding::G726(code_size) => g726_block(code_size).1,
             Coding::Gsm => GSM_SAMPLES_PER_BLOCK,
@@ -237,7 +247,7 @@ impl Pcm {
     /// bytes came out with `dwAvgBytesPerSec` stating 1 066 and 8 000 alike.
     pub fn derived_byte_rate(&self) -> Option<usize> {
         match self.coding {
-            Coding::G722 | Coding::AdpcmCt | Coding::Truespeech | Coding::ImaWav { .. } => None,
+            Coding::G722 | Coding::AdpcmCt | Coding::Truespeech | Coding::ImaWav { .. } | Coding::MsAdpcm { .. } => None,
             _ => Some(self.coded_bytes_per_second()),
         }
     }
@@ -265,6 +275,7 @@ impl Pcm {
             Coding::G726(_) => "adpcm_g726",
             Coding::Gsm => "gsm_ms",
             Coding::ImaWav { .. } => "adpcm_ima_wav",
+            Coding::MsAdpcm { .. } => "adpcm_ms",
             Coding::AdpcmCt => "adpcm_ct",
             Coding::Truespeech => "truespeech",
             Coding::Mace3 => "mace3",
@@ -289,6 +300,12 @@ pub struct Wav {
     speaker_mask: Option<u32>,
     big_endian: bool,
     known_extent: Option<(u64, usize, &'static str)>,
+    adpcm_setup: Vec<u8>,
+}
+
+struct ParsedFormat<'a> {
+    geometry: (Pcm, Option<u32>, u8),
+    body: &'a [u8],
 }
 
 impl Wav {
@@ -415,12 +432,12 @@ impl Wav {
         };
         let format = fmt.ok_or_else(|| invalid("a Wave file with no fmt chunk"))?;
         let (start, end, declared_bytes) = data.ok_or_else(|| invalid("a Wave file with no data chunk"))?;
-        Self::from_samples(&bytes[start..end], format, declared_bytes, fact, big_endian, known_extent, limits)
+        Self::from_samples(&bytes[start..end], ParsedFormat { geometry: format, body: fmt_body.map(|(s,e)| &bytes[s..e]).unwrap_or(&[]) }, declared_bytes, fact, big_endian, known_extent, limits)
     }
 
-    fn from_samples(samples: &[u8], format: (Pcm, Option<u32>, u8), declared_bytes: usize,
+    fn from_samples(samples: &[u8], format: ParsedFormat<'_>, declared_bytes: usize,
         fact: Option<usize>, big_endian: bool, known_extent: Option<(u64, usize, &'static str)>, limits: &Limits) -> Result<Self> {
-        let (pcm, speaker_mask, padding_bits) = format;
+        let (pcm, speaker_mask, padding_bits) = format.geometry;
         if samples.is_empty() {
             return Err(invalid("a Wave file with no samples in it"));
         }
@@ -438,13 +455,13 @@ impl Wav {
         validate_pcm_padding(samples, pcm.bits_per_sample, padding_bits)?;
         let blocks = samples.len() / pcm.block_align();
         let mut frames = blocks * pcm.frames_per_block();
-        if matches!(pcm.coding, Coding::ImaWav { .. }) {
+        if let Some(label) = pcm.coding.wave_block_name() {
             if !samples.len().is_multiple_of(pcm.block_align()) {
-                return Err(invalid("incomplete IMA WAVE block"));
+                return Err(invalid(&format!("incomplete {label} WAVE block")));
             }
             if let Some(stated) = fact.filter(|&n| n > 0) {
                 if declared_bytes <= samples.len() && stated > frames {
-                    return Err(invalid("IMA fact exceeds available decoded frames"));
+                    return Err(invalid(&format!("{label} fact exceeds available decoded frames")));
                 }
                 frames = frames.min(stated);
             }
@@ -459,7 +476,7 @@ impl Wav {
         // this coding decodes. The reader still carries the claim, so the disagreement
         // stays visible as `declared_frames` beside `frames`.
         if pcm.derived_byte_rate().is_none()
-            && !matches!(pcm.coding, Coding::Truespeech | Coding::ImaWav { .. })
+            && !matches!(pcm.coding, Coding::Truespeech | Coding::ImaWav { .. } | Coding::MsAdpcm { .. })
             && declared_bytes <= samples.len()
             && let Some(stated) = fact
             && stated != frames
@@ -468,6 +485,21 @@ impl Wav {
                 "the fact chunk states {stated} frames where the run codes {frames}"
             )));
         }
+        let adpcm_setup = match pcm.coding {
+            Coding::ImaWav { .. } => {
+                let mut setup = format.body.get(..20).ok_or_else(||invalid("IMA WAVE setup is incomplete"))?.to_vec();
+                setup[16..18].copy_from_slice(&2u16.to_le_bytes());
+                setup
+            }
+            Coding::MsAdpcm { .. } => {
+                let count = usize::from(u16::from_le_bytes(format.body[20..22].try_into().unwrap()));
+                let mut setup = format.body[..22+count*4].to_vec();
+                let extension = (setup.len()-18) as u16;
+                setup[16..18].copy_from_slice(&extension.to_le_bytes());
+                setup
+            }
+            _ => Vec::new(),
+        };
         Ok(Self {
             pcm,
             declared_bytes,
@@ -477,13 +509,14 @@ impl Wav {
             speaker_mask,
             big_endian,
             known_extent,
+            adpcm_setup,
         })
     }
 
     /// Packets the sample run is read out as, the last a short one when the run does
     /// not divide evenly.
     pub fn packets(&self) -> usize {
-        if matches!(self.pcm.coding, Coding::ImaWav { .. }) {
+        if self.pcm.coding.wave_block_name().is_some() {
             self.frames.div_ceil(self.window_frames())
         } else { self.data.len().div_ceil(self.window_bytes()) }
     }
@@ -610,6 +643,11 @@ pub(crate) fn parse_fmt(body: &[u8], limits: &Limits) -> Result<(Pcm, Option<u32
             )));
         }
         format = data_format as u16;
+        // This setup carries EXTENSIBLE fields, not ADPCMWAVEFORMAT's
+        // coefficient table. Preserve unsupported-track skipping in AVI.
+        if format == 0x0002 {
+            return Err(unsupported("extensible MS ADPCM WAVE setup is not supported"));
+        }
         let valid_bits = u16_at(18);
         match format {
             PCM => {
@@ -640,6 +678,7 @@ pub(crate) fn parse_fmt(body: &[u8], limits: &Limits) -> Result<(Pcm, Option<u32
         return Err(invalid("sample rate of zero"));
     }
     let kind = match (format, bits) {
+        (0x0002, _) => ms_adpcm::parse(body, channels, block_align, bits)?,
         (0x0011, _) => {
             if !(1..=2).contains(&channels) { return Err(unsupported("IMA WAVE requires mono or stereo")); }
             if bits != 4 { return Err(invalid("IMA WAVE requires four-bit codes")); }
@@ -805,7 +844,6 @@ pub(crate) fn parse_fmt(body: &[u8], limits: &Limits) -> Result<(Pcm, Option<u32
 /// A Wave file read as an audio track.
 pub struct WavAudioReader {
     wav: Wav,
-    adpcm_setup: [u8; 20],
     packet: usize,
     frame_skip: usize,
     presentation_floor: u64,
@@ -819,17 +857,8 @@ impl WavAudioReader {
         let cap = u64::try_from(limits.file_bytes).unwrap_or(u64::MAX);
         reader.by_ref().take(cap.saturating_add(1)).read_to_end(&mut bytes)?;
         let wav = Wav::parse(&bytes, &limits)?;
-        let mut adpcm_setup = [0u8; 20];
-        if let Coding::ImaWav { block_bytes, block_frames } = wav.pcm.coding {
-            for (at, value) in [(0,17), (2,wav.pcm.channels), (12,block_bytes), (14,4), (16,2), (18,block_frames)] {
-                adpcm_setup[at..at+2].copy_from_slice(&value.to_le_bytes());
-            }
-            adpcm_setup[4..8].copy_from_slice(&wav.pcm.sample_rate.to_le_bytes());
-            adpcm_setup[8..12].copy_from_slice(&(wav.pcm.coded_bytes_per_second() as u32).to_le_bytes());
-        }
         Ok(Self {
             wav,
-            adpcm_setup,
             packet: 0,
             frame_skip: 0,
             presentation_floor: 0,
@@ -891,15 +920,15 @@ impl AudioStream for WavAudioReader {
         if let Some((expected, actual, kind)) = self.wav.known_extent && expected > actual as u64 {
             return Err(invalid(&format!("{kind} file extent is truncated")));
         }
-        if matches!(self.wav.pcm.coding, Coding::ImaWav { .. })
+        if let Some(label) = self.wav.pcm.coding.wave_block_name()
             && self.wav.declared_frames.is_some_and(|n| n > self.wav.frames) {
-            return Err(invalid("IMA fact sample payload is truncated"));
+            return Err(invalid(&format!("{label} fact sample payload is truncated")));
         }
         Ok(())
     }
 
     fn extra_data(&self) -> &[u8] {
-        if matches!(self.wav.pcm.coding, Coding::ImaWav { .. }) { return &self.adpcm_setup; }
+        if self.wav.pcm.coding.wave_block_name().is_some() { return &self.wav.adpcm_setup; }
         if self.wav.is_big_endian() && matches!(self.wav.pcm.coding, Coding::Pcm(PcmFormat::Float { .. })) {
             // Existing QuickTime/AIFF float dispatch uses zero for big endian.
             &[0]
@@ -926,7 +955,7 @@ impl AudioStream for WavAudioReader {
         self.frame_skip = 0;
         let pts = (self.packet * self.wav.window_frames() + skip) as i64;
         let held = data.len() / self.wav.pcm.block_align() * self.wav.pcm.frames_per_block();
-        let duration = if matches!(self.wav.pcm.coding, Coding::ImaWav { .. }) { held.min(self.wav.frames.saturating_sub(pts as usize)) } else { held };
+        let duration = if self.wav.pcm.coding.wave_block_name().is_some() { held.min(self.wav.frames.saturating_sub(pts as usize)) } else { held };
         let packet = EncodedPacket {
             duration: duration as i64,
             pts,
@@ -945,7 +974,7 @@ impl AudioStream for WavAudioReader {
             .map_err(|_| invalid("decoded audio precedes its source timeline"))?;
         packet.timebase_num = 1;
         packet.timebase_den = self.sample_rate();
-        if matches!(self.wav.pcm.coding, Coding::ImaWav { .. }) {
+        if self.wav.pcm.coding.wave_block_name().is_some() {
             let available = (self.wav.frames as u64).saturating_sub(packet.pts) as usize;
             packet.data.truncate(packet.data.len().min(available.saturating_mul(stride)));
         }
@@ -2262,5 +2291,21 @@ mod bw64_storage_limits {
             assert!(packet.data.capacity() <= 4096);
             assert!(reader.validate_eof().is_err());
         }
+    }
+}
+
+#[cfg(test)]
+mod ms_adpcm_storage_limits {
+    use super::*;
+    #[test]
+    fn complete_256_entry_setup_keeps_only_bounded_codec_metadata() {
+        let file = include_bytes!("../../../tests/fixtures/playback-errors/wave-ms-adpcm-playback/c1-b8-max-count-full-riff.wav");
+        let mut reader = WavAudioReader::open(file.as_slice(), Limits::default()).unwrap();
+        assert_eq!(reader.wav.adpcm_setup.len(), 1046);
+        assert!(reader.wav.adpcm_setup.capacity() <= 1046);
+        assert_eq!(reader.wav.data.len(),16);
+        assert!(reader.wav.data.capacity() <= 32);
+        assert_eq!(reader.next_packet().unwrap().unwrap().data.len(),16);
+        reader.validate_eof().unwrap();
     }
 }

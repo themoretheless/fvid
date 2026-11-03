@@ -1,5 +1,5 @@
 //! Sony Wave64: GUID chunks with header-inclusive sizes and eight-byte alignment.
-use super::{Limits, Wav, parse_fmt};
+use super::{Limits, ParsedFormat, Wav, parse_fmt};
 use crate::{Result, invalid, unsupported};
 const RIFF: [u8; 16] = [
     0x72, 0x69, 0x66, 0x66, 0x2e, 0x91, 0xcf, 0x11, 0xa5, 0xd6, 0x28, 0xdb, 0x04, 0xc1, 0x00, 0x00,
@@ -97,7 +97,7 @@ pub(super) fn parse(bytes: &[u8], limits: &Limits) -> Result<Wav> {
     let (samples, declared) = data.ok_or_else(|| invalid("Wave64 file has no data chunk"))?;
     Wav::from_samples(
         samples,
-        format,
+        ParsedFormat { geometry: format, body: fmt_body.unwrap_or(&[]) },
         declared,
         fact,
         false,

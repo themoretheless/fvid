@@ -13348,3 +13348,28 @@ mod native_wave_ima_file_regressions {
         }
     }
 }
+
+#[cfg(test)]
+mod native_wave_ms_adpcm_file_regressions {
+    use super::*;
+    #[test]
+    fn automatic_wave_ms_factory_preserves_extended_coefficients_and_tail() {
+        let root = Path::new(env!("CARGO_MANIFEST_DIR")).join("tests/fixtures/playback-errors/wave-ms-adpcm-playback");
+        for table in ["standard", "extended"] {
+            for kind in ["riff", "rf64", "wave64"] {
+                let path = root.join(format!("c2-b16-{table}-trim-{kind}.wav"));
+                let mut stream = AUDIO_READERS.iter().find_map(|a|a.open(&path,None)).expect("native MS ADPCM WAVE");
+                assert_eq!(stream.codec(), "adpcm_ms");
+                let mut decoder = stream.make_decoder().unwrap();
+                let mut out = Vec::new();
+                while let Some(p) = stream.next_packet().unwrap() {
+                    if let Some(d) = decoder.decode_packet(&p.data,stream.decoder_stamp(&p),p.duration as u64).unwrap() {
+                        if let Some(p) = stream.present_decoded(d.packet,d.source_pts).unwrap() {out.extend(p.data);}
+                    }
+                }
+                stream.validate_eof().unwrap();
+                assert_eq!(out,std::fs::read(root.join(format!("c2-b16-{table}-trim.f32le"))).unwrap(),"{table}/{kind}");
+            }
+        }
+    }
+}

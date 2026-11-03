@@ -1,0 +1,27 @@
+{
+  "base_commit": "aa2a36013ff550472af1c3c6b6423d1159956c6b",
+  "command": [
+    "cargo",
+    "test",
+    "--locked",
+    "--offline",
+    "--no-default-features",
+    "--features",
+    "player",
+    "--test",
+    "wave_ms_adpcm_playback",
+    "--",
+    "--test-threads=2"
+  ],
+  "exit_code": 101,
+  "source_sha256": {
+    "src/playback/audio/wav.rs": "d24260c39f587e3513f25354443c577ef9899e74a27f6150a256193828e6ed2b",
+    "src/playback/audio/wav_wave64.rs": "2f26ec8167240e2913fbebbf09085ef832682cb571fbc0303c1d98110b27cd91"
+  },
+  "candidate_sha256": {
+    "src/playback/audio/wav.rs": "e5e3f9ed88d62e87ecd96215334dec841c85e2a735f187fc6446dead4e4c3378",
+    "src/playback/audio/wav_wave64.rs": "989a3da5b280c50cf104a6b4733f8a09e1c1dbac1587f7af7294438a0c695fc3"
+  },
+  "test_sha256": "072e49fc81fb42b0b5e55b9fc00cf0b45c2e1aec74533b9bc8185b154b32b650",
+  "unlinked_helper": "src/playback/audio/wav_ms_adpcm.rs"
+}

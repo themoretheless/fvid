@@ -1,0 +1,12 @@
+
+running 7 tests
+test riff_waveform_and_neutral_video_controls_are_independent_of_wave_ms_adpcm ... ok
+test truncated_ms_adpcm_prefix_and_corrupt_block_refuse_at_the_specific_stage ... ok
+test unknown_data_length_does_not_hide_an_unfulfilled_fact_sample_count ... ok
+test unsupported_extensible_ms_keeps_later_avi_pcm_playable ... ok
+test wave_ms_adpcm_metadata_failures_refuse_specifically_and_limits_remain_enforced ... ok
+test wave_ms_adpcm_sizes_tables_and_finite_fields_preserve_exact_native_pcm_and_packets ... ok
+test actual_workers_play_wave_ms_adpcm_through_seek_and_eof ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 5.32s
+

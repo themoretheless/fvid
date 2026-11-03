@@ -1,0 +1,178 @@
+{
+  "library": "/opt/homebrew/lib/libsndfile.dylib",
+  "version": "libsndfile-1.2.2",
+  "cases": [
+    {
+      "file": "c1-b8-standard-full-riff.wav",
+      "error": "Unspecified internal error."
+    },
+    {
+      "file": "c1-b8-standard-trim-riff.wav",
+      "error": "Unspecified internal error."
+    },
+    {
+      "file": "c1-b8-standard-nofact-riff.wav",
+      "error": "Unspecified internal error."
+    },
+    {
+      "file": "c1-b8-extended-full-riff.wav",
+      "error": "Unspecified internal error."
+    },
+    {
+      "file": "c1-b8-extended-trim-riff.wav",
+      "error": "Unspecified internal error."
+    },
+    {
+      "file": "c1-b8-extended-nofact-riff.wav",
+      "error": "Unspecified internal error."
+    },
+    {
+      "file": "c1-b2048-standard-full-riff.wav",
+      "mode": "full",
+      "table": "standard",
+      "reported_frames": 8168,
+      "read_frames": 8168,
+      "expected_frames": 8168,
+      "byte_identical": true,
+      "prefix_identical": true
+    },
+    {
+      "file": "c1-b2048-standard-trim-riff.wav",
+      "mode": "trim",
+      "table": "standard",
+      "reported_frames": 8168,
+      "read_frames": 8168,
+      "expected_frames": 8161,
+      "byte_identical": false,
+      "prefix_identical": true
+    },
+    {
+      "file": "c1-b2048-standard-nofact-riff.wav",
+      "mode": "nofact",
+      "table": "standard",
+      "reported_frames": 8168,
+      "read_frames": 8168,
+      "expected_frames": 8168,
+      "byte_identical": true,
+      "prefix_identical": true
+    },
+    {
+      "file": "c1-b2048-extended-full-riff.wav",
+      "mode": "full",
+      "table": "extended",
+      "reported_frames": 8168,
+      "read_frames": 8168,
+      "expected_frames": 8168,
+      "byte_identical": false,
+      "prefix_identical": false
+    },
+    {
+      "file": "c1-b2048-extended-trim-riff.wav",
+      "mode": "trim",
+      "table": "extended",
+      "reported_frames": 8168,
+      "read_frames": 8168,
+      "expected_frames": 8161,
+      "byte_identical": false,
+      "prefix_identical": false
+    },
+    {
+      "file": "c1-b2048-extended-nofact-riff.wav",
+      "mode": "nofact",
+      "table": "extended",
+      "reported_frames": 8168,
+      "read_frames": 8168,
+      "expected_frames": 8168,
+      "byte_identical": false,
+      "prefix_identical": false
+    },
+    {
+      "file": "c2-b16-standard-full-riff.wav",
+      "error": "Unspecified internal error."
+    },
+    {
+      "file": "c2-b16-standard-trim-riff.wav",
+      "error": "Unspecified internal error."
+    },
+    {
+      "file": "c2-b16-standard-nofact-riff.wav",
+      "error": "Unspecified internal error."
+    },
+    {
+      "file": "c2-b16-extended-full-riff.wav",
+      "error": "Unspecified internal error."
+    },
+    {
+      "file": "c2-b16-extended-trim-riff.wav",
+      "error": "Unspecified internal error."
+    },
+    {
+      "file": "c2-b16-extended-nofact-riff.wav",
+      "error": "Unspecified internal error."
+    },
+    {
+      "file": "c2-b4096-standard-full-riff.wav",
+      "mode": "full",
+      "table": "standard",
+      "reported_frames": 8168,
+      "read_frames": 8168,
+      "expected_frames": 8168,
+      "byte_identical": true,
+      "prefix_identical": true
+    },
+    {
+      "file": "c2-b4096-standard-trim-riff.wav",
+      "mode": "trim",
+      "table": "standard",
+      "reported_frames": 8168,
+      "read_frames": 8168,
+      "expected_frames": 8161,
+      "byte_identical": false,
+      "prefix_identical": true
+    },
+    {
+      "file": "c2-b4096-standard-nofact-riff.wav",
+      "mode": "nofact",
+      "table": "standard",
+      "reported_frames": 8168,
+      "read_frames": 8168,
+      "expected_frames": 8168,
+      "byte_identical": true,
+      "prefix_identical": true
+    },
+    {
+      "file": "c2-b4096-extended-full-riff.wav",
+      "mode": "full",
+      "table": "extended",
+      "reported_frames": 8168,
+      "read_frames": 8168,
+      "expected_frames": 8168,
+      "byte_identical": false,
+      "prefix_identical": false
+    },
+    {
+      "file": "c2-b4096-extended-trim-riff.wav",
+      "mode": "trim",
+      "table": "extended",
+      "reported_frames": 8168,
+      "read_frames": 8168,
+      "expected_frames": 8161,
+      "byte_identical": false,
+      "prefix_identical": false
+    },
+    {
+      "file": "c2-b4096-extended-nofact-riff.wav",
+      "mode": "nofact",
+      "table": "extended",
+      "reported_frames": 8168,
+      "read_frames": 8168,
+      "expected_frames": 8168,
+      "byte_identical": false,
+      "prefix_identical": false
+    },
+    {
+      "file": "c1-b8-max-count-full-riff.wav",
+      "error": "Unspecified internal error."
+    }
+  ]
+}

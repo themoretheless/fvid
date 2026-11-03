@@ -1,0 +1,31 @@
+{
+  "PATH": "/nonexistent",
+  "FFMPEG": "/nonexistent/ffmpeg",
+  "FFPROBE": "/nonexistent/ffprobe",
+  "runs": [
+    {
+      "name": "integration-repeat-1",
+      "passed": 7,
+      "exit_code": 0,
+      "binary_sha256": "b7787d123c4ee8d7b59f8c6e02d1bbfe2e59be70ef6f7e36a808981d01d1e5b0"
+    },
+    {
+      "name": "integration-repeat-2",
+      "passed": 7,
+      "exit_code": 0,
+      "binary_sha256": "b7787d123c4ee8d7b59f8c6e02d1bbfe2e59be70ef6f7e36a808981d01d1e5b0"
+    },
+    {
+      "name": "integration-repeat-3",
+      "passed": 7,
+      "exit_code": 0,
+      "binary_sha256": "b7787d123c4ee8d7b59f8c6e02d1bbfe2e59be70ef6f7e36a808981d01d1e5b0"
+    },
+    {
+      "name": "native-factory-without-external-tools",
+      "passed": 1,
+      "exit_code": 0,
+      "binary_sha256": "d56556c67bd1cd4a3e3b3759c2e70f700f3d2e2b5f45f0a11d3a1b444a513111"
+    }
+  ]
+}

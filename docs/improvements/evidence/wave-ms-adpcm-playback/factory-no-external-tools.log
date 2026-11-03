@@ -1,0 +1,6 @@
+
+running 1 test
+test player::native_wave_ms_adpcm_file_regressions::automatic_wave_ms_factory_preserves_extended_coefficients_and_tail ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 1225 filtered out; finished in 0.04s
+

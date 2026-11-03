@@ -1,8 +1,8 @@
 {
   "target": 1000,
   "counting_rule": "One independently confirmed problem or useful capability; fixture variants and baseline integration repairs are excluded. Only accepted entries count.",
-  "accepted_count": 530,
-  "next_id": "FVID-0531",
+  "accepted_count": 531,
+  "next_id": "FVID-0532",
   "entries": [
     {
       "id": "FVID-0001",
@@ -6020,6 +6020,17 @@
       "result": "Validate mono/stereo four-bit WAVEFORMATEX block geometry and samples-per-block, route complete blocks to the existing owned decoder, bound positive fact tails and retain exact native clocks/seek. Thirty-six RIFF/RF64/Wave64 cases include blocks exceeding 2048 decoded frames, trimmed final blocks and absent fact; 144 playback-worker sessions and native player factory pass. Specific metadata and corrupt-step refusals, exact truncated prefixes and unknown-data/fact EOF checks pass. Final frozen gates pass243 Rust executions plus18 no-external-tool repeats, two pre-existing physical-device ignores, and core/player checks. All89 files regenerate identically and3636 source/fixture hashes remain stable. FFmpeg matches24/24 full/absent-fact cases and libsndfile8/8 RIFF controls; padded-tail disagreements are retained explicitly and never weaken analytic fact expectations. Public Coding enum migration is documented.",
       "status": "accepted",
       "validation": "batch-541-validation.json"
+    },
+    {
+      "id": "FVID-0531",
+      "batch": 542,
+      "title": "Play Microsoft ADPCM WAVE with retained coefficient setup and exact block clocks",
+      "source": "src/playback/audio/wav_ms_adpcm.rs",
+      "regression": "tests/wave_ms_adpcm_playback.rs",
+      "before": "Original aa2a36013f rejects WAVE tag0x0002 despite existing owned MS ADPCM reconstruction. The exact final seven-test stand passes independent PCM/video and legacy unsupported-EXTENSIBLE/AVI controls and fails five MS ADPCM gates.",
+      "result": "Validate four-bit mono/stereo ADPCMWAVEFORMAT, block/sample geometry, standard coefficient prefix and bounded7..256-entry table; retain the exact interpreted setup for the existing decoder. Seventy-three RIFF/RF64/Wave64 cases preserve analytic PCM, encoded bytes, setup, clocks, native seek/rewind/EOF and positive fact tails, including long blocks and predictor255. Metadata refusals, decoder-specific bad predictor/delta errors, exact truncated prefixes, unknown-data/fact EOF and292 real-worker sessions pass. Preserve Unsupported EXTENSIBLE MS routing so later AVI PCM remains playable. Seventeen frozen gates pass254 Rust executions, two old device ignores, core/player checks and22 no-external-tool executions. All199 files regenerate identically;3840 source/fixture hashes remain stable. FFmpeg matches24 standard complete/absent-fact cases; fact-tail/extra-predictor and libsndfile limits remain explicit diagnostics rather than weakened oracles. The public Coding::MsAdpcm addition has documented downstream match migration. No performance or physical-device claim.",
+      "status": "accepted",
+      "validation": "batch-542-validation.json"
     }
   ]
 }
