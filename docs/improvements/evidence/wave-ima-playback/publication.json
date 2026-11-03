@@ -1,0 +1,13 @@
+{
+  "published_commit": "fafe0e800a1ed8acb3c2afc55917d29cd03468d3",
+  "remote": "https://github.com/themoretheless/fvid.git",
+  "verified_refs": [
+    "fafe0e800a1ed8acb3c2afc55917d29cd03468d3\trefs/heads/codex/deliver-fvid-20261029",
+    "fafe0e800a1ed8acb3c2afc55917d29cd03468d3\trefs/heads/main"
+  ],
+  "clean_worktree_at_verification": true,
+  "source_freeze_matches": 3636,
+  "accepted_count": 530,
+  "cleanup": "Removed owned subtitle/IMA target directory, temporary baseline backup and qualification scripts, and owned Python caches. Regression media and evidence retained. Active parallel worktrees, all branches and stashes retained.",
+  "rejected_mp4_audit_count_delta": 0
+}
