@@ -1,0 +1,12 @@
+{
+  "published_commit": "c7eff864549b2d0facebacbe98bfb25c044a0a8a",
+  "remote": "https://github.com/themoretheless/fvid.git",
+  "verified_refs": [
+    "c7eff864549b2d0facebacbe98bfb25c044a0a8a\trefs/heads/codex/deliver-fvid-20261029",
+    "c7eff864549b2d0facebacbe98bfb25c044a0a8a\trefs/heads/main"
+  ],
+  "clean_worktree_at_verification": true,
+  "source_freeze_matches": 4215,
+  "accepted_count": 532,
+  "cleanup": "Removed owned target directory, temporary120-second measurement media, old/new benchmark executables, qualification script and owned Python caches. Kept short regression fixtures, generator/example/comparator sources, full measurement campaigns and all proof manifests. Active worktrees, branches and stashes retained."
+}
