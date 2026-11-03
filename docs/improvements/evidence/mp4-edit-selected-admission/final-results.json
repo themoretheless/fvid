@@ -1,0 +1,59 @@
+[
+  {
+    "name": "final-integration",
+    "log": "docs/improvements/evidence/mp4-edit-selected-admission/final-integration.log",
+    "passed": 51,
+    "ignored": 0
+  },
+  {
+    "name": "final-lib-build",
+    "log": "docs/improvements/evidence/mp4-edit-selected-admission/final-lib-build.log",
+    "passed": true
+  },
+  {
+    "name": "root-parser",
+    "log": "docs/improvements/evidence/mp4-edit-selected-admission/root-parser.log",
+    "passed": 17,
+    "ignored": 0
+  },
+  {
+    "name": "root-audio",
+    "log": "docs/improvements/evidence/mp4-edit-selected-admission/root-audio.log",
+    "passed": 15,
+    "ignored": 0
+  },
+  {
+    "name": "root-video",
+    "log": "docs/improvements/evidence/mp4-edit-selected-admission/root-video.log",
+    "passed": 7,
+    "ignored": 0
+  },
+  {
+    "name": "worker",
+    "log": "docs/improvements/evidence/mp4-edit-selected-admission/worker.log",
+    "passed": 39,
+    "ignored": 0
+  },
+  {
+    "name": "cpal",
+    "log": "docs/improvements/evidence/mp4-edit-selected-admission/cpal.log",
+    "passed": 43,
+    "ignored": 2
+  },
+  {
+    "name": "media-audio",
+    "log": "docs/improvements/evidence/mp4-edit-selected-admission/media-audio.log",
+    "passed": 13,
+    "ignored": 0
+  },
+  {
+    "name": "final-core-check",
+    "log": "docs/improvements/evidence/mp4-edit-selected-admission/final-core-check.log",
+    "passed": true
+  },
+  {
+    "name": "final-player-check",
+    "log": "docs/improvements/evidence/mp4-edit-selected-admission/final-player-check.log",
+    "passed": true
+  }
+]

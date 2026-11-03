@@ -62,9 +62,13 @@ fn mp4_immediate_edit_prefix(
     interval: Option<(Duration, Duration)>,
 ) -> Option<usize> {
     if track.edits.is_empty() || track.has_declared_gaps() { return None; }
-    let first = track.sample_descriptions.first()?;
+    let first = track.description_for_sample(0)?;
+    // A dormant catalog entry cannot extend the work admitted for an edit.
+    // Keep the catalog-only shortcut for ordinary identical descriptions;
+    // otherwise compare referenced headers with compact-index-aware traversal.
     if first.sample_rate == 0 || track.timescale % first.sample_rate != 0
-        || !track.sample_descriptions.iter().all(|d| d == first)
+        || (!track.sample_descriptions.iter().all(|d| d == first)
+            && track.description_changes_before(track.samples.len()))
         || !matches!(&first.codec, b"alaw" | b"ulaw" | b"raw " | b"sowt" | b"twos" | b"in24" | b"in32" | b"fl32" | b"fl64" | b"alac" | b"ima4" | b"MAC3" | b"MAC6" | b"ms\x00\x11" | b"ms\x00\x02")
     { return None; }
     let rate = first.sample_rate;

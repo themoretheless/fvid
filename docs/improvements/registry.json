@@ -1,8 +1,8 @@
 {
   "target": 1000,
   "counting_rule": "One independently confirmed problem or useful capability; fixture variants and baseline integration repairs are excluded. Only accepted entries count.",
-  "accepted_count": 538,
-  "next_id": "FVID-0539",
+  "accepted_count": 539,
+  "next_id": "FVID-0540",
   "entries": [
     {
       "id": "FVID-0001",
@@ -6108,6 +6108,17 @@
       "result": "Normalize only v0 compressionID0 packetSize0 mono/stereo8/16-bit NONE/zero to raw/twos; preserve payload/index/clocks and common reference validation. Zero channels/rate retain specific Invalid refusals. Other versions/compression/width/layout remain unsupported and preserve later valid tracks. Twenty-four qualified cases cover three clocks, exact PCM/video, duration, seek/rewind/EOF/MAX,72 actual software-worker sessions per stand and full/interval owned f32/f64 export. Qualification passes171 Rust executions, two existing physical-device ignores, core/player checks and three external-tool-free repeats. All102 authored files regenerate identically and5128 source/input hashes remain stable. Independent FFmpeg matches24/24 qualified cases;24 wider diagnostics remain explicitly unsupported and are not counted. One compatibility capability; no performance or hardware claim.",
       "status": "accepted",
       "validation": "batch-549-validation.json"
+    },
+    {
+      "id": "FVID-0539",
+      "batch": 550,
+      "title": "Scope finite MP4 audio-edit packet admission to referenced descriptions",
+      "source": "crates/fvid-media/src/owned_mp4_audio_timeline_impl.rs",
+      "regression": "tests/mp4_edit_selected_admission.rs",
+      "before": "Published dcf9f07d1b disables immediate finite-edit prefix admission whenever dormant stsd entries differ from catalog slot1. Corrected authored baseline records60 specific false MP4 packet exceeds budget refusals at400 bytes; identical-description/native originals and1024-byte exact PCM controls pass. Final unchanged four-test stand passes controls/native playback and fails two admission/export gates.",
+      "result": "Resolve the first referenced header and retain the cheap equal-catalog condition, otherwise establish constant selected geometry with the existing compact-index-aware traversal. Eighty PCM/ALAC variants cover dormant supported/opaque/duplicate descriptions,8000/1001 movie clocks, v0/v1 early/preroll/repeat/gap/silence edits. The audible prefix now admits400 bytes while valid larger packets still refuse when reached; exact f32/PCM-only f64 output, public plan/raw export, memory/cancellation controls, native duration/PCM/seek/rewind/EOF,240 actual software-worker sessions per stand and exact software video pass. Native occupied-source-sample frontiers and owned cumulative movie-grid policies remain distinct and unchanged, with separate analytic rational oracles; ALAC remains refused by the explicitly PCM-only precise API. Qualification passes197 Rust executions, two existing device ignores, core/player checks and three external-tool-free repeats. All145 authored files regenerate identically and5275 portable source/input hashes remain stable. Incorrect initial tfhd rewriting/output API/oracle assumptions are archived as authoring diagnostics, not counted bugs. One edit admission invariant distinct from selected Track headers and compact-index geometry; no performance, hardware or public-interface claim.",
+      "status": "accepted",
+      "validation": "batch-550-validation.json"
     }
   ]
 }

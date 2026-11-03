@@ -1,0 +1,50 @@
+
+running 45 tests
+test audio::cpal_backend::ac3_codec_stereo_device_path::codec_stereo_survives_cpal_routing_ring_and_callback ... ok
+test audio::cpal_backend::clock_progress_regressions::rate_switch_zero_suspend_and_seek_keep_the_rendered_clock_continuous ... ok
+test audio::cpal_backend::clock_progress_regressions::stretched_master_clock_tracks_rendered_frames_not_search_retirement ... ok
+test audio::cpal_backend::eac3_codec_stereo_device_path::codec_stereo_survives_cpal_routing_ring_and_callback ... ok
+test audio::cpal_backend::clock_progress_regressions::callback_clock_is_sample_exact_across_rates_channels_and_fractional_phase ... ok
+test audio::cpal_backend::eof_drain_regressions::accelerated_device_refills_when_source_lead_is_exhausted ... ok
+test audio::cpal_backend::eof_drain_regressions::device_errors_survive_seek_but_old_stream_errors_cannot_poison_restart ... ok
+test audio::cpal_backend::eof_drain_regressions::actual_worker_finishes_short_stretched_audio_and_device_eof_at_all_rates ... ok
+test audio::cpal_backend::eof_drain_regressions::device_failure_terminates_drain_as_error_without_false_eof ... ok
+test audio::cpal_backend::eof_drain_regressions::pause_and_resume_keep_the_pending_tail_alive ... ok
+test audio::cpal_backend::eof_drain_regressions::public_position_refreshes_during_long_packet_pacing ... ok
+test audio::cpal_backend::eof_drain_regressions::rendered_callback_tail_waits_for_latency_and_survives_pause_until_flush ... ok
+test audio::cpal_backend::eof_drain_regressions::pcm_frontier_includes_decoded_packet_duration ... ok
+test audio::cpal_backend::eof_drain_regressions::seek_cancels_old_drain_and_rejects_a_late_callback_tail ... ok
+test audio::cpal_backend::eof_drain_regressions::stop_does_not_wait_for_an_unconsumed_output_queue ... ok
+test audio::cpal_backend::eof_drain_regressions::source_eof_waits_until_the_device_consumes_queued_pcm ... ok
+test audio::cpal_backend::explicit_aac_speaker_route_regressions::real_device_aac_pce_layout_smoke ... ignored, requires physical default output; opens paused without emitting sound
+test audio::cpal_backend::explicit_flac_speaker_route_regressions::actual_cpal_push_ring_and_callback_follow_authored_flac_speaker_oracles ... ok
+test audio::cpal_backend::finite_stretch_regressions::finite_rates_fractional_carry_stereo_and_callback_boundaries_match_reference ... ok
+test audio::cpal_backend::finite_stretch_regressions::finite_short_audio_emits_its_rate_adjusted_duration_and_drains ... ok
+test audio::cpal_backend::finite_stretch_regressions::grown_finite_access_unit_retires_the_last_partial_processing_segment ... ok
+test audio::cpal_backend::finite_stretch_regressions::returning_to_normal_rate_finishes_the_inflight_segment_and_finite_tail ... ok
+test audio::cpal_backend::finite_stretch_regressions::zero_rate_preserves_finite_input_and_resumes_without_a_stuck_segment ... ok
+test audio::cpal_backend::explicit_aac_speaker_route_regressions::actual_cpal_ring_and_callbacks_follow_independent_aac_pce_stereo_oracles ... ok
+test audio::cpal_backend::packet_conservation_regressions::one_large_decoded_access_unit_reaches_the_output_ring_without_loss ... ok
+test audio::cpal_backend::packet_timeline_regressions::leading_gap_and_seek_anchor_preserve_the_declared_packet_start ... ok
+test audio::cpal_backend::packet_timeline_regressions::overlapping_and_duplicate_packets_do_not_repeat_already_queued_samples ... ok
+test audio::cpal_backend::packet_timeline_regressions::oversized_gap_refuses_atomically_before_publishing_silence_or_payload ... ok
+test audio::cpal_backend::packet_timeline_regressions::packet_timestamp_gap_preserves_silence_and_following_audio ... ok
+test audio::cpal_backend::packet_timeline_regressions::stereo_gap_wraps_without_reusing_old_buffer_samples ... ok
+test audio::cpal_backend::physical_layout_smoke::real_device_flac_layout_smoke ... ignored, requires a physical default output device; opens paused and emits no sound
+test audio::cpal_backend::ring_growth_admission_regressions::actual_audio_worker_preserves_large_packet_through_device_callback_and_navigation ... ok
+test audio::cpal_backend::ring_growth_admission_regressions::flush_after_growth_drops_old_audio_and_reanchors_output_clock ... ok
+test audio::cpal_backend::ring_growth_admission_regressions::grown_ring_stretch_matches_contiguous_fixture_samples ... ok
+test audio::cpal_backend::ring_growth_admission_regressions::growth_preserves_wrapped_stereo_tail_and_consumed_position ... ok
+test audio::cpal_backend::ring_growth_admission_regressions::overflow_budget_and_partial_frame_refusals_preserve_queued_audio ... ok
+test audio::cpal_backend::ring_growth_admission_regressions::partial_fixture_pcm_refuses_without_publishing_any_samples ... ok
+test audio::cpal_backend::ogg_speaker_device_path::native_ogg_speakers_reach_actual_cpal_ring_and_callbacks_in_stereo_order ... ok
+test audio::cpal_backend::tests::a_flush_forgets_the_half_finished_segment ... ok
+test audio::cpal_backend::tests::a_flush_rewinds_both_positions ... ok
+test audio::cpal_backend::tests::a_stereo_stream_survives_wrapping_the_ring ... ok
+test audio::cpal_backend::tests::a_stretched_read_joins_a_window_that_wraps ... ok
+test audio::cpal_backend::tests::a_stretched_read_moves_the_clock_by_its_rate ... ok
+test audio::cpal_backend::tests::explicit_output_selection_matches_names_and_never_falls_back ... ok
+test audio::cpal_backend::signed_aac_timeline_regressions::signed_aac_windows_reach_the_cpal_callback_at_their_original_sample_positions ... ok
+
+test result: ok. 43 passed; 0 failed; 2 ignored; 0 measured; 1183 filtered out; finished in 2.39s
+

@@ -1,0 +1,9 @@
+{
+  "base": "dcf9f07d1b773051fbbdf53ac57c43d9f8adfed3",
+  "stand_passed": 1,
+  "stand_failed": 1,
+  "expected_refusals": 60,
+  "log": "docs/improvements/evidence/mp4-edit-selected-admission/before.log",
+  "source": "docs/improvements/evidence/mp4-edit-selected-admission/baseline-source.json",
+  "authoring_error": "Initial malformed rewrite replaced tfhd duration rather than absent description index; archived separately, not defect evidence."
+}

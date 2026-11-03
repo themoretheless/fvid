@@ -1,0 +1,9 @@
+{
+  "base": "dcf9f07d1b773051fbbdf53ac57c43d9f8adfed3",
+  "passed": 2,
+  "failed": 2,
+  "runtime_sha256": "4f66b6e00784f00752440f5ab816ddd5cbadab36e36a208fdc43ecb0c655092c",
+  "test_sha256": "8bb11ea90e9d78f6e3e8437d205748eb47bc31dacc96512281d90de4a1dbcae6",
+  "log": "docs/improvements/evidence/mp4-edit-selected-admission/final-baseline.log",
+  "reason": "Specific packet-budget refusals; valid originals/reached-large refusals and native playback controls pass"
+}

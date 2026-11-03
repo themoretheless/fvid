@@ -1,0 +1,95 @@
+{
+  "status": "accepted",
+  "accepted_ids": [
+    "FVID-0539"
+  ],
+  "count_delta": 1,
+  "accepted_count": 539,
+  "next_id": "FVID-0540",
+  "qualification": [
+    {
+      "name": "final-integration",
+      "log": "docs/improvements/evidence/mp4-edit-selected-admission/final-integration.log",
+      "passed": 51,
+      "ignored": 0
+    },
+    {
+      "name": "final-lib-build",
+      "log": "docs/improvements/evidence/mp4-edit-selected-admission/final-lib-build.log",
+      "passed": true
+    },
+    {
+      "name": "root-parser",
+      "log": "docs/improvements/evidence/mp4-edit-selected-admission/root-parser.log",
+      "passed": 17,
+      "ignored": 0
+    },
+    {
+      "name": "root-audio",
+      "log": "docs/improvements/evidence/mp4-edit-selected-admission/root-audio.log",
+      "passed": 15,
+      "ignored": 0
+    },
+    {
+      "name": "root-video",
+      "log": "docs/improvements/evidence/mp4-edit-selected-admission/root-video.log",
+      "passed": 7,
+      "ignored": 0
+    },
+    {
+      "name": "worker",
+      "log": "docs/improvements/evidence/mp4-edit-selected-admission/worker.log",
+      "passed": 39,
+      "ignored": 0
+    },
+    {
+      "name": "cpal",
+      "log": "docs/improvements/evidence/mp4-edit-selected-admission/cpal.log",
+      "passed": 43,
+      "ignored": 2
+    },
+    {
+      "name": "media-audio",
+      "log": "docs/improvements/evidence/mp4-edit-selected-admission/media-audio.log",
+      "passed": 13,
+      "ignored": 0
+    },
+    {
+      "name": "final-core-check",
+      "log": "docs/improvements/evidence/mp4-edit-selected-admission/final-core-check.log",
+      "passed": true
+    },
+    {
+      "name": "final-player-check",
+      "log": "docs/improvements/evidence/mp4-edit-selected-admission/final-player-check.log",
+      "passed": true
+    },
+    {
+      "name": "no-external-1",
+      "log": "docs/improvements/evidence/mp4-edit-selected-admission/no-external-1.log",
+      "passed": 4,
+      "ignored": 0
+    },
+    {
+      "name": "no-external-2",
+      "log": "docs/improvements/evidence/mp4-edit-selected-admission/no-external-2.log",
+      "passed": 4,
+      "ignored": 0
+    },
+    {
+      "name": "no-external-3",
+      "log": "docs/improvements/evidence/mp4-edit-selected-admission/no-external-3.log",
+      "passed": 4,
+      "ignored": 0
+    }
+  ],
+  "rust_executions": 197,
+  "baseline": "docs/improvements/evidence/mp4-edit-selected-admission/final-baseline.json",
+  "reproducibility": "docs/improvements/evidence/mp4-edit-selected-admission/reproducibility.json",
+  "frozen_source": "docs/improvements/evidence/mp4-edit-selected-admission/candidate-source.json",
+  "limitations": [
+    "No change to native occupied-frontier or owned cumulative-raster edit policies",
+    "Precise f64 API remains PCM-only; ALAC refusal is a control",
+    "No public signature, bitstream, performance or physical-device claim"
+  ]
+}

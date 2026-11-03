@@ -1,0 +1,9 @@
+
+running 4 tests
+test dormant_descriptions_do_not_expand_the_finite_edit_packet_budget ... ok
+test original_edits_and_reached_large_packets_keep_their_controls ... ok
+test public_plans_exports_f64_and_resource_refusals_keep_edit_boundaries ... ok
+test actual_native_pcm_workers_seek_and_video_keep_the_selected_timeline ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 4.58s
+

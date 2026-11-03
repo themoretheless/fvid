@@ -1,0 +1,22 @@
+
+running 17 tests
+test container::mp4::tests::a_disc_and_the_albums_own_artist_read_from_their_boxes ... ok
+test container::mp4::tests::a_fragment_that_leaves_out_its_decode_time_continues_the_track ... ok
+test container::mp4::tests::a_fragment_of_audio_is_indexed_as_its_own_run_states ... ok
+test container::mp4::tests::a_mace_table_that_does_not_divide_into_blocks_is_refused ... ok
+test container::mp4::tests::a_track_number_reads_from_its_binary_box_both_writers_spell_it ... ok
+test container::mp4::tests::colr_reads_both_writers_spellings_of_the_cicp_triple ... ok
+test container::mp4::tests::every_fragmented_sample_reads_the_bytes_its_index_points_at ... ok
+test container::mp4::tests::fragment_validation_preserves_refusals_and_resolves_an_implicit_base ... ok
+test container::mp4::tests::fragments_of_video_keep_the_decode_stamps_and_the_restart_points ... ok
+test container::mp4::tests::tags_this_reader_cannot_read_leave_the_file_unstated ... ok
+test container::mp4::tests::a_mace_track_is_indexed_in_blocks_though_its_table_counts_samples ... ok
+test container::mp4::tests::the_coding_s_block_is_two_or_one_bytes_a_channel_and_six_samples_whichever_it_is ... ok
+test container::mp4::tests::the_movie_tags_name_it_in_either_writers_spelling ... ok
+test container::mp4::tests::the_rights_and_the_note_read_from_their_atoms_both_ways ... ok
+test container::mp4::tests::the_sound_a_fragment_indexes_is_the_sound_the_player_hears ... ok
+test container::mp4::tests::the_wave_record_sits_where_the_entry_version_puts_the_children ... ok
+test container::mp4::tests::the_picture_a_fragment_indexes_reaches_the_picture_route ... ok
+
+test result: ok. 17 passed; 0 failed; 0 ignored; 0 measured; 1211 filtered out; finished in 0.10s
+
