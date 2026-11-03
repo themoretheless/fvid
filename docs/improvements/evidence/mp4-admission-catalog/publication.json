@@ -1,0 +1,20 @@
+{
+  "source_commit": "741b7898da835a2771a8629c5bed15619ddbdee6",
+  "remote_refs": {
+    "refs/heads/codex/deliver-fvid-20261029": "741b7898da835a2771a8629c5bed15619ddbdee6",
+    "refs/heads/main": "741b7898da835a2771a8629c5bed15619ddbdee6"
+  },
+  "accepted_count": 541,
+  "next_id": "FVID-0542",
+  "rust_executions": 191,
+  "existing_device_ignores": 2,
+  "performance_comparison": "comparison.json",
+  "source_stable": true,
+  "owned_target_removed": "/private/tmp/fvid-admission-catalog-target-20261103",
+  "measured_binaries_removed": true,
+  "measured_binary_hashes_preserved": true,
+  "regression_files_preserved": 5,
+  "parallel_work_preserved": true,
+  "stashes_preserved": 4,
+  "branch_worktree_deletions": 0
+}
