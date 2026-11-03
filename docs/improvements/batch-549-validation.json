@@ -1,0 +1,85 @@
+{
+  "status": "accepted",
+  "accepted_ids": [
+    "FVID-0538"
+  ],
+  "count_delta": 1,
+  "accepted_count": 538,
+  "next_id": "FVID-0539",
+  "qualification": [
+    {
+      "name": "final-integration",
+      "log": "docs/improvements/evidence/mp4-v0-pcm-aliases/final-integration.log",
+      "passed": 32,
+      "ignored": 0
+    },
+    {
+      "name": "root-parser",
+      "log": "docs/improvements/evidence/mp4-v0-pcm-aliases/root-parser.log",
+      "passed": 17,
+      "ignored": 0
+    },
+    {
+      "name": "root-audio",
+      "log": "docs/improvements/evidence/mp4-v0-pcm-aliases/root-audio.log",
+      "passed": 15,
+      "ignored": 0
+    },
+    {
+      "name": "root-video",
+      "log": "docs/improvements/evidence/mp4-v0-pcm-aliases/root-video.log",
+      "passed": 7,
+      "ignored": 0
+    },
+    {
+      "name": "worker",
+      "log": "docs/improvements/evidence/mp4-v0-pcm-aliases/worker.log",
+      "passed": 39,
+      "ignored": 0
+    },
+    {
+      "name": "cpal",
+      "log": "docs/improvements/evidence/mp4-v0-pcm-aliases/cpal.log",
+      "passed": 43,
+      "ignored": 2
+    },
+    {
+      "name": "no-external-1",
+      "log": "docs/improvements/evidence/mp4-v0-pcm-aliases/no-external-1.log",
+      "passed": 6,
+      "ignored": 0
+    },
+    {
+      "name": "no-external-2",
+      "log": "docs/improvements/evidence/mp4-v0-pcm-aliases/no-external-2.log",
+      "passed": 6,
+      "ignored": 0
+    },
+    {
+      "name": "no-external-3",
+      "log": "docs/improvements/evidence/mp4-v0-pcm-aliases/no-external-3.log",
+      "passed": 6,
+      "ignored": 0
+    },
+    {
+      "name": "final-core-check",
+      "log": "docs/improvements/evidence/mp4-v0-pcm-aliases/final-core-check.log",
+      "passed": true
+    },
+    {
+      "name": "final-player-check",
+      "log": "docs/improvements/evidence/mp4-v0-pcm-aliases/final-player-check.log",
+      "passed": true
+    }
+  ],
+  "rust_executions": 171,
+  "baseline": "docs/improvements/evidence/mp4-v0-pcm-aliases/final-baseline.json",
+  "reference": "docs/improvements/evidence/mp4-v0-pcm-aliases/qualified-reference.json",
+  "reproducibility": "docs/improvements/evidence/mp4-v0-pcm-aliases/reproducibility.json",
+  "frozen_source": "docs/improvements/evidence/mp4-v0-pcm-aliases/candidate-source.json",
+  "limitations": [
+    "Only classic version0 uncompressed8/16-bit mono/stereo aliases qualified",
+    "Wider24/32-bit experiments remain unsupported diagnostics",
+    "Software playback/owned exports; no hardware-device or performance claim"
+  ]
+}

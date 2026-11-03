@@ -1,0 +1,389 @@
+{
+  "version": "ffmpeg version 9.0.2 Copyright (c) 2000-2026 the FFmpeg developers",
+  "results": [
+    {
+      "file": "b8-c1-t8000-none.mov",
+      "input_sha256": "2ff278bf35fe299303ef4466d247e8c11e5e8c831348f592808a69f34c2724ca",
+      "returncode": 0,
+      "exact": true,
+      "output_sha256": "ade7863d996b84e1226e494de1642fd5266251fbfb1f09b8ebe2ff431b0ffa80",
+      "stderr": ""
+    },
+    {
+      "file": "b8-c1-t8000-zero.mov",
+      "input_sha256": "b5551bc5b9d1595a730fca999abf0c7b318128475c42ffcc8db07c0e0fc78c17",
+      "returncode": 0,
+      "exact": true,
+      "output_sha256": "ade7863d996b84e1226e494de1642fd5266251fbfb1f09b8ebe2ff431b0ffa80",
+      "stderr": ""
+    },
+    {
+      "file": "b8-c1-t1000-none.mov",
+      "input_sha256": "dc4eae89b4f9988820a159f5fec973ac4f038e05c388a6d1d5840d678af9cd2c",
+      "returncode": 0,
+      "exact": true,
+      "output_sha256": "ade7863d996b84e1226e494de1642fd5266251fbfb1f09b8ebe2ff431b0ffa80",
+      "stderr": ""
+    },
+    {
+      "file": "b8-c1-t1000-zero.mov",
+      "input_sha256": "a790b0eca3adead45109b487cec0145b20c85907230842e7857c43920d65bd50",
+      "returncode": 0,
+      "exact": true,
+      "output_sha256": "ade7863d996b84e1226e494de1642fd5266251fbfb1f09b8ebe2ff431b0ffa80",
+      "stderr": ""
+    },
+    {
+      "file": "b8-c1-t1001-none.mov",
+      "input_sha256": "f6af6fe3f0303b5a77aff6da9462f0e6a57e3c5892398acace5402011d099913",
+      "returncode": 0,
+      "exact": true,
+      "output_sha256": "ade7863d996b84e1226e494de1642fd5266251fbfb1f09b8ebe2ff431b0ffa80",
+      "stderr": ""
+    },
+    {
+      "file": "b8-c1-t1001-zero.mov",
+      "input_sha256": "bf8d0ce9ccfe55a5d10aacc01dd506b58255c01c93de601a01d2117c6a1f42d9",
+      "returncode": 0,
+      "exact": true,
+      "output_sha256": "ade7863d996b84e1226e494de1642fd5266251fbfb1f09b8ebe2ff431b0ffa80",
+      "stderr": ""
+    },
+    {
+      "file": "b8-c2-t8000-none.mov",
+      "input_sha256": "c389925b179edade5d0f7dd8a8f892c4ff3021baa46757815db97e6c6ed72903",
+      "returncode": 0,
+      "exact": true,
+      "output_sha256": "631e220c37c96ce587dd441bb135d0f9468624b7aabfe8f1f99a9dfeda6bd045",
+      "stderr": ""
+    },
+    {
+      "file": "b8-c2-t8000-zero.mov",
+      "input_sha256": "2b4c6f84652955cd54ffdd8d5e45c565c125131c93537a01d85b9cca9cd7a238",
+      "returncode": 0,
+      "exact": true,
+      "output_sha256": "631e220c37c96ce587dd441bb135d0f9468624b7aabfe8f1f99a9dfeda6bd045",
+      "stderr": ""
+    },
+    {
+      "file": "b8-c2-t1000-none.mov",
+      "input_sha256": "e321261aa766adb2a91d91c0ebe20549114cd830ce1bdfcbcae0fc51f5283abd",
+      "returncode": 0,
+      "exact": true,
+      "output_sha256": "631e220c37c96ce587dd441bb135d0f9468624b7aabfe8f1f99a9dfeda6bd045",
+      "stderr": ""
+    },
+    {
+      "file": "b8-c2-t1000-zero.mov",
+      "input_sha256": "23dfc3c16cc968138fb876795d9a0cff8347c25abce09af70bce5c26974b8e8a",
+      "returncode": 0,
+      "exact": true,
+      "output_sha256": "631e220c37c96ce587dd441bb135d0f9468624b7aabfe8f1f99a9dfeda6bd045",
+      "stderr": ""
+    },
+    {
+      "file": "b8-c2-t1001-none.mov",
+      "input_sha256": "48a7d8b1708701f80b8c1531bf434a6a60de576daf2375f3cc9e52a25c1a1e98",
+      "returncode": 0,
+      "exact": true,
+      "output_sha256": "631e220c37c96ce587dd441bb135d0f9468624b7aabfe8f1f99a9dfeda6bd045",
+      "stderr": ""
+    },
+    {
+      "file": "b8-c2-t1001-zero.mov",
+      "input_sha256": "6555a359cb7218ec61e6e07f379326460983a6d81fc1b4e1232f26a8fef11ae9",
+      "returncode": 0,
+      "exact": true,
+      "output_sha256": "631e220c37c96ce587dd441bb135d0f9468624b7aabfe8f1f99a9dfeda6bd045",
+      "stderr": ""
+    },
+    {
+      "file": "b16-c1-t8000-none.mov",
+      "input_sha256": "1e9ba68dd3fd089ff775adcf110b1817156e94268767be06649c9c63019b463c",
+      "returncode": 0,
+      "exact": true,
+      "output_sha256": "ade7863d996b84e1226e494de1642fd5266251fbfb1f09b8ebe2ff431b0ffa80",
+      "stderr": ""
+    },
+    {
+      "file": "b16-c1-t8000-zero.mov",
+      "input_sha256": "7fe4bb5a0750fe8faeddbf284f8c00eebdafc27802a29fbab064015149b6269b",
+      "returncode": 0,
+      "exact": true,
+      "output_sha256": "ade7863d996b84e1226e494de1642fd5266251fbfb1f09b8ebe2ff431b0ffa80",
+      "stderr": ""
+    },
+    {
+      "file": "b16-c1-t1000-none.mov",
+      "input_sha256": "23573cdd53b5d77df7fd0a6c82dfd78aca988dbf14d38819ffc5b9b28202a138",
+      "returncode": 0,
+      "exact": true,
+      "output_sha256": "ade7863d996b84e1226e494de1642fd5266251fbfb1f09b8ebe2ff431b0ffa80",
+      "stderr": ""
+    },
+    {
+      "file": "b16-c1-t1000-zero.mov",
+      "input_sha256": "35711f6310dc6645e4b565eb293547b13069516843f86175ab3148c110a50917",
+      "returncode": 0,
+      "exact": true,
+      "output_sha256": "ade7863d996b84e1226e494de1642fd5266251fbfb1f09b8ebe2ff431b0ffa80",
+      "stderr": ""
+    },
+    {
+      "file": "b16-c1-t1001-none.mov",
+      "input_sha256": "ed30c79dd40c938aafa45722b58f39da0fcf6998ad33fb71efd53122ec609664",
+      "returncode": 0,
+      "exact": true,
+      "output_sha256": "ade7863d996b84e1226e494de1642fd5266251fbfb1f09b8ebe2ff431b0ffa80",
+      "stderr": ""
+    },
+    {
+      "file": "b16-c1-t1001-zero.mov",
+      "input_sha256": "1c04612a71667527e41de57d772766fa5b0ae5e946685b50f260e2dc0a5f73d2",
+      "returncode": 0,
+      "exact": true,
+      "output_sha256": "ade7863d996b84e1226e494de1642fd5266251fbfb1f09b8ebe2ff431b0ffa80",
+      "stderr": ""
+    },
+    {
+      "file": "b16-c2-t8000-none.mov",
+      "input_sha256": "2eac9f56118b4f514bd2131d9efbbddf1e81f8fae248d23f19aa3877ec53a13a",
+      "returncode": 0,
+      "exact": true,
+      "output_sha256": "631e220c37c96ce587dd441bb135d0f9468624b7aabfe8f1f99a9dfeda6bd045",
+      "stderr": ""
+    },
+    {
+      "file": "b16-c2-t8000-zero.mov",
+      "input_sha256": "4d4483ef737deb77914ef058adf845e61549df79a72d833920566fbdee938813",
+      "returncode": 0,
+      "exact": true,
+      "output_sha256": "631e220c37c96ce587dd441bb135d0f9468624b7aabfe8f1f99a9dfeda6bd045",
+      "stderr": ""
+    },
+    {
+      "file": "b16-c2-t1000-none.mov",
+      "input_sha256": "68d102008b7516e84abe5588e3bc2b4af940aade1e60fe9c0427bf715501fbf5",
+      "returncode": 0,
+      "exact": true,
+      "output_sha256": "631e220c37c96ce587dd441bb135d0f9468624b7aabfe8f1f99a9dfeda6bd045",
+      "stderr": ""
+    },
+    {
+      "file": "b16-c2-t1000-zero.mov",
+      "input_sha256": "8722559b9cde49367485843239218bc3ead705db72e6054b082c0a79e4b8958e",
+      "returncode": 0,
+      "exact": true,
+      "output_sha256": "631e220c37c96ce587dd441bb135d0f9468624b7aabfe8f1f99a9dfeda6bd045",
+      "stderr": ""
+    },
+    {
+      "file": "b16-c2-t1001-none.mov",
+      "input_sha256": "49137512510811b1a6742a803702a002799d0e963ce96af7a6019b95580c2c91",
+      "returncode": 0,
+      "exact": true,
+      "output_sha256": "631e220c37c96ce587dd441bb135d0f9468624b7aabfe8f1f99a9dfeda6bd045",
+      "stderr": ""
+    },
+    {
+      "file": "b16-c2-t1001-zero.mov",
+      "input_sha256": "fa7e7df8a5546052c462190a0afd04e2383cab6c2de57bb5e9e893364acd2876",
+      "returncode": 0,
+      "exact": true,
+      "output_sha256": "631e220c37c96ce587dd441bb135d0f9468624b7aabfe8f1f99a9dfeda6bd045",
+      "stderr": ""
+    },
+    {
+      "file": "b24-c1-t8000-none.mov",
+      "input_sha256": "fb7c7ba9ac099ae6ce7ea1dd166f564aa4c4c4a429b279add6041ce3ce869865",
+      "returncode": 0,
+      "exact": false,
+      "output_sha256": "ec88525cb115dcfedd4338b39b904e4493373ed511a1808f7f0f78b9d62a3d12",
+      "stderr": ""
+    },
+    {
+      "file": "b24-c1-t8000-zero.mov",
+      "input_sha256": "2aaf27177b9bbead2875d7e16867e8cc65ce04f5e7ecf7cdbee8fc2551240589",
+      "returncode": 234,
+      "exact": false,
+      "output_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr": "[aist#0:1/none @ 0xc85028300] Decoding requested, but no decoder found for: none\nError opening output file -.\nError opening output files: Invalid argument\n"
+    },
+    {
+      "file": "b24-c1-t1000-none.mov",
+      "input_sha256": "223b8ed2849e6f583e617c164be52ddad6fa015a635e5d7798a070fb1cf57e05",
+      "returncode": 0,
+      "exact": false,
+      "output_sha256": "ec88525cb115dcfedd4338b39b904e4493373ed511a1808f7f0f78b9d62a3d12",
+      "stderr": ""
+    },
+    {
+      "file": "b24-c1-t1000-zero.mov",
+      "input_sha256": "44819bb760de5c977ce01fc279b3a024d02300b7cbde2970a192fe2ee8dca2cd",
+      "returncode": 234,
+      "exact": false,
+      "output_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr": "[aist#0:1/none @ 0xbc1028300] Decoding requested, but no decoder found for: none\nError opening output file -.\nError opening output files: Invalid argument\n"
+    },
+    {
+      "file": "b24-c1-t1001-none.mov",
+      "input_sha256": "4523feaead2a134be0a9d3da642f00186e6218f1d67fb7d6e2e94a73cec33934",
+      "returncode": 0,
+      "exact": false,
+      "output_sha256": "ec88525cb115dcfedd4338b39b904e4493373ed511a1808f7f0f78b9d62a3d12",
+      "stderr": ""
+    },
+    {
+      "file": "b24-c1-t1001-zero.mov",
+      "input_sha256": "00826965aeaae9daa90203c797b0fc3d05527e6c6f6fcb8f654cc2c47f235879",
+      "returncode": 234,
+      "exact": false,
+      "output_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr": "[aist#0:1/none @ 0xb9b06c300] Decoding requested, but no decoder found for: none\nError opening output file -.\nError opening output files: Invalid argument\n"
+    },
+    {
+      "file": "b24-c2-t8000-none.mov",
+      "input_sha256": "69f9cb09c6e26d2d4e9fab9bbb0ff7beafe2859d1c984ee33d73898a75be26fb",
+      "returncode": 0,
+      "exact": false,
+      "output_sha256": "03e8bb62bd93a11d1cdef78b434d12d39c8e00b256f1e8a196083f2909f774bc",
+      "stderr": ""
+    },
+    {
+      "file": "b24-c2-t8000-zero.mov",
+      "input_sha256": "563f60d840591b855a5330489a427cbcfe5eea4f2aa776f2714cdc0e59fb31e9",
+      "returncode": 234,
+      "exact": false,
+      "output_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr": "[aist#0:1/none @ 0x95d05c300] Decoding requested, but no decoder found for: none\nError opening output file -.\nError opening output files: Invalid argument\n"
+    },
+    {
+      "file": "b24-c2-t1000-none.mov",
+      "input_sha256": "90839b4b8954edc8c3676265e2151f249adb975c03f1b44104038c65a555f033",
+      "returncode": 0,
+      "exact": false,
+      "output_sha256": "03e8bb62bd93a11d1cdef78b434d12d39c8e00b256f1e8a196083f2909f774bc",
+      "stderr": ""
+    },
+    {
+      "file": "b24-c2-t1000-zero.mov",
+      "input_sha256": "3bb3b6066d025a8bef6f408f050e671737ea250393de11932894abf1650263ef",
+      "returncode": 234,
+      "exact": false,
+      "output_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr": "[aist#0:1/none @ 0xc13050300] Decoding requested, but no decoder found for: none\nError opening output file -.\nError opening output files: Invalid argument\n"
+    },
+    {
+      "file": "b24-c2-t1001-none.mov",
+      "input_sha256": "9202336da78d666740f59ad713884baf29be58ff2c59bbe091826a7fe5f15665",
+      "returncode": 0,
+      "exact": false,
+      "output_sha256": "03e8bb62bd93a11d1cdef78b434d12d39c8e00b256f1e8a196083f2909f774bc",
+      "stderr": ""
+    },
+    {
+      "file": "b24-c2-t1001-zero.mov",
+      "input_sha256": "e7b702eef5007bd8e6a51971184e743fc0166210f53a9b4a57f8c607561a490a",
+      "returncode": 234,
+      "exact": false,
+      "output_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr": "[aist#0:1/none @ 0x7a9034300] Decoding requested, but no decoder found for: none\nError opening output file -.\nError opening output files: Invalid argument\n"
+    },
+    {
+      "file": "b32-c1-t8000-none.mov",
+      "input_sha256": "62480c87d18333feaf8db0bc827920b94fb45f4eeda5234fe235c92596a15e33",
+      "returncode": 0,
+      "exact": false,
+      "output_sha256": "cbf2a029c9e519a692fe521c9c5a15af61c5298c642e5736e52d6584e82c5912",
+      "stderr": ""
+    },
+    {
+      "file": "b32-c1-t8000-zero.mov",
+      "input_sha256": "35020978e4fad1e0f7caf238c92a688562b58eba146e6559eda90deb15fa0485",
+      "returncode": 234,
+      "exact": false,
+      "output_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr": "[aist#0:1/none @ 0xaed400300] Decoding requested, but no decoder found for: none\nError opening output file -.\nError opening output files: Invalid argument\n"
+    },
+    {
+      "file": "b32-c1-t1000-none.mov",
+      "input_sha256": "5580d0dfc34074d4949f3c41dbeb13c3fde7ff86f470791df84bf723a9f3f492",
+      "returncode": 0,
+      "exact": false,
+      "output_sha256": "cbf2a029c9e519a692fe521c9c5a15af61c5298c642e5736e52d6584e82c5912",
+      "stderr": ""
+    },
+    {
+      "file": "b32-c1-t1000-zero.mov",
+      "input_sha256": "f70dbc41febcccf059ce843fb3ee3ae19724f56ad1382374de2093a2a4b227c8",
+      "returncode": 234,
+      "exact": false,
+      "output_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr": "[aist#0:1/none @ 0xa32800300] Decoding requested, but no decoder found for: none\nError opening output file -.\nError opening output files: Invalid argument\n"
+    },
+    {
+      "file": "b32-c1-t1001-none.mov",
+      "input_sha256": "ff60af4bbfe52336ebf30dd513128f80d3d37386dc2ca3993ac80f934cf35cd9",
+      "returncode": 0,
+      "exact": false,
+      "output_sha256": "cbf2a029c9e519a692fe521c9c5a15af61c5298c642e5736e52d6584e82c5912",
+      "stderr": ""
+    },
+    {
+      "file": "b32-c1-t1001-zero.mov",
+      "input_sha256": "8bc6da76b036bdfbab845d1bc5fb7a1ee4dfb261dc0b710925d6bbafc99bce25",
+      "returncode": 234,
+      "exact": false,
+      "output_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr": "[aist#0:1/none @ 0x705034300] Decoding requested, but no decoder found for: none\nError opening output file -.\nError opening output files: Invalid argument\n"
+    },
+    {
+      "file": "b32-c2-t8000-none.mov",
+      "input_sha256": "1cb552b63562f848ae1a5481efb5cc3432203dda97a21f310fdb02e519d3089c",
+      "returncode": 0,
+      "exact": false,
+      "output_sha256": "8a292c6eb1243731880bf0e3b0f95b87e7a740c5ae4cb8bda2311a5b33e92b0b",
+      "stderr": ""
+    },
+    {
+      "file": "b32-c2-t8000-zero.mov",
+      "input_sha256": "dc9f6a7d518e8fb6782926c1007c8c459f36845d717ab41683a493b8dd7c8208",
+      "returncode": 234,
+      "exact": false,
+      "output_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr": "[aist#0:1/none @ 0x9cec1c300] Decoding requested, but no decoder found for: none\nError opening output file -.\nError opening output files: Invalid argument\n"
+    },
+    {
+      "file": "b32-c2-t1000-none.mov",
+      "input_sha256": "39525fc7804986512dba60a4cc1fda8288d19a07b16f7de9bb1f64dea4f86db5",
+      "returncode": 0,
+      "exact": false,
+      "output_sha256": "8a292c6eb1243731880bf0e3b0f95b87e7a740c5ae4cb8bda2311a5b33e92b0b",
+      "stderr": ""
+    },
+    {
+      "file": "b32-c2-t1000-zero.mov",
+      "input_sha256": "3fcc803ca13e333ef73a3c6a927e7d04359f138956089e5f773f6160984f78d3",
+      "returncode": 234,
+      "exact": false,
+      "output_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr": "[aist#0:1/none @ 0xc4943c300] Decoding requested, but no decoder found for: none\nError opening output file -.\nError opening output files: Invalid argument\n"
+    },
+    {
+      "file": "b32-c2-t1001-none.mov",
+      "input_sha256": "c763081a9be941c1291327aa947bb376b8476dfed8a59955adadc958412e5c54",
+      "returncode": 0,
+      "exact": false,
+      "output_sha256": "8a292c6eb1243731880bf0e3b0f95b87e7a740c5ae4cb8bda2311a5b33e92b0b",
+      "stderr": ""
+    },
+    {
+      "file": "b32-c2-t1001-zero.mov",
+      "input_sha256": "093d433e0805ebc85125ae83105d6510eccba839df5c2d826f493192e8ff7342",
+      "returncode": 234,
+      "exact": false,
+      "output_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr": "[aist#0:1/none @ 0xb3343c300] Decoding requested, but no decoder found for: none\nError opening output file -.\nError opening output files: Invalid argument\n"
+    }
+  ]
+}

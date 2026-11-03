@@ -1,0 +1,198 @@
+{
+  "version": "ffmpeg version 9.0.2 Copyright (c) 2000-2026 the FFmpeg developers",
+  "scope": "Documented classic8/16 v0 alias cases only; wider diagnostics retained separately",
+  "results": [
+    {
+      "file": "b8-c1-t8000-none.mov",
+      "input_sha256": "2ff278bf35fe299303ef4466d247e8c11e5e8c831348f592808a69f34c2724ca",
+      "returncode": 0,
+      "exact": true,
+      "output_sha256": "ade7863d996b84e1226e494de1642fd5266251fbfb1f09b8ebe2ff431b0ffa80",
+      "stderr": ""
+    },
+    {
+      "file": "b8-c1-t8000-zero.mov",
+      "input_sha256": "b5551bc5b9d1595a730fca999abf0c7b318128475c42ffcc8db07c0e0fc78c17",
+      "returncode": 0,
+      "exact": true,
+      "output_sha256": "ade7863d996b84e1226e494de1642fd5266251fbfb1f09b8ebe2ff431b0ffa80",
+      "stderr": ""
+    },
+    {
+      "file": "b8-c1-t1000-none.mov",
+      "input_sha256": "dc4eae89b4f9988820a159f5fec973ac4f038e05c388a6d1d5840d678af9cd2c",
+      "returncode": 0,
+      "exact": true,
+      "output_sha256": "ade7863d996b84e1226e494de1642fd5266251fbfb1f09b8ebe2ff431b0ffa80",
+      "stderr": ""
+    },
+    {
+      "file": "b8-c1-t1000-zero.mov",
+      "input_sha256": "a790b0eca3adead45109b487cec0145b20c85907230842e7857c43920d65bd50",
+      "returncode": 0,
+      "exact": true,
+      "output_sha256": "ade7863d996b84e1226e494de1642fd5266251fbfb1f09b8ebe2ff431b0ffa80",
+      "stderr": ""
+    },
+    {
+      "file": "b8-c1-t1001-none.mov",
+      "input_sha256": "f6af6fe3f0303b5a77aff6da9462f0e6a57e3c5892398acace5402011d099913",
+      "returncode": 0,
+      "exact": true,
+      "output_sha256": "ade7863d996b84e1226e494de1642fd5266251fbfb1f09b8ebe2ff431b0ffa80",
+      "stderr": ""
+    },
+    {
+      "file": "b8-c1-t1001-zero.mov",
+      "input_sha256": "bf8d0ce9ccfe55a5d10aacc01dd506b58255c01c93de601a01d2117c6a1f42d9",
+      "returncode": 0,
+      "exact": true,
+      "output_sha256": "ade7863d996b84e1226e494de1642fd5266251fbfb1f09b8ebe2ff431b0ffa80",
+      "stderr": ""
+    },
+    {
+      "file": "b8-c2-t8000-none.mov",
+      "input_sha256": "c389925b179edade5d0f7dd8a8f892c4ff3021baa46757815db97e6c6ed72903",
+      "returncode": 0,
+      "exact": true,
+      "output_sha256": "631e220c37c96ce587dd441bb135d0f9468624b7aabfe8f1f99a9dfeda6bd045",
+      "stderr": ""
+    },
+    {
+      "file": "b8-c2-t8000-zero.mov",
+      "input_sha256": "2b4c6f84652955cd54ffdd8d5e45c565c125131c93537a01d85b9cca9cd7a238",
+      "returncode": 0,
+      "exact": true,
+      "output_sha256": "631e220c37c96ce587dd441bb135d0f9468624b7aabfe8f1f99a9dfeda6bd045",
+      "stderr": ""
+    },
+    {
+      "file": "b8-c2-t1000-none.mov",
+      "input_sha256": "e321261aa766adb2a91d91c0ebe20549114cd830ce1bdfcbcae0fc51f5283abd",
+      "returncode": 0,
+      "exact": true,
+      "output_sha256": "631e220c37c96ce587dd441bb135d0f9468624b7aabfe8f1f99a9dfeda6bd045",
+      "stderr": ""
+    },
+    {
+      "file": "b8-c2-t1000-zero.mov",
+      "input_sha256": "23dfc3c16cc968138fb876795d9a0cff8347c25abce09af70bce5c26974b8e8a",
+      "returncode": 0,
+      "exact": true,
+      "output_sha256": "631e220c37c96ce587dd441bb135d0f9468624b7aabfe8f1f99a9dfeda6bd045",
+      "stderr": ""
+    },
+    {
+      "file": "b8-c2-t1001-none.mov",
+      "input_sha256": "48a7d8b1708701f80b8c1531bf434a6a60de576daf2375f3cc9e52a25c1a1e98",
+      "returncode": 0,
+      "exact": true,
+      "output_sha256": "631e220c37c96ce587dd441bb135d0f9468624b7aabfe8f1f99a9dfeda6bd045",
+      "stderr": ""
+    },
+    {
+      "file": "b8-c2-t1001-zero.mov",
+      "input_sha256": "6555a359cb7218ec61e6e07f379326460983a6d81fc1b4e1232f26a8fef11ae9",
+      "returncode": 0,
+      "exact": true,
+      "output_sha256": "631e220c37c96ce587dd441bb135d0f9468624b7aabfe8f1f99a9dfeda6bd045",
+      "stderr": ""
+    },
+    {
+      "file": "b16-c1-t8000-none.mov",
+      "input_sha256": "1e9ba68dd3fd089ff775adcf110b1817156e94268767be06649c9c63019b463c",
+      "returncode": 0,
+      "exact": true,
+      "output_sha256": "ade7863d996b84e1226e494de1642fd5266251fbfb1f09b8ebe2ff431b0ffa80",
+      "stderr": ""
+    },
+    {
+      "file": "b16-c1-t8000-zero.mov",
+      "input_sha256": "7fe4bb5a0750fe8faeddbf284f8c00eebdafc27802a29fbab064015149b6269b",
+      "returncode": 0,
+      "exact": true,
+      "output_sha256": "ade7863d996b84e1226e494de1642fd5266251fbfb1f09b8ebe2ff431b0ffa80",
+      "stderr": ""
+    },
+    {
+      "file": "b16-c1-t1000-none.mov",
+      "input_sha256": "23573cdd53b5d77df7fd0a6c82dfd78aca988dbf14d38819ffc5b9b28202a138",
+      "returncode": 0,
+      "exact": true,
+      "output_sha256": "ade7863d996b84e1226e494de1642fd5266251fbfb1f09b8ebe2ff431b0ffa80",
+      "stderr": ""
+    },
+    {
+      "file": "b16-c1-t1000-zero.mov",
+      "input_sha256": "35711f6310dc6645e4b565eb293547b13069516843f86175ab3148c110a50917",
+      "returncode": 0,
+      "exact": true,
+      "output_sha256": "ade7863d996b84e1226e494de1642fd5266251fbfb1f09b8ebe2ff431b0ffa80",
+      "stderr": ""
+    },
+    {
+      "file": "b16-c1-t1001-none.mov",
+      "input_sha256": "ed30c79dd40c938aafa45722b58f39da0fcf6998ad33fb71efd53122ec609664",
+      "returncode": 0,
+      "exact": true,
+      "output_sha256": "ade7863d996b84e1226e494de1642fd5266251fbfb1f09b8ebe2ff431b0ffa80",
+      "stderr": ""
+    },
+    {
+      "file": "b16-c1-t1001-zero.mov",
+      "input_sha256": "1c04612a71667527e41de57d772766fa5b0ae5e946685b50f260e2dc0a5f73d2",
+      "returncode": 0,
+      "exact": true,
+      "output_sha256": "ade7863d996b84e1226e494de1642fd5266251fbfb1f09b8ebe2ff431b0ffa80",
+      "stderr": ""
+    },
+    {
+      "file": "b16-c2-t8000-none.mov",
+      "input_sha256": "2eac9f56118b4f514bd2131d9efbbddf1e81f8fae248d23f19aa3877ec53a13a",
+      "returncode": 0,
+      "exact": true,
+      "output_sha256": "631e220c37c96ce587dd441bb135d0f9468624b7aabfe8f1f99a9dfeda6bd045",
+      "stderr": ""
+    },
+    {
+      "file": "b16-c2-t8000-zero.mov",
+      "input_sha256": "4d4483ef737deb77914ef058adf845e61549df79a72d833920566fbdee938813",
+      "returncode": 0,
+      "exact": true,
+      "output_sha256": "631e220c37c96ce587dd441bb135d0f9468624b7aabfe8f1f99a9dfeda6bd045",
+      "stderr": ""
+    },
+    {
+      "file": "b16-c2-t1000-none.mov",
+      "input_sha256": "68d102008b7516e84abe5588e3bc2b4af940aade1e60fe9c0427bf715501fbf5",
+      "returncode": 0,
+      "exact": true,
+      "output_sha256": "631e220c37c96ce587dd441bb135d0f9468624b7aabfe8f1f99a9dfeda6bd045",
+      "stderr": ""
+    },
+    {
+      "file": "b16-c2-t1000-zero.mov",
+      "input_sha256": "8722559b9cde49367485843239218bc3ead705db72e6054b082c0a79e4b8958e",
+      "returncode": 0,
+      "exact": true,
+      "output_sha256": "631e220c37c96ce587dd441bb135d0f9468624b7aabfe8f1f99a9dfeda6bd045",
+      "stderr": ""
+    },
+    {
+      "file": "b16-c2-t1001-none.mov",
+      "input_sha256": "49137512510811b1a6742a803702a002799d0e963ce96af7a6019b95580c2c91",
+      "returncode": 0,
+      "exact": true,
+      "output_sha256": "631e220c37c96ce587dd441bb135d0f9468624b7aabfe8f1f99a9dfeda6bd045",
+      "stderr": ""
+    },
+    {
+      "file": "b16-c2-t1001-zero.mov",
+      "input_sha256": "fa7e7df8a5546052c462190a0afd04e2383cab6c2de57bb5e9e893364acd2876",
+      "returncode": 0,
+      "exact": true,
+      "output_sha256": "631e220c37c96ce587dd441bb135d0f9468624b7aabfe8f1f99a9dfeda6bd045",
+      "stderr": ""
+    }
+  ]
+}

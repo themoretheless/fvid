@@ -1873,6 +1873,20 @@ fn parse_sample_entry(entry: Atom<'_>, mut result: Track, refused: &mut Vec<Skip
                 }),
             )
         }
+        // Historical QuickTime v0 sometimes spells classic raw/twos PCM as
+        // NONE or zero. Wider/newer/compressed meanings are ambiguous, so only
+        // normalize the classic mono/stereo8/16-bit uncompressed form.
+        (b"soun", b"NONE" | b"\0\0\0\0") => {
+            if u16be(entry.data,8)? != 0 || u16be(entry.data,20)? != 0
+                || u16be(entry.data,22)? != 0 { return Ok(None); }
+            audio_entry(entry.data,&mut result)?;
+            if !matches!(result.bit_depth,8|16) { return Ok(None); }
+            if result.channels == 0 { return Err(invalid("zero classic QuickTime PCM channel count")); }
+            if result.sample_rate == 0 { return Err(invalid("zero classic QuickTime PCM sample rate")); }
+            if result.channels > 2 { return Ok(None); }
+            result.codec = if result.bit_depth == 8 { *b"raw " } else { *b"twos" };
+            (entry.data.len(),None)
+        }
         (b"soun", b"lpcm") => {
             let Some(at) = lpcm_v2_entry(entry.data, &mut result)? else { return Ok(None); };
             (at, None)

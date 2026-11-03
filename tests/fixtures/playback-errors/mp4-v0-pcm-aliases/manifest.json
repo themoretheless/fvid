@@ -1,0 +1,578 @@
+{
+  "provenance": "Authored60ms8/16/24/32bit mono/stereo PCM ramps and distinct VP9 pictures in QuickTime-brand movies. Classic v0 NONE/zero aliases versus native raw/twos controls. No encoder,private media or network.",
+  "spec": "https://developer.apple.com/documentation/quicktime-file-format/sound_sample_description_version_0",
+  "cases": [
+    {
+      "file": "b8-c1-t8000-none.mov",
+      "control": "b8-c1-t8000-control.mov",
+      "expected": "b8-c1.f32le",
+      "bits": 8,
+      "channels": 1,
+      "rate": 8000,
+      "frames": 480,
+      "alias": "none"
+    },
+    {
+      "file": "b8-c1-t8000-zero.mov",
+      "control": "b8-c1-t8000-control.mov",
+      "expected": "b8-c1.f32le",
+      "bits": 8,
+      "channels": 1,
+      "rate": 8000,
+      "frames": 480,
+      "alias": "zero"
+    },
+    {
+      "file": "b8-c1-t1000-none.mov",
+      "control": "b8-c1-t1000-control.mov",
+      "expected": "b8-c1.f32le",
+      "bits": 8,
+      "channels": 1,
+      "rate": 8000,
+      "frames": 480,
+      "alias": "none"
+    },
+    {
+      "file": "b8-c1-t1000-zero.mov",
+      "control": "b8-c1-t1000-control.mov",
+      "expected": "b8-c1.f32le",
+      "bits": 8,
+      "channels": 1,
+      "rate": 8000,
+      "frames": 480,
+      "alias": "zero"
+    },
+    {
+      "file": "b8-c1-t1001-none.mov",
+      "control": "b8-c1-t1001-control.mov",
+      "expected": "b8-c1.f32le",
+      "bits": 8,
+      "channels": 1,
+      "rate": 8000,
+      "frames": 480,
+      "alias": "none"
+    },
+    {
+      "file": "b8-c1-t1001-zero.mov",
+      "control": "b8-c1-t1001-control.mov",
+      "expected": "b8-c1.f32le",
+      "bits": 8,
+      "channels": 1,
+      "rate": 8000,
+      "frames": 480,
+      "alias": "zero"
+    },
+    {
+      "file": "b8-c2-t8000-none.mov",
+      "control": "b8-c2-t8000-control.mov",
+      "expected": "b8-c2.f32le",
+      "bits": 8,
+      "channels": 2,
+      "rate": 8000,
+      "frames": 480,
+      "alias": "none"
+    },
+    {
+      "file": "b8-c2-t8000-zero.mov",
+      "control": "b8-c2-t8000-control.mov",
+      "expected": "b8-c2.f32le",
+      "bits": 8,
+      "channels": 2,
+      "rate": 8000,
+      "frames": 480,
+      "alias": "zero"
+    },
+    {
+      "file": "b8-c2-t1000-none.mov",
+      "control": "b8-c2-t1000-control.mov",
+      "expected": "b8-c2.f32le",
+      "bits": 8,
+      "channels": 2,
+      "rate": 8000,
+      "frames": 480,
+      "alias": "none"
+    },
+    {
+      "file": "b8-c2-t1000-zero.mov",
+      "control": "b8-c2-t1000-control.mov",
+      "expected": "b8-c2.f32le",
+      "bits": 8,
+      "channels": 2,
+      "rate": 8000,
+      "frames": 480,
+      "alias": "zero"
+    },
+    {
+      "file": "b8-c2-t1001-none.mov",
+      "control": "b8-c2-t1001-control.mov",
+      "expected": "b8-c2.f32le",
+      "bits": 8,
+      "channels": 2,
+      "rate": 8000,
+      "frames": 480,
+      "alias": "none"
+    },
+    {
+      "file": "b8-c2-t1001-zero.mov",
+      "control": "b8-c2-t1001-control.mov",
+      "expected": "b8-c2.f32le",
+      "bits": 8,
+      "channels": 2,
+      "rate": 8000,
+      "frames": 480,
+      "alias": "zero"
+    },
+    {
+      "file": "b16-c1-t8000-none.mov",
+      "control": "b16-c1-t8000-control.mov",
+      "expected": "b16-c1.f32le",
+      "bits": 16,
+      "channels": 1,
+      "rate": 8000,
+      "frames": 480,
+      "alias": "none"
+    },
+    {
+      "file": "b16-c1-t8000-zero.mov",
+      "control": "b16-c1-t8000-control.mov",
+      "expected": "b16-c1.f32le",
+      "bits": 16,
+      "channels": 1,
+      "rate": 8000,
+      "frames": 480,
+      "alias": "zero"
+    },
+    {
+      "file": "b16-c1-t1000-none.mov",
+      "control": "b16-c1-t1000-control.mov",
+      "expected": "b16-c1.f32le",
+      "bits": 16,
+      "channels": 1,
+      "rate": 8000,
+      "frames": 480,
+      "alias": "none"
+    },
+    {
+      "file": "b16-c1-t1000-zero.mov",
+      "control": "b16-c1-t1000-control.mov",
+      "expected": "b16-c1.f32le",
+      "bits": 16,
+      "channels": 1,
+      "rate": 8000,
+      "frames": 480,
+      "alias": "zero"
+    },
+    {
+      "file": "b16-c1-t1001-none.mov",
+      "control": "b16-c1-t1001-control.mov",
+      "expected": "b16-c1.f32le",
+      "bits": 16,
+      "channels": 1,
+      "rate": 8000,
+      "frames": 480,
+      "alias": "none"
+    },
+    {
+      "file": "b16-c1-t1001-zero.mov",
+      "control": "b16-c1-t1001-control.mov",
+      "expected": "b16-c1.f32le",
+      "bits": 16,
+      "channels": 1,
+      "rate": 8000,
+      "frames": 480,
+      "alias": "zero"
+    },
+    {
+      "file": "b16-c2-t8000-none.mov",
+      "control": "b16-c2-t8000-control.mov",
+      "expected": "b16-c2.f32le",
+      "bits": 16,
+      "channels": 2,
+      "rate": 8000,
+      "frames": 480,
+      "alias": "none"
+    },
+    {
+      "file": "b16-c2-t8000-zero.mov",
+      "control": "b16-c2-t8000-control.mov",
+      "expected": "b16-c2.f32le",
+      "bits": 16,
+      "channels": 2,
+      "rate": 8000,
+      "frames": 480,
+      "alias": "zero"
+    },
+    {
+      "file": "b16-c2-t1000-none.mov",
+      "control": "b16-c2-t1000-control.mov",
+      "expected": "b16-c2.f32le",
+      "bits": 16,
+      "channels": 2,
+      "rate": 8000,
+      "frames": 480,
+      "alias": "none"
+    },
+    {
+      "file": "b16-c2-t1000-zero.mov",
+      "control": "b16-c2-t1000-control.mov",
+      "expected": "b16-c2.f32le",
+      "bits": 16,
+      "channels": 2,
+      "rate": 8000,
+      "frames": 480,
+      "alias": "zero"
+    },
+    {
+      "file": "b16-c2-t1001-none.mov",
+      "control": "b16-c2-t1001-control.mov",
+      "expected": "b16-c2.f32le",
+      "bits": 16,
+      "channels": 2,
+      "rate": 8000,
+      "frames": 480,
+      "alias": "none"
+    },
+    {
+      "file": "b16-c2-t1001-zero.mov",
+      "control": "b16-c2-t1001-control.mov",
+      "expected": "b16-c2.f32le",
+      "bits": 16,
+      "channels": 2,
+      "rate": 8000,
+      "frames": 480,
+      "alias": "zero"
+    }
+  ],
+  "unsupported": [
+    "unsupported-none-version.mov",
+    "unsupported-none-compressed.mov",
+    "unsupported-none-unknown-width.mov",
+    "unsupported-zero-version.mov",
+    "unsupported-zero-compressed.mov",
+    "unsupported-zero-unknown-width.mov",
+    "b24-c1-t8000-none.mov",
+    "b24-c1-t8000-zero.mov",
+    "b24-c1-t1000-none.mov",
+    "b24-c1-t1000-zero.mov",
+    "b24-c1-t1001-none.mov",
+    "b24-c1-t1001-zero.mov",
+    "b24-c2-t8000-none.mov",
+    "b24-c2-t8000-zero.mov",
+    "b24-c2-t1000-none.mov",
+    "b24-c2-t1000-zero.mov",
+    "b24-c2-t1001-none.mov",
+    "b24-c2-t1001-zero.mov",
+    "b32-c1-t8000-none.mov",
+    "b32-c1-t8000-zero.mov",
+    "b32-c1-t1000-none.mov",
+    "b32-c1-t1000-zero.mov",
+    "b32-c1-t1001-none.mov",
+    "b32-c1-t1001-zero.mov",
+    "b32-c2-t8000-none.mov",
+    "b32-c2-t8000-zero.mov",
+    "b32-c2-t1000-none.mov",
+    "b32-c2-t1000-zero.mov",
+    "b32-c2-t1001-none.mov",
+    "b32-c2-t1001-zero.mov"
+  ],
+  "fallback": [
+    "unsupported-none-version-then-valid.mov",
+    "unsupported-none-compressed-then-valid.mov",
+    "unsupported-none-unknown-width-then-valid.mov",
+    "unsupported-zero-version-then-valid.mov",
+    "unsupported-zero-compressed-then-valid.mov",
+    "unsupported-zero-unknown-width-then-valid.mov"
+  ],
+  "diagnostics": [
+    {
+      "file": "b24-c1-t8000-none.mov",
+      "control": "b24-c1-t8000-control.mov",
+      "expected": "b24-c1.f32le",
+      "bits": 24,
+      "channels": 1,
+      "rate": 8000,
+      "frames": 480,
+      "alias": "none",
+      "qualification": "Unsupported classic alias width; independent decoder does not match native PCM"
+    },
+    {
+      "file": "b24-c1-t8000-zero.mov",
+      "control": "b24-c1-t8000-control.mov",
+      "expected": "b24-c1.f32le",
+      "bits": 24,
+      "channels": 1,
+      "rate": 8000,
+      "frames": 480,
+      "alias": "zero",
+      "qualification": "Unsupported classic alias width; independent decoder does not match native PCM"
+    },
+    {
+      "file": "b24-c1-t1000-none.mov",
+      "control": "b24-c1-t1000-control.mov",
+      "expected": "b24-c1.f32le",
+      "bits": 24,
+      "channels": 1,
+      "rate": 8000,
+      "frames": 480,
+      "alias": "none",
+      "qualification": "Unsupported classic alias width; independent decoder does not match native PCM"
+    },
+    {
+      "file": "b24-c1-t1000-zero.mov",
+      "control": "b24-c1-t1000-control.mov",
+      "expected": "b24-c1.f32le",
+      "bits": 24,
+      "channels": 1,
+      "rate": 8000,
+      "frames": 480,
+      "alias": "zero",
+      "qualification": "Unsupported classic alias width; independent decoder does not match native PCM"
+    },
+    {
+      "file": "b24-c1-t1001-none.mov",
+      "control": "b24-c1-t1001-control.mov",
+      "expected": "b24-c1.f32le",
+      "bits": 24,
+      "channels": 1,
+      "rate": 8000,
+      "frames": 480,
+      "alias": "none",
+      "qualification": "Unsupported classic alias width; independent decoder does not match native PCM"
+    },
+    {
+      "file": "b24-c1-t1001-zero.mov",
+      "control": "b24-c1-t1001-control.mov",
+      "expected": "b24-c1.f32le",
+      "bits": 24,
+      "channels": 1,
+      "rate": 8000,
+      "frames": 480,
+      "alias": "zero",
+      "qualification": "Unsupported classic alias width; independent decoder does not match native PCM"
+    },
+    {
+      "file": "b24-c2-t8000-none.mov",
+      "control": "b24-c2-t8000-control.mov",
+      "expected": "b24-c2.f32le",
+      "bits": 24,
+      "channels": 2,
+      "rate": 8000,
+      "frames": 480,
+      "alias": "none",
+      "qualification": "Unsupported classic alias width; independent decoder does not match native PCM"
+    },
+    {
+      "file": "b24-c2-t8000-zero.mov",
+      "control": "b24-c2-t8000-control.mov",
+      "expected": "b24-c2.f32le",
+      "bits": 24,
+      "channels": 2,
+      "rate": 8000,
+      "frames": 480,
+      "alias": "zero",
+      "qualification": "Unsupported classic alias width; independent decoder does not match native PCM"
+    },
+    {
+      "file": "b24-c2-t1000-none.mov",
+      "control": "b24-c2-t1000-control.mov",
+      "expected": "b24-c2.f32le",
+      "bits": 24,
+      "channels": 2,
+      "rate": 8000,
+      "frames": 480,
+      "alias": "none",
+      "qualification": "Unsupported classic alias width; independent decoder does not match native PCM"
+    },
+    {
+      "file": "b24-c2-t1000-zero.mov",
+      "control": "b24-c2-t1000-control.mov",
+      "expected": "b24-c2.f32le",
+      "bits": 24,
+      "channels": 2,
+      "rate": 8000,
+      "frames": 480,
+      "alias": "zero",
+      "qualification": "Unsupported classic alias width; independent decoder does not match native PCM"
+    },
+    {
+      "file": "b24-c2-t1001-none.mov",
+      "control": "b24-c2-t1001-control.mov",
+      "expected": "b24-c2.f32le",
+      "bits": 24,
+      "channels": 2,
+      "rate": 8000,
+      "frames": 480,
+      "alias": "none",
+      "qualification": "Unsupported classic alias width; independent decoder does not match native PCM"
+    },
+    {
+      "file": "b24-c2-t1001-zero.mov",
+      "control": "b24-c2-t1001-control.mov",
+      "expected": "b24-c2.f32le",
+      "bits": 24,
+      "channels": 2,
+      "rate": 8000,
+      "frames": 480,
+      "alias": "zero",
+      "qualification": "Unsupported classic alias width; independent decoder does not match native PCM"
+    },
+    {
+      "file": "b32-c1-t8000-none.mov",
+      "control": "b32-c1-t8000-control.mov",
+      "expected": "b32-c1.f32le",
+      "bits": 32,
+      "channels": 1,
+      "rate": 8000,
+      "frames": 480,
+      "alias": "none",
+      "qualification": "Unsupported classic alias width; independent decoder does not match native PCM"
+    },
+    {
+      "file": "b32-c1-t8000-zero.mov",
+      "control": "b32-c1-t8000-control.mov",
+      "expected": "b32-c1.f32le",
+      "bits": 32,
+      "channels": 1,
+      "rate": 8000,
+      "frames": 480,
+      "alias": "zero",
+      "qualification": "Unsupported classic alias width; independent decoder does not match native PCM"
+    },
+    {
+      "file": "b32-c1-t1000-none.mov",
+      "control": "b32-c1-t1000-control.mov",
+      "expected": "b32-c1.f32le",
+      "bits": 32,
+      "channels": 1,
+      "rate": 8000,
+      "frames": 480,
+      "alias": "none",
+      "qualification": "Unsupported classic alias width; independent decoder does not match native PCM"
+    },
+    {
+      "file": "b32-c1-t1000-zero.mov",
+      "control": "b32-c1-t1000-control.mov",
+      "expected": "b32-c1.f32le",
+      "bits": 32,
+      "channels": 1,
+      "rate": 8000,
+      "frames": 480,
+      "alias": "zero",
+      "qualification": "Unsupported classic alias width; independent decoder does not match native PCM"
+    },
+    {
+      "file": "b32-c1-t1001-none.mov",
+      "control": "b32-c1-t1001-control.mov",
+      "expected": "b32-c1.f32le",
+      "bits": 32,
+      "channels": 1,
+      "rate": 8000,
+      "frames": 480,
+      "alias": "none",
+      "qualification": "Unsupported classic alias width; independent decoder does not match native PCM"
+    },
+    {
+      "file": "b32-c1-t1001-zero.mov",
+      "control": "b32-c1-t1001-control.mov",
+      "expected": "b32-c1.f32le",
+      "bits": 32,
+      "channels": 1,
+      "rate": 8000,
+      "frames": 480,
+      "alias": "zero",
+      "qualification": "Unsupported classic alias width; independent decoder does not match native PCM"
+    },
+    {
+      "file": "b32-c2-t8000-none.mov",
+      "control": "b32-c2-t8000-control.mov",
+      "expected": "b32-c2.f32le",
+      "bits": 32,
+      "channels": 2,
+      "rate": 8000,
+      "frames": 480,
+      "alias": "none",
+      "qualification": "Unsupported classic alias width; independent decoder does not match native PCM"
+    },
+    {
+      "file": "b32-c2-t8000-zero.mov",
+      "control": "b32-c2-t8000-control.mov",
+      "expected": "b32-c2.f32le",
+      "bits": 32,
+      "channels": 2,
+      "rate": 8000,
+      "frames": 480,
+      "alias": "zero",
+      "qualification": "Unsupported classic alias width; independent decoder does not match native PCM"
+    },
+    {
+      "file": "b32-c2-t1000-none.mov",
+      "control": "b32-c2-t1000-control.mov",
+      "expected": "b32-c2.f32le",
+      "bits": 32,
+      "channels": 2,
+      "rate": 8000,
+      "frames": 480,
+      "alias": "none",
+      "qualification": "Unsupported classic alias width; independent decoder does not match native PCM"
+    },
+    {
+      "file": "b32-c2-t1000-zero.mov",
+      "control": "b32-c2-t1000-control.mov",
+      "expected": "b32-c2.f32le",
+      "bits": 32,
+      "channels": 2,
+      "rate": 8000,
+      "frames": 480,
+      "alias": "zero",
+      "qualification": "Unsupported classic alias width; independent decoder does not match native PCM"
+    },
+    {
+      "file": "b32-c2-t1001-none.mov",
+      "control": "b32-c2-t1001-control.mov",
+      "expected": "b32-c2.f32le",
+      "bits": 32,
+      "channels": 2,
+      "rate": 8000,
+      "frames": 480,
+      "alias": "none",
+      "qualification": "Unsupported classic alias width; independent decoder does not match native PCM"
+    },
+    {
+      "file": "b32-c2-t1001-zero.mov",
+      "control": "b32-c2-t1001-control.mov",
+      "expected": "b32-c2.f32le",
+      "bits": 32,
+      "channels": 2,
+      "rate": 8000,
+      "frames": 480,
+      "alias": "zero",
+      "qualification": "Unsupported classic alias width; independent decoder does not match native PCM"
+    }
+  ],
+  "malformed": [
+    {
+      "file": "bad-none-reference.mov",
+      "needle": "invalid sample data reference"
+    },
+    {
+      "file": "bad-none-channels.mov",
+      "needle": "zero classic QuickTime PCM channel count"
+    },
+    {
+      "file": "bad-none-rate.mov",
+      "needle": "zero classic QuickTime PCM sample rate"
+    },
+    {
+      "file": "bad-zero-reference.mov",
+      "needle": "invalid sample data reference"
+    },
+    {
+      "file": "bad-zero-channels.mov",
+      "needle": "zero classic QuickTime PCM channel count"
+    },
+    {
+      "file": "bad-zero-rate.mov",
+      "needle": "zero classic QuickTime PCM sample rate"
+    }
+  ]
+}
