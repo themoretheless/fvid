@@ -1,0 +1,179 @@
+{
+  "binary": "/opt/homebrew/opt/ffmpeg-full/bin/ffmpeg",
+  "cases": [
+    {
+      "file": "v0-video-only.mp4",
+      "inputSha256": "30923323b549bd5f979df284d75ffba98fb710018eb5f09fe183fd753581d160",
+      "returncode": 0,
+      "exact": true,
+      "bytes": 1152,
+      "stderr": ""
+    },
+    {
+      "file": "v0-known-av.mp4",
+      "inputSha256": "3c8e1717f6bb006c4b26d4ca19ee622b3d3137874e18e2539fe1d07cb01d7474",
+      "returncode": 0,
+      "exact": true,
+      "bytes": 1152,
+      "stderr": ""
+    },
+    {
+      "file": "v0-order-va.mp4",
+      "inputSha256": "55f65703dfb00dbaccd98791690ea2518b809f5aa9d16682653cb022aa96e653",
+      "returncode": 0,
+      "exact": true,
+      "bytes": 1152,
+      "stderr": ""
+    },
+    {
+      "file": "v0-order-av.mp4",
+      "inputSha256": "1efa0660c62e9f3a4594e58a26ff7c92c2bb876024615257af86fa122ab88e96",
+      "returncode": 0,
+      "exact": true,
+      "bytes": 1152,
+      "stderr": ""
+    },
+    {
+      "file": "v0-order-vab.mp4",
+      "inputSha256": "02f5eca55472f8c9e49c02e618dde79378005830bccadc8887dea271bd57b798",
+      "returncode": 0,
+      "exact": true,
+      "bytes": 1152,
+      "stderr": ""
+    },
+    {
+      "file": "v0-order-vba.mp4",
+      "inputSha256": "4c203c26c889ddf491b64b206ac39d47393b5635d40a056465ddd9dc4606cd82",
+      "returncode": 0,
+      "exact": true,
+      "bytes": 1152,
+      "stderr": ""
+    },
+    {
+      "file": "v0-order-avb.mp4",
+      "inputSha256": "7fa323c6790ef323b93baec7de437930282739fbe2af10156386fccc55fdd540",
+      "returncode": 0,
+      "exact": true,
+      "bytes": 1152,
+      "stderr": ""
+    },
+    {
+      "file": "v0-order-abv.mp4",
+      "inputSha256": "3e247553e0ae6b5ee4216c6db06ff2ef43f832ba3cbb84cec7520ab5eaec989b",
+      "returncode": 0,
+      "exact": true,
+      "bytes": 1152,
+      "stderr": ""
+    },
+    {
+      "file": "v0-order-bva.mp4",
+      "inputSha256": "3125762c10d0319da5db781dbd991a45ea5d24865f40ceadacbb8c508bfc9a18",
+      "returncode": 0,
+      "exact": true,
+      "bytes": 1152,
+      "stderr": ""
+    },
+    {
+      "file": "v0-order-bav.mp4",
+      "inputSha256": "38bb40d1ea974aec5908b25d492f490cb59c0fadcf5f7886b2bb503aff878f7d",
+      "returncode": 0,
+      "exact": true,
+      "bytes": 1152,
+      "stderr": ""
+    },
+    {
+      "file": "v1-video-only.mp4",
+      "inputSha256": "d89a5927d015d79561024e1af3596460422c09d7206eaa176444b08d33474c2d",
+      "returncode": 0,
+      "exact": true,
+      "bytes": 1152,
+      "stderr": ""
+    },
+    {
+      "file": "v1-known-av.mp4",
+      "inputSha256": "af206823a290b8d53d6342bf70b7d0b38cbb2eaba42be0e3d5eb48c1148dc723",
+      "returncode": 0,
+      "exact": true,
+      "bytes": 1152,
+      "stderr": ""
+    },
+    {
+      "file": "v1-order-va.mp4",
+      "inputSha256": "a5f35759988862c4e866f872300ca7f589d01b4e095b17e9565be77f4e5ed12d",
+      "returncode": 0,
+      "exact": true,
+      "bytes": 1152,
+      "stderr": ""
+    },
+    {
+      "file": "v1-order-av.mp4",
+      "inputSha256": "16534afb37646b76acfd42177165f369d7fc3b900610c39f0b28d6c9bc5113e8",
+      "returncode": 0,
+      "exact": true,
+      "bytes": 1152,
+      "stderr": ""
+    },
+    {
+      "file": "v1-order-vab.mp4",
+      "inputSha256": "1f33083702179513da0262afcbd21bc7e12732d234fa3273bacdd261151d58b1",
+      "returncode": 0,
+      "exact": true,
+      "bytes": 1152,
+      "stderr": ""
+    },
+    {
+      "file": "v1-order-vba.mp4",
+      "inputSha256": "2847e6bdeba21f5515bbae857989cf6226783a82cafd953cdbf8ae57641c32a2",
+      "returncode": 0,
+      "exact": true,
+      "bytes": 1152,
+      "stderr": ""
+    },
+    {
+      "file": "v1-order-avb.mp4",
+      "inputSha256": "45ef69f5e4a00e7105f16cafb583269f8140467bafbac693f5924e73a9526c29",
+      "returncode": 0,
+      "exact": true,
+      "bytes": 1152,
+      "stderr": ""
+    },
+    {
+      "file": "v1-order-abv.mp4",
+      "inputSha256": "6ed664744823f2d4f7f668d587f6c011079d27b7828aab898bdaff45d5307134",
+      "returncode": 0,
+      "exact": true,
+      "bytes": 1152,
+      "stderr": ""
+    },
+    {
+      "file": "v1-order-bva.mp4",
+      "inputSha256": "cf9d379dbd20d6006743d7115465b99d97be51e4b9755c14415c71fd656fcdce",
+      "returncode": 0,
+      "exact": true,
+      "bytes": 1152,
+      "stderr": ""
+    },
+    {
+      "file": "v1-order-bav.mp4",
+      "inputSha256": "21be21d1fd718ea1fe803c3d5a9c9b947c951700d58275d38aa279944cb4409c",
+      "returncode": 0,
+      "exact": true,
+      "bytes": 1152,
+      "stderr": ""
+    }
+  ],
+  "version": "ffmpeg version 9.0.2 Copyright (c) 2000-2026 the FFmpeg developers",
+  "command": [
+    "-v",
+    "error",
+    "-i",
+    "<file>",
+    "-map",
+    "0:v:0",
+    "-pix_fmt",
+    "yuv420p",
+    "-f",
+    "rawvideo",
+    "-"
+  ]
+}

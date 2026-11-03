@@ -1,0 +1,217 @@
+{
+  "provenance": "Authored60ms neutral VP9 with optional known PCM or opaque z002/z003 sound tracks. Distinct-ID controls and duplicate-ID companions retain payloads, references, sample tables and offsets; tkhd v0/v1 layouts are authored explicitly. No private media, encoder, random mutation audit or network.",
+  "cases": [
+    {
+      "file": "v0-video-only.mp4",
+      "totalTracks": 1,
+      "supportedTracks": 1,
+      "unsupportedTracks": 0
+    },
+    {
+      "file": "v0-known-av.mp4",
+      "totalTracks": 2,
+      "supportedTracks": 2,
+      "unsupportedTracks": 0
+    },
+    {
+      "file": "v0-order-va.mp4",
+      "totalTracks": 2,
+      "supportedTracks": 1,
+      "unsupportedTracks": 1
+    },
+    {
+      "file": "v0-order-av.mp4",
+      "totalTracks": 2,
+      "supportedTracks": 1,
+      "unsupportedTracks": 1
+    },
+    {
+      "file": "v0-order-vab.mp4",
+      "totalTracks": 3,
+      "supportedTracks": 1,
+      "unsupportedTracks": 2
+    },
+    {
+      "file": "v0-order-vba.mp4",
+      "totalTracks": 3,
+      "supportedTracks": 1,
+      "unsupportedTracks": 2
+    },
+    {
+      "file": "v0-order-avb.mp4",
+      "totalTracks": 3,
+      "supportedTracks": 1,
+      "unsupportedTracks": 2
+    },
+    {
+      "file": "v0-order-abv.mp4",
+      "totalTracks": 3,
+      "supportedTracks": 1,
+      "unsupportedTracks": 2
+    },
+    {
+      "file": "v0-order-bva.mp4",
+      "totalTracks": 3,
+      "supportedTracks": 1,
+      "unsupportedTracks": 2
+    },
+    {
+      "file": "v0-order-bav.mp4",
+      "totalTracks": 3,
+      "supportedTracks": 1,
+      "unsupportedTracks": 2
+    },
+    {
+      "file": "v1-video-only.mp4",
+      "totalTracks": 1,
+      "supportedTracks": 1,
+      "unsupportedTracks": 0
+    },
+    {
+      "file": "v1-known-av.mp4",
+      "totalTracks": 2,
+      "supportedTracks": 2,
+      "unsupportedTracks": 0
+    },
+    {
+      "file": "v1-order-va.mp4",
+      "totalTracks": 2,
+      "supportedTracks": 1,
+      "unsupportedTracks": 1
+    },
+    {
+      "file": "v1-order-av.mp4",
+      "totalTracks": 2,
+      "supportedTracks": 1,
+      "unsupportedTracks": 1
+    },
+    {
+      "file": "v1-order-vab.mp4",
+      "totalTracks": 3,
+      "supportedTracks": 1,
+      "unsupportedTracks": 2
+    },
+    {
+      "file": "v1-order-vba.mp4",
+      "totalTracks": 3,
+      "supportedTracks": 1,
+      "unsupportedTracks": 2
+    },
+    {
+      "file": "v1-order-avb.mp4",
+      "totalTracks": 3,
+      "supportedTracks": 1,
+      "unsupportedTracks": 2
+    },
+    {
+      "file": "v1-order-abv.mp4",
+      "totalTracks": 3,
+      "supportedTracks": 1,
+      "unsupportedTracks": 2
+    },
+    {
+      "file": "v1-order-bva.mp4",
+      "totalTracks": 3,
+      "supportedTracks": 1,
+      "unsupportedTracks": 2
+    },
+    {
+      "file": "v1-order-bav.mp4",
+      "totalTracks": 3,
+      "supportedTracks": 1,
+      "unsupportedTracks": 2
+    }
+  ],
+  "bad": [
+    {
+      "file": "v0-duplicate-known.mp4",
+      "previouslyAccepted": false,
+      "totalTracks": 2
+    },
+    {
+      "file": "v0-duplicate-order-va.mp4",
+      "previouslyAccepted": true,
+      "totalTracks": 2
+    },
+    {
+      "file": "v0-duplicate-order-av.mp4",
+      "previouslyAccepted": true,
+      "totalTracks": 2
+    },
+    {
+      "file": "v0-duplicate-order-vab.mp4",
+      "previouslyAccepted": true,
+      "totalTracks": 3
+    },
+    {
+      "file": "v0-duplicate-order-vba.mp4",
+      "previouslyAccepted": true,
+      "totalTracks": 3
+    },
+    {
+      "file": "v0-duplicate-order-avb.mp4",
+      "previouslyAccepted": true,
+      "totalTracks": 3
+    },
+    {
+      "file": "v0-duplicate-order-abv.mp4",
+      "previouslyAccepted": true,
+      "totalTracks": 3
+    },
+    {
+      "file": "v0-duplicate-order-bva.mp4",
+      "previouslyAccepted": true,
+      "totalTracks": 3
+    },
+    {
+      "file": "v0-duplicate-order-bav.mp4",
+      "previouslyAccepted": true,
+      "totalTracks": 3
+    },
+    {
+      "file": "v1-duplicate-known.mp4",
+      "previouslyAccepted": false,
+      "totalTracks": 2
+    },
+    {
+      "file": "v1-duplicate-order-va.mp4",
+      "previouslyAccepted": true,
+      "totalTracks": 2
+    },
+    {
+      "file": "v1-duplicate-order-av.mp4",
+      "previouslyAccepted": true,
+      "totalTracks": 2
+    },
+    {
+      "file": "v1-duplicate-order-vab.mp4",
+      "previouslyAccepted": true,
+      "totalTracks": 3
+    },
+    {
+      "file": "v1-duplicate-order-vba.mp4",
+      "previouslyAccepted": true,
+      "totalTracks": 3
+    },
+    {
+      "file": "v1-duplicate-order-avb.mp4",
+      "previouslyAccepted": true,
+      "totalTracks": 3
+    },
+    {
+      "file": "v1-duplicate-order-abv.mp4",
+      "previouslyAccepted": true,
+      "totalTracks": 3
+    },
+    {
+      "file": "v1-duplicate-order-bva.mp4",
+      "previouslyAccepted": true,
+      "totalTracks": 3
+    },
+    {
+      "file": "v1-duplicate-order-bav.mp4",
+      "previouslyAccepted": true,
+      "totalTracks": 3
+    }
+  ]
+}

@@ -1,0 +1,12 @@
+{
+  "base": "6878bfe685153bca42cbbdf757c7874038bec5c0",
+  "passed": 1,
+  "failed": 1,
+  "falseAdmissions": 32,
+  "newlyRejectedFiles": 16,
+  "alreadyStrictKnownCodecFiles": 2,
+  "validControls": 20,
+  "log": "docs/improvements/evidence/mp4-opaque-track-ids/before.log",
+  "source": "docs/improvements/evidence/mp4-opaque-track-ids/baseline-source.json",
+  "primarySource": "https://developer.apple.com/documentation/quicktime-file-format/track_header_atom/track_id"
+}

@@ -1,0 +1,7 @@
+# Candidate FVID-0548: movie-wide track IDs
+
+Not counted pending full qualification. Apple defines Track ID as unique and nonzero: https://developer.apple.com/documentation/quicktime-file-format/track_header_atom/track_id . Original6878bfe685 checks duplicates only after a track is supported and retained. Sixteen authored duplicate-ID movies with opaque sound tracks are admitted through both readers (32 false admissions); two already-strict known-codec duplicate controls are not new fixes. The same two-test stand passes all20 valid v0/v1 controls and fails the duplicate-ID gate.
+
+The candidate records every nonzero tkhd ID before codec-dependent early returns. The declared-track limit still bounds this temporary namespace; existing zero-ID and duplicate diagnostics stay unchanged. Unsupported sound remains unsupported/skipped within valid unique-ID controls. Exact software video, clocks, seeking, rewind and EOF remain successful; all20 valid clips match complete independent FFmpeg video. The18 malformed movies test correct refusal, not successful decoding. Generator is pure, separate and private-media-free. Qualification remains pending.
+
+Local qualification finished: 207 Rust test executions, two existing device ignores, core/player checks and actual wasm32 compatibility (220/220) pass. All 5671 frozen input hashes match. Publication and acceptance remain pending because the existing main CI fails the ALAC discrete-channel downmix test; see push-or-clear.json. No new improvement counted.

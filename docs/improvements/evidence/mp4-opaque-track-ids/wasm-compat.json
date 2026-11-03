@@ -1,0 +1,1723 @@
+{
+  "pointerWidth": 32,
+  "checks": [
+    {
+      "case": 0,
+      "target": "-1",
+      "want": 0,
+      "got": 0,
+      "pass": true
+    },
+    {
+      "case": 0,
+      "target": "0",
+      "want": 0,
+      "got": 0,
+      "pass": true
+    },
+    {
+      "case": 0,
+      "target": "19",
+      "want": 0,
+      "got": 0,
+      "pass": true
+    },
+    {
+      "case": 0,
+      "target": "20",
+      "want": 1,
+      "got": 1,
+      "pass": true
+    },
+    {
+      "case": 0,
+      "target": "40",
+      "want": 2,
+      "got": 2,
+      "pass": true
+    },
+    {
+      "case": 0,
+      "target": "60",
+      "want": 2,
+      "got": 2,
+      "pass": true
+    },
+    {
+      "case": 0,
+      "target": "4294967296",
+      "want": 2,
+      "got": 2,
+      "pass": true
+    },
+    {
+      "case": 0,
+      "target": "4294967316",
+      "want": 2,
+      "got": 2,
+      "pass": true
+    },
+    {
+      "case": 0,
+      "target": "1099511627776",
+      "want": 2,
+      "got": 2,
+      "pass": true
+    },
+    {
+      "case": 0,
+      "target": "1099511627796",
+      "want": 2,
+      "got": 2,
+      "pass": true
+    },
+    {
+      "case": 0,
+      "target": "9223372036854775807",
+      "want": 2,
+      "got": 2,
+      "pass": true
+    },
+    {
+      "case": 1,
+      "target": "-1",
+      "want": 0,
+      "got": 0,
+      "pass": true
+    },
+    {
+      "case": 1,
+      "target": "0",
+      "want": 0,
+      "got": 0,
+      "pass": true
+    },
+    {
+      "case": 1,
+      "target": "959",
+      "want": 0,
+      "got": 0,
+      "pass": true
+    },
+    {
+      "case": 1,
+      "target": "960",
+      "want": 1,
+      "got": 1,
+      "pass": true
+    },
+    {
+      "case": 1,
+      "target": "1920",
+      "want": 2,
+      "got": 2,
+      "pass": true
+    },
+    {
+      "case": 1,
+      "target": "2880",
+      "want": 2,
+      "got": 2,
+      "pass": true
+    },
+    {
+      "case": 1,
+      "target": "4294967296",
+      "want": 2,
+      "got": 2,
+      "pass": true
+    },
+    {
+      "case": 1,
+      "target": "4294968256",
+      "want": 2,
+      "got": 2,
+      "pass": true
+    },
+    {
+      "case": 1,
+      "target": "1099511627776",
+      "want": 2,
+      "got": 2,
+      "pass": true
+    },
+    {
+      "case": 1,
+      "target": "1099511628736",
+      "want": 2,
+      "got": 2,
+      "pass": true
+    },
+    {
+      "case": 1,
+      "target": "9223372036854775807",
+      "want": 2,
+      "got": 2,
+      "pass": true
+    },
+    {
+      "case": 2,
+      "target": "-1",
+      "want": 0,
+      "got": 0,
+      "pass": true
+    },
+    {
+      "case": 2,
+      "target": "0",
+      "want": 0,
+      "got": 0,
+      "pass": true
+    },
+    {
+      "case": 2,
+      "target": "19",
+      "want": 0,
+      "got": 0,
+      "pass": true
+    },
+    {
+      "case": 2,
+      "target": "20",
+      "want": 1,
+      "got": 1,
+      "pass": true
+    },
+    {
+      "case": 2,
+      "target": "40",
+      "want": 2,
+      "got": 2,
+      "pass": true
+    },
+    {
+      "case": 2,
+      "target": "60",
+      "want": 2,
+      "got": 2,
+      "pass": true
+    },
+    {
+      "case": 2,
+      "target": "4294967296",
+      "want": 2,
+      "got": 2,
+      "pass": true
+    },
+    {
+      "case": 2,
+      "target": "4294967316",
+      "want": 2,
+      "got": 2,
+      "pass": true
+    },
+    {
+      "case": 2,
+      "target": "1099511627776",
+      "want": 2,
+      "got": 2,
+      "pass": true
+    },
+    {
+      "case": 2,
+      "target": "1099511627796",
+      "want": 2,
+      "got": 2,
+      "pass": true
+    },
+    {
+      "case": 2,
+      "target": "9223372036854775807",
+      "want": 2,
+      "got": 2,
+      "pass": true
+    },
+    {
+      "case": 3,
+      "target": "-1",
+      "want": 0,
+      "got": 0,
+      "pass": true
+    },
+    {
+      "case": 3,
+      "target": "0",
+      "want": 0,
+      "got": 0,
+      "pass": true
+    },
+    {
+      "case": 3,
+      "target": "959",
+      "want": 0,
+      "got": 0,
+      "pass": true
+    },
+    {
+      "case": 3,
+      "target": "960",
+      "want": 1,
+      "got": 1,
+      "pass": true
+    },
+    {
+      "case": 3,
+      "target": "1920",
+      "want": 2,
+      "got": 2,
+      "pass": true
+    },
+    {
+      "case": 3,
+      "target": "2880",
+      "want": 2,
+      "got": 2,
+      "pass": true
+    },
+    {
+      "case": 3,
+      "target": "4294967296",
+      "want": 2,
+      "got": 2,
+      "pass": true
+    },
+    {
+      "case": 3,
+      "target": "4294968256",
+      "want": 2,
+      "got": 2,
+      "pass": true
+    },
+    {
+      "case": 3,
+      "target": "1099511627776",
+      "want": 2,
+      "got": 2,
+      "pass": true
+    },
+    {
+      "case": 3,
+      "target": "1099511628736",
+      "want": 2,
+      "got": 2,
+      "pass": true
+    },
+    {
+      "case": 3,
+      "target": "9223372036854775807",
+      "want": 2,
+      "got": 2,
+      "pass": true
+    },
+    {
+      "count": 0,
+      "duration": 0,
+      "target": "-1",
+      "want": 0,
+      "got": 0,
+      "pass": true
+    },
+    {
+      "count": 0,
+      "duration": 0,
+      "target": "0",
+      "want": 0,
+      "got": 0,
+      "pass": true
+    },
+    {
+      "count": 0,
+      "duration": 0,
+      "target": "1",
+      "want": 0,
+      "got": 0,
+      "pass": true
+    },
+    {
+      "count": 0,
+      "duration": 0,
+      "target": "19",
+      "want": 0,
+      "got": 0,
+      "pass": true
+    },
+    {
+      "count": 0,
+      "duration": 0,
+      "target": "20",
+      "want": 0,
+      "got": 0,
+      "pass": true
+    },
+    {
+      "count": 0,
+      "duration": 0,
+      "target": "21",
+      "want": 0,
+      "got": 0,
+      "pass": true
+    },
+    {
+      "count": 0,
+      "duration": 0,
+      "target": "4294967295",
+      "want": 0,
+      "got": 0,
+      "pass": true
+    },
+    {
+      "count": 0,
+      "duration": 0,
+      "target": "4294967296",
+      "want": 0,
+      "got": 0,
+      "pass": true
+    },
+    {
+      "count": 0,
+      "duration": 0,
+      "target": "4294967316",
+      "want": 0,
+      "got": 0,
+      "pass": true
+    },
+    {
+      "count": 0,
+      "duration": 0,
+      "target": "1099511627776",
+      "want": 0,
+      "got": 0,
+      "pass": true
+    },
+    {
+      "count": 0,
+      "duration": 0,
+      "target": "9223372036854775807",
+      "want": 0,
+      "got": 0,
+      "pass": true
+    },
+    {
+      "count": 0,
+      "duration": 1,
+      "target": "-1",
+      "want": 0,
+      "got": 0,
+      "pass": true
+    },
+    {
+      "count": 0,
+      "duration": 1,
+      "target": "0",
+      "want": 0,
+      "got": 0,
+      "pass": true
+    },
+    {
+      "count": 0,
+      "duration": 1,
+      "target": "1",
+      "want": 0,
+      "got": 0,
+      "pass": true
+    },
+    {
+      "count": 0,
+      "duration": 1,
+      "target": "19",
+      "want": 0,
+      "got": 0,
+      "pass": true
+    },
+    {
+      "count": 0,
+      "duration": 1,
+      "target": "20",
+      "want": 0,
+      "got": 0,
+      "pass": true
+    },
+    {
+      "count": 0,
+      "duration": 1,
+      "target": "21",
+      "want": 0,
+      "got": 0,
+      "pass": true
+    },
+    {
+      "count": 0,
+      "duration": 1,
+      "target": "4294967295",
+      "want": 0,
+      "got": 0,
+      "pass": true
+    },
+    {
+      "count": 0,
+      "duration": 1,
+      "target": "4294967296",
+      "want": 0,
+      "got": 0,
+      "pass": true
+    },
+    {
+      "count": 0,
+      "duration": 1,
+      "target": "4294967316",
+      "want": 0,
+      "got": 0,
+      "pass": true
+    },
+    {
+      "count": 0,
+      "duration": 1,
+      "target": "1099511627776",
+      "want": 0,
+      "got": 0,
+      "pass": true
+    },
+    {
+      "count": 0,
+      "duration": 1,
+      "target": "9223372036854775807",
+      "want": 0,
+      "got": 0,
+      "pass": true
+    },
+    {
+      "count": 0,
+      "duration": 20,
+      "target": "-1",
+      "want": 0,
+      "got": 0,
+      "pass": true
+    },
+    {
+      "count": 0,
+      "duration": 20,
+      "target": "0",
+      "want": 0,
+      "got": 0,
+      "pass": true
+    },
+    {
+      "count": 0,
+      "duration": 20,
+      "target": "1",
+      "want": 0,
+      "got": 0,
+      "pass": true
+    },
+    {
+      "count": 0,
+      "duration": 20,
+      "target": "19",
+      "want": 0,
+      "got": 0,
+      "pass": true
+    },
+    {
+      "count": 0,
+      "duration": 20,
+      "target": "20",
+      "want": 0,
+      "got": 0,
+      "pass": true
+    },
+    {
+      "count": 0,
+      "duration": 20,
+      "target": "21",
+      "want": 0,
+      "got": 0,
+      "pass": true
+    },
+    {
+      "count": 0,
+      "duration": 20,
+      "target": "4294967295",
+      "want": 0,
+      "got": 0,
+      "pass": true
+    },
+    {
+      "count": 0,
+      "duration": 20,
+      "target": "4294967296",
+      "want": 0,
+      "got": 0,
+      "pass": true
+    },
+    {
+      "count": 0,
+      "duration": 20,
+      "target": "4294967316",
+      "want": 0,
+      "got": 0,
+      "pass": true
+    },
+    {
+      "count": 0,
+      "duration": 20,
+      "target": "1099511627776",
+      "want": 0,
+      "got": 0,
+      "pass": true
+    },
+    {
+      "count": 0,
+      "duration": 20,
+      "target": "9223372036854775807",
+      "want": 0,
+      "got": 0,
+      "pass": true
+    },
+    {
+      "count": 0,
+      "duration": 4294967295,
+      "target": "-1",
+      "want": 0,
+      "got": 0,
+      "pass": true
+    },
+    {
+      "count": 0,
+      "duration": 4294967295,
+      "target": "0",
+      "want": 0,
+      "got": 0,
+      "pass": true
+    },
+    {
+      "count": 0,
+      "duration": 4294967295,
+      "target": "1",
+      "want": 0,
+      "got": 0,
+      "pass": true
+    },
+    {
+      "count": 0,
+      "duration": 4294967295,
+      "target": "19",
+      "want": 0,
+      "got": 0,
+      "pass": true
+    },
+    {
+      "count": 0,
+      "duration": 4294967295,
+      "target": "20",
+      "want": 0,
+      "got": 0,
+      "pass": true
+    },
+    {
+      "count": 0,
+      "duration": 4294967295,
+      "target": "21",
+      "want": 0,
+      "got": 0,
+      "pass": true
+    },
+    {
+      "count": 0,
+      "duration": 4294967295,
+      "target": "4294967295",
+      "want": 0,
+      "got": 0,
+      "pass": true
+    },
+    {
+      "count": 0,
+      "duration": 4294967295,
+      "target": "4294967296",
+      "want": 0,
+      "got": 0,
+      "pass": true
+    },
+    {
+      "count": 0,
+      "duration": 4294967295,
+      "target": "4294967316",
+      "want": 0,
+      "got": 0,
+      "pass": true
+    },
+    {
+      "count": 0,
+      "duration": 4294967295,
+      "target": "1099511627776",
+      "want": 0,
+      "got": 0,
+      "pass": true
+    },
+    {
+      "count": 0,
+      "duration": 4294967295,
+      "target": "9223372036854775807",
+      "want": 0,
+      "got": 0,
+      "pass": true
+    },
+    {
+      "count": 1,
+      "duration": 0,
+      "target": "-1",
+      "want": 0,
+      "got": 0,
+      "pass": true
+    },
+    {
+      "count": 1,
+      "duration": 0,
+      "target": "0",
+      "want": 0,
+      "got": 0,
+      "pass": true
+    },
+    {
+      "count": 1,
+      "duration": 0,
+      "target": "1",
+      "want": 0,
+      "got": 0,
+      "pass": true
+    },
+    {
+      "count": 1,
+      "duration": 0,
+      "target": "19",
+      "want": 0,
+      "got": 0,
+      "pass": true
+    },
+    {
+      "count": 1,
+      "duration": 0,
+      "target": "20",
+      "want": 0,
+      "got": 0,
+      "pass": true
+    },
+    {
+      "count": 1,
+      "duration": 0,
+      "target": "21",
+      "want": 0,
+      "got": 0,
+      "pass": true
+    },
+    {
+      "count": 1,
+      "duration": 0,
+      "target": "4294967295",
+      "want": 0,
+      "got": 0,
+      "pass": true
+    },
+    {
+      "count": 1,
+      "duration": 0,
+      "target": "4294967296",
+      "want": 0,
+      "got": 0,
+      "pass": true
+    },
+    {
+      "count": 1,
+      "duration": 0,
+      "target": "4294967316",
+      "want": 0,
+      "got": 0,
+      "pass": true
+    },
+    {
+      "count": 1,
+      "duration": 0,
+      "target": "1099511627776",
+      "want": 0,
+      "got": 0,
+      "pass": true
+    },
+    {
+      "count": 1,
+      "duration": 0,
+      "target": "9223372036854775807",
+      "want": 0,
+      "got": 0,
+      "pass": true
+    },
+    {
+      "count": 1,
+      "duration": 1,
+      "target": "-1",
+      "want": 0,
+      "got": 0,
+      "pass": true
+    },
+    {
+      "count": 1,
+      "duration": 1,
+      "target": "0",
+      "want": 0,
+      "got": 0,
+      "pass": true
+    },
+    {
+      "count": 1,
+      "duration": 1,
+      "target": "1",
+      "want": 0,
+      "got": 0,
+      "pass": true
+    },
+    {
+      "count": 1,
+      "duration": 1,
+      "target": "19",
+      "want": 0,
+      "got": 0,
+      "pass": true
+    },
+    {
+      "count": 1,
+      "duration": 1,
+      "target": "20",
+      "want": 0,
+      "got": 0,
+      "pass": true
+    },
+    {
+      "count": 1,
+      "duration": 1,
+      "target": "21",
+      "want": 0,
+      "got": 0,
+      "pass": true
+    },
+    {
+      "count": 1,
+      "duration": 1,
+      "target": "4294967295",
+      "want": 0,
+      "got": 0,
+      "pass": true
+    },
+    {
+      "count": 1,
+      "duration": 1,
+      "target": "4294967296",
+      "want": 0,
+      "got": 0,
+      "pass": true
+    },
+    {
+      "count": 1,
+      "duration": 1,
+      "target": "4294967316",
+      "want": 0,
+      "got": 0,
+      "pass": true
+    },
+    {
+      "count": 1,
+      "duration": 1,
+      "target": "1099511627776",
+      "want": 0,
+      "got": 0,
+      "pass": true
+    },
+    {
+      "count": 1,
+      "duration": 1,
+      "target": "9223372036854775807",
+      "want": 0,
+      "got": 0,
+      "pass": true
+    },
+    {
+      "count": 1,
+      "duration": 20,
+      "target": "-1",
+      "want": 0,
+      "got": 0,
+      "pass": true
+    },
+    {
+      "count": 1,
+      "duration": 20,
+      "target": "0",
+      "want": 0,
+      "got": 0,
+      "pass": true
+    },
+    {
+      "count": 1,
+      "duration": 20,
+      "target": "1",
+      "want": 0,
+      "got": 0,
+      "pass": true
+    },
+    {
+      "count": 1,
+      "duration": 20,
+      "target": "19",
+      "want": 0,
+      "got": 0,
+      "pass": true
+    },
+    {
+      "count": 1,
+      "duration": 20,
+      "target": "20",
+      "want": 0,
+      "got": 0,
+      "pass": true
+    },
+    {
+      "count": 1,
+      "duration": 20,
+      "target": "21",
+      "want": 0,
+      "got": 0,
+      "pass": true
+    },
+    {
+      "count": 1,
+      "duration": 20,
+      "target": "4294967295",
+      "want": 0,
+      "got": 0,
+      "pass": true
+    },
+    {
+      "count": 1,
+      "duration": 20,
+      "target": "4294967296",
+      "want": 0,
+      "got": 0,
+      "pass": true
+    },
+    {
+      "count": 1,
+      "duration": 20,
+      "target": "4294967316",
+      "want": 0,
+      "got": 0,
+      "pass": true
+    },
+    {
+      "count": 1,
+      "duration": 20,
+      "target": "1099511627776",
+      "want": 0,
+      "got": 0,
+      "pass": true
+    },
+    {
+      "count": 1,
+      "duration": 20,
+      "target": "9223372036854775807",
+      "want": 0,
+      "got": 0,
+      "pass": true
+    },
+    {
+      "count": 1,
+      "duration": 4294967295,
+      "target": "-1",
+      "want": 0,
+      "got": 0,
+      "pass": true
+    },
+    {
+      "count": 1,
+      "duration": 4294967295,
+      "target": "0",
+      "want": 0,
+      "got": 0,
+      "pass": true
+    },
+    {
+      "count": 1,
+      "duration": 4294967295,
+      "target": "1",
+      "want": 0,
+      "got": 0,
+      "pass": true
+    },
+    {
+      "count": 1,
+      "duration": 4294967295,
+      "target": "19",
+      "want": 0,
+      "got": 0,
+      "pass": true
+    },
+    {
+      "count": 1,
+      "duration": 4294967295,
+      "target": "20",
+      "want": 0,
+      "got": 0,
+      "pass": true
+    },
+    {
+      "count": 1,
+      "duration": 4294967295,
+      "target": "21",
+      "want": 0,
+      "got": 0,
+      "pass": true
+    },
+    {
+      "count": 1,
+      "duration": 4294967295,
+      "target": "4294967295",
+      "want": 0,
+      "got": 0,
+      "pass": true
+    },
+    {
+      "count": 1,
+      "duration": 4294967295,
+      "target": "4294967296",
+      "want": 0,
+      "got": 0,
+      "pass": true
+    },
+    {
+      "count": 1,
+      "duration": 4294967295,
+      "target": "4294967316",
+      "want": 0,
+      "got": 0,
+      "pass": true
+    },
+    {
+      "count": 1,
+      "duration": 4294967295,
+      "target": "1099511627776",
+      "want": 0,
+      "got": 0,
+      "pass": true
+    },
+    {
+      "count": 1,
+      "duration": 4294967295,
+      "target": "9223372036854775807",
+      "want": 0,
+      "got": 0,
+      "pass": true
+    },
+    {
+      "count": 3,
+      "duration": 0,
+      "target": "-1",
+      "want": 0,
+      "got": 0,
+      "pass": true
+    },
+    {
+      "count": 3,
+      "duration": 0,
+      "target": "0",
+      "want": 0,
+      "got": 0,
+      "pass": true
+    },
+    {
+      "count": 3,
+      "duration": 0,
+      "target": "1",
+      "want": 0,
+      "got": 0,
+      "pass": true
+    },
+    {
+      "count": 3,
+      "duration": 0,
+      "target": "19",
+      "want": 0,
+      "got": 0,
+      "pass": true
+    },
+    {
+      "count": 3,
+      "duration": 0,
+      "target": "20",
+      "want": 0,
+      "got": 0,
+      "pass": true
+    },
+    {
+      "count": 3,
+      "duration": 0,
+      "target": "21",
+      "want": 0,
+      "got": 0,
+      "pass": true
+    },
+    {
+      "count": 3,
+      "duration": 0,
+      "target": "4294967295",
+      "want": 0,
+      "got": 0,
+      "pass": true
+    },
+    {
+      "count": 3,
+      "duration": 0,
+      "target": "4294967296",
+      "want": 0,
+      "got": 0,
+      "pass": true
+    },
+    {
+      "count": 3,
+      "duration": 0,
+      "target": "4294967316",
+      "want": 0,
+      "got": 0,
+      "pass": true
+    },
+    {
+      "count": 3,
+      "duration": 0,
+      "target": "1099511627776",
+      "want": 0,
+      "got": 0,
+      "pass": true
+    },
+    {
+      "count": 3,
+      "duration": 0,
+      "target": "9223372036854775807",
+      "want": 0,
+      "got": 0,
+      "pass": true
+    },
+    {
+      "count": 3,
+      "duration": 1,
+      "target": "-1",
+      "want": 0,
+      "got": 0,
+      "pass": true
+    },
+    {
+      "count": 3,
+      "duration": 1,
+      "target": "0",
+      "want": 0,
+      "got": 0,
+      "pass": true
+    },
+    {
+      "count": 3,
+      "duration": 1,
+      "target": "1",
+      "want": 1,
+      "got": 1,
+      "pass": true
+    },
+    {
+      "count": 3,
+      "duration": 1,
+      "target": "19",
+      "want": 2,
+      "got": 2,
+      "pass": true
+    },
+    {
+      "count": 3,
+      "duration": 1,
+      "target": "20",
+      "want": 2,
+      "got": 2,
+      "pass": true
+    },
+    {
+      "count": 3,
+      "duration": 1,
+      "target": "21",
+      "want": 2,
+      "got": 2,
+      "pass": true
+    },
+    {
+      "count": 3,
+      "duration": 1,
+      "target": "4294967295",
+      "want": 2,
+      "got": 2,
+      "pass": true
+    },
+    {
+      "count": 3,
+      "duration": 1,
+      "target": "4294967296",
+      "want": 2,
+      "got": 2,
+      "pass": true
+    },
+    {
+      "count": 3,
+      "duration": 1,
+      "target": "4294967316",
+      "want": 2,
+      "got": 2,
+      "pass": true
+    },
+    {
+      "count": 3,
+      "duration": 1,
+      "target": "1099511627776",
+      "want": 2,
+      "got": 2,
+      "pass": true
+    },
+    {
+      "count": 3,
+      "duration": 1,
+      "target": "9223372036854775807",
+      "want": 2,
+      "got": 2,
+      "pass": true
+    },
+    {
+      "count": 3,
+      "duration": 20,
+      "target": "-1",
+      "want": 0,
+      "got": 0,
+      "pass": true
+    },
+    {
+      "count": 3,
+      "duration": 20,
+      "target": "0",
+      "want": 0,
+      "got": 0,
+      "pass": true
+    },
+    {
+      "count": 3,
+      "duration": 20,
+      "target": "1",
+      "want": 0,
+      "got": 0,
+      "pass": true
+    },
+    {
+      "count": 3,
+      "duration": 20,
+      "target": "19",
+      "want": 0,
+      "got": 0,
+      "pass": true
+    },
+    {
+      "count": 3,
+      "duration": 20,
+      "target": "20",
+      "want": 1,
+      "got": 1,
+      "pass": true
+    },
+    {
+      "count": 3,
+      "duration": 20,
+      "target": "21",
+      "want": 1,
+      "got": 1,
+      "pass": true
+    },
+    {
+      "count": 3,
+      "duration": 20,
+      "target": "4294967295",
+      "want": 2,
+      "got": 2,
+      "pass": true
+    },
+    {
+      "count": 3,
+      "duration": 20,
+      "target": "4294967296",
+      "want": 2,
+      "got": 2,
+      "pass": true
+    },
+    {
+      "count": 3,
+      "duration": 20,
+      "target": "4294967316",
+      "want": 2,
+      "got": 2,
+      "pass": true
+    },
+    {
+      "count": 3,
+      "duration": 20,
+      "target": "1099511627776",
+      "want": 2,
+      "got": 2,
+      "pass": true
+    },
+    {
+      "count": 3,
+      "duration": 20,
+      "target": "9223372036854775807",
+      "want": 2,
+      "got": 2,
+      "pass": true
+    },
+    {
+      "count": 3,
+      "duration": 4294967295,
+      "target": "-1",
+      "want": 0,
+      "got": 0,
+      "pass": true
+    },
+    {
+      "count": 3,
+      "duration": 4294967295,
+      "target": "0",
+      "want": 0,
+      "got": 0,
+      "pass": true
+    },
+    {
+      "count": 3,
+      "duration": 4294967295,
+      "target": "1",
+      "want": 0,
+      "got": 0,
+      "pass": true
+    },
+    {
+      "count": 3,
+      "duration": 4294967295,
+      "target": "19",
+      "want": 0,
+      "got": 0,
+      "pass": true
+    },
+    {
+      "count": 3,
+      "duration": 4294967295,
+      "target": "20",
+      "want": 0,
+      "got": 0,
+      "pass": true
+    },
+    {
+      "count": 3,
+      "duration": 4294967295,
+      "target": "21",
+      "want": 0,
+      "got": 0,
+      "pass": true
+    },
+    {
+      "count": 3,
+      "duration": 4294967295,
+      "target": "4294967295",
+      "want": 1,
+      "got": 1,
+      "pass": true
+    },
+    {
+      "count": 3,
+      "duration": 4294967295,
+      "target": "4294967296",
+      "want": 1,
+      "got": 1,
+      "pass": true
+    },
+    {
+      "count": 3,
+      "duration": 4294967295,
+      "target": "4294967316",
+      "want": 1,
+      "got": 1,
+      "pass": true
+    },
+    {
+      "count": 3,
+      "duration": 4294967295,
+      "target": "1099511627776",
+      "want": 2,
+      "got": 2,
+      "pass": true
+    },
+    {
+      "count": 3,
+      "duration": 4294967295,
+      "target": "9223372036854775807",
+      "want": 2,
+      "got": 2,
+      "pass": true
+    },
+    {
+      "count": 100,
+      "duration": 0,
+      "target": "-1",
+      "want": 0,
+      "got": 0,
+      "pass": true
+    },
+    {
+      "count": 100,
+      "duration": 0,
+      "target": "0",
+      "want": 0,
+      "got": 0,
+      "pass": true
+    },
+    {
+      "count": 100,
+      "duration": 0,
+      "target": "1",
+      "want": 0,
+      "got": 0,
+      "pass": true
+    },
+    {
+      "count": 100,
+      "duration": 0,
+      "target": "19",
+      "want": 0,
+      "got": 0,
+      "pass": true
+    },
+    {
+      "count": 100,
+      "duration": 0,
+      "target": "20",
+      "want": 0,
+      "got": 0,
+      "pass": true
+    },
+    {
+      "count": 100,
+      "duration": 0,
+      "target": "21",
+      "want": 0,
+      "got": 0,
+      "pass": true
+    },
+    {
+      "count": 100,
+      "duration": 0,
+      "target": "4294967295",
+      "want": 0,
+      "got": 0,
+      "pass": true
+    },
+    {
+      "count": 100,
+      "duration": 0,
+      "target": "4294967296",
+      "want": 0,
+      "got": 0,
+      "pass": true
+    },
+    {
+      "count": 100,
+      "duration": 0,
+      "target": "4294967316",
+      "want": 0,
+      "got": 0,
+      "pass": true
+    },
+    {
+      "count": 100,
+      "duration": 0,
+      "target": "1099511627776",
+      "want": 0,
+      "got": 0,
+      "pass": true
+    },
+    {
+      "count": 100,
+      "duration": 0,
+      "target": "9223372036854775807",
+      "want": 0,
+      "got": 0,
+      "pass": true
+    },
+    {
+      "count": 100,
+      "duration": 1,
+      "target": "-1",
+      "want": 0,
+      "got": 0,
+      "pass": true
+    },
+    {
+      "count": 100,
+      "duration": 1,
+      "target": "0",
+      "want": 0,
+      "got": 0,
+      "pass": true
+    },
+    {
+      "count": 100,
+      "duration": 1,
+      "target": "1",
+      "want": 1,
+      "got": 1,
+      "pass": true
+    },
+    {
+      "count": 100,
+      "duration": 1,
+      "target": "19",
+      "want": 19,
+      "got": 19,
+      "pass": true
+    },
+    {
+      "count": 100,
+      "duration": 1,
+      "target": "20",
+      "want": 20,
+      "got": 20,
+      "pass": true
+    },
+    {
+      "count": 100,
+      "duration": 1,
+      "target": "21",
+      "want": 21,
+      "got": 21,
+      "pass": true
+    },
+    {
+      "count": 100,
+      "duration": 1,
+      "target": "4294967295",
+      "want": 99,
+      "got": 99,
+      "pass": true
+    },
+    {
+      "count": 100,
+      "duration": 1,
+      "target": "4294967296",
+      "want": 99,
+      "got": 99,
+      "pass": true
+    },
+    {
+      "count": 100,
+      "duration": 1,
+      "target": "4294967316",
+      "want": 99,
+      "got": 99,
+      "pass": true
+    },
+    {
+      "count": 100,
+      "duration": 1,
+      "target": "1099511627776",
+      "want": 99,
+      "got": 99,
+      "pass": true
+    },
+    {
+      "count": 100,
+      "duration": 1,
+      "target": "9223372036854775807",
+      "want": 99,
+      "got": 99,
+      "pass": true
+    },
+    {
+      "count": 100,
+      "duration": 20,
+      "target": "-1",
+      "want": 0,
+      "got": 0,
+      "pass": true
+    },
+    {
+      "count": 100,
+      "duration": 20,
+      "target": "0",
+      "want": 0,
+      "got": 0,
+      "pass": true
+    },
+    {
+      "count": 100,
+      "duration": 20,
+      "target": "1",
+      "want": 0,
+      "got": 0,
+      "pass": true
+    },
+    {
+      "count": 100,
+      "duration": 20,
+      "target": "19",
+      "want": 0,
+      "got": 0,
+      "pass": true
+    },
+    {
+      "count": 100,
+      "duration": 20,
+      "target": "20",
+      "want": 1,
+      "got": 1,
+      "pass": true
+    },
+    {
+      "count": 100,
+      "duration": 20,
+      "target": "21",
+      "want": 1,
+      "got": 1,
+      "pass": true
+    },
+    {
+      "count": 100,
+      "duration": 20,
+      "target": "4294967295",
+      "want": 99,
+      "got": 99,
+      "pass": true
+    },
+    {
+      "count": 100,
+      "duration": 20,
+      "target": "4294967296",
+      "want": 99,
+      "got": 99,
+      "pass": true
+    },
+    {
+      "count": 100,
+      "duration": 20,
+      "target": "4294967316",
+      "want": 99,
+      "got": 99,
+      "pass": true
+    },
+    {
+      "count": 100,
+      "duration": 20,
+      "target": "1099511627776",
+      "want": 99,
+      "got": 99,
+      "pass": true
+    },
+    {
+      "count": 100,
+      "duration": 20,
+      "target": "9223372036854775807",
+      "want": 99,
+      "got": 99,
+      "pass": true
+    },
+    {
+      "count": 100,
+      "duration": 4294967295,
+      "target": "-1",
+      "want": 0,
+      "got": 0,
+      "pass": true
+    },
+    {
+      "count": 100,
+      "duration": 4294967295,
+      "target": "0",
+      "want": 0,
+      "got": 0,
+      "pass": true
+    },
+    {
+      "count": 100,
+      "duration": 4294967295,
+      "target": "1",
+      "want": 0,
+      "got": 0,
+      "pass": true
+    },
+    {
+      "count": 100,
+      "duration": 4294967295,
+      "target": "19",
+      "want": 0,
+      "got": 0,
+      "pass": true
+    },
+    {
+      "count": 100,
+      "duration": 4294967295,
+      "target": "20",
+      "want": 0,
+      "got": 0,
+      "pass": true
+    },
+    {
+      "count": 100,
+      "duration": 4294967295,
+      "target": "21",
+      "want": 0,
+      "got": 0,
+      "pass": true
+    },
+    {
+      "count": 100,
+      "duration": 4294967295,
+      "target": "4294967295",
+      "want": 1,
+      "got": 1,
+      "pass": true
+    },
+    {
+      "count": 100,
+      "duration": 4294967295,
+      "target": "4294967296",
+      "want": 1,
+      "got": 1,
+      "pass": true
+    },
+    {
+      "count": 100,
+      "duration": 4294967295,
+      "target": "4294967316",
+      "want": 1,
+      "got": 1,
+      "pass": true
+    },
+    {
+      "count": 100,
+      "duration": 4294967295,
+      "target": "1099511627776",
+      "want": 99,
+      "got": 99,
+      "pass": true
+    },
+    {
+      "count": 100,
+      "duration": 4294967295,
+      "target": "9223372036854775807",
+      "want": 99,
+      "got": 99,
+      "pass": true
+    }
+  ],
+  "passed": 220,
+  "failed": 0
+}

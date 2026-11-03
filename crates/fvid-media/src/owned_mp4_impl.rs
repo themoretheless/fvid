@@ -875,6 +875,7 @@ impl<R: Read + Seek> Mp4Reader<R> {
             u64::MAX
         };
         let mut tracks = Vec::new();
+        let mut track_ids = Vec::new();
         let mut track_header_flags = Vec::new();
         let mut track_header_durations = Vec::new();
         let mut represented_descriptions = Vec::new();
@@ -887,14 +888,11 @@ impl<R: Read + Seek> Mp4Reader<R> {
             if ordinal >= limits.tracks {
                 return Err(invalid("MP4 track limit exceeded"));
             }
-            let Some((track, flags, duration, represented)) = parse_track(atom.data, &mdats, remaining, fragmented, quicktime_brand, &mut refused)?
+            let Some((track, flags, duration, represented)) = parse_track(atom.data, &mdats, remaining, fragmented, quicktime_brand, &mut track_ids, &mut refused)?
             else {
                 skipped += 1;
                 continue;
             };
-            if tracks.iter().any(|t: &Track| t.id == track.id) {
-                return Err(invalid("duplicate track ID"));
-            }
             remaining -= track.samples.cost();
             tracks.push(track);
             track_header_flags.push(flags);
@@ -1683,6 +1681,7 @@ fn parse_track(
     limit: usize,
     fragmented: bool,
     quicktime: bool,
+    track_ids: &mut Vec<u32>,
     refused: &mut Vec<SkippedTrack>,
 ) -> Result<Option<(Track, u32, Option<u64>, Vec<bool>)>> {
     let track = atoms(data)?;
@@ -1693,6 +1692,12 @@ fn parse_track(
     if id == 0 {
         return Err(invalid("zero MP4 track ID"));
     }
+    // Track IDs belong to the movie namespace, even when no codec accepts
+    // this track. Validate before any unsupported-track return.
+    if track_ids.contains(&id) {
+        return Err(invalid("duplicate track ID"));
+    }
+    track_ids.push(id);
     let duration = if narrow { u64::from(u32be(tkhd, 20)?) } else { u64be(tkhd, 28)? };
     let unknown = if narrow { u64::from(u32::MAX) } else { u64::MAX };
     let header_duration = (duration != 0 && duration != unknown).then_some(duration);

@@ -1,0 +1,29 @@
+{
+  "status": "preserved-not-published",
+  "accepted_count": 547,
+  "candidate_id": "FVID-0548",
+  "candidate_counted": false,
+  "candidate_local_qualification": {
+    "rust_test_executions": 207,
+    "old_device_ignores": 2,
+    "source_paths_verified": 5671,
+    "wasm": "wasm-compat.json",
+    "results": "final-results.json"
+  },
+  "publication_blocker": {
+    "run": 41608660282,
+    "url": "https://github.com/themoretheless/fvid/actions/runs/41608660282",
+    "head": "6878bfe685153bca42cbbdf757c7874038bec5c0",
+    "job": "test",
+    "step": "Test owned media codecs without libav",
+    "test": "discrete_alac_downmix_averages_all_unlabelled_channels_without_silencing_them",
+    "location": "crates/fvid-media/tests/alac_multichannel.rs:111",
+    "error": "owned rematrix requires a standard explicit speaker layout"
+  },
+  "preserved": [
+    "active AAC and AV1 worktrees left untouched",
+    "four stashes left untouched",
+    "regression fixtures and proof logs retained"
+  ],
+  "cleanup": "only owned temporary qualification target and script after all jobs terminate"
+}

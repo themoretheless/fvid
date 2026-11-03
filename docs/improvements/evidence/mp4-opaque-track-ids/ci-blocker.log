@@ -1,0 +1,17 @@
+test	Test owned media codecs without libav	2026-11-03T09:12:47.4210621Z
+test	Test owned media codecs without libav	2026-11-03T09:12:47.4210682Z failures:
+test	Test owned media codecs without libav	2026-11-03T09:12:47.4210754Z
+test	Test owned media codecs without libav	2026-11-03T09:12:47.4210913Z ---- discrete_alac_downmix_averages_all_unlabelled_channels_without_silencing_them stdout ----
+test	Test owned media codecs without libav	2026-11-03T09:12:47.4211410Z
+test	Test owned media codecs without libav	2026-11-03T09:12:47.4211681Z thread 'discrete_alac_downmix_averages_all_unlabelled_channels_without_silencing_them' (5538) panicked at crates/fvid-media/tests/alac_multichannel.rs:111:22:
+test	Test owned media codecs without libav	2026-11-03T09:12:47.4212198Z called `Result::unwrap()` on an `Err` value: "owned rematrix requires a standard explicit speaker layout"
+test	Test owned media codecs without libav	2026-11-03T09:12:47.4212686Z note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+test	Test owned media codecs without libav	2026-11-03T09:12:47.4212850Z
+test	Test owned media codecs without libav	2026-11-03T09:12:47.4212852Z
+test	Test owned media codecs without libav	2026-11-03T09:12:47.4212904Z failures:
+test	Test owned media codecs without libav	2026-11-03T09:12:47.4213086Z     discrete_alac_downmix_averages_all_unlabelled_channels_without_silencing_them
+test	Test owned media codecs without libav	2026-11-03T09:12:47.4213326Z
+test	Test owned media codecs without libav	2026-11-03T09:12:47.4213539Z test result: FAILED. 1 passed; 1 failed; 0 ignored; 0 measured; 0 filtered out; finished in 7.93s
+test	Test owned media codecs without libav	2026-11-03T09:12:47.4213834Z
+test	Test owned media codecs without libav	2026-11-03T09:12:47.4216514Z ^[[1m^[[91merror^[[0m: test failed, to rerun pass `--test alac_multichannel`
+test	Test owned media codecs without libav	2026-11-03T09:12:47.4394239Z ##[error]Process completed with exit code 101.
