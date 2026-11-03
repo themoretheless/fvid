@@ -74,6 +74,8 @@ struct Program {
     /// Samples one block holds, as the coding's arithmetic and the header's own
     /// timing agree on. ADPCM packets each carry one independently coded block.
     frames: u64,
+    /// Native sample origin for ADPCM; PCM/G711 carry their own record spans.
+    origin: u64,
     /// The whole `strf` body: the `WAVEFORMATEX` a decoder reads its block length
     /// and, for Microsoft's coding, its prediction tables out of.
     setup: Vec<u8>,
@@ -259,12 +261,12 @@ fn laid_out(codec: &'static str, index: usize, stream: &Audio, limits: &Limits) 
             stream.number, stream.scale, stream.rate
         )));
     }
-    if stream.start != 0 {
-        return Err(invalid(&format!(
-            "AVI audio stream {} starts at {} on the timeline, which this reader does not offset its packets for",
-            stream.number, stream.start
-        )));
-    }
+    let origin = u64::from(stream.start).checked_mul(frames)
+        .ok_or_else(|| invalid("AVI ADPCM stream origin overflow"))?;
+    origin.checked_add(frames.checked_mul(count as u64)
+        .ok_or_else(|| invalid("AVI ADPCM duration overflow"))?)
+        .filter(|&end| end <= i64::MAX as u64)
+        .ok_or_else(|| invalid("AVI ADPCM clock exceeds the packet time range"))?;
     // How fast the run plays, as the format record states it, is the block's bytes
     // over the time it holds: a writer's own arithmetic, checked rather than believed.
     let stated = u64::from(format.bytes_per_second);
@@ -299,6 +301,7 @@ fn laid_out(codec: &'static str, index: usize, stream: &Audio, limits: &Limits) 
         channels: format.channels,
         bits: format.bits,
         frames,
+        origin,
         setup: stream.setup.clone(),
         stream: index,
         records: count,
@@ -347,7 +350,7 @@ fn laid_out_pcm(codec: &'static str, index: usize, stream: &Audio) -> Result<Pro
     Ok(Program {
         speaker_mask: None,
         codec, sample_rate: f.sample_rate, channels: f.channels, bits: f.bits,
-        frames: 1, setup: stream.setup.clone(), stream: index, records: samples.len(),
+        frames: 1, origin: 0, setup: stream.setup.clone(), stream: index, records: samples.len(),
         input_frame_bytes: stride, packet_frames: Some(SAMPLE_PACKET_FRAMES),
         block_records: None, samples: Some(samples),
     })
@@ -364,7 +367,7 @@ fn laid_out_g711(codec: &'static str,index:usize,stream:&Audio)->Result<Program>
         cursor=cursor.checked_add(frames).ok_or_else(||invalid("AVI G.711 clock overflow"))?;
     }
     if samples.is_empty() || cursor-u64::from(stream.start)!=u64::from(stream.declared){return Err(invalid("AVI G.711 declared frame count disagrees with records"));}
-    Ok(Program{speaker_mask:None,codec,sample_rate:f.sample_rate,channels:f.channels,bits:8,frames:1,setup:stream.setup.clone(),stream:index,records:samples.len(),input_frame_bytes:usize::from(f.channels),packet_frames:Some(SAMPLE_PACKET_FRAMES),block_records:None,samples:Some(samples)})
+    Ok(Program{speaker_mask:None,codec,sample_rate:f.sample_rate,channels:f.channels,bits:8,frames:1,origin:0,setup:stream.setup.clone(),stream:index,records:samples.len(),input_frame_bytes:usize::from(f.channels),packet_frames:Some(SAMPLE_PACKET_FRAMES),block_records:None,samples:Some(samples)})
 }
 
 /// Packets are timestamped in samples of the stream's own rate, which is the unit
@@ -396,7 +399,7 @@ impl AudioStream for AviAudioReader {
 
     fn duration(&self) -> Option<Duration> {
         let program = self.program();
-        let frames = program.samples.as_ref().map_or(program.frames*program.records as u64,|s|s.last().map_or(0,|&(at,n)|at+n));
+        let frames = program.samples.as_ref().map_or(program.origin+program.frames*program.records as u64,|s|s.last().map_or(0,|&(at,n)|at+n));
         let frames = i64::try_from(frames).unwrap_or(i64::MAX);
         (frames > 0)
             .then(|| crate::audio::sample_duration(frames as u64, program.sample_rate.max(1)))
@@ -459,7 +462,7 @@ impl AudioStream for AviAudioReader {
         let frames = i64::try_from(program.frames).unwrap_or(i64::MAX);
         let packet = EncodedPacket {
             data,
-            pts: at as i64 * frames,
+            pts: program.origin as i64 + at as i64 * frames,
             duration: frames,
         };
         self.packet += 1;
@@ -482,7 +485,7 @@ impl AudioStream for AviAudioReader {
             let skip=samples.get(packet).map_or(0,|&(at,_)|target.saturating_sub(at)as usize);
             self.packet=packet;self.frame_skip=skip;return target as i64;
         }
-        let end = program.frames.saturating_mul(program.records as u64);
+        let end = program.origin + program.frames * program.records as u64;
         if pts.max(0) as u64 >= end {
             self.packet = program.records;
             return i64::try_from(end).unwrap_or(i64::MAX);
@@ -490,10 +493,11 @@ impl AudioStream for AviAudioReader {
         // Inside the stream, land at the preceding independently coded block.
         // At its end there is no block left to present.
         let frames = program.frames.max(1);
-        let wanted = pts.max(0) as u64 / frames;
+        let wanted = (pts.max(0) as u64).saturating_sub(program.origin) / frames;
         let at = wanted.min(program.records as u64 - 1) as usize;
+        let landed = i64::try_from(program.origin + at as u64 * frames).unwrap_or(i64::MAX);
         self.packet = at;
-        i64::try_from(at as u64 * frames).unwrap_or(i64::MAX)
+        landed
     }
 }
 
@@ -746,14 +750,23 @@ mod tests {
     }
 
     #[test]
-    fn a_stream_that_starts_later_is_not_offset_for() {
+    fn delayed_adpcm_offsets_packets_and_clamps_before_its_origin() {
+        let mut original = AviAudioReader::open(MS_MONO, Limits::default()).unwrap();
+        let first = original.next_packet().unwrap().unwrap();
+        let frames = original.program().frames;
         let mut bytes = MS_MONO.to_vec();
         poke(&mut bytes, b"strh", 28, 2_036);
-        let (said, _) = said(&bytes, 0);
-        assert_eq!(
-            said.expect("a reason").as_str(),
-            "AVI audio stream 0 starts at 2036 on the timeline, which this reader does not offset its packets for"
-        );
+        let mut delayed = AviAudioReader::open(&bytes[..], Limits::default()).unwrap();
+        let origin = 2036 * frames;
+        let packet = delayed.next_packet().unwrap().unwrap();
+        assert_eq!(packet.data, first.data);
+        assert_eq!(packet.pts, origin as i64);
+        assert_eq!(packet.duration, first.duration);
+        assert_eq!(delayed.seek_to(0), origin as i64);
+        let end = origin + delayed.program().records as u64 * frames;
+        assert_eq!(delayed.duration(), Some(crate::audio::sample_duration(end, delayed.sample_rate())));
+        assert_eq!(delayed.seek_to(i64::MAX), end as i64);
+        assert!(delayed.next_packet().unwrap().is_none());
     }
 
     #[test]
