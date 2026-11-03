@@ -1,0 +1,88 @@
+{
+  "status": "passed",
+  "samples_per_variant_workload": 18,
+  "total_timed_executions": 288,
+  "protocol": "benchmark-protocol.json",
+  "cases": [
+    {
+      "name": "ima-c1-late",
+      "before_median_ns": 96839896.0,
+      "after_median_ns": 4229.5,
+      "median_speedup": 22896.298853292352,
+      "after_over_before": 4.367518114641511e-05,
+      "before_decoded_frames": 960003.0,
+      "after_decoded_frames": 36.0,
+      "passed": true
+    },
+    {
+      "name": "ima-c1-start",
+      "before_median_ns": 199062.0,
+      "after_median_ns": 204396.0,
+      "median_speedup": 0.9739035988962602,
+      "after_over_before": 1.0267956717002742,
+      "before_decoded_frames": 2043.0,
+      "after_decoded_frames": 2043.0,
+      "passed": true
+    },
+    {
+      "name": "ima-c2-late",
+      "before_median_ns": 167211479.0,
+      "after_median_ns": 6792.0,
+      "median_speedup": 24618.886778563014,
+      "after_over_before": 4.0619220884948934e-05,
+      "before_decoded_frames": 960003.0,
+      "after_decoded_frames": 36.0,
+      "passed": true
+    },
+    {
+      "name": "ima-c2-start",
+      "before_median_ns": 357521.0,
+      "after_median_ns": 363291.5,
+      "median_speedup": 0.9841160610694167,
+      "after_over_before": 1.0161403106390954,
+      "before_decoded_frames": 2043.0,
+      "after_decoded_frames": 2043.0,
+      "passed": true
+    },
+    {
+      "name": "ms-c1-late",
+      "before_median_ns": 170295666.5,
+      "after_median_ns": 4416.5,
+      "median_speedup": 38558.96445148873,
+      "after_over_before": 2.5934306437562814e-05,
+      "before_decoded_frames": 960000.0,
+      "after_decoded_frames": 28.0,
+      "passed": true
+    },
+    {
+      "name": "ms-c1-start",
+      "before_median_ns": 266125.0,
+      "after_median_ns": 269563.0,
+      "median_speedup": 0.987246024120521,
+      "after_over_before": 1.0129187411930485,
+      "before_decoded_frames": 2048.0,
+      "after_decoded_frames": 2048.0,
+      "passed": true
+    },
+    {
+      "name": "ms-c2-late",
+      "before_median_ns": 252785146.0,
+      "after_median_ns": 6354.5,
+      "median_speedup": 39780.493508537256,
+      "after_over_before": 2.513794857234214e-05,
+      "before_decoded_frames": 960000.0,
+      "after_decoded_frames": 28.0,
+      "passed": true
+    },
+    {
+      "name": "ms-c2-start",
+      "before_median_ns": 430334.0,
+      "after_median_ns": 419333.5,
+      "median_speedup": 1.0262332964096597,
+      "after_over_before": 0.9744372975409799,
+      "before_decoded_frames": 2048.0,
+      "after_decoded_frames": 2048.0,
+      "passed": true
+    }
+  ]
+}

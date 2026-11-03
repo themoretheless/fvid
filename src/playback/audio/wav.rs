@@ -845,7 +845,8 @@ pub(crate) fn parse_fmt(body: &[u8], limits: &Limits) -> Result<(Pcm, Option<u32
 pub struct WavAudioReader {
     wav: Wav,
     packet: usize,
-    frame_skip: usize,
+    // Whole coded blocks skipped within the first window; PCM blocks are frames.
+    block_skip: usize,
     presentation_floor: u64,
 }
 
@@ -860,7 +861,7 @@ impl WavAudioReader {
         Ok(Self {
             wav,
             packet: 0,
-            frame_skip: 0,
+            block_skip: 0,
             presentation_floor: 0,
         })
     }
@@ -950,11 +951,12 @@ impl AudioStream for WavAudioReader {
         if self.packet >= self.wav.packets() {
             return Ok(None);
         }
-        let skip = self.frame_skip;
+        let skip = self.block_skip;
         let data = self.wav.packet(self.packet)[skip * self.wav.pcm.block_align()..].to_vec();
-        self.frame_skip = 0;
-        let pts = (self.packet * self.wav.window_frames() + skip) as i64;
-        let held = data.len() / self.wav.pcm.block_align() * self.wav.pcm.frames_per_block();
+        self.block_skip = 0;
+        let frames_per_block = self.wav.pcm.frames_per_block();
+        let pts = (self.packet * self.wav.window_frames() + skip * frames_per_block) as i64;
+        let held = data.len() / self.wav.pcm.block_align() * frames_per_block;
         let duration = if self.wav.pcm.coding.wave_block_name().is_some() { held.min(self.wav.frames.saturating_sub(pts as usize)) } else { held };
         let packet = EncodedPacket {
             duration: duration as i64,
@@ -991,7 +993,7 @@ impl AudioStream for WavAudioReader {
 
     fn rewind(&mut self) {
         self.packet = 0;
-        self.frame_skip = 0;
+        self.block_skip = 0;
         self.presentation_floor = 0;
     }
 
@@ -1005,7 +1007,7 @@ impl AudioStream for WavAudioReader {
     }
 
     fn seek_to(&mut self, pts: i64) -> i64 {
-        self.frame_skip = 0;
+        self.block_skip = 0;
         self.presentation_floor = (pts.max(0) as u64).min(self.wav.frames as u64);
         if pts.max(0) as u64 >= self.wav.frames as u64 {
             self.packet = self.wav.packets();
@@ -1017,11 +1019,20 @@ impl AudioStream for WavAudioReader {
                 self.packet = self.wav.packets();
             } else {
                 self.packet = target / PACKET_FRAMES;
-                self.frame_skip = target % PACKET_FRAMES;
+                self.block_skip = target % PACKET_FRAMES;
             }
             return target as i64;
         }
-        // Predictive codecs need the complete preceding history after reset.
+        if self.wav.pcm.coding.wave_block_name().is_some() {
+            // IMA/MS headers restart prediction at every complete coded block.
+            // Keep the native presentation floor for a target inside that block.
+            let target = (pts.max(0) as usize).min(self.wav.frames);
+            let window = self.wav.window_frames();
+            self.packet = target / window;
+            self.block_skip = (target % window) / self.wav.pcm.frames_per_block();
+            return target as i64;
+        }
+        // Other predictive codings retain preceding history after reset.
         // Decode that history normally and suppress it in present_decoded.
         self.packet = 0;
         self.presentation_floor as i64

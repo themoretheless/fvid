@@ -1,8 +1,8 @@
 {
   "target": 1000,
   "counting_rule": "One independently confirmed problem or useful capability; fixture variants and baseline integration repairs are excluded. Only accepted entries count.",
-  "accepted_count": 531,
-  "next_id": "FVID-0532",
+  "accepted_count": 532,
+  "next_id": "FVID-0533",
   "entries": [
     {
       "id": "FVID-0001",
@@ -6031,6 +6031,17 @@
       "result": "Validate four-bit mono/stereo ADPCMWAVEFORMAT, block/sample geometry, standard coefficient prefix and bounded7..256-entry table; retain the exact interpreted setup for the existing decoder. Seventy-three RIFF/RF64/Wave64 cases preserve analytic PCM, encoded bytes, setup, clocks, native seek/rewind/EOF and positive fact tails, including long blocks and predictor255. Metadata refusals, decoder-specific bad predictor/delta errors, exact truncated prefixes, unknown-data/fact EOF and292 real-worker sessions pass. Preserve Unsupported EXTENSIBLE MS routing so later AVI PCM remains playable. Seventeen frozen gates pass254 Rust executions, two old device ignores, core/player checks and22 no-external-tool executions. All199 files regenerate identically;3840 source/fixture hashes remain stable. FFmpeg matches24 standard complete/absent-fact cases; fact-tail/extra-predictor and libsndfile limits remain explicit diagnostics rather than weakened oracles. The public Coding::MsAdpcm addition has documented downstream match migration. No performance or physical-device claim.",
       "status": "accepted",
       "validation": "batch-542-validation.json"
+    },
+    {
+      "id": "FVID-0532",
+      "batch": 543,
+      "title": "Seek independent WAVE ADPCM blocks without decoding unrelated history",
+      "source": "src/playback/audio/wav.rs",
+      "regression": "tests/wave_block_seek.rs",
+      "before": "Original e259ba70f2 resets all predictive WAVE seeks to packet0. The six-test stand passes natural PCM/video, selected-corruption and budget controls, but fails valid suffix playback past earlier corrupt IMA/MS headers, actual-worker seek and bounded-preroll checks. The accumulated direct failure report covers both codec families.",
+      "result": "Select the packet window and complete IMA/MS coded block containing the native target; scale skipped blocks into native packet PTS and preserve intra-block presentation floors. Seventy-three RIFF/RF64/Wave64 cases verify exact native suffixes, raw/warm seeks, EOF/MAX, rewind and146 actual-worker sessions. Selected corrupt headers still refuse; unrelated skipped payload does not block valid random access. Other stateful codings retain full history. Eighteen frozen gates pass260 Rust executions plus18 no-external-tool repeats, two old physical-device ignores and core/player/example builds. All370 short fixture files regenerate identically and4215 source/fixture hashes remain stable. Same-source benchmark binaries and hashed temporary120-second inputs produce288 PCM/clock-verified ABBA measurements: late seek decodes28\u201336 instead of960000\u2013960003 frames, with pooled dev-build medians96.840\u2013252.785ms before and4.230\u20136.792us after. Start-of-file controls stay within the recorded1.25 median-ratio gate (observed0.974\u20131.027). These are already-open RAM input/CPU-path measurements, not release, cold-I/O or physical-player latency claims. One navigation improvement, no extra ID for its measured performance benefit.",
+      "status": "accepted",
+      "validation": "batch-543-validation.json"
     }
   ]
 }

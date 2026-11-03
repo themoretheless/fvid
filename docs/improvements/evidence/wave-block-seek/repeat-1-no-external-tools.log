@@ -1,0 +1,11 @@
+
+running 6 tests
+test clean_seek_decodes_less_than_one_block_of_preroll ... ok
+test file_payload_and_channel_budgets_still_precede_decode ... ok
+test healthy_block_media_and_literal_pcm_video_controls_remain_valid ... ok
+test seeking_valid_later_blocks_bypasses_unrelated_corrupt_headers ... ok
+test selected_corrupt_headers_and_rewound_bad_prefixes_still_refuse ... ok
+test actual_workers_seek_past_bad_blocks_with_exact_pcm_and_anchor ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 2.18s
+

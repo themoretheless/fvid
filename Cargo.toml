@@ -341,3 +341,7 @@ required-features = ["player"]
 [[example]]
 name = "bench_avi_seek_index"
 required-features = ["player"]
+
+[[example]]
+name = "wave_block_seek_bench"
+required-features = ["player"]

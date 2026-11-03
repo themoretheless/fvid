@@ -1,0 +1,475 @@
+{
+  "status": "accepted",
+  "accepted_ids": [
+    "FVID-0532"
+  ],
+  "count_delta": 1,
+  "accepted_count": 532,
+  "next_id": "FVID-0533",
+  "qualification": [
+    {
+      "name": "integration",
+      "command": [
+        "cargo",
+        "test",
+        "--locked",
+        "--offline",
+        "--no-default-features",
+        "--features",
+        "player",
+        "--test",
+        "rf64_playback",
+        "--test",
+        "rifx_playback",
+        "--test",
+        "pcm_padding_playback",
+        "--test",
+        "avi_extensible_pcm",
+        "--test",
+        "wave_speaker_playback",
+        "--test",
+        "wav_valid_bits",
+        "--test",
+        "wav_unsigned8",
+        "--test",
+        "wav_aiff_au_regressions",
+        "--test",
+        "wave_ogg_flac_plan_regressions",
+        "--test",
+        "audio_reader_eof",
+        "--test",
+        "block_audio_eof",
+        "--test",
+        "audio_index_eof",
+        "--test",
+        "coded_seek_history",
+        "--test",
+        "coded_window_clock",
+        "--test",
+        "aifc_g711_original_width",
+        "--test",
+        "g711_native",
+        "--test",
+        "wave64_playback",
+        "--test",
+        "bw64_playback",
+        "--test",
+        "wave_ima_playback",
+        "--test",
+        "mp4_subtitle_inferred_clock",
+        "--test",
+        "mp4_subtitle_negative_clock",
+        "--test",
+        "wave_ms_adpcm_playback",
+        "--test",
+        "wave_block_seek",
+        "--",
+        "--test-threads=2"
+      ],
+      "exit_code": 0,
+      "passed": 83,
+      "ignored": 0,
+      "source_stable": true
+    },
+    {
+      "name": "root-wave",
+      "command": [
+        "cargo",
+        "test",
+        "--locked",
+        "--offline",
+        "--no-default-features",
+        "--features",
+        "player",
+        "--lib",
+        "playback_wav",
+        "--",
+        "--test-threads=2"
+      ],
+      "exit_code": 0,
+      "passed": 37,
+      "ignored": 0,
+      "source_stable": true
+    },
+    {
+      "name": "root-aiff",
+      "command": [
+        "cargo",
+        "test",
+        "--locked",
+        "--offline",
+        "--no-default-features",
+        "--features",
+        "player",
+        "--lib",
+        "playback_aiff",
+        "--",
+        "--test-threads=2"
+      ],
+      "exit_code": 0,
+      "passed": 14,
+      "ignored": 0,
+      "source_stable": true
+    },
+    {
+      "name": "root-avi",
+      "command": [
+        "cargo",
+        "test",
+        "--locked",
+        "--offline",
+        "--no-default-features",
+        "--features",
+        "player",
+        "--lib",
+        "playback_avi_audio",
+        "--",
+        "--test-threads=2"
+      ],
+      "exit_code": 0,
+      "passed": 13,
+      "ignored": 0,
+      "source_stable": true
+    },
+    {
+      "name": "audio-worker",
+      "command": [
+        "cargo",
+        "test",
+        "--locked",
+        "--offline",
+        "--no-default-features",
+        "--features",
+        "player",
+        "--lib",
+        "audio_thread",
+        "--",
+        "--test-threads=2"
+      ],
+      "exit_code": 0,
+      "passed": 39,
+      "ignored": 0,
+      "source_stable": true
+    },
+    {
+      "name": "root-cpal",
+      "command": [
+        "cargo",
+        "test",
+        "--locked",
+        "--offline",
+        "--no-default-features",
+        "--features",
+        "player",
+        "--lib",
+        "audio::cpal_backend",
+        "--",
+        "--test-threads=2"
+      ],
+      "exit_code": 0,
+      "passed": 43,
+      "ignored": 2,
+      "source_stable": true
+    },
+    {
+      "name": "owned-wave",
+      "command": [
+        "cargo",
+        "test",
+        "-p",
+        "fvid-media",
+        "--locked",
+        "--offline",
+        "--no-default-features",
+        "--features",
+        "player",
+        "--lib",
+        "owned_wave",
+        "--",
+        "--test-threads=2"
+      ],
+      "exit_code": 0,
+      "passed": 11,
+      "ignored": 0,
+      "source_stable": true
+    },
+    {
+      "name": "player-factory",
+      "command": [
+        "cargo",
+        "test",
+        "--locked",
+        "--offline",
+        "--no-default-features",
+        "--features",
+        "player",
+        "--lib",
+        "native_wave64_file_regressions"
+      ],
+      "exit_code": 0,
+      "passed": 1,
+      "ignored": 0,
+      "source_stable": true
+    },
+    {
+      "name": "player-queue",
+      "command": [
+        "cargo",
+        "test",
+        "--locked",
+        "--offline",
+        "--no-default-features",
+        "--features",
+        "player",
+        "--lib",
+        "player_queue_and_geometry_regressions"
+      ],
+      "exit_code": 0,
+      "passed": 3,
+      "ignored": 0,
+      "source_stable": true
+    },
+    {
+      "name": "core-check",
+      "command": [
+        "cargo",
+        "check",
+        "--locked",
+        "--offline",
+        "--no-default-features"
+      ],
+      "exit_code": 0,
+      "passed": 0,
+      "ignored": 0,
+      "source_stable": true
+    },
+    {
+      "name": "player-check",
+      "command": [
+        "cargo",
+        "check",
+        "--locked",
+        "--offline",
+        "--no-default-features",
+        "--features",
+        "player"
+      ],
+      "exit_code": 0,
+      "passed": 0,
+      "ignored": 0,
+      "source_stable": true
+    },
+    {
+      "name": "bw64-player-factory",
+      "command": [
+        "cargo",
+        "test",
+        "--locked",
+        "--offline",
+        "--no-default-features",
+        "--features",
+        "player",
+        "--lib",
+        "native_bw64_file_regressions"
+      ],
+      "exit_code": 0,
+      "passed": 1,
+      "ignored": 0,
+      "source_stable": true
+    },
+    {
+      "name": "ima-player-factory",
+      "command": [
+        "cargo",
+        "test",
+        "--locked",
+        "--offline",
+        "--no-default-features",
+        "--features",
+        "player",
+        "--lib",
+        "native_wave_ima_file_regressions"
+      ],
+      "exit_code": 0,
+      "passed": 1,
+      "ignored": 0,
+      "source_stable": true
+    },
+    {
+      "name": "adpcm-unit",
+      "command": [
+        "cargo",
+        "test",
+        "--locked",
+        "--offline",
+        "--no-default-features",
+        "--features",
+        "player",
+        "--lib",
+        "codec::adpcm_decoder"
+      ],
+      "exit_code": 0,
+      "passed": 10,
+      "ignored": 0,
+      "source_stable": true
+    },
+    {
+      "name": "owned-ima-unit",
+      "command": [
+        "cargo",
+        "test",
+        "--locked",
+        "--offline",
+        "-p",
+        "fvid-media",
+        "--no-default-features",
+        "--features",
+        "player",
+        "--lib",
+        "owned_ima_wav"
+      ],
+      "exit_code": 0,
+      "passed": 1,
+      "ignored": 0,
+      "source_stable": true
+    },
+    {
+      "name": "ms-player-factory",
+      "command": [
+        "cargo",
+        "test",
+        "--locked",
+        "--offline",
+        "--no-default-features",
+        "--features",
+        "player",
+        "--lib",
+        "native_wave_ms_adpcm_file_regressions"
+      ],
+      "exit_code": 0,
+      "passed": 1,
+      "ignored": 0,
+      "source_stable": true
+    },
+    {
+      "name": "owned-ms-unit",
+      "command": [
+        "cargo",
+        "test",
+        "--locked",
+        "--offline",
+        "-p",
+        "fvid-media",
+        "--no-default-features",
+        "--features",
+        "player",
+        "--lib",
+        "owned_ms_adpcm"
+      ],
+      "exit_code": 0,
+      "passed": 2,
+      "ignored": 0,
+      "source_stable": true
+    },
+    {
+      "name": "benchmark-build",
+      "command": [
+        "cargo",
+        "build",
+        "--locked",
+        "--offline",
+        "--no-default-features",
+        "--features",
+        "player",
+        "--example",
+        "wave_block_seek_bench"
+      ],
+      "exit_code": 0,
+      "passed": 0,
+      "ignored": 0,
+      "source_stable": true
+    }
+  ],
+  "executed_tests": 260,
+  "ignored": 2,
+  "no_external_tool_executions": 18,
+  "baseline": {
+    "base": "e259ba70f2af90cda5d56f4ea5f15e2dafd309a9",
+    "passed": 3,
+    "failed": 3,
+    "evidence": "evidence/wave-block-seek/before.log"
+  },
+  "source_stability": {
+    "paths": 4215,
+    "all_match": true,
+    "manifest": "evidence/wave-block-seek/candidate-source.json"
+  },
+  "fixture_regeneration": {
+    "files": 370,
+    "byte_identical": true
+  },
+  "native_worker_sessions": 146,
+  "performance": {
+    "comparison": "evidence/wave-block-seek/benchmark-comparison.json",
+    "protocol": "evidence/wave-block-seek/benchmark-protocol.json",
+    "verification": "evidence/wave-block-seek/benchmark-verification.json",
+    "timed_executions": 288,
+    "rounds_per_variant_workload": 18,
+    "order": [
+      "A1",
+      "B1",
+      "B2",
+      "A2"
+    ],
+    "status": "passed",
+    "scope": "Dev profile, RAM-backed already-open WAVE, seek+decoder reset until first presented PCM; no release/cold-I/O/physical-device/whole-player claim.",
+    "all_start_controls_pass": true,
+    "all_pcm_pts_timebase_assertions_pass": true,
+    "late_cases": [
+      {
+        "name": "ima-c1-late",
+        "before_median_ns": 96839896.0,
+        "after_median_ns": 4229.5,
+        "median_speedup": 22896.298853292352,
+        "after_over_before": 4.367518114641511e-05,
+        "before_decoded_frames": 960003.0,
+        "after_decoded_frames": 36.0,
+        "passed": true
+      },
+      {
+        "name": "ima-c2-late",
+        "before_median_ns": 167211479.0,
+        "after_median_ns": 6792.0,
+        "median_speedup": 24618.886778563014,
+        "after_over_before": 4.0619220884948934e-05,
+        "before_decoded_frames": 960003.0,
+        "after_decoded_frames": 36.0,
+        "passed": true
+      },
+      {
+        "name": "ms-c1-late",
+        "before_median_ns": 170295666.5,
+        "after_median_ns": 4416.5,
+        "median_speedup": 38558.96445148873,
+        "after_over_before": 2.5934306437562814e-05,
+        "before_decoded_frames": 960000.0,
+        "after_decoded_frames": 28.0,
+        "passed": true
+      },
+      {
+        "name": "ms-c2-late",
+        "before_median_ns": 252785146.0,
+        "after_median_ns": 6354.5,
+        "median_speedup": 39780.493508537256,
+        "after_over_before": 2.513794857234214e-05,
+        "before_decoded_frames": 960000.0,
+        "after_decoded_frames": 28.0,
+        "passed": true
+      }
+    ]
+  },
+  "scope": "One independent-block navigation problem: correct seeks bypass unrelated corrupt payload blocks and reduce decoded preroll. Full/selected corruption, global metadata and EOF checks remain strict; stateful codings preserve history. No public API changes; correctness and performance count together, not separately.",
+  "zero_count_work": [
+    "Benchmark example private-helper authoring compile error was repaired and retained only as diagnostics."
+  ]
+}

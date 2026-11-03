@@ -1,0 +1,21 @@
+{
+  "order": [
+    "A1",
+    "B1",
+    "B2",
+    "A2"
+  ],
+  "binary_A": "original Wav reader",
+  "binary_B": "independent-block seek candidate",
+  "rounds_per_campaign": 9,
+  "excluded_warmup_rounds_per_workload": 1,
+  "scope": "Dev profile, already-open RAM-backed WAVE input, seek+decoder reset until first presented PCM. No physical output, release-build or cold-file-I/O claim.",
+  "gates": {
+    "late_minimum_median_speedup": 2.0,
+    "start_maximum_median_ratio": 1.25,
+    "late_maximum_decoded_frame_capacity": 64,
+    "late_minimum_decoded_work_reduction": 10.0,
+    "all_samples_and_clock_verified": true
+  },
+  "rejected_comparisons": "Do not accept a candidate with a failed frozen start control or unverified PCM, even if late-seek workloads win."
+}

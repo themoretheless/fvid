@@ -1,0 +1,9 @@
+{
+  "base_commit": "e259ba70f2af90cda5d56f4ea5f15e2dafd309a9",
+  "wav_sha256": "e5e3f9ed88d62e87ecd96215334dec841c85e2a735f187fc6446dead4e4c3378",
+  "test_sha256": "19cf8704a63839775e5f192b10e1d3e0c9736cc001f516ce8b5cece2ee864458",
+  "benchmark_sha256": "491b1b2c7852b6e8e1fd36ef10e585b313680758d3749aef0b4b85b2287bdbe5",
+  "binary_sha256": "44934ae4b00358abefd66acd69d3d97c35ce083c80a2395d61f31405c134ac7d",
+  "profile": "dev; debug assertions enabled; no default features; player",
+  "rustc": "rustc 1.98.1 (48a229cea 2026-09-01)"
+}

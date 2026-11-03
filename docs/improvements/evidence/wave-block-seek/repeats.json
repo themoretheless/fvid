@@ -1,0 +1,25 @@
+{
+  "PATH": "/nonexistent",
+  "FFMPEG": "/nonexistent/ffmpeg",
+  "FFPROBE": "/nonexistent/ffprobe",
+  "runs": [
+    {
+      "repeat": 1,
+      "passed": 6,
+      "exit_code": 0,
+      "binary_sha256": "81a857886d5842f9075cbbcd11b987748f5fb0816d7466beda3e6e52f4a9daf4"
+    },
+    {
+      "repeat": 2,
+      "passed": 6,
+      "exit_code": 0,
+      "binary_sha256": "81a857886d5842f9075cbbcd11b987748f5fb0816d7466beda3e6e52f4a9daf4"
+    },
+    {
+      "repeat": 3,
+      "passed": 6,
+      "exit_code": 0,
+      "binary_sha256": "81a857886d5842f9075cbbcd11b987748f5fb0816d7466beda3e6e52f4a9daf4"
+    }
+  ]
+}
