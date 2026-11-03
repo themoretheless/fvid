@@ -1,0 +1,15 @@
+{
+  "source_commit": "661143c34d4505b0ee0c452c79d80a6b5d6124c3",
+  "remote_refs": {
+    "refs/heads/codex/deliver-fvid-20261029": "661143c34d4505b0ee0c452c79d80a6b5d6124c3",
+    "refs/heads/main": "661143c34d4505b0ee0c452c79d80a6b5d6124c3"
+  },
+  "accepted_count": 538,
+  "next_id": "FVID-0539",
+  "owned_target_removed": "/private/tmp/fvid-v0-pcm-alias-target-20261103",
+  "source_stable": true,
+  "regression_fixtures_preserved": 102,
+  "parallel_worktrees_preserved": true,
+  "stashes_preserved": 4,
+  "notes": "Active AAC branch backed up to its own remote; no unqualified active work merged. Historical preservation branches retained, no branch/worktree deletion."
+}

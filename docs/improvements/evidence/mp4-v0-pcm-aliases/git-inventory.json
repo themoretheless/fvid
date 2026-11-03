@@ -1,0 +1,11 @@
+{
+  "main_worktree": "clean at inventory",
+  "aac_worktree": "active; tracked clean; one untracked author-owned validation note preserved",
+  "av1_worktree": "tracked and untracked clean; preserved active history",
+  "stashes": 4,
+  "excluded_from_merge": [
+    "active AAC qualification",
+    "historical unqualified preservation snapshots"
+  ],
+  "branch_worktree_deletions": 0
+}
