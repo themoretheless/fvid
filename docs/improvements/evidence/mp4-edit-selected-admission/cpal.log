@@ -47,4 +47,3 @@ test audio::cpal_backend::tests::explicit_output_selection_matches_names_and_nev
 test audio::cpal_backend::signed_aac_timeline_regressions::signed_aac_windows_reach_the_cpal_callback_at_their_original_sample_positions ... ok
 
 test result: ok. 43 passed; 0 failed; 2 ignored; 0 measured; 1183 filtered out; finished in 2.39s
-

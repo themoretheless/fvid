@@ -9,4 +9,3 @@ test playback_mp4::tests::presentation_intervals_follow_composition_order ... ok
 test playback_mp4::tests::an_avc_parameter_set_in_the_record_states_its_signal_at_open ... ok
 
 test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 1221 filtered out; finished in 0.09s
-

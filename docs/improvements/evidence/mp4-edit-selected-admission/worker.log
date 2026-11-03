@@ -41,4 +41,3 @@ test audio_thread::vorbis_worker_tests::ogg_vorbis_rate_changes_keep_backend_clo
 test audio_thread::vorbis_worker_tests::ogg_codec_changes_keep_backend_pcm_clock_through_navigation ... ok
 
 test result: ok. 39 passed; 0 failed; 0 ignored; 0 measured; 1189 filtered out; finished in 5.43s
-

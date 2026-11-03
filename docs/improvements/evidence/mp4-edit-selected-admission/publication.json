@@ -1,0 +1,18 @@
+{
+  "source_commit": "dbd9d233dd3b19f66ac626a0c2e81df3e13cc6ee",
+  "remote_refs": {
+    "refs/heads/codex/deliver-fvid-20261029": "dbd9d233dd3b19f66ac626a0c2e81df3e13cc6ee",
+    "refs/heads/main": "dbd9d233dd3b19f66ac626a0c2e81df3e13cc6ee"
+  },
+  "accepted_count": 539,
+  "next_id": "FVID-0540",
+  "rust_executions": 197,
+  "existing_device_ignores": 2,
+  "source_stable": true,
+  "owned_target_removed": "/private/tmp/fvid-edit-selected-target-20261103",
+  "candidate_backup_removed": true,
+  "regression_files_preserved": 145,
+  "parallel_work_preserved": true,
+  "stashes_preserved": 4,
+  "log_normalization": "Only trailing empty lines removed; all command output and result lines retained"
+}

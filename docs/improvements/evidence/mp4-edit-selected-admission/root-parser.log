@@ -19,4 +19,3 @@ test container::mp4::tests::the_wave_record_sits_where_the_entry_version_puts_th
 test container::mp4::tests::the_picture_a_fragment_indexes_reaches_the_picture_route ... ok
 
 test result: ok. 17 passed; 0 failed; 0 ignored; 0 measured; 1211 filtered out; finished in 0.10s
-
