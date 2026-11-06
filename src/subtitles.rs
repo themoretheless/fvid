@@ -267,9 +267,15 @@ pub fn parse_ass(text: &str) -> Vec<Cue> {
 pub fn ass_block(block: &str) -> (Option<(Duration, Duration)>, String) {
     let line = block.trim_matches(|c: char| c.is_whitespace() || c == '\u{feff}');
     let (prefixed, fields) = match line.split_once(':') {
-        Some(("Dialogue", rest)) => (true, rest),
+        Some((k, rest)) if k.trim().eq_ignore_ascii_case("dialogue") => (true, rest),
         // The other event lines of a script are not for showing.
-        Some(("Comment" | "Format" | "Style", _)) => return (None, String::new()),
+        Some((k, _))
+            if ["comment", "format", "style"]
+                .iter()
+                .any(|p| k.trim().eq_ignore_ascii_case(p)) =>
+        {
+            return (None, String::new());
+        }
         _ => (false, line),
     };
     let ten = fields.splitn(10, ',').collect::<Vec<_>>();

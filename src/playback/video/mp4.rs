@@ -391,6 +391,7 @@ impl<R: Read + Seek> SingleLayerMp4VideoReader<R> {
         let setup = self.decoder_setup();
         let codec = setup.codec;
         let configuration = setup.configuration.clone();
+        let fallback = self.decoder_setup().colour;
         if codec == *b"av01" {
             let mut seed = av1_metadata::signal_from_bytes(&configuration);
             let mut packet = Vec::new();
@@ -404,7 +405,21 @@ impl<R: Read + Seek> SingleLayerMp4VideoReader<R> {
                 let (stated, light) = av1_metadata::signal_from_container_sample(&packet);
                 seed = (stated.filled_with(seed.0), light.filled_with(seed.1));
             }
+            let effective = seed.0.filled_with(fallback);
             self.open_signal = Some(seed);
+            self.open_colour = crate::playback_native::AvcColour::from_matrix(
+                if effective.matrix != 0 { effective.matrix } else { 2 },
+                effective.full_range,
+            )
+            .ok();
+            return;
+        }
+        if codec == *b"vp09" {
+            self.open_colour = crate::playback_native::AvcColour::from_matrix(
+                if fallback.matrix != 0 { fallback.matrix } else { 2 },
+                fallback.full_range,
+            )
+            .ok();
             return;
         }
         if matches!(&codec, b"avc1" | b"avc3") {
@@ -423,7 +438,10 @@ impl<R: Read + Seek> SingleLayerMp4VideoReader<R> {
                         if !nal.is_empty() && (nal[0] & 31) == 7
                             && let Ok(sps) = crate::codec::avc::Sps::parse(nal)
                         {
-                            if let Ok(c) = crate::playback_native::AvcColour::from_vui(sps.vui.as_ref()) {
+                            if let Ok(c) = crate::playback_native::AvcColour::from_vui_with_fallback(
+                                sps.vui.as_ref(),
+                                fallback,
+                            ) {
                                 colour = Some(c);
                             }
                             if let Some((_, full_range, col)) = sps.vui.and_then(|v| v.video_signal) {
@@ -471,7 +489,10 @@ impl<R: Read + Seek> SingleLayerMp4VideoReader<R> {
                                 && header.layer_id == 0
                                 && let Ok(s) = crate::codec::hevc_sps::Sps::parse(nal, self.work_budget)
                             {
-                                if let Ok(c) = crate::playback_native::AvcColour::from_hevc_vui(s.vui.as_ref()) {
+                                if let Ok(c) = crate::playback_native::AvcColour::from_hevc_vui_with_fallback(
+                                    s.vui.as_ref(),
+                                    fallback,
+                                ) {
                                     colour = Some(c);
                                 }
                                 if let Some(v) = s.vui.as_ref().and_then(|v| v.signal.as_ref()) {
@@ -528,23 +549,51 @@ impl<R: Read + Seek> SingleLayerMp4VideoReader<R> {
         if let Some(hardware) = &self.hardware {
             return Ok(hardware.colour);
         }
+        let fallback = self.decoder_setup().colour;
         match &self.decoder {
             Decoder::Hevc(d) => match d.try_parameters() {
                 Some((s, _)) if s.vui.is_some() => {
-                    crate::playback_native::AvcColour::from_hevc_vui(s.vui.as_ref())
+                    crate::playback_native::AvcColour::from_hevc_vui_with_fallback(
+                        s.vui.as_ref(),
+                        fallback,
+                    )
                 }
                 Some(_) if self.open_colour.is_some() => Ok(self.open_colour.unwrap()),
-                Some((s, _)) => crate::playback_native::AvcColour::from_hevc_vui(s.vui.as_ref()),
-                None => Ok(self.open_colour.unwrap_or_default()),
+                Some((s, _)) => crate::playback_native::AvcColour::from_hevc_vui_with_fallback(
+                    s.vui.as_ref(),
+                    fallback,
+                ),
+                None => Ok(self.open_colour.unwrap_or_else(|| {
+                    crate::playback_native::AvcColour::from_hevc_vui_with_fallback(None, fallback)
+                        .unwrap_or_default()
+                })),
             },
             Decoder::Layered(d) => Ok(d.metadata.colour.or(self.open_colour).unwrap_or_default()),
             Decoder::Avc(_) => match self.avc_vui() {
-                Some(vui) => crate::playback_native::AvcColour::from_vui(Some(vui)),
-                None => Ok(self.open_colour.unwrap_or_default()),
+                Some(vui) => {
+                    crate::playback_native::AvcColour::from_vui_with_fallback(Some(vui), fallback)
+                }
+                None => Ok(self.open_colour.unwrap_or_else(|| {
+                    crate::playback_native::AvcColour::from_vui_with_fallback(None, fallback)
+                        .unwrap_or_default()
+                })),
             },
-            Decoder::Unconfigured | Decoder::Vp9(_) | Decoder::Av1(_) => {
-                Ok(crate::playback_native::AvcColour::default())
+            Decoder::Av1(d) => {
+                let effective = d
+                    .color()
+                    .map(crate::codec::av1_sequence::Color::signal)
+                    .unwrap_or_default()
+                    .filled_with(fallback);
+                crate::playback_native::AvcColour::from_matrix(
+                    if effective.matrix != 0 { effective.matrix } else { 2 },
+                    effective.full_range,
+                )
             }
+            Decoder::Vp9(_) => crate::playback_native::AvcColour::from_matrix(
+                if fallback.matrix != 0 { fallback.matrix } else { 2 },
+                fallback.full_range,
+            ),
+            Decoder::Unconfigured => Ok(crate::playback_native::AvcColour::default()),
         }
     }
     /// The signal the coding itself states, which is what a picture is graded
@@ -719,6 +768,7 @@ impl<R: Read + Seek> SingleLayerMp4VideoReader<R> {
                 (Arc::new(picture), planes8.map(Arc::new))
             }));
         }
+        let fallback = self.decoder_setup().colour;
         match &mut self.decoder {
             Decoder::Unconfigured => Err(invalid("MP4 decoder is not configured")),
             Decoder::Layered(_) => Err(invalid("mixed HEVC packets require the window pipeline")),
@@ -728,10 +778,13 @@ impl<R: Read + Seek> SingleLayerMp4VideoReader<R> {
                 let identity = vui
                     .and_then(|v| v.video_signal)
                     .and_then(|(_, _, c)| c)
-                    .is_some_and(|c| c[2] == 0);
+                    .map(|c| c[2])
+                    .filter(|&m| m != 2)
+                    .or_else(|| (fallback.matrix != 0 && fallback.matrix != 2).then_some(fallback.matrix))
+                    == Some(0);
                 if picture.chroma_format()? != 1 || identity {
                     self.decoded_planar = Some(Arc::new(
-                        crate::playback_native::avc_picture_with_vui(&picture, vui, self.queue_budget)?,
+                        crate::playback_native::avc_picture_with_vui_and_fallback(&picture, vui, fallback, self.queue_budget)?,
                     ));
                 }
                 Ok(Some((picture,None)))
@@ -741,16 +794,18 @@ impl<R: Read + Seek> SingleLayerMp4VideoReader<R> {
                     return Ok(None);
                 };
                 let p = &frame.picture;
-                let colour = crate::playback_native::AvcColour::from_hevc_vui(
+                let colour = crate::playback_native::AvcColour::from_hevc_vui_with_fallback(
                     d.try_parameters().and_then(|(s,_)| s.vui.as_ref()),
+                    fallback,
                 )?;
                 let explicit_geometry =
                     d.parameters().0.chroma_format != 1 || p.depth[0] != p.depth[1];
                 if explicit_geometry {
-                    self.decoded_planar = Some(Arc::new(crate::playback_native::hevc_picture_with_vui(
+                    self.decoded_planar = Some(Arc::new(crate::playback_native::hevc_picture_with_vui_and_fallback(
                         p,
                         d.parameters().0.chroma_format,
                         d.parameters().0.vui.as_ref(),
+                        fallback,
                     )?));
                 }
                 let coded_width = p.dimensions[0] as usize;
@@ -799,22 +854,31 @@ impl<R: Read + Seek> SingleLayerMp4VideoReader<R> {
                     let decoded = d.decode(frame)?;
                     if decoded.header.show_frame {
                         let p = &decoded.picture;
+                        let color_space = match decoded.header.picture.format.color_space {
+                            0 => match fallback.matrix {
+                                1 => 2,
+                                7 => 4,
+                                9 | 10 => 5,
+                                _ => 0,
+                            },
+                            cs => cs,
+                        };
                         let colour = crate::playback_native::AvcColour {
-                            kr: match decoded.header.picture.format.color_space {
+                            kr: match color_space {
                                 0 | 1 | 3 => 0.299,
                                 2 | 7 => 0.2126,
                                 4 => 0.212,
                                 5 => 0.2627,
                                 _ => return Err(invalid("unsupported VP9 RGB colour configuration")),
                             },
-                            kb: match decoded.header.picture.format.color_space {
+                            kb: match color_space {
                                 0 | 1 | 3 => 0.114,
                                 2 | 7 => 0.0722,
                                 4 => 0.087,
                                 5 => 0.0593,
                                 _ => return Err(invalid("unsupported VP9 RGB colour configuration")),
                             },
-                            full: decoded.header.picture.format.full_range,
+                            full: decoded.header.picture.format.full_range || fallback.full_range,
                         };
                         self.decoded_planar = Some(Arc::new(crate::playback_native::vp9_picture(p, colour, decoded.header.picture.format.color_space == 7)?));
                         let coded_width = p.size[0] as usize;
@@ -852,8 +916,13 @@ impl<R: Read + Seek> SingleLayerMp4VideoReader<R> {
                 if let Some(decoded) = d.decode_container_sample(&self.packet)? {
                     if decoded.show {
                         let p = &decoded.picture;
+                        let matrix = if decoded.color.matrix != 2 || fallback.matrix == 0 {
+                            decoded.color.matrix
+                        } else {
+                            fallback.matrix
+                        };
                         let colour = crate::playback_native::AvcColour {
-                            kr: match decoded.color.matrix {
+                            kr: match matrix {
                                 0 | 1 => 0.2126,
                                 2 | 5 | 6 => 0.299,
                                 4 => 0.30,
@@ -863,7 +932,7 @@ impl<R: Read + Seek> SingleLayerMp4VideoReader<R> {
                                     return Err(invalid("unsupported AV1 RGB matrix coefficients"));
                                 }
                             },
-                            kb: match decoded.color.matrix {
+                            kb: match matrix {
                                 0 | 1 => 0.0722,
                                 2 | 5 | 6 => 0.114,
                                 4 => 0.11,
@@ -873,7 +942,7 @@ impl<R: Read + Seek> SingleLayerMp4VideoReader<R> {
                                     return Err(invalid("unsupported AV1 RGB matrix coefficients"));
                                 }
                             },
-                            full: decoded.color.full_range,
+                            full: decoded.color.full_range || fallback.full_range,
                         };
                         let coded_width = p.size[0] as usize;
                         let coded_height = p.size[1] as usize;

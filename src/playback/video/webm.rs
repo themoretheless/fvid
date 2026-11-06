@@ -1113,23 +1113,41 @@ impl<R: Read + Seek> WebmVideoReader<R> {
                                 (first_pts, duration)
                             } else { (pts, duration) };
                             let vui = d.active_vui().or_else(|| d.recorded_vui());
+                            let signal = vui
+                                .and_then(|v| v.video_signal)
+                                .map(|(_, full_range, colour)| {
+                                    let [primaries, transfer, matrix] = colour.unwrap_or([0; 3]);
+                                    ColourDescription {
+                                        primaries,
+                                        transfer,
+                                        matrix,
+                                        full_range,
+                                    }
+                                })
+                                .unwrap_or_default();
                             let identity = vui
                                 .and_then(|v| v.video_signal)
                                 .and_then(|(_, _, c)| c)
-                                .is_some_and(|c| c[2] == 0);
+                                .map(|c| c[2])
+                                .filter(|&m| m != 2)
+                                .or_else(|| (self.colour.matrix != 0 && self.colour.matrix != 2).then_some(self.colour.matrix))
+                                == Some(0);
                             let decoded = if picture.chroma_format()? != 1 || identity {
                                 Picture::Packed(Arc::new(
-                                    crate::playback_native::avc_picture_with_vui(
+                                    crate::playback_native::avc_picture_with_vui_and_fallback(
                                         &picture,
                                         vui,
+                                        self.colour,
                                         self.rgb_budget,
                                     )?,
                                 ))
                             } else {
-                                Picture::Coded(picture, AvcColour::from_vui(vui)?)
+                                Picture::Coded(picture, AvcColour::from_vui_with_fallback(vui, self.colour)?)
                             };
-                            visible = Some(Frame { layer_id: None, signal: None,
-                            hdr: HdrMetadata::default(),
+                            visible = Some(Frame {
+                                layer_id: None,
+                                signal: Some(signal),
+                                hdr: HdrMetadata::default(),
                                 paired,
                                 decoded,
                                 pts,
@@ -1144,10 +1162,30 @@ impl<R: Read + Seek> WebmVideoReader<R> {
                 VideoDecoder::Hevc(d) => {
                     if let Some(frame) = d.decode_packet(&packet)?.filter(|f| f.output) {
                         let p = &frame.picture;
-                        let packed=crate::playback_native::hevc_picture_with_vui(
-                            p,d.parameters().0.chroma_format,d.parameters().0.vui.as_ref(),
+                        let sps = &d.parameters().0;
+                        let signal = sps
+                            .vui
+                            .as_ref()
+                            .and_then(|v| v.signal.as_ref())
+                            .map(|v| {
+                                let [primaries, transfer, matrix] = v.colour.unwrap_or([0; 3]);
+                                ColourDescription {
+                                    primaries,
+                                    transfer,
+                                    matrix,
+                                    full_range: v.full_range,
+                                }
+                            })
+                            .unwrap_or_default();
+                        let packed = crate::playback_native::hevc_picture_with_vui_and_fallback(
+                            p,
+                            sps.chroma_format,
+                            sps.vui.as_ref(),
+                            self.colour,
                         )?;
-                        visible = Some(Frame { layer_id: None, signal: None,
+                        visible = Some(Frame {
+                            layer_id: None,
+                            signal: Some(signal),
                             hdr: HdrMetadata::default(),
                             paired: false,
                             decoded: Picture::Packed(Arc::new(packed)),
@@ -1204,7 +1242,10 @@ impl<R: Read + Seek> WebmVideoReader<R> {
                 }
                 VideoDecoder::Av1(d) => {
                     if let Some(decoded) = d.decode_container_sample(&packet)? {
-                        visible = Some(Frame { layer_id: None, signal: None,
+                        let signal = crate::codec::av1_sequence::Color::signal(&decoded.color);
+                        visible = Some(Frame {
+                            layer_id: None,
+                            signal: Some(signal),
                             hdr: HdrMetadata::default(),
                             paired: false,
                             decoded: Picture::Av1(decoded),
@@ -1320,15 +1361,31 @@ impl<R: Read + Seek> WebmVideoReader<R> {
                 0,
                 matches!(&self.decoder, VideoDecoder::Hevc(d) if d.try_parameters().is_some_and(|(s, _)| s.chroma_format == 0)),
             ),
-            Picture::Vp9(d) => (
-                d.picture.size,
-                d.picture.depth,
-                d.header.picture.format.full_range,
-                d.header.picture.format.color_space,
-                false,
-            ),
+            Picture::Vp9(d) => {
+                let color_space = match d.header.picture.format.color_space {
+                    0 => match self.colour.matrix {
+                        1 => 2,
+                        7 => 4,
+                        9 | 10 => 5,
+                        _ => 0,
+                    },
+                    cs => cs,
+                };
+                (
+                    d.picture.size,
+                    d.picture.depth,
+                    d.header.picture.format.full_range || self.colour.full_range,
+                    color_space,
+                    false,
+                )
+            }
             Picture::Av1(d) => {
-                let color_space = match d.color.matrix {
+                let matrix = if d.color.matrix != 2 || self.colour.matrix == 0 {
+                    d.color.matrix
+                } else {
+                    self.colour.matrix
+                };
+                let color_space = match matrix {
                     0 => 7,
                     1 => 2,
                     2 | 4 | 5 | 6 => 1,
@@ -1339,7 +1396,7 @@ impl<R: Read + Seek> WebmVideoReader<R> {
                 (
                     d.picture.size,
                     d.picture.depth,
-                    d.color.full_range,
+                    d.color.full_range || self.colour.full_range,
                     color_space,
                     d.color.monochrome,
                 )

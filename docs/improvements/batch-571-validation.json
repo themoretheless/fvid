@@ -1,0 +1,37 @@
+{
+  "status": "accepted",
+  "accepted_ids": [
+    "FVID-0585",
+    "FVID-0586",
+    "FVID-0587",
+    "FVID-0588",
+    "FVID-0589"
+  ],
+  "count_delta": 5,
+  "accepted_count": 589,
+  "next_id": "FVID-0590",
+  "qualification": [
+    {
+      "name": "video-colour-and-subtitle-convert",
+      "command": [
+        "cargo",
+        "test",
+        "--features",
+        "player",
+        "--test",
+        "video_colour_and_subtitle_convert",
+        "--test",
+        "mkv_vui_fallback_and_subtitle_burn",
+        "--test",
+        "matroska_subtitles_and_mp4_vui_fallback",
+        "--test",
+        "native_subtitle_convert",
+        "--test",
+        "owned_subtitle"
+      ],
+      "exit_code": 0,
+      "passed": 21,
+      "ignored": 0
+    }
+  ]
+}

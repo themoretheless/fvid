@@ -208,6 +208,7 @@ impl Decoder {
                         continue;
                     }
                     let matrix = match format.color_space {
+                        0 => 2,
                         2 => 1,
                         4 => 7,
                         5 => 9,

@@ -1,8 +1,8 @@
 {
   "target": 1000,
   "counting_rule": "One independently confirmed problem or useful capability; fixture variants and baseline integration repairs are excluded. Only accepted entries count.",
-  "accepted_count": 584,
-  "next_id": "FVID-0585",
+  "accepted_count": 589,
+  "next_id": "FVID-0590",
   "entries": [
     {
       "id": "FVID-0001",
@@ -6615,6 +6615,61 @@
       "result": "Accept '.srt', '.vtt', '.ass', and '.ssa' subtitle files and validate WebVTT/ASS/SSA headers alongside '-->' in owned_subtitle_burn::supports, plan_burn_subtitles, and burn_subtitles.",
       "status": "accepted",
       "validation": "batch-570-validation.json"
+    },
+    {
+      "id": "FVID-0585",
+      "batch": 571,
+      "title": "Preserve container Colour (colr) matrix and full_range fallback and per-frame presented_signal in WebmVideoReader and Mp4VideoReader when AVC or HEVC VUI omits colour description or reports code 2",
+      "source": "src/playback/video/webm.rs",
+      "regression": "tests/video_colour_and_subtitle_convert.rs",
+      "before": "WebmVideoReader and Mp4VideoReader passed bitstream VUI directly to AvcColour::from_vui / from_hevc_vui without container Colour fallback when VUI matrix was absent or 2 (Unspecified) or full_range was false, and WebmVideoReader::decode_next left Frame.signal = None for single-layer AVC, HEVC, and AV1.",
+      "result": "Fallback to container Colour matrix and full_range in AvcColour::from_vui_with_fallback, from_hevc_vui_with_fallback, avc_picture_with_vui_and_fallback, hevc_picture_with_vui_and_fallback, and Mp4VideoReader, and record per-frame Frame.signal in WebmVideoReader::decode_next.",
+      "status": "accepted",
+      "validation": "batch-571-validation.json"
+    },
+    {
+      "id": "FVID-0586",
+      "batch": 571,
+      "title": "Fall back to container Colour (colr) matrix and full_range for Matroska and MP4 VP9 CS_UNKNOWN and AV1 unspecified matrix",
+      "source": "crates/fvid-media/src/owned_webm_codec.rs",
+      "regression": "tests/video_colour_and_subtitle_convert.rs",
+      "before": "WebmVideoReader, Mp4VideoReader, and owned_webm_codec treated VP9 color_space == 0 (CS_UNKNOWN) as an explicit BT.601 (matrix = 6) statement and ignored container Colour.full_range, overwriting container BT.709/BT.2020 matrix and full-range metadata.",
+      "result": "Map VP9 CS_UNKNOWN (color_space == 0) to Unspecified (matrix = 2) in owned_webm_codec and fall back to container Colour matrix and full_range for VP9 and AV1 across WebmVideoReader, Mp4VideoReader, and owned_video_decode.",
+      "status": "accepted",
+      "validation": "batch-571-validation.json"
+    },
+    {
+      "id": "FVID-0587",
+      "batch": 571,
+      "title": "Support standalone .ssa (SubStation Alpha v4.00) script conversion and planning to Matroska S_TEXT/ASS",
+      "source": "crates/fvid-media/src/owned_subtitle_impl.rs",
+      "regression": "tests/video_colour_and_subtitle_convert.rs",
+      "before": "owned_subtitle and native_subtitle rejected standalone '.ssa' files, required 'Layer' in [Events] Format:, rejected 'Marked=N' dialogue layer tokens, and rejected '[V4 Styles]' / 'ScriptType: v4.00' headers when muxing S_TEXT/ASS.",
+      "result": "Admit '.ssa' files in try_plan_with_controls and try_convert_with_controls, normalize 'Format: Marked, ...' and 'Marked=N' dialogue tokens to canonical Matroska S_TEXT/ASS events, and accept '[V4 Styles]' / 'ScriptType: v4.00' headers in owned_matroska_tracks_impl.",
+      "status": "accepted",
+      "validation": "batch-571-validation.json"
+    },
+    {
+      "id": "FVID-0588",
+      "batch": 571,
+      "title": "Support standalone .vtt WebVTT and Matroska S_TEXT/WEBVTT subtitle conversion and planning to Matroska S_TEXT/ASS",
+      "source": "crates/fvid-media/src/owned_subtitle_impl.rs",
+      "regression": "tests/video_colour_and_subtitle_convert.rs",
+      "before": "owned_subtitle and native_subtitle rejected '.vtt' files, Matroska 'S_TEXT/WEBVTT' tracks, and 2-part 'MM:SS.mmm' WebVTT timestamps.",
+      "result": "Support 2-part 'MM:SS.mmm' timestamps, standalone '.vtt' files (with WEBVTT headers, NOTE/STYLE/REGION blocks, and cue identifiers), and Matroska 'S_TEXT/WEBVTT' tracks in try_plan_with_controls and try_convert_with_controls.",
+      "status": "accepted",
+      "validation": "batch-571-validation.json"
+    },
+    {
+      "id": "FVID-0589",
+      "batch": 571,
+      "title": "Match Dialogue:, Comment:, Format:, and Style: prefixes case-insensitively in subtitles::ass_block",
+      "source": "src/subtitles.rs",
+      "regression": "tests/video_colour_and_subtitle_convert.rs",
+      "before": "subtitles::ass_block matched only exact-case 'Dialogue:', 'Comment:', 'Format:', and 'Style:' prefixes, causing lowercase 'comment:' or 'style:' lines in Matroska ASS/SSA blocks to render as visible subtitle text and 9-field 'dialogue:' lines to be dropped.",
+      "result": "Match 'Dialogue', 'Comment', 'Format', and 'Style' prefixes case-insensitively with whitespace trimming in subtitles::ass_block.",
+      "status": "accepted",
+      "validation": "batch-571-validation.json"
     }
   ]
 }

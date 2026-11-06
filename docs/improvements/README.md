@@ -4106,3 +4106,14 @@ See `batch-569-validation.json`.
 
 See `batch-570-validation.json`.
 
+## Batch 571 — FVID-0585..0589: `WebmVideoReader`/`Mp4VideoReader` container `Colour` fallback, VP9 `CS_UNKNOWN` fallback, `.ssa`/`.vtt`/`S_TEXT/WEBVTT` subtitle conversion, and case-insensitive `ass_block`
+
+- **FVID-0585** — Preserve container `Colour` (`colr`) `matrix` and `full_range` fallback and per-frame `presented_signal` in `WebmVideoReader` and `Mp4VideoReader` when AVC or HEVC VUI omits colour description or reports code `2` (`src/playback/video/webm.rs`, `src/playback/video/mp4.rs`, `src/playback/video/native.rs`, `src/playback/video/packed.rs`, `tests/video_colour_and_subtitle_convert.rs`).
+- **FVID-0586** — Fall back to container `Colour` (`colr`) `matrix` and `full_range` for Matroska and MP4 VP9 `CS_UNKNOWN` (`color_space == 0`) and AV1 unspecified matrix (`crates/fvid-media/src/owned_webm_codec.rs`, `crates/fvid-media/src/owned_video_decode.rs`, `src/playback/video/webm.rs`, `src/playback/video/mp4.rs`, `tests/video_colour_and_subtitle_convert.rs`).
+- **FVID-0587** — Support standalone `.ssa` (`SubStation Alpha v4.00`) script conversion and planning to Matroska `S_TEXT/ASS` (`crates/fvid-media/src/owned_subtitle_impl.rs`, `crates/fvid-media/src/owned_matroska_tracks_impl.rs`, `tests/video_colour_and_subtitle_convert.rs`).
+- **FVID-0588** — Support standalone `.vtt` WebVTT and Matroska `S_TEXT/WEBVTT` subtitle conversion and planning to Matroska `S_TEXT/ASS` (`crates/fvid-media/src/owned_subtitle_impl.rs`, `tests/video_colour_and_subtitle_convert.rs`).
+- **FVID-0589** — Match `Dialogue:`, `Comment:`, `Format:`, and `Style:` prefixes case-insensitively in `subtitles::ass_block` (`src/subtitles.rs`, `tests/video_colour_and_subtitle_convert.rs`).
+
+See `batch-571-validation.json`.
+
+

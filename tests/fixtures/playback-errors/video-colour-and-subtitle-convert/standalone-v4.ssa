@@ -1,0 +1,14 @@
+[Script Info]
+Title: Synthetic SSA v4.00
+ScriptType: v4.00
+PlayResX: 384
+PlayResY: 288
+
+[V4 Styles]
+Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, TertiaryColour, BackColour, Bold, Italic, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, AlphaLevel, Encoding
+Style: Default,Arial,18,16777215,255,0,0,0,0,1,1,0,2,10,10,10,0,1
+
+[Events]
+Format: Marked, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
+Dialogue: Marked=0,0:00:00.20,0:00:00.90,Default,Alice,0,0,0,,First SSA cue
+Dialogue: Marked=1,0:00:01.00,0:00:01.80,Default,Bob,0,0,0,,Second, SSA cue

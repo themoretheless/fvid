@@ -20,7 +20,10 @@ pub(crate) use exact_edits::ExactVideoEdits;
 #[path = "packed.rs"]
 mod packed;
 pub use packed::{PackedPlanar, rgba_to_rgb_on_black};
-pub(crate) use packed::{av1_picture, avc_picture_with_vui, hevc_picture_with_vui, vp9_picture};
+pub(crate) use packed::{
+    av1_picture, avc_picture_with_vui_and_fallback, hevc_picture_with_vui,
+    hevc_picture_with_vui_and_fallback, vp9_picture,
+};
 
 pub use fvid_media::owned_video_timeline::PlaybackEdit;
 
@@ -1009,10 +1012,35 @@ impl Default for AvcColour {
     }
 }
 impl AvcColour {
+    pub fn from_matrix(matrix: u8, full: bool) -> Result<Self> {
+        let (kr, kb) = match matrix {
+            0 | 1 => (0.2126, 0.0722),
+            2 | 5 | 6 => (0.299, 0.114),
+            4 => (0.30, 0.11),
+            7 => (0.212, 0.087),
+            9 | 10 => (0.2627, 0.0593),
+            _ => {
+                return Err(invalid(
+                    "colour matrix is not implemented for playback",
+                ));
+            }
+        };
+        Ok(Self { kr, kb, full })
+    }
     pub fn from_hevc_vui(vui: Option<&crate::codec::hevc_vui::Vui>) -> Result<Self> {
+        Self::from_hevc_vui_with_fallback(vui, ColourDescription::default())
+    }
+    pub fn from_hevc_vui_with_fallback(
+        vui: Option<&crate::codec::hevc_vui::Vui>,
+        fallback: ColourDescription,
+    ) -> Result<Self> {
         let signal = vui.and_then(|v| v.signal.as_ref());
-        let full = signal.is_some_and(|s| s.full_range);
-        let matrix = signal.and_then(|s| s.colour).map_or(2, |c| c[2]);
+        let full = signal.is_some_and(|s| s.full_range) || fallback.full_range;
+        let matrix = signal
+            .and_then(|s| s.colour)
+            .map(|c| c[2])
+            .filter(|&m| m != 2)
+            .unwrap_or_else(|| if fallback.matrix != 0 { fallback.matrix } else { 2 });
         let (kr, kb) = match matrix {
             0 | 1 => (0.2126, 0.0722),
             2 | 5 | 6 => (0.299, 0.114),
@@ -1029,12 +1057,19 @@ impl AvcColour {
     }
     /// Matrix coefficients and range from the VUI; BT.601 when unspecified.
     pub fn from_vui(vui: Option<&crate::codec::avc::Vui>) -> Result<Self> {
+        Self::from_vui_with_fallback(vui, ColourDescription::default())
+    }
+    pub fn from_vui_with_fallback(
+        vui: Option<&crate::codec::avc::Vui>,
+        fallback: ColourDescription,
+    ) -> Result<Self> {
         let signal = vui.and_then(|v| v.video_signal);
-        let full = signal.is_some_and(|(_, full, _)| full);
+        let full = signal.is_some_and(|(_, full, _)| full) || fallback.full_range;
         let matrix = signal
             .and_then(|(_, _, colour)| colour)
             .map(|c| c[2])
-            .unwrap_or(2);
+            .filter(|&m| m != 2)
+            .unwrap_or_else(|| if fallback.matrix != 0 { fallback.matrix } else { 2 });
         let (kr, kb) = match matrix {
             0 | 1 => (0.2126, 0.0722),
             2 | 5 | 6 => (0.299, 0.114),

@@ -20,24 +20,32 @@ fn timestamp(value: &str) -> Result<u64> {
         .or_else(|| trimmed.split_once('.'))
         .ok_or_else(|| invalid("invalid SRT timestamp"))?;
     let fields: Vec<_> = clock.split(':').collect();
-    if fields.len() != 3
+    if !matches!(fields.len(), 2 | 3)
         || fields
             .iter()
             .any(|f| f.is_empty() || !f.bytes().all(|b| b.is_ascii_digit()))
-        || fields[1].parse::<u32>().map_or(true, |v| v >= 60)
-        || fields[2].parse::<u32>().map_or(true, |v| v >= 60)
         || fraction.len() != 3
         || !fraction.bytes().all(|b| b.is_ascii_digit())
     {
         return Err(invalid("invalid SRT timestamp"));
     }
-    let hours = fields[0]
-        .parse::<u64>()
-        .map_err(|_| invalid("SRT timestamp overflow"))?;
-    let minutes = fields[1]
+    let (hours, minutes_str, seconds_str) = if fields.len() == 3 {
+        let hours = fields[0]
+            .parse::<u64>()
+            .map_err(|_| invalid("SRT timestamp overflow"))?;
+        (hours, fields[1], fields[2])
+    } else {
+        (0u64, fields[0], fields[1])
+    };
+    if minutes_str.parse::<u32>().map_or(true, |v| v >= 60)
+        || seconds_str.parse::<u32>().map_or(true, |v| v >= 60)
+    {
+        return Err(invalid("invalid SRT timestamp"));
+    }
+    let minutes = minutes_str
         .parse::<u64>()
         .map_err(|_| invalid("invalid SRT timestamp"))?;
-    let seconds = fields[2]
+    let seconds = seconds_str
         .parse::<u64>()
         .map_err(|_| invalid("invalid SRT timestamp"))?;
     let millis = fraction
@@ -51,6 +59,21 @@ fn timestamp(value: &str) -> Result<u64> {
         .and_then(|n| n.checked_mul(1_000_000))
         .filter(|n| *n <= i64::MAX as u64)
         .ok_or_else(|| invalid("SRT timestamp overflow"))
+}
+
+fn webvtt_packet_body(text: &str) -> String {
+    let normalized = text.trim_matches('\n');
+    let lines: Vec<&str> = normalized.lines().collect();
+    if let Some(arrow_idx) = lines.iter().position(|line| line.contains("-->"))
+        && arrow_idx <= 1
+        && arrow_idx + 1 < lines.len()
+    {
+        return lines[arrow_idx + 1..].join("\n");
+    }
+    if lines.len() >= 3 && lines[1].trim().is_empty() {
+        return lines[2..].join("\n");
+    }
+    normalized.to_owned()
 }
 
 #[derive(Clone, Default)]
@@ -316,11 +339,8 @@ pub fn try_plan_with_controls(
     check_controls()?;
     let planned_dest = destination.unwrap_or_else(|| Path::new("planned-subtitle.mkv"));
     let (stream_index, source_codec, cues) = if !is_matroska_source(source)? {
-        if source
-            .extension()
-            .and_then(|s| s.to_str())
-            .is_some_and(|s| s.eq_ignore_ascii_case("ass"))
-        {
+        let ext = source.extension().and_then(|s| s.to_str());
+        if ext.is_some_and(|s| s.eq_ignore_ascii_case("ass") || s.eq_ignore_ascii_case("ssa")) {
             let Some(stats) = try_convert_ass_inner(
                 source,
                 planned_dest,
@@ -334,7 +354,12 @@ pub fn try_plan_with_controls(
             else {
                 return Ok(None);
             };
-            (0usize, "ass", stats.cues)
+            let codec = if ext.is_some_and(|s| s.eq_ignore_ascii_case("ssa")) {
+                "ssa"
+            } else {
+                "ass"
+            };
+            (0usize, codec, stats.cues)
         } else {
             let Some(stats) = try_convert_srt_inner(
                 source,
@@ -349,7 +374,12 @@ pub fn try_plan_with_controls(
             else {
                 return Ok(None);
             };
-            (0usize, "subrip", stats.cues)
+            let codec = if ext.is_some_and(|s| s.eq_ignore_ascii_case("vtt")) {
+                "webvtt"
+            } else {
+                "subrip"
+            };
+            (0usize, codec, stats.cues)
         }
     } else {
         let effective_packet_bytes =
@@ -402,6 +432,7 @@ pub fn try_plan_with_controls(
         let codec_name = match reader.tracks.get(idx).map(|t| t.codec.as_str()) {
             Some("S_TEXT/ASS" | "S_ASS") => "ass",
             Some("S_TEXT/SSA" | "S_SSA") => "ssa",
+            Some("S_TEXT/WEBVTT") => "webvtt",
             _ => "subrip",
         };
         let Some(stats) = try_convert_matroska_inner(
@@ -513,7 +544,7 @@ pub fn try_convert_with_controls(
         if source
             .extension()
             .and_then(|s| s.to_str())
-            .is_some_and(|s| s.eq_ignore_ascii_case("ass"))
+            .is_some_and(|s| s.eq_ignore_ascii_case("ass") || s.eq_ignore_ascii_case("ssa"))
         {
             try_convert_ass_inner(
                 source,
@@ -921,7 +952,11 @@ fn try_convert_matroska_inner(
             dry_run,
         );
     }
-    if !matches!(track.codec.as_str(), "S_TEXT/UTF8" | "S_TEXT/ASCII" | "S_UTF8") {
+    let is_webvtt = track.codec == "S_TEXT/WEBVTT";
+    if !matches!(
+        track.codec.as_str(),
+        "S_TEXT/UTF8" | "S_TEXT/ASCII" | "S_UTF8" | "S_TEXT/WEBVTT"
+    ) {
         return Ok(None);
     }
     if destination.extension().and_then(|s| s.to_str()) != Some("mkv") {
@@ -998,7 +1033,13 @@ fn try_convert_matroska_inner(
         let data = reader.read_packet(i)?;
         let text =
             std::str::from_utf8(&data).map_err(|_| invalid("Matroska SubRip is not UTF-8"))?;
-        let Some(text) = ass_text(&text.replace("\r\n", "\n")) else {
+        let normalized_packet = text.replace("\r\n", "\n").replace('\r', "\n");
+        let cue_source = if is_webvtt {
+            webvtt_packet_body(&normalized_packet)
+        } else {
+            normalized_packet
+        };
+        let Some(text) = ass_text(&cue_source) else {
             return Ok(None);
         };
         if text.is_empty() {
@@ -1154,14 +1195,34 @@ fn try_convert_ass_inner(
                 if key.trim().eq_ignore_ascii_case("Format") {
                     let declared: Vec<_> = value.split(',').map(|s| s.trim().to_ascii_lowercase()).collect();
                     let names: Vec<_> = canonical.split(',').collect();
-                    if declared.len()!=10 || declared.last().map(String::as_str)!=Some("text") { return Ok(None); }
-                    let mut order = [0;10];
-                    for (index,name) in names.iter().enumerate() {
-                        if declared.iter().filter(|s|s.as_str()==*name).count()!=1 { return Ok(None); }
-                        order[index] = declared.iter().position(|s|s==name).unwrap();
+                    if declared.len() != 10 || declared.last().map(String::as_str) != Some("text") {
+                        return Ok(None);
+                    }
+                    let mut order = [0; 10];
+                    for (index, name) in names.iter().enumerate() {
+                        if index == 0 {
+                            let matches_col0 = declared
+                                .iter()
+                                .filter(|s| matches!(s.as_str(), "layer" | "marked"))
+                                .count();
+                            if matches_col0 != 1 {
+                                return Ok(None);
+                            }
+                            order[0] = declared
+                                .iter()
+                                .position(|s| matches!(s.as_str(), "layer" | "marked"))
+                                .unwrap();
+                        } else {
+                            if declared.iter().filter(|s| s.as_str() == *name).count() != 1 {
+                                return Ok(None);
+                            }
+                            order[index] = declared.iter().position(|s| s == name).unwrap();
+                        }
                     }
                     format = Some(order);
-                    if order.iter().enumerate().any(|(i,at)|i!=*at) {
+                    if order.iter().enumerate().any(|(i, at)| i != *at)
+                        || declared[order[0]].as_str() != "layer"
+                    {
                         configuration.push_str("Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text\n");
                         continue;
                     }
@@ -1174,8 +1235,15 @@ fn try_convert_ass_inner(
                     if fields.len() != 10 {
                         return Err(invalid("invalid ASS dialogue fields"));
                     }
-                    let layer = fields[order[0]]
-                        .trim()
+                    let raw_layer = fields[order[0]].trim();
+                    let layer_str = if let Some((k, v)) = raw_layer.split_once('=')
+                        && k.trim().eq_ignore_ascii_case("marked")
+                    {
+                        v.trim()
+                    } else {
+                        raw_layer
+                    };
+                    let layer = layer_str
                         .parse::<i32>()
                         .map_err(|_| invalid("invalid ASS layer"))?;
                     let start = ass_time(fields[order[1]])?;
@@ -1251,12 +1319,12 @@ fn try_convert_srt_inner(
     check_controls: &impl Fn() -> Result<()>,
     dry_run: bool,
 ) -> Result<Option<SubtitleStats>> {
-    if source
+    let ext_lower = source
         .extension()
         .and_then(|s| s.to_str())
-        .map(|s| s.eq_ignore_ascii_case("srt"))
-        != Some(true)
-    {
+        .map(str::to_ascii_lowercase);
+    let is_vtt = ext_lower.as_deref() == Some("vtt");
+    if !matches!(ext_lower.as_deref(), Some("srt" | "vtt")) {
         return Ok(None);
     }
     if destination.extension().and_then(|s| s.to_str()) != Some("mkv") {
@@ -1318,17 +1386,72 @@ fn try_convert_srt_inner(
         .join("\n");
     let mut cues = Vec::new();
     let mut event_bytes = 0usize;
+    let mut saw_vtt_header = false;
     for block in text.split("\n\n").filter(|b| !b.trim().is_empty()) {
         check_controls()?;
+        let mut lines = block.trim_matches('\n').lines();
+        let first = lines.next().ok_or_else(|| invalid("empty SRT cue"))?;
+        let first_trimmed = first.trim();
+        if is_vtt && !saw_vtt_header {
+            saw_vtt_header = true;
+            if first_trimmed == "WEBVTT"
+                || first_trimmed.starts_with("WEBVTT ")
+                || first_trimmed.starts_with("WEBVTT\t")
+            {
+                let rest: Vec<_> = lines.collect();
+                let Some(arrow_pos) = rest.iter().position(|line| line.contains("-->")) else {
+                    continue;
+                };
+                let timing = if arrow_pos == 0 {
+                    rest[0]
+                } else {
+                    rest[arrow_pos]
+                };
+                let (start, end) = timing
+                    .split_once("-->")
+                    .ok_or_else(|| invalid("invalid SRT cue timing"))?;
+                let start = start.split_whitespace().last().unwrap_or("");
+                let end = end.split_whitespace().next().unwrap_or("");
+                let (start, end) = (timestamp(start)?, timestamp(end)?);
+                if end <= start {
+                    return Err(invalid("SRT cue must end after its start"));
+                }
+                let body = rest[arrow_pos + 1..].join("\n");
+                if body.is_empty() {
+                    return Err(invalid("empty SRT cue text"));
+                }
+                let Some(body) = ass_text(&body) else {
+                    return Ok(None);
+                };
+                let formatted_len = format!("{},0,Default,,0,0,0,,{body}", cues.len()).len();
+                if formatted_len > max_packet_bytes {
+                    return Err(invalid("subtitle packet exceeds packet byte limit"));
+                }
+                event_bytes = event_bytes.saturating_add(formatted_len);
+                cues.push((start, end, body));
+                continue;
+            }
+        }
+        if is_vtt
+            && (first_trimmed == "NOTE"
+                || first_trimmed.starts_with("NOTE ")
+                || first_trimmed.starts_with("NOTE\t")
+                || first_trimmed == "STYLE"
+                || first_trimmed.starts_with("STYLE ")
+                || first_trimmed.starts_with("STYLE\t")
+                || first_trimmed == "REGION"
+                || first_trimmed.starts_with("REGION ")
+                || first_trimmed.starts_with("REGION\t"))
+        {
+            continue;
+        }
         if max_packets.is_some_and(|limit| cues.len() as u64 >= limit) {
             return Err(invalid("packet work limit exceeded"));
         }
-        let mut lines = block.trim_matches('\n').lines();
-        let first = lines.next().ok_or_else(|| invalid("empty SRT cue"))?;
         let timing = if first.contains("-->") {
             first
         } else {
-            if first.trim().parse::<u64>().is_err() {
+            if !is_vtt && first_trimmed.parse::<u64>().is_err() {
                 return Err(invalid("invalid SRT cue counter"));
             }
             lines
@@ -1338,6 +1461,11 @@ fn try_convert_srt_inner(
         let (start, end) = timing
             .split_once("-->")
             .ok_or_else(|| invalid("invalid SRT cue timing"))?;
+        let start = if is_vtt {
+            start.split_whitespace().last().unwrap_or("")
+        } else {
+            start
+        };
         let end = end.split_whitespace().next().unwrap_or("");
         let (start, end) = (timestamp(start)?, timestamp(end)?);
         if end <= start {

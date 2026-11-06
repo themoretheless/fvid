@@ -1,0 +1,13 @@
+WEBVTT - Synthetic WebVTT
+
+NOTE header comment
+
+STYLE
+::cue { color: white; }
+
+cue-alpha
+00:00.250 --> 00:00.950 line:80%
+<b>First</b> WebVTT cue
+
+inline-beta 00:01.100 --> 00:01.900 align:start
+<i>Second</i> WebVTT cue

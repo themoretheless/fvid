@@ -38,8 +38,14 @@ fn track_entry_with_usability(
                 return Err(invalid("video metadata or codec delay supplied for ASS track"));
             }
             let header = std::str::from_utf8(configuration).map_err(|_| invalid("ASS header is not UTF-8"))?;
-            if !header.contains("[Script Info]") || !header.contains("[V4+ Styles]")
-                || !header.contains("ScriptType: v4.00+") || header.contains('\0') {
+            let has_styles = header.contains("[V4+ Styles]") || header.contains("[V4 Styles]");
+            let has_script_type =
+                header.contains("ScriptType: v4.00+") || header.contains("ScriptType: v4.00");
+            if !header.contains("[Script Info]")
+                || !has_styles
+                || !has_script_type
+                || header.contains('\0')
+            {
                 return Err(invalid("invalid ASS codec header"));
             }
             ("S_TEXT/ASS", configuration, 17, Vec::new())

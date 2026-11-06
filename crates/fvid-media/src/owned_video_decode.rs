@@ -353,8 +353,9 @@ pub(crate) fn decode_webm(
         let selected=transform.interval.is_none_or(|(from,_)|time>=i128::from(from)*1000);
         stats.width=u32::try_from(decoded.frame.width).map_err(|_|"video width overflow")?;
         stats.height=u32::try_from(decoded.frame.height).map_err(|_|"video height overflow")?;
-        let (full_range, frame_matrix, frame_primaries, frame_transfer) =
+        let (frame_full_range, frame_matrix, frame_primaries, frame_transfer) =
             frame_colour.unwrap_or((full_range, matrix, track_primaries, track_transfer));
+        let full_range = frame_full_range || full_range;
         let matrix = if matches!(frame_matrix, 0 | 2) {
             matrix
         } else {

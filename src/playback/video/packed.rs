@@ -471,11 +471,23 @@ pub(crate) fn avc_picture_with_vui(
     vui: Option<&crate::codec::avc::Vui>,
     budget: usize,
 ) -> Result<PackedPlanar> {
-    let colour = AvcColour::from_vui(vui)?;
+    avc_picture_with_vui_and_fallback(p, vui, crate::color::hdr::ColourDescription::default(), budget)
+}
+
+pub(crate) fn avc_picture_with_vui_and_fallback(
+    p: &crate::codec::avc_picture::IntraPicture,
+    vui: Option<&crate::codec::avc::Vui>,
+    fallback: crate::color::hdr::ColourDescription,
+    budget: usize,
+) -> Result<PackedPlanar> {
+    let colour = AvcColour::from_vui_with_fallback(vui, fallback)?;
     let identity = vui
         .and_then(|v| v.video_signal)
         .and_then(|(_, _, c)| c)
-        .is_some_and(|c| c[2] == 0);
+        .map(|c| c[2])
+        .filter(|&m| m != 2)
+        .or_else(|| (fallback.matrix != 0 && fallback.matrix != 2).then_some(fallback.matrix))
+        == Some(0);
     let format = p.chroma_format()?;
     if !identity {
         return PackedPlanar::from_picture(p, colour, budget);
@@ -513,9 +525,23 @@ pub(crate) fn hevc_picture_with_vui(
     format: u8,
     vui: Option<&crate::codec::hevc_vui::Vui>,
 ) -> Result<PackedPlanar> {
-    let colour = AvcColour::from_hevc_vui(vui)?;
-    let identity = vui.and_then(|v| v.signal.as_ref())
-        .and_then(|s| s.colour).is_some_and(|c| c[2] == 0);
+    hevc_picture_with_vui_and_fallback(p, format, vui, crate::color::hdr::ColourDescription::default())
+}
+
+pub(crate) fn hevc_picture_with_vui_and_fallback(
+    p: &crate::codec::hevc_picture::Picture,
+    format: u8,
+    vui: Option<&crate::codec::hevc_vui::Vui>,
+    fallback: crate::color::hdr::ColourDescription,
+) -> Result<PackedPlanar> {
+    let colour = AvcColour::from_hevc_vui_with_fallback(vui, fallback)?;
+    let identity = vui
+        .and_then(|v| v.signal.as_ref())
+        .and_then(|s| s.colour)
+        .map(|c| c[2])
+        .filter(|&m| m != 2)
+        .or_else(|| (fallback.matrix != 0 && fallback.matrix != 2).then_some(fallback.matrix))
+        == Some(0);
     if !identity { return hevc_picture(p, format, colour); }
     if format != 3 { return Err(invalid("HEVC identity RGB requires 4:4:4")); }
     // Reuse validated conformance cropping and exact component-depth lifting.
