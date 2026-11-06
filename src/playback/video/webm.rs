@@ -156,7 +156,7 @@ impl<R: Read + Seek> WebmVideoReader<R> {
         let number=demux.preferred_track_numbers(&candidates).first().copied()
             .ok_or_else(||invalid("WebM/Matroska has no supported AVC, HEVC, VP9, AV1 or FFV1 video track"))?;
         let track=demux.tracks.iter().find(|t|t.number==number).unwrap();
-        let mut default_duration =
+        let default_duration =
             (track.default_duration_ns > 0).then_some(track.default_duration_ns);
         let ffv1 = track.codec == "V_FFV1";
         let ffv1_size = if ffv1 {
@@ -204,6 +204,19 @@ impl<R: Read + Seek> WebmVideoReader<R> {
         };
         let (track, private) = (track.number, track.codec_private.clone());
         let rgb_budget = budget / 4;
+        // A lazy multi-cluster index stops after the opening cluster when
+        // Segment.Info.Duration is declared. If that first cluster holds only
+        // companion tracks or invisible decode-only pre-roll, walk forward
+        // until the first visible video packet is indexed so duration(),
+        // origin() and initial AV1 signal probing observe the track start.
+        if !(avc || hevc) {
+            while !demux
+                .packets
+                .iter()
+                .any(|p| p.track == track && !p.invisible)
+                && demux.scan_more().map_err(map_packet_limit)?
+            {}
+        }
         // An AV1 track's own statement, read before a single picture is
         // decoded: the configuration OBUs the muxer put in CodecPrivate and the
         // first packet of the track, which is where SVT-AV1 puts a mastering
@@ -212,7 +225,7 @@ impl<R: Read + Seek> WebmVideoReader<R> {
         // what it makes of them when it meets them again.
         let open_signal = av1.then(|| {
             let mut seed = crate::codec::av1_metadata::signal_from_bytes(&private);
-            if let Some(index) = demux.packets.iter().position(|p| p.track == track)
+            if let Some(index) = demux.packets.iter().position(|p| p.track == track && !p.invisible)
                 && let Ok(packet) = demux.read_packet(index) {
                     // The packet is the later of the two statements, so it wins
                     // and the CodecPrivate fills whatever it left out.
@@ -238,25 +251,6 @@ impl<R: Read + Seek> WebmVideoReader<R> {
                 future.push(minimum);
             }
             future.reverse();
-            if default_duration.is_none() {
-                let last = demux
-                    .packets
-                    .iter()
-                    .filter(|p| p.track == track && !p.invisible)
-                    .map(|p| p.pts_ns)
-                    .max();
-                if let Some(last) = last {
-                    let previous = demux
-                        .packets
-                        .iter()
-                        .filter(|p| p.track == track && !p.invisible && p.pts_ns < last)
-                        .map(|p| p.pts_ns)
-                        .max();
-                    default_duration = previous.and_then(|previous| {
-                        u64::try_from(i128::from(last) - i128::from(previous)).ok()
-                    });
-                }
-            }
             Some(future)
         } else {
             None

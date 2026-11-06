@@ -156,13 +156,25 @@ impl<R: Read + Seek> WebmSubtitleReader<R> {
                 continue;
             };
             // Simultaneous blocks share their next strictly later visible
-            // presentation boundary; an equal-PTS neighbor is not a terminal fallback.
-            let next = blocks[position + 1..]
-                .iter()
-                .find(|(next_pts, index)| {
-                    *next_pts > *pts && !self.demuxer.packets[*index].invisible
-                })
-                .and_then(|(pts, _)| presentation(*pts));
+            // non-empty presentation boundary; an equal-PTS neighbor or an
+            // empty clear block is not a terminal fallback.
+            let mut next = None;
+            for (next_pts, next_index) in &blocks[position + 1..] {
+                if *next_pts <= *pts || self.demuxer.packets[*next_index].invisible {
+                    continue;
+                }
+                let next_block = self.demuxer.read_packet(*next_index)?;
+                let next_block = String::from_utf8_lossy(&next_block);
+                let next_text = if script {
+                    subtitles::ass_block(&next_block).1
+                } else {
+                    subtitles::plain(next_block.trim())
+                };
+                if !next_text.is_empty() {
+                    next = presentation(*next_pts);
+                    break;
+                }
+            }
             let (start, end) = match stated {
                 Some(range) => range,
                 None => {

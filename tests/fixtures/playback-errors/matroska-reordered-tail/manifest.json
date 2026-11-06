@@ -1,0 +1,189 @@
+{
+  "provenance": "Authored short AVC, HEVC and PAFF Matroska clips without TrackEntry.DefaultDuration testing previous-explicit and declared PAFF tail durations. No private media, FFmpeg or network.",
+  "progressive": [
+    {
+      "family": "avc",
+      "name": "avc-previous-explicit",
+      "inferred": "avc-previous-explicit-inferred.mkv",
+      "declared": "avc-previous-explicit-declared.mkv",
+      "origin_ns": 0,
+      "expected_ns": 45000000,
+      "size": [
+        32,
+        16
+      ],
+      "intervals": [
+        [
+          0,
+          5000000
+        ],
+        [
+          20000000,
+          25000000
+        ],
+        [
+          40000000,
+          45000000
+        ]
+      ]
+    },
+    {
+      "family": "avc",
+      "name": "avc-offset-previous-explicit",
+      "inferred": "avc-offset-previous-explicit-inferred.mkv",
+      "declared": "avc-offset-previous-explicit-declared.mkv",
+      "origin_ns": 70000000,
+      "expected_ns": 45000000,
+      "size": [
+        32,
+        16
+      ],
+      "intervals": [
+        [
+          0,
+          5000000
+        ],
+        [
+          20000000,
+          25000000
+        ],
+        [
+          40000000,
+          45000000
+        ]
+      ]
+    },
+    {
+      "family": "hevc",
+      "name": "hevc-previous-explicit",
+      "inferred": "hevc-previous-explicit-inferred.mkv",
+      "declared": "hevc-previous-explicit-declared.mkv",
+      "origin_ns": 0,
+      "expected_ns": 45000000,
+      "size": [
+        64,
+        64
+      ],
+      "intervals": [
+        [
+          0,
+          5000000
+        ],
+        [
+          20000000,
+          25000000
+        ],
+        [
+          40000000,
+          45000000
+        ]
+      ]
+    },
+    {
+      "family": "hevc",
+      "name": "hevc-offset-previous-explicit",
+      "inferred": "hevc-offset-previous-explicit-inferred.mkv",
+      "declared": "hevc-offset-previous-explicit-declared.mkv",
+      "origin_ns": 70000000,
+      "expected_ns": 45000000,
+      "size": [
+        64,
+        64
+      ],
+      "intervals": [
+        [
+          0,
+          5000000
+        ],
+        [
+          20000000,
+          25000000
+        ],
+        [
+          40000000,
+          45000000
+        ]
+      ]
+    }
+  ],
+  "paff": [
+    {
+      "file": "paff-y8-c8-top-pcm-unequal-declared-tail.mkv",
+      "stem": "y8-c8-top-pcm",
+      "origin_ns": 0,
+      "expected_ns": 40000000,
+      "intervals": [
+        [
+          0,
+          20000000
+        ],
+        [
+          20000000,
+          40000000
+        ]
+      ]
+    },
+    {
+      "file": "paff-y8-c8-top-pcm-offset-unequal-declared-tail.mkv",
+      "stem": "y8-c8-top-pcm",
+      "origin_ns": 50000000,
+      "expected_ns": 40000000,
+      "intervals": [
+        [
+          0,
+          20000000
+        ],
+        [
+          20000000,
+          40000000
+        ]
+      ]
+    },
+    {
+      "file": "paff-y8-c14-bottom-pcm-unequal-declared-tail.mkv",
+      "stem": "y8-c14-bottom-pcm",
+      "origin_ns": 0,
+      "expected_ns": 40000000,
+      "intervals": [
+        [
+          0,
+          20000000
+        ],
+        [
+          20000000,
+          40000000
+        ]
+      ]
+    },
+    {
+      "file": "paff-y8-c14-bottom-pcm-offset-unequal-declared-tail.mkv",
+      "stem": "y8-c14-bottom-pcm",
+      "origin_ns": 50000000,
+      "expected_ns": 40000000,
+      "intervals": [
+        [
+          0,
+          20000000
+        ],
+        [
+          20000000,
+          40000000
+        ]
+      ]
+    }
+  ],
+  "sha256": {
+    "avc-offset-previous-explicit-declared.mkv": "07d405e5e0231cb98b3458851e5a539a51c0cbcd1d4ee3f96f646434e793e4f5",
+    "avc-offset-previous-explicit-inferred.mkv": "0768189b8f183c313d5c737d2e32f3125cfad2a9f1323700e3e4d8bb229cc3cf",
+    "avc-previous-explicit-declared.mkv": "3c2c423609074ed1a7116c39dbdf809a4c521eb7724212b91511a3d761dfbb0a",
+    "avc-previous-explicit-inferred.mkv": "a46d2504d112967d0b6b0b70b7b3912162d4dcb97c22f338be7d8f4583f193a3",
+    "hevc-offset-previous-explicit-declared.mkv": "49802fd72c7d0b6c59e6110d1d2afc8af30477b3df62359b5b674a91da3e10be",
+    "hevc-offset-previous-explicit-inferred.mkv": "c41dec8d2b8f4f475f0c8ed92c887884adba0a0982fcf6a6eafdecd38c28a4f2",
+    "hevc-previous-explicit-declared.mkv": "9a21ff7afab38130c5b40f466a581739bf501c3496d5986fb7f775873638506b",
+    "hevc-previous-explicit-inferred.mkv": "e0760a53b2f0075b3a87e2347463239e84ff4978570bbd001a2680ee157c155b",
+    "paff-y8-c14-bottom-pcm-offset-unequal-declared-tail.mkv": "af411b698c8e308ed4498c58c8c106522e847daa39b53948619c9679c9c53dfe",
+    "paff-y8-c14-bottom-pcm-unequal-declared-tail.mkv": "23c299c3657d64bbe8c3c4eb8144d025d77650cc257d489c8d4b8a72e22a776e",
+    "paff-y8-c8-top-pcm-offset-unequal-declared-tail.mkv": "f05efbf687d0e9d8f3ab5fea9afcec559bde180531c50eb585ba4b5077e4879e",
+    "paff-y8-c8-top-pcm-unequal-declared-tail.mkv": "eb9a877b49ad99a4d6860d4bfe998f70435df1b1ae9af371458c136b7aa93b4a"
+  }
+}

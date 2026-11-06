@@ -4066,4 +4066,15 @@ See `batch-565-validation.json`.
 
 FVID-0564 (`src/playback/subtitles/webm_subtitles.rs`, `tests/matroska_subtitle_equal_pts.rs`): Advance inferred Matroska subtitle endpoints to the first visible packet with a strictly later presentation timestamp (`*next_pts > *pts`), so simultaneous `SimpleBlock` subtitle cues without `BlockDuration` or `DefaultDuration` end at the next distinct subtitle group instead of falling back to `start + LAST_LINE` (`2s`) and lingering across video seeks. Verified across 12 synthetic Matroska witnesses (`UTF8`, `SSA`, `ASS` across `equal`, `terminal`, `explicit`, and `distinct` modes) and 26 related subtitle regression tests. See `batch-566-validation.json`.
 
+## Batch 567 — FVID-0565..0569: Matroska tail/cluster timing and subtitle text/endpoint fidelity
+
+- **FVID-0565** — Unfabricated Matroska AVC/HEVC/PAFF tail and field-pair duration inference (`src/playback/video/webm.rs`, `tests/matroska_reordered_tail.rs`).
+- **FVID-0566** — Walk lazy Matroska clusters to the first visible video packet on open (`src/playback/video/webm.rs`, `tests/matroska_lazy_cluster_origin.rs`).
+- **FVID-0567** — Skip empty and markup-only Matroska subtitle blocks when inferring untimed cue endpoints (`src/playback/subtitles/webm_subtitles.rs`, `tests/matroska_empty_subtitle_successor.rs`).
+- **FVID-0568** — Isolate HTML angle-bracket and ASS brace-override state machines in subtitle plain-text stripping (`src/subtitles.rs`, `tests/subtitle_nested_delimiters.rs`).
+- **FVID-0569** — Accept canonical SSA `Marked=N` layer fields in Matroska `S_TEXT/SSA` blocks (`src/subtitles.rs`, `tests/subtitle_nested_delimiters.rs`).
+
+See `batch-567-validation.json`.
+
+
 

@@ -1,8 +1,8 @@
 {
   "target": 1000,
   "counting_rule": "One independently confirmed problem or useful capability; fixture variants and baseline integration repairs are excluded. Only accepted entries count.",
-  "accepted_count": 564,
-  "next_id": "FVID-0565",
+  "accepted_count": 569,
+  "next_id": "FVID-0570",
   "entries": [
     {
       "id": "FVID-0001",
@@ -6395,6 +6395,61 @@
       "result": "Advance inferred Matroska subtitle endpoints to the first visible packet with a strictly later presentation timestamp (*next_pts > *pts), preserving explicit BlockDuration, terminal LAST_LINE fallback, and UTF8/SSA/ASS seek alignment across 12 synthetic Matroska witnesses.",
       "status": "accepted",
       "validation": "batch-566-validation.json"
+    },
+    {
+      "id": "FVID-0565",
+      "batch": 567,
+      "title": "Unfabricated Matroska AVC/HEVC/PAFF tail and field-pair duration inference",
+      "source": "src/playback/video/webm.rs",
+      "regression": "tests/matroska_reordered_tail.rs",
+      "before": "WebmVideoReader::open_with_hardware fabricated default_duration from the final PTS delta (last_pts - previous_pts) for AVC and HEVC tracks without TrackEntry.DefaultDuration, causing presentation_tail_duration to ignore the preceding visible packet's explicit BlockDuration cap and causing untimed PAFF field pairs to double the last inter-field gap instead of using Segment.Info.Duration or the previous frame period.",
+      "result": "Keep default_duration strictly bound to declared TrackEntry.DefaultDuration (> 0), so progressive AVC/HEVC streams cap unknown tail duration by the previous explicit BlockDuration and untimed PAFF field pairs use Segment.Info.Duration - current.pts or the previous frame period.",
+      "status": "accepted",
+      "validation": "batch-567-validation.json"
+    },
+    {
+      "id": "FVID-0566",
+      "batch": 567,
+      "title": "Walk lazy Matroska clusters to the first visible video packet on open",
+      "source": "src/playback/video/webm.rs",
+      "regression": "tests/matroska_lazy_cluster_origin.rs",
+      "before": "When Segment.Info.Duration was declared on a multi-cluster Matroska/WebM file whose opening cluster contained only companion subtitle packets or invisible decode-only VP9/AV1 pre-roll, WebmVideoReader::open_with_hardware stopped after Cluster 0 and probed the first raw packet regardless of visibility, returning None for duration(), 0 for origin(), empty cache_packets(), and missing AV1 in-band HDR metadata before the first frame.",
+      "result": "Walk clusters on open until the first visible video packet is indexed, and probe open_signal from the first visible AV1 packet so pre-decode duration(), origin(), cache_packets(), and bitstream_hdr() resolve accurately across 8 VP9/AV1 multi-cluster witnesses.",
+      "status": "accepted",
+      "validation": "batch-567-validation.json"
+    },
+    {
+      "id": "FVID-0567",
+      "batch": 567,
+      "title": "Skip empty and markup-only Matroska subtitle blocks when inferring untimed cue endpoints",
+      "source": "src/playback/subtitles/webm_subtitles.rs",
+      "regression": "tests/matroska_empty_subtitle_successor.rs",
+      "before": "WebmSubtitleReader::cues selected the next visible subtitle packet with a strictly later PTS as the endpoint of an untimed SimpleBlock cue even when that successor decoded to empty text after stripping whitespace, HTML tags or ASS override blocks, prematurely cutting off the active cue.",
+      "result": "Advance untimed Matroska subtitle endpoint inference to the first strictly later visible block whose decoded text is non-empty, verified across 12 UTF8/SSA/ASS synthetic witnesses and video seek boundaries.",
+      "status": "accepted",
+      "validation": "batch-567-validation.json"
+    },
+    {
+      "id": "FVID-0568",
+      "batch": 567,
+      "title": "Isolate HTML angle-bracket and ASS brace-override state machines in subtitle plain-text stripping",
+      "source": "src/subtitles.rs",
+      "regression": "tests/subtitle_nested_delimiters.rs",
+      "before": "subtitles::plain toggled tag and override_block flags unconditionally on every '<', '>', '{', and '}', so an ASS override block containing '<' (e.g. {\\fnArial<Bold}) left tag = true after '}' and an HTML attribute containing '{' (e.g. <span style=\"{color:red\">) left override_block = true after '>', swallowing the rest of the subtitle cue.",
+      "result": "Ignore '<' and '>' while inside an ASS '{...}' override block and ignore '{' and '}' while inside an HTML '<...>' tag, preserving visible cue text across Matroska, MP4 tx3g, and sidecar subtitles.",
+      "status": "accepted",
+      "validation": "batch-567-validation.json"
+    },
+    {
+      "id": "FVID-0569",
+      "batch": 567,
+      "title": "Accept canonical SSA Marked=N layer fields in Matroska S_TEXT/SSA blocks",
+      "source": "src/subtitles.rs",
+      "regression": "tests/subtitle_nested_delimiters.rs",
+      "before": "subtitles::ass_block required field 1 of a 9-field Matroska S_TEXT/SSA or S_TEXT/ASS packet to contain only ASCII digits, so canonical SSAv4 packets carrying Marked=0 in field 1 (e.g. 0,Marked=0,Default,NTP,0000,0000,0000,!Effect,Text) failed fields_form and leaked the entire raw comma-separated metadata prefix onto the screen.",
+      "result": "Accept Marked=<digits> (case-insensitively) alongside empty or numeric Layer fields in 9-field Matroska SSA/ASS packets and return only the cleaned ninth text field.",
+      "status": "accepted",
+      "validation": "batch-567-validation.json"
     }
   ]
 }

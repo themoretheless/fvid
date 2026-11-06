@@ -1,0 +1,397 @@
+{
+  "provenance": "Pure authored 16x16 three-color VP9 with invented UTF8/SSA/ASS text. Empty, whitespace-only and markup-only subtitle blocks following untimed SimpleBlock cues, plus visible controls. No private media, FFmpeg or network.",
+  "cases": [
+    {
+      "file": "utf8-empty-middle.mkv",
+      "codec": "utf8",
+      "mode": "empty-middle",
+      "pts_ns": [
+        0,
+        30000000,
+        80000000
+      ],
+      "packet_durations_ns": [
+        null,
+        null,
+        40000000
+      ],
+      "cues": [
+        {
+          "text": "First caption",
+          "start_ns": 0,
+          "end_ns": 80000000
+        },
+        {
+          "text": "Later caption",
+          "start_ns": 80000000,
+          "end_ns": 120000000
+        }
+      ]
+    },
+    {
+      "file": "utf8-markup-middle.mkv",
+      "codec": "utf8",
+      "mode": "markup-middle",
+      "pts_ns": [
+        0,
+        30000000,
+        80000000
+      ],
+      "packet_durations_ns": [
+        null,
+        null,
+        40000000
+      ],
+      "cues": [
+        {
+          "text": "First caption",
+          "start_ns": 0,
+          "end_ns": 80000000
+        },
+        {
+          "text": "Later caption",
+          "start_ns": 80000000,
+          "end_ns": 120000000
+        }
+      ]
+    },
+    {
+      "file": "utf8-empty-tail.mkv",
+      "codec": "utf8",
+      "mode": "empty-tail",
+      "pts_ns": [
+        0,
+        40000000,
+        70000000
+      ],
+      "packet_durations_ns": [
+        40000000,
+        null,
+        null
+      ],
+      "cues": [
+        {
+          "text": "First caption",
+          "start_ns": 0,
+          "end_ns": 40000000
+        },
+        {
+          "text": "Second caption",
+          "start_ns": 40000000,
+          "end_ns": 2040000000
+        }
+      ]
+    },
+    {
+      "file": "utf8-visible-control.mkv",
+      "codec": "utf8",
+      "mode": "visible-control",
+      "pts_ns": [
+        0,
+        30000000,
+        80000000
+      ],
+      "packet_durations_ns": [
+        null,
+        null,
+        40000000
+      ],
+      "cues": [
+        {
+          "text": "First caption",
+          "start_ns": 0,
+          "end_ns": 30000000
+        },
+        {
+          "text": "Middle caption",
+          "start_ns": 30000000,
+          "end_ns": 80000000
+        },
+        {
+          "text": "Later caption",
+          "start_ns": 80000000,
+          "end_ns": 120000000
+        }
+      ]
+    },
+    {
+      "file": "ssa-empty-middle.mkv",
+      "codec": "ssa",
+      "mode": "empty-middle",
+      "pts_ns": [
+        0,
+        30000000,
+        80000000
+      ],
+      "packet_durations_ns": [
+        null,
+        null,
+        40000000
+      ],
+      "cues": [
+        {
+          "text": "First caption",
+          "start_ns": 0,
+          "end_ns": 80000000
+        },
+        {
+          "text": "Later caption",
+          "start_ns": 80000000,
+          "end_ns": 120000000
+        }
+      ]
+    },
+    {
+      "file": "ssa-markup-middle.mkv",
+      "codec": "ssa",
+      "mode": "markup-middle",
+      "pts_ns": [
+        0,
+        30000000,
+        80000000
+      ],
+      "packet_durations_ns": [
+        null,
+        null,
+        40000000
+      ],
+      "cues": [
+        {
+          "text": "First caption",
+          "start_ns": 0,
+          "end_ns": 80000000
+        },
+        {
+          "text": "Later caption",
+          "start_ns": 80000000,
+          "end_ns": 120000000
+        }
+      ]
+    },
+    {
+      "file": "ssa-empty-tail.mkv",
+      "codec": "ssa",
+      "mode": "empty-tail",
+      "pts_ns": [
+        0,
+        40000000,
+        70000000
+      ],
+      "packet_durations_ns": [
+        40000000,
+        null,
+        null
+      ],
+      "cues": [
+        {
+          "text": "First caption",
+          "start_ns": 0,
+          "end_ns": 40000000
+        },
+        {
+          "text": "Second caption",
+          "start_ns": 40000000,
+          "end_ns": 2040000000
+        }
+      ]
+    },
+    {
+      "file": "ssa-visible-control.mkv",
+      "codec": "ssa",
+      "mode": "visible-control",
+      "pts_ns": [
+        0,
+        30000000,
+        80000000
+      ],
+      "packet_durations_ns": [
+        null,
+        null,
+        40000000
+      ],
+      "cues": [
+        {
+          "text": "First caption",
+          "start_ns": 0,
+          "end_ns": 30000000
+        },
+        {
+          "text": "Middle caption",
+          "start_ns": 30000000,
+          "end_ns": 80000000
+        },
+        {
+          "text": "Later caption",
+          "start_ns": 80000000,
+          "end_ns": 120000000
+        }
+      ]
+    },
+    {
+      "file": "ass-empty-middle.mkv",
+      "codec": "ass",
+      "mode": "empty-middle",
+      "pts_ns": [
+        0,
+        30000000,
+        80000000
+      ],
+      "packet_durations_ns": [
+        null,
+        null,
+        40000000
+      ],
+      "cues": [
+        {
+          "text": "First caption",
+          "start_ns": 0,
+          "end_ns": 80000000
+        },
+        {
+          "text": "Later caption",
+          "start_ns": 80000000,
+          "end_ns": 120000000
+        }
+      ]
+    },
+    {
+      "file": "ass-markup-middle.mkv",
+      "codec": "ass",
+      "mode": "markup-middle",
+      "pts_ns": [
+        0,
+        30000000,
+        80000000
+      ],
+      "packet_durations_ns": [
+        null,
+        null,
+        40000000
+      ],
+      "cues": [
+        {
+          "text": "First caption",
+          "start_ns": 0,
+          "end_ns": 80000000
+        },
+        {
+          "text": "Later caption",
+          "start_ns": 80000000,
+          "end_ns": 120000000
+        }
+      ]
+    },
+    {
+      "file": "ass-empty-tail.mkv",
+      "codec": "ass",
+      "mode": "empty-tail",
+      "pts_ns": [
+        0,
+        40000000,
+        70000000
+      ],
+      "packet_durations_ns": [
+        40000000,
+        null,
+        null
+      ],
+      "cues": [
+        {
+          "text": "First caption",
+          "start_ns": 0,
+          "end_ns": 40000000
+        },
+        {
+          "text": "Second caption",
+          "start_ns": 40000000,
+          "end_ns": 2040000000
+        }
+      ]
+    },
+    {
+      "file": "ass-visible-control.mkv",
+      "codec": "ass",
+      "mode": "visible-control",
+      "pts_ns": [
+        0,
+        30000000,
+        80000000
+      ],
+      "packet_durations_ns": [
+        null,
+        null,
+        40000000
+      ],
+      "cues": [
+        {
+          "text": "First caption",
+          "start_ns": 0,
+          "end_ns": 30000000
+        },
+        {
+          "text": "Middle caption",
+          "start_ns": 30000000,
+          "end_ns": 80000000
+        },
+        {
+          "text": "Later caption",
+          "start_ns": 80000000,
+          "end_ns": 120000000
+        }
+      ]
+    }
+  ],
+  "sha256": {
+    "frame-0.packet": "d586e4311a14b4eeebf2c61fadc917a6dc99aeccb87ceffb1e5166c318e67346",
+    "frame-1.packet": "81a6bc19b3f2ed2d203a852e97b487c13712d0a3d9730d8cadf902a5cbda05c4",
+    "frame-2.packet": "338d4038d521a4e55109198d490b0f8ac78bbb13d41591848bbe2ac879988144",
+    "utf8-empty-middle-0.packet": "657577ec140ab081cc64fbd30b81f41f17b2694a3b772d7b16e3ed4665b6efd1",
+    "utf8-empty-middle-1.packet": "0aad7da77d2ed59c396c99a74e49f3a4524dcdbcb5163251b1433d640247aeb4",
+    "utf8-empty-middle-2.packet": "a1114838f5fec7e2ca5693ac7e8061315cd59e376e1b86752626263120d92eb9",
+    "utf8-empty-middle.mkv": "67a5db655f26acf71c13b4f9ee6f784b1b77093a8a4811c966ad93e6a70b3805",
+    "utf8-markup-middle-0.packet": "657577ec140ab081cc64fbd30b81f41f17b2694a3b772d7b16e3ed4665b6efd1",
+    "utf8-markup-middle-1.packet": "663ddd7a0a8adf83c191605743fa3a973fc2677385fd902292b30113f258e37e",
+    "utf8-markup-middle-2.packet": "a1114838f5fec7e2ca5693ac7e8061315cd59e376e1b86752626263120d92eb9",
+    "utf8-markup-middle.mkv": "e43014fcf8a95d5d3b642ed7b034b2ecc2ce1c1f9405376e28735f1011c1bc7c",
+    "utf8-empty-tail-0.packet": "657577ec140ab081cc64fbd30b81f41f17b2694a3b772d7b16e3ed4665b6efd1",
+    "utf8-empty-tail-1.packet": "f4f08d492f0a41648194003c02cf04740a4763700da48c35b96846d7a298cfcd",
+    "utf8-empty-tail-2.packet": "0aad7da77d2ed59c396c99a74e49f3a4524dcdbcb5163251b1433d640247aeb4",
+    "utf8-empty-tail.mkv": "6f8c9af22d772cc8df88f19171d2ea398a06a693e7cc344e84688fc3e3dc349b",
+    "utf8-visible-control-0.packet": "657577ec140ab081cc64fbd30b81f41f17b2694a3b772d7b16e3ed4665b6efd1",
+    "utf8-visible-control-1.packet": "685d1cf3d81074847ebeb69a00092eecbf4b955ef920aa998ce14edaad27fd76",
+    "utf8-visible-control-2.packet": "a1114838f5fec7e2ca5693ac7e8061315cd59e376e1b86752626263120d92eb9",
+    "utf8-visible-control.mkv": "e4661ef2e7674a084ceb55b58726fda8678cee76e05cd56efc58c7c4f587a97b",
+    "ssa-empty-middle-0.packet": "42b188507f571fc4989be6ca605b91cda9624b5f8f1a13a583b889caf36947be",
+    "ssa-empty-middle-1.packet": "f5d80b6fdc808b93d22cfc6fc054eeec358dcea9dd86104c9f850835156a22eb",
+    "ssa-empty-middle-2.packet": "02f0d697d0e71dafd369b68502d41eae4b73b4fd7688fc08d8e1f8b9b4c47886",
+    "ssa-empty-middle.mkv": "13cb0164df0e7083c80ae116e67c450fefaf563901b255ca6d972c13b9b0908e",
+    "ssa-markup-middle-0.packet": "42b188507f571fc4989be6ca605b91cda9624b5f8f1a13a583b889caf36947be",
+    "ssa-markup-middle-1.packet": "a1899adc17f38122bb0da1c8bbd3c96aa88c37997876411a4e277810ed5ca1c8",
+    "ssa-markup-middle-2.packet": "02f0d697d0e71dafd369b68502d41eae4b73b4fd7688fc08d8e1f8b9b4c47886",
+    "ssa-markup-middle.mkv": "26b720249194ddec394fc248f1719b7147cb56f722cb457bfe5a9bf7ecc536c5",
+    "ssa-empty-tail-0.packet": "42b188507f571fc4989be6ca605b91cda9624b5f8f1a13a583b889caf36947be",
+    "ssa-empty-tail-1.packet": "92ae09a8b4980c5c967efb9596b76d18bd9655b25fbf54d612a31aca80ea5bc5",
+    "ssa-empty-tail-2.packet": "3aff34314ee12910be36f2febdd66874da54ad02edeba8be0559c657e909db59",
+    "ssa-empty-tail.mkv": "719cc6618c82fd8f159ce8276e8baa8fb56a075d6cb6045209a27e967a8d127d",
+    "ssa-visible-control-0.packet": "42b188507f571fc4989be6ca605b91cda9624b5f8f1a13a583b889caf36947be",
+    "ssa-visible-control-1.packet": "0f44e95448162763b8baffc9333521cde703f177b99d10624f9a13c1fb7168dd",
+    "ssa-visible-control-2.packet": "02f0d697d0e71dafd369b68502d41eae4b73b4fd7688fc08d8e1f8b9b4c47886",
+    "ssa-visible-control.mkv": "deef90a4e57b71d749c53683ddaf2eb9126e04a8b1e1be489c2c42c19da1dfce",
+    "ass-empty-middle-0.packet": "de2595972a33d887e82fb736437d6f0a082fe8c7aba99c7ac4863d99cef1de3b",
+    "ass-empty-middle-1.packet": "a62680b6d840c6ee8b314ef861dae2bd4d136e817f79527837eecedb56a978fa",
+    "ass-empty-middle-2.packet": "b28407da2eb7aad972f0f4c91c9fa20bb6b1b4aa78037699c6697848c108bd79",
+    "ass-empty-middle.mkv": "ba0569917edde5e69a54135e1c3217a14adcd8b982a754fa22ffe2387331ed10",
+    "ass-markup-middle-0.packet": "de2595972a33d887e82fb736437d6f0a082fe8c7aba99c7ac4863d99cef1de3b",
+    "ass-markup-middle-1.packet": "a8a1222f0834b62b84bc6e6bcc6361a4b7ae3fa7d6415a8dc488b613d58b8246",
+    "ass-markup-middle-2.packet": "b28407da2eb7aad972f0f4c91c9fa20bb6b1b4aa78037699c6697848c108bd79",
+    "ass-markup-middle.mkv": "71cf37954381ef1e90d0e2c6ab242cbcfba75c0baa6466ce26299d2d3ddfb0fa",
+    "ass-empty-tail-0.packet": "de2595972a33d887e82fb736437d6f0a082fe8c7aba99c7ac4863d99cef1de3b",
+    "ass-empty-tail-1.packet": "807bee4d39ccde010f7011a06db4bb4ff9edf8a2dfa06d9497cc8631242597fb",
+    "ass-empty-tail-2.packet": "adddc91edcccea5e0f2b1bffba03f5fd10a226b584f74da0bf12bb1d8964cd13",
+    "ass-empty-tail.mkv": "624d894c2346ca68a76958b488a6a0a198465ef01725ade92d6dce162470d70b",
+    "ass-visible-control-0.packet": "de2595972a33d887e82fb736437d6f0a082fe8c7aba99c7ac4863d99cef1de3b",
+    "ass-visible-control-1.packet": "8cb0e1e2bc350ee66201df1cdabbc1d4aea82d1f17cff5e600f79a304451b4cd",
+    "ass-visible-control-2.packet": "b28407da2eb7aad972f0f4c91c9fa20bb6b1b4aa78037699c6697848c108bd79",
+    "ass-visible-control.mkv": "efbdf7fe73764aeaae91fab39f96797822facd1d52a02298b5bc92bbdb8affab"
+  }
+}

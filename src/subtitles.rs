@@ -94,13 +94,20 @@ pub(crate) fn plain(text: &str) -> String {
     let mut tag = false;
     let mut override_block = false;
     for ch in text.chars() {
-        match ch {
-            '{' => override_block = true,
-            '}' => override_block = false,
-            '<' => tag = true,
-            '>' => tag = false,
-            _ if tag || override_block => {}
-            _ => out.push(ch),
+        if override_block {
+            if ch == '}' {
+                override_block = false;
+            }
+        } else if tag {
+            if ch == '>' {
+                tag = false;
+            }
+        } else {
+            match ch {
+                '{' => override_block = true,
+                '<' => tag = true,
+                _ => out.push(ch),
+            }
         }
     }
     out.replace("\\N", "\n")
@@ -244,12 +251,21 @@ pub fn ass_block(block: &str) -> (Option<(Duration, Duration)>, String) {
         );
     }
     // Mapped events begin with a numeric ReadOrder and an ASS Layer. SSA
-    // uses the same field layout but leaves Layer empty.
+    // uses the same field layout but leaves Layer empty or writes `Marked=0`.
     let nine = fields.splitn(9, ',').collect::<Vec<_>>();
+    let layer = nine.get(1).map(|s| s.trim()).unwrap_or_default();
+    let layer_ok = layer.bytes().all(|byte| byte.is_ascii_digit())
+        || layer
+            .split_once('=')
+            .is_some_and(|(key, val)| {
+                key.trim().eq_ignore_ascii_case("marked")
+                    && !val.trim().is_empty()
+                    && val.trim().bytes().all(|byte| byte.is_ascii_digit())
+            });
     let fields_form = nine.len() == 9
         && !nine[0].is_empty()
         && nine[0].bytes().all(|byte| byte.is_ascii_digit())
-        && nine[1].bytes().all(|byte| byte.is_ascii_digit());
+        && layer_ok;
     if fields_form {
         return (None, plain(nine[8].trim()));
     }

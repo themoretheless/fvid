@@ -1,0 +1,64 @@
+{
+  "provenance": "Pure authored 16x16 three-color VP9 with Matroska S_TEXT/SSA Marked=0 blocks, S_TEXT/ASS and S_TEXT/UTF8 blocks, and MP4 tx3g samples carrying cross-nested angle/brace delimiters inside ASS override blocks and HTML tags. No private media, FFmpeg or network.",
+  "mkv_cases": [
+    {
+      "file": "ssa-marked0.mkv",
+      "codec": "SSA",
+      "texts": [
+        "First, with commas",
+        "Middle\nnext",
+        "Last \u041f\u0440\u0438\u0432\u0435\u0442"
+      ]
+    },
+    {
+      "file": "ass-nested-delimiters.mkv",
+      "codec": "ASS",
+      "texts": [
+        "First line",
+        "Middle\nnext",
+        "Last line"
+      ]
+    },
+    {
+      "file": "utf8-nested-delimiters.mkv",
+      "codec": "UTF8",
+      "texts": [
+        "First line",
+        "Middle\nnext",
+        "Last line"
+      ]
+    }
+  ],
+  "mp4_case": {
+    "file": "tx3g-nested-delimiters.mp4",
+    "texts": [
+      "First line",
+      "Middle\nnext",
+      "Last line"
+    ]
+  },
+  "sha256": {
+    "frame-0.packet": "d586e4311a14b4eeebf2c61fadc917a6dc99aeccb87ceffb1e5166c318e67346",
+    "frame-1.packet": "81a6bc19b3f2ed2d203a852e97b487c13712d0a3d9730d8cadf902a5cbda05c4",
+    "frame-2.packet": "338d4038d521a4e55109198d490b0f8ac78bbb13d41591848bbe2ac879988144",
+    "frame-0.yuv16": "b4cc94ff03bd17b32107a79a64ba427cd43b6e49d209bb4d29190f3deb737a11",
+    "frame-1.yuv16": "31d05f629132273f660622387ef2865866de6688c0969265e891ad9d4c936237",
+    "frame-2.yuv16": "2f59155bee83baf25a0d39c17290257f055569e5b1d77ca8b866b1a4b2cee6f7",
+    "ssa-marked0.mkv-0.packet": "10967853437f6b490a76152668481c5d6c152befb746bd9c697f59f0ec095556",
+    "ssa-marked0.mkv-1.packet": "8e1fa70082e6cc690f63a240a9f7bd432c0b905b9bb7a8944fc4731886d4b93d",
+    "ssa-marked0.mkv-2.packet": "4dc9ca65d677d1153170ea5ee52b00be4bcc8d167d5176e4be00e0a72f9bd046",
+    "ssa-marked0.mkv": "c40fbc4ab22b846d918e29b9742c20cc8fd0c9144becf861fb9315d16ad25ead",
+    "ass-nested-delimiters.mkv-0.packet": "994dc77fcf06839801194e7fd0b35b73feb8c8ef15897d0b77644c4678c0b6c5",
+    "ass-nested-delimiters.mkv-1.packet": "39c9acb97d9201e25e5ee85892cd33c4e4c014b9c5e95366cdc163e6395f1f60",
+    "ass-nested-delimiters.mkv-2.packet": "fdcae40a41860ac75cd16ffb33dfa3ac25d3f16d4a525f9f10e8d6d373b2eab6",
+    "ass-nested-delimiters.mkv": "bdf6df4ab667d5be8a4f882a01fa88226c24df5d11300dd045f83627e76c3514",
+    "utf8-nested-delimiters.mkv-0.packet": "ee4188a2f921c523b2963b389b6fb6f82f26ece603f9b4c0b1623a8da265456c",
+    "utf8-nested-delimiters.mkv-1.packet": "45265d3ad108170af56b7c345f34099c9061bc483b7c9e4cf201acf0afbe88ae",
+    "utf8-nested-delimiters.mkv-2.packet": "bace0f1453aa8bf613f01df017c5199f235ee94896f4fdeab5ea2c22e9ed433e",
+    "utf8-nested-delimiters.mkv": "33416091a9cb250ebed5f3faa6345b90ee50e92984790422ffcaf9869a0b19b9",
+    "tx3g-nested-delimiters.mp4": "04a3e566c9b4c73590d1812f48ceab4fd94528306ec6d887b6bedc81a763d7cc",
+    "tx3g-nested-delimiters.mp4-0.packet": "7b1c557a218d66e27d7731d80a59e0877ee60e505ed51abe4cd682c097a105dc",
+    "tx3g-nested-delimiters.mp4-1.packet": "377c32f0bd13e3671ae2b14253549fd1947bf4aa9ad01a049edf6f49019ef0d5",
+    "tx3g-nested-delimiters.mp4-2.packet": "1c2809e910c0ca544688f1d7cadd92ada63b4a34a2850e05fa1948686279eca8"
+  }
+}

@@ -1,0 +1,315 @@
+{
+  "provenance": "Authored multi-cluster VP9 and AV1 Matroska clips with declared Duration where cluster 0 holds only subtitle or invisible pre-roll packets. No private media, FFmpeg or network.",
+  "cases": [
+    {
+      "file": "vp9-subtitle-origin-0ms.mkv",
+      "codec": "VP9",
+      "preamble": "subtitle",
+      "origin_ns": 0,
+      "expected_duration_ns": 60000000,
+      "intervals": [
+        [
+          0,
+          20000000
+        ],
+        [
+          20000000,
+          40000000
+        ],
+        [
+          40000000,
+          60000000
+        ]
+      ],
+      "sizes": [
+        [
+          16,
+          16
+        ],
+        [
+          32,
+          16
+        ],
+        [
+          16,
+          32
+        ]
+      ],
+      "initial_cll": null
+    },
+    {
+      "file": "vp9-subtitle-origin-60ms.mkv",
+      "codec": "VP9",
+      "preamble": "subtitle",
+      "origin_ns": 60000000,
+      "expected_duration_ns": 60000000,
+      "intervals": [
+        [
+          0,
+          20000000
+        ],
+        [
+          20000000,
+          40000000
+        ],
+        [
+          40000000,
+          60000000
+        ]
+      ],
+      "sizes": [
+        [
+          16,
+          16
+        ],
+        [
+          32,
+          16
+        ],
+        [
+          16,
+          32
+        ]
+      ],
+      "initial_cll": null
+    },
+    {
+      "file": "vp9-invisible-origin-0ms.mkv",
+      "codec": "VP9",
+      "preamble": "invisible",
+      "origin_ns": 0,
+      "expected_duration_ns": 60000000,
+      "intervals": [
+        [
+          0,
+          20000000
+        ],
+        [
+          20000000,
+          40000000
+        ],
+        [
+          40000000,
+          60000000
+        ]
+      ],
+      "sizes": [
+        [
+          16,
+          16
+        ],
+        [
+          32,
+          16
+        ],
+        [
+          16,
+          32
+        ]
+      ],
+      "initial_cll": null
+    },
+    {
+      "file": "vp9-invisible-origin-60ms.mkv",
+      "codec": "VP9",
+      "preamble": "invisible",
+      "origin_ns": 60000000,
+      "expected_duration_ns": 60000000,
+      "intervals": [
+        [
+          0,
+          20000000
+        ],
+        [
+          20000000,
+          40000000
+        ],
+        [
+          40000000,
+          60000000
+        ]
+      ],
+      "sizes": [
+        [
+          16,
+          16
+        ],
+        [
+          32,
+          16
+        ],
+        [
+          16,
+          32
+        ]
+      ],
+      "initial_cll": null
+    },
+    {
+      "file": "av1-subtitle-origin-0ms.mkv",
+      "codec": "AV1",
+      "preamble": "subtitle",
+      "origin_ns": 0,
+      "expected_duration_ns": 60000000,
+      "intervals": [
+        [
+          0,
+          20000000
+        ],
+        [
+          20000000,
+          40000000
+        ],
+        [
+          40000000,
+          60000000
+        ]
+      ],
+      "sizes": [
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ]
+      ],
+      "initial_cll": [
+        1000.0,
+        400.0
+      ]
+    },
+    {
+      "file": "av1-subtitle-origin-60ms.mkv",
+      "codec": "AV1",
+      "preamble": "subtitle",
+      "origin_ns": 60000000,
+      "expected_duration_ns": 60000000,
+      "intervals": [
+        [
+          0,
+          20000000
+        ],
+        [
+          20000000,
+          40000000
+        ],
+        [
+          40000000,
+          60000000
+        ]
+      ],
+      "sizes": [
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ]
+      ],
+      "initial_cll": [
+        1000.0,
+        400.0
+      ]
+    },
+    {
+      "file": "av1-invisible-origin-0ms.mkv",
+      "codec": "AV1",
+      "preamble": "invisible",
+      "origin_ns": 0,
+      "expected_duration_ns": 60000000,
+      "intervals": [
+        [
+          0,
+          20000000
+        ],
+        [
+          20000000,
+          40000000
+        ],
+        [
+          40000000,
+          60000000
+        ]
+      ],
+      "sizes": [
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ]
+      ],
+      "initial_cll": [
+        1000.0,
+        400.0
+      ]
+    },
+    {
+      "file": "av1-invisible-origin-60ms.mkv",
+      "codec": "AV1",
+      "preamble": "invisible",
+      "origin_ns": 60000000,
+      "expected_duration_ns": 60000000,
+      "intervals": [
+        [
+          0,
+          20000000
+        ],
+        [
+          20000000,
+          40000000
+        ],
+        [
+          40000000,
+          60000000
+        ]
+      ],
+      "sizes": [
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ]
+      ],
+      "initial_cll": [
+        1000.0,
+        400.0
+      ]
+    }
+  ],
+  "sha256": {
+    "av1-invisible-origin-0ms.mkv": "8f9c5f5915d8704de2353573f489cdc5cbe5ec160025034e9c592bb2679557f3",
+    "av1-invisible-origin-60ms.mkv": "0b22360395a39f6f419ad4d48a30160d08ee09d1deea2b3c1b1b114646e0d215",
+    "av1-subtitle-origin-0ms.mkv": "f5914577bb03ae2cbc5ccd91af63a4f04525b7f3639e4d44587a59c75295c5ea",
+    "av1-subtitle-origin-60ms.mkv": "f5fefe528800c28503a4483c4c80e16ce2614dcf313b39cf7773cf23e7ebe405",
+    "vp9-invisible-origin-0ms.mkv": "3d633ca6661fadc0a69bd4f04eff6c1b4e9aa271174ea1eb7b018b9b2a5a6780",
+    "vp9-invisible-origin-60ms.mkv": "692adca3890303c512ff586f6ef300e3f107d992d183d46f54a8e7a783fcc5de",
+    "vp9-subtitle-origin-0ms.mkv": "198db7dcccbc8c8f30d66fe041040b2d6af92c250ba7424146e12feffb3e8641",
+    "vp9-subtitle-origin-60ms.mkv": "cde6838364c45888f861094269e7bc4fee381b58ed2ee953df3cb8b6ddae4658"
+  }
+}

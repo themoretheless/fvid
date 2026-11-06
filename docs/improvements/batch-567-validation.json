@@ -1,0 +1,79 @@
+{
+  "status": "accepted",
+  "accepted_ids": [
+    "FVID-0565",
+    "FVID-0566",
+    "FVID-0567",
+    "FVID-0568",
+    "FVID-0569"
+  ],
+  "count_delta": 5,
+  "accepted_count": 569,
+  "next_id": "FVID-0570",
+  "qualification": [
+    {
+      "name": "matroska-reordered-tail",
+      "command": [
+        "cargo",
+        "test",
+        "--features",
+        "player",
+        "--test",
+        "matroska_reordered_tail",
+        "--test",
+        "avc_matroska_field_timing",
+        "--test",
+        "matroska_tail_playback",
+        "--test",
+        "matroska_parameter_seek"
+      ],
+      "exit_code": 0,
+      "passed": 27,
+      "ignored": 0
+    },
+    {
+      "name": "matroska-lazy-cluster-origin",
+      "command": [
+        "cargo",
+        "test",
+        "--features",
+        "player",
+        "--test",
+        "matroska_lazy_cluster_origin"
+      ],
+      "exit_code": 0,
+      "passed": 1,
+      "ignored": 0
+    },
+    {
+      "name": "matroska-empty-subtitle-successor",
+      "command": [
+        "cargo",
+        "test",
+        "--features",
+        "player",
+        "--test",
+        "matroska_empty_subtitle_successor"
+      ],
+      "exit_code": 0,
+      "passed": 3,
+      "ignored": 0
+    },
+    {
+      "name": "subtitle-nested-delimiters",
+      "command": [
+        "cargo",
+        "test",
+        "--features",
+        "player",
+        "--test",
+        "subtitle_nested_delimiters",
+        "--test",
+        "matroska_ssa_text"
+      ],
+      "exit_code": 0,
+      "passed": 5,
+      "ignored": 0
+    }
+  ]
+}
