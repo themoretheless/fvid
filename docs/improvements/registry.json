@@ -1,8 +1,8 @@
 {
   "target": 1000,
   "counting_rule": "One independently confirmed problem or useful capability; fixture variants and baseline integration repairs are excluded. Only accepted entries count.",
-  "accepted_count": 574,
-  "next_id": "FVID-0575",
+  "accepted_count": 579,
+  "next_id": "FVID-0580",
   "entries": [
     {
       "id": "FVID-0001",
@@ -6505,6 +6505,61 @@
       "result": "Scan headers on open for A_AC3 alongside A_EAC3 and fall through to the indexed DefaultDuration/BlockDuration and packet-span duration calculation when Segment/Info/Duration is absent and EOF has not yet been reached.",
       "status": "accepted",
       "validation": "batch-568-validation.json"
+    },
+    {
+      "id": "FVID-0575",
+      "batch": 569,
+      "title": "Normalize Matroska Dolby and text subtitle codec names across owned_webm_probe, media_probe, and owned_codec_metadata",
+      "source": "crates/fvid-media/src/owned_webm_probe.rs",
+      "regression": "tests/matroska_subtitles_and_mp4_vui_fallback.rs",
+      "before": "owned_webm_probe left Matroska A_AC3, A_AC3/BSID9, A_AC3/BSID10, A_EAC3, S_TEXT/UTF8, S_TEXT/ASS, S_TEXT/SSA, S_TEXT/WEBVTT, S_TEXT/ASCII, and legacy S_UTF8/S_ASS/S_SSA codec IDs unmapped, and media_probe / owned_codec_metadata omitted S_TEXT/WEBVTT, S_TEXT/ASCII, and legacy S_UTF8/S_ASS/S_SSA.",
+      "result": "Map Matroska Dolby and text subtitle codec IDs to canonical names ('ac3', 'eac3', 'subrip', 'ass', 'ssa', 'webvtt') in owned_webm_probe.rs and media_probe.rs, and register 'webvtt' in owned_codec_metadata.rs.",
+      "status": "accepted",
+      "validation": "batch-569-validation.json"
+    },
+    {
+      "id": "FVID-0576",
+      "batch": 569,
+      "title": "Support DefaultDuration fallback and S_TEXT/SSA / legacy codec IDs in Matroska subtitle conversion and planning",
+      "source": "crates/fvid-media/src/owned_subtitle_impl.rs",
+      "regression": "tests/matroska_subtitles_and_mp4_vui_fallback.rs",
+      "before": "owned_subtitle::try_convert_matroska_inner required per-packet BlockDuration (ignoring track DefaultDuration on SimpleBlock packets) and rejected S_TEXT/SSA, S_ASS, S_SSA, S_TEXT/ASCII, and S_UTF8 tracks.",
+      "result": "Fallback to track.default_duration_ns when per-packet duration_ns is absent, and support S_TEXT/SSA, S_ASS, S_SSA, S_TEXT/ASCII, and S_UTF8 in both subtitle conversion and planning while normalizing SSA Marked=N layer fields to integer ASS layers.",
+      "status": "accepted",
+      "validation": "batch-569-validation.json"
+    },
+    {
+      "id": "FVID-0577",
+      "batch": 569,
+      "title": "Support S_TEXT/WEBVTT, S_TEXT/ASCII, and legacy S_UTF8/S_ASS/S_SSA tracks in WebmSubtitleReader",
+      "source": "src/playback/subtitles/webm_subtitles.rs",
+      "regression": "tests/matroska_subtitles_and_mp4_vui_fallback.rs",
+      "before": "WebmSubtitleReader only listed S_TEXT/UTF8, S_TEXT/ASS, and S_TEXT/SSA in TEXT_CODECS, ignoring embedded S_TEXT/WEBVTT, S_TEXT/ASCII, S_UTF8, S_ASS, and S_SSA tracks.",
+      "result": "Admit S_TEXT/WEBVTT, S_TEXT/ASCII, S_UTF8, S_ASS, and S_SSA in WebmSubtitleReader, provide human-readable SubtitleTrack::label() names, and strip embedded WebVTT cue identifier/timing headers before extracting plain cue text.",
+      "status": "accepted",
+      "validation": "batch-569-validation.json"
+    },
+    {
+      "id": "FVID-0578",
+      "batch": 569,
+      "title": "Support custom [Events] Format: column order, case-insensitive Dialogue:, and \\h hard space in ASS/SSA subtitle parsing",
+      "source": "src/subtitles.rs",
+      "regression": "tests/matroska_subtitles_and_mp4_vui_fallback.rs",
+      "before": "subtitles::parse_ass required exact case-sensitive 'Dialogue:' prefixes and hardcoded Start/End/Text to columns 1, 2, and 9 regardless of the [Events] Format: declaration, and subtitles::plain left '\\h' hard-space escapes as literal '\\h' in rendered text.",
+      "result": "Honor custom [Events] Format: column positions and case-insensitive Dialogue: lines in subtitles::parse_ass, and convert '\\h' to non-breaking space '\\u{a0}' in subtitles::plain.",
+      "status": "accepted",
+      "validation": "batch-569-validation.json"
+    },
+    {
+      "id": "FVID-0579",
+      "batch": 569,
+      "title": "Preserve container colr (nclx) primaries, transfer, and matrix when MP4 AVC or HEVC VUI reports unspecified code 2",
+      "source": "crates/fvid-media/src/owned_mp4_video_decode.rs",
+      "regression": "tests/matroska_subtitles_and_mp4_vui_fallback.rs",
+      "before": "owned_mp4_video_decode unconditionally overwrote container_colour with AVC and HEVC VUI colour codes whenever colour_description_present_flag was set, clobbering explicit MP4 colr (nclx) values with 2 (Unspecified) when VUI left individual colour components unspecified.",
+      "result": "Retain non-zero container colr (nclx) primaries, transfer, and matrix in owned_mp4_video_decode whenever the corresponding AVC or HEVC VUI code is 2 (Unspecified), matching AV1 and player MP4 colour resolution.",
+      "status": "accepted",
+      "validation": "batch-569-validation.json"
     }
   ]
 }

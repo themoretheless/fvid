@@ -133,6 +133,7 @@ pub fn descriptor(name: &str) -> Option<CodecDescriptor> {
         "subrip" => ("subrip", &[]),
         "ass" => ("ass", &[]),
         "ssa" => ("ssa", &[]),
+        "webvtt" => ("webvtt", &[]),
         "bin_data" => ("bin_data", &[]),
         _ => return None,
     };

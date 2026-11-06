@@ -114,6 +114,7 @@ pub(crate) fn plain(text: &str) -> String {
     }
     out.replace("\\N", "\n")
         .replace("\\n", "\n")
+        .replace("\\h", "\u{a0}")
         .split('\n')
         .map(str::trim)
         .filter(|line| !line.is_empty())
@@ -197,27 +198,52 @@ pub fn parse_ass(text: &str) -> Vec<Cue> {
     let text = text.strip_prefix('\u{feff}').unwrap_or(text);
     let mut cues = Vec::new();
     let mut in_events = false;
+    let mut format_cols: Option<(usize, usize, usize, usize)> = None;
     for line in text.lines() {
         let trimmed = line.trim_matches(|c: char| c.is_whitespace() || c == '\u{feff}');
         if trimmed.starts_with('[') && trimmed.ends_with(']') {
             in_events = trimmed.eq_ignore_ascii_case("[events]");
+            format_cols = None;
             continue;
         }
         if !in_events {
             continue;
         }
-        let Some(rest) = trimmed.strip_prefix("Dialogue:") else {
+        let Some((key, rest)) = trimmed.split_once(':') else {
             continue;
         };
-        // The text field may itself contain commas, so it keeps the remainder.
-        let fields: Vec<&str> = rest.splitn(10, ',').collect();
-        if fields.len() < 10 {
+        if key.trim().eq_ignore_ascii_case("format") {
+            let cols: Vec<String> = rest
+                .split(',')
+                .map(|col| col.trim().to_ascii_lowercase())
+                .collect();
+            if let (Some(start_idx), Some(end_idx), Some(text_idx)) = (
+                cols.iter().position(|c| c == "start"),
+                cols.iter().position(|c| c == "end"),
+                cols.iter().position(|c| c == "text"),
+            ) && cols.len() >= 4
+                && text_idx + 1 == cols.len()
+            {
+                format_cols = Some((cols.len(), start_idx, end_idx, text_idx));
+            }
             continue;
         }
-        let (Some(start), Some(end)) = (clock(fields[1].trim()), clock(fields[2].trim())) else {
+        if !key.trim().eq_ignore_ascii_case("dialogue") {
+            continue;
+        }
+        let (field_count, start_idx, end_idx, text_idx) = format_cols.unwrap_or((10, 1, 2, 9));
+        // The text field may itself contain commas, so it keeps the remainder.
+        let fields: Vec<&str> = rest.splitn(field_count, ',').collect();
+        if fields.len() < field_count {
+            continue;
+        }
+        let (Some(start), Some(end)) = (
+            clock(fields[start_idx].trim()),
+            clock(fields[end_idx].trim()),
+        ) else {
             continue;
         };
-        let text = plain(fields[9]);
+        let text = plain(fields[text_idx]);
         if !text.is_empty() && start < end {
             cues.push(Cue { start, end, text });
         }

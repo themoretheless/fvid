@@ -231,9 +231,10 @@ fn matroska_with_limits(
                 "A_MPEG/L3" => "mp3",
                 "A_MPEG/L2" => "mp2",
                 "A_MPEG/L1" => "mp1",
-                "S_TEXT/UTF8" => "subrip",
-                "S_TEXT/ASS" => "ass",
-                "S_TEXT/SSA" => "ssa",
+                "S_TEXT/UTF8" | "S_TEXT/ASCII" | "S_UTF8" => "subrip",
+                "S_TEXT/ASS" | "S_ASS" => "ass",
+                "S_TEXT/SSA" | "S_SSA" => "ssa",
+                "S_TEXT/WEBVTT" => "webvtt",
                 other => other,
             }
             .to_owned(),

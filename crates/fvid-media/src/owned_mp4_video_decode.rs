@@ -278,9 +278,16 @@ pub(crate) fn decode_presented(
                 if let Some((_, full, codes)) = vui.and_then(|v| v.video_signal) {
                     colour.full_range = full;
                     if let Some([primaries, transfer, matrix]) = codes {
-                        colour.primaries = primaries;
-                        colour.transfer = transfer;
-                        colour.matrix = matrix;
+                        let named = |sequence: u8, container: u8| {
+                            if sequence == 2 && container != 0 {
+                                container
+                            } else {
+                                sequence
+                            }
+                        };
+                        colour.primaries = named(primaries, container_colour.primaries);
+                        colour.transfer = named(transfer, container_colour.transfer);
+                        colour.matrix = named(matrix, container_colour.matrix);
                     }
                 }
                 frames.push(FrameMetadata {
@@ -554,9 +561,16 @@ pub(crate) fn decode_presented(
                 if let Some(signal) = decoder.parameters().0.vui.as_ref().and_then(|v| v.signal) {
                     colour.full_range = signal.full_range;
                     if let Some([primaries, transfer, matrix]) = signal.colour {
-                        colour.primaries = primaries;
-                        colour.transfer = transfer;
-                        colour.matrix = matrix;
+                        let named = |sequence: u8, container: u8| {
+                            if sequence == 2 && container != 0 {
+                                container
+                            } else {
+                                sequence
+                            }
+                        };
+                        colour.primaries = named(primaries, container_colour.primaries);
+                        colour.transfer = named(transfer, container_colour.transfer);
+                        colour.matrix = named(matrix, container_colour.matrix);
                     }
                 }
                 let mut hdr = crate::owned_webm_codec::hdr_metadata(decoder.hdr());

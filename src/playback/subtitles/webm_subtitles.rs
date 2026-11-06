@@ -19,11 +19,20 @@ use std::time::Duration;
 const SUBTITLE_KIND: u64 = 17;
 
 /// The codec IDs whose blocks are text this reader can lay out.
-const TEXT_CODECS: &[&str] = &["S_TEXT/UTF8", "S_TEXT/ASS", "S_TEXT/SSA"];
+const TEXT_CODECS: &[&str] = &[
+    "S_TEXT/UTF8",
+    "S_TEXT/ASCII",
+    "S_UTF8",
+    "S_TEXT/ASS",
+    "S_ASS",
+    "S_TEXT/SSA",
+    "S_SSA",
+    "S_TEXT/WEBVTT",
+];
 
 /// Of those, the IDs stored as the script lines of the ASS family rather than
 /// as bare text, so only their blocks are read field by field.
-const SCRIPT_CODECS: &[&str] = &["S_TEXT/ASS", "S_TEXT/SSA"];
+const SCRIPT_CODECS: &[&str] = &["S_TEXT/ASS", "S_ASS", "S_TEXT/SSA", "S_SSA"];
 
 /// One embedded subtitle track, described by what the container carries.
 pub struct SubtitleTrack {
@@ -46,12 +55,25 @@ impl SubtitleTrack {
             return self.language.clone();
         }
         match self.codec.as_str() {
-            "S_TEXT/UTF8" => "UTF-8".to_owned(),
-            "S_TEXT/ASS" => "ASS".to_owned(),
-            "S_TEXT/SSA" => "SSA".to_owned(),
+            "S_TEXT/UTF8" | "S_UTF8" => "UTF-8".to_owned(),
+            "S_TEXT/ASCII" => "ASCII".to_owned(),
+            "S_TEXT/ASS" | "S_ASS" => "ASS".to_owned(),
+            "S_TEXT/SSA" | "S_SSA" => "SSA".to_owned(),
+            "S_TEXT/WEBVTT" => "WebVTT".to_owned(),
             other => other.to_owned(),
         }
     }
+}
+
+fn webvtt_block(block: &str) -> String {
+    let lines: Vec<&str> = block.trim_matches(|c: char| c.is_whitespace() || c == '\u{feff}').lines().collect();
+    if lines.len() >= 3 && lines[0].trim().is_empty() && lines[1].trim().is_empty() {
+        return subtitles::plain(&lines[2..].join("\n"));
+    }
+    if let Some(arrow_idx) = lines.iter().position(|line| line.contains("-->")) {
+        return subtitles::plain(&lines[arrow_idx + 1..].join("\n"));
+    }
+    subtitles::plain(block.trim())
 }
 
 /// Matroska reader over the text subtitle tracks it can lay out.
@@ -117,6 +139,7 @@ impl<R: Read + Seek> WebmSubtitleReader<R> {
             .expect("supported lists existing tracks");
         let default = Duration::from_nanos(track.default_duration_ns);
         let script = SCRIPT_CODECS.contains(&track.codec.as_str());
+        let webvtt = track.codec == "S_TEXT/WEBVTT";
         // Packet PTS is already scaled to nanoseconds; CodecDelay uses that
         // same unit and applies to both current and successor presentation.
         let delay = i128::from(track.codec_delay_ns);
@@ -142,6 +165,8 @@ impl<R: Read + Seek> WebmSubtitleReader<R> {
             let block = String::from_utf8_lossy(&block);
             let (stated, text) = if script {
                 subtitles::ass_block(&block)
+            } else if webvtt {
+                (None, webvtt_block(&block))
             } else {
                 (None, subtitles::plain(block.trim()))
             };
@@ -167,6 +192,8 @@ impl<R: Read + Seek> WebmSubtitleReader<R> {
                 let next_block = String::from_utf8_lossy(&next_block);
                 let next_text = if script {
                     subtitles::ass_block(&next_block).1
+                } else if webvtt {
+                    webvtt_block(&next_block)
                 } else {
                     subtitles::plain(next_block.trim())
                 };

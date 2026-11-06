@@ -400,7 +400,8 @@ pub fn try_plan_with_controls(
             _ => 0,
         };
         let codec_name = match reader.tracks.get(idx).map(|t| t.codec.as_str()) {
-            Some("S_TEXT/ASS") => "ass",
+            Some("S_TEXT/ASS" | "S_ASS") => "ass",
+            Some("S_TEXT/SSA" | "S_SSA") => "ssa",
             _ => "subrip",
         };
         let Some(stats) = try_convert_matroska_inner(
@@ -423,7 +424,7 @@ pub fn try_plan_with_controls(
     }
     check_controls()?;
     let mut steps = vec![media_info::PlanStep {
-        action: if source_codec == "ass" {
+        action: if matches!(source_codec, "ass" | "ssa") {
             "copy".into()
         } else {
             "decode".into()
@@ -806,7 +807,11 @@ fn try_convert_matroska_inner(
         .get(&track.number)
         .unwrap_or(&track.language)
         .clone();
-    if track.codec == "S_TEXT/ASS" {
+    let default_duration = (track.default_duration_ns > 0).then_some(track.default_duration_ns);
+    if matches!(
+        track.codec.as_str(),
+        "S_TEXT/ASS" | "S_ASS" | "S_TEXT/SSA" | "S_SSA"
+    ) {
         if destination.extension().and_then(|s| s.to_str()) != Some("mkv") {
             return Err(invalid("convert-subtitles requires Matroska (.mkv) output"));
         }
@@ -852,7 +857,11 @@ fn try_convert_matroska_inner(
                 .ok_or_else(|| invalid("subtitle packet count overflow"))?;
             let raw_start = u64::try_from(packet.pts_ns)
                 .map_err(|_| invalid("subtitle requires nonnegative timestamps"))?;
-            let Some(duration) = packet.duration_ns.filter(|d| *d > 0) else {
+            let Some(duration) = packet
+                .duration_ns
+                .filter(|d| *d > 0)
+                .or(default_duration)
+            else {
                 return Ok(None);
             };
             let timing = matroska_subtitle_span(raw_start, duration, delay)?;
@@ -878,9 +887,19 @@ fn try_convert_matroska_inner(
             let payload = reader.read_packet(i)?;
             let text =
                 std::str::from_utf8(&payload).map_err(|_| invalid("Matroska ASS is not UTF-8"))?;
-            if text.is_empty() || text.contains('\0') || text.splitn(9, ',').count() != 9 {
+            let fields: Vec<&str> = text.splitn(9, ',').collect();
+            if text.is_empty() || text.contains('\0') || fields.len() != 9 {
                 return Err(invalid("invalid Matroska ASS event"));
             }
+            let payload = if let Some((key, val)) = fields[1].trim().split_once('=')
+                && key.trim().eq_ignore_ascii_case("marked")
+                && !val.trim().is_empty()
+                && val.trim().bytes().all(|b| b.is_ascii_digit())
+            {
+                format!("{},{},{}", fields[0], val.trim(), fields[2..].join(",")).into_bytes()
+            } else {
+                payload
+            };
             // Validate and charge hidden input before omitting its output.
             if invisible {
                 continue;
@@ -902,7 +921,7 @@ fn try_convert_matroska_inner(
             dry_run,
         );
     }
-    if track.codec != "S_TEXT/UTF8" {
+    if !matches!(track.codec.as_str(), "S_TEXT/UTF8" | "S_TEXT/ASCII" | "S_UTF8") {
         return Ok(None);
     }
     if destination.extension().and_then(|s| s.to_str()) != Some("mkv") {
@@ -946,7 +965,11 @@ fn try_convert_matroska_inner(
             .ok_or_else(|| invalid("subtitle packet count overflow"))?;
         let raw_start = u64::try_from(packet.pts_ns)
             .map_err(|_| invalid("subtitle requires nonnegative timestamps"))?;
-        let Some(duration) = packet.duration_ns.filter(|d| *d > 0) else {
+        let Some(duration) = packet
+            .duration_ns
+            .filter(|d| *d > 0)
+            .or(default_duration)
+        else {
             return Ok(None);
         };
         let timing = matroska_subtitle_span(raw_start, duration, delay)?;

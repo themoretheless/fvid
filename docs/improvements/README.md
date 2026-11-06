@@ -4086,6 +4086,17 @@ See `batch-567-validation.json`.
 
 See `batch-568-validation.json`.
 
+## Batch 569 — FVID-0575..0579: Matroska probe/subtitle codec parity, `DefaultDuration` and `S_TEXT/SSA` conversion, ASS `Format:`/`\h`, and MP4 VUI `nclx` fallback
+
+- **FVID-0575** — Normalize Matroska Dolby and text subtitle codec names across `owned_webm_probe`, `media_probe`, and `owned_codec_metadata` (`crates/fvid-media/src/owned_webm_probe.rs`, `src/media_probe.rs`, `crates/fvid-media/src/owned_codec_metadata.rs`, `tests/matroska_subtitles_and_mp4_vui_fallback.rs`).
+- **FVID-0576** — Support `DefaultDuration` fallback and `S_TEXT/SSA` / legacy codec IDs in Matroska subtitle conversion and planning (`crates/fvid-media/src/owned_subtitle_impl.rs`, `tests/matroska_subtitles_and_mp4_vui_fallback.rs`).
+- **FVID-0577** — Support `S_TEXT/WEBVTT`, `S_TEXT/ASCII`, and legacy `S_UTF8`/`S_ASS`/`S_SSA` tracks in `WebmSubtitleReader` (`src/playback/subtitles/webm_subtitles.rs`, `tests/matroska_subtitles_and_mp4_vui_fallback.rs`).
+- **FVID-0578** — Support custom `[Events]` `Format:` column order, case-insensitive `Dialogue:`, and `\h` hard space in ASS/SSA subtitle parsing (`src/subtitles.rs`, `tests/matroska_subtitles_and_mp4_vui_fallback.rs`).
+- **FVID-0579** — Preserve container `colr` (`nclx`) `primaries`, `transfer`, and `matrix` when MP4 AVC or HEVC VUI reports unspecified code `2` (`crates/fvid-media/src/owned_mp4_video_decode.rs`, `tests/matroska_subtitles_and_mp4_vui_fallback.rs`).
+
+See `batch-569-validation.json`.
+
+
 
 
 
