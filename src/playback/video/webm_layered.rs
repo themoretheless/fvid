@@ -9,6 +9,8 @@ use crate::codec::{
     hevc_vps::{LayeredVps, Vps},
 };
 use std::collections::VecDeque;
+#[path = "webm_layered_probe.rs"]
+mod probe;
 struct Epoch {
     first: usize,
     vps: Arc<LayeredVps>,
@@ -172,8 +174,12 @@ impl Layered {
         demux: &mut WebmReader<R>,
         track: u64,
         budget: usize,
-    ) -> Result<Option<Self>> {
+    ) -> Result<(Option<Self>, bool)> {
         let cfg = HevcConfig::parse(configuration)?;
+        let probed = probe::probe(&cfg, configuration, demux, track, budget)?;
+        if !probed.may_need_layered {
+            return Ok((None, probed.inband_parameters));
+        }
         let copy_vps = |nal: &[u8]| -> Result<Vec<u8>> {
             if nal.len() > budget / 8 {
                 return Err(invalid("Matroska HEVC dispatch VPS exceeds budget"));
@@ -258,14 +264,14 @@ impl Layered {
             }
         }
         let Some(nal) = active else {
-            return Ok(None);
+            return Ok((None, probed.inband_parameters));
         };
         if Vps::parse_layered_metadata(&nal, budget / 2)?
             .layers
             .effective_max_layers()
             <= 1
         {
-            return Ok(None);
+            return Ok((None, probed.inband_parameters));
         }
         let vps = LayeredVps::parse(&nal, budget / 2)?;
         let ols = vps.automatic_output_layer_set()?;
@@ -318,7 +324,7 @@ impl Layered {
             .checked_sub(owned_timeline.saturating_add(selection_bytes(&selections)))
             .ok_or_else(|| invalid("Matroska layered timeline capacity exceeds budget"))?;
         let prefix_budget = if prefix_end > 0 { decode_budget / 2 } else { 0 };
-        Ok(Some(Self {
+        Ok((Some(Self {
             decoder: LayeredDecoder::from_configuration(
                 layered_configuration,
                 ols,
@@ -343,7 +349,7 @@ impl Layered {
             ended: false,
             signal: Default::default(),
             hdr: Default::default(),
-        }))
+        }), probed.inband_parameters))
     }
     pub fn reset(&mut self) {
         self.decoder.reset_queued(&mut self.queue);

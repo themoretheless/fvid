@@ -93,7 +93,7 @@ fn native_plan_describes_the_actual_export_pipeline_and_rejects_unsupported_opti
             assert!(media::plan_decode_audio(&source, &bad, &CopyOptions::default()).is_err());
         }
         assert!(media::plan_decode_audio(&source, &transform,
-            &CopyOptions { max_packets: Some(1), ..Default::default() }).unwrap().notes.iter().any(|note| note.contains("packet work limit: Some(1)")));
+            &CopyOptions { max_packets: Some(1), ..Default::default() }).unwrap().notes.iter().any(|note| note.contains("packet work limit: 1 packets")));
     }
     let run = std::process::Command::new(env!("CARGO_BIN_EXE_fvid"))
         .args(["media", "plan", "decode-audio"]).arg(fixture("aac-mono-44k.aac"))
@@ -201,7 +201,7 @@ fn cli_audio_limits_and_plan_use_owned_export_without_media_feature() {
         .args(["--max-packet-bytes", "128", "--max-packets", "2"])
         .output().unwrap();
     assert!(plan.status.success(), "{}", String::from_utf8_lossy(&plan.stderr));
-    assert!(String::from_utf8_lossy(&plan.stdout).contains("packet work limit: Some(2)"));
+    assert!(String::from_utf8_lossy(&plan.stdout).contains("packet work limit: 2 packets"));
     let precise = dir.0.join("precise.f32le");
     let result = std::process::Command::new(env!("CARGO_BIN_EXE_fvid"))
         .args(["media", "decode-audio"]).arg(&source).arg(&precise)

@@ -165,13 +165,16 @@ pub(crate) fn supports(
             return Err("controlled memory limit must be positive".into());
         }
         crate::owned_budget::check_rss_budget(options)?;
-        let reader = crate::owned_aac::adts::StreamReader::open_with_packet_limit(
-            BufReader::new(File::open(source).map_err(|e| e.to_string())?),
-            options
-                .max_packet_bytes
-                .min(options.max_controlled_bytes.unwrap_or(usize::MAX)),
-        )
-        .map_err(|e| e.to_string())?;
+        let reader = crate::owned_aac::adts::map_controlled_adts_packet_error(
+            crate::owned_aac::adts::StreamReader::open_with_packet_limit(
+                BufReader::new(File::open(source).map_err(|e| e.to_string())?),
+                options
+                    .max_packet_bytes
+                    .min(options.max_controlled_bytes.unwrap_or(usize::MAX)),
+            )
+            .map_err(|e| e.to_string()),
+            options,
+        )?;
         let config = reader.configuration();
         crate::owned_aac::stream::check_adts_decode_admission(reader.audio_specific_config(), options)
             .map_err(|e| e.to_string())?;

@@ -534,6 +534,8 @@ fn mix_merge_concat_and_matroska_publish_enforce_controlled_memory_budgets() {
     let mut tight_concat_controls = tight_mix_controls.clone();
     tight_concat_controls.max_packets = Some(1);
     tight_concat_controls.max_controlled_bytes = Some(200 * 1024);
+    let mut generous_concat_controls = generous_mix_controls.clone();
+    generous_concat_controls.max_controlled_bytes = Some(128 * 1024 * 1024);
     let concat_plan_err = fvid::media::plan_concat(&concat_sources, &tight_concat_controls)
         .expect_err("sample-domain plan_concat must refuse controlled memory budget exceeded");
     assert!(
@@ -552,7 +554,7 @@ fn mix_merge_concat_and_matroska_publish_enforce_controlled_memory_budgets() {
         assert!(!bad_concat_out.exists());
 
         let ok_concat_out = dir.join(format!("ok-concat.{ext}"));
-        fvid::media::concat(&concat_sources, &ok_concat_out, &generous_mix_controls)
+        fvid::media::concat(&concat_sources, &ok_concat_out, &generous_concat_controls)
             .unwrap_or_else(|e| panic!("sample-domain concat ({ext}) with generous budget failed: {e}"));
         assert!(ok_concat_out.is_file());
     }

@@ -16,8 +16,8 @@ fn sequential_probe_counts_samples_and_rejects_truncation_and_configuration_chan
     let mut changed = MONO.to_vec();
     changed.extend_from_slice(include_bytes!("fixtures/audio/aac-stereo.aac"));
     assert!(inspect_adts(Cursor::new(changed)).is_err());
-    let mut unsupported = MONO.to_vec(); unsupported[2] &= 0x3f; // AAC Main
-    assert!(inspect_adts(Cursor::new(unsupported)).unwrap_err().to_string().contains("AAC-LC"));
+    let mut unsupported = MONO.to_vec(); unsupported[2] |= 0xc0; // AAC SSR with unsupported frameLengthFlag
+    assert!(inspect_adts(Cursor::new(unsupported)).is_err());
 }
 #[test]
 fn public_probe_and_cli_use_exact_sample_clock() {

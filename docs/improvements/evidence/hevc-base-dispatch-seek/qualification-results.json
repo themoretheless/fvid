@@ -1,0 +1,81 @@
+[
+  {
+    "name": "related",
+    "command": [
+      "cargo",
+      "test",
+      "--locked",
+      "--offline",
+      "--no-default-features",
+      "--test",
+      "hevc_base_dispatch_seek",
+      "--test",
+      "matroska_parameter_seek",
+      "--test",
+      "hevc_hdr_seek",
+      "--test",
+      "hevc_layered_playback",
+      "--test",
+      "hevc_vpsless_epochs",
+      "--test",
+      "hevc_layered_vps_epochs",
+      "--test",
+      "mp4_layered_seek_coverage",
+      "--test",
+      "hevc_inband_layered_dispatch",
+      "--test",
+      "hevc_layered_parameters",
+      "--test",
+      "mixed_layered_descriptions",
+      "--test",
+      "hevc_matroska_layered",
+      "--",
+      "--nocapture",
+      "--test-threads=2"
+    ],
+    "exit_code": 0,
+    "passed": 84,
+    "ignored": 0
+  },
+  {
+    "name": "core-lib",
+    "command": [
+      "cargo",
+      "test",
+      "--locked",
+      "--offline",
+      "--no-default-features",
+      "--lib",
+      "--",
+      "--nocapture",
+      "--test-threads=2"
+    ],
+    "exit_code": 0,
+    "passed": 379,
+    "ignored": 0
+  },
+  {
+    "name": "player-related",
+    "command": [
+      "cargo",
+      "test",
+      "--locked",
+      "--offline",
+      "--no-default-features",
+      "--features",
+      "player",
+      "--test",
+      "hevc_base_dispatch_seek",
+      "--test",
+      "matroska_parameter_seek",
+      "--test",
+      "hevc_matroska_layered",
+      "--",
+      "--nocapture",
+      "--test-threads=2"
+    ],
+    "exit_code": 0,
+    "passed": 13,
+    "ignored": 0
+  }
+]

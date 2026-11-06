@@ -1427,7 +1427,7 @@ pub fn loudness_with_options(
         return Err("packet byte limit must be positive".into());
     }
     if options.max_packets == Some(0) {
-        return Err("packet work limit requires at least one packet".into());
+        return Err("loudness requires at least one packet".into());
     }
     if options.max_controlled_bytes == Some(0) {
         return Err("controlled memory limit must be positive".into());
@@ -1567,7 +1567,7 @@ pub fn normalize_loudness_with_options(
         return Err("packet byte limit must be positive".into());
     }
     if options.max_packets == Some(0) {
-        return Err("packet work limit requires at least one packet".into());
+        return Err("loudness requires at least one packet".into());
     }
     if options.max_controlled_bytes == Some(0) {
         return Err("controlled memory limit must be positive".into());

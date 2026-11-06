@@ -1,0 +1,50 @@
+{
+  "status": "terminal",
+  "target_count": 1078,
+  "results": [
+    {
+      "name": "remaining-integration-targets",
+      "exit_code": 101,
+      "passed": 2599,
+      "failed": 47,
+      "ignored": 0,
+      "log": "/private/tmp/fvid-remaining-integration-targets-20261103.log",
+      "failed_targets": [
+        "audio_budget_controls_regressions",
+        "container_loudness_plan_regressions",
+        "lossless_overlay_multitrack_budget_parity_regressions",
+        "lossless_plan_cli_routing_regressions",
+        "lossless_plan_regressions",
+        "lossless_y4m_budget_parity_regressions",
+        "loudness_normalize_budget_parity_regressions",
+        "matroska_parameter_seek",
+        "matroska_prefix_budget_mp4_wave_info_regressions",
+        "mp4_matroska_budget_parity_regressions",
+        "multitrack_lossless_budget_parity_regressions",
+        "native_adts_library_export",
+        "native_adts_probe",
+        "native_audio_api",
+        "native_audio_library_plan",
+        "native_audio_plan",
+        "native_deband",
+        "native_drawing",
+        "native_loudnorm_cli",
+        "native_matroska_pcm",
+        "native_matroska_video",
+        "native_mp4_matroska",
+        "native_opus_audio_export",
+        "native_perspective",
+        "native_remux_api",
+        "native_webm_multitrack",
+        "owned_matroska_audio_plan",
+        "owned_mp4_packet_cap",
+        "player_queue_regressions",
+        "video_export_controls_regressions",
+        "wave_ogg_flac_plan_regressions",
+        "y4m_export_budget_parity_regressions",
+        "y4m_prefix_budget_regression",
+        "y4m_xfade_subburn_budget_parity_regressions"
+      ]
+    }
+  ]
+}

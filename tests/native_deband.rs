@@ -297,8 +297,9 @@ fn cli_and_native_codec_routes() {
     }
     let expected = std::fs::read(fixture("deband-portable-strong.expected.raw")).unwrap();
     for command in ["decode", "export-y4m", "transcode-lossless"] {
+        let ext = if command == "export-y4m" { "y4m" } else { "mkv" };
         let output = std::env::temp_dir().join(format!(
-            "fvid-deband-cli-{}-{command}.mkv",
+            "fvid-deband-cli-{}-{command}.{ext}",
             std::process::id()
         ));
         let mut process = std::process::Command::new(env!("CARGO_BIN_EXE_fvid"));

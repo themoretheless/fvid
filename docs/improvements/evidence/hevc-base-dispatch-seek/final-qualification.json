@@ -1,0 +1,20 @@
+[
+  {
+    "name": "player-lib",
+    "command": [
+      "cargo",
+      "test",
+      "--locked",
+      "--offline",
+      "--no-default-features",
+      "--features",
+      "player",
+      "--lib",
+      "--",
+      "--test-threads=2"
+    ],
+    "exit_code": 0,
+    "passed": 1208,
+    "ignored": 26
+  }
+]

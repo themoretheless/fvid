@@ -48,7 +48,7 @@ pub fn normalize_file_with_options(
         return Err(invalid("packet byte limit must be positive"));
     }
     if options.max_packets == Some(0) {
-        return Err(invalid("packet work limit requires at least one packet"));
+        return Err(invalid("loudness requires at least one packet"));
     }
     if options.max_controlled_bytes == Some(0) {
         return Err(invalid("controlled memory limit must be positive"));

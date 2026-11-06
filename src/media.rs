@@ -752,6 +752,28 @@ pub fn remux(
     options: &CopyOptions,
 ) -> Result<CopyStats> {
     use std::io::Read;
+    if options.cancel.as_ref().is_some_and(crate::media_control::CancelFlag::is_cancelled) {
+        return Err("media operation cancelled".into());
+    }
+    if options.max_packet_bytes == 0 {
+        return Err("packet byte limit must be positive".into());
+    }
+    if options.max_controlled_bytes == Some(0) {
+        return Err("controlled memory limit must be positive".into());
+    }
+    fvid_media::owned_budget::check_rss_budget(options)?;
+    if options.max_packets == Some(0)
+        && (matches!(destination.extension().and_then(|s| s.to_str()), Some("mka" | "mkv"))
+            || std::fs::File::open(source).is_ok_and(|mut f| {
+                let mut prefix = [0u8; 8];
+                f.read_exact(&mut prefix).is_ok()
+                    && (crate::container::mp4::recognizes_prefix(&prefix)
+                        || prefix[..4] == [0x1a, 0x45, 0xdf, 0xa3]
+                        || crate::container::adts::header(&prefix).is_some())
+            }))
+    {
+        return Err("Matroska output requires at least one packet".into());
+    }
     validate_concat_matroska_options(options)?;
     if !matches!(destination.extension().and_then(|s| s.to_str()), Some("mp4" | "m4a" | "mka" | "mkv")) {
         return fvid_media::remux(source, destination, options);
@@ -876,11 +898,11 @@ pub fn trim(
     to: i64,
     options: &CopyOptions,
 ) -> Result<CopyStats> {
-    validate_concat_matroska_options(options)?;
     if destination.extension().and_then(|s|s.to_str())==Some("y4m") {
         let stats=crate::native_export::trim_y4m_with_options(source,destination,from,to,options).map_err(|e|e.to_string())?;
         return Ok(CopyStats {packets:stats.packets,payload_bytes:stats.payload_bytes,segments:1,backend:"fvid",fvid_payload_copies:0});
     }
+    validate_concat_matroska_options(options)?;
     let trim_interval = (from >= 0 && to > from).then(|| {
         (
             std::time::Duration::from_micros(from as u64),
@@ -993,6 +1015,28 @@ pub fn plan_trim(
 
 /// Plan owned ADTS/MP4 remuxing with the same option restrictions as execution.
 pub fn plan_remux(source: &std::path::Path, options: &CopyOptions) -> Result<MediaPlan> {
+    if options.cancel.as_ref().is_some_and(crate::media_control::CancelFlag::is_cancelled) {
+        return Err("media operation cancelled".into());
+    }
+    if options.max_packet_bytes == 0 {
+        return Err("packet byte limit must be positive".into());
+    }
+    if options.max_controlled_bytes == Some(0) {
+        return Err("controlled memory limit must be positive".into());
+    }
+    fvid_media::owned_budget::check_rss_budget(options)?;
+    if options.max_packets == Some(0)
+        && std::fs::File::open(source).is_ok_and(|mut f| {
+            use std::io::Read;
+            let mut prefix = [0u8; 8];
+            f.read_exact(&mut prefix).is_ok()
+                && (crate::container::mp4::recognizes_prefix(&prefix)
+                    || prefix[..4] == [0x1a, 0x45, 0xdf, 0xa3]
+                    || crate::container::adts::header(&prefix).is_some())
+        })
+    {
+        return Err("Matroska output requires at least one packet".into());
+    }
     validate_concat_matroska_options(options)?;
     if crate::native_export::is_matroska_source(source).map_err(|e|e.to_string())? {
         if validate_matroska_copy_options(options).is_err() {return fvid_media::plan_remux(source,options);}
@@ -1023,11 +1067,11 @@ pub fn plan_remux(source: &std::path::Path, options: &CopyOptions) -> Result<Med
 
 /// Concatenate compatible packed WAVE PCM through the owned streaming writer.
 pub fn concat(sources: &[std::path::PathBuf], destination: &std::path::Path, options: &CopyOptions) -> Result<CopyStats> {
-    validate_concat_matroska_options(options)?;
     if destination.extension().and_then(|s|s.to_str())==Some("y4m") {
         let stats=crate::native_export::concat_y4m_with_options(sources,destination,options).map_err(|e|e.to_string())?;
         return Ok(CopyStats {packets:stats.packets,payload_bytes:stats.payload_bytes,segments:sources.len(),backend:"fvid",fvid_payload_copies:0});
     }
+    validate_concat_matroska_options(options)?;
     if validate_concat_matroska_options(options).is_ok()
         && let Some(stats)=crate::native_export::try_concat_mp4_matroska_with_options(sources,destination,options).map_err(|e|e.to_string())? {
             return Ok(CopyStats {packets:stats.packets,payload_bytes:stats.payload_bytes,segments:sources.len(),backend:"fvid",fvid_payload_copies:0});
@@ -1303,7 +1347,7 @@ pub fn measure_loudness(source: &std::path::Path, options: &CopyOptions) -> Resu
         return Err("packet byte limit must be positive".into());
     }
     if options.max_packets == Some(0) {
-        return Err("packet work limit requires at least one packet".into());
+        return Err("loudness requires at least one packet".into());
     }
     if options.max_controlled_bytes == Some(0) {
         return Err("controlled memory limit must be positive".into());
@@ -1353,7 +1397,7 @@ pub fn normalize_loudness_controlled(source: &std::path::Path, destination: &std
         return Err("packet byte limit must be positive".into());
     }
     if options.max_packets == Some(0) {
-        return Err("packet work limit requires at least one packet".into());
+        return Err("loudness requires at least one packet".into());
     }
     if options.max_controlled_bytes == Some(0) {
         return Err("controlled memory limit must be positive".into());

@@ -17,7 +17,7 @@ pub(crate) fn decode_matroska_audio_reader_controlled<R: std::io::Read + std::io
     let mut decoder = if in_band_ps { MatroskaTimelineDecoder::with_in_band_ps(&track)? } else { MatroskaTimelineDecoder::from_matroska(&track)? };
     let rate = decoder.sample_rate();
     let channels = decoder.channels();
-    let exact_clock=matches!(track.codec.as_str(),"A_AAC"|"A_PCM/INT/LIT"|"A_PCM/INT/BIG"|"A_PCM/FLOAT/IEEE"|"A_MPEG/L1"|"A_MPEG/L2"|"A_MPEG/L3"|"A_FLAC"|"A_OPUS"|"A_ALAC");
+    let exact_clock=matches!(track.codec.as_str(),"A_AAC"|"A_PCM/INT/LIT"|"A_PCM/INT/BIG"|"A_PCM/FLOAT/IEEE"|"A_MPEG/L1"|"A_MPEG/L2"|"A_MPEG/L3"|"A_FLAC"|"A_ALAC");
     if track.sample_rate != u64::from(rate) || (!in_band_ps && track.channels != u64::from(channels)) {
         return Err(invalid(
             "Matroska audio geometry disagrees with configuration",

@@ -138,7 +138,7 @@ pub fn probe_y4m_with_options(
             .max_packets
             .is_some_and(|max| (frames as u64) > max)
         {
-            return Err("Y4M frame count exceeds packet limit".into());
+            return Err("Y4M input packet count exceeds limit".into());
         }
     }
     let duration_us = rate

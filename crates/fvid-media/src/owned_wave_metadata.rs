@@ -312,15 +312,10 @@ pub(crate) fn matroska_source_info_with_interval(
     {
         extra.extend(scoped.clone());
     }
-    let language = reader
-        .track_languages
-        .get(&track.number)
-        .map(String::as_str)
-        .unwrap_or(&track.language);
     let info = info_for_file_tags(
         &reader.tags,
         &track.name,
-        language,
+        &track.language,
         Some(&reader.writing_app),
         &extra,
     )?;

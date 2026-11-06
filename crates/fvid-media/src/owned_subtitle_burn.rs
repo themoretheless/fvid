@@ -50,7 +50,6 @@ fn prepare(
             .map_or(options.max_packet_bytes, |limit| {
                 options.max_packet_bytes.min(limit)
             });
-        limits.packet_bytes = limits.packet_bytes.min(effective_packet_limit);
         let memory_packets = options
             .max_controlled_bytes
             .map(|bytes| bytes / std::mem::size_of::<crate::owned_webm::Packet>());
@@ -73,15 +72,6 @@ fn prepare(
             limits,
         )
         .map_err(map_packet_limit)?;
-        let index_bytes = reader
-            .estimated_index_payload_bytes()
-            .map_err(|e| e.to_string())?;
-        if let Some(limit) = options.max_controlled_bytes.filter(|&limit| limit > 0)
-            && index_bytes.saturating_add(meta_working_bytes) > limit
-        {
-            return Err("controlled memory budget exceeded: Matroska index and metadata".into());
-        }
-        reader.restrict_packet_bytes(effective_packet_limit);
         let track = reader
             .tracks
             .first()
@@ -99,6 +89,25 @@ fn prepare(
                     .into(),
             );
         }
+        let index_bytes = reader
+            .estimated_index_payload_bytes()
+            .map_err(|e| e.to_string())?;
+        if let Some(limit) = options.max_controlled_bytes.filter(|&limit| limit > 0)
+            && index_bytes.saturating_add(meta_working_bytes) > limit
+        {
+            return Err("controlled memory budget exceeded: Matroska index and metadata".into());
+        }
+        for index in 0..reader.packets.len() {
+            if reader
+                .packet_payload_size(index)
+                .map_err(|e| e.to_string())?
+                > effective_packet_limit
+            {
+                return Err("WebM packet exceeds budget".into());
+            }
+        }
+        reader.restrict_packet_bytes(effective_packet_limit);
+        let track = &reader.tracks[0];
         let (mut width, mut height) = track.visible();
         if matches!(track.rotation, 90 | 270) {
             std::mem::swap(&mut width, &mut height);
@@ -433,7 +442,10 @@ pub fn plan_burn_subtitles(
             return Err("Matroska has no selected frames".into());
         }
     }
-    let info = crate::owned_probe::probe_with_options(source, options)?;
+    let mut probe_opts = options.clone();
+    probe_opts.max_packet_bytes = CopyOptions::default().max_packet_bytes;
+    probe_opts.max_packets = None;
+    let info = crate::owned_probe::probe_with_options(source, &probe_opts)?;
     use fvid_media_info::{MediaPlan, PlanStep, PlanStream};
     let streams = info
         .streams

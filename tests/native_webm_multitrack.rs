@@ -347,11 +347,19 @@ fn webm_companion_limits_cancel_and_invalid_selection_do_not_publish() {
     ] {
         let output =
             std::env::temp_dir().join(format!("fvid-webm-abort-{}-{case}.mkv", std::process::id()));
-        assert!(fvid_media::owned_lossless::supports(
-            &source,
-            &Default::default(),
-            &options
-        ));
+        if case != 3 {
+            assert!(fvid_media::owned_lossless::supports(
+                &source,
+                &Default::default(),
+                &options
+            ));
+        } else {
+            assert!(!fvid_media::owned_lossless::supports(
+                &source,
+                &Default::default(),
+                &options
+            ));
+        }
         let actual = fvid_media::transcode_lossless(&source, &output, Default::default(), &options)
             .unwrap_err();
         assert!(actual.contains(error), "{actual}");

@@ -1,0 +1,112 @@
+{
+  "status": "accepted",
+  "accepted_ids": [
+    "FVID-0552"
+  ],
+  "count_delta": 1,
+  "accepted_count": 552,
+  "next_id": "FVID-0553",
+  "validation": "docs/improvements/evidence/hevc-base-dispatch-seek/qualification-results.json",
+  "qualification": [
+    {
+      "name": "related",
+      "command": [
+        "cargo",
+        "test",
+        "--locked",
+        "--offline",
+        "--no-default-features",
+        "--test",
+        "hevc_base_dispatch_seek",
+        "--test",
+        "matroska_parameter_seek",
+        "--test",
+        "hevc_hdr_seek",
+        "--test",
+        "hevc_layered_playback",
+        "--test",
+        "hevc_vpsless_epochs",
+        "--test",
+        "hevc_layered_vps_epochs",
+        "--test",
+        "mp4_layered_seek_coverage",
+        "--test",
+        "hevc_inband_layered_dispatch",
+        "--test",
+        "hevc_layered_parameters",
+        "--test",
+        "mixed_layered_descriptions",
+        "--test",
+        "hevc_matroska_layered",
+        "--",
+        "--nocapture",
+        "--test-threads=2"
+      ],
+      "exit_code": 0,
+      "passed": 84,
+      "ignored": 0
+    },
+    {
+      "name": "core-lib",
+      "command": [
+        "cargo",
+        "test",
+        "--locked",
+        "--offline",
+        "--no-default-features",
+        "--lib",
+        "--",
+        "--nocapture",
+        "--test-threads=2"
+      ],
+      "exit_code": 0,
+      "passed": 379,
+      "ignored": 0
+    },
+    {
+      "name": "player-related",
+      "command": [
+        "cargo",
+        "test",
+        "--locked",
+        "--offline",
+        "--no-default-features",
+        "--features",
+        "player",
+        "--test",
+        "hevc_base_dispatch_seek",
+        "--test",
+        "matroska_parameter_seek",
+        "--test",
+        "hevc_matroska_layered",
+        "--",
+        "--nocapture",
+        "--test-threads=2"
+      ],
+      "exit_code": 0,
+      "passed": 13,
+      "ignored": 0
+    },
+    {
+      "name": "player-lib",
+      "command": [
+        "cargo",
+        "test",
+        "--locked",
+        "--offline",
+        "--no-default-features",
+        "--features",
+        "player",
+        "--lib",
+        "--",
+        "--test-threads=2"
+      ],
+      "exit_code": 0,
+      "passed": 1208,
+      "ignored": 26
+    }
+  ],
+  "baseline": "docs/improvements/evidence/hevc-base-dispatch-seek/before-complete.log",
+  "player_baseline": "docs/improvements/evidence/hevc-base-dispatch-seek/player-before.log",
+  "regeneration": "docs/improvements/evidence/hevc-base-dispatch-seek/regeneration.json"
+}

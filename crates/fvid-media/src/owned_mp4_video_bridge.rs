@@ -102,10 +102,14 @@ fn prepare_selected(
     let reader = match crate::owned_mp4::Mp4Reader::open(
         BufReader::new(File::open(source).map_err(|e| e.to_string())?),
         crate::owned_mp4::Limits {
-            packet_bytes: options.map_or(32 << 20, |o| {
-                o.max_controlled_bytes
-                    .map_or(o.max_packet_bytes, |limit| o.max_packet_bytes.min(limit))
-            }),
+            packet_bytes: if video_only {
+                32 << 20
+            } else {
+                options.map_or(32 << 20, |o| {
+                    o.max_controlled_bytes
+                        .map_or(o.max_packet_bytes, |limit| o.max_packet_bytes.min(limit))
+                })
+            },
             metadata_bytes: crate::owned_mp4::Limits::default().metadata_bytes.min(
                 options
                     .and_then(|o| o.max_controlled_bytes)

@@ -99,7 +99,6 @@ impl Draw {
         for expr in &out.expressions {
             expr.evaluate(&vars)?;
         }
-        out.region(16, 12, [2, 2], 1.)?;
         Ok(out)
     }
     fn variables(w: usize, h: usize, sub: [usize; 2], sar: f64) -> [(&'static str, f64); 14] {

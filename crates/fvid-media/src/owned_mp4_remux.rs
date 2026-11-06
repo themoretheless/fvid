@@ -9,7 +9,6 @@ type Result<T> = std::result::Result<T, String>;
 fn policies(options: &CopyOptions) -> bool {
     !options.cancel.as_ref().is_some_and(|c| c.is_cancelled())
         && options.max_packet_bytes > 0
-        && options.max_packets != Some(0)
         && options.max_controlled_bytes != Some(0)
         && crate::owned_budget::check_rss_budget(options).is_ok()
         && options.stream_metadata_set.iter().all(|(_, key, value)| {
@@ -333,9 +332,6 @@ pub fn remux(
     if options.max_packet_bytes == 0 {
         return Err("packet byte limit must be positive".into());
     }
-    if options.max_packets == Some(0) {
-        return Err("packet work limit requires at least one packet".into());
-    }
     if options.max_controlled_bytes == Some(0) {
         return Err("controlled memory limit must be positive".into());
     }
@@ -372,9 +368,6 @@ pub fn plan_remux(source: &Path, options: &CopyOptions) -> Result<fvid_media_inf
     }
     if options.max_packet_bytes == 0 {
         return Err("packet byte limit must be positive".into());
-    }
-    if options.max_packets == Some(0) {
-        return Err("packet work limit requires at least one packet".into());
     }
     if options.max_controlled_bytes == Some(0) {
         return Err("controlled memory limit must be positive".into());

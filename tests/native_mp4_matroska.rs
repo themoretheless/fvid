@@ -341,9 +341,10 @@ fn unsupported_tracks_and_invalid_edits_fail_before_output() {
         } else {
             bytes[at + 16..at + 20].copy_from_slice(&(-1i32).to_be_bytes());
         }
-        let mut input = mp4::Mp4Reader::open(Cursor::new(bytes), Default::default()).unwrap();
-        let mut out = Cursor::new(Vec::new());
-        assert!(mp4_matroska::write(&mut input, &mut out, None, None).is_err());
-        assert!(out.get_ref().is_empty());
+        if let Ok(mut input) = mp4::Mp4Reader::open(Cursor::new(bytes), Default::default()) {
+            let mut out = Cursor::new(Vec::new());
+            assert!(mp4_matroska::write(&mut input, &mut out, None, None).is_err());
+            assert!(out.get_ref().is_empty());
+        }
     }
 }

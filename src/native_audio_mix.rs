@@ -252,6 +252,7 @@ fn validate_and_inspect_source_with_options(
         default_probe.cancel = options.cancel.clone();
         default_probe.max_rss_bytes = options.max_rss_bytes;
         default_probe.max_controlled_bytes = options.max_controlled_bytes;
+        default_probe.max_packets = options.max_packets;
         if !is_single_stream_fvid_media_audio_with_options(source, &default_probe)? {
             return Err(invalid("source is not a single-stream owned audio input"));
         }
@@ -374,7 +375,7 @@ pub fn eligible_with_options(
             let Ok(info) = crate::native_media::constant_audio_source_info_selected_with_options(source, None, &clean_opts) else {
                 return Ok(false);
             };
-            if crate::native_probe::try_probe_as_with_options(source, None, &clean_opts)
+            if crate::native_probe::try_probe_metadata_with_options(source, &clean_opts)
                 .is_ok_and(|probe| {
                     probe.is_some_and(|p| {
                         p.streams.iter().filter(|s| s.media_type == "audio").count() != 1

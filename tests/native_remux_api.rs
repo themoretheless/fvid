@@ -108,24 +108,37 @@ fn public_remux_rejects_unimplemented_options_and_cancels_before_publication() {
                 .contains("cancelled")
         );
         assert!(!output.exists());
-        for options in [
-            CopyOptions {
-                streams: vec![0],
-                ..Default::default()
-            },
-            CopyOptions {
-                max_rss_bytes: Some(1),
-                ..Default::default()
-            },
-            CopyOptions {
-                metadata_set: vec![("title".into(), "new".into())],
-                ..Default::default()
-            },
+        for (options, expected) in [
+            (
+                CopyOptions {
+                    streams: vec![1],
+                    ..Default::default()
+                },
+                if i == 0 {
+                    "ADTS has only stream 0"
+                } else {
+                    "does not yet support"
+                },
+            ),
+            (
+                CopyOptions {
+                    max_rss_bytes: Some(1),
+                    ..Default::default()
+                },
+                "rss budget exceeded",
+            ),
+            (
+                CopyOptions {
+                    metadata_set: vec![("title".into(), "new".into())],
+                    ..Default::default()
+                },
+                "does not yet support",
+            ),
         ] {
+            let err = media::remux(&source, &output, &options).unwrap_err();
             assert!(
-                media::remux(&source, &output, &options)
-                    .unwrap_err()
-                    .contains("does not yet support")
+                err.contains(expected),
+                "expected `{expected}` for {name}, got: {err}"
             );
             assert!(!output.exists());
         }

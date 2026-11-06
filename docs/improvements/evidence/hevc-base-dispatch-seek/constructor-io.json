@@ -1,0 +1,18 @@
+{
+  "same_base_layer_read_bytes": true,
+  "rows": [
+    {
+      "file": "healthy-video.mkv",
+      "file_bytes": 7514,
+      "before_read_bytes": 21026,
+      "after_read_bytes": 21026
+    },
+    {
+      "file": "healthy-companion.mkv",
+      "file_bytes": 7731,
+      "before_read_bytes": 21555,
+      "after_read_bytes": 21555
+    }
+  ],
+  "scope": "base-only colored control, with/without companion; no general startup speed claim"
+}

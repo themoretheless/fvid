@@ -54,21 +54,17 @@ pub(crate) fn supports_with_options(
     transform: &DecodeTransform,
     options: Option<&CopyOptions>,
 ) -> bool {
-    if options
-        .and_then(|o| o.cancel.as_ref())
-        .is_some_and(fvid_control::CancelFlag::is_cancelled)
-        || options.is_some_and(|o| {
-            o.max_packet_bytes == 0
-                || o.max_packets == Some(0)
-                || o.max_controlled_bytes == Some(0)
-                || crate::owned_budget::check_rss_budget(o).is_err()
-        })
-    {
+    if options.is_some_and(|o| {
+        o.max_packet_bytes == 0
+            || o.max_packets == Some(0)
+            || o.max_controlled_bytes == Some(0)
+            || crate::owned_budget::check_rss_budget(o).is_err()
+    }) {
         return false;
     }
     let Ok(mut input) = input_limited(
         source,
-        options.map_or(usize::MAX, |o| o.max_packet_bytes),
+        usize::MAX,
         options.and_then(|o| o.max_controlled_bytes),
     ) else {
         let mut prefix = [0u8; 4];
@@ -82,7 +78,11 @@ pub(crate) fn supports_with_options(
         return false;
     }
     if matches!(input.tracks[0].codec.as_str(),"V_VP9"|"V_AV1"|"V_MPEGH/ISO/HEVC"|"V_MPEG4/ISO/AVC") {
-        match crate::owned_webm_codec::presentation_durations(&mut input, options) {
+        let mut uncancelled = options.cloned();
+        if let Some(ref mut o) = uncancelled {
+            o.cancel = None;
+        }
+        match crate::owned_webm_codec::presentation_durations(&mut input, uncancelled.as_ref()) {
             Ok(None) => return false,
             // Corrupt admitted packets must fail execution atomically.
             Ok(Some(_)) | Err(_) => {},
@@ -284,7 +284,7 @@ pub(crate) fn export_processed(
     crate::owned_budget::check_rss_budget(options)?;
     let input = input_limited(
         source,
-        options.max_packet_bytes,
+        usize::MAX,
         options.max_controlled_bytes,
     )?;
     let track = input.tracks.iter().find(|t|t.kind==1).ok_or("input has no video stream")?;

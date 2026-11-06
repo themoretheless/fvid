@@ -1,8 +1,8 @@
 {
   "target": 1000,
   "counting_rule": "One independently confirmed problem or useful capability; fixture variants and baseline integration repairs are excluded. Only accepted entries count.",
-  "accepted_count": 551,
-  "next_id": "FVID-0552",
+  "accepted_count": 560,
+  "next_id": "FVID-0561",
   "entries": [
     {
       "id": "FVID-0001",
@@ -6252,6 +6252,105 @@
       "result": "Find the next strictly greater PTS group logarithmically in the existing sorted index before signed clipping/edit mapping. Preserve explicit durations, terminal fallback, admission, quotas and public API. Candidate3pass; exact source YUV, RGB/intervals after real native seeks, repeated cue extraction and boundary lookups pass. Related integrations21pass; full player library1207pass with26 existing ignores. Fourteen files regenerate exactly without FFmpeg/network; relevant source hashes and stand extension recorded. One successor-selection defect, distinct from FVID-0519 signed endpoint clipping; no per-case IDs, performance/export/hardware/GUI styling claim. Broader CPU and remote platform checks remain separately in progress.",
       "status": "accepted",
       "validation": "batch-562-validation.json"
+    },
+    {
+      "id": "FVID-0552",
+      "batch": 563,
+      "title": "Defer HEVC base-layer picture body decoding until presentation or seek",
+      "source": "src/playback/video/webm_layered_probe.rs",
+      "regression": "tests/hevc_base_dispatch_seek.rs",
+      "before": "Baseline Matroska HEVC layered dispatch decodes full picture bodies during open, rejecting files whose earlier CVS picture slices are truncated, have bad emulation-prevention bytes or reference an absent PPS even when seeking directly to a later independent CVS with valid in-band VPS/SPS/PPS parameters; Player::new with a start bound also fails on open before seeking.",
+      "result": "Probe Matroska HEVC layered capability from NAL headers and parameter sets without decoding base-layer slice entropy during open, and defer Player initial frame presentation until after the configured start-bound seek. Sequential playback still refuses damaged earlier pictures with the exact NAL/RBSP/PPS error, while exact seeks and start-bound playback into a later valid CVS succeed across all 6 hevc_base_dispatch_seek tests, matroska_parameter_seek and player::hevc_start_seek_tests.",
+      "status": "accepted",
+      "validation": "batch-563-validation.json"
+    },
+    {
+      "id": "FVID-0553",
+      "batch": 564,
+      "title": "Accept finite sub-pixel drawing expressions before integer canvas clipping",
+      "source": "crates/fvid-media/src/owned_draw.rs",
+      "regression": "tests/native_drawing.rs",
+      "before": "eval_i64 rejected finite non-integral float results such as tw/2 on odd text widths (e.g. x=(w-tw)/2 when w=8, tw=5 -> 1.5) with 'drawing expression is nonfinite or outside integer coordinates'.",
+      "result": "Truncate finite float results within i64 bounds toward zero while continuing to reject NaN, infinity and out-of-range coordinates before mutation.",
+      "status": "accepted",
+      "validation": "batch-564-validation.json"
+    },
+    {
+      "id": "FVID-0554",
+      "batch": 564,
+      "title": "Include decoded audio frame working set in ADTS and Matroska memory budgets",
+      "source": "crates/fvid-media/src/owned_adts_export.rs",
+      "regression": "tests/audio_budget_controls_regressions.rs",
+      "before": "ADTS and Matroska audio decode/loudness/loudnorm routes clamped packet reader limits to raw max_controlled_bytes without charging the decoded float32 PCM frame working set, causing tiny controlled-memory budgets to fail with 'ADTS packet exceeds budget' instead of 'controlled memory budget exceeded'.",
+      "result": "Verify that the container metadata plus one decoded PCM frame working set fits within max_controlled_bytes before packet scanning across ADTS and Matroska audio decode, plan, loudness and loudnorm routes.",
+      "status": "accepted",
+      "validation": "batch-564-validation.json"
+    },
+    {
+      "id": "FVID-0555",
+      "batch": 564,
+      "title": "Scope Matroska and MP4 packet byte budgets to selected streams, intervals and max_packets prefixes",
+      "source": "src/native_export.rs",
+      "regression": "tests/y4m_prefix_budget_regression.rs",
+      "before": "Matroska WebmReader::open enforced options.max_packet_bytes during global container scan before filtering by selected track, active interval or max_packets prefix, rejecting valid prefix/interval/track-scoped exports when unselected or trailing packets were larger.",
+      "result": "Scan container index metadata with default parser packet bounds and enforce effective packet byte budgets strictly on selected streams within the active interval and max_packets prefix across Y4M export/trim/concat, FFV1 lossless export/plan, subtitle burn and Matroska audio decode/plan.",
+      "status": "accepted",
+      "validation": "batch-564-validation.json"
+    },
+    {
+      "id": "FVID-0556",
+      "batch": 564,
+      "title": "Enforce explicit speaker masks for multichannel downmix admission in audio plans",
+      "source": "crates/fvid-media/src/owned_audio_plan.rs",
+      "regression": "tests/container_loudness_plan_regressions.rs",
+      "before": "owned_audio_plan::plan_decode_audio checked only channel counts (1..=8) when admitting stereo downmixes, allowing discrete multichannel Matroska Opus/FLAC/PCM, raw FLAC and chained Ogg streams with speaker_mask == 0 to pass planning while execution rejected them.",
+      "result": "Query source_geometry_with_mask during audio decode planning and refuse multichannel (>2) downmixes when the source speaker mask is absent or incompatible with the target layout.",
+      "status": "accepted",
+      "validation": "batch-564-validation.json"
+    },
+    {
+      "id": "FVID-0557",
+      "batch": 564,
+      "title": "Honor edit-list timescale and end-trimming in Matroska PCM and MP4-to-Matroska remux",
+      "source": "crates/fvid-media/src/owned_matroska_pcm_export.rs",
+      "regression": "tests/native_matroska_pcm.rs",
+      "before": "owned_matroska_pcm_export::supports admitted Matroska PCM inputs even when metadata mutations or stream selections required LIST/INFO preservation on the shared timeline route, and owned_mp4_matroska rejected edit lists whose movie_timescale was larger than track.timescale.",
+      "result": "Delegate Matroska PCM exports with metadata/stream options to the shared timeline pipeline so LIST/INFO chunks match WAVE exports byte-for-byte, and compute MP4 edit end timestamps via 128-bit rational scaling without requiring movie_timescale <= track.timescale.",
+      "status": "accepted",
+      "validation": "batch-564-validation.json"
+    },
+    {
+      "id": "FVID-0558",
+      "batch": 564,
+      "title": "Preserve full Opus packet duration when TrackEntry SeekPreRoll is zero without DiscardPadding",
+      "source": "crates/fvid-media/src/owned_matroska_audio_timeline_impl.rs",
+      "regression": "tests/native_opus_audio_export.rs",
+      "before": "Matroska Opus timeline export truncated the final packet to block.duration_ns even when DiscardPadding was absent and SeekPreRoll was 0, clipping speech/hybrid/surround profiles whose block duration rounded down below the 20ms Opus frame.",
+      "result": "Apply block.duration_ns tail truncation when DiscardPadding is absent only if the track declares a positive SeekPreRoll, preserving full decoded Opus frame samples on unpadded streams while keeping pre-rolled duration caps intact.",
+      "status": "accepted",
+      "validation": "batch-564-validation.json"
+    },
+    {
+      "id": "FVID-0559",
+      "batch": 564,
+      "title": "Enforce companion track metadata and packet schedule budgets in multitrack lossless export",
+      "source": "crates/fvid-media/src/owned_mp4_multitrack_export.rs",
+      "regression": "tests/multitrack_lossless_budget_parity_regressions.rs",
+      "before": "Multitrack Matroska and MP4 lossless planning/export charged unselected companion track metadata tags and mismatched the staged video bridge Matroska metadata budget between plan_selection and try_export.",
+      "result": "Filter stream metadata mutations to selected tracks before charging metadata working sets, and verify check_source_matroska_metadata_budget plus mp4_index_bytes consistently in both multitrack MP4 planning and execution.",
+      "status": "accepted",
+      "validation": "batch-564-validation.json"
+    },
+    {
+      "id": "FVID-0560",
+      "batch": 564,
+      "title": "Charge simultaneous Y4M reader and frame working sets in native Y4M export and planning",
+      "source": "src/native_export.rs",
+      "regression": "tests/lossless_plan_regressions.rs",
+      "before": "inspect_first_y4m_frame_with_filters_and_options and validate_video_packet_budget_with_geometry_filters_interval_and_limit undercharged the simultaneous Y4MReader buffer plus RawFrame allocation on passthrough exports and overcharged container decoder allocations against pixel filter working sets.",
+      "result": "Charge Y4MReader yuv+rgb buffers plus RawFrame simultaneously in both passthrough and transformed Y4M inspections, and bound container pixel filter working sets consistently across planning and execution.",
+      "status": "accepted",
+      "validation": "batch-564-validation.json"
     }
   ]
 }

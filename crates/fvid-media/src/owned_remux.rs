@@ -11,15 +11,15 @@ pub fn remux(
     if options.max_packet_bytes == 0 {
         return Err("packet byte limit must be positive".into());
     }
-    if options.max_packets == Some(0) {
-        return Err("packet work limit requires at least one packet".into());
-    }
     if options.max_controlled_bytes == Some(0) {
         return Err("controlled memory limit must be positive".into());
     }
     crate::owned_budget::check_rss_budget(options)?;
     if crate::owned_mp4_remux::supports(source, destination, options) {
         return crate::owned_mp4_remux::remux(source, destination, options);
+    }
+    if options.max_packets == Some(0) {
+        return Err("packet work limit requires at least one packet".into());
     }
     if crate::owned_adts_remux::supports(source, destination, options) {
         return crate::owned_adts_remux::remux(source, destination, options);

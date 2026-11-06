@@ -2278,6 +2278,7 @@ impl Player {
             let _ = progress.send(OpenProgress::Spool(self.spool.clone()));
         }
         self.open_stage("Чтение индекса и первого кадра");
+        let has_start_bound = self.bounds.start.is_some();
         let video = NativeReader::without_memory_limit(BufReader::with_capacity(
             crate::playback_spool::READ_AHEAD,
             source,
@@ -2285,13 +2286,17 @@ impl Player {
         .and_then(|mut reader| {
             #[cfg(all(target_os = "macos", feature = "videotoolbox"))]
             if self.shared_surfaces { reader.enable_shared_surfaces()?; }
-            if let Some(first) = reader.read_frame_raw()? {
-                Ok((reader, first))
+            // An indexed start may recover a new independently coded sequence
+            // past a damaged old picture. Do not decode frame zero first.
+            if has_start_bound && reader.seekable() {
+                Ok((reader, None))
+            } else if let Some(first) = reader.read_frame_raw()? {
+                Ok((reader, Some(first)))
             } else {
                 Err(crate::invalid("video has no frames"))
             }
         });
-        let (mut reader, mut first_frame) = match video {
+        let (mut reader, first_frame) = match video {
             Ok(reader) => reader,
             // A file with nothing to show can still be all sound, and a listener
             // with only ears still wants it played. The reason the picture
@@ -2311,9 +2316,21 @@ impl Player {
         reader.warm_seeking(&path);
         // `--start-time` and `--stop-time` belong to the first item of the queue.
         let bounds = std::mem::take(&mut self.bounds);
-        if let Some(start) = bounds.start {
-            first_frame = reader.seek_raw(start)?.ok_or_else(|| crate::invalid("start-time has no video frame"))?;
-        }
+        let first_frame = if let Some(start) = bounds.start {
+            match reader.seek_raw(start)? {
+                Some(first) => first,
+                None => {
+                    // An empty video track may still accompany playable sound.
+                    // Keep its original bounded sound-only fallback.
+                    drop(reader);
+                    self.bounds = bounds;
+                    if self.open_sound_only(&path) { return Ok(()); }
+                    return Err(crate::invalid("start-time has no video frame"));
+                }
+            }
+        } else {
+            first_frame.ok_or_else(|| crate::invalid("video has no frames"))?
+        };
         self.stop_time = bounds.stop;
         self.cache_packets = reader.cache_packets();
         self.prioritize_swap(bounds.start.unwrap_or(Duration::ZERO));
@@ -13405,3 +13422,7 @@ mod native_avi_adpcm_start_file_regressions {
         }
     }
 }
+
+#[cfg(test)]
+#[path = "player_hevc_start_seek_tests.rs"]
+mod hevc_start_seek_tests;

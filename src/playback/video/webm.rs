@@ -261,6 +261,7 @@ impl<R: Read + Seek> WebmVideoReader<R> {
         } else {
             None
         };
+        let mut hevc_inband_parameters = false;
         let decoder = if let Some((w, h)) = ffv1_size {
             VideoDecoder::Ffv1(Box::new(crate::codec::ffv1_decoder::Decoder::from_configuration(
                 w,
@@ -270,16 +271,21 @@ impl<R: Read + Seek> WebmVideoReader<R> {
             )?))
         } else if avc {
             VideoDecoder::Avc(Box::new(AvcDecoder::new(&private, queue_budget)?))
-        } else if hevc && let Some(d)=layered::Layered::open(&private,&mut demux,track,queue_budget)? {
-            VideoDecoder::Layered(Box::new(d))
         } else if hevc {
-            let mut d = HevcDecoder::from_inband_configuration(&private, queue_budget)?;
-            if let Some(index) = demux.packets.iter().position(|p| p.track == track) {
-                if let Ok(packet) = demux.read_packet(index) {
-                    d.observe_packet(&packet);
+            let (layered_decoder, inband_parameters) =
+                layered::Layered::open(&private, &mut demux, track, queue_budget)?;
+            hevc_inband_parameters = inband_parameters;
+            if let Some(d) = layered_decoder {
+                VideoDecoder::Layered(Box::new(d))
+            } else {
+                let mut d = HevcDecoder::from_inband_configuration(&private, queue_budget)?;
+                if let Some(index) = demux.packets.iter().position(|p| p.track == track) {
+                    if let Ok(packet) = demux.read_packet(index) {
+                        d.observe_packet(&packet);
+                    }
                 }
+                VideoDecoder::Hevc(Box::new(d))
             }
-            VideoDecoder::Hevc(Box::new(d))
         } else if av1 {
             VideoDecoder::Av1(Box::new(crate::codec::av1_decoder::Decoder::from_configuration(
                 &private, (budget - rgb_budget) / 12 * 10,
@@ -288,7 +294,11 @@ impl<R: Read + Seek> WebmVideoReader<R> {
             VideoDecoder::Vp9(Box::new(Decoder::new((budget - rgb_budget) / 12 * 10)))
         };
         #[cfg(all(target_os = "macos", feature = "videotoolbox"))]
-        let hardware = if matches!(decoder,VideoDecoder::Layered(_)) || !allow_hardware || std::env::var_os("FVID_SOFTWARE_DECODE").is_some() {
+        let hardware = if matches!(decoder, VideoDecoder::Layered(_))
+            || hevc_inband_parameters
+            || !allow_hardware
+            || std::env::var_os("FVID_SOFTWARE_DECODE").is_some()
+        {
             None
         } else {
             open_hardware(

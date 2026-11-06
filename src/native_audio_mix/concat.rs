@@ -115,9 +115,6 @@ fn segment_packet_count(source: &Path, options: &fvid_media::CopyOptions) -> Res
         return Ok(u64::MAX);
     }
     if prefix.starts_with(&[0x1a, 0x45, 0xdf, 0xa3]) {
-        let effective_packet_bytes = options
-            .max_packet_bytes
-            .min(options.max_controlled_bytes.unwrap_or(usize::MAX));
         let memory_packets = options
             .max_controlled_bytes
             .map(|limit| limit / std::mem::size_of::<crate::container::webm::Packet>());
@@ -141,7 +138,6 @@ fn segment_packet_count(source: &Path, options: &fvid_media::CopyOptions) -> Res
         };
         let mut reader = crate::container::webm::WebmReader::open(input, limits)
             .map_err(map_packet_limit)?;
-        reader.restrict_packet_bytes(effective_packet_bytes);
         reader.scan_all().map_err(map_packet_limit)?;
         if let Some(mem_limit) = options.max_controlled_bytes
             && reader.estimated_index_payload_bytes()? > mem_limit
@@ -244,7 +240,9 @@ pub fn validate_concat_segments_with_options(
             // active encoded-packet cap must not be applied to their payloads.
             geom_probe.max_packet_bytes = fvid_media::CopyOptions::default().max_packet_bytes;
         }
-        if !super::eligible_with_options(std::slice::from_ref(source), &geom_probe)? {
+        let mut eligible_probe = geom_probe.clone();
+        eligible_probe.max_controlled_bytes = None;
+        if !super::eligible_with_options(std::slice::from_ref(source), &eligible_probe)? {
             return Err(invalid(
                 "PCM concat requires 2..=256 single audio inputs with matching sample rate and channels",
             ));

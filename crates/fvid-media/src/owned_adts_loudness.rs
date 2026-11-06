@@ -27,13 +27,16 @@ pub(crate) fn validate_header_configuration(source: &Path, options: &CopyOptions
     if !policies(options) {
         return Err("owned ADTS loudness requires stream 0 and no metadata edits".into());
     }
-    let reader = crate::owned_aac::adts::StreamReader::open_with_packet_limit(
-        BufReader::new(File::open(source).map_err(|e| e.to_string())?),
-        options
-            .max_packet_bytes
-            .min(options.max_controlled_bytes.unwrap_or(usize::MAX)),
-    )
-    .map_err(|e| e.to_string())?;
+    let reader = crate::owned_aac::adts::map_controlled_adts_packet_error(
+        crate::owned_aac::adts::StreamReader::open_with_packet_limit(
+            BufReader::new(File::open(source).map_err(|e| e.to_string())?),
+            options
+                .max_packet_bytes
+                .min(options.max_controlled_bytes.unwrap_or(usize::MAX)),
+        )
+        .map_err(|e| e.to_string()),
+        options,
+    )?;
     let config = reader.configuration();
     crate::owned_aac::stream::check_adts_decode_admission(reader.audio_specific_config(), options)
         .map_err(|e| e.to_string())?;
@@ -120,11 +123,14 @@ pub(crate) fn supports(source: &Path, options: &CopyOptions) -> bool {
 }
 fn check_meter_budget(source: &Path, rate: u32, options: &CopyOptions) -> Result<()> {
     if let Some(limit) = options.max_controlled_bytes {
-        let reader = crate::owned_aac::adts::StreamReader::open_with_packet_limit(
-            BufReader::new(File::open(source).map_err(|e| e.to_string())?),
-            options.max_packet_bytes.min(limit),
-        )
-        .map_err(|e| e.to_string())?;
+        let reader = crate::owned_aac::adts::map_controlled_adts_packet_error(
+            crate::owned_aac::adts::StreamReader::open_with_packet_limit(
+                BufReader::new(File::open(source).map_err(|e| e.to_string())?),
+                options.max_packet_bytes.min(limit),
+            )
+            .map_err(|e| e.to_string()),
+            options,
+        )?;
         let decoder = crate::owned_aac::NativeAacDecoder::new(reader.audio_specific_config())
             .map_err(|e| e.to_string())?;
         let channels = u128::from(decoder.channels().max(1));

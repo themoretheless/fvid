@@ -50,10 +50,6 @@ pub(crate) fn decode_presented(
     let mut reader = match crate::owned_mp4::Mp4Reader::open(
         BufReader::new(File::open(source).map_err(|e| e.to_string())?),
         crate::owned_mp4::Limits {
-            packet_bytes: options.map_or(32 << 20, |o| {
-                o.max_controlled_bytes
-                    .map_or(o.max_packet_bytes, |limit| o.max_packet_bytes.min(limit))
-            }),
             metadata_bytes: crate::owned_mp4::Limits::default().metadata_bytes.min(
                 options
                     .and_then(|o| o.max_controlled_bytes)
@@ -71,6 +67,22 @@ pub(crate) fn decode_presented(
         return Ok(None);
     };
     let track = &reader.tracks()[index];
+    if let Some(o) = options {
+        let packet_limit = o
+            .max_controlled_bytes
+            .map_or(o.max_packet_bytes, |limit| o.max_packet_bytes.min(limit));
+        let exceeds = match &track.samples {
+            crate::owned_mp4::SampleIndex::Expanded(samples) => {
+                samples.iter().any(|s| s.size as usize > packet_limit)
+            }
+            crate::owned_mp4::SampleIndex::Uniform(u) => {
+                u.count > 0 && u.bytes_per_frame as usize > packet_limit
+            }
+        };
+        if exceeds {
+            return Err("MP4 packet exceeds budget".into());
+        }
+    }
     if !matches!(
         &track.codec,
         b"avc1" | b"avc3" | b"hvc1" | b"hev1" | b"av01" | b"vp09"

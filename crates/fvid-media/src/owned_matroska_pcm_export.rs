@@ -166,22 +166,6 @@ pub(crate) fn geometry_for_decode(
     crate::owned_matroska_audio::admit_audio_reader_with_interval(&mut reader, index, interval, options)
         .map_err(|e| e.to_string())?;
     let _ = crate::owned_wave_metadata::matroska_source_info_with_interval(source, interval, options)?;
-    if transform.is_some_and(|t| t.interval.is_some()) {
-        let mut probe = decode_options(options);
-        probe.progress = None;
-        let stats = crate::owned_matroska_pcm::decode_matroska_pcm_f64(
-            BufReader::new(File::open(source).map_err(|e| e.to_string())?),
-            &mut std::io::sink(),
-            interval,
-            &probe,
-        )
-        .map_err(|e| e.to_string())?;
-        crate::owned_ogg_opus_export::check_nonempty_interval_prefix(
-            transform,
-            stats.sample_rate,
-            stats.sample_frames,
-        )?;
-    }
     Ok((rate, channels))
 }
 

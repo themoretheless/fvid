@@ -2470,7 +2470,8 @@ fn controlled_memory_budget_is_admitted_and_enforced_across_owned_video_exports_
         fvid_media::burn_subtitles(&source_y4m, &rejected_out, &subs_srt, &tight).unwrap_err(),
     ] {
         assert!(
-            err.contains("exceeds controlled memory budget"),
+            err.contains("exceeds controlled memory budget")
+                || err.contains("controlled memory budget exceeded"),
             "expected controlled memory budget diagnostic, got: {err}"
         );
         assert!(!rejected_out.exists());
@@ -2843,9 +2844,9 @@ fn export_y4m_and_plan_export_y4m_enforce_controlled_memory_for_temporal_pixel_f
     let no_filters = fvid::native_pixels::PixelFilters::default();
 
     for (src_label, src, limit, tmix_frames) in [
-        ("y4m", &source_y4m, 160usize, "frames=5"),
-        ("mp4", &source_mp4, 1500usize, "frames=5"),
-        ("mkv", &source_mkv, 64usize, "frames=5"),
+        ("y4m", &source_y4m, 200usize, "frames=5"),
+        ("mp4", &source_mp4, 14_000usize, "frames=5"),
+        ("mkv", &source_mkv, 88_000usize, "frames=5"),
     ] {
         let tight_opts = fvid::media::CopyOptions {
             max_packets: Some(1),

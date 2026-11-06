@@ -330,7 +330,7 @@ pub(crate) fn open_audio_reader<R: Read + Seek>(
     if let Some(maximum) = memory_packets {
         limits.packets = limits.packets.min(maximum);
     }
-    let mut reader = MatroskaTimelineReader::open(source, limits).map_err(|error| {
+    let reader = MatroskaTimelineReader::open(source, limits).map_err(|error| {
         if memory_packets.is_some_and(|max| max < crate::owned_webm::Limits::default().packets)
             && error
                 .to_string()
@@ -341,7 +341,7 @@ pub(crate) fn open_audio_reader<R: Read + Seek>(
             error.into()
         }
     })?;
-    reader.restrict_packet_bytes(packet_bytes);
+    let _ = packet_bytes;
     Ok(reader)
 }
 pub(crate) fn validate_audio_packet_budget<R: Read + Seek>(
@@ -404,6 +404,7 @@ pub(crate) fn validate_audio_packet_budget_with_interval<R: Read + Seek>(
             track_packets += 1;
         }
     }
+    reader.restrict_packet_bytes(options.max_packet_bytes);
     Ok(())
 }
 pub(crate) fn admit_audio_reader<R: Read + Seek>(
@@ -584,6 +585,7 @@ pub(crate) fn admit_audio_reader_with_interval<R: Read + Seek>(
                 error.into()
             }
         })?;
+    reader.restrict_packet_bytes(options.max_packet_bytes);
     Ok(())
 }
 /// Decode the presentation timeline, including delay, signed padding, gaps and

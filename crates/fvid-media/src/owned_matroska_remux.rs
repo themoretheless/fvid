@@ -114,9 +114,6 @@ pub(crate) fn publish(
     if options.max_packet_bytes == 0 {
         return Err("packet byte limit must be positive".into());
     }
-    if options.max_packets == Some(0) {
-        return Err("packet work limit requires at least one packet".into());
-    }
     if options.max_controlled_bytes == Some(0) {
         return Err("controlled memory limit must be positive".into());
     }

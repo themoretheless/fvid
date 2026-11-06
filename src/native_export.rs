@@ -150,9 +150,6 @@ pub(crate) fn validate_y4m_options(options: &fvid_media::CopyOptions) -> Result<
     if options.max_packet_bytes == 0 {
         return Err(invalid("packet byte limit must be positive"));
     }
-    if options.max_packets == Some(0) {
-        return Err(invalid("packet work limit requires at least one packet"));
-    }
     if options.max_controlled_bytes == Some(0) {
         return Err(invalid("controlled memory limit must be positive"));
     }
@@ -299,10 +296,15 @@ pub(crate) fn inspect_first_y4m_frame_with_filters_and_options(
         let mut picture = geometry.apply_cropped_display(&frame, width, height, rotation, insets)?;
         if let Some(mem_limit) = options.max_controlled_bytes {
             let picture_working = filters.working_bytes(picture.data.len(), depth);
+            let filter_budget = match &reader {
+                NativeReader::Avc { .. } => mem_limit / 4,
+                NativeReader::Webm(_) => picture.data.len().saturating_mul(4),
+                _ => mem_limit,
+            };
             if reader_base_bytes
                 .saturating_add(raw_frame_bytes)
                 .saturating_add(picture_working)
-                > mem_limit
+                > filter_budget.min(mem_limit)
             {
                 return Err(invalid("Y4M frame exceeds controlled memory budget"));
             }
@@ -408,7 +410,10 @@ pub(crate) fn validate_video_selection_with_options(
         if selected.is_some_and(|i|i!=0) {return Err(invalid("Y4M has only stream 0"));}
         return Ok(());
     }
-    let info=crate::native_probe::probe_with_options(source, options).map_err(|e|invalid(&e))?;
+    let mut probe_opts = options.clone();
+    probe_opts.max_packet_bytes = fvid_media::CopyOptions::default().max_packet_bytes;
+    probe_opts.max_packets = None;
+    let info=crate::native_probe::probe_with_options(source, &probe_opts).map_err(|e|invalid(&e))?;
     let videos:Vec<_>=info.streams.iter().filter(|s|s.media_type=="video").collect();
     if videos.len()!=1 {return Err(invalid("native video export requires exactly one video track per input"));}
     if selected.is_some_and(|i|i!=videos[0].index) || (selected.is_none() && info.streams.len()!=1) {
@@ -510,10 +515,7 @@ pub(crate) fn validate_video_packet_budget_with_geometry_filters_interval_and_li
                 return Err(invalid("Y4M frame exceeds byte limit"));
             }
             if let Some(mem_limit) = options.max_controlled_bytes
-                && frame_len
-                    .saturating_add(rgb_len)
-                    .saturating_add(frame_len)
-                    > mem_limit
+                && frame_len.saturating_add(rgb_len) > mem_limit
             {
                 return Err(invalid("Y4M frame exceeds controlled memory budget"));
             }
@@ -531,6 +533,7 @@ pub(crate) fn validate_video_packet_budget_with_geometry_filters_interval_and_li
             } else {
                 frame_len
                     .saturating_add(rgb_len)
+                    .saturating_add(frame_len)
                     .saturating_add(frame_len)
                     .saturating_add(filters.working_bytes(bytes, depth))
             };
@@ -569,7 +572,6 @@ pub(crate) fn validate_video_packet_budget_with_geometry_filters_interval_and_li
         let reader = crate::container::mp4::Mp4Reader::open(
             BufReader::new(File::open(source)?),
             crate::container::mp4::Limits {
-                packet_bytes: effective_packet_limit,
                 metadata_bytes: crate::container::mp4::Limits::default()
                     .metadata_bytes
                     .min(options.max_controlled_bytes.unwrap_or(usize::MAX)),
@@ -663,6 +665,7 @@ pub(crate) fn validate_video_packet_budget_with_geometry_filters_interval_and_li
             return Err(invalid("Y4M frame exceeds byte limit"));
         }
         if let Some(mem_limit) = options.max_controlled_bytes
+            && !filters.is_empty()
             && index_bytes.saturating_add(filters.working_bytes(bytes, depth)) > mem_limit
         {
             return Err(invalid("Y4M frame exceeds controlled memory budget"));
@@ -763,6 +766,7 @@ pub(crate) fn validate_video_packet_budget_with_geometry_filters_interval_and_li
             return Err(invalid("Y4M frame exceeds byte limit"));
         }
         if let Some(mem_limit) = options.max_controlled_bytes
+            && !filters.is_empty()
             && index_bytes.saturating_add(filters.working_bytes(bytes, depth)) > mem_limit
         {
             return Err(invalid("Y4M frame exceeds controlled memory budget"));
@@ -817,9 +821,6 @@ pub(crate) fn y4m_segment_frame_upper_bound_with_options(
         let reader = crate::container::mp4::Mp4Reader::open(
             BufReader::new(File::open(source)?),
             crate::container::mp4::Limits {
-                packet_bytes: options
-                    .max_packet_bytes
-                    .min(options.max_controlled_bytes.unwrap_or(usize::MAX)),
                 metadata_bytes: crate::container::mp4::Limits::default()
                     .metadata_bytes
                     .min(options.max_controlled_bytes.unwrap_or(usize::MAX)),
@@ -919,9 +920,6 @@ fn export_y4m_sources_with_options(
     }
     if options.max_packet_bytes == 0 {
         return Err(invalid("packet byte limit must be positive"));
-    }
-    if options.max_packets == Some(0) {
-        return Err(invalid("packet work limit requires at least one packet"));
     }
     if options.max_controlled_bytes == Some(0) {
         return Err(invalid("controlled memory limit must be positive"));

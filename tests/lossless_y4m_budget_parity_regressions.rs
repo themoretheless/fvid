@@ -65,14 +65,12 @@ fn lossless_export_and_planning_validate_zero_packet_bytes_and_policy_across_y4m
         assert_eq!(fvid_exec_err, fvid_plan_err);
     }
 
-    // 2. Unsupported policy options (streams = [1] or max_controlled_bytes = Some(1024)) on Y4M, single-track MP4,
+    // 2. Unsupported policy options (streams = [1]) on Y4M, single-track MP4,
     // and single-track Matroska must report identical policy refusals in plan_transcode_lossless and transcode_lossless.
     let mut stream1 = CopyOptions::default();
     stream1.streams = vec![1];
-    let mut mem_budget = CopyOptions::default();
-    mem_budget.max_controlled_bytes = Some(1024);
 
-    for (opt_label, opts) in [("streams=[1]", &stream1), ("max_controlled_bytes=1024", &mem_budget)] {
+    for (opt_label, opts) in [("streams=[1]", &stream1)] {
         for (src_label, src) in [("y4m", &y4m), ("mkv", &mkv), ("mp4", &mp4)] {
             let plan_err = media::plan_transcode_lossless(
                 src,

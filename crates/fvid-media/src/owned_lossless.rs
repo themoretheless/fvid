@@ -464,9 +464,7 @@ pub(crate) fn policy(o: &CopyOptions, text_tags: bool) -> bool {
 }
 /// Whether the owned export pipeline admits this source, transform and policy.
 pub fn supports(source: &Path, t: &LosslessTransform, o: &CopyOptions) -> bool {
-    if o.cancel
-        .as_ref()
-        .is_some_and(fvid_control::CancelFlag::is_cancelled)
+    if o.cancel.as_ref().is_some_and(fvid_control::CancelFlag::is_cancelled)
         || o.max_packet_bytes == 0
         || o.max_packets == Some(0)
         || o.max_controlled_bytes == Some(0)
@@ -999,7 +997,10 @@ pub fn plan_transcode_lossless(
             }
         }
     }
-    let info = crate::owned_probe::probe_with_options(source, options)?;
+    let mut probe_opts = options.clone();
+    probe_opts.max_packet_bytes = CopyOptions::default().max_packet_bytes;
+    probe_opts.max_packets = None;
+    let info = crate::owned_probe::probe_with_options(source, &probe_opts)?;
     let mut steps = vec![PlanStep {
         action: "decode".into(),
         detail: "read source video frames with the owned container parser and decoder".into(),

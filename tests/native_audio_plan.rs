@@ -28,7 +28,7 @@ fn owned_plans_and_cli_are_available_without_media_feature() {
 #[test]
 fn native_plan_rejects_invalid_requests_before_execution() {
     let source = fixture("aac-mono-44k.aac");
-    for options in [vec!["--from","0.1"], vec!["--volume","NaN"], vec!["--channels","7"],
+    for options in [vec!["--from","0.1"], vec!["--volume","NaN"], vec!["--channels","9"],
         vec!["--rate","0"], vec!["--rate","32000","--sample-rate","48000"],
         vec!["--from","2","--to","1"], vec!["--streams","1"], vec!["--volume"]] {
         let run = std::process::Command::new(env!("CARGO_BIN_EXE_fvid"))

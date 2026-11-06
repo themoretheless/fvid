@@ -238,13 +238,16 @@ fn source_descriptor_for_decode(source: &Path, options: &CopyOptions,
         if !crate::owned_audio_export::simple_options(options) {
             return Err("ADTS has only stream 0".into());
         }
-        let reader = crate::owned_aac::adts::StreamReader::open_with_packet_limit(
-            BufReader::new(File::open(source).map_err(|e| e.to_string())?),
-            options
-                .max_packet_bytes
-                .min(options.max_controlled_bytes.unwrap_or(usize::MAX)),
-        )
-        .map_err(|e| e.to_string())?;
+        let reader = crate::owned_aac::adts::map_controlled_adts_packet_error(
+            crate::owned_aac::adts::StreamReader::open_with_packet_limit(
+                BufReader::new(File::open(source).map_err(|e| e.to_string())?),
+                options
+                    .max_packet_bytes
+                    .min(options.max_controlled_bytes.unwrap_or(usize::MAX)),
+            )
+            .map_err(|e| e.to_string()),
+            options,
+        )?;
         let config = reader.configuration();
         let prefix = transform.and_then(|transform|
             crate::owned_adts_export::decoded_prefix(*transform, config.sample_rate));
@@ -390,7 +393,9 @@ pub fn plan_decode_audio(
         {
             return Err("unsupported channel conversion".into());
         }
-        if !crate::owned_pcm_channels::rematrix_layout_supported(channels, mask) {
+        if !(channels <= 2 && mask == 0)
+            && !(mask != 0 && crate::owned_pcm_channels::rematrix_layout_supported(channels, mask))
+        {
             return Err("unsupported speaker layout".into());
         }
     }

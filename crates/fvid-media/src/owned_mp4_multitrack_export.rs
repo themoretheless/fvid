@@ -28,12 +28,6 @@ fn qualify(
     let reader = match Mp4Reader::open(
         BufReader::new(File::open(source).map_err(|e| e.to_string())?),
         crate::owned_mp4::Limits {
-            packet_bytes: options
-                .max_controlled_bytes
-                .filter(|&limit| limit > 0)
-                .map_or(options.max_packet_bytes, |limit| {
-                    options.max_packet_bytes.min(limit)
-                }),
             metadata_bytes: crate::owned_mp4::Limits::default().metadata_bytes.min(
                 options
                     .max_controlled_bytes
@@ -402,22 +396,43 @@ pub(crate) fn try_export(
     else {
         return Ok(None);
     };
-    if !crate::owned_lossless::request(transform).is_some_and(|request| {
-        crate::owned_ffv1_export::supports_with_options(&bridge.path, &request, Some(options))
-    }) {
+    let Some(request) = crate::owned_lossless::request(transform) else {
+        return Ok(None);
+    };
+    if !crate::owned_ffv1_export::supports_with_options(&bridge.path, &request, Some(options)) {
         return Ok(None);
     }
+    let mut selected_options = options.clone();
+    selected_options
+        .stream_metadata_set
+        .retain(|(i, _, _)| input.selected.contains(i));
+    selected_options
+        .stream_metadata_delete
+        .retain(|(i, _)| input.selected.contains(i));
     let mp4_index_bytes = input
         .reader
         .estimated_index_payload_bytes()
         .map_err(|e| e.to_string())?;
+    let base_working_bytes = crate::owned_lossless::check_source_matroska_metadata_budget(
+        &bridge.path,
+        request.interval,
+        &selected_options,
+    )?
+    .saturating_add(mp4_index_bytes);
+    if options
+        .max_controlled_bytes
+        .filter(|&limit| limit > 0)
+        .is_some_and(|limit| base_working_bytes > limit)
+    {
+        return Err("Matroska metadata working set exceeds controlled memory budget".into());
+    }
     let private = Directory::new()?;
     let video_path = private.0.join("video.mkv");
     let mut stage = options.clone();
     stage.max_controlled_bytes = options
         .max_controlled_bytes
         .filter(|&limit| limit > 0)
-        .map(|limit| limit.saturating_sub(mp4_index_bytes).max(1));
+        .map(|limit| limit.saturating_sub(input.index_and_meta_bytes).max(1));
     stage.progress = None;
     stage.streams.clear();
     stage.max_packets = None;

@@ -222,7 +222,8 @@ fn reproduction_lossless_export_and_cli_controls_enforce_rss_and_packet_budgets(
     assert!(!xfade_small.status.success());
     let stderr = String::from_utf8_lossy(&xfade_small.stderr);
     assert!(
-        stderr.contains("packet exceeds byte limit"),
+        stderr.contains("packet exceeds byte limit")
+            || stderr.contains("exceeds packet byte limit"),
         "unexpected xfade error: {stderr}"
     );
     assert!(!cli_xfade.exists());
@@ -268,7 +269,8 @@ fn reproduction_lossless_export_and_cli_controls_enforce_rss_and_packet_budgets(
     assert!(!burn_small.status.success());
     let stderr = String::from_utf8_lossy(&burn_small.stderr);
     assert!(
-        stderr.contains("packet exceeds byte limit"),
+        stderr.contains("packet exceeds byte limit")
+            || stderr.contains("exceeds packet byte limit"),
         "unexpected burn-subtitles error: {stderr}"
     );
     assert!(!cli_burn_small.exists());

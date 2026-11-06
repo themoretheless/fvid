@@ -666,7 +666,6 @@ pub fn aac_source_info_selected_with_options(
         };
         let mut reader =
             crate::container::webm::WebmReader::open(input, limits).map_err(map_packet_limit)?;
-        reader.restrict_packet_bytes(options.max_packet_bytes);
         reader.scan_all().map_err(map_packet_limit)?;
         if let Some(limit) = options.max_controlled_bytes
             && reader.estimated_index_payload_bytes()? > limit
@@ -692,6 +691,7 @@ pub fn aac_source_info_selected_with_options(
                 }
             }
         }
+        reader.restrict_packet_bytes(options.max_packet_bytes);
         let in_band_ps = negotiate_matroska_ps_with_interval(&mut reader, index, interval, options.max_packets, || control.check())?;
         let track = &reader.tracks[index];
         (index, track.codec_private.clone(), (track.sample_rate, track.channels), in_band_ps)
@@ -1089,7 +1089,9 @@ pub fn is_owned_audio_trim_source_with_interval_and_options(
     if !is_mp4_audio_container(path)? && !crate::native_export::is_matroska_source(path)? {
         return Ok(false);
     }
-    let info = crate::native_probe::probe_with_options(path, options).map_err(|e| invalid(&e))?;
+    let info = crate::native_probe::try_probe_metadata_with_options(path, options)
+        .map_err(|e| invalid(&e))?
+        .ok_or_else(|| invalid("native probe does not yet support this container"))?;
     Ok(info.streams.iter().any(|stream| {
         stream.media_type == "audio"
             && constant_audio_source_info_selected_with_interval_and_options(path, Some(stream.index), interval, options).is_ok()
@@ -1279,7 +1281,6 @@ fn inspect_audio_source_selected(
             };
             let mut reader = crate::container::webm::WebmReader::open(BufReader::new(input), limits)
                 .map_err(map_packet_limit)?;
-            reader.restrict_packet_bytes(options.max_packet_bytes);
             reader.scan_all().map_err(map_packet_limit)?;
             if let Some(limit) = options.max_controlled_bytes
                 && reader.estimated_index_payload_bytes()? > limit
@@ -1305,6 +1306,7 @@ fn inspect_audio_source_selected(
                     }
                 }
             }
+            reader.restrict_packet_bytes(options.max_packet_bytes);
             let in_band_ps=negotiate_matroska_ps_with_interval(&mut reader,index,interval,options.max_packets,||control.check())?;
             let track=&reader.tracks[index];
             let decoder=if in_band_ps {MatroskaTimelineDecoder::with_in_band_ps(track)?.0} else {crate::native_audio_decoder::PacketPcmDecoder::from_matroska(track)?};

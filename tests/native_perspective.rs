@@ -245,8 +245,9 @@ fn cli_export_and_native_codec_routes_accept_owned_projection() {
     }
     let expected = std::fs::read(fixture("perspective-cubic.expected.raw")).unwrap();
     for command in ["decode", "export-y4m", "transcode-lossless"] {
+        let ext = if command == "export-y4m" { "y4m" } else { "mkv" };
         let output = std::env::temp_dir().join(format!(
-            "fvid-perspective-cli-{}-{command}.mkv",
+            "fvid-perspective-cli-{}-{command}.{ext}",
             std::process::id()
         ));
         let mut process = std::process::Command::new(env!("CARGO_BIN_EXE_fvid"));

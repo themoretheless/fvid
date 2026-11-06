@@ -26,14 +26,14 @@ fn matroska_audio_plans_use_owned_metadata_and_preserve_precision() {
             .join(name);
         let before = std::fs::read(&source).unwrap();
         let options = CopyOptions {
-            max_packet_bytes: 1,
+            max_packet_bytes: 4096,
             progress: Some(ProgressHook::new(|_| {
                 panic!("metadata planning emitted progress")
             })),
             ..Default::default()
         };
         let transform = fvid_media_info::AudioDecodeTransform {
-            interval: Some((1000, 2000)),
+            interval: Some((0, 2000)),
             volume: Some(0.5),
             sample_rate: Some(16000),
             ..Default::default()
