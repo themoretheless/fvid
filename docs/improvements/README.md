@@ -4076,5 +4076,16 @@ FVID-0564 (`src/playback/subtitles/webm_subtitles.rs`, `tests/matroska_subtitle_
 
 See `batch-567-validation.json`.
 
+## Batch 568 — FVID-0570..0574: Subtitle BOM handling, in-band AVC/HEVC opening colour/HDR, Matroska AVC probe profile/level, and Dolby indexed duration fallback
+
+- **FVID-0570** — Strip UTF-8 BOM (`\u{FEFF}`) across sidecar, Matroska, and MP4 `tx3g` subtitle parsers (`src/subtitles.rs`, `src/playback/subtitles/mp4_subtitles.rs`, `tests/subtitle_bom_handling.rs`).
+- **FVID-0571** — Preserve opening and post-`rewind()`/`seek_to_sync(0)` `bitstream_colour()` and `bitstream_hdr()` for Matroska single-layer and multilayer HEVC and AVC (`src/playback/video/webm.rs`, `src/playback/video/webm_layered.rs`, `tests/inband_open_signal_and_ac3_duration.rs`).
+- **FVID-0572** — Preserve opening and post-`rewind()` `bitstream_colour()`, `active_colour()`, and `bitstream_hdr()` for MP4 in-band `avc3` and single-layer/multilayer/mixed `hev1` (`src/playback/video/mp4.rs`, `src/playback/video/mp4_dispatch.rs`, `src/playback/video/mp4_mixed_hevc.rs`, `tests/inband_open_signal_and_ac3_duration.rs`).
+- **FVID-0573** — Populate `StreamInfo.profile` and `StreamInfo.level` for Matroska `V_MPEG4/ISO/AVC` tracks in media probe (`crates/fvid-media/src/owned_webm_probe.rs`, `src/media_probe.rs`, `tests/inband_open_signal_and_ac3_duration.rs`).
+- **FVID-0574** — Fallback to indexed block and packet-span duration for Matroska `A_AC3` and `A_EAC3` when `Segment/Info/Duration` is omitted (`src/playback/audio/webm_audio.rs`, `tests/inband_open_signal_and_ac3_duration.rs`).
+
+See `batch-568-validation.json`.
+
+
 
 

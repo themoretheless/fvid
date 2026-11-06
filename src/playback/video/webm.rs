@@ -223,7 +223,7 @@ impl<R: Read + Seek> WebmVideoReader<R> {
         // volume and a content light level a Matroska `Colour` element names
         // neither of. Bytes that do not parse state nothing; the walk reports
         // what it makes of them when it meets them again.
-        let open_signal = av1.then(|| {
+        let mut open_signal = av1.then(|| {
             let mut seed = crate::codec::av1_metadata::signal_from_bytes(&private);
             if let Some(index) = demux.packets.iter().position(|p| p.track == track && !p.invisible)
                 && let Ok(packet) = demux.read_packet(index) {
@@ -255,7 +255,7 @@ impl<R: Read + Seek> WebmVideoReader<R> {
         } else {
             None
         };
-        let mut hevc_inband_parameters = false;
+        let mut _hevc_inband_parameters = false;
         let decoder = if let Some((w, h)) = ffv1_size {
             VideoDecoder::Ffv1(Box::new(crate::codec::ffv1_decoder::Decoder::from_configuration(
                 w,
@@ -264,20 +264,96 @@ impl<R: Read + Seek> WebmVideoReader<R> {
                 queue_budget,
             )?))
         } else if avc {
-            VideoDecoder::Avc(Box::new(AvcDecoder::new(&private, queue_budget)?))
+            let d = AvcDecoder::new(&private, queue_budget)?;
+            let mut stated = d
+                .recorded_vui()
+                .and_then(|v| v.video_signal)
+                .map(|(_, full_range, colour)| {
+                    let [primaries, transfer, matrix] = colour.unwrap_or([0; 3]);
+                    ColourDescription {
+                        primaries,
+                        transfer,
+                        matrix,
+                        full_range,
+                    }
+                })
+                .unwrap_or_default();
+            if let Ok(cfg) = crate::codec::config::AvcConfig::parse(&private)
+                && let Some(index) = demux.packets.iter().position(|p| p.track == track)
+                && demux.packet_payload_size(index).is_ok_and(|sz| sz <= queue_budget)
+                && let Ok(packet) = demux.read_packet(index)
+                && let Ok(units) = crate::codec::config::NalUnits::new(&packet, cfg.length_size)
+            {
+                for nal in units.flatten() {
+                    if !nal.is_empty() && (nal[0] & 31) == 7
+                        && let Ok(sps) = crate::codec::avc::Sps::parse(nal)
+                        && let Some((_, full_range, colour)) = sps.vui.and_then(|v| v.video_signal)
+                    {
+                        let [primaries, transfer, matrix] = colour.unwrap_or([0; 3]);
+                        stated = ColourDescription {
+                            primaries,
+                            transfer,
+                            matrix,
+                            full_range,
+                        };
+                    }
+                }
+            }
+            open_signal = Some((stated, HdrMetadata::default()));
+            VideoDecoder::Avc(Box::new(d))
         } else if hevc {
             let (layered_decoder, inband_parameters) =
                 layered::Layered::open(&private, &mut demux, track, queue_budget)?;
-            hevc_inband_parameters = inband_parameters;
+            _hevc_inband_parameters = inband_parameters;
             if let Some(d) = layered_decoder {
+                open_signal = Some((d.signal, d.hdr));
                 VideoDecoder::Layered(Box::new(d))
             } else {
-                let mut d = HevcDecoder::from_inband_configuration(&private, queue_budget)?;
-                if let Some(index) = demux.packets.iter().position(|p| p.track == track) {
-                    if let Ok(packet) = demux.read_packet(index) {
-                        d.observe_packet(&packet);
+                let d = HevcDecoder::from_inband_configuration(&private, queue_budget)?;
+                let mut stated = d
+                    .try_parameters()
+                    .and_then(|(s, _)| s.vui.as_ref())
+                    .and_then(|v| v.signal.as_ref())
+                    .map(|v| {
+                        let [primaries, transfer, matrix] = v.colour.unwrap_or([0; 3]);
+                        ColourDescription {
+                            primaries,
+                            transfer,
+                            matrix,
+                            full_range: v.full_range,
+                        }
+                    })
+                    .unwrap_or_default();
+                let mut initial_hdr = d.hdr();
+                if let Some(index) = demux.packets.iter().position(|p| p.track == track)
+                    && demux.packet_payload_size(index).is_ok_and(|sz| sz <= queue_budget)
+                    && let Ok(packet) = demux.read_packet(index)
+                {
+                    let mut preview = HevcDecoder::from_inband_configuration(&private, queue_budget)?;
+                    preview.observe_packet(&packet);
+                    initial_hdr = preview.hdr();
+                    if let Ok(cfg) = crate::codec::config::HevcConfig::parse(&private)
+                        && let Ok(units) = crate::codec::config::NalUnits::new(&packet, cfg.length_size)
+                    {
+                        for nal in units.flatten() {
+                            if let Ok(header) = crate::codec::hevc_nal::NalHeader::parse(nal)
+                                && header.unit_type == 33
+                                && header.layer_id == 0
+                                && let Ok(s) = crate::codec::hevc_sps::Sps::parse(nal, queue_budget)
+                                && let Some(v) = s.vui.as_ref().and_then(|v| v.signal.as_ref())
+                            {
+                                let [primaries, transfer, matrix] = v.colour.unwrap_or([0; 3]);
+                                stated = ColourDescription {
+                                    primaries,
+                                    transfer,
+                                    matrix,
+                                    full_range: v.full_range,
+                                };
+                            }
+                        }
                     }
                 }
+                open_signal = Some((stated, initial_hdr));
                 VideoDecoder::Hevc(Box::new(d))
             }
         } else if av1 {
@@ -289,7 +365,7 @@ impl<R: Read + Seek> WebmVideoReader<R> {
         };
         #[cfg(all(target_os = "macos", feature = "videotoolbox"))]
         let hardware = if matches!(decoder, VideoDecoder::Layered(_))
-            || hevc_inband_parameters
+            || _hevc_inband_parameters
             || !allow_hardware
             || std::env::var_os("FVID_SOFTWARE_DECODE").is_some()
         {

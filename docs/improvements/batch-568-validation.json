@@ -1,0 +1,53 @@
+{
+  "status": "accepted",
+  "accepted_ids": [
+    "FVID-0570",
+    "FVID-0571",
+    "FVID-0572",
+    "FVID-0573",
+    "FVID-0574"
+  ],
+  "count_delta": 5,
+  "accepted_count": 574,
+  "next_id": "FVID-0575",
+  "qualification": [
+    {
+      "name": "subtitle-bom-handling",
+      "command": [
+        "cargo",
+        "test",
+        "--features",
+        "player",
+        "--test",
+        "subtitle_bom_handling",
+        "--test",
+        "subtitle_nested_delimiters",
+        "--test",
+        "matroska_empty_subtitle_successor"
+      ],
+      "exit_code": 0,
+      "passed": 7,
+      "ignored": 0
+    },
+    {
+      "name": "inband-open-signal-and-ac3-duration",
+      "command": [
+        "cargo",
+        "test",
+        "--features",
+        "player",
+        "--test",
+        "inband_open_signal_and_ac3_duration",
+        "--test",
+        "hevc_inband_layered_dispatch",
+        "--test",
+        "hevc_hdr_seek",
+        "--test",
+        "mixed_layered_descriptions"
+      ],
+      "exit_code": 0,
+      "passed": 13,
+      "ignored": 0
+    }
+  ]
+}

@@ -23,6 +23,7 @@ struct SingleView<R> {
     signal: ColourDescription,
     initial_signal: ColourDescription,
     hdr: HdrMetadata,
+    initial_hdr: HdrMetadata,
     selected: Option<u8>,
     presented_sample: Option<usize>,
     failed: bool,
@@ -142,7 +143,7 @@ impl<R: Read + Seek> SingleView<R> {
         self.failed = false;
         self.colour = self.initial_colour;
         self.signal = self.initial_signal;
-        self.hdr = HdrMetadata::default();
+        self.hdr = self.initial_hdr;
     }
     fn group(&mut self) -> Result<Option<LayeredVideoFrame>> {
         let first = if self.lookahead.is_some() {
@@ -301,24 +302,74 @@ impl<R: Read + Seek> Mp4VideoReader<R> {
                     }
                     let vps = LayeredVps::parse(&nal, budget / 2)?;
                     let ols = vps.automatic_output_layer_set()?;
+                    let opening_layer = vps
+                        .extension
+                        .as_ref()
+                        .and_then(|e| e.output.sets.get(ols))
+                        .map_or(0, |s| (63 - s.output.leading_zeros()) as u8);
                     let mut colour = crate::playback_native::AvcColour::default();
                     let mut stated = ColourDescription::default();
-                    let config = HevcConfig::parse(
-                        &demuxer.tracks()[index]
-                            .description_for_sample(0)
-                            .unwrap()
-                            .configuration,
-                    )?;
+                    let mut hdr = HdrMetadata::default();
+                    let first_desc = demuxer.tracks()[index]
+                        .description_for_sample(0)
+                        .unwrap();
+                    let first_is_hev1 = first_desc.codec == *b"hev1";
+                    let config = HevcConfig::parse(&first_desc.configuration)?;
                     for array in &config.arrays {
                         for nal in &array.units {
-                            if array.nal_type == 33
-                                && crate::codec::hevc_nal::NalHeader::parse(nal)?.layer_id == 0
-                            {
+                            let header = crate::codec::hevc_nal::NalHeader::parse(nal)?;
+                            if array.nal_type == 33 && header.layer_id == 0 {
                                 let s = crate::codec::hevc_sps::Sps::parse(nal, budget / 2)?;
                                 colour = crate::playback_native::AvcColour::from_hevc_vui(
                                     s.vui.as_ref(),
                                 )?;
                                 stated = signal(s.vui.as_ref());
+                            }
+                            if matches!(array.nal_type, 39 | 40)
+                                && header.layer_id == opening_layer
+                            {
+                                if let Ok(rbsp) =
+                                    crate::codec::hevc_nal::NalRbsp::parse(nal, budget / 2)
+                                {
+                                    let _ = crate::codec::hevc_sei::update_hdr_from_rbsp(
+                                        &mut hdr,
+                                        &rbsp.bytes,
+                                    );
+                                }
+                            }
+                        }
+                    }
+                    let length_size = config.length_size;
+                    let mut packet = Vec::new();
+                    if first_is_hev1
+                        && demuxer.read_packet(index, 0, &mut packet).is_ok()
+                        && let Ok(units) =
+                            crate::codec::config::NalUnits::new(&packet, length_size)
+                    {
+                        for nal in units.flatten() {
+                            let Ok(header) = crate::codec::hevc_nal::NalHeader::parse(nal) else {
+                                continue;
+                            };
+                            if header.unit_type == 33
+                                && header.layer_id == 0
+                                && let Ok(s) = crate::codec::hevc_sps::Sps::parse(nal, budget / 2)
+                                && let Ok(c) =
+                                    crate::playback_native::AvcColour::from_hevc_vui(s.vui.as_ref())
+                            {
+                                colour = c;
+                                stated = signal(s.vui.as_ref());
+                            }
+                            if matches!(header.unit_type, 39 | 40)
+                                && header.layer_id == opening_layer
+                            {
+                                if let Ok(rbsp) =
+                                    crate::codec::hevc_nal::NalRbsp::parse(nal, budget / 2)
+                                {
+                                    let _ = crate::codec::hevc_sei::update_hdr_from_rbsp(
+                                        &mut hdr,
+                                        &rbsp.bytes,
+                                    );
+                                }
                             }
                         }
                     }
@@ -340,7 +391,8 @@ impl<R: Read + Seek> Mp4VideoReader<R> {
                             initial_colour: colour,
                             signal: stated,
                             initial_signal: stated,
-                            hdr: HdrMetadata::default(),
+                            hdr,
+                            initial_hdr: hdr,
                             selected: None,
                             presented_sample: None,
                             failed: false,

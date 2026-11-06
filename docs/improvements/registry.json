@@ -1,8 +1,8 @@
 {
   "target": 1000,
   "counting_rule": "One independently confirmed problem or useful capability; fixture variants and baseline integration repairs are excluded. Only accepted entries count.",
-  "accepted_count": 569,
-  "next_id": "FVID-0570",
+  "accepted_count": 574,
+  "next_id": "FVID-0575",
   "entries": [
     {
       "id": "FVID-0001",
@@ -6450,6 +6450,61 @@
       "result": "Accept Marked=<digits> (case-insensitively) alongside empty or numeric Layer fields in 9-field Matroska SSA/ASS packets and return only the cleaned ninth text field.",
       "status": "accepted",
       "validation": "batch-567-validation.json"
+    },
+    {
+      "id": "FVID-0570",
+      "batch": 568,
+      "title": "Strip UTF-8 BOM across sidecar, Matroska, and MP4 tx3g subtitle parsers",
+      "source": "src/subtitles.rs",
+      "regression": "tests/subtitle_bom_handling.rs",
+      "before": "UTF-8 BOM (\\u{FEFF}) at the start of sidecar SRT/WebVTT/ASS files, Matroska S_TEXT/UTF8, S_TEXT/ASS, and S_TEXT/SSA blocks, or MP4 tx3g payloads prevented header/field recognition and leaked raw '\\u{FEFF}' or full 9-field ASS metadata prefixes into visible subtitle cues.",
+      "result": "Strip leading and inline '\\u{FEFF}' in subtitles::parse, plain, parse_srt, parse_webvtt, parse_ass, ass_block, and mp4_subtitles::decoded_text.",
+      "status": "accepted",
+      "validation": "batch-568-validation.json"
+    },
+    {
+      "id": "FVID-0571",
+      "batch": 568,
+      "title": "Preserve opening and post-rewind/seek_to_sync(0) bitstream_colour() and bitstream_hdr() for Matroska single-layer and multilayer HEVC and AVC",
+      "source": "src/playback/video/webm.rs",
+      "regression": "tests/inband_open_signal_and_ac3_duration.rs",
+      "before": "WebmVideoReader::open_with_hardware only populated open_signal for AV1, and webm_layered::Layered::reset cleared signal and hdr to default instead of restoring opening metadata, so Matroska AVC and single-layer/multilayer HEVC tracks with in-band SPS VUI or HDR SEI in packet 0 lost their colour/HDR signal before the first frame, after rewind(), and after seek_to_sync(0).",
+      "result": "Capture opening colour and HDR metadata from CodecPrivate and packet 0 for Matroska AVC, single-layer HEVC, and multilayer HEVC, and restore them on rewind() and seek_to_sync(0) without mutating live decoder CLVS state.",
+      "status": "accepted",
+      "validation": "batch-568-validation.json"
+    },
+    {
+      "id": "FVID-0572",
+      "batch": 568,
+      "title": "Preserve opening and post-rewind bitstream_colour(), active_colour(), and bitstream_hdr() for MP4 in-band AVC and single-layer/multilayer/mixed HEVC",
+      "source": "src/playback/video/mp4.rs",
+      "regression": "tests/inband_open_signal_and_ac3_duration.rs",
+      "before": "SingleLayerMp4VideoReader::read_open_signal only inspected AV1, and SingleView/MixedHevc only inspected hvcC arrays without checking sample 0 or restoring initial metadata on reset(), so MP4 avc3 and single-layer/multilayer/mixed hev1 tracks carrying in-band SPS VUI or HDR SEI in sample 0 returned default colour/HDR at open and after rewind().",
+      "result": "Inspect sample 0 for in-band avc3 and hev1 across SingleLayerMp4VideoReader, SingleView, and MixedHevc (while keeping complete avc1/hvc1 metadata-only on open) and restore initial colour, signal, and HDR on rewind().",
+      "status": "accepted",
+      "validation": "batch-568-validation.json"
+    },
+    {
+      "id": "FVID-0573",
+      "batch": 568,
+      "title": "Populate StreamInfo.profile and StreamInfo.level for Matroska V_MPEG4/ISO/AVC tracks in media probe",
+      "source": "crates/fvid-media/src/owned_webm_probe.rs",
+      "regression": "tests/inband_open_signal_and_ac3_duration.rs",
+      "before": "Matroska probing hardcoded profile: None and level: None for all tracks in both owned_webm_probe.rs and media_probe.rs, even when V_MPEG4/ISO/AVC tracks carried a valid AVCDecoderConfigurationRecord in CodecPrivate.",
+      "result": "Extract AVC profile name and level from CodecPrivate via owned_avc::configuration_profile_level in both owned_webm_probe.rs and media_probe.rs, matching MP4 avc1/avc3 stream probing.",
+      "status": "accepted",
+      "validation": "batch-568-validation.json"
+    },
+    {
+      "id": "FVID-0574",
+      "batch": 568,
+      "title": "Fallback to indexed block and packet-span duration for Matroska A_AC3 and A_EAC3 when Segment/Info/Duration is omitted",
+      "source": "src/playback/audio/webm_audio.rs",
+      "regression": "tests/inband_open_signal_and_ac3_duration.rs",
+      "before": "WebmAudioReader::duration() returned early with endpoint.or(self.demuxer.duration_ns) for A_AC3 and A_EAC3 tracks and did not scan A_AC3 headers on open, returning None before EOF whenever Segment/Info/Duration was absent even when DefaultDuration, BlockDuration, or multi-packet timestamps defined the track duration.",
+      "result": "Scan headers on open for A_AC3 alongside A_EAC3 and fall through to the indexed DefaultDuration/BlockDuration and packet-span duration calculation when Segment/Info/Duration is absent and EOF has not yet been reached.",
+      "status": "accepted",
+      "validation": "batch-568-validation.json"
     }
   ]
 }

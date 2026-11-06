@@ -166,7 +166,9 @@ pub(super) struct Layered {
     ready_budget: usize,
     ended: bool,
     pub signal: ColourDescription,
+    initial_signal: ColourDescription,
     pub hdr: HdrMetadata,
+    initial_hdr: HdrMetadata,
 }
 impl Layered {
     pub fn open<R: Read + Seek>(
@@ -324,6 +326,80 @@ impl Layered {
             .checked_sub(owned_timeline.saturating_add(selection_bytes(&selections)))
             .ok_or_else(|| invalid("Matroska layered timeline capacity exceeds budget"))?;
         let prefix_budget = if prefix_end > 0 { decode_budget / 2 } else { 0 };
+        let opening_layer = if prefix_end > 0 {
+            0
+        } else {
+            let first = &selections[0];
+            let output = first
+                .vps
+                .extension
+                .as_ref()
+                .and_then(|e| e.output.sets.get(first.selection.output_layer_set()))
+                .map_or(1, |s| s.output);
+            (63 - output.leading_zeros()) as u8
+        };
+        let mut initial_signal = ColourDescription::default();
+        let mut initial_hdr = HdrMetadata::default();
+        for array in &cfg.arrays {
+            for nal in &array.units {
+                let Ok(header) = crate::codec::hevc_nal::NalHeader::parse(nal) else {
+                    continue;
+                };
+                if array.nal_type == 33 && header.layer_id == 0 {
+                    if let Ok(s) = crate::codec::hevc_sps::Sps::parse(nal, budget / 2) {
+                        if let Some(v) = s.vui.as_ref().and_then(|v| v.signal.as_ref()) {
+                            let [primaries, transfer, matrix] = v.colour.unwrap_or([0; 3]);
+                            initial_signal = ColourDescription {
+                                primaries,
+                                transfer,
+                                matrix,
+                                full_range: v.full_range,
+                            };
+                        }
+                    }
+                }
+                if matches!(array.nal_type, 39 | 40) && header.layer_id == opening_layer {
+                    if let Ok(rbsp) = crate::codec::hevc_nal::NalRbsp::parse(nal, budget / 2) {
+                        let _ = crate::codec::hevc_sei::update_hdr_from_rbsp(
+                            &mut initial_hdr,
+                            &rbsp.bytes,
+                        );
+                    }
+                }
+            }
+        }
+        if let Some(first_pkt) = demux.packets.iter().position(|p| p.track == track)
+            && demux.packet_payload_size(first_pkt).is_ok_and(|sz| sz <= budget / 8)
+            && let Ok(packet) = demux.read_packet(first_pkt)
+            && let Ok(units) = crate::codec::config::NalUnits::new(&packet, cfg.length_size)
+        {
+            for nal in units.flatten() {
+                let Ok(header) = crate::codec::hevc_nal::NalHeader::parse(nal) else {
+                    continue;
+                };
+                if header.unit_type == 33 && header.layer_id == 0 {
+                    if let Ok(s) = crate::codec::hevc_sps::Sps::parse(nal, budget / 2) {
+                        if let Some(v) = s.vui.as_ref().and_then(|v| v.signal.as_ref()) {
+                            let [primaries, transfer, matrix] = v.colour.unwrap_or([0; 3]);
+                            initial_signal = ColourDescription {
+                                primaries,
+                                transfer,
+                                matrix,
+                                full_range: v.full_range,
+                            };
+                        }
+                    }
+                }
+                if matches!(header.unit_type, 39 | 40) && header.layer_id == opening_layer {
+                    if let Ok(rbsp) = crate::codec::hevc_nal::NalRbsp::parse(nal, budget / 2) {
+                        let _ = crate::codec::hevc_sei::update_hdr_from_rbsp(
+                            &mut initial_hdr,
+                            &rbsp.bytes,
+                        );
+                    }
+                }
+            }
+        }
         Ok((Some(Self {
             decoder: LayeredDecoder::from_configuration(
                 layered_configuration,
@@ -347,8 +423,10 @@ impl Layered {
             packet_index: 0,
             ready_budget: budget - budget / 2,
             ended: false,
-            signal: Default::default(),
-            hdr: Default::default(),
+            signal: initial_signal,
+            initial_signal,
+            hdr: initial_hdr,
+            initial_hdr,
         }), probed.inband_parameters))
     }
     pub fn reset(&mut self) {
@@ -360,8 +438,8 @@ impl Layered {
         self.ready.clear();
         self.packet_index = 0;
         self.ended = false;
-        self.signal = Default::default();
-        self.hdr = Default::default();
+        self.signal = self.initial_signal;
+        self.hdr = self.initial_hdr;
     }
     fn retain(&mut self, pictures: Vec<LayeredDecoded>) -> Result<()> {
         // One display view per AU, using the same highest-output-layer policy

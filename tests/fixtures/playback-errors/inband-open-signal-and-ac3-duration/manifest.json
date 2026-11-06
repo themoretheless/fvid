@@ -1,0 +1,55 @@
+{
+  "avc_frames": [
+    "avc-frame-0.raw",
+    "avc-frame-1.raw"
+  ],
+  "hdr0": {
+    "primaries": [
+      [
+        8500,
+        39850
+      ],
+      [
+        6550,
+        2300
+      ],
+      [
+        35400,
+        14600
+      ]
+    ],
+    "white": [
+      15635,
+      16450
+    ],
+    "maximum": 10000000,
+    "minimum": 1,
+    "cll": 1000,
+    "fall": 400
+  },
+  "hdr1": {
+    "primaries": [
+      [
+        13250,
+        34500
+      ],
+      [
+        7500,
+        3000
+      ],
+      [
+        34000,
+        16000
+      ]
+    ],
+    "white": [
+      15635,
+      16450
+    ],
+    "maximum": 15000000,
+    "minimum": 10,
+    "cll": 1400,
+    "fall": 500
+  },
+  "provenance": "Owned synthetic AVC/HEVC/VP9/AC-3/E-AC-3 packets and pixel oracles; offline muxing without FFmpeg, external codecs, private media, or network."
+}

@@ -228,6 +228,7 @@ struct SingleLayerMp4VideoReader<R> {
     /// only in-band writes it there. `None` for every other codec, which the
     /// coding answers from its parameter sets instead.
     open_signal: Option<(ColourDescription, HdrMetadata)>,
+    open_colour: Option<crate::playback_native::AvcColour>,
     failed: bool,
     reorder_bounds: ReorderBounds,
     strictly_ordered_pts: bool,
@@ -358,6 +359,7 @@ impl<R: Read + Seek> SingleLayerMp4VideoReader<R> {
             parameter_preroll: None,
             packet: Vec::new(),
             open_signal: None,
+            open_colour: None,
             failed: false,
             reorder_bounds,
             strictly_ordered_pts,
@@ -369,10 +371,11 @@ impl<R: Read + Seek> SingleLayerMp4VideoReader<R> {
         };
         if deferred {
             source.select_description(0)?;
+        } else {
+            source.read_open_signal();
         }
-        source.read_open_signal();
         source.initial_metadata = DecoderMetadata {
-            colour: source.decoder_colour().ok(),
+            colour: source.open_colour.or_else(|| source.decoder_colour().ok()),
             signal: source.decoder_signal(),
             hdr: source.decoder_hdr(),
         };
@@ -385,22 +388,109 @@ impl<R: Read + Seek> SingleLayerMp4VideoReader<R> {
     /// parse state nothing, since the picture route meets the same bytes later
     /// and reports what it makes of them there.
     fn read_open_signal(&mut self) {
-        if self.decoder_setup().codec != *b"av01" {
+        let setup = self.decoder_setup();
+        let codec = setup.codec;
+        let configuration = setup.configuration.clone();
+        if codec == *b"av01" {
+            let mut seed = av1_metadata::signal_from_bytes(&configuration);
+            let mut packet = Vec::new();
+            if self
+                .demuxer
+                .read_packet(self.track_index, self.sample_index, &mut packet)
+                .is_ok()
+            {
+                // The sample is the later statement of the two, so it wins and the
+                // configuration record fills whatever it left out.
+                let (stated, light) = av1_metadata::signal_from_container_sample(&packet);
+                seed = (stated.filled_with(seed.0), light.filled_with(seed.1));
+            }
+            self.open_signal = Some(seed);
             return;
         }
-        let mut seed = av1_metadata::signal_from_bytes(&self.decoder_setup().configuration);
-        let mut packet = Vec::new();
-        if self
-            .demuxer
-            .read_packet(self.track_index, self.sample_index, &mut packet)
-            .is_ok()
-        {
-            // The sample is the later statement of the two, so it wins and the
-            // configuration record fills whatever it left out.
-            let (stated, light) = av1_metadata::signal_from_container_sample(&packet);
-            seed = (stated.filled_with(seed.0), light.filled_with(seed.1));
+        if matches!(&codec, b"avc1" | b"avc3") {
+            let mut stated = self.decoder_signal();
+            let mut colour = self.decoder_colour().ok();
+            if codec == *b"avc3" {
+                let mut packet = Vec::new();
+                if let Ok(cfg) = crate::codec::config::AvcConfig::parse(&configuration)
+                    && self
+                        .demuxer
+                        .read_packet(self.track_index, self.sample_index, &mut packet)
+                        .is_ok()
+                    && let Ok(units) = crate::codec::config::NalUnits::new(&packet, cfg.length_size)
+                {
+                    for nal in units.flatten() {
+                        if !nal.is_empty() && (nal[0] & 31) == 7
+                            && let Ok(sps) = crate::codec::avc::Sps::parse(nal)
+                        {
+                            if let Ok(c) = crate::playback_native::AvcColour::from_vui(sps.vui.as_ref()) {
+                                colour = Some(c);
+                            }
+                            if let Some((_, full_range, col)) = sps.vui.and_then(|v| v.video_signal) {
+                                let [primaries, transfer, matrix] = col.unwrap_or([0; 3]);
+                                stated = ColourDescription {
+                                    primaries,
+                                    transfer,
+                                    matrix,
+                                    full_range,
+                                };
+                            }
+                        }
+                    }
+                }
+            }
+            self.open_signal = Some((stated, HdrMetadata::default()));
+            self.open_colour = colour;
+            return;
         }
-        self.open_signal = Some(seed);
+        if matches!(&codec, b"hvc1" | b"hev1") {
+            let mut stated = self.decoder_signal();
+            let mut colour = self.decoder_colour().ok();
+            let mut hdr = self.decoder_hdr();
+            if codec == *b"hev1"
+                && matches!(&self.decoder, Decoder::Hevc(_))
+            {
+                let mut packet = Vec::new();
+                if self
+                    .demuxer
+                    .read_packet(self.track_index, self.sample_index, &mut packet)
+                    .is_ok()
+                {
+                    if let Ok(mut preview) =
+                        HevcDecoder::from_inband_configuration(&configuration, self.work_budget)
+                    {
+                        preview.observe_packet(&packet);
+                        hdr = preview.hdr_with_fallback(hdr);
+                    }
+                    if let Ok(cfg) = crate::codec::config::HevcConfig::parse(&configuration)
+                        && let Ok(units) = crate::codec::config::NalUnits::new(&packet, cfg.length_size)
+                    {
+                        for nal in units.flatten() {
+                            if let Ok(header) = crate::codec::hevc_nal::NalHeader::parse(nal)
+                                && header.unit_type == 33
+                                && header.layer_id == 0
+                                && let Ok(s) = crate::codec::hevc_sps::Sps::parse(nal, self.work_budget)
+                            {
+                                if let Ok(c) = crate::playback_native::AvcColour::from_hevc_vui(s.vui.as_ref()) {
+                                    colour = Some(c);
+                                }
+                                if let Some(v) = s.vui.as_ref().and_then(|v| v.signal.as_ref()) {
+                                    let [primaries, transfer, matrix] = v.colour.unwrap_or([0; 3]);
+                                    stated = ColourDescription {
+                                        primaries,
+                                        transfer,
+                                        matrix,
+                                        full_range: v.full_range,
+                                    };
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            self.open_signal = Some((stated, hdr));
+            self.open_colour = colour;
+        }
     }
     pub fn active_vui(&self) -> Option<&crate::codec::avc::Vui> {
         match &self.decoder {
@@ -439,11 +529,19 @@ impl<R: Read + Seek> SingleLayerMp4VideoReader<R> {
             return Ok(hardware.colour);
         }
         match &self.decoder {
-            Decoder::Hevc(d) => crate::playback_native::AvcColour::from_hevc_vui(
-                d.try_parameters().and_then(|(s, _)| s.vui.as_ref()),
-            ),
-            Decoder::Layered(d) => Ok(d.metadata.colour.unwrap_or_default()),
-            Decoder::Avc(_) => crate::playback_native::AvcColour::from_vui(self.avc_vui()),
+            Decoder::Hevc(d) => match d.try_parameters() {
+                Some((s, _)) if s.vui.is_some() => {
+                    crate::playback_native::AvcColour::from_hevc_vui(s.vui.as_ref())
+                }
+                Some(_) if self.open_colour.is_some() => Ok(self.open_colour.unwrap()),
+                Some((s, _)) => crate::playback_native::AvcColour::from_hevc_vui(s.vui.as_ref()),
+                None => Ok(self.open_colour.unwrap_or_default()),
+            },
+            Decoder::Layered(d) => Ok(d.metadata.colour.or(self.open_colour).unwrap_or_default()),
+            Decoder::Avc(_) => match self.avc_vui() {
+                Some(vui) => crate::playback_native::AvcColour::from_vui(Some(vui)),
+                None => Ok(self.open_colour.unwrap_or_default()),
+            },
             Decoder::Unconfigured | Decoder::Vp9(_) | Decoder::Av1(_) => {
                 Ok(crate::playback_native::AvcColour::default())
             }
@@ -466,6 +564,7 @@ impl<R: Read + Seek> SingleLayerMp4VideoReader<R> {
             .unwrap_or_else(|| self.decoder_signal())
     }
     fn decoder_signal(&self) -> ColourDescription {
+        let seed = self.open_signal.map(|(seed, _)| seed).unwrap_or_default();
         match &self.decoder {
             Decoder::Hevc(d) => d
                 .try_parameters()
@@ -480,7 +579,8 @@ impl<R: Read + Seek> SingleLayerMp4VideoReader<R> {
                         full_range: signal.full_range,
                     }
                 })
-                .unwrap_or_default(),
+                .unwrap_or_default()
+                .filled_with(seed),
             Decoder::Avc(_) => self
                 .avc_vui()
                 .and_then(|vui| vui.video_signal)
@@ -493,15 +593,14 @@ impl<R: Read + Seek> SingleLayerMp4VideoReader<R> {
                         full_range,
                     }
                 })
-                .unwrap_or_default(),
-            Decoder::Layered(d) => d.metadata.signal,
-            Decoder::Av1(d) => {
-                let seed = self.open_signal.map(|(seed, _)| seed).unwrap_or_default();
-                d.color()
-                    .map(crate::codec::av1_sequence::Color::signal)
-                    .unwrap_or_default()
-                    .filled_with(seed)
-            }
+                .unwrap_or_default()
+                .filled_with(seed),
+            Decoder::Layered(d) => d.metadata.signal.filled_with(seed),
+            Decoder::Av1(d) => d
+                .color()
+                .map(crate::codec::av1_sequence::Color::signal)
+                .unwrap_or_default()
+                .filled_with(seed),
             Decoder::Unconfigured | Decoder::Vp9(_) => ColourDescription::default(),
         }
     }
@@ -525,13 +624,11 @@ impl<R: Read + Seek> SingleLayerMp4VideoReader<R> {
             .unwrap_or_else(|| self.decoder_hdr())
     }
     fn decoder_hdr(&self) -> HdrMetadata {
+        let seed = self.open_signal.map(|(_, seed)| seed).unwrap_or_default();
         match &self.decoder {
-            Decoder::Hevc(d) => d.hdr(),
-            Decoder::Layered(d) => d.metadata.hdr,
-            Decoder::Av1(d) => {
-                let seed = self.open_signal.map(|(_, seed)| seed).unwrap_or_default();
-                d.hdr_with_fallback(seed)
-            }
+            Decoder::Hevc(d) => d.hdr_with_fallback(seed),
+            Decoder::Layered(d) => d.metadata.hdr.filled_with(seed),
+            Decoder::Av1(d) => d.hdr_with_fallback(seed),
             Decoder::Unconfigured | Decoder::Avc(_) | Decoder::Vp9(_) => HdrMetadata::default(),
         }
     }
@@ -934,6 +1031,7 @@ impl<R: Read + Seek> SingleLayerMp4VideoReader<R> {
         self.needs_description_reset = false;
         self.pending_avc_field_sample = None;
         self.open_signal = None;
+        self.open_colour = None;
         self.read_open_signal();
         Ok(())
     }

@@ -240,6 +240,13 @@ fn matroska_with_limits(
         };
         // DefaultDuration is a declared nominal cadence, not a measured average.
         // Leave average_frame_rate unknown instead of substituting that value.
+        let (profile, level) = if codec == "h264" {
+            fvid_media::owned_avc::configuration_profile_level(&track.codec_private)
+                .map(|(p, l)| (Some(p.into()), Some(i32::from(l))))
+                .unwrap_or((None, None))
+        } else {
+            (None, None)
+        };
         streams.push(StreamInfo {
             index,
             media_type: match track.kind {
@@ -255,8 +262,8 @@ fn matroska_with_limits(
             duration: None,
             bit_rate: None,
             average_frame_rate: [0, 1],
-            profile: None,
-            level: None,
+            profile,
+            level,
             disposition: reader
                 .track_dispositions
                 .get(&track.number)

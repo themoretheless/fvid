@@ -217,6 +217,13 @@ fn try_probe_webm_with_limits(
                 tags.insert(key.into(), value.clone());
             }
         }
+        let (profile, level) = if track.codec == "V_MPEG4/ISO/AVC" {
+            crate::owned_avc::configuration_profile_level(&track.codec_private)
+                .map(|(p, l)| (Some(p.into()), Some(i32::from(l))))
+                .unwrap_or((None, None))
+        } else {
+            (None, None)
+        };
         streams.push(StreamInfo {
             index,
             media_type: match track.kind {
@@ -238,8 +245,8 @@ fn try_probe_webm_with_limits(
             duration: None,
             bit_rate: None,
             average_frame_rate: [0, 1],
-            profile: None,
-            level: None,
+            profile,
+            level,
             disposition: reader
                 .track_dispositions
                 .get(&track.number)

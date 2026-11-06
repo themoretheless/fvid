@@ -399,7 +399,7 @@ fn box_text(sample: &[u8]) -> Option<String> {
     (!joined.is_empty()).then_some(joined)
 }
 
-/// Decode BOM-tagged UTF-16 and retain the legacy unmarked UTF-8 policy.
+/// Decode BOM-tagged UTF-16 or UTF-8 and retain the legacy unmarked UTF-8 policy.
 fn decoded_text(bytes: &[u8], lossy_utf8: bool) -> Option<std::borrow::Cow<'_, str>> {
     let utf16 = bytes
         .strip_prefix(&[0xfe, 0xff])
@@ -421,12 +421,15 @@ fn decoded_text(bytes: &[u8], lossy_utf8: bool) -> Option<std::borrow::Cow<'_, s
             .collect::<std::result::Result<String, _>>()
             .ok()?;
         Some(std::borrow::Cow::Owned(text))
-    } else if lossy_utf8 {
-        Some(String::from_utf8_lossy(bytes))
     } else {
-        std::str::from_utf8(bytes)
-            .ok()
-            .map(std::borrow::Cow::Borrowed)
+        let bytes = bytes.strip_prefix(&[0xef, 0xbb, 0xbf]).unwrap_or(bytes);
+        if lossy_utf8 {
+            Some(String::from_utf8_lossy(bytes))
+        } else {
+            std::str::from_utf8(bytes)
+                .ok()
+                .map(std::borrow::Cow::Borrowed)
+        }
     }
 }
 

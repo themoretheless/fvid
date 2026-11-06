@@ -727,13 +727,15 @@ impl<R: Read + Seek> WebmAudioReader<R> {
             vorbis,
             vorbis_end_ns: None,
         };
-        if source.codec_tag=="A_EAC3" {
-            // No dec3 equivalent exists in Matroska. Index metadata once and
+        if matches!(source.codec_tag.as_str(), "A_EAC3" | "A_AC3") {
+            // No dec3/dac3 equivalent exists in Matroska. Index metadata once and
             // inspect only selected audio headers; video bodies are skipped.
             source.demuxer.scan_all_headers()?;
-            // Damaged/unsupported headers retain the existing packet-probed
-            // decoder refusal/concealment path, without inventing partial maps.
-            source.eac3_automatic_layout=source.scan_eac3_speakers().ok().flatten();
+            if source.codec_tag == "A_EAC3" {
+                // Damaged/unsupported headers retain the existing packet-probed
+                // decoder refusal/concealment path, without inventing partial maps.
+                source.eac3_automatic_layout = source.scan_eac3_speakers().ok().flatten();
+            }
             source.rewind();
         }
         if programme.is_some(){
@@ -1707,7 +1709,9 @@ impl<R: Read + Seek + Send> AudioStream for WebmAudioReader<R> {
         }
         if matches!(self.codec_tag.as_str(), "A_AC3" | "A_EAC3") {
             let endpoint = if self.ac3_duration_complete { self.ac3_end_ns.get() } else { None };
-            return endpoint.or(self.demuxer.duration_ns).map(std::time::Duration::from_nanos);
+            if let Some(ns) = endpoint.or(self.demuxer.duration_ns) {
+                return Some(std::time::Duration::from_nanos(ns));
+            }
         }
         if matches!(self.codec_tag.as_str(), "A_MPEG/L1" | "A_MPEG/L2" | "A_MPEG/L3") && self.demuxer.fully_indexed() {
             let rate=self.sample_rate(); if rate==0 {return None;}

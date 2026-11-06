@@ -25,6 +25,7 @@ pub const DELAY_STEP: Duration = Duration::from_millis(50);
 
 /// Read cues from whatever subtitle text is handed over, sniffing the format.
 pub fn parse(text: &str) -> Vec<Cue> {
+    let text = text.strip_prefix('\u{feff}').unwrap_or(text);
     if text.trim_start().starts_with("WEBVTT") {
         parse_webvtt(text)
     } else if text.contains("[Events]") {
@@ -106,6 +107,7 @@ pub(crate) fn plain(text: &str) -> String {
             match ch {
                 '{' => override_block = true,
                 '<' => tag = true,
+                '\u{feff}' => {}
                 _ => out.push(ch),
             }
         }
@@ -130,12 +132,14 @@ fn body(lines: &[&str], index: &mut usize) -> String {
 
 /// SubRip: an optional counter line, a range line, then text until a blank line.
 pub fn parse_srt(text: &str) -> Vec<Cue> {
+    let text = text.strip_prefix('\u{feff}').unwrap_or(text);
     cues_by_range(text.lines())
 }
 
 /// WebVTT shares SubRip's block layout; the header and the `NOTE`, `STYLE` and
 /// `REGION` blocks carry no timing, so their entire paragraphs are skipped.
 pub fn parse_webvtt(text: &str) -> Vec<Cue> {
+    let text = text.strip_prefix('\u{feff}').unwrap_or(text);
     let lines: Vec<&str> = text.lines().collect();
     let mut cues = Vec::new();
     let mut index = 0;
@@ -190,10 +194,11 @@ fn cues_by_range<'a, I: Iterator<Item = &'a str>>(lines: I) -> Vec<Cue> {
 /// `Dialogue: Layer,Start,End,Style,Name,MarginL,MarginR,MarginV,Effect,Text`.
 /// Only the timing and the text are read.
 pub fn parse_ass(text: &str) -> Vec<Cue> {
+    let text = text.strip_prefix('\u{feff}').unwrap_or(text);
     let mut cues = Vec::new();
     let mut in_events = false;
     for line in text.lines() {
-        let trimmed = line.trim();
+        let trimmed = line.trim_matches(|c: char| c.is_whitespace() || c == '\u{feff}');
         if trimmed.starts_with('[') && trimmed.ends_with(']') {
             in_events = trimmed.eq_ignore_ascii_case("[events]");
             continue;
@@ -234,7 +239,7 @@ pub fn parse_ass(text: &str) -> Vec<Cue> {
 /// field list of an older script, names no text the reader can place and shows
 /// nothing.
 pub fn ass_block(block: &str) -> (Option<(Duration, Duration)>, String) {
-    let line = block.trim();
+    let line = block.trim_matches(|c: char| c.is_whitespace() || c == '\u{feff}');
     let (prefixed, fields) = match line.split_once(':') {
         Some(("Dialogue", rest)) => (true, rest),
         // The other event lines of a script are not for showing.

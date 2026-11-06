@@ -17,6 +17,7 @@ pub(super) struct MixedHevc {
     packet_budget: usize,
     lookahead: Option<LayeredVideoFrame>,
     pub(super) metadata: DecoderMetadata,
+    initial_metadata: DecoderMetadata,
 }
 impl MixedHevc {
     pub(super) fn open<R: Read + Seek>(
@@ -157,12 +158,11 @@ impl MixedHevc {
             }
         }
         let mut metadata = DecoderMetadata::default();
-        let config = crate::codec::config::HevcConfig::parse(
-            &demux.tracks()[track]
-                .description_for_sample(start)
-                .unwrap()
-                .configuration,
-        )?;
+        let start_desc = demux.tracks()[track]
+            .description_for_sample(start)
+            .unwrap();
+        let start_is_hev1 = start_desc.codec == *b"hev1";
+        let config = crate::codec::config::HevcConfig::parse(&start_desc.configuration)?;
         let layer = if has_prefix {
             0
         } else {
@@ -197,6 +197,47 @@ impl MixedHevc {
                 }
             }
         }
+        let length_size = config.length_size;
+        let mut packet = Vec::new();
+        if start_is_hev1
+            && demux.read_packet(track, start, &mut packet).is_ok()
+            && let Ok(units) = crate::codec::config::NalUnits::new(&packet, length_size)
+        {
+            for nal in units.flatten() {
+                let Ok(header) = crate::codec::hevc_nal::NalHeader::parse(nal) else {
+                    continue;
+                };
+                if header.unit_type == 33
+                    && header.layer_id == 0
+                    && let Ok(s) = crate::codec::hevc_sps::Sps::parse(nal, budget)
+                    && let Ok(c) = crate::playback_native::AvcColour::from_hevc_vui(s.vui.as_ref())
+                {
+                    metadata.colour = Some(c);
+                    metadata.signal = s
+                        .vui
+                        .as_ref()
+                        .and_then(|v| v.signal.as_ref())
+                        .map(|v| {
+                            let [primaries, transfer, matrix] = v.colour.unwrap_or([0; 3]);
+                            ColourDescription {
+                                primaries,
+                                transfer,
+                                matrix,
+                                full_range: v.full_range,
+                            }
+                        })
+                        .unwrap_or_default();
+                }
+                if matches!(header.unit_type, 39 | 40) && header.layer_id == layer {
+                    if let Ok(rbsp) = crate::codec::hevc_nal::NalRbsp::parse(nal, budget) {
+                        let _ = crate::codec::hevc_sei::update_hdr_from_rbsp(
+                            &mut metadata.hdr,
+                            &rbsp.bytes,
+                        );
+                    }
+                }
+            }
+        }
         Ok(Self {
             pipeline,
             prefix,
@@ -213,6 +254,7 @@ impl MixedHevc {
             packet_budget: budget / 16,
             lookahead: None,
             metadata,
+            initial_metadata: metadata,
         })
     }
     pub(super) fn reset(&mut self) {
@@ -225,7 +267,7 @@ impl MixedHevc {
         self.prefix_index = self.window_start;
         self.prefix_description = self.initial_description;
         self.lookahead = None;
-        self.metadata = DecoderMetadata::default();
+        self.metadata = self.initial_metadata;
     }
     pub(super) fn contains(&self, index: usize) -> bool {
         index >= self.window_start && index < self.window_end
