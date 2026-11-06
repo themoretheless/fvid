@@ -1,0 +1,61 @@
+{
+  "status": "accepted",
+  "accepted_ids": [
+    "FVID-0564"
+  ],
+  "count_delta": 1,
+  "accepted_count": 564,
+  "next_id": "FVID-0565",
+  "qualification": [
+    {
+      "name": "matroska-subtitle-equal-pts",
+      "command": [
+        "cargo",
+        "test",
+        "--features",
+        "player",
+        "--test",
+        "matroska_subtitle_equal_pts"
+      ],
+      "exit_code": 0,
+      "passed": 3,
+      "ignored": 0
+    },
+    {
+      "name": "related-matroska-subtitle-suites",
+      "command": [
+        "cargo",
+        "test",
+        "--features",
+        "player",
+        "--test",
+        "matroska_invisible_subtitles",
+        "--test",
+        "matroska_negative_subtitles",
+        "--test",
+        "matroska_subtitle_delay",
+        "--test",
+        "matroska_subtitle_spans",
+        "--test",
+        "mp4_fragment_subtitle_equal_pts"
+      ],
+      "exit_code": 0,
+      "passed": 26,
+      "ignored": 0
+    },
+    {
+      "name": "webm-subtitles-unit",
+      "command": [
+        "cargo",
+        "test",
+        "--features",
+        "player",
+        "--lib",
+        "webm_subtitles"
+      ],
+      "exit_code": 0,
+      "passed": 8,
+      "ignored": 0
+    }
+  ]
+}

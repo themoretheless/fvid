@@ -4062,3 +4062,8 @@ Accepted total 560/1000. See `batch-564-validation.json`.
 
 See `batch-565-validation.json`.
 
+## Batch 566 — FVID-0564: Infer Matroska subtitle endpoints at the next strictly later visible PTS group
+
+FVID-0564 (`src/playback/subtitles/webm_subtitles.rs`, `tests/matroska_subtitle_equal_pts.rs`): Advance inferred Matroska subtitle endpoints to the first visible packet with a strictly later presentation timestamp (`*next_pts > *pts`), so simultaneous `SimpleBlock` subtitle cues without `BlockDuration` or `DefaultDuration` end at the next distinct subtitle group instead of falling back to `start + LAST_LINE` (`2s`) and lingering across video seeks. Verified across 12 synthetic Matroska witnesses (`UTF8`, `SSA`, `ASS` across `equal`, `terminal`, `explicit`, and `distinct` modes) and 26 related subtitle regression tests. See `batch-566-validation.json`.
+
+

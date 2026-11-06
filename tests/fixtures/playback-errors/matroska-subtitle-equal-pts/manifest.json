@@ -1,0 +1,415 @@
+{
+  "provenance": "Pure authored 16x16 three-color VP9 with invented UTF8/SSA/ASS text. Equal-PTS SimpleBlock groups without BlockDuration or DefaultDuration, terminal equal-PTS groups, explicit BlockDuration controls and distinct-PTS controls. No private media, FFmpeg or network.",
+  "cases": [
+    {
+      "file": "utf8-equal.mkv",
+      "codec": "utf8",
+      "mode": "equal",
+      "pts_ns": [
+        0,
+        0,
+        40000000
+      ],
+      "packet_durations_ns": [
+        null,
+        null,
+        40000000
+      ],
+      "cues": [
+        {
+          "text": "First simultaneous",
+          "start_ns": 0,
+          "end_ns": 40000000
+        },
+        {
+          "text": "Second simultaneous",
+          "start_ns": 0,
+          "end_ns": 40000000
+        },
+        {
+          "text": "Later caption",
+          "start_ns": 40000000,
+          "end_ns": 80000000
+        }
+      ]
+    },
+    {
+      "file": "utf8-terminal.mkv",
+      "codec": "utf8",
+      "mode": "terminal",
+      "pts_ns": [
+        0,
+        40000000,
+        40000000
+      ],
+      "packet_durations_ns": [
+        40000000,
+        null,
+        null
+      ],
+      "cues": [
+        {
+          "text": "First simultaneous",
+          "start_ns": 0,
+          "end_ns": 40000000
+        },
+        {
+          "text": "Second simultaneous",
+          "start_ns": 40000000,
+          "end_ns": 2040000000
+        },
+        {
+          "text": "Later caption",
+          "start_ns": 40000000,
+          "end_ns": 2040000000
+        }
+      ]
+    },
+    {
+      "file": "utf8-explicit.mkv",
+      "codec": "utf8",
+      "mode": "explicit",
+      "pts_ns": [
+        0,
+        0,
+        40000000
+      ],
+      "packet_durations_ns": [
+        40000000,
+        40000000,
+        40000000
+      ],
+      "cues": [
+        {
+          "text": "First simultaneous",
+          "start_ns": 0,
+          "end_ns": 40000000
+        },
+        {
+          "text": "Second simultaneous",
+          "start_ns": 0,
+          "end_ns": 40000000
+        },
+        {
+          "text": "Later caption",
+          "start_ns": 40000000,
+          "end_ns": 80000000
+        }
+      ]
+    },
+    {
+      "file": "utf8-distinct.mkv",
+      "codec": "utf8",
+      "mode": "distinct",
+      "pts_ns": [
+        0,
+        40000000,
+        80000000
+      ],
+      "packet_durations_ns": [
+        null,
+        null,
+        40000000
+      ],
+      "cues": [
+        {
+          "text": "First simultaneous",
+          "start_ns": 0,
+          "end_ns": 40000000
+        },
+        {
+          "text": "Second simultaneous",
+          "start_ns": 40000000,
+          "end_ns": 80000000
+        },
+        {
+          "text": "Later caption",
+          "start_ns": 80000000,
+          "end_ns": 120000000
+        }
+      ]
+    },
+    {
+      "file": "ssa-equal.mkv",
+      "codec": "ssa",
+      "mode": "equal",
+      "pts_ns": [
+        0,
+        0,
+        40000000
+      ],
+      "packet_durations_ns": [
+        null,
+        null,
+        40000000
+      ],
+      "cues": [
+        {
+          "text": "First simultaneous",
+          "start_ns": 0,
+          "end_ns": 40000000
+        },
+        {
+          "text": "Second simultaneous",
+          "start_ns": 0,
+          "end_ns": 40000000
+        },
+        {
+          "text": "Later caption",
+          "start_ns": 40000000,
+          "end_ns": 80000000
+        }
+      ]
+    },
+    {
+      "file": "ssa-terminal.mkv",
+      "codec": "ssa",
+      "mode": "terminal",
+      "pts_ns": [
+        0,
+        40000000,
+        40000000
+      ],
+      "packet_durations_ns": [
+        40000000,
+        null,
+        null
+      ],
+      "cues": [
+        {
+          "text": "First simultaneous",
+          "start_ns": 0,
+          "end_ns": 40000000
+        },
+        {
+          "text": "Second simultaneous",
+          "start_ns": 40000000,
+          "end_ns": 2040000000
+        },
+        {
+          "text": "Later caption",
+          "start_ns": 40000000,
+          "end_ns": 2040000000
+        }
+      ]
+    },
+    {
+      "file": "ssa-explicit.mkv",
+      "codec": "ssa",
+      "mode": "explicit",
+      "pts_ns": [
+        0,
+        0,
+        40000000
+      ],
+      "packet_durations_ns": [
+        40000000,
+        40000000,
+        40000000
+      ],
+      "cues": [
+        {
+          "text": "First simultaneous",
+          "start_ns": 0,
+          "end_ns": 40000000
+        },
+        {
+          "text": "Second simultaneous",
+          "start_ns": 0,
+          "end_ns": 40000000
+        },
+        {
+          "text": "Later caption",
+          "start_ns": 40000000,
+          "end_ns": 80000000
+        }
+      ]
+    },
+    {
+      "file": "ssa-distinct.mkv",
+      "codec": "ssa",
+      "mode": "distinct",
+      "pts_ns": [
+        0,
+        40000000,
+        80000000
+      ],
+      "packet_durations_ns": [
+        null,
+        null,
+        40000000
+      ],
+      "cues": [
+        {
+          "text": "First simultaneous",
+          "start_ns": 0,
+          "end_ns": 40000000
+        },
+        {
+          "text": "Second simultaneous",
+          "start_ns": 40000000,
+          "end_ns": 80000000
+        },
+        {
+          "text": "Later caption",
+          "start_ns": 80000000,
+          "end_ns": 120000000
+        }
+      ]
+    },
+    {
+      "file": "ass-equal.mkv",
+      "codec": "ass",
+      "mode": "equal",
+      "pts_ns": [
+        0,
+        0,
+        40000000
+      ],
+      "packet_durations_ns": [
+        null,
+        null,
+        40000000
+      ],
+      "cues": [
+        {
+          "text": "First simultaneous",
+          "start_ns": 0,
+          "end_ns": 40000000
+        },
+        {
+          "text": "Second simultaneous",
+          "start_ns": 0,
+          "end_ns": 40000000
+        },
+        {
+          "text": "Later caption",
+          "start_ns": 40000000,
+          "end_ns": 80000000
+        }
+      ]
+    },
+    {
+      "file": "ass-terminal.mkv",
+      "codec": "ass",
+      "mode": "terminal",
+      "pts_ns": [
+        0,
+        40000000,
+        40000000
+      ],
+      "packet_durations_ns": [
+        40000000,
+        null,
+        null
+      ],
+      "cues": [
+        {
+          "text": "First simultaneous",
+          "start_ns": 0,
+          "end_ns": 40000000
+        },
+        {
+          "text": "Second simultaneous",
+          "start_ns": 40000000,
+          "end_ns": 2040000000
+        },
+        {
+          "text": "Later caption",
+          "start_ns": 40000000,
+          "end_ns": 2040000000
+        }
+      ]
+    },
+    {
+      "file": "ass-explicit.mkv",
+      "codec": "ass",
+      "mode": "explicit",
+      "pts_ns": [
+        0,
+        0,
+        40000000
+      ],
+      "packet_durations_ns": [
+        40000000,
+        40000000,
+        40000000
+      ],
+      "cues": [
+        {
+          "text": "First simultaneous",
+          "start_ns": 0,
+          "end_ns": 40000000
+        },
+        {
+          "text": "Second simultaneous",
+          "start_ns": 0,
+          "end_ns": 40000000
+        },
+        {
+          "text": "Later caption",
+          "start_ns": 40000000,
+          "end_ns": 80000000
+        }
+      ]
+    },
+    {
+      "file": "ass-distinct.mkv",
+      "codec": "ass",
+      "mode": "distinct",
+      "pts_ns": [
+        0,
+        40000000,
+        80000000
+      ],
+      "packet_durations_ns": [
+        null,
+        null,
+        40000000
+      ],
+      "cues": [
+        {
+          "text": "First simultaneous",
+          "start_ns": 0,
+          "end_ns": 40000000
+        },
+        {
+          "text": "Second simultaneous",
+          "start_ns": 40000000,
+          "end_ns": 80000000
+        },
+        {
+          "text": "Later caption",
+          "start_ns": 80000000,
+          "end_ns": 120000000
+        }
+      ]
+    }
+  ],
+  "sha256": {
+    "frame-0.packet": "d586e4311a14b4eeebf2c61fadc917a6dc99aeccb87ceffb1e5166c318e67346",
+    "frame-1.packet": "81a6bc19b3f2ed2d203a852e97b487c13712d0a3d9730d8cadf902a5cbda05c4",
+    "frame-2.packet": "338d4038d521a4e55109198d490b0f8ac78bbb13d41591848bbe2ac879988144",
+    "utf8-0.packet": "9f36ababf583df2e041c5955d394b07c137ee6917b845d8fb2b7561fa70b9890",
+    "utf8-1.packet": "befb5df98858a761acf0d0f5e7ce68059a4a0d3fc598d88dbe34055ed4792212",
+    "utf8-2.packet": "a1114838f5fec7e2ca5693ac7e8061315cd59e376e1b86752626263120d92eb9",
+    "utf8-equal.mkv": "b766d623c8d26fb5be8fb193f4de7d72a17d9754990637bf789346f076799836",
+    "utf8-terminal.mkv": "cc4d11343a52302315fad3b34cd5caf0b0e1d700555a40e84e914e7ae0d91ee5",
+    "utf8-explicit.mkv": "63b30333bd8e0f3596c1155e54a0375f700ac254798999ee308b7a17e5d9badf",
+    "utf8-distinct.mkv": "c63254c8ee5e5eecae6858baa7a9bc1c224433ea27207f9bf1f2815d6c0e9702",
+    "ssa-0.packet": "20b7aaf6d8b161d8545988c8e14e83bafeba21a1682830b61b0b42b864b12e3a",
+    "ssa-1.packet": "645ceb62bb7cad87389d5abb365d7be72e62788b8516fb0f4c4d4ada3bcb8408",
+    "ssa-2.packet": "02f0d697d0e71dafd369b68502d41eae4b73b4fd7688fc08d8e1f8b9b4c47886",
+    "ssa-equal.mkv": "06f6637a712cd94f5cac7de22efa20602226c5a7e867f55160e225e9c0cdc756",
+    "ssa-terminal.mkv": "0fd832beacc9c6e45ee6421834ab9b6478e132affd11c298a96de437aa880e7e",
+    "ssa-explicit.mkv": "b945190669c2a6177fca4c5965b6b66873c48c3815c0a192dd1c6de8371de49d",
+    "ssa-distinct.mkv": "1ad603533acd527d6f6387d7cb51d22396bc7c73f4462fd978e86552adea7a24",
+    "ass-0.packet": "2adc61fa1075e24608a571ecc889f0d84b645193ce838c8f1e871a9adcd49333",
+    "ass-1.packet": "c0558a31adb39fa495a0932bf345c415d783597210fdc1f0c61b0b2a0a534c14",
+    "ass-2.packet": "b28407da2eb7aad972f0f4c91c9fa20bb6b1b4aa78037699c6697848c108bd79",
+    "ass-equal.mkv": "f6a3745138fbeee602dda503c9c528d0f31c62d07dd40bbeb00f508f9735c02b",
+    "ass-terminal.mkv": "23ed30a5cd5bc72298e2814cc0e2190ce7f5633cbafd5f77c0a44ae0e932bdca",
+    "ass-explicit.mkv": "100ac0f64fc88fdeeff5663c537aec2cacfbca7f10411cd4af74243f39b37936",
+    "ass-distinct.mkv": "512ba3058234675d31413ebcb6f15bf560fe7fc05cef53f16461581120e33a1b"
+  }
+}

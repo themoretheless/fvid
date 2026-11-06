@@ -1,8 +1,8 @@
 {
   "target": 1000,
   "counting_rule": "One independently confirmed problem or useful capability; fixture variants and baseline integration repairs are excluded. Only accepted entries count.",
-  "accepted_count": 563,
-  "next_id": "FVID-0564",
+  "accepted_count": 564,
+  "next_id": "FVID-0565",
   "entries": [
     {
       "id": "FVID-0001",
@@ -6384,6 +6384,17 @@
       "result": "Add ExecutionMode::StagedCompute for discrete Vulkan/Metal/D3D12 adapters with storage buffers, and pack RGB24 into R32Uint textures for GPU-side unpacking in mode 4.0 while aligning RGBA uploads to 64-pixel rows.",
       "status": "accepted",
       "validation": "batch-565-validation.json"
+    },
+    {
+      "id": "FVID-0564",
+      "batch": 566,
+      "title": "Infer Matroska subtitle endpoints at the next strictly later visible PTS group",
+      "source": "src/playback/subtitles/webm_subtitles.rs",
+      "regression": "tests/matroska_subtitle_equal_pts.rs",
+      "before": "WebmSubtitleReader::cues selected the immediate visible successor regardless of PTS, so when multiple visible SimpleBlock subtitle cues shared a start timestamp without BlockDuration or DefaultDuration, cue_end rejected next == start and fell back to start + LAST_LINE (2s), leaving the earlier cue visible across later subtitle groups and seeks.",
+      "result": "Advance inferred Matroska subtitle endpoints to the first visible packet with a strictly later presentation timestamp (*next_pts > *pts), preserving explicit BlockDuration, terminal LAST_LINE fallback, and UTF8/SSA/ASS seek alignment across 12 synthetic Matroska witnesses.",
+      "status": "accepted",
+      "validation": "batch-566-validation.json"
     }
   ]
 }

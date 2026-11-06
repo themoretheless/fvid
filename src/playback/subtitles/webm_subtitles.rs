@@ -155,10 +155,13 @@ impl<R: Read + Seek> WebmSubtitleReader<R> {
             let Some(container) = presentation(*pts) else {
                 continue;
             };
-            let next = blocks
+            // Simultaneous blocks share their next strictly later visible
+            // presentation boundary; an equal-PTS neighbor is not a terminal fallback.
+            let next = blocks[position + 1..]
                 .iter()
-                .skip(position + 1)
-                .find(|(_, index)| !self.demuxer.packets[*index].invisible)
+                .find(|(next_pts, index)| {
+                    *next_pts > *pts && !self.demuxer.packets[*index].invisible
+                })
                 .and_then(|(pts, _)| presentation(*pts));
             let (start, end) = match stated {
                 Some(range) => range,
