@@ -1,5 +1,6 @@
 //! GPU-resident filter chains. Upload and download are explicit boundary operations.
-//! This API does not yet import decoder surfaces or export to a hardware encoder.
+//! On macOS Metal, `GpuPipeline::upload_surface` and `ResidentFrame::export_surface`
+//! bridge `fvid_vt::Surface` hardware decoder/encoder buffers directly on the GPU.
 
 /// Submitted boundary payload transfers, excluding small immutable plan uniforms.
 /// Staging bytes include texture-row padding. These are API counters, not a driver trace.

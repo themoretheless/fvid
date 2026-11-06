@@ -869,11 +869,15 @@ impl Session {
                 kCVPixelBufferMetalCompatibilityKey,
             ];
             let values = [number, kCFBooleanTrue];
-            // Bi-planar NV12/P010 can be imported by the Metal adapter. Preserve
-            // compatibility of the legacy three-plane CPU output.
+            // Bi-planar NV12/P010 and tri-planar 4:2:0 can be imported by the Metal adapter.
             let attribute_count = if matches!(
                 pixel_format as u32,
-                P010_VIDEO | P010_FULL | NV12_VIDEO | NV12_FULL
+                P010_VIDEO
+                    | P010_FULL
+                    | NV12_VIDEO
+                    | NV12_FULL
+                    | PLANAR_420
+                    | PLANAR_420_FULL
             ) {
                 2
             } else {
@@ -1280,6 +1284,79 @@ mod retained_surface_tests {
             }
         }
     }
+    #[test]
+    #[cfg(feature = "metal")]
+    #[ignore = "requires a physical VideoToolbox decoder and Metal GPU"]
+    fn planar_420_import_metal_zero_copy() {
+        let bytes = include_bytes!("../../../tests/fixtures/display/par-2x1.mp4");
+        let at = |tag: &[u8]| bytes.windows(4).position(|v| v == tag).unwrap() + 4;
+        let word = |pos| u32::from_be_bytes(bytes[pos..pos + 4].try_into().unwrap()) as usize;
+        let ac = at(b"avcC");
+        let length_size = (bytes[ac + 4] & 3) + 1;
+        let mut pos = ac + 6;
+        let mut sps = Vec::new();
+        let mut pps = Vec::new();
+        for _ in 0..bytes[ac + 5] & 31 {
+            let size = u16::from_be_bytes([bytes[pos], bytes[pos + 1]]) as usize;
+            pos += 2;
+            sps.push(&bytes[pos..pos + size]);
+            pos += size;
+        }
+        let count = bytes[pos];
+        pos += 1;
+        for _ in 0..count {
+            let size = u16::from_be_bytes([bytes[pos], bytes[pos + 1]]) as usize;
+            pos += 2;
+            pps.push(&bytes[pos..pos + size]);
+            pos += size;
+        }
+        let instance = wgpu::Instance::new(wgpu::InstanceDescriptor {
+            backends: wgpu::Backends::METAL,
+            ..wgpu::InstanceDescriptor::new_without_display_handle()
+        });
+        let adapter = pollster::block_on(instance.request_adapter(&Default::default())).unwrap();
+        assert_ne!(adapter.get_info().device_type, wgpu::DeviceType::Cpu);
+        let (device, queue) =
+            pollster::block_on(adapter.request_device(&Default::default())).unwrap();
+        for full in [false, true] {
+            let mut session = Session::new_avc_format(
+                &sps,
+                &pps,
+                length_size,
+                if full { PLANAR_420_FULL } else { PLANAR_420 },
+            )
+            .unwrap();
+            let stsz = at(b"stsz");
+            let stco = at(b"stco");
+            let mut packet_at = word(stco + 8);
+            let mut imported = Vec::new();
+            for index in 0..word(stsz + 8) {
+                let size = word(stsz + 12 + 4 * index);
+                if let Some(surface) = session
+                    .decode_surface(&bytes[packet_at..packet_at + size])
+                    .unwrap()
+                {
+                    assert_eq!(surface.depth(), 8);
+                    assert_eq!(surface.full_range(), full);
+                    let planes = surface.import_metal(&device).unwrap();
+                    assert!(planes.cr.is_some());
+                    imported.push((planes, surface.download().unwrap()));
+                }
+                packet_at += size;
+            }
+            drop(session);
+            assert_eq!(imported.len(), 10);
+            for (native, reference) in imported {
+                assert_eq!(read_plane(&device, &queue, &native.y, 1), reference.y);
+                assert_eq!(read_plane(&device, &queue, &native.uv, 1), reference.cb);
+                assert_eq!(
+                    read_plane(&device, &queue, native.cr.as_ref().unwrap(), 1),
+                    reference.cr
+                );
+            }
+        }
+    }
+
     #[test]
     #[cfg(feature = "metal")]
     #[ignore = "requires a physical Metal GPU"]

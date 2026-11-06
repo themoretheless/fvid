@@ -16,6 +16,7 @@ pub struct GpuPipeline {
     inner: Engine,
     input_len: usize,
     output_len: usize,
+    input_header: Header,
     output_header: Header,
 }
 enum Engine {
@@ -120,6 +121,7 @@ impl GpuPipeline {
             inner,
             input_len,
             output_len,
+            input_header: header.clone(),
             output_header: current,
         })
     }
@@ -128,6 +130,9 @@ impl GpuPipeline {
     }
     pub fn output_len(&self) -> usize {
         self.output_len
+    }
+    pub fn input_header(&self) -> &Header {
+        &self.input_header
     }
     pub fn output_header(&self) -> &Header {
         &self.output_header
@@ -147,6 +152,16 @@ impl GpuPipeline {
             Engine::Wgpu(p) => p.uses_uma_compute(),
             #[cfg(feature = "cuda")]
             Engine::Cuda(_) => false,
+        }
+    }
+    /// True when the pipeline executes storage-buffer compute shaders (`UmaCompute` or `StagedCompute`)
+    /// rather than the GL fallback render pipeline.
+    pub fn uses_compute(&self) -> bool {
+        match &self.inner {
+            #[cfg(feature = "gpu")]
+            Engine::Wgpu(p) => p.uses_compute(),
+            #[cfg(feature = "cuda")]
+            Engine::Cuda(_) => true,
         }
     }
     /// Includes resident textures/buffers, staging, uniforms and caller boundary buffers.
@@ -188,6 +203,29 @@ impl GpuPipeline {
             Engine::Wgpu(p) => p.upload_frame(bytes)?,
             #[cfg(feature = "cuda")]
             Engine::Cuda(p) => p.upload(bytes).map_err(Error::Gpu)?,
+        }
+        Ok(UploadedFrame { pipeline: self })
+    }
+    /// Import an 8-bit 4:2:0 `fvid_vt::Surface` (`NV12` or 3-plane `PLANAR_420`) directly into
+    /// the resident GPU input buffer on Metal without downloading or copying pixels on the CPU.
+    #[cfg(all(target_os = "macos", feature = "gpu"))]
+    pub fn upload_surface(&mut self, surface: &fvid_vt::Surface) -> Result<UploadedFrame<'_>> {
+        if self.input_header.format != crate::PixelFormat::Yuv420 || self.input_header.depth() != 8
+        {
+            return Err(fail(
+                "resident surface import requires an 8-bit Yuv420 pipeline input header",
+            ));
+        }
+        let width = self.input_header.width;
+        let height = self.input_header.height;
+        match &mut self.inner {
+            Engine::Wgpu(p) => p.upload_vt_surface(surface, width, height)?,
+            #[cfg(feature = "cuda")]
+            Engine::Cuda(_) => {
+                return Err(fail(
+                    "VideoToolbox surface import requires the Metal backend",
+                ));
+            }
         }
         Ok(UploadedFrame { pipeline: self })
     }
@@ -235,5 +273,29 @@ impl ResidentFrame<'_> {
             Engine::Cuda(p) => p.download(bytes).map_err(Error::Gpu)?,
         }
         Ok(self.pipeline.transfers())
+    }
+    /// Export the resident 8-bit 4:2:0 frame directly into an `IOSurface`-backed NV12
+    /// `fvid_vt::Surface` on Metal without host readback, ready for `fvid_vt::Encoder::encode`.
+    #[cfg(all(target_os = "macos", feature = "gpu"))]
+    pub fn export_surface(self, full_range: bool) -> Result<(fvid_vt::Surface, TransferStats)> {
+        if self.pipeline.output_header.format != crate::PixelFormat::Yuv420
+            || self.pipeline.output_header.depth() != 8
+        {
+            return Err(fail(
+                "resident surface export requires an 8-bit Yuv420 pipeline output header",
+            ));
+        }
+        let width = self.pipeline.output_header.width;
+        let height = self.pipeline.output_header.height;
+        let surface = match &mut self.pipeline.inner {
+            Engine::Wgpu(p) => p.export_vt_surface(width, height, full_range)?,
+            #[cfg(feature = "cuda")]
+            Engine::Cuda(_) => {
+                return Err(fail(
+                    "VideoToolbox surface export requires the Metal backend",
+                ));
+            }
+        };
+        Ok((surface, self.pipeline.transfers()))
     }
 }

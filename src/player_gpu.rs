@@ -84,6 +84,39 @@ fn to_linear(c: vec3<f32>) -> vec3<f32> {
     return select(high, low, c <= vec3(0.04045));
 }
 
+fn load_rgba_texel(p: vec2<i32>) -> vec4<f32> {
+    if params.adjust_b.z > 3.5 {
+        let total = i32(round(params.sample_scale));
+        let size = vec2<i32>(textureDimensions(plane_y, 0));
+        let base = (p.y * size.x + p.x) * 3;
+        var out = vec4<f32>(0.0, 0.0, 0.0, 1.0);
+        for (var c = 0; c < 3; c = c + 1) {
+            let idx = base + c;
+            let plane = idx / total;
+            let rem = idx % total;
+            let coord = vec2<i32>(rem % size.x, rem / size.x);
+            var val = 0.0;
+            if plane == 0 {
+                val = textureLoad(plane_y, coord, 0).r;
+            } else if plane == 1 {
+                val = textureLoad(plane_cb, coord, 0).r;
+            } else {
+                val = textureLoad(plane_cr, coord, 0).r;
+            }
+            if c == 0 {
+                out.r = val;
+            } else if c == 1 {
+                out.g = val;
+            } else {
+                out.b = val;
+            }
+        }
+        return out;
+    }
+    let raw = textureLoad(plane_y, p, 0);
+    return vec4(raw.rgb * raw.a, raw.a);
+}
+
 // Interpolate normalized byte texels in float32, preserving precision when
 // an RGB8 source is scaled into a 10-bit encoder surface.
 fn sample_rgba(uv: vec2<f32>) -> vec4<f32> {
@@ -98,14 +131,10 @@ fn sample_rgba(uv: vec2<f32>) -> vec4<f32> {
     let lo = vec2<i32>(floor(at));
     let hi = min(lo + vec2(1), size - vec2(1));
     let fraction = fract(at);
-    let a_raw = textureLoad(plane_y, lo, 0);
-    let a = vec4(a_raw.rgb * a_raw.a, a_raw.a);
-    let b_raw = textureLoad(plane_y, vec2(hi.x, lo.y), 0);
-    let b = vec4(b_raw.rgb * b_raw.a, b_raw.a);
-    let c_raw = textureLoad(plane_y, vec2(lo.x, hi.y), 0);
-    let c = vec4(c_raw.rgb * c_raw.a, c_raw.a);
-    let d_raw = textureLoad(plane_y, hi, 0);
-    let d = vec4(d_raw.rgb * d_raw.a, d_raw.a);
+    let a = load_rgba_texel(lo);
+    let b = load_rgba_texel(vec2(hi.x, lo.y));
+    let c = load_rgba_texel(vec2(lo.x, hi.y));
+    let d = load_rgba_texel(hi);
     return mix(mix(a, b, fraction.x), mix(c, d, fraction.x), fraction.y);
 }
 
@@ -369,7 +398,7 @@ fn fs(in: VertexOut) -> @location(0) vec4<f32> {
     let g = (y - params.kr * r - params.kb * b) / (1.0 - params.kr - params.kb);
     var rgb = clamp(vec3(r, g, b), vec3(0.0), vec3(1.0));
     var opacity = 1.0;
-    if params.adjust_b.z == 3.0 {
+    if params.adjust_b.z >= 3.0 {
         let rgba = sample_rgba(in.uv);
         opacity = rgba.a;
         rgb = rgba.rgb / max(opacity, 0.0000001);
@@ -543,7 +572,7 @@ impl MetalEncoderRenderer {
             self.window,
             IDENTITY_ADJUST,
             grade,
-            self.gpu.rotation,
+            0,
         );
         self.render(device, queue, output_size)
     }
@@ -565,7 +594,7 @@ impl MetalEncoderRenderer {
             self.window,
             IDENTITY_ADJUST,
             grade,
-            self.gpu.rotation,
+            0,
         )?;
         self.render(device, queue, output_size)
     }
@@ -675,7 +704,6 @@ pub struct VideoGpu {
     planes: Option<Planes>,
     surface_mode: f32,
     rgb_source: Option<Arc<Vec<u8>>>,
-    rgb_staging: Vec<u8>,
     rotation: u16,
     /// The grade the shader reads, which travels with the bind group below.
     grid: Grid,
@@ -683,6 +711,7 @@ pub struct VideoGpu {
     /// The plane geometry and grade the current bind group was built for: a
     /// change to either needs a new one, and nothing else does.
     bound: Option<([usize; 2], [usize; 2], usize)>,
+    imported_surface: bool,
     serial: u64,
     /// The crop the uniform currently holds, kept so a crop changed while the
     /// same frame stays on screen still reaches the shader.
@@ -1105,11 +1134,11 @@ fn build_with_source(
         planes: None,
         surface_mode: 0.0,
         rgb_source: None,
-        rgb_staging: Vec::new(),
         rotation: 0,
         grid: Grid::empty(device),
         bind_group: None,
         bound: None,
+        imported_surface: false,
         serial: u64::MAX,
         window: [0.0; 4],
         adjust: IDENTITY_ADJUST,
@@ -1429,7 +1458,7 @@ impl VideoGpu {
         window: [f32; 4],
         adjust: [f32; 5],
     ) -> crate::Result<bool> {
-        if self.surface_mode == 3.0
+        if self.surface_mode >= 3.0
             && self.planes.as_ref().is_some_and(|p| p.size == size)
             && self
                 .rgb_source
@@ -1550,57 +1579,82 @@ impl VideoGpu {
         {
             return Err(crate::invalid("invalid RGB display frame"));
         }
-        if self.surface_mode != 3.0 || self.planes.as_ref().is_none_or(|p| p.size != size) {
-            let mut planes = self.create_planes(device, size, [1, 1], 8);
-            planes.textures[0] = device.create_texture(&wgpu::TextureDescriptor {
-                label: Some("fvid RGB display"),
-                size: wgpu::Extent3d {
-                    width: size[0] as u32,
-                    height: size[1] as u32,
-                    depth_or_array_layers: 1,
-                },
-                mip_level_count: 1,
-                sample_count: 1,
-                dimension: wgpu::TextureDimension::D2,
-                format: wgpu::TextureFormat::Rgba8Unorm,
-                usage: wgpu::TextureUsages::TEXTURE_BINDING | wgpu::TextureUsages::COPY_DST,
-                view_formats: &[],
-            });
-            planes.views[0] = planes.textures[0].create_view(&Default::default());
-            self.planes = Some(planes);
+        let target_mode = if channels == 4 { 3.0 } else { 4.0 };
+        let chroma = if channels == 4 { [1, 1] } else { size };
+        if self.imported_surface
+            || self.surface_mode != target_mode
+            || self
+                .planes
+                .as_ref()
+                .is_none_or(|p| p.size != size || p.chroma != chroma)
+        {
+            if channels == 4 {
+                let mut planes = self.create_planes(device, size, [1, 1], 8);
+                planes.textures[0] = device.create_texture(&wgpu::TextureDescriptor {
+                    label: Some("fvid RGBA display"),
+                    size: wgpu::Extent3d {
+                        width: size[0] as u32,
+                        height: size[1] as u32,
+                        depth_or_array_layers: 1,
+                    },
+                    mip_level_count: 1,
+                    sample_count: 1,
+                    dimension: wgpu::TextureDimension::D2,
+                    format: wgpu::TextureFormat::Rgba8Unorm,
+                    usage: wgpu::TextureUsages::TEXTURE_BINDING | wgpu::TextureUsages::COPY_DST,
+                    view_formats: &[],
+                });
+                planes.views[0] = planes.textures[0].create_view(&Default::default());
+                self.planes = Some(planes);
+            } else {
+                self.planes = Some(self.create_planes(device, size, size, 8));
+            }
             self.bound = None;
         }
-        self.surface_mode = 3.0;
+        self.surface_mode = target_mode;
+        self.imported_surface = false;
         self.rgb_source = None;
         self.rotation = 0;
         self.serial = serial;
         self.window = window;
         self.adjust = adjust;
         self.grid.set(device, queue, None);
-        self.bind_planes(device, size, [1, 1]);
-        let needed = size[0] * size[1] * 4;
-        if self.rgb_staging.len() < needed {
-            self.rgb_staging.resize(needed, 0);
+        self.bind_planes(device, size, chroma);
+        let planes = self.planes.as_ref().unwrap();
+        if channels == 4 {
+            queue.write_texture(
+                planes.textures[0].as_image_copy(),
+                rgb,
+                wgpu::TexelCopyBufferLayout {
+                    offset: 0,
+                    bytes_per_row: Some(size[0] as u32 * 4),
+                    rows_per_image: Some(size[1] as u32),
+                },
+                wgpu::Extent3d {
+                    width: size[0] as u32,
+                    height: size[1] as u32,
+                    depth_or_array_layers: 1,
+                },
+            );
+        } else {
+            let chunk = size[0] * size[1];
+            for (index, slice) in rgb.chunks_exact(chunk).enumerate() {
+                queue.write_texture(
+                    planes.textures[index].as_image_copy(),
+                    slice,
+                    wgpu::TexelCopyBufferLayout {
+                        offset: 0,
+                        bytes_per_row: Some(size[0] as u32),
+                        rows_per_image: Some(size[1] as u32),
+                    },
+                    wgpu::Extent3d {
+                        width: size[0] as u32,
+                        height: size[1] as u32,
+                        depth_or_array_layers: 1,
+                    },
+                );
+            }
         }
-        let rgba = &mut self.rgb_staging[..needed];
-        for (src, dst) in rgb.chunks_exact(channels).zip(rgba.chunks_exact_mut(4)) {
-            dst[..3].copy_from_slice(&src[..3]);
-            dst[3] = if channels==4 {src[3]} else {255};
-        }
-        queue.write_texture(
-            self.planes.as_ref().unwrap().textures[0].as_image_copy(),
-            rgba,
-            wgpu::TexelCopyBufferLayout {
-                offset: 0,
-                bytes_per_row: Some(size[0] as u32 * 4),
-                rows_per_image: Some(size[1] as u32),
-            },
-            wgpu::Extent3d {
-                width: size[0] as u32,
-                height: size[1] as u32,
-                depth_or_array_layers: 1,
-            },
-        );
         self.write_params(queue, 8, AvcColour::default(), window, adjust);
         Ok(())
     }
@@ -1616,7 +1670,8 @@ impl VideoGpu {
         grade: Option<&Arc<Grade>>,
         rotation: u16,
     ) {
-        if self.surface_mode == 0.0
+        if !self.imported_surface
+            && self.surface_mode == 0.0
             && self.serial == serial
             && self.window == window
             && self.adjust == adjust
@@ -1631,16 +1686,19 @@ impl VideoGpu {
         let size = frame.size;
         let chroma = frame.chroma;
         let bytes_per_sample = if frame.depth == 8 { 1 } else { 2 };
-        if self.planes.as_ref().is_none_or(|p| {
-            p.size != size
-                || p.chroma != chroma
-                || p.depth != frame.depth
-                || self.surface_mode != 0.0
-        }) {
+        if self.imported_surface
+            || self.planes.as_ref().is_none_or(|p| {
+                p.size != size
+                    || p.chroma != chroma
+                    || p.depth != frame.depth
+                    || self.surface_mode != 0.0
+            })
+        {
             self.planes = Some(self.create_planes(device, size, chroma, frame.depth));
             self.bound = None;
         }
         self.surface_mode = 0.0;
+        self.imported_surface = false;
         self.rgb_source = None;
         self.rotation = rotation;
         self.grid.set(device, queue, grade);
@@ -1711,21 +1769,22 @@ impl VideoGpu {
         if ![0, 90, 180, 270].contains(&rotation) {
             return Err(crate::invalid("invalid surface rotation"));
         }
-        let native_mode = if frame.depth() == 8 { 1.0 } else { 2.0 };
-        if self.surface_mode == native_mode
-            && self.rotation == rotation
-            && self.serial == serial
-            && self.window == window
-            && self.adjust == adjust
-            && self.grid.holds(grade)
+        if !self.imported_surface
+            || self.serial != serial
+            || self
+                .planes
+                .as_ref()
+                .is_none_or(|p| p.size != [frame.width(), frame.height()] || p.depth != frame.depth())
         {
-            return Ok(());
-        }
-        if self.surface_mode != native_mode || self.serial != serial {
             let imported = frame
                 .import_metal(device)
                 .map_err(|e| crate::Error::Gpu(e.to_string()))?;
-            let textures = [imported.y, imported.uv.clone(), imported.uv];
+            let (native_mode, textures) = if let Some(cr) = imported.cr {
+                (0.0, [imported.y, imported.uv, cr])
+            } else {
+                let mode = if frame.depth() == 8 { 1.0 } else { 2.0 };
+                (mode, [imported.y, imported.uv.clone(), imported.uv])
+            };
             let views = std::array::from_fn(|i| textures[i].create_view(&Default::default()));
             self.planes = Some(Planes {
                 size: [frame.width(), frame.height()],
@@ -1734,10 +1793,17 @@ impl VideoGpu {
                 textures,
                 views,
             });
+            self.surface_mode = native_mode;
+            self.imported_surface = true;
             self.bound = None;
+        } else if self.rotation == rotation
+            && self.window == window
+            && self.adjust == adjust
+            && self.grid.holds(grade)
+        {
+            return Ok(());
         }
         self.rotation = rotation;
-        self.surface_mode = if frame.depth() == 8 { 1.0 } else { 2.0 };
         self.rgb_source = None;
         self.serial = serial;
         self.window = window;
@@ -1832,7 +1898,15 @@ impl VideoGpu {
             colour.kr as f32,
             colour.kb as f32,
             if self.srgb { 1.0 } else { 0.0 },
-            if depth > 8 { 1.0 / scale } else { 0.0 },
+            if self.surface_mode == 4.0 {
+                self.planes
+                    .as_ref()
+                    .map_or(0.0, |p| (p.size[0] * p.size[1]) as f32)
+            } else if depth > 8 {
+                1.0 / scale
+            } else {
+                0.0
+            },
             window[0],
             window[1],
             window[2],
@@ -3765,6 +3839,90 @@ mod tests {
                 frames += 1;
             }
             assert!(frames >= 10);
+        }
+
+        // Also verify 3-plane PLANAR_420 ('y420') hardware surface zero-copy Metal import
+        // through VideoGpu::import_surface_rotated across all rotations.
+        let bytes = include_bytes!("../tests/fixtures/display/par-2x1.mp4").as_slice();
+        let mut reader = Mp4Reader::open(std::io::Cursor::new(bytes), Limits::default()).unwrap();
+        let track = reader
+            .tracks()
+            .iter()
+            .position(|t| t.handler == *b"vide")
+            .unwrap();
+        let config = AvcConfig::parse(&reader.tracks()[track].configuration).unwrap();
+        let mut session =
+            fvid_vt::Session::new(&config.sps, &config.pps, config.length_size).unwrap();
+        let mut packet = Vec::new();
+        reader.read_packet(track, 0, &mut packet).unwrap();
+        let surface = session.decode_surface(&packet).unwrap().unwrap();
+        let planes = surface.download().unwrap();
+        let colour = AvcColour {
+            kr: 0.2126,
+            kb: 0.0722,
+            full: planes.full_range,
+        };
+        let mut data = planes.y;
+        data.extend(planes.cb);
+        data.extend(planes.cr);
+        let packed = PackedPlanar::new(
+            crate::native_geometry::GeometryFrame {
+                width: planes.width,
+                height: planes.height,
+                subsampling: Some([2, 2]),
+                data,
+            },
+            planes.depth,
+            colour,
+        )
+        .unwrap();
+        for rotation in [0, 90, 180, 270] {
+            let turned = packed.rotated(rotation).unwrap();
+            serial += 1;
+            gpu.upload_packed(
+                &device,
+                &queue,
+                &turned,
+                serial,
+                [0.0, 0.0, 1.0, 1.0],
+                IDENTITY_ADJUST,
+                None,
+                0,
+            )
+            .unwrap();
+            let reference = read_picture(
+                &device,
+                &queue,
+                &gpu,
+                turned.frame.width,
+                turned.frame.height,
+            );
+            gpu.import_surface_rotated(
+                &device,
+                &queue,
+                &surface,
+                colour,
+                serial,
+                [0.0, 0.0, 1.0, 1.0],
+                IDENTITY_ADJUST,
+                None,
+                rotation,
+            )
+            .unwrap();
+            let shown = read_picture(
+                &device,
+                &queue,
+                &gpu,
+                turned.frame.width,
+                turned.frame.height,
+            );
+            assert!(
+                shown
+                    .iter()
+                    .zip(&reference)
+                    .all(|(a, b)| a.abs_diff(*b) <= 1),
+                "3-plane PLANAR_420 surface conversion differs at rotation {rotation}"
+            );
         }
     }
     #[test]

@@ -1,8 +1,8 @@
 {
   "target": 1000,
   "counting_rule": "One independently confirmed problem or useful capability; fixture variants and baseline integration repairs are excluded. Only accepted entries count.",
-  "accepted_count": 560,
-  "next_id": "FVID-0561",
+  "accepted_count": 563,
+  "next_id": "FVID-0564",
   "entries": [
     {
       "id": "FVID-0001",
@@ -6351,6 +6351,39 @@
       "result": "Charge Y4MReader yuv+rgb buffers plus RawFrame simultaneously in both passthrough and transformed Y4M inspections, and bound container pixel filter working sets consistently across planning and execution.",
       "status": "accepted",
       "validation": "batch-564-validation.json"
+    },
+    {
+      "id": "FVID-0561",
+      "batch": 565,
+      "title": "Import tri-planar 4:2:0 VideoToolbox surfaces zero-copy into Metal textures and player display",
+      "source": "crates/fvid-vt/src/metal.rs",
+      "regression": "crates/fvid-vt/src/lib.rs",
+      "before": "Session omitted kCVPixelBufferMetalCompatibilityKey for PLANAR_420 and PLANAR_420_FULL formats, and FrameSurface::import_metal rejected tri-planar 4:2:0 CVPixelBuffers, forcing a CPU download for legacy three-plane decoder sessions.",
+      "result": "Request Metal compatibility on PLANAR_420/PLANAR_420_FULL decoder pools, import plane 2 as an R8Unorm Cr texture in FrameSurface::import_metal, and bind 3-plane native surfaces directly in VideoGpu::import_surface_rotated across all rotations.",
+      "status": "accepted",
+      "validation": "batch-565-validation.json"
+    },
+    {
+      "id": "FVID-0562",
+      "batch": 565,
+      "title": "Zero-copy VideoToolbox surface import and export in resident Metal GPU pipelines",
+      "source": "src/gpu/mod.rs",
+      "regression": "tests/resident.rs",
+      "before": "GpuPipeline and GpuProcessor required CPU planar byte slices for upload and download, copying decoded VideoToolbox surfaces through host memory before and after resident GPU filter stages.",
+      "result": "Add GpuPipeline::upload_surface and ResidentFrame::export_surface on macOS Metal with zero-copy CVMetalTexture import and compute-shader plane packing/unpacking for both NV12 and tri-planar 4:2:0 surfaces, verified bit-exact against CPU reference.",
+      "status": "accepted",
+      "validation": "batch-565-validation.json"
+    },
+    {
+      "id": "FVID-0563",
+      "batch": 565,
+      "title": "Staged storage-buffer compute execution and packed RGBA texture display in VideoGpu",
+      "source": "src/player_gpu.rs",
+      "regression": "tests/gpu_shader.rs",
+      "before": "Non-UMA discrete GPUs fell back to per-plane render passes in GpuProcessor, and VideoGpu::upload_rgb unpacked 3-byte RGB24 frames into 4-byte RGBA staging buffers on the CPU before upload.",
+      "result": "Add ExecutionMode::StagedCompute for discrete Vulkan/Metal/D3D12 adapters with storage buffers, and pack RGB24 into R32Uint textures for GPU-side unpacking in mode 4.0 while aligning RGBA uploads to 64-pixel rows.",
+      "status": "accepted",
+      "validation": "batch-565-validation.json"
     }
   ]
 }

@@ -120,13 +120,15 @@ impl From<forma_gpu::metal_memory::MetalMemoryError> for Error {
     }
 }
 
-/// Native NV12 or P010 planes. NV12 samples are normalized eight-bit values.
-/// For P010, Samples are normalized MSB-aligned ten-bit words:
-/// multiply by 65535 / 64 to recover the source ten-bit sample.
+/// Native NV12, P010, or 3-plane 4:2:0 planes. NV12 and 4:2:0 samples are
+/// normalized eight-bit values. For P010, samples are normalized MSB-aligned
+/// ten-bit words: multiply by 65535 / 64 to recover the source ten-bit sample.
 pub struct MetalPlanes {
     pub y: wgpu::Texture,
-    /// Cb in red, Cr in green.
+    /// For NV12/P010: Cb in red, Cr in green. For 3-plane 4:2:0: Cb in red.
     pub uv: wgpu::Texture,
+    /// Present only for 3-plane 4:2:0 (`'y420'` / `'f420'`): Cr in red.
+    pub cr: Option<wgpu::Texture>,
 }
 impl Surface {
     /// Render both native encoder planes without exposing writable texture
@@ -268,8 +270,9 @@ impl Surface {
         };
         Ok(surface)
     }
-    /// Map a retained NV12 or P010 image without locking, downloading or uploading its
-    /// pixels. P010 requires TEXTURE_FORMAT_16BIT_NORM; NV12 needs no optional feature.
+    /// Map a retained NV12, P010, or 3-plane 4:2:0 image without locking, downloading or
+    /// uploading its pixels. P010 requires TEXTURE_FORMAT_16BIT_NORM; NV12 and 4:2:0 need no
+    /// optional feature.
     pub fn import_metal(&self, device: &wgpu::Device) -> Result<MetalPlanes, Error> {
         self.import_metal_usage(device, false)
     }
@@ -279,12 +282,20 @@ impl Surface {
         render: bool,
     ) -> Result<MetalPlanes, Error> {
         let format = unsafe { CVPixelBufferGetPixelFormatType(self.0.image) };
-        let (y_format, uv_format, y_metal, uv_metal) = match format {
+        let (y_format, uv_format, y_metal, uv_metal, tri_planar) = match format {
             NV12_VIDEO | NV12_FULL => (
                 wgpu::TextureFormat::R8Unorm,
                 wgpu::TextureFormat::Rg8Unorm,
                 MTLPixelFormat::R8Unorm,
                 MTLPixelFormat::RG8Unorm,
+                false,
+            ),
+            PLANAR_420 | PLANAR_420_FULL if !render => (
+                wgpu::TextureFormat::R8Unorm,
+                wgpu::TextureFormat::R8Unorm,
+                MTLPixelFormat::R8Unorm,
+                MTLPixelFormat::R8Unorm,
+                true,
             ),
             P010_VIDEO | P010_FULL => {
                 if !device
@@ -300,9 +311,14 @@ impl Surface {
                     wgpu::TextureFormat::Rg16Unorm,
                     MTLPixelFormat::R16Unorm,
                     MTLPixelFormat::RG16Unorm,
+                    false,
                 )
             }
-            _ => return Err(Error("Metal import requires NV12 or P010 surfaces".into())),
+            _ => {
+                return Err(Error(
+                    "Metal import requires NV12, P010, or 3-plane 4:2:0 surfaces".into(),
+                ));
+            }
         };
         // SAFETY: the cache is reused per wgpu Metal device. The image is retained.
         // Public imports follow synchronous decode and are read-only. Internal output
@@ -340,17 +356,17 @@ impl Surface {
             if attributes.as_ref().is_some_and(|a| a.0.is_null()) {
                 return Err(Error("Metal attributes allocation failed".into()));
             }
-            let mut textures = Vec::new();
-            for (plane, format, metal_format, width, height) in [
+            let chroma_w = self.width().div_ceil(2);
+            let chroma_h = self.height().div_ceil(2);
+            let mut plane_specs = vec![
                 (0, y_format, y_metal, self.width(), self.height()),
-                (
-                    1,
-                    uv_format,
-                    uv_metal,
-                    self.width().div_ceil(2),
-                    self.height().div_ceil(2),
-                ),
-            ] {
+                (1, uv_format, uv_metal, chroma_w, chroma_h),
+            ];
+            if tri_planar {
+                plane_specs.push((2, uv_format, uv_metal, chroma_w, chroma_h));
+            }
+            let mut textures = Vec::with_capacity(plane_specs.len());
+            for (plane, format, metal_format, width, height) in plane_specs {
                 let size = wgpu::Extent3d {
                     width: u32::try_from(width)
                         .map_err(|_| Error("surface width overflow".into()))?,
@@ -399,7 +415,7 @@ impl Surface {
                 textures.push(device.create_texture_from_hal::<wgpu::hal::api::Metal>(
                     raw,
                     &wgpu::TextureDescriptor {
-                        label: Some("VideoToolbox P010 plane"),
+                        label: Some("VideoToolbox plane"),
                         size,
                         mip_level_count: 1,
                         sample_count: 1,
@@ -418,9 +434,10 @@ impl Surface {
                 ));
             }
             drop(cache_guard);
+            let cr = tri_planar.then(|| textures.pop().unwrap());
             let uv = textures.pop().unwrap();
             let y = textures.pop().unwrap();
-            Ok(MetalPlanes { y, uv })
+            Ok(MetalPlanes { y, uv, cr })
         }
     }
 }

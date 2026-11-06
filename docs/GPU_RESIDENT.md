@@ -1,6 +1,6 @@
 # GPU-кадры между фильтрами без возврата в RAM
 
-Реализованы `GpuPipeline`, `UploadedFrame` и `ResidentFrame`: одна загрузка входа, последовательность GPU-фильтров и только явно запрошенная выгрузка. Есть реализации через wgpu (Metal/Vulkan/DX12/GL) и CUDA. Это завершённый путь **filter→filter**; импорт кадров аппаратного декодера и передача аппаратному энкодеру пока отсутствуют.
+Реализованы `GpuPipeline`, `UploadedFrame` и `ResidentFrame`: одна загрузка входа, последовательность GPU-фильтров и только явно запрошенная выгрузка. Есть реализации через wgpu (Metal/Vulkan/DX12/GL) и CUDA. На macOS (`videotoolbox` + `metal`) поддерживается прямой zero-copy импорт аппаратных поверхностей `fvid_vt::Surface` (`GpuPipeline::upload_surface`) и прямой экспорт результата обратно в `fvid_vt::Surface` (`ResidentFrame::export_surface`) для подачи в аппаратный `fvid_vt::Encoder`.
 
 ## Запуск
 
@@ -93,4 +93,4 @@ python scripts/validate_hw_cuda.py --benchmark-reference
 
 Путь: FFmpeg CUDA hwaccel decode (NV12 device surfaces) → `fvid-cuda` NV12 crop/hflip/vflip (device-to-device) → `h264_nvenc`. Статистика сообщает `host_frame_copies=0` на happy path. Это не полный codec graph и не замена software lossless path.
 
-Первый целевой путь для Apple GPU по-прежнему VideoToolbox/CVPixelBuffer/IOSurface ↔ Metal.
+Первый целевой путь для Apple GPU (VideoToolbox/CVPixelBuffer/IOSurface ↔ Metal) соединён напрямую с резидентным пайплайном через `GpuPipeline::upload_surface` и `ResidentFrame::export_surface` без выгрузки плоскостей на CPU.

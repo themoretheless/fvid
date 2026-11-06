@@ -256,7 +256,7 @@ fn programmable_filters_translate_to_every_shader_backend() {
 
 #[cfg(feature = "gpu")]
 #[test]
-fn compute_shader_and_programmable_filters_translate_to_metal_and_spirv() {
+fn compute_shader_and_programmable_filters_translate_to_metal_spirv_and_hlsl() {
     let compute_base = include_str!("../src/gpu/compute.wgsl");
     for source in [
         compute_base,
@@ -302,6 +302,61 @@ fn compute_shader_and_programmable_filters_translate_to_metal_and_spirv() {
             .as_ref()
             .expect("MSL compute entry point");
         assert!(msl_source.contains(translated_name));
+
+        let spv_options = spv::Options {
+            lang_version: (1, 0),
+            fake_missing_bindings: false,
+            binding_map: (0..8)
+                .map(|index| {
+                    (
+                        binding(index),
+                        spv::BindingInfo {
+                            descriptor_set: 0,
+                            binding: index,
+                            binding_array_size: None,
+                        },
+                    )
+                })
+                .collect(),
+            capabilities: Some([spv::Capability::Shader].into_iter().collect()),
+            ..Default::default()
+        };
+        let spv_pipeline = spv::PipelineOptions {
+            shader_stage: ShaderStage::Compute,
+            entry_point: "compute_main".into(),
+        };
+        let words = spv::write_vec(&module, &info, &spv_options, Some(&spv_pipeline))
+            .expect("SPIR-V compute translation must succeed");
+        assert!(words.len() > 5);
+        assert_eq!(words[0], 0x0723_0203);
+
+        let hlsl_options = hlsl::Options {
+            shader_model: hlsl::ShaderModel::V5_1,
+            fake_missing_bindings: false,
+            binding_map: (0..8)
+                .map(|index| {
+                    (
+                        binding(index),
+                        hlsl::BindTarget {
+                            register: index,
+                            ..Default::default()
+                        },
+                    )
+                })
+                .collect(),
+            ..Default::default()
+        };
+        let hlsl_pipeline = hlsl::PipelineOptions {
+            entry_point: Some((ShaderStage::Compute, "compute_main".into())),
+        };
+        let mut hlsl_source = String::new();
+        let hlsl_reflection = hlsl::Writer::new(&mut hlsl_source, &hlsl_options, &hlsl_pipeline)
+            .write(&module, &info, None)
+            .expect("HLSL compute translation must succeed");
+        let hlsl_name = hlsl_reflection.entry_point_names[0]
+            .as_ref()
+            .expect("HLSL compute entry point");
+        assert!(hlsl_source.contains(hlsl_name));
     }
 }
 

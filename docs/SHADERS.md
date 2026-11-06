@@ -86,11 +86,10 @@ hides the platform media engine.
 
 The complete acceleration goal remains open. In particular:
 
-- Qualified Metal players import VideoToolbox NV12/P010 surfaces directly;
+- Qualified Metal players import VideoToolbox NV12, P010 and 3-plane 4:2:0 (`y420`/`f420`) surfaces directly;
   CPU consumers explicitly download them.
 - Native decode/export APIs and most built-in filters still use CPU processing.
-- General resident shader pipelines do not yet import decoder surfaces or
-  export encoder surfaces. CUDA `media hw-filter` has a dedicated NVDEC/NVENC
+- On macOS (`videotoolbox` + `metal`), resident shader pipelines (`GpuPipeline`) directly import VideoToolbox decoder surfaces (`upload_surface`) and export hardware encoder surfaces (`export_surface`) without host roundtrips. CUDA `media hw-filter` has a dedicated NVDEC/NVENC
   path, limited to its built-in NV12 geometry filters.
 - RGB player frames upload their display codes and take the same picture
   adjustment and display shader as source-depth planar frames. An immutable

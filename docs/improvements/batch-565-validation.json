@@ -1,0 +1,92 @@
+{
+  "status": "accepted",
+  "accepted_ids": [
+    "FVID-0561",
+    "FVID-0562",
+    "FVID-0563"
+  ],
+  "count_delta": 3,
+  "accepted_count": 563,
+  "next_id": "FVID-0564",
+  "qualification": [
+    {
+      "name": "fvid-vt-metal-hardware",
+      "command": [
+        "cargo",
+        "test",
+        "-p",
+        "fvid-vt",
+        "--features",
+        "metal",
+        "--",
+        "--include-ignored"
+      ],
+      "exit_code": 0,
+      "passed": 6,
+      "ignored": 0
+    },
+    {
+      "name": "resident-metal-hardware",
+      "command": [
+        "cargo",
+        "test",
+        "--features",
+        "player",
+        "--test",
+        "resident",
+        "metal_",
+        "--",
+        "--include-ignored"
+      ],
+      "exit_code": 0,
+      "passed": 2,
+      "ignored": 0
+    },
+    {
+      "name": "resident-plan-validation",
+      "command": [
+        "cargo",
+        "test",
+        "--features",
+        "player",
+        "--test",
+        "resident"
+      ],
+      "exit_code": 0,
+      "passed": 1,
+      "ignored": 3
+    },
+    {
+      "name": "gpu-shader-all-backends",
+      "command": [
+        "cargo",
+        "test",
+        "--features",
+        "player",
+        "--test",
+        "gpu_shader",
+        "--",
+        "--include-ignored"
+      ],
+      "exit_code": 0,
+      "passed": 9,
+      "ignored": 0
+    },
+    {
+      "name": "player-gpu-metal-hardware",
+      "command": [
+        "cargo",
+        "test",
+        "--features",
+        "player",
+        "--lib",
+        "player_gpu",
+        "--",
+        "--include-ignored"
+      ],
+      "exit_code": 0,
+      "passed": 34,
+      "ignored": 0
+    }
+  ]
+}
