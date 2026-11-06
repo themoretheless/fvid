@@ -81,7 +81,7 @@ impl<R: BufRead + Seek> Y4mReader<R> {
                 ));
             }
         }
-        let rate = rate.ok_or_else(|| invalid("playback requires a Y4M frame rate"))?;
+        let rate = rate.unwrap_or((25, 1));
         let period = Duration::from_secs_f64(f64::from(rate.1) / f64::from(rate.0));
         if period.is_zero() {
             return Err(invalid("frame rate exceeds clock precision"));
@@ -243,11 +243,13 @@ mod tests {
         for header in [
             "YUV4MPEG2 W2 H2 F0:1\n",
             "YUV4MPEG2 W2 H2 F25:0\n",
-            "YUV4MPEG2 W2 H2\n",
             "YUV4MPEG2 W2 H2 F25:1 F30:1\n",
         ] {
             assert!(Y4mReader::new(Cursor::new(header), 100).is_err());
         }
+        let default_rate = Y4mReader::new(Cursor::new("YUV4MPEG2 W2 H2\n"), 100).unwrap();
+        assert_eq!(default_rate.frame_rate(), (25, 1));
+        assert_eq!(default_rate.frame_period(), Duration::from_millis(40));
         let data = b"YUV4MPEG2 W2 H2 F25:1\nFRAME\n\x10";
         assert!(Y4mReader::new(Cursor::new(data), 17).is_err());
         let mut reader = Y4mReader::new(Cursor::new(data), 18).unwrap();

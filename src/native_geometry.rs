@@ -201,6 +201,8 @@ impl VideoGeometry {
                     1
                 } else if p.chroma_width == width.div_ceil(2) {
                     2
+                } else if p.chroma_width == width.div_ceil(4) {
+                    4
                 } else {
                     return Err(invalid("unsupported chroma width"));
                 };
@@ -208,6 +210,8 @@ impl VideoGeometry {
                     1
                 } else if p.chroma_height == height.div_ceil(2) {
                     2
+                } else if p.chroma_height == height.div_ceil(4) {
+                    4
                 } else {
                     return Err(invalid("unsupported chroma height"));
                 };
@@ -230,7 +234,10 @@ impl VideoGeometry {
                 sy,
                 ..
             } => {
-                if (*w, *h) != (width, height) || ![1, 2].contains(sx) || ![1, 2].contains(sy) {
+                if (*w, *h) != (width, height)
+                    || ![1, 2, 4].contains(sx)
+                    || ![1, 2, 4].contains(sy)
+                {
                     return Err(invalid("invalid Y4M geometry"));
                 }
                 (Cow::Borrowed(data.as_slice()), *sx, *sy, false)

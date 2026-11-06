@@ -1,8 +1,8 @@
 {
   "target": 1000,
   "counting_rule": "One independently confirmed problem or useful capability; fixture variants and baseline integration repairs are excluded. Only accepted entries count.",
-  "accepted_count": 589,
-  "next_id": "FVID-0590",
+  "accepted_count": 594,
+  "next_id": "FVID-0595",
   "entries": [
     {
       "id": "FVID-0001",
@@ -6670,6 +6670,61 @@
       "result": "Match 'Dialogue', 'Comment', 'Format', and 'Style' prefixes case-insensitively with whitespace trimming in subtitles::ass_block.",
       "status": "accepted",
       "validation": "batch-571-validation.json"
+    },
+    {
+      "id": "FVID-0590",
+      "batch": 572,
+      "title": "Support AAC Main/LC/SSR/LTP profiles, actual frame_samples, and in-band PCE extradata_bytes in ADTS probe",
+      "source": "crates/fvid-media/src/owned_probe.rs",
+      "regression": "tests/y4m_adts_and_mkv_probe.rs",
+      "before": "try_adts_as rejected valid AAC Main, SSR, and LTP ADTS files by requiring object_type == 2, and probe_adts_with_options hardcoded profile = 'LC', frame_samples = 1024, and extradata_bytes = 2 even when channel_configuration == 0 produced a longer AudioSpecificConfig from an in-band PCE.",
+      "result": "Admit object_type 1..=4 in try_adts_as and derive StreamInfo.profile ('Main', 'LC', 'SSR', 'LTP'), frame_samples, and extradata_bytes = reader.audio_specific_config().len() from AacConfig::parse in probe_adts_with_options.",
+      "status": "accepted",
+      "validation": "batch-572-validation.json"
+    },
+    {
+      "id": "FVID-0591",
+      "batch": 572,
+      "title": "Default omitted Y4M F frame-rate token to 25:1 in Y4mReader::new and NativeReader",
+      "source": "src/playback.rs",
+      "regression": "tests/y4m_adts_and_mkv_probe.rs",
+      "before": "Y4mReader::new rejected valid Y4M files that omitted an explicit F frame-rate token ('playback requires a Y4M frame rate') even though Header::frame_rate, probe_y4m, and decode_video default omitted Y4M rates to 25:1 per the Y4M specification.",
+      "result": "Default an omitted F rate token in Y4mReader::new to (25, 1) (25 fps, 40 ms period).",
+      "status": "accepted",
+      "validation": "batch-572-validation.json"
+    },
+    {
+      "id": "FVID-0592",
+      "batch": 572,
+      "title": "Support 440, 411, and 410 planar chroma subsampling in native Y4M export, inspection, and VideoGeometry",
+      "source": "src/native_export.rs",
+      "regression": "tests/y4m_adts_and_mkv_probe.rs",
+      "before": "inspect_first_y4m_frame_with_filters_and_options, export_y4m_sources_with_options, and VideoGeometry::apply_with_sampling only recognized 444, 422, and 420 chroma subsampling, rejecting 8-bit and high-bit-depth 440 ([1, 2]), 411 ([4, 1]), and 410 ([4, 4]) planar frames.",
+      "result": "Recognize 440 ([1, 2]), 411 ([4, 1]), and 410 ([4, 4]) subsampling across Planar8, Planar, and transformed GeometryFrame pictures in native_export and native_geometry.",
+      "status": "accepted",
+      "validation": "batch-572-validation.json"
+    },
+    {
+      "id": "FVID-0593",
+      "batch": 572,
+      "title": "Support high-bit-depth C411p9..16 and C410p9..16 Y4M headers in Header::parse and try_y4m_with_options",
+      "source": "crates/fvid-media/src/owned_y4m_impl.rs",
+      "regression": "tests/y4m_adts_and_mkv_probe.rs",
+      "before": "Header::parse and try_y4m_with_options accepted 8-bit C411 and C410 Y4M headers but rejected 9/10/12/14/16-bit C411p9..16 and C410p9..16 headers with 'unsupported Y4M chroma layout'.",
+      "result": "Accept '411' -> PixelFormat::Yuv411 and '410' -> PixelFormat::Yuv410 for 9/10/12/14/16-bit Y4M headers in Header::parse and try_y4m_with_options.",
+      "status": "accepted",
+      "validation": "batch-572-validation.json"
+    },
+    {
+      "id": "FVID-0594",
+      "batch": 572,
+      "title": "Infer open-ended Matroska ChapterAtom end timestamps from next chapter start or container duration in owned_webm_probe",
+      "source": "crates/fvid-media/src/owned_webm_probe.rs",
+      "regression": "tests/y4m_adts_and_mkv_probe.rs",
+      "before": "owned_webm_probe::try_probe_webm_with_limits defaulted an omitted ChapterTimeEnd (chapter.end_ns == None) to start, collapsing open-ended Matroska chapters to zero-length points and disagreeing with src/media_probe.rs and owned_mp4_probe_impl.rs.",
+      "result": "Infer an omitted Matroska chapter end_ns from the next chapter's start_ns or the container duration_ns (clamped to >= start) in owned_webm_probe.",
+      "status": "accepted",
+      "validation": "batch-572-validation.json"
     }
   ]
 }

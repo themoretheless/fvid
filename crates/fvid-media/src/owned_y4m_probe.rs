@@ -59,7 +59,7 @@ pub fn try_y4m_with_options(
                 .strip_prefix('C')
                 .and_then(|v| v.split_once('p'))
                 .is_some_and(|(layout, depth)| {
-                    matches!(layout, "420" | "422" | "444" | "440")
+                    matches!(layout, "420" | "422" | "444" | "440" | "411" | "410")
                         && matches!(depth, "9" | "10" | "12" | "14" | "16")
                 })
         {

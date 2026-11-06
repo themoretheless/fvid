@@ -4116,4 +4116,15 @@ See `batch-570-validation.json`.
 
 See `batch-571-validation.json`.
 
+## Batch 572 — FVID-0590..0594: ADTS Main/SSR/LTP & PCE probe, Y4M default `25:1` rate in `Y4mReader`, `440`/`411`/`410` native Y4M export, `C411p9..16`/`C410p9..16` Y4M headers, and open-ended Matroska chapter end inference
+
+- **FVID-0590** — Support AAC `Main`/`LC`/`SSR`/`LTP` profiles, actual `frame_samples`, and in-band PCE `extradata_bytes` in ADTS probe (`crates/fvid-media/src/owned_probe.rs`, `tests/y4m_adts_and_mkv_probe.rs`).
+- **FVID-0591** — Default omitted Y4M `F` frame-rate token to `25:1` (`25 fps`) in `Y4mReader::new` and `NativeReader` (`src/playback.rs`, `tests/y4m_adts_and_mkv_probe.rs`).
+- **FVID-0592** — Support `440` (`[1, 2]`), `411` (`[4, 1]`), and `410` (`[4, 4]`) planar chroma subsampling in native Y4M export, inspection, and `VideoGeometry` (`src/native_export.rs`, `src/native_geometry.rs`, `tests/y4m_adts_and_mkv_probe.rs`).
+- **FVID-0593** — Support high-bit-depth `C411p9..16` and `C410p9..16` Y4M headers in `Header::parse` and `try_y4m_with_options` (`crates/fvid-media/src/owned_y4m_impl.rs`, `crates/fvid-media/src/owned_y4m_probe.rs`, `tests/y4m_adts_and_mkv_probe.rs`).
+- **FVID-0594** — Infer open-ended Matroska `ChapterAtom` end timestamps from next chapter start or container duration in `owned_webm_probe` (`crates/fvid-media/src/owned_webm_probe.rs`, `tests/y4m_adts_and_mkv_probe.rs`).
+
+See `batch-572-validation.json`.
+
+
 

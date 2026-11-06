@@ -1,0 +1,29 @@
+{
+  "status": "accepted",
+  "accepted_ids": [
+    "FVID-0590",
+    "FVID-0591",
+    "FVID-0592",
+    "FVID-0593",
+    "FVID-0594"
+  ],
+  "count_delta": 5,
+  "accepted_count": 594,
+  "next_id": "FVID-0595",
+  "qualification": [
+    {
+      "name": "y4m-adts-and-mkv-probe",
+      "command": [
+        "cargo",
+        "test",
+        "--features",
+        "player",
+        "--test",
+        "y4m_adts_and_mkv_probe"
+      ],
+      "exit_code": 0,
+      "passed": 5,
+      "ignored": 0
+    }
+  ]
+}

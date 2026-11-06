@@ -86,6 +86,8 @@ impl Header {
                                 "422" => PixelFormat::Yuv422,
                                 "444" => PixelFormat::Yuv444,
                                 "440" => PixelFormat::Yuv440,
+                                "411" => PixelFormat::Yuv411,
+                                "410" => PixelFormat::Yuv410,
                                 _ => return Err(invalid("unsupported Y4M chroma layout")),
                             }
                         }

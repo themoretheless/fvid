@@ -142,7 +142,7 @@ pub(crate) fn try_webm_as(path: &Path, format: Option<&str>) -> Result<Option<Me
     crate::owned_webm_probe::try_probe_webm(path)
 }
 
-/// Select supported AAC-LC ADTS framing before legacy inspection. Once a
+/// Select supported AAC ADTS framing before legacy inspection. Once a
 /// supported header selects this parser, packet errors cannot trigger fallback.
 pub(crate) fn try_adts_as(path: &Path, format: Option<&str>) -> Result<Option<MediaInfo>, String> {
     if format.is_some_and(|hint| hint != "aac") {
@@ -158,13 +158,13 @@ pub(crate) fn try_adts_as(path: &Path, format: Option<&str>) -> Result<Option<Me
     let Some(header) = crate::owned_aac::adts::header(&prefix) else {
         return Ok(None);
     };
-    if header.asc[0] >> 3 != 2 {
+    if !matches!(header.asc[0] >> 3, 1..=4) {
         return Ok(None);
     }
     probe_adts(path).map(Some)
 }
 
-/// Count AAC-LC ADTS packets using owned framing, without decoding PCM.
+/// Count AAC ADTS packets using owned framing, without decoding PCM.
 /// The streaming reader retains only one bounded ADTS packet at a time.
 pub fn probe_adts(path: &Path) -> Result<MediaInfo, String> {
     probe_adts_with_options(path, &Default::default())
@@ -200,6 +200,18 @@ pub fn probe_adts_with_options(
     )
     .map_err(|e| e.to_string())?;
     let config = reader.configuration();
+    let parsed_asc =
+        crate::owned_aac::config::AacConfig::parse(reader.audio_specific_config())
+            .map_err(|e| e.to_string())?;
+    let extradata_bytes = reader.audio_specific_config().len();
+    let frame_samples = u64::from(parsed_asc.frame_samples);
+    let profile = match parsed_asc.object_type {
+        1 => Some("Main".into()),
+        2 => Some("LC".into()),
+        3 => Some("SSR".into()),
+        4 => Some("LTP".into()),
+        _ => None,
+    };
     let mut frames = 0u64;
     let mut packets = 0u64;
     while reader.next_packet().map_err(|e| e.to_string())?.is_some() {
@@ -215,7 +227,9 @@ pub fn probe_adts_with_options(
         if options.max_packets.is_some_and(|max| packets > max) {
             return Err("ADTS packet count exceeds packet limit".into());
         }
-        frames = frames.checked_add(1024).ok_or("AAC duration overflow")?;
+        frames = frames
+            .checked_add(frame_samples)
+            .ok_or("AAC duration overflow")?;
     }
     let duration = i64::try_from(frames).map_err(|_| "AAC duration exceeds API range")?;
     let duration_us =
@@ -238,7 +252,7 @@ pub fn probe_adts_with_options(
             duration: Some(duration),
             bit_rate: None,
             average_frame_rate: [0, 1],
-            profile: Some("LC".into()),
+            profile,
             level: None,
             disposition: 0,
             metadata: BTreeMap::new(),
@@ -248,7 +262,7 @@ pub fn probe_adts_with_options(
             sample_rate: config.sample_rate as i32,
             channels: i32::from(config.channels),
             video_delay: 0,
-            extradata_bytes: 2,
+            extradata_bytes,
         }],
     })
 }

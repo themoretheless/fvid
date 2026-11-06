@@ -227,6 +227,9 @@ pub(crate) fn inspect_first_y4m_frame_with_filters_and_options(
                 Some([2, 2]) => "420",
                 Some([2, 1]) => "422",
                 Some([1, 1]) => "444",
+                Some([1, 2]) => "440",
+                Some([4, 1]) => "411",
+                Some([4, 4]) => "410",
                 _ => return Err(invalid("unsupported Y4M chroma layout")),
             },
             p.depth,
@@ -244,6 +247,11 @@ pub(crate) fn inspect_first_y4m_frame_with_filters_and_options(
             ("444", 8)
         }
         RawFrame::Planar8(p)
+            if p.chroma_width == p.width && p.chroma_height == p.height.div_ceil(2) =>
+        {
+            ("440", 8)
+        }
+        RawFrame::Planar8(p)
             if p.chroma_width == p.width.div_ceil(2) && p.chroma_height == p.height =>
         {
             ("422", 8)
@@ -252,6 +260,16 @@ pub(crate) fn inspect_first_y4m_frame_with_filters_and_options(
             if p.chroma_width == p.width.div_ceil(2) && p.chroma_height == p.height.div_ceil(2) =>
         {
             ("420", 8)
+        }
+        RawFrame::Planar8(p)
+            if p.chroma_width == p.width.div_ceil(4) && p.chroma_height == p.height =>
+        {
+            ("411", 8)
+        }
+        RawFrame::Planar8(p)
+            if p.chroma_width == p.width.div_ceil(4) && p.chroma_height == p.height.div_ceil(4) =>
+        {
+            ("410", 8)
         }
         _ => return Err(invalid("Y4M export requires supported planar frames")),
     };
@@ -325,6 +343,9 @@ pub(crate) fn inspect_first_y4m_frame_with_filters_and_options(
             Some([2, 2]) => "420",
             Some([2, 1]) => "422",
             Some([1, 1]) => "444",
+            Some([1, 2]) => "440",
+            Some([4, 1]) => "411",
+            Some([4, 4]) => "410",
             _ => {
                 return Err(invalid(
                     "Y4M export cannot represent this transformed chroma layout",
@@ -333,15 +354,15 @@ pub(crate) fn inspect_first_y4m_frame_with_filters_and_options(
         };
         (picture.width, picture.height)
     };
-    let cw = if chroma == "444" {
-        width
-    } else {
-        width.div_ceil(2)
+    let cw = match chroma {
+        "444" | "440" => width,
+        "411" | "410" => width.div_ceil(4),
+        _ => width.div_ceil(2),
     };
-    let ch = if chroma == "420" {
-        height.div_ceil(2)
-    } else {
-        height
+    let ch = match chroma {
+        "420" | "440" => height.div_ceil(2),
+        "410" => height.div_ceil(4),
+        _ => height,
     };
     let bytes = width
         .checked_mul(height)
@@ -1029,6 +1050,9 @@ fn export_y4m_sources_with_options(
                     Some([2, 2]) => "420",
                     Some([2, 1]) => "422",
                     Some([1, 1]) => "444",
+                    Some([1, 2]) => "440",
+                    Some([4, 1]) => "411",
+                    Some([4, 4]) => "410",
                     _ => return Err(invalid("unsupported Y4M chroma layout")),
                 },
                 p.depth,
@@ -1046,6 +1070,11 @@ fn export_y4m_sources_with_options(
                 ("444", 8)
             }
             RawFrame::Planar8(p)
+                if p.chroma_width == p.width && p.chroma_height == p.height.div_ceil(2) =>
+            {
+                ("440", 8)
+            }
+            RawFrame::Planar8(p)
                 if p.chroma_width == p.width.div_ceil(2) && p.chroma_height == p.height =>
             {
                 ("422", 8)
@@ -1054,6 +1083,17 @@ fn export_y4m_sources_with_options(
                 if p.chroma_width == p.width.div_ceil(2) && p.chroma_height == p.height.div_ceil(2) =>
             {
                 ("420", 8)
+            }
+            RawFrame::Planar8(p)
+                if p.chroma_width == p.width.div_ceil(4) && p.chroma_height == p.height =>
+            {
+                ("411", 8)
+            }
+            RawFrame::Planar8(p)
+                if p.chroma_width == p.width.div_ceil(4)
+                    && p.chroma_height == p.height.div_ceil(4) =>
+            {
+                ("410", 8)
             }
             _ => return Err(invalid("Y4M export requires supported planar frames")),
         };
@@ -1080,6 +1120,9 @@ fn export_y4m_sources_with_options(
                 Some([2, 2]) => "420",
                 Some([2, 1]) => "422",
                 Some([1, 1]) => "444",
+                Some([1, 2]) => "440",
+                Some([4, 1]) => "411",
+                Some([4, 4]) => "410",
                 _ => {
                     return Err(invalid(
                         "Y4M export cannot represent this transformed chroma layout",
@@ -1130,8 +1173,16 @@ fn export_y4m_sources_with_options(
                 _ => unreachable!(),
             }
         }
-        let cw=if chroma=="444" {width} else {width.div_ceil(2)};
-        let ch=if chroma=="420" {height.div_ceil(2)} else {height};
+        let cw = match chroma {
+            "444" | "440" => width,
+            "411" | "410" => width.div_ceil(4),
+            _ => width.div_ceil(2),
+        };
+        let ch = match chroma {
+            "420" | "440" => height.div_ceil(2),
+            "410" => height.div_ceil(4),
+            _ => height,
+        };
         let bytes=width.checked_mul(height).and_then(|n|cw.checked_mul(ch).and_then(|c|c.checked_mul(2)).and_then(|c|n.checked_add(c))).and_then(|n|n.checked_mul(if depth==8 {1} else {2})).ok_or_else(||invalid("Y4M payload count overflow"))?;
         if bytes > options.max_packet_bytes {
             return Err(invalid("Y4M frame exceeds byte limit"));

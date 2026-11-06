@@ -271,8 +271,14 @@ fn try_probe_webm_with_limits(
     let mut chapters = Vec::new();
     for (index, chapter) in reader.chapters.iter().enumerate() {
         let start = checked(chapter.start_ns)?;
-        // The shared API requires an end; absent end remains a zero-length point.
-        let end = chapter.end_ns.map(checked).transpose()?.unwrap_or(start);
+        let end = if let Some(end) = chapter.end_ns {
+            checked(end)?
+        } else {
+            match reader.chapters.get(index + 1) {
+                Some(next) => checked(next.start_ns)?,
+                None => duration.unwrap_or(start).max(start),
+            }
+        };
         let metadata = if chapter.title.is_empty() {
             BTreeMap::new()
         } else {
