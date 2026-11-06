@@ -1,0 +1,29 @@
+{
+  "status": "accepted",
+  "accepted_ids": [
+    "FVID-0595",
+    "FVID-0596",
+    "FVID-0597",
+    "FVID-0598",
+    "FVID-0599"
+  ],
+  "count_delta": 5,
+  "accepted_count": 599,
+  "next_id": "FVID-0600",
+  "qualification": [
+    {
+      "name": "aiff-avi-ffv1-and-mkv-probe",
+      "command": [
+        "cargo",
+        "test",
+        "--features",
+        "player",
+        "--test",
+        "aiff_avi_ffv1_and_mkv_probe"
+      ],
+      "exit_code": 0,
+      "passed": 5,
+      "ignored": 0
+    }
+  ]
+}

@@ -64,11 +64,10 @@ pub fn eligible(source: &Path) -> Result<bool> {
     let Ok(header) = crate::Header::parse(&line) else {
         return Ok(false);
     };
-    Ok(header.tokens.iter().any(|t| t.starts_with('F'))
-        && !header
-            .tokens
-            .iter()
-            .any(|t| matches!(t.as_str(), "C420mpeg2" | "C420paldv")))
+    Ok(!header
+        .tokens
+        .iter()
+        .any(|t| matches!(t.as_str(), "C420mpeg2" | "C420paldv")))
 }
 fn check(cancel: Option<&CancelFlag>) -> Result<()> {
     if cancel.is_some_and(CancelFlag::is_cancelled) {

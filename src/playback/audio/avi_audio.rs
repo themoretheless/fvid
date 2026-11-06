@@ -100,6 +100,7 @@ pub struct AviAudioReader {
     chosen: usize,
     packet: usize,
     frame_skip: usize,
+    presentation_floor: u64,
 }
 
 impl AviAudioReader {
@@ -175,6 +176,7 @@ impl AviAudioReader {
             chosen: nth,
             packet: 0,
             frame_skip: 0,
+            presentation_floor: 0,
         })
     }
 
@@ -365,6 +367,9 @@ fn laid_out_g711(codec: &'static str,index:usize,stream:&Audio)->Result<Program>
         if record.len==0||record.len%usize::from(f.channels)!=0{return Err(invalid("AVI G.711 record ends in an incomplete channel frame"));}
         let frames=(record.len/usize::from(f.channels))as u64;samples.push((cursor,frames));
         cursor=cursor.checked_add(frames).ok_or_else(||invalid("AVI G.711 clock overflow"))?;
+        if cursor > i64::MAX as u64 {
+            return Err(invalid("AVI G.711 clock exceeds the packet time range"));
+        }
     }
     if samples.is_empty() || cursor-u64::from(stream.start)!=u64::from(stream.declared){return Err(invalid("AVI G.711 declared frame count disagrees with records"));}
     Ok(Program{speaker_mask:None,codec,sample_rate:f.sample_rate,channels:f.channels,bits:8,frames:1,origin:0,setup:stream.setup.clone(),stream:index,records:samples.len(),input_frame_bytes:usize::from(f.channels),packet_frames:Some(SAMPLE_PACKET_FRAMES),block_records:None,samples:Some(samples)})
@@ -469,12 +474,55 @@ impl AudioStream for AviAudioReader {
         Ok(Some(packet))
     }
 
+    fn present_decoded(
+        &self,
+        mut packet: crate::audio::AudioPacket,
+        source_pts: i64,
+    ) -> Result<Option<crate::audio::AudioPacket>> {
+        let stride = usize::from(self.channels()) * 4;
+        if stride == 0 || !packet.data.len().is_multiple_of(stride) {
+            return Err(invalid("invalid decoded audio geometry"));
+        }
+        packet.pts = u64::try_from(source_pts)
+            .map_err(|_| invalid("decoded audio precedes its source timeline"))?;
+        packet.timebase_num = 1;
+        packet.timebase_den = self.sample_rate();
+        let frames = packet.data.len() / stride;
+        let skip = self
+            .presentation_floor
+            .saturating_sub(packet.pts)
+            .min(frames as u64) as usize;
+        if skip == frames {
+            return Ok(None);
+        }
+        if skip != 0 {
+            packet.data.copy_within(skip * stride.., 0);
+            packet.data.truncate((frames - skip) * stride);
+            packet.pts += skip as u64;
+        }
+        Ok(Some(packet))
+    }
+
     fn rewind(&mut self) {
-        self.packet = 0;self.frame_skip=0;
+        self.packet = 0;
+        self.frame_skip = 0;
+        self.presentation_floor = 0;
+    }
+
+    fn seek_time(&mut self, target: Duration) -> i64 {
+        let program = self.program();
+        let end = program.samples.as_ref().map_or(
+            program.origin + program.frames * program.records as u64,
+            |s| s.last().map_or(0, |&(at, n)| at + n),
+        );
+        let target = (target.as_nanos() * u128::from(self.sample_rate()))
+            .div_ceil(1_000_000_000)
+            .min(u128::from(end)) as i64;
+        self.seek_to(target)
     }
 
     fn seek_to(&mut self, pts: i64) -> i64 {
-        let program = self.program();
+        let program = &self.programs[self.chosen];
         if let Some(samples)=&program.samples {
             let start=samples.first().map_or(0,|&(at,_)|at);
             let end=samples.last().map_or(0,|&(at,n)|at+n);
@@ -483,19 +531,24 @@ impl AudioStream for AviAudioReader {
             // Select the first exclusive record end strictly after the target.
             let packet=samples.partition_point(|&(at,n)|at+n<=target);
             let skip=samples.get(packet).map_or(0,|&(at,_)|target.saturating_sub(at)as usize);
+            self.presentation_floor = target;
             self.packet=packet;self.frame_skip=skip;return target as i64;
         }
-        let end = program.origin + program.frames * program.records as u64;
+        let origin = program.origin;
+        let frames = program.frames;
+        let records = program.records;
+        let end = origin + frames * records as u64;
+        self.presentation_floor = (pts.max(0) as u64).clamp(origin, end);
         if pts.max(0) as u64 >= end {
-            self.packet = program.records;
+            self.packet = records;
             return i64::try_from(end).unwrap_or(i64::MAX);
         }
         // Inside the stream, land at the preceding independently coded block.
         // At its end there is no block left to present.
-        let frames = program.frames.max(1);
-        let wanted = (pts.max(0) as u64).saturating_sub(program.origin) / frames;
-        let at = wanted.min(program.records as u64 - 1) as usize;
-        let landed = i64::try_from(program.origin + at as u64 * frames).unwrap_or(i64::MAX);
+        let frames = frames.max(1);
+        let wanted = (pts.max(0) as u64).saturating_sub(origin) / frames;
+        let at = wanted.min(records as u64 - 1) as usize;
+        let landed = i64::try_from(origin + at as u64 * frames).unwrap_or(i64::MAX);
         self.packet = at;
         landed
     }

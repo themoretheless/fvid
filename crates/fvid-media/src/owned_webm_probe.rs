@@ -198,6 +198,8 @@ fn try_probe_webm_with_limits(
             "S_TEXT/ASS" | "S_ASS" => "ass",
             "S_TEXT/SSA" | "S_SSA" => "ssa",
             "S_TEXT/WEBVTT" => "webvtt",
+            "S_VOBSUB" => "dvd_subtitle",
+            "S_HDMV/PGS" => "hdmv_pgs_subtitle",
             other => other,
         };
         let narrow = |n| {
@@ -236,7 +238,7 @@ fn try_probe_webm_with_limits(
                 1 => "video",
                 2 => "audio",
                 17 => "subtitle",
-                _ => "unknown",
+                _ => "data",
             }
             .into(),
             codec: match (track.codec.as_str(),track.bit_depth) {

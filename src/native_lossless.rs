@@ -425,6 +425,8 @@ pub fn write_mp4_selected<W: Write + Seek>(
             Some([2, 1]) => "yuv422p",
             Some([1, 1]) => "yuv444p",
             Some([1, 2]) => "yuv440p",
+            Some([4, 1]) => "yuv411p",
+            Some([4, 4]) => "yuv410p",
             _ => return Err(invalid("unexpected FFV1 input subsampling")),
         };
         stats.pixel_format = if bit_depth == 8 {

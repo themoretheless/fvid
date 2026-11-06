@@ -4126,5 +4126,16 @@ See `batch-571-validation.json`.
 
 See `batch-572-validation.json`.
 
+## Batch 573 — FVID-0595..0599: AIFF zero-frame block-aligned SSND rejection, `AviAudioReader` `seek_time` and `present_decoded`, Y4M/MP4 FFV1 `411`/`410` & default-rate eligibility, and Matroska bitmap subtitle / `data` track probing
+
+- **FVID-0595** — Reject AIFF block-aligned `SSND` chunks whose `declared_frames == 0` trims the sample run to empty (`src/playback/audio/aiff.rs`, `tests/aiff_avi_ffv1_and_mkv_probe.rs`).
+- **FVID-0596** — Support sub-sample `seek_time`, `present_decoded` `presentation_floor` trimming, and G.711 clock range check in `AviAudioReader` (`src/playback/audio/avi_audio.rs`, `tests/aiff_avi_ffv1_and_mkv_probe.rs`).
+- **FVID-0597** — Support `411`/`410` subsampling and omitted Y4M `F` frame-rate token in `native_lossless` and `native_lossless_y4m` (`src/native_lossless.rs`, `src/native_lossless_y4m.rs`, `tests/aiff_avi_ffv1_and_mkv_probe.rs`).
+- **FVID-0598** — Map Matroska `S_VOBSUB` (`dvd_subtitle`) and `S_HDMV/PGS` (`hdmv_pgs_subtitle`) bitmap subtitle codec IDs in `media_probe` and `owned_webm_probe` (`src/media_probe.rs`, `crates/fvid-media/src/owned_webm_probe.rs`, `tests/aiff_avi_ffv1_and_mkv_probe.rs`).
+- **FVID-0599** — Report `"data"` `media_type` for non-AVS Matroska tracks in `owned_webm_probe` (`crates/fvid-media/src/owned_webm_probe.rs`, `tests/aiff_avi_ffv1_and_mkv_probe.rs`).
+
+See `batch-573-validation.json`.
+
+
 
 

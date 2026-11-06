@@ -184,6 +184,9 @@ impl Aiff {
         } else {
             samples
         };
+        if samples.is_empty() {
+            return Err(invalid("an AIFF file with no samples in it"));
+        }
         if matches!(pcm.coding, Coding::Pcm(_) | Coding::ALaw | Coding::MuLaw)
             && !samples.len().is_multiple_of(pcm.block_align())
         {

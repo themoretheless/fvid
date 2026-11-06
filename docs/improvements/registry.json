@@ -1,8 +1,8 @@
 {
   "target": 1000,
   "counting_rule": "One independently confirmed problem or useful capability; fixture variants and baseline integration repairs are excluded. Only accepted entries count.",
-  "accepted_count": 594,
-  "next_id": "FVID-0595",
+  "accepted_count": 599,
+  "next_id": "FVID-0600",
   "entries": [
     {
       "id": "FVID-0001",
@@ -6725,6 +6725,61 @@
       "result": "Infer an omitted Matroska chapter end_ns from the next chapter's start_ns or the container duration_ns (clamped to >= start) in owned_webm_probe.",
       "status": "accepted",
       "validation": "batch-572-validation.json"
+    },
+    {
+      "id": "FVID-0595",
+      "batch": 573,
+      "title": "Reject AIFF block-aligned SSND chunks whose declared_frames trims the sample run to empty",
+      "source": "src/playback/audio/aiff.rs",
+      "regression": "tests/aiff_avi_ffv1_and_mkv_probe.rs",
+      "before": "Aiff::parse checked samples.is_empty() before slicing block-aligned SSND payloads to declared_frames * block_align, so an AIFF file with block_size != 0, declared_frames == 0, and non-empty SSND padding succeeded with 0 frames and 0 packets instead of returning 'an AIFF file with no samples in it'.",
+      "result": "Recheck samples.is_empty() after block_size != 0 trimming in Aiff::parse so empty valid sample runs are rejected.",
+      "status": "accepted",
+      "validation": "batch-573-validation.json"
+    },
+    {
+      "id": "FVID-0596",
+      "batch": 573,
+      "title": "Support sub-sample seek_time, present_decoded presentation_floor trimming, and G.711 clock range check in AviAudioReader",
+      "source": "src/playback/audio/avi_audio.rs",
+      "regression": "tests/aiff_avi_ffv1_and_mkv_probe.rs",
+      "before": "AviAudioReader lacked presentation_floor, present_decoded, and a custom seek_time override, so unquantized seek_time(Duration) floored instead of ceiling to the first sample at or after the target and ADPCM block seeks did not trim decoded samples preceding presentation_floor; laid_out_g711 also omitted the cursor > i64::MAX as u64 check.",
+      "result": "Track presentation_floor in AviAudioReader, implement present_decoded and div_ceil seek_time(Duration), and enforce cursor <= i64::MAX as u64 in laid_out_g711.",
+      "status": "accepted",
+      "validation": "batch-573-validation.json"
+    },
+    {
+      "id": "FVID-0597",
+      "batch": 573,
+      "title": "Support 411 and 410 subsampling and omitted Y4M F frame-rate token in native_lossless and native_lossless_y4m",
+      "source": "src/native_lossless_y4m.rs",
+      "regression": "tests/aiff_avi_ffv1_and_mkv_probe.rs",
+      "before": "native_lossless_y4m::eligible required an explicit F token even though Y4M defaults omitted rates to 25:1, and native_lossless::write_mp4_selected rejected [4, 1] (yuv411p) and [4, 4] (yuv410p) subsampling when formatting LosslessStats.pixel_format.",
+      "result": "Admit Y4M headers without an explicit F token in native_lossless_y4m::eligible and format Some([4, 1]) => 'yuv411p' and Some([4, 4]) => 'yuv410p' in native_lossless::write_mp4_selected.",
+      "status": "accepted",
+      "validation": "batch-573-validation.json"
+    },
+    {
+      "id": "FVID-0598",
+      "batch": 573,
+      "title": "Map Matroska S_VOBSUB and S_HDMV/PGS bitmap subtitle codec IDs in media_probe and owned_webm_probe",
+      "source": "src/media_probe.rs",
+      "regression": "tests/aiff_avi_ffv1_and_mkv_probe.rs",
+      "before": "src/media_probe.rs and crates/fvid-media/src/owned_webm_probe.rs left Matroska bitmap subtitle codec IDs S_VOBSUB and S_HDMV/PGS unmapped instead of normalizing them to 'dvd_subtitle' and 'hdmv_pgs_subtitle'.",
+      "result": "Normalize 'S_VOBSUB' to 'dvd_subtitle' and 'S_HDMV/PGS' to 'hdmv_pgs_subtitle' in both Matroska probe implementations.",
+      "status": "accepted",
+      "validation": "batch-573-validation.json"
+    },
+    {
+      "id": "FVID-0599",
+      "batch": 573,
+      "title": "Report 'data' media_type for non-AVS Matroska tracks in owned_webm_probe",
+      "source": "crates/fvid-media/src/owned_webm_probe.rs",
+      "regression": "tests/aiff_avi_ffv1_and_mkv_probe.rs",
+      "before": "owned_webm_probe mapped non-video/audio/subtitle Matroska track kinds to 'unknown', disagreeing with src/media_probe.rs which reports 'data'.",
+      "result": "Map non-AVS Matroska track kinds to 'data' in owned_webm_probe to match src/media_probe.rs.",
+      "status": "accepted",
+      "validation": "batch-573-validation.json"
     }
   ]
 }
