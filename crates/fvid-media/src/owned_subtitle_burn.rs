@@ -147,7 +147,17 @@ fn prepare(
         return Err("controlled memory budget exceeded: subtitle burn SRT working set".into());
     }
     let text = std::fs::read_to_string(subs).map_err(|e| e.to_string())?;
-    if !text.contains("-->") {
+    let trimmed = text.trim_start_matches('\u{feff}').trim_start();
+    let has_cues = text.contains("-->")
+        || trimmed.starts_with("WEBVTT")
+        || text.lines().any(|line| {
+            let l = line.trim_matches(|c: char| c.is_whitespace() || c == '\u{feff}');
+            l.eq_ignore_ascii_case("[Script Info]")
+                || l.eq_ignore_ascii_case("[Events]")
+                || l.split_once(':')
+                    .is_some_and(|(k, _)| k.trim().eq_ignore_ascii_case("dialogue"))
+        });
+    if !has_cues {
         return Err("owned burn-in currently requires plain SRT".into());
     }
     let cues = crate::owned_play_controls::parse_subtitle_text(&text)?;
@@ -226,9 +236,12 @@ pub fn supports(source: &Path, subs: &Path, options: &CopyOptions) -> bool {
                 Err(_) if crate::owned_mp4_video_bridge::recognizes(source) => true,
                 _ => false,
             })
-        && subs
-            .extension()
-            .is_some_and(|ext| ext.eq_ignore_ascii_case("srt"))
+        && subs.extension().and_then(|ext| ext.to_str()).is_some_and(|ext| {
+            ext.eq_ignore_ascii_case("srt")
+                || ext.eq_ignore_ascii_case("vtt")
+                || ext.eq_ignore_ascii_case("ass")
+                || ext.eq_ignore_ascii_case("ssa")
+        })
 }
 pub fn plan_burn_subtitles(
     source: &Path,

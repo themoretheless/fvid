@@ -1,0 +1,6 @@
+[Script Info]
+ScriptType: v4.00+
+
+[Events]
+Format: Style, Start, End, Layer, Name, MarginL, MarginR, MarginV, Effect, Text
+dialogue: Default, 0:00:00.50, 0:00:01.00, 0, Alice, 0, 0, 0, , {comment}<i>ASS</i>\hBurn

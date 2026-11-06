@@ -247,6 +247,18 @@ pub fn write_mp4_selected<W: Write + Seek>(
         })
         .collect::<Result<Vec<_>>>()?;
     let mut options = plans.iter().map(|p| p.options).collect::<Vec<_>>();
+    {
+        let video_meta = options[video]
+            .video
+            .as_mut()
+            .ok_or_else(|| invalid("missing video metadata"))?;
+        video_meta.colour = (source_colour.primaries != 0
+            || source_colour.transfer != 0
+            || source_colour.matrix != 0
+            || source_colour.full_range)
+            .then_some(source_colour);
+        video_meta.hdr = reader.hdr();
+    }
     if bake_rotation {
         options[video].rotation = 0;
         let [width, height] = reader.dimensions();

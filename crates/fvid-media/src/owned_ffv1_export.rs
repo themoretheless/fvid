@@ -486,7 +486,15 @@ pub(crate) fn export_processed(
                         } else {
                             crate::owned_matroska::ColourDescription {
                                 full_range: view.full_range,
-                                matrix: view.matrix,
+                                matrix: if matches!(view.matrix, 0 | 2) {
+                                    if track.colour.matrix == 0 {
+                                        view.matrix
+                                    } else {
+                                        track.colour.matrix
+                                    }
+                                } else {
+                                    view.matrix
+                                },
                                 primaries: if matches!(view.primaries, 0 | 2) {
                                     track.colour.primaries
                                 } else {

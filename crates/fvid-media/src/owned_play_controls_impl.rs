@@ -8017,23 +8017,45 @@ pub fn active_bitmap_subtitle<'a>(
 pub fn plain_subtitle(raw: &str) -> String {
     let payload = subtitle_payload(raw.trim());
     let mut out = String::new();
+    let mut tag = false;
+    let mut override_block = false;
     let mut chars = payload.chars().peekable();
     while let Some(ch) = chars.next() {
-        if ch == '{' && chars.peek() == Some(&'\\') {
-            for next in chars.by_ref() {
-                if next == '}' {
-                    break;
-                }
+        if override_block {
+            if ch == '}' {
+                override_block = false;
             }
+            continue;
+        }
+        if tag {
+            if ch == '>' {
+                tag = false;
+            }
+            continue;
+        }
+        if ch == '{' {
+            override_block = true;
+            continue;
+        }
+        if ch == '<' {
+            tag = true;
+            continue;
+        }
+        if ch == '\u{feff}' {
             continue;
         }
         if ch == '\\' {
             match chars.peek().copied() {
-                Some('N') | Some('n') | Some('h') => {
+                Some('N') | Some('n') => {
                     chars.next();
                     if !out.ends_with('\n') {
                         out.push('\n');
                     }
+                    continue;
+                }
+                Some('h') => {
+                    chars.next();
+                    out.push('\u{a0}');
                     continue;
                 }
                 _ => {}
@@ -8041,21 +8063,35 @@ pub fn plain_subtitle(raw: &str) -> String {
         }
         out.push(ch);
     }
-    out.trim().to_string()
+    out.split('\n')
+        .map(str::trim)
+        .filter(|line| !line.is_empty())
+        .collect::<Vec<_>>()
+        .join("\n")
 }
 
 fn subtitle_payload(raw: &str) -> &str {
-    if let Some(rest) = raw.strip_prefix("Dialogue:")
+    if let Some((key, rest)) = raw.split_once(':')
+        && key.trim().eq_ignore_ascii_case("dialogue")
         && let Some(text) = field_after_commas(rest.trim_start(), 9)
     {
         return text;
     }
-    if let Some(head) = raw.split(',').next()
+    let mut parts = raw.splitn(3, ',');
+    if let (Some(head), Some(second)) = (parts.next(), parts.next())
         && !head.is_empty()
         && head.chars().all(|ch| ch.is_ascii_digit())
-        && let Some(text) = field_after_commas(raw, 8)
     {
-        return text;
+        let second = second.trim();
+        let layer_ok = second.bytes().all(|b| b.is_ascii_digit())
+            || second.split_once('=').is_some_and(|(k, v)| {
+                k.trim().eq_ignore_ascii_case("marked")
+                    && !v.trim().is_empty()
+                    && v.trim().bytes().all(|b| b.is_ascii_digit())
+            });
+        if layer_ok && let Some(text) = field_after_commas(raw, 8) {
+            return text;
+        }
     }
     raw
 }
@@ -8164,7 +8200,10 @@ pub fn parse_srt(text: &str) -> Vec<SubtitleCue> {
         let Some((start, end)) = timing.split_once("-->") else {
             continue;
         };
-        let Some(start_us) = parse_subtitle_clock(start) else {
+        let Some(start_token) = start.split_whitespace().last() else {
+            continue;
+        };
+        let Some(start_us) = parse_subtitle_clock(start_token) else {
             continue;
         };
         let Some(end_token) = end.split_whitespace().next() else {
@@ -8189,34 +8228,56 @@ pub fn parse_srt(text: &str) -> Vec<SubtitleCue> {
 
 fn parse_ass(text: &str) -> Vec<SubtitleCue> {
     let has_sections = text.lines().any(|line| {
-        let trimmed = line.trim();
+        let trimmed = line.trim_matches(|c: char| c.is_whitespace() || c == '\u{feff}');
         trimmed.eq_ignore_ascii_case("[Script Info]") || trimmed.eq_ignore_ascii_case("[Events]")
     });
     let mut in_events = !has_sections;
+    let mut format_cols: Option<(usize, usize, usize, usize)> = None;
     let mut cues = Vec::new();
     for line in text.lines() {
-        let trimmed = line.trim();
+        let trimmed = line.trim_matches(|c: char| c.is_whitespace() || c == '\u{feff}');
         if trimmed.starts_with('[') && trimmed.ends_with(']') {
             in_events = trimmed.eq_ignore_ascii_case("[Events]");
+            format_cols = None;
             continue;
         }
         if !in_events {
             continue;
         }
-        let Some(rest) = trimmed.strip_prefix("Dialogue:") else {
+        let Some((key, rest)) = trimmed.split_once(':') else {
             continue;
         };
-        let fields: Vec<&str> = rest.splitn(10, ',').map(str::trim).collect();
-        if fields.len() < 10 {
+        if key.trim().eq_ignore_ascii_case("format") {
+            let cols: Vec<String> = rest
+                .split(',')
+                .map(|col| col.trim().to_ascii_lowercase())
+                .collect();
+            if let (Some(start_idx), Some(end_idx), Some(text_idx)) = (
+                cols.iter().position(|c| c == "start"),
+                cols.iter().position(|c| c == "end"),
+                cols.iter().position(|c| c == "text"),
+            ) && cols.len() >= 4
+                && text_idx + 1 == cols.len()
+            {
+                format_cols = Some((cols.len(), start_idx, end_idx, text_idx));
+            }
             continue;
         }
-        let Some(start_us) = parse_subtitle_clock(fields[1]) else {
+        if !key.trim().eq_ignore_ascii_case("dialogue") {
+            continue;
+        }
+        let (field_count, start_idx, end_idx, text_idx) = format_cols.unwrap_or((10, 1, 2, 9));
+        let fields: Vec<&str> = rest.splitn(field_count, ',').collect();
+        if fields.len() < field_count {
+            continue;
+        }
+        let Some(start_us) = parse_subtitle_clock(fields[start_idx].trim()) else {
             continue;
         };
-        let Some(end_us) = parse_subtitle_clock(fields[2]) else {
+        let Some(end_us) = parse_subtitle_clock(fields[end_idx].trim()) else {
             continue;
         };
-        let text = plain_subtitle(fields[9]);
+        let text = plain_subtitle(fields[text_idx]);
         if text.is_empty() {
             continue;
         }
@@ -8229,14 +8290,16 @@ fn parse_ass(text: &str) -> Vec<SubtitleCue> {
     cues
 }
 
-/// Parse an SRT or ASS/SSA document.
+/// Parse an SRT, WebVTT, or ASS/SSA document.
 pub fn parse_subtitle_text(text: &str) -> Result<Vec<SubtitleCue>> {
     let text = text.strip_prefix('\u{feff}').unwrap_or(text);
     let is_ass = text.lines().any(|line| {
-        let trimmed = line.trim();
+        let trimmed = line.trim_matches(|c: char| c.is_whitespace() || c == '\u{feff}');
         trimmed.eq_ignore_ascii_case("[Script Info]")
             || trimmed.eq_ignore_ascii_case("[Events]")
-            || trimmed.starts_with("Dialogue:")
+            || trimmed
+                .split_once(':')
+                .is_some_and(|(k, _)| k.trim().eq_ignore_ascii_case("dialogue"))
     });
     let cues = if is_ass {
         let ass = parse_ass(text);

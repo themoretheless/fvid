@@ -240,6 +240,8 @@ pub(crate) fn decode_webm(
     let stored_rotation=track.rotation;
     let number = track.number;
     let track_hdr=track.hdr;
+    let track_primaries = track.colour.primaries;
+    let track_transfer = track.colour.transfer;
     let full_range = track.colour.full_range;
     let explicit_full_range = track.full_range;
     let matrix = if track.colour.matrix == 0 {6} else {track.colour.matrix};
@@ -351,7 +353,23 @@ pub(crate) fn decode_webm(
         let selected=transform.interval.is_none_or(|(from,_)|time>=i128::from(from)*1000);
         stats.width=u32::try_from(decoded.frame.width).map_err(|_|"video width overflow")?;
         stats.height=u32::try_from(decoded.frame.height).map_err(|_|"video height overflow")?;
-        let (full_range,matrix,primaries,transfer)=frame_colour.unwrap_or((full_range,matrix,0,0));
+        let (full_range, frame_matrix, frame_primaries, frame_transfer) =
+            frame_colour.unwrap_or((full_range, matrix, track_primaries, track_transfer));
+        let matrix = if matches!(frame_matrix, 0 | 2) {
+            matrix
+        } else {
+            frame_matrix
+        };
+        let primaries = if matches!(frame_primaries, 0 | 2) {
+            track_primaries
+        } else {
+            frame_primaries
+        };
+        let transfer = if matches!(frame_transfer, 0 | 2) {
+            track_transfer
+        } else {
+            frame_transfer
+        };
         let (full_range, matrix) = if decoded.frame.subsampling.is_none() {
             (frame_colour.map(|c|c.0).or(explicit_full_range).unwrap_or(true), 0)
         } else { (full_range, matrix) };

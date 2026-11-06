@@ -1,8 +1,8 @@
 {
   "target": 1000,
   "counting_rule": "One independently confirmed problem or useful capability; fixture variants and baseline integration repairs are excluded. Only accepted entries count.",
-  "accepted_count": 579,
-  "next_id": "FVID-0580",
+  "accepted_count": 584,
+  "next_id": "FVID-0585",
   "entries": [
     {
       "id": "FVID-0001",
@@ -6560,6 +6560,61 @@
       "result": "Retain non-zero container colr (nclx) primaries, transfer, and matrix in owned_mp4_video_decode whenever the corresponding AVC or HEVC VUI code is 2 (Unspecified), matching AV1 and player MP4 colour resolution.",
       "status": "accepted",
       "validation": "batch-569-validation.json"
+    },
+    {
+      "id": "FVID-0580",
+      "batch": 570,
+      "title": "Preserve Matroska container Colour fallback when bitstream VUI/sequence header reports unspecified code 2 or omits colour description",
+      "source": "crates/fvid-media/src/owned_video_decode.rs",
+      "regression": "tests/mkv_vui_fallback_and_subtitle_burn.rs",
+      "before": "owned_video_decode::decode_webm fell back to (full_range, matrix, 0, 0) when frame_colour was None (dropping container primaries and transfer) and only replaced frame_colour components equal to 0, while owned_ffv1_export only replaced view.primaries == 0 and view.transfer == 0 without replacing code 2 (Unspecified) or view.matrix in VideoMetadata::colour.",
+      "result": "Fallback to container track.colour primaries, transfer, and matrix in owned_video_decode::decode_webm and owned_ffv1_export::export_processed whenever frame_colour is None or reports 0 or 2 (Unspecified).",
+      "status": "accepted",
+      "validation": "batch-570-validation.json"
+    },
+    {
+      "id": "FVID-0581",
+      "batch": 570,
+      "title": "Treat H.273 unspecified code 2 as replaceable in ColourDescription::filled_with",
+      "source": "src/color/hdr.rs",
+      "regression": "tests/mkv_vui_fallback_and_subtitle_burn.rs",
+      "before": "ColourDescription::filled_with only replaced components equal to 0 and treated code 2 (Unspecified) as an explicit statement, preventing container nclx/Colour and bitstream VUI/sequence header descriptions from cross-filling unspecified code 2.",
+      "result": "Replace mine == 2 when theirs != 0 in ColourDescription::filled_with and treat only non-{0,2} codes as stated triples for full_range inheritance.",
+      "status": "accepted",
+      "validation": "batch-570-validation.json"
+    },
+    {
+      "id": "FVID-0582",
+      "batch": 570,
+      "title": "Preserve bitstream VUI colour and HDR10 SEI/OBU metadata in native_lossless::write_mp4_selected",
+      "source": "src/native_lossless.rs",
+      "regression": "tests/mkv_vui_fallback_and_subtitle_burn.rs",
+      "before": "native_lossless::write_mp4_selected populated output Matroska TrackOptions.video colour and hdr strictly from MP4 container colr/mdcv/ccll boxes via mp4_matroska::plan, dropping in-band VUI colour and SEI 137/144 / AV1 metadata OBU HDR metadata.",
+      "result": "Write combined container+bitstream reader.colour() and reader.hdr() into output Matroska TrackOptions.video in native_lossless::write_mp4_selected, matching native_lossless_y4m.",
+      "status": "accepted",
+      "validation": "batch-570-validation.json"
+    },
+    {
+      "id": "FVID-0583",
+      "batch": 570,
+      "title": "Support \\h hard space, HTML tags, general {...} override blocks, SSA Marked=N, custom [Events] Format:, and inline WebVTT cue IDs in fvid_media::plain_subtitle and parse_subtitle_text",
+      "source": "crates/fvid-media/src/owned_play_controls_impl.rs",
+      "regression": "tests/mkv_vui_fallback_and_subtitle_burn.rs",
+      "before": "fvid_media::plain_subtitle left '\\h', HTML tags, and non-backslash '{...}' blocks in cue text, subtitle_payload rejected SSA 'Marked=N' block payloads, parse_srt dropped cues with inline WebVTT 'id - time --> time' headers, and parse_ass ignored custom [Events] Format: column orders and case-insensitive Dialogue: prefixes.",
+      "result": "Convert '\\h' to '\\u{a0}', strip isolated '<...>' and '{...}' tags in plain_subtitle, accept SSA 'Marked=N' payloads in subtitle_payload, support inline WebVTT cue IDs in parse_srt, and honor custom [Events] Format: column order and case-insensitive Dialogue: lines in parse_ass.",
+      "status": "accepted",
+      "validation": "batch-570-validation.json"
+    },
+    {
+      "id": "FVID-0584",
+      "batch": 570,
+      "title": "Support external .vtt WebVTT and .ass/.ssa ASS/SSA subtitle files in owned_subtitle_burn::supports, plan_burn_subtitles, and burn_subtitles",
+      "source": "crates/fvid-media/src/owned_subtitle_burn.rs",
+      "regression": "tests/mkv_vui_fallback_and_subtitle_burn.rs",
+      "before": "owned_subtitle_burn::supports and prepare only accepted '.srt' files containing '-->', rejecting valid external '.vtt', '.ass', and '.ssa' subtitle files even though parse_subtitle_text already parsed ASS/SSA and WebVTT.",
+      "result": "Accept '.srt', '.vtt', '.ass', and '.ssa' subtitle files and validate WebVTT/ASS/SSA headers alongside '-->' in owned_subtitle_burn::supports, plan_burn_subtitles, and burn_subtitles.",
+      "status": "accepted",
+      "validation": "batch-570-validation.json"
     }
   ]
 }

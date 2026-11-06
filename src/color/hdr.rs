@@ -312,14 +312,23 @@ impl ColourDescription {
     /// `colr` atom or `Colour` element completed by the coding's own VUI or
     /// sequence header.
     ///
-    /// H.273 numbers 0 as "unspecified", so 0 is the only value the fall-back
-    /// may replace: a source that names a code keeps it whichever of the two it
-    /// came from. A range flag has no unspecified value to be replaced by, so
-    /// it falls back only when this statement named none of the three codes,
-    /// which is the case of a container with no colour description at all.
+    /// H.273 numbers 0 and 2 as "unspecified", so 0 and 2 are the values the
+    /// fall-back may replace: a source that names a code keeps it whichever of
+    /// the two it came from. A range flag has no unspecified value to be
+    /// replaced by, so it falls back only when this statement named none of the
+    /// three codes, which is the case of a container with no colour description
+    /// at all.
     pub fn filled_with(self, fallback: Self) -> Self {
-        let named = |mine: u8, theirs: u8| if mine == 0 { theirs } else { mine };
-        let stated_triple = (self.primaries | self.transfer | self.matrix) != 0;
+        let named = |mine: u8, theirs: u8| {
+            if mine == 0 || (mine == 2 && theirs != 0) {
+                theirs
+            } else {
+                mine
+            }
+        };
+        let stated_triple = [self.primaries, self.transfer, self.matrix]
+            .into_iter()
+            .any(|code| !matches!(code, 0 | 2));
         Self {
             primaries: named(self.primaries, fallback.primaries),
             transfer: named(self.transfer, fallback.transfer),

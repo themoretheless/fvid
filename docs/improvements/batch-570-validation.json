@@ -1,0 +1,39 @@
+{
+  "status": "accepted",
+  "accepted_ids": [
+    "FVID-0580",
+    "FVID-0581",
+    "FVID-0582",
+    "FVID-0583",
+    "FVID-0584"
+  ],
+  "count_delta": 5,
+  "accepted_count": 584,
+  "next_id": "FVID-0585",
+  "qualification": [
+    {
+      "name": "mkv-vui-fallback-and-subtitle-burn",
+      "command": [
+        "cargo",
+        "test",
+        "--features",
+        "player",
+        "--test",
+        "mkv_vui_fallback_and_subtitle_burn",
+        "--test",
+        "matroska_subtitles_and_mp4_vui_fallback",
+        "--test",
+        "native_lossless",
+        "--test",
+        "legacy_media_controls",
+        "--test",
+        "play_controls_regressions",
+        "--test",
+        "subtitle_burn_matroska_xfade_metadata_regressions"
+      ],
+      "exit_code": 0,
+      "passed": 35,
+      "ignored": 0
+    }
+  ]
+}

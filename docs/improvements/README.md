@@ -4096,7 +4096,13 @@ See `batch-568-validation.json`.
 
 See `batch-569-validation.json`.
 
+## Batch 570 — FVID-0580..0584: Matroska VUI colour fallback, `ColourDescription::filled_with` code `2`, MP4 lossless VUI/HDR preservation, `fvid-media` subtitle parsing parity, and `.vtt`/`.ass`/`.ssa` subtitle burn-in
 
+- **FVID-0580** — Preserve Matroska container `Colour` fallback when bitstream VUI/sequence header reports unspecified code `2` or omits colour description (`crates/fvid-media/src/owned_video_decode.rs`, `crates/fvid-media/src/owned_ffv1_export.rs`, `tests/mkv_vui_fallback_and_subtitle_burn.rs`).
+- **FVID-0581** — Treat H.273 unspecified code `2` as replaceable in `ColourDescription::filled_with` (`src/color/hdr.rs`, `tests/mkv_vui_fallback_and_subtitle_burn.rs`).
+- **FVID-0582** — Preserve bitstream VUI `colour` and HDR10 SEI/OBU `hdr` metadata in `native_lossless::write_mp4_selected` (`src/native_lossless.rs`, `tests/mkv_vui_fallback_and_subtitle_burn.rs`).
+- **FVID-0583** — Support `\h` hard space, HTML tags, general `{...}` override blocks, SSA `Marked=N`, custom `[Events]` `Format:`, and inline WebVTT cue IDs in `fvid_media::plain_subtitle` and `parse_subtitle_text` (`crates/fvid-media/src/owned_play_controls_impl.rs`, `tests/mkv_vui_fallback_and_subtitle_burn.rs`).
+- **FVID-0584** — Support external `.vtt` WebVTT and `.ass`/`.ssa` ASS/SSA subtitle files in `owned_subtitle_burn::supports`, `plan_burn_subtitles`, and `burn_subtitles` (`crates/fvid-media/src/owned_subtitle_burn.rs`, `tests/mkv_vui_fallback_and_subtitle_burn.rs`).
 
-
+See `batch-570-validation.json`.
 

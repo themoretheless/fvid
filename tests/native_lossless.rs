@@ -203,14 +203,12 @@ fn rotation_aspect_hdr_and_completion_publication_are_preserved() {
     let source = fixture("hevc/hdr10.mp4");
     let mut result = Cursor::new(Vec::new());
     fvid::native_lossless::write_mp4(&source, &mut result, None, None).unwrap();
-    let input = mp4::Mp4Reader::open(
-        Cursor::new(std::fs::read(source).unwrap()),
-        Default::default(),
-    )
-    .unwrap();
+    let input =
+        NativeReader::software(Cursor::new(std::fs::read(source).unwrap()), usize::MAX).unwrap();
     let output =
         webm::WebmReader::open(Cursor::new(result.into_inner()), Default::default()).unwrap();
-    assert_eq!(input.tracks()[0].hdr, output.tracks[0].hdr);
+    assert_eq!(input.colour(), output.tracks[0].colour);
+    assert_eq!(input.hdr(), output.tracks[0].hdr);
 }
 
 #[test]
