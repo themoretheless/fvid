@@ -1420,7 +1420,7 @@ pub fn transcode_lossless(source: &std::path::Path, transform: &crate::media_inf
         crate::native_lossless::validate_first_mp4_frame(source, &geometry, &filters, false)
             .map_err(|e| e.to_string())?;
     }
-    let streams=if crate::native_lossless_y4m::is_source(source).map_err(|e|e.to_string())? {
+    let streams=if planar_eligible {
         vec![PlanStream {index:0,media_type:"video".into(),codec:"rawvideo".into(),disposition:"primary_video".into()}]
     } else {
         let info=crate::native_probe::probe(source)?;

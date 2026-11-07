@@ -179,13 +179,12 @@ fn uses_native_audio_route(source: &std::path::Path, options: &CopyOptions, tran
     {
         use std::io::{Read, Seek, SeekFrom};
         let mut input = std::fs::File::open(source).map_err(|e| e.to_string())?;
-        if crate::native_pcm::is_wave_reader(&mut input).map_err(|e| e.to_string())? {
-            return Ok(true);
-        }
-        input.seek(SeekFrom::Start(0)).map_err(|e| e.to_string())?;
-        let mut prefix = [0u8; 8];
+        let mut prefix = [0u8; 12];
         match input.read_exact(&mut prefix) {
-            Ok(()) if crate::container::mp4::recognizes_prefix(&prefix) => {
+            Ok(()) if matches!(&prefix[..4], b"RIFF" | b"RF64") && &prefix[8..12] == b"WAVE" => {
+                return Ok(true);
+            }
+            Ok(()) if crate::container::mp4::recognizes_prefix(&prefix[..8]) => {
                 if options.cancel.as_ref().is_some_and(|c| c.is_cancelled()) {
                     return Err("media operation cancelled".into());
                 }
@@ -206,7 +205,29 @@ fn uses_native_audio_route(source: &std::path::Path, options: &CopyOptions, tran
                 }
             }
             Ok(()) => {}
-            Err(e) if e.kind() == std::io::ErrorKind::UnexpectedEof => {}
+            Err(e) if e.kind() == std::io::ErrorKind::UnexpectedEof => {
+                input.seek(SeekFrom::Start(0)).map_err(|e| e.to_string())?;
+                let mut short_prefix = [0u8; 8];
+                if input.read_exact(&mut short_prefix).is_ok()
+                    && crate::container::mp4::recognizes_prefix(&short_prefix)
+                {
+                    if options.cancel.as_ref().is_some_and(|c| c.is_cancelled()) {
+                        return Err("media operation cancelled".into());
+                    }
+                    input.seek(SeekFrom::Start(0)).map_err(|e| e.to_string())?;
+                    let mut limits = crate::container::mp4::Limits::default();
+                    if options.max_packet_bytes > 0 {
+                        limits.packet_bytes = limits.packet_bytes.min(options.max_packet_bytes);
+                    }
+                    let reader = crate::container::mp4::Mp4Reader::open_indexed(
+                        std::io::BufReader::new(input),
+                        limits,
+                    ).map_err(|e| e.to_string())?;
+                    if reader.tracks().iter().any(|t| t.ensure_constant_description().is_err()) {
+                        return Ok(false);
+                    }
+                }
+            }
             Err(e) => return Err(e.to_string()),
         }
     }
@@ -809,18 +830,21 @@ pub fn remux(
         validate_concat_matroska_options(options)?;
         return fvid_media::remux(source, destination, options);
     }
-    let mut input = match std::fs::File::open(source) {
-        Ok(f) => f,
-        Err(e) => {
+    let prefix = {
+        let mut input = match std::fs::File::open(source) {
+            Ok(f) => f,
+            Err(e) => {
+                validate_concat_matroska_options(options)?;
+                return Err(e.to_string());
+            }
+        };
+        let mut prefix = [0; 8];
+        if let Err(e) = input.read_exact(&mut prefix) {
             validate_concat_matroska_options(options)?;
             return Err(e.to_string());
         }
+        prefix
     };
-    let mut prefix = [0; 8];
-    if let Err(e) = input.read_exact(&mut prefix) {
-        validate_concat_matroska_options(options)?;
-        return Err(e.to_string());
-    }
     let adts = crate::container::adts::header(&prefix).is_some();
     let mp4 = crate::container::mp4::recognizes_prefix(&prefix);
     let matroska_src = prefix[..4] == [0x1a, 0x45, 0xdf, 0xa3];
@@ -1336,12 +1360,24 @@ pub fn mix_audio_with_controls(
     {
         return Err("output already exists".into());
     }
-    let mut default_controls = CopyOptions::default();
-    default_controls.cancel = controls.cancel.clone();
-    default_controls.max_rss_bytes = controls.max_rss_bytes;
+    let default_controls = {
+        let mut dc = CopyOptions::default();
+        dc.cancel = controls.cancel.clone();
+        dc.max_rss_bytes = controls.max_rss_bytes;
+        dc
+    };
+    let same_as_default = controls.streams.is_empty()
+        && controls.max_packet_bytes == default_controls.max_packet_bytes
+        && controls.max_packets.is_none()
+        && controls.max_controlled_bytes.is_none()
+        && controls.metadata_set.is_empty()
+        && controls.metadata_delete.is_empty()
+        && controls.stream_metadata_set.is_empty()
+        && controls.stream_metadata_delete.is_empty();
     if crate::native_audio_mix::eligible_with_options(sources, controls).map_err(|e| e.to_string())?
-        || crate::native_audio_mix::eligible_with_options(sources, &default_controls)
-            .map_err(|e| e.to_string())?
+        || (!same_as_default
+            && crate::native_audio_mix::eligible_with_options(sources, &default_controls)
+                .map_err(|e| e.to_string())?)
     {
         crate::native_audio_mix::mix_audio_with_controls(sources, destination, options, controls)
             .map_err(|e| e.to_string())
@@ -1362,12 +1398,24 @@ pub fn plan_mix_audio_with_controls(
     controls: &CopyOptions,
 ) -> Result<MediaPlan> {
     validate_concat_matroska_options(controls)?;
-    let mut default_controls = CopyOptions::default();
-    default_controls.cancel = controls.cancel.clone();
-    default_controls.max_rss_bytes = controls.max_rss_bytes;
+    let default_controls = {
+        let mut dc = CopyOptions::default();
+        dc.cancel = controls.cancel.clone();
+        dc.max_rss_bytes = controls.max_rss_bytes;
+        dc
+    };
+    let same_as_default = controls.streams.is_empty()
+        && controls.max_packet_bytes == default_controls.max_packet_bytes
+        && controls.max_packets.is_none()
+        && controls.max_controlled_bytes.is_none()
+        && controls.metadata_set.is_empty()
+        && controls.metadata_delete.is_empty()
+        && controls.stream_metadata_set.is_empty()
+        && controls.stream_metadata_delete.is_empty();
     if crate::native_audio_mix::eligible_with_options(sources, controls).map_err(|e| e.to_string())?
-        || crate::native_audio_mix::eligible_with_options(sources, &default_controls)
-            .map_err(|e| e.to_string())?
+        || (!same_as_default
+            && crate::native_audio_mix::eligible_with_options(sources, &default_controls)
+                .map_err(|e| e.to_string())?)
     {
         crate::native_audio_mix::plan_with_controls(sources, options, controls)
             .map_err(|e| e.to_string())
@@ -1395,12 +1443,24 @@ pub fn merge_audio_with_controls(
     {
         return Err("output already exists".into());
     }
-    let mut default_controls = CopyOptions::default();
-    default_controls.cancel = controls.cancel.clone();
-    default_controls.max_rss_bytes = controls.max_rss_bytes;
+    let default_controls = {
+        let mut dc = CopyOptions::default();
+        dc.cancel = controls.cancel.clone();
+        dc.max_rss_bytes = controls.max_rss_bytes;
+        dc
+    };
+    let same_as_default = controls.streams.is_empty()
+        && controls.max_packet_bytes == default_controls.max_packet_bytes
+        && controls.max_packets.is_none()
+        && controls.max_controlled_bytes.is_none()
+        && controls.metadata_set.is_empty()
+        && controls.metadata_delete.is_empty()
+        && controls.stream_metadata_set.is_empty()
+        && controls.stream_metadata_delete.is_empty();
     if crate::native_audio_mix::eligible_with_options(sources, controls).map_err(|e| e.to_string())?
-        || crate::native_audio_mix::eligible_with_options(sources, &default_controls)
-            .map_err(|e| e.to_string())?
+        || (!same_as_default
+            && crate::native_audio_mix::eligible_with_options(sources, &default_controls)
+                .map_err(|e| e.to_string())?)
     {
         crate::native_audio_mix::merge_audio_with_controls(sources, destination, controls)
             .map_err(|e| e.to_string())
@@ -1417,12 +1477,24 @@ pub fn plan_merge_audio_with_controls(
     controls: &CopyOptions,
 ) -> Result<MediaPlan> {
     validate_concat_matroska_options(controls)?;
-    let mut default_controls = CopyOptions::default();
-    default_controls.cancel = controls.cancel.clone();
-    default_controls.max_rss_bytes = controls.max_rss_bytes;
+    let default_controls = {
+        let mut dc = CopyOptions::default();
+        dc.cancel = controls.cancel.clone();
+        dc.max_rss_bytes = controls.max_rss_bytes;
+        dc
+    };
+    let same_as_default = controls.streams.is_empty()
+        && controls.max_packet_bytes == default_controls.max_packet_bytes
+        && controls.max_packets.is_none()
+        && controls.max_controlled_bytes.is_none()
+        && controls.metadata_set.is_empty()
+        && controls.metadata_delete.is_empty()
+        && controls.stream_metadata_set.is_empty()
+        && controls.stream_metadata_delete.is_empty();
     if crate::native_audio_mix::eligible_with_options(sources, controls).map_err(|e| e.to_string())?
-        || crate::native_audio_mix::eligible_with_options(sources, &default_controls)
-            .map_err(|e| e.to_string())?
+        || (!same_as_default
+            && crate::native_audio_mix::eligible_with_options(sources, &default_controls)
+                .map_err(|e| e.to_string())?)
     {
         crate::native_audio_mix::plan_merge_with_controls(sources, controls)
             .map_err(|e| e.to_string())

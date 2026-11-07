@@ -1,8 +1,8 @@
 {
   "target": 1000,
   "counting_rule": "One independently confirmed problem or useful capability; fixture variants and baseline integration repairs are excluded. Only accepted entries count.",
-  "accepted_count": 824,
-  "next_id": "FVID-0825",
+  "accepted_count": 829,
+  "next_id": "FVID-0830",
   "entries": [
     {
       "id": "FVID-0001",
@@ -9255,7 +9255,62 @@
       "result": "native_lossless::eligible reads up to 9 bytes once, delegating to native_lossless_y4m::eligible only when the YUV4MPEG2 signature matches and otherwise reusing the same BufReader for MP4 inspection.",
       "status": "accepted",
       "validation": "batch-618-validation.json"
+    },
+    {
+      "id": "FVID-0825",
+      "batch": 619,
+      "title": "Combine WAVE and MP4 prefix inspection into a single 12-byte read in media::uses_native_audio_route",
+      "source": "src/media.rs",
+      "regression": "tests/media_dispatch_and_lossless_plan_single_open.rs",
+      "before": "uses_native_audio_route called is_wave_reader (reading 12 bytes and seeking to 0) and then sought to 0 and read 8 bytes again for MP4 prefix detection.",
+      "result": "uses_native_audio_route reads the 12-byte prefix once to classify both RIFF/RF64 WAVE and MP4 containers without redundant seeks or reads.",
+      "status": "accepted",
+      "validation": "batch-619-validation.json"
+    },
+    {
+      "id": "FVID-0826",
+      "batch": 619,
+      "title": "Close the 8-byte prefix probe file handle before delegating in media::remux",
+      "source": "src/media.rs",
+      "regression": "tests/media_dispatch_and_lossless_plan_single_open.rs",
+      "before": "media::remux kept its File handle open for the entire function body while delegating to native_export or fvid_media::remux.",
+      "result": "media::remux scopes the 8-byte prefix read so the descriptor is closed immediately after container classification.",
+      "status": "accepted",
+      "validation": "batch-619-validation.json"
+    },
+    {
+      "id": "FVID-0827",
+      "batch": 619,
+      "title": "Skip duplicate eligible_with_options calls when controls match default controls in media mix/merge audio entrypoints",
+      "source": "src/media.rs",
+      "regression": "tests/media_dispatch_and_lossless_plan_single_open.rs",
+      "before": "mix_audio_with_controls, plan_mix_audio_with_controls, merge_audio_with_controls, and plan_merge_audio_with_controls evaluated native_audio_mix::eligible_with_options(sources, controls) and then unconditionally re-ran eligible_with_options(sources, &default_controls) when the first returned false, even when controls was already default.",
+      "result": "All four entrypoints check whether controls differs from default_controls before running the fallback eligibility pass.",
+      "status": "accepted",
+      "validation": "batch-619-validation.json"
+    },
+    {
+      "id": "FVID-0828",
+      "batch": 619,
+      "title": "Close the WAVE prefix BufReader before delegating to container metadata extraction in pcm_matroska::extract_source_wave_info",
+      "source": "src/native_export/pcm_matroska.rs",
+      "regression": "tests/media_dispatch_and_lossless_plan_single_open.rs",
+      "before": "extract_source_wave_info sought back to 0 even for non-RIFF files and kept its BufReader<File> open while calling extract_source_pcm_metadata_with_interval_packet_and_memory_limit.",
+      "result": "extract_source_wave_info scopes the WAVE check and drops the reader before delegating to extract_source_pcm_metadata_with_interval_packet_and_memory_limit.",
+      "status": "accepted",
+      "validation": "batch-619-validation.json"
+    },
+    {
+      "id": "FVID-0829",
+      "batch": 619,
+      "title": "Reuse planar_eligible instead of re-probing native_lossless_y4m::is_source in native_plan::transcode_lossless",
+      "source": "src/native_plan.rs",
+      "regression": "tests/media_dispatch_and_lossless_plan_single_open.rs",
+      "before": "native_plan::transcode_lossless computed planar_eligible = native_lossless_y4m::eligible(source) and then called native_lossless_y4m::is_source(source) again to build the plan stream list.",
+      "result": "native_plan::transcode_lossless reuses planar_eligible directly to construct the rawvideo PlanStream without reopening the source.",
+      "status": "accepted",
+      "validation": "batch-619-validation.json"
     }
   ],
-  "pending_count": 176
+  "pending_count": 171
 }

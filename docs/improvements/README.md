@@ -4536,3 +4536,63 @@ See `batch-612-validation.json`.
 
 See `batch-613-validation.json`.
 
+## Batch 614 — FVID-0800..0804: Single-open WAVE inspection and zero-reopen container fallback in `native_pcm` and `native_media`
+
+- **FVID-0800** — Reuse a single `File` handle across `is_wave_reader` and `inspect` in `native_pcm::loudness_channel_weights_with_options` (`src/native_pcm.rs`, `tests/wave_loudness_and_mix_single_open.rs`).
+- **FVID-0801** — Reuse a single `File` handle across `is_wave_reader` and `measure_loudness_reader_with_options` in `native_pcm::measure_loudness_file_with_options` (`src/native_pcm.rs`, `tests/wave_loudness_and_mix_single_open.rs`).
+- **FVID-0802** — Reuse the pass-1 `File` handle across `is_wave_reader` and `measure_loudness_reader_with_options` in `native_pcm::normalize_loudness_file_with_options` (`src/native_pcm.rs`, `tests/wave_loudness_and_mix_single_open.rs`).
+- **FVID-0803** — Reuse the `BufReader<File>` across MP4/Matroska inspection and `StreamReader::open_with_packet_limit` in `native_media::constant_audio_source_info_selected_with_interval_and_options` (`src/native_media.rs`, `tests/wave_loudness_and_mix_single_open.rs`).
+- **FVID-0804** — Reuse the `BufReader<File>` across MP4/Matroska inspection and `StreamReader::open_with_packet_limit` in `native_media::aac_source_info_selected_with_options` (`src/native_media.rs`, `tests/wave_loudness_and_mix_single_open.rs`).
+
+See `batch-614-validation.json`.
+
+## Batch 615 — FVID-0805..0809: Single-open WAVE trim/concat and single-open raw Ogg/FLAC/MP3 decode-plan inspection
+
+- **FVID-0805** — Reuse a single `File` handle across `inspect` and `trim_reader_inspected` in `native_pcm::trim_wave` (`src/native_pcm.rs`, `tests/wave_trim_concat_and_raw_plan_single_open.rs`).
+- **FVID-0806** — Inspect and stream each WAVE input from a single `File` handle in `native_pcm::concat_wave` (`src/native_pcm.rs`, `tests/wave_trim_concat_and_raw_plan_single_open.rs`).
+- **FVID-0807** — Validate the `OggS` capture pattern inside `owned_raw_ogg::open_with_interval` and remove the redundant `recognizes(path)` open in `owned_ogg_flac_plan::try_plan_decode_audio` (`crates/fvid-media/src/owned_raw_ogg.rs`, `crates/fvid-media/src/owned_ogg_flac_plan.rs`, `tests/wave_trim_concat_and_raw_plan_single_open.rs`).
+- **FVID-0808** — Remove the redundant `owned_raw_flac::recognizes(source)` open before `open_with_interval` in `owned_ogg_flac_plan::try_plan_decode_audio` (`crates/fvid-media/src/owned_ogg_flac_plan.rs`, `tests/wave_trim_concat_and_raw_plan_single_open.rs`).
+- **FVID-0809** — Remove the redundant `owned_raw_mp3::recognizes(source)` open before `open_with_interval` in `owned_mp3_plan::try_plan_decode_audio` (`crates/fvid-media/src/owned_mp3_plan.rs`, `tests/wave_trim_concat_and_raw_plan_single_open.rs`).
+
+See `batch-615-validation.json`.
+
+## Batch 616 — FVID-0810..0814: Single-open raw Ogg/FLAC/MP3 audio decode & loudness and single-pass Matroska/MP4 inspection in `native_plan`
+
+- **FVID-0810** — Remove redundant `recognizes(source)` opens in `owned_ogg_flac_decode::try_decode_audio_with_controls` (`crates/fvid-media/src/owned_ogg_flac_decode.rs`, `tests/raw_audio_decode_and_native_plan_single_open.rs`).
+- **FVID-0811** — Remove redundant `recognizes(source)` opens in `owned_ogg_flac_decode::try_measure_loudness` and `try_plan_loudness` (`crates/fvid-media/src/owned_ogg_flac_decode.rs`, `tests/raw_audio_decode_and_native_plan_single_open.rs`).
+- **FVID-0812** — Remove redundant `recognizes(source)` open in `owned_mp3_decode::try_decode_audio_with_controls` (`crates/fvid-media/src/owned_mp3_decode.rs`, `tests/raw_audio_decode_and_native_plan_single_open.rs`).
+- **FVID-0813** — Remove redundant `recognizes(source)` opens in `owned_mp3_decode::try_measure_loudness` and `try_plan_loudness` (`crates/fvid-media/src/owned_mp3_decode.rs`, `tests/raw_audio_decode_and_native_plan_single_open.rs`).
+- **FVID-0814** — Reuse the 8-byte prefix and `BufReader<File>` across Matroska, MP4, and `StreamReader` inspection in `native_plan::trim_audio_with_options` (`src/native_plan.rs`, `tests/raw_audio_decode_and_native_plan_single_open.rs`).
+
+See `batch-616-validation.json`.
+
+## Batch 617 — FVID-0815..0819: Single-open header inspection in `native_plan`, `native_loudnorm`, and `native_media`
+
+- **FVID-0815** — Reuse the initial 8-byte header read and close the file before compressed audio inspection in `native_plan::decode_audio_with_options` (`src/native_plan.rs`, `tests/native_plan_and_loudnorm_single_open.rs`).
+- **FVID-0816** — Inspect WAVE once in `native_plan::loudness_with_options` instead of calling `is_wave` and re-opening for `inspect` (`src/native_plan.rs`, `tests/native_plan_and_loudnorm_single_open.rs`).
+- **FVID-0817** — Drop the container validation reader before delegating to `native_probe` in `native_plan::remux_with_options` (`src/native_plan.rs`, `tests/native_plan_and_loudnorm_single_open.rs`).
+- **FVID-0818** — Combine ADTS detection and first-frame budget inspection into a single 7-byte read in `native_loudnorm::{try_plan, try_apply}` (`src/native_loudnorm.rs`, `tests/native_plan_and_loudnorm_single_open.rs`).
+- **FVID-0819** — Gate multi-track container fallback on a single 8-byte prefix read in `native_media::is_owned_audio_trim_source_with_interval_and_options` (`src/native_media.rs`, `tests/native_plan_and_loudnorm_single_open.rs`).
+
+See `batch-617-validation.json`.
+
+## Batch 618 — FVID-0820..0824: Single-open WAVE/MP4/Y4M inspection in `native_audio_mix`, `native_export`, and `native_lossless`
+
+- **FVID-0820** — Inspect WAVE once in `native_audio_mix::validate_and_inspect_source_with_options` instead of calling `decode_audio_with_options` (`src/native_audio_mix.rs`, `tests/native_mix_export_and_lossless_single_open.rs`).
+- **FVID-0821** — Select the MP4 audio track directly from the open `Mp4Reader` in `native_audio_mix::concat::segment_packet_count` (`src/native_audio_mix/concat.rs`, `tests/native_mix_export_and_lossless_single_open.rs`).
+- **FVID-0822** — Close the 9-byte Y4M prefix probe handle before delegating to `native_probe` in `native_export::validate_video_selection_with_options` (`src/native_export.rs`, `tests/native_mix_export_and_lossless_single_open.rs`).
+- **FVID-0823** — Eliminate redundant `aac_source_info_selected_with_options` call in `native_export::trim_audio_pcm_with_controls` (`src/native_export.rs`, `tests/native_mix_export_and_lossless_single_open.rs`).
+- **FVID-0824** — Gate Y4M and MP4 lossless eligibility on a single 9-byte prefix read in `native_lossless::eligible` (`src/native_lossless.rs`, `tests/native_mix_export_and_lossless_single_open.rs`).
+
+See `batch-618-validation.json`.
+
+## Batch 619 — FVID-0825..0829: Single-open prefix and eligibility dispatch in `media`, `pcm_matroska`, and `native_plan`
+
+- **FVID-0825** — Combine WAVE and MP4 prefix inspection into a single 12-byte read in `media::uses_native_audio_route` (`src/media.rs`, `tests/media_dispatch_and_lossless_plan_single_open.rs`).
+- **FVID-0826** — Close the 8-byte prefix probe file handle before delegating in `media::remux` (`src/media.rs`, `tests/media_dispatch_and_lossless_plan_single_open.rs`).
+- **FVID-0827** — Skip duplicate `eligible_with_options` calls when `controls` match `default_controls` in `media` mix/merge audio entrypoints (`src/media.rs`, `tests/media_dispatch_and_lossless_plan_single_open.rs`).
+- **FVID-0828** — Close the WAVE prefix `BufReader` before delegating to container metadata extraction in `pcm_matroska::extract_source_wave_info` (`src/native_export/pcm_matroska.rs`, `tests/media_dispatch_and_lossless_plan_single_open.rs`).
+- **FVID-0829** — Reuse `planar_eligible` instead of re-probing `native_lossless_y4m::is_source` in `native_plan::transcode_lossless` (`src/native_plan.rs`, `tests/media_dispatch_and_lossless_plan_single_open.rs`).
+
+See `batch-619-validation.json`.
+

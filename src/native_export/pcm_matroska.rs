@@ -541,33 +541,35 @@ pub(crate) fn extract_source_wave_info(
     if cancel.is_some_and(|c| c.is_cancelled()) {
         return Err(invalid("media operation cancelled"));
     }
-    let mut input = BufReader::new(std::fs::File::open(source)?);
-    let mut prefix = [0u8; 8];
-    if input.read_exact(&mut prefix).is_err() {
-        return Ok(Vec::new());
-    }
-    input.seek(SeekFrom::Start(0))?;
-    if matches!(&prefix[..4], b"RIFF" | b"RF64" | b"RIFX") {
-        if let Ok(info) = fvid_media::owned_wave_inspect::inspect(&mut input, cancel) {
-            if let Some(mem_limit) = options.max_controlled_bytes {
-                let info_bytes =
-                    fvid_media::owned_wave_inspect::info_chunks_bytes(&mut input, &info, cancel)
-                        .map_err(|e| invalid(&e.to_string()))?;
-                let needed =
-                    fvid_media::owned_wave_metadata::wave_metadata_working_bytes(info_bytes, options)
-                        .map_err(|e| invalid(&e))?
-                        .saturating_add(16 * 1024);
-                if needed > mem_limit {
-                    return Err(invalid(&format!(
-                        "controlled memory budget exceeded: need {needed} bytes, limit {mem_limit}"
-                    )));
+    {
+        let mut input = BufReader::new(std::fs::File::open(source)?);
+        let mut prefix = [0u8; 8];
+        if input.read_exact(&mut prefix).is_err() {
+            return Ok(Vec::new());
+        }
+        if matches!(&prefix[..4], b"RIFF" | b"RF64" | b"RIFX") {
+            input.seek(SeekFrom::Start(0))?;
+            if let Ok(info) = fvid_media::owned_wave_inspect::inspect(&mut input, cancel) {
+                if let Some(mem_limit) = options.max_controlled_bytes {
+                    let info_bytes =
+                        fvid_media::owned_wave_inspect::info_chunks_bytes(&mut input, &info, cancel)
+                            .map_err(|e| invalid(&e.to_string()))?;
+                    let needed =
+                        fvid_media::owned_wave_metadata::wave_metadata_working_bytes(info_bytes, options)
+                            .map_err(|e| invalid(&e))?
+                            .saturating_add(16 * 1024);
+                    if needed > mem_limit {
+                        return Err(invalid(&format!(
+                            "controlled memory budget exceeded: need {needed} bytes, limit {mem_limit}"
+                        )));
+                    }
+                    if info_bytes == 0 {
+                        return Ok(Vec::new());
+                    }
                 }
-                if info_bytes == 0 {
-                    return Ok(Vec::new());
-                }
+                return fvid_media::owned_wave_inspect::info_chunks(&mut input, &info, cancel)
+                    .map_err(|e| invalid(&e.to_string()));
             }
-            return fvid_media::owned_wave_inspect::info_chunks(&mut input, &info, cancel)
-                .map_err(|e| invalid(&e.to_string()));
         }
     }
     let base = extract_source_pcm_metadata_with_interval_packet_and_memory_limit(
