@@ -205,10 +205,46 @@ pub(crate) fn descriptor_with_transform(
     transform: Option<AudioDecodeTransform>,
     options: &CopyOptions,
 ) -> Result<(u32, u16, &'static str)> {
+    descriptor_for_decode(source, transform, options)
+        .map(|(rate, channels, codec, _, _)| (rate, channels, codec))
+}
+pub(crate) fn descriptor_for_decode(
+    source: &Path,
+    transform: Option<AudioDecodeTransform>,
+    options: &CopyOptions,
+) -> Result<(u32, u16, &'static str, u64, usize)> {
     let parsed = open_with_transform(source, transform, options)?;
     if parsed.presentation_samples() == 0 {
         return Err("MPEG audio stream contains no audible samples".into());
     }
+    let info = parsed.wave_info()?;
+    let pres = parsed.presentation_window();
+    let until = transform.and_then(|t| crate::owned_adts_export::decoded_prefix(t, parsed.sample_rate));
+    let last = match until {
+        Some((_from, at)) => u64::try_from(
+            (at.as_nanos() * u128::from(parsed.sample_rate)).div_ceil(1_000_000_000),
+        )
+        .unwrap_or(u64::MAX),
+        None => parsed.presentation_samples(),
+    };
+    let to = pres.start.saturating_add(last).min(pres.end);
+    let mut packets = u64::from(parsed.info_packet().is_some());
+    let mut packet_end = pres.start;
+    for frame in &parsed.frames {
+        if frame.pts >= to {
+            break;
+        }
+        if options.max_packets.is_some_and(|limit| packets >= limit) {
+            break;
+        }
+        packets += 1;
+        packet_end = frame.pts.saturating_add(u64::from(frame.samples)).min(to);
+    }
+    let prefix_samples = if options.max_packets.is_some() {
+        packet_end.saturating_sub(pres.start)
+    } else {
+        last.min(parsed.presentation_samples())
+    };
     Ok((
         parsed.sample_rate,
         parsed.channels,
@@ -217,6 +253,8 @@ pub(crate) fn descriptor_with_transform(
             LAYER_II => "mp2",
             _ => "mp3",
         },
+        prefix_samples,
+        info.len(),
     ))
 }
 enum MpegDecoder {

@@ -92,6 +92,8 @@ pub fn apply(
         rate,
         channels,
         false,
+        1024,
+        0,
         options,
     )?;
     let spool = crate::owned_adts_export::decode_to_wave(source, None, options)?;
@@ -168,6 +170,8 @@ pub fn plan_loudnorm(
         rate,
         channels,
         false,
+        1024,
+        0,
         options,
     )?;
     plan.command = "loudnorm".into();

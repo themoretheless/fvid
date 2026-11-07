@@ -1,0 +1,27 @@
+{
+  "status": "accepted",
+  "accepted_ids": [
+    "FVID-0655",
+    "FVID-0656",
+    "FVID-0657",
+    "FVID-0658",
+    "FVID-0659"
+  ],
+  "count_delta": 5,
+  "accepted_count": 659,
+  "next_id": "FVID-0660",
+  "qualification": [
+    {
+      "name": "mix-probe-chapter-and-loudnorm-budget",
+      "command": [
+        "cargo",
+        "test",
+        "--test",
+        "mix_probe_chapter_and_loudnorm_budget"
+      ],
+      "exit_code": 0,
+      "passed": 4,
+      "ignored": 0
+    }
+  ]
+}

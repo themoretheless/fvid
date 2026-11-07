@@ -29,9 +29,12 @@ pub fn probe_mpeg_with_options(
         return Err("input does not have a bare MPEG audio signature".into());
     }
     let source = crate::owned_raw_mp3::open(path, options)?;
+    let pres = source.presentation_window();
+    let active_frames = source.frames.iter().take_while(|f| f.pts < pres.end).count();
+    let packet_work = active_frames.saturating_add(usize::from(source.info_packet().is_some()));
     if options
         .max_packets
-        .is_some_and(|max| (source.frames.len() as u64) > max)
+        .is_some_and(|max| (packet_work as u64) > max)
     {
         return Err("MPEG packet count exceeds packet limit".into());
     }

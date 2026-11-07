@@ -307,9 +307,11 @@ fn matroska_with_limits(
                 time_base: [1, 1_000_000],
                 start,
                 end,
-                metadata: [("title".into(), chapter.title.clone())]
-                    .into_iter()
-                    .collect(),
+                metadata: if chapter.title.is_empty() {
+                    BTreeMap::new()
+                } else {
+                    BTreeMap::from([("title".into(), chapter.title.clone())])
+                },
             })
         })
         .collect::<Result<Vec<_>>>()?;

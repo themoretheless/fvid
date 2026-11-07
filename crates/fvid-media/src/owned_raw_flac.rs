@@ -219,11 +219,46 @@ pub(crate) fn descriptor_with_transform(
     transform: Option<AudioDecodeTransform>,
     options: &CopyOptions,
 ) -> Result<(u32, u16, u32)> {
+    descriptor_for_decode(source, transform, options)
+        .map(|(rate, channels, mask, _, _)| (rate, channels, mask))
+}
+pub(crate) fn descriptor_for_decode(
+    source: &Path,
+    transform: Option<AudioDecodeTransform>,
+    options: &CopyOptions,
+) -> Result<(u32, u16, u32, u64, usize)> {
     let p = open_with_transform(source, transform, options)?;
     if p.samples() == 0 {
         return Err("FLAC stream contains no audible samples".into());
     }
-    Ok((p.sample_rate, p.channels, p.channel_mask))
+    let info = crate::owned_flac_layout::wave_info_from_extra(p.metadata_blocks())?;
+    let until = transform.and_then(|t| crate::owned_adts_export::decoded_prefix(t, p.sample_rate));
+    let to = match until {
+        Some((_from, at)) => u64::try_from(
+            (at.as_nanos() * u128::from(p.sample_rate)).div_ceil(1_000_000_000),
+        )
+        .unwrap_or(u64::MAX)
+        .min(p.samples()),
+        None => p.samples(),
+    };
+    let prefix_frames = match options.max_packets {
+        Some(limit) => p
+            .frames
+            .iter()
+            .take_while(|f| f.pts < to)
+            .take(usize::try_from(limit).unwrap_or(usize::MAX))
+            .map(|f| u64::from(f.samples))
+            .sum::<u64>()
+            .min(to),
+        None => to,
+    };
+    Ok((
+        p.sample_rate,
+        p.channels,
+        p.channel_mask,
+        prefix_frames,
+        info.len(),
+    ))
 }
 pub(crate) fn geometry(source: &Path, options: &CopyOptions) -> Result<(u32, u16)> {
     let parsed = open(source, options)?;

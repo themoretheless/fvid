@@ -182,15 +182,15 @@ fn audio_plan_with_controls(
                 match crate::owned_ogg_audio_export::coding(source, controls)? {
                     crate::owned_ogg_audio_export::Backend::Opus => {
                         let p = crate::owned_ogg_opus_export::open(source, controls)?;
-                        Some(u64::try_from(p.end_samples().max(0)).unwrap_or(0))
+                        Some(p.prefix_end_samples(None, controls.max_packets))
                     }
                     crate::owned_ogg_audio_export::Backend::Vorbis => {
                         let (p, _) = crate::owned_ogg_vorbis_export::open(source, controls)?;
-                        Some(u64::try_from(p.end_samples().max(0)).unwrap_or(0))
+                        Some(p.prefix_end_samples(None, controls.max_packets))
                     }
                     crate::owned_ogg_audio_export::Backend::Joint => {
                         let (p, _) = crate::owned_ogg_joint_export::open(source, controls)?;
-                        Some(u64::try_from(p.end_samples().max(0)).unwrap_or(0))
+                        Some(p.prefix_end_samples(None, controls.max_packets))
                     }
                 }
             } else if !crate::owned_adts_export::recognizes(source)?

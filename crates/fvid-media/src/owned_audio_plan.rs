@@ -114,8 +114,8 @@ pub(crate) struct AudioDescriptor {
     raw_encoded_audio: bool,
     ogg: bool,
     g711_wave: bool,
-    stage2_frames: u64,
-    stage2_meta_bytes: usize,
+    pub(crate) stage2_frames: u64,
+    pub(crate) stage2_meta_bytes: usize,
 }
 
 /// Read-only audio source geometry (`rate`, `channels`) for native loudness and planning.
@@ -235,13 +235,17 @@ fn source_descriptor_for_decode(source: &Path, options: &CopyOptions,
         (rate, channels, mask, codec, precision)
     } else if raw_flac {
         let _ = crate::owned_raw_flac::source_info(source, options)?;
-        let (rate, channels, mask) =
-            crate::owned_raw_flac::descriptor_with_transform(source, transform.copied(), options)?;
+        let (rate, channels, mask, frames, info_len) =
+            crate::owned_raw_flac::descriptor_for_decode(source, transform.copied(), options)?;
+        stage2_frames = frames;
+        stage2_meta_bytes = info_len;
         (rate, channels, mask, "flac".to_owned(), "float32".to_owned())
     } else if raw_encoded_audio {
         let _ = crate::owned_raw_mp3::source_info(source, options)?;
-        let (rate, channels, raw_codec) =
-            crate::owned_raw_mp3::descriptor_with_transform(source, transform.copied(), options)?;
+        let (rate, channels, raw_codec, frames, info_len) =
+            crate::owned_raw_mp3::descriptor_for_decode(source, transform.copied(), options)?;
+        stage2_frames = frames;
+        stage2_meta_bytes = info_len;
         (rate, channels, crate::owned_pcm_channels::standard_mask(channels).unwrap_or(0) as u32,
          raw_codec.to_owned(), "float32".to_owned())
     } else if adts {
@@ -415,7 +419,7 @@ pub fn plan_decode_audio(
     if adts || mp4 || is_matroska || raw_encoded_audio || ogg || g711_wave {
         let (stage2_rate, stage2_channels, _) = mp4_target.unwrap_or((rate, channels, mask));
         let stage2_bits = if precision == "float64" { 64 } else { 32 };
-        let stage2_frames = if g711_wave || ogg || adts {
+        let stage2_frames = if g711_wave || ogg || adts || raw_encoded_audio {
             stage2_frames.max(1024)
         } else {
             1024

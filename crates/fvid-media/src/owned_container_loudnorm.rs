@@ -81,6 +81,7 @@ pub fn apply(
     if dual_pass || crate::owned_loudnorm::report_requested(Some(&resolved))? {
         crate::owned_container_loudness::plan_loudness(source, &decode_options)?;
     }
+    let desc = crate::owned_audio_plan::source_descriptor(source, &decode_options)?;
     let precise = codec.starts_with("A_PCM/") || codec.starts_with("pcm_");
     crate::owned_loudnorm::check_spool_loudnorm_budget(
         &resolved,
@@ -88,6 +89,8 @@ pub fn apply(
         rate,
         channels,
         precise,
+        desc.stage2_frames,
+        desc.stage2_meta_bytes,
         options,
     )?;
     let spool = crate::owned_container_loudness::decode_to_wave(source, &decode_options)?;
@@ -146,7 +149,8 @@ pub fn plan_loudnorm(
         p.notes.push("private decoded WAVE is removed on success or failure; completion is emitted once after analysis".into());
         p
     };
-    let (rate, channels) = crate::owned_audio_plan::source_geometry(source, &decode_options)?;
+    let desc = crate::owned_audio_plan::source_descriptor(source, &decode_options)?;
+    let (rate, channels) = (desc.rate, desc.channels);
     let precise = plan.streams[0].codec.starts_with("A_PCM/") || plan.streams[0].codec.starts_with("pcm_");
     crate::owned_loudnorm::check_spool_loudnorm_budget(
         &resolved,
@@ -154,6 +158,8 @@ pub fn plan_loudnorm(
         rate,
         channels,
         precise,
+        desc.stage2_frames,
+        desc.stage2_meta_bytes,
         options,
     )?;
     plan.command = "loudnorm".into();

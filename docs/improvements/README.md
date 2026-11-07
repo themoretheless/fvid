@@ -4246,3 +4246,14 @@ See `batch-583-validation.json`.
 
 See `batch-584-validation.json`.
 
+## Batch 585 — FVID-0655..0659: `max_packets`-bounded Ogg frame estimation in `audio_plan_with_controls`, Ogg and bare MPEG `probe_with_options` audio packet work alignment, untitled Matroska chapter metadata parity in `src/media_probe.rs`, and actual prefix frame accounting in `check_spool_loudnorm_budget`
+
+- **FVID-0655** — Bound Ogg Opus, Vorbis, and Joint frame estimates by `controls.max_packets` in `audio_plan_with_controls` (`crates/fvid-media/src/owned_audio_mix.rs`, `tests/mix_probe_chapter_and_loudnorm_budget.rs`).
+- **FVID-0656** — Check Ogg audio packet work instead of framing header packet count in `probe_ogg_with_options` (`crates/fvid-media/src/owned_probe.rs`, `tests/mix_probe_chapter_and_loudnorm_budget.rs`).
+- **FVID-0657** — Check active presentation frames plus leading `Info` packet against `max_packets` in `probe_mpeg_with_options` (`crates/fvid-media/src/owned_mpeg_probe.rs`, `tests/mix_probe_chapter_and_loudnorm_budget.rs`).
+- **FVID-0658** — Omit empty `title` metadata for untitled Matroska chapters in frontend `media_probe` (`src/media_probe.rs`, `tests/mix_probe_chapter_and_loudnorm_budget.rs`).
+- **FVID-0659** — Enforce actual prefix sample frames and metadata size in `check_spool_loudnorm_budget` (`crates/fvid-media/src/owned_loudnorm.rs`, `crates/fvid-media/src/owned_container_loudnorm.rs`, `crates/fvid-media/src/owned_audio_plan.rs`, `tests/mix_probe_chapter_and_loudnorm_budget.rs`).
+
+See `batch-585-validation.json`.
+
+

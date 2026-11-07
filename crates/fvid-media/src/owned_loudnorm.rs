@@ -191,6 +191,8 @@ pub(crate) fn check_spool_loudnorm_budget(
     rate: u32,
     channels: u16,
     precise: bool,
+    sample_frames: u64,
+    source_info_bytes: usize,
     options: &CopyOptions,
 ) -> Result<()> {
     let Some(limit) = options.max_controlled_bytes else {
@@ -201,11 +203,14 @@ pub(crate) fn check_spool_loudnorm_budget(
         sum.checked_add(v.len() as u128 + 10)
             .ok_or("loudnorm metadata estimate overflow")
     })?;
-    let metadata_working = 8 * (assignments + 12);
+    let metadata_working = 8 * (source_info_bytes as u128 + assignments + 12);
     let width = if precise { 8usize } else { 4usize };
     let frame_bytes = usize::from(channels.max(1)) * width;
-    let size = frame_bytes;
-    let frames = 1usize;
+    let frames = usize::try_from(sample_frames.max(1))
+        .map_err(|_| "loudnorm sample frame count overflow")?;
+    let size = frames
+        .checked_mul(frame_bytes)
+        .ok_or("loudnorm input size overflow")?;
     let resampled_frames = (frames as u128 * 192000).div_ceil(u128::from(rate.max(1)));
     let report_bytes = if params.print == Print::None {
         0

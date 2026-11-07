@@ -474,12 +474,6 @@ pub fn probe_ogg_with_options(
     }
     let mut file = File::open(path).map_err(|e| e.to_string())?;
     let (limits, index_estimate) = crate::owned_ogg_opus_export::preflight(&mut file, options)?;
-    if options
-        .max_packets
-        .is_some_and(|max| (limits.packets as u64) > max)
-    {
-        return Err("Ogg packet count exceeds packet limit".into());
-    }
     let mut bytes = Vec::with_capacity(limits.file_bytes);
     crate::owned_ogg_opus_export::CheckedRead {
         input: std::io::BufReader::new(file),
@@ -517,6 +511,12 @@ pub fn probe_ogg_with_options(
             )?;
             let program = crate::owned_ogg_audio_program::Program::from_ogg(ogg.clone(), nth)
                 .map_err(|e| e.to_string())?;
+            if options
+                .max_packets
+                .is_some_and(|max| program.packet_work().map_or(true, |work| work > max))
+            {
+                return Err("Ogg packet count exceeds packet limit".into());
+            }
             (
                 "vorbis_opus",
                 program.sample_rate(),
@@ -533,6 +533,12 @@ pub fn probe_ogg_with_options(
                         Some(entry.source_index),
                     )
                     .map_err(|e| e.to_string())?;
+                    if options
+                        .max_packets
+                        .is_some_and(|max| (program.packet_count() as u64) > max)
+                    {
+                        return Err("Ogg packet count exceeds packet limit".into());
+                    }
                     let decoder = program
                         .decoder_admission_bytes()
                         .map_err(|e| e.to_string())?;
@@ -581,6 +587,12 @@ pub fn probe_ogg_with_options(
                         Some(entry.source_index),
                     )
                     .map_err(|e| e.to_string())?;
+                    if options
+                        .max_packets
+                        .is_some_and(|max| (program.packet_times().len() as u64) > max)
+                    {
+                        return Err("Ogg packet count exceeds packet limit".into());
+                    }
                     (
                         "vorbis",
                         program.sample_rate(),

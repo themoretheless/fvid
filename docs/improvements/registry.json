@@ -1,8 +1,8 @@
 {
   "target": 1000,
   "counting_rule": "One independently confirmed problem or useful capability; fixture variants and baseline integration repairs are excluded. Only accepted entries count.",
-  "accepted_count": 654,
-  "next_id": "FVID-0655",
+  "accepted_count": 659,
+  "next_id": "FVID-0660",
   "entries": [
     {
       "id": "FVID-0001",
@@ -7385,6 +7385,61 @@
       "result": "Return the decoded prefix sample_frames from adts_prefix_info_for_transform when max_controlled_bytes and Stage-2 WAVE DSP or metadata edits are active, and pass stage2_frames.max(1024) to check_spool_wave_export_budget in plan_decode_audio.",
       "status": "accepted",
       "validation": "batch-584-validation.json"
+    },
+    {
+      "id": "FVID-0655",
+      "batch": 585,
+      "title": "Bound Ogg Opus, Vorbis, and Joint frame estimates by controls.max_packets in audio_plan_with_controls",
+      "source": "crates/fvid-media/src/owned_audio_mix.rs",
+      "regression": "tests/mix_probe_chapter_and_loudnorm_budget.rs",
+      "before": "audio_plan_with_controls estimated Ogg Opus, Vorbis, and Joint input sample frames using p.end_samples() (the full stream duration) instead of p.prefix_end_samples(None, controls.max_packets), causing plan_mix_audio_with_controls and plan_merge_audio_with_controls to overestimate working buffer memory and reject max_packets-bounded Ogg mixes that succeed during execution.",
+      "result": "Use p.prefix_end_samples(None, controls.max_packets) for Ogg Opus, Vorbis, and Joint inputs in audio_plan_with_controls.",
+      "status": "accepted",
+      "validation": "batch-585-validation.json"
+    },
+    {
+      "id": "FVID-0656",
+      "batch": 585,
+      "title": "Check Ogg audio packet work instead of framing header packet count in probe_ogg_with_options",
+      "source": "crates/fvid-media/src/owned_probe.rs",
+      "regression": "tests/mix_probe_chapter_and_loudnorm_budget.rs",
+      "before": "probe_ogg_with_options checked options.max_packets against preflight limits.packets (which includes OpusHead + OpusTags or Vorbis identification + comment + setup header packets), rejecting probe_with_options when max_packets equaled standalone_packet_work.",
+      "result": "Check options.max_packets against each stream's audio packet work (program.packet_count() for Opus, program.packet_times().len() for Vorbis, and program.packet_work() for Joint).",
+      "status": "accepted",
+      "validation": "batch-585-validation.json"
+    },
+    {
+      "id": "FVID-0657",
+      "batch": 585,
+      "title": "Check active presentation frames plus leading Info packet against max_packets in probe_mpeg_with_options",
+      "source": "crates/fvid-media/src/owned_mpeg_probe.rs",
+      "regression": "tests/mix_probe_chapter_and_loudnorm_budget.rs",
+      "before": "probe_mpeg_with_options checked source.frames.len() against options.max_packets, ignoring both the leading Xing/LAME Info packet and trailing frames trimmed by end_padding (pts >= presentation_window().end), diverging from standalone_packet_work and owned_raw_mp3.",
+      "result": "Compute active_frames + usize::from(source.info_packet().is_some()) for frames with pts < source.presentation_window().end and check that packet work against options.max_packets in probe_mpeg_with_options.",
+      "status": "accepted",
+      "validation": "batch-585-validation.json"
+    },
+    {
+      "id": "FVID-0658",
+      "batch": 585,
+      "title": "Omit empty title metadata for untitled Matroska chapters in frontend media_probe",
+      "source": "src/media_probe.rs",
+      "regression": "tests/mix_probe_chapter_and_loudnorm_budget.rs",
+      "before": "src/media_probe.rs::matroska_with_limits unconditionally inserted (\"title\", chapter.title.clone()) into ChapterInfo.metadata, producing {\"title\": \"\"} for untitled Matroska chapters instead of an empty map like owned_webm_probe.",
+      "result": "Omit the \"title\" metadata entry in matroska_with_limits when chapter.title.is_empty().",
+      "status": "accepted",
+      "validation": "batch-585-validation.json"
+    },
+    {
+      "id": "FVID-0659",
+      "batch": 585,
+      "title": "Enforce actual prefix sample frames and metadata size in check_spool_loudnorm_budget",
+      "source": "crates/fvid-media/src/owned_loudnorm.rs",
+      "regression": "tests/mix_probe_chapter_and_loudnorm_budget.rs",
+      "before": "check_spool_loudnorm_budget used a hardcoded frames = 1usize and ignored source WAVE INFO metadata bytes, allowing container plan_loudnorm to admit multi-packet Ogg, FLAC, MP3, and G.711 streams under tight max_controlled_bytes that subsequently failed in Stage-2 WAVE loudnorm.",
+      "result": "Thread stage2_frames and stage2_meta_bytes from source_descriptor into check_spool_loudnorm_budget for owned_container_loudnorm::plan_loudnorm and apply.",
+      "status": "accepted",
+      "validation": "batch-585-validation.json"
     }
   ]
 }
