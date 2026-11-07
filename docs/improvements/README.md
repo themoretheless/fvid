@@ -4666,7 +4666,13 @@ See `batch-625-validation.json`.
 
 See `batch-626-validation.json`.
 
+## Batch 627 — FVID-0865..0869: Single-head classification, `WaveInfo` preflight reuse, RIFF `INFO` caching, and Matroska metadata reuse in loudnorm
 
+- **FVID-0865** — Single 12-byte head read for ADTS, standalone container, and WAVE detection in `native_loudnorm::try_plan` and `try_apply` (`src/native_loudnorm.rs`, `tests/loudnorm_head_metadata_and_preflight_reuse.rs`).
+- **FVID-0866** — Reuse `WaveInfo` in `owned_loudnorm::plan_loudnorm` instead of re-opening `source` via `owned_wave_loudness::plan_loudness` (`crates/fvid-media/src/owned_loudnorm.rs`, `tests/loudnorm_head_metadata_and_preflight_reuse.rs`).
+- **FVID-0867** — Cache RIFF `INFO` chunks during admission in `owned_loudnorm::apply_resolved` (`crates/fvid-media/src/owned_loudnorm.rs`, `tests/loudnorm_head_metadata_and_preflight_reuse.rs`).
+- **FVID-0868** — Cache RIFF `INFO` chunks during admission in `owned_loudnorm::apply_dynamic` (`crates/fvid-media/src/owned_loudnorm.rs`, `tests/loudnorm_head_metadata_and_preflight_reuse.rs`).
+- **FVID-0869** — Reuse extracted `MatroskaPcmMetadata` across budget check and publication in `native_loudnorm::try_apply` (`src/native_export/pcm_matroska.rs`, `tests/loudnorm_head_metadata_and_preflight_reuse.rs`).
 
-
+See `batch-627-validation.json`.
 

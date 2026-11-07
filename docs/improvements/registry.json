@@ -1,8 +1,8 @@
 {
   "target": 1000,
   "counting_rule": "One independently confirmed problem or useful capability; fixture variants and baseline integration repairs are excluded. Only accepted entries count.",
-  "accepted_count": 864,
-  "next_id": "FVID-0865",
+  "accepted_count": 869,
+  "next_id": "FVID-0870",
   "entries": [
     {
       "id": "FVID-0001",
@@ -9695,7 +9695,62 @@
       "result": "validate_concat_segments_internal caches (rate, channels) and packet_counts from the first loop and reuses them for all reached segments in the second loop.",
       "status": "accepted",
       "validation": "batch-626-validation.json"
+    },
+    {
+      "id": "FVID-0865",
+      "batch": 627,
+      "title": "Single 12-byte head read for ADTS, standalone container, and WAVE detection in native_loudnorm::try_plan and try_apply",
+      "source": "src/native_loudnorm.rs",
+      "regression": "tests/loudnorm_head_metadata_and_preflight_reuse.rs",
+      "before": "native_loudnorm::try_plan and try_apply opened source three separate times to read the 7-byte ADTS header, recognizes_standalone_audio_with_options, and is_wave / is_wave_reader.",
+      "result": "Read the 12-byte source head once via read_source_head in try_plan and try_apply and classify ADTS, standalone container audio (recognizes_standalone_from_head), and RIFF/RF64 WAVE from that single head buffer.",
+      "status": "accepted",
+      "validation": "batch-627-validation.json"
+    },
+    {
+      "id": "FVID-0866",
+      "batch": 627,
+      "title": "Reuse WaveInfo in owned_loudnorm::plan_loudnorm instead of re-opening source via owned_wave_loudness::plan_loudness",
+      "source": "crates/fvid-media/src/owned_loudnorm.rs",
+      "regression": "tests/loudnorm_head_metadata_and_preflight_reuse.rs",
+      "before": "When dual_pass or report was enabled, owned_loudnorm::plan_loudnorm called owned_wave_loudness::plan_loudness(source, &decode_options), which reopened source to read the 12-byte head and reopened it again in preflight.",
+      "result": "owned_loudnorm::plan_loudnorm calls owned_wave_loudness::check_preflight(&wave_info, &decode_options) directly on the already-inspected WaveInfo without reopening source.",
+      "status": "accepted",
+      "validation": "batch-627-validation.json"
+    },
+    {
+      "id": "FVID-0867",
+      "batch": 627,
+      "title": "Cache RIFF INFO chunks during admission in owned_loudnorm::apply_resolved",
+      "source": "crates/fvid-media/src/owned_loudnorm.rs",
+      "regression": "tests/loudnorm_head_metadata_and_preflight_reuse.rs",
+      "before": "owned_loudnorm::apply_resolved inspected source and scanned info_chunks_bytes inside the read_wave_with_admission callback, then reopened source after linear gain processing to call inspect and info_chunks a second time.",
+      "result": "Extract and cache info_chunks from the open file during the read_wave_with_admission callback in apply_resolved when metadata_bytes > 0, eliminating the post-processing file open and WAVE re-inspection.",
+      "status": "accepted",
+      "validation": "batch-627-validation.json"
+    },
+    {
+      "id": "FVID-0868",
+      "batch": 627,
+      "title": "Cache RIFF INFO chunks during admission in owned_loudnorm::apply_dynamic",
+      "source": "crates/fvid-media/src/owned_loudnorm.rs",
+      "regression": "tests/loudnorm_head_metadata_and_preflight_reuse.rs",
+      "before": "owned_loudnorm::apply_dynamic inspected source and scanned info_chunks_bytes inside the read_wave_with_admission callback, then reopened source after dynamic normalization to call inspect and info_chunks a second time.",
+      "result": "Extract and cache info_chunks from the open file during the read_wave_with_admission callback in apply_dynamic when metadata_bytes > 0, eliminating the post-processing file open and WAVE re-inspection.",
+      "status": "accepted",
+      "validation": "batch-627-validation.json"
+    },
+    {
+      "id": "FVID-0869",
+      "batch": 627,
+      "title": "Reuse extracted MatroskaPcmMetadata across budget check and publication in native_loudnorm::try_apply",
+      "source": "src/native_export/pcm_matroska.rs",
+      "regression": "tests/loudnorm_head_metadata_and_preflight_reuse.rs",
+      "before": "In the Matroska output branch of native_loudnorm::try_apply, check_output_memory_budget extracted MatroskaPcmMetadata from source and discarded it, and try_apply then called extract_source_pcm_metadata_with_interval_packet_and_memory_limit a second time before publication.",
+      "result": "check_output_memory_budget_with_metadata returns the extracted Option<MatroskaPcmMetadata>, which native_loudnorm::try_apply reuses for export_audio_pcm_transformed_with_source_metadata.",
+      "status": "accepted",
+      "validation": "batch-627-validation.json"
     }
   ],
-  "pending_count": 136
+  "pending_count": 131
 }

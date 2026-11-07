@@ -241,7 +241,7 @@ pub fn standalone_packet_work(source: &Path, options: &CopyOptions) -> Result<Op
     Ok(Some(options.max_packets.map_or(count, |limit| count.min(limit))))
 }
 
-pub(crate) fn read_source_head(source: &Path) -> Result<([u8; 12], usize)> {
+pub fn read_source_head(source: &Path) -> Result<([u8; 12], usize)> {
     let mut file = File::open(source).map_err(|e| e.to_string())?;
     let mut head = [0u8; 12];
     let mut filled = 0;

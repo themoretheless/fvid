@@ -634,8 +634,25 @@ pub(crate) fn check_output_memory_budget(
     options: &fvid_media::CopyOptions,
     matroska: Option<bool>,
 ) -> Result<()> {
+    check_output_memory_budget_with_metadata(
+        source,
+        channels,
+        stage_working_bytes,
+        options,
+        matroska,
+    )
+    .map(|_| ())
+}
+
+pub(crate) fn check_output_memory_budget_with_metadata(
+    source: &std::path::Path,
+    channels: u16,
+    stage_working_bytes: usize,
+    options: &fvid_media::CopyOptions,
+    matroska: Option<bool>,
+) -> Result<Option<MatroskaPcmMetadata>> {
     let Some(limit) = options.max_controlled_bytes else {
-        return Ok(());
+        return Ok(None);
     };
     if limit == 0 {
         return Err(invalid("controlled memory budget exceeded: limit is 0"));
@@ -668,6 +685,7 @@ pub(crate) fn check_output_memory_budget(
                 .saturating_add(16 * 1024),
         );
     }
+    let mut extracted_base: Option<MatroskaPcmMetadata> = None;
     if check_matroska {
         let base = if let Some(base) = cached_base {
             Some(base)
@@ -689,6 +707,7 @@ pub(crate) fn check_output_memory_budget(
                 Err(_) => None,
             }
         };
+        extracted_base = base.clone();
         let (name, language, metadata, text, scoped) =
             parse_matroska_pcm_metadata(base, Some(options))?;
         let mut tag_bytes = name.len().saturating_add(language.len()).saturating_add(64);
@@ -719,7 +738,7 @@ pub(crate) fn check_output_memory_budget(
             "controlled memory budget exceeded: need {needed} bytes, limit {limit}"
         )));
     }
-    Ok(())
+    Ok(extracted_base)
 }
 
 fn parse_matroska_pcm_metadata(

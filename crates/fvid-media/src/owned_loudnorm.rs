@@ -316,7 +316,7 @@ pub fn plan_loudnorm(
     let report = report_requested(Some(&resolved))?;
     if dual_pass || report {
         let decode_options = crate::owned_adts_export::pcm_decode_options(options);
-        crate::owned_wave_loudness::plan_loudness(source, &decode_options)?;
+        crate::owned_wave_loudness::check_preflight(&wave_info, &decode_options)?;
     }
     if let Some(limit) = options.max_controlled_bytes {
         let metadata_bytes = crate::owned_wave_inspect::info_chunks_bytes(
@@ -578,6 +578,7 @@ fn apply_resolved(
     let mut width = 0usize;
     let mut float = false;
     let mut mask = 0;
+    let mut cached_info_chunks = Vec::new();
     let (input, bytes) = crate::owned_audio_mix::read_wave_with_admission(
         source,
         None,
@@ -630,6 +631,14 @@ fn apply_resolved(
                     "controlled memory budget exceeded: need {estimate} bytes"
                 ));
             }
+            if metadata_bytes > 0 {
+                cached_info_chunks = crate::owned_wave_inspect::info_chunks(
+                    file,
+                    info,
+                    options.cancel.as_ref(),
+                )
+                .map_err(|e| e.to_string())?;
+            }
             check()
         },
         |size| {
@@ -666,17 +675,8 @@ fn apply_resolved(
         }
     }
     drop(bytes);
-    let mut source_file = std::fs::File::open(source).map_err(|e| e.to_string())?;
-    let source_info = crate::owned_wave_inspect::inspect(&mut source_file, options.cancel.as_ref())
-        .map_err(|e| e.to_string())?;
-    let info_chunks = crate::owned_wave_inspect::info_chunks(
-        &mut source_file,
-        &source_info,
-        options.cancel.as_ref(),
-    )
-    .map_err(|e| e.to_string())?;
     let info_chunks = crate::owned_wave_metadata::edit_info_chunks(
-        &info_chunks,
+        &cached_info_chunks,
         &options.metadata_delete,
         &options.metadata_set,
     )?;
@@ -763,6 +763,7 @@ fn apply_dynamic(
     let mut mask = 0;
     let mut weights = Vec::new();
     let mut samples = 0usize;
+    let mut cached_info_chunks = Vec::new();
     let (input, raw) = crate::owned_audio_mix::read_wave_with_admission(
         source,
         None,
@@ -828,6 +829,14 @@ fn apply_dynamic(
                 return Err(format!(
                     "controlled memory budget exceeded: need {estimate} bytes"
                 ));
+            }
+            if metadata_bytes > 0 {
+                cached_info_chunks = crate::owned_wave_inspect::info_chunks(
+                    file,
+                    info,
+                    options.cancel.as_ref(),
+                )
+                .map_err(|e| e.to_string())?;
             }
             check()
         },
@@ -932,17 +941,8 @@ fn apply_dynamic(
         output
     };
     drop(data);
-    let mut source_file = std::fs::File::open(source).map_err(|e| e.to_string())?;
-    let source_info = crate::owned_wave_inspect::inspect(&mut source_file, options.cancel.as_ref())
-        .map_err(|e| e.to_string())?;
-    let info_chunks = crate::owned_wave_inspect::info_chunks(
-        &mut source_file,
-        &source_info,
-        options.cancel.as_ref(),
-    )
-    .map_err(|e| e.to_string())?;
     let info_chunks = crate::owned_wave_metadata::edit_info_chunks(
-        &info_chunks,
+        &cached_info_chunks,
         &options.metadata_delete,
         &options.metadata_set,
     )?;

@@ -156,36 +156,34 @@ pub fn try_plan(
         );
         return Ok(Some(plan));
     }
+    let (head, head_len) = fvid_media::owned_audio_plan::read_source_head(source)
+        .map_err(|e| crate::invalid(&e))?;
+    if head_len >= 7
+        && !head[..3].starts_with(b"ID3")
+        && let Some(header) = crate::container::adts::header(&head[..7])
     {
-        use std::io::Read;
-        let mut prefix = [0u8; 7];
-        if std::fs::File::open(source)?.read_exact(&mut prefix).is_ok()
-            && !prefix.starts_with(b"ID3")
-            && let Some(header) = crate::container::adts::header(&prefix)
-        {
-            if options.streams.first().is_some_and(|&s| s != 0) {
-                return Err("owned ADTS loudnorm requires stream 0 and valid WAVE INFO metadata edits".into());
-            }
-            if header.frame_bytes - header.header_bytes
-                > options
-                    .max_packet_bytes
-                    .min(options.max_controlled_bytes.unwrap_or(usize::MAX))
-            {
-                return Err("ADTS packet exceeds budget".into());
-            }
-            return Ok(Some(
-                fvid_media::owned_adts_loudnorm::plan_loudnorm(
-                    source,
-                    Some(&resolved),
-                    dual_pass,
-                    options,
-                )
-                .map_err(|e| crate::invalid(&e))?,
-            ));
+        if options.streams.first().is_some_and(|&s| s != 0) {
+            return Err("owned ADTS loudnorm requires stream 0 and valid WAVE INFO metadata edits".into());
         }
+        if header.frame_bytes - header.header_bytes
+            > options
+                .max_packet_bytes
+                .min(options.max_controlled_bytes.unwrap_or(usize::MAX))
+        {
+            return Err("ADTS packet exceeds budget".into());
+        }
+        return Ok(Some(
+            fvid_media::owned_adts_loudnorm::plan_loudnorm(
+                source,
+                Some(&resolved),
+                dual_pass,
+                options,
+            )
+            .map_err(|e| crate::invalid(&e))?,
+        ));
     }
-    if fvid_media::owned_container_loudness::recognizes_standalone_audio_with_options(
-        source, options,
+    if fvid_media::owned_container_loudness::recognizes_standalone_from_head(
+        source, &head, head_len, options,
     )
     .map_err(|e| crate::invalid(&e))?
     {
@@ -199,8 +197,9 @@ pub fn try_plan(
             .map_err(|e| crate::invalid(&e))?,
         ));
     }
-    let mut wave_file = std::fs::File::open(source)?;
-    let wave = crate::native_pcm::is_wave_reader(&mut wave_file)?;
+    let wave = head_len == 12
+        && matches!(&head[..4], b"RIFF" | b"RF64")
+        && &head[8..12] == b"WAVE";
     if wave {
         if options.streams.len() > 1 {
             return Err("loudnorm requires one selected audio stream".into());
@@ -208,6 +207,7 @@ pub fn try_plan(
         if options.streams.first().is_some_and(|&s| s != 0) {
             return Err("WAVE has only stream 0".into());
         }
+        let mut wave_file = std::fs::File::open(source)?;
         if let Ok(info) = crate::native_pcm::inspect(
             &mut wave_file,
             options.cancel.as_ref(),
@@ -240,7 +240,6 @@ pub fn try_plan(
             .map_err(|e| crate::invalid(&e))?,
         ));
     }
-    drop(wave_file);
     let index = if wave {
         selected_audio(source, options)?
     } else if options.max_controlled_bytes.is_some()
@@ -473,16 +472,18 @@ pub fn try_apply(
         }
         let clean = strip_metadata_options(options);
         let mut prechecked_channels = None;
+        let mut prechecked_metadata = None;
         if options.max_controlled_bytes.is_some() {
             let (_, channels) = fvid_media::owned_audio_plan::source_geometry(source, &clean)
                 .map_err(|e| crate::invalid(&e))?;
-            crate::native_export::pcm_matroska::check_output_memory_budget(
-                source,
-                channels,
-                65536,
-                options,
-                Some(true),
-            )?;
+            prechecked_metadata =
+                crate::native_export::pcm_matroska::check_output_memory_budget_with_metadata(
+                    source,
+                    channels,
+                    65536,
+                    options,
+                    Some(true),
+                )?;
             prechecked_channels = Some(channels);
         }
         let spool = Spool::create()?;
@@ -501,13 +502,14 @@ pub fn try_apply(
         if options.max_controlled_bytes.is_some() {
             let decoded_channels = u16::try_from(stats.channels).unwrap_or(2);
             if prechecked_channels != Some(decoded_channels) {
-                crate::native_export::pcm_matroska::check_output_memory_budget(
-                    source,
-                    decoded_channels,
-                    65536,
-                    options,
-                    Some(true),
-                )?;
+                prechecked_metadata =
+                    crate::native_export::pcm_matroska::check_output_memory_budget_with_metadata(
+                        source,
+                        decoded_channels,
+                        65536,
+                        options,
+                        Some(true),
+                    )?;
             }
         }
         let mut publish_options = CopyOptions::default();
@@ -519,18 +521,21 @@ pub fn try_apply(
         publish_options.metadata_delete = options.metadata_delete.clone();
         publish_options.stream_metadata_set = options.stream_metadata_set.clone();
         publish_options.stream_metadata_delete = options.stream_metadata_delete.clone();
-        let source_matroska_metadata = Some(
-            crate::native_export::pcm_matroska::extract_source_pcm_metadata_with_interval_packet_and_memory_limit(
-                source,
-                options.streams.first().copied(),
-                true,
-                None,
-                Some(options.max_packet_bytes),
-                options.max_packets,
-                options.max_controlled_bytes,
-                options.cancel.as_ref(),
-            )?,
-        );
+        let source_matroska_metadata = match prechecked_metadata {
+            Some(metadata) => Some(metadata),
+            None => Some(
+                crate::native_export::pcm_matroska::extract_source_pcm_metadata_with_interval_packet_and_memory_limit(
+                    source,
+                    options.streams.first().copied(),
+                    true,
+                    None,
+                    Some(options.max_packet_bytes),
+                    options.max_packets,
+                    options.max_controlled_bytes,
+                    options.cancel.as_ref(),
+                )?,
+            ),
+        };
         crate::native_export::export_audio_pcm_transformed_with_source_metadata(
             &spool_wav,
             destination,
@@ -585,8 +590,10 @@ pub fn try_apply(
     }
     let mut default_opts = CopyOptions::default();
     default_opts.streams = options.streams.clone();
-    if fvid_media::owned_container_loudness::recognizes_standalone_audio_with_options(
-        source, options,
+    let (head, head_len) = fvid_media::owned_audio_plan::read_source_head(source)
+        .map_err(|e| crate::invalid(&e))?;
+    if fvid_media::owned_container_loudness::recognizes_standalone_from_head(
+        source, &head, head_len, options,
     )
     .map_err(|e| crate::invalid(&e))?
     {
@@ -604,7 +611,10 @@ pub fn try_apply(
         }
         return Ok(None);
     }
-    if crate::native_pcm::is_wave(source)? {
+    let wave = head_len == 12
+        && matches!(&head[..4], b"RIFF" | b"RF64")
+        && &head[8..12] == b"WAVE";
+    if wave {
         if options.streams.len() > 1 {
             return Err("loudnorm requires one selected audio stream".into());
         }
@@ -624,16 +634,10 @@ pub fn try_apply(
     }
     // PCE bootstrap can read the first ADTS payload during metadata inspection.
     // Check its declared size before any such preflight allocation.
-    let adts_header = {
-        use std::io::Read;
-        let mut prefix = [0u8; 7];
-        if std::fs::File::open(source)?.read_exact(&mut prefix).is_ok()
-            && !prefix.starts_with(b"ID3")
-        {
-            crate::container::adts::header(&prefix)
-        } else {
-            None
-        }
+    let adts_header = if head_len >= 7 && !head[..3].starts_with(b"ID3") {
+        crate::container::adts::header(&head[..7])
+    } else {
+        None
     };
     let adts_source = adts_header.is_some();
     if let Some(header) = adts_header {

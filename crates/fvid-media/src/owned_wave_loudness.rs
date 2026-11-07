@@ -91,20 +91,20 @@ struct Input {
     capacity: usize,
     size: usize,
 }
-fn preflight(source: &Path, options: &CopyOptions) -> Result<Input> {
+pub(crate) fn check_preflight(
+    info: &crate::owned_wave_inspect::WaveInfo,
+    options: &CopyOptions,
+) -> Result<(Vec<f64>, usize, usize)> {
     check_options(options)?;
     if !policies(options) {
         return Err("owned WAVE loudness requires stream 0 and no metadata edits".into());
     }
-    let mut file = File::open(source).map_err(|e| e.to_string())?;
-    let info = crate::owned_wave_inspect::inspect(&mut file, options.cancel.as_ref())
-        .map_err(|e| e.to_string())?;
     if !qualified_rate(info.sample_rate) {
         return Err(
             "owned WAVE true-peak measurement requires a qualified standard PCM rate".into(),
         );
     }
-    let weights = weights(&info)?;
+    let weights = weights(info)?;
     let frame = usize::from(info.block);
     let capacity = (4096 * frame).min(options.max_packet_bytes / frame * frame);
     if capacity == 0 {
@@ -150,6 +150,17 @@ fn preflight(source: &Path, options: &CopyOptions) -> Result<Input> {
         ));
     }
     check(options)?;
+    Ok((weights, capacity, size))
+}
+fn preflight(source: &Path, options: &CopyOptions) -> Result<Input> {
+    check_options(options)?;
+    if !policies(options) {
+        return Err("owned WAVE loudness requires stream 0 and no metadata edits".into());
+    }
+    let mut file = File::open(source).map_err(|e| e.to_string())?;
+    let info = crate::owned_wave_inspect::inspect(&mut file, options.cancel.as_ref())
+        .map_err(|e| e.to_string())?;
+    let (weights, capacity, size) = check_preflight(&info, options)?;
     Ok(Input {
         file,
         info,

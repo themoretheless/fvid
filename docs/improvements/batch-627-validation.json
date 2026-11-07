@@ -1,0 +1,15 @@
+{
+  "batch": 627,
+  "ids": [
+    "FVID-0865",
+    "FVID-0866",
+    "FVID-0867",
+    "FVID-0868",
+    "FVID-0869"
+  ],
+  "commands": [
+    "cargo test --test loudnorm_head_metadata_and_preflight_reuse",
+    "python3 scripts/check_improvements_registry.py"
+  ],
+  "status": "accepted"
+}
