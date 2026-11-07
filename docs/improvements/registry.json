@@ -1,8 +1,8 @@
 {
   "target": 1000,
   "counting_rule": "One independently confirmed problem or useful capability; fixture variants and baseline integration repairs are excluded. Only accepted entries count.",
-  "accepted_count": 754,
-  "next_id": "FVID-0755",
+  "accepted_count": 759,
+  "next_id": "FVID-0760",
   "entries": [
     {
       "id": "FVID-0001",
@@ -8485,6 +8485,61 @@
       "result": "Add native_pcm::is_wave_reader(&mut input) to inspect the already-opened reader and add a frame-aligned chunks_exact(frame_bytes) fast path in Sink::write.",
       "status": "accepted",
       "validation": "batch-604-validation.json"
+    },
+    {
+      "id": "FVID-0755",
+      "batch": 605,
+      "title": "Pass prechecked_channels from normalize_file_with_options into decode_fvid_media_audio_to_destination_with_prechecked_channels",
+      "source": "src/native_pcm/normalize.rs",
+      "regression": "tests/normalize_wave_info_and_plan_single_open.rs",
+      "before": "native_pcm::normalize::normalize_file_with_options ran source_geometry and check_output_memory_budget when max_controlled_bytes.is_some(), and then called decode_fvid_media_audio_to_destination which ran source_geometry and check_output_memory_budget a second time.",
+      "result": "Expose decode_fvid_media_audio_to_destination_with_prechecked_channels in src/media.rs and pass the prechecked channel count from normalize_file_with_options so the Matroska output memory budget is checked once.",
+      "status": "accepted",
+      "validation": "batch-605-validation.json"
+    },
+    {
+      "id": "FVID-0756",
+      "batch": 605,
+      "title": "Reuse the already-opened BufReader<File> and skip redundant info_chunks RIFF scan when info_bytes == 0 in extract_source_wave_info",
+      "source": "src/native_export/pcm_matroska.rs",
+      "regression": "tests/normalize_wave_info_and_plan_single_open.rs",
+      "before": "native_export::pcm_matroska::extract_source_wave_info opened source twice for RIFF/RF64/RIFX WAVE inputs and scanned all RIFF chunks a second time via info_chunks even when info_chunks_bytes returned 0.",
+      "result": "Inspect WAVE headers on the already-opened BufReader<File> and return Ok(Vec::new()) immediately when info_bytes == 0.",
+      "status": "accepted",
+      "validation": "batch-605-validation.json"
+    },
+    {
+      "id": "FVID-0757",
+      "batch": 605,
+      "title": "Reuse a single File handle across MP4 prefix inspection, WAVE detection, and WAVE header inspection in native_plan::decode_audio_with_options",
+      "source": "src/native_plan.rs",
+      "regression": "tests/normalize_wave_info_and_plan_single_open.rs",
+      "before": "native_plan::decode_audio_with_options opened source up to three separate times: once for the MP4 dynamic-description check, once in native_pcm::is_wave(source), and once in File::open(source) for native_pcm::inspect.",
+      "result": "Open source once at the start of decode_audio_with_options and reuse &mut file for MP4 prefix/index inspection, native_pcm::is_wave_reader, and native_pcm::inspect.",
+      "status": "accepted",
+      "validation": "batch-605-validation.json"
+    },
+    {
+      "id": "FVID-0758",
+      "batch": 605,
+      "title": "Reuse the already-opened BufReader<File> in native_plan::remux_with_options and cache is_wave(source) in native_plan::loudness_with_options",
+      "source": "src/native_plan.rs",
+      "regression": "tests/normalize_wave_info_and_plan_single_open.rs",
+      "before": "native_plan::remux_with_options opened source a second time when checking MP4 packet/memory budgets before fast_start_with_memory_limit, and loudness_with_options called native_pcm::is_wave(source) twice.",
+      "result": "Pass &mut input to Mp4Reader::open and seek back to 0 before fast_start_with_memory_limit in remux_with_options, and compute is_wave(source) once in loudness_with_options.",
+      "status": "accepted",
+      "validation": "batch-605-validation.json"
+    },
+    {
+      "id": "FVID-0759",
+      "batch": 605,
+      "title": "Open source once via is_wave_reader in native_pcm::loudness::default_weights_with_options",
+      "source": "src/native_pcm/loudness.rs",
+      "regression": "tests/normalize_wave_info_and_plan_single_open.rs",
+      "before": "native_pcm::loudness::default_weights_with_options called super::is_wave(source) (opening source and scanning for G.711) and then opened source a second time for super::inspect.",
+      "result": "Open File::open(source) once and reuse it across super::is_wave_reader(&mut file) and super::inspect(&mut file, ...).",
+      "status": "accepted",
+      "validation": "batch-605-validation.json"
     }
   ],
   "pending_count": 0

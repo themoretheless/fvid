@@ -267,6 +267,22 @@ pub(crate) fn decode_fvid_media_audio_to_destination(
     transform: AudioDecodeTransform,
     options: &CopyOptions,
 ) -> Result<AudioDecodeStats> {
+    decode_fvid_media_audio_to_destination_with_prechecked_channels(
+        source,
+        destination,
+        transform,
+        options,
+        None,
+    )
+}
+
+pub(crate) fn decode_fvid_media_audio_to_destination_with_prechecked_channels(
+    source: &std::path::Path,
+    destination: &std::path::Path,
+    transform: AudioDecodeTransform,
+    options: &CopyOptions,
+    mut prechecked_channels: Option<u16>,
+) -> Result<AudioDecodeStats> {
     if options
         .cancel
         .as_ref()
@@ -297,28 +313,29 @@ pub(crate) fn decode_fvid_media_audio_to_destination(
         meta_options.max_controlled_bytes = None;
         validate_owned_audio_options_for_destination(&meta_options, Some(destination))?;
     }
-    let mut prechecked_channels = None;
     if matroska_out && options.max_controlled_bytes.is_some() {
-        let mut clean_probe = options.clone();
-        clean_probe.metadata_set.clear();
-        clean_probe.metadata_delete.clear();
-        clean_probe.stream_metadata_set.clear();
-        clean_probe.stream_metadata_delete.clear();
-        let (_, src_channels) =
-            fvid_media::owned_audio_plan::source_geometry(source, &clean_probe)?;
-        let out_channels = transform
-            .channels
-            .and_then(|c| u16::try_from(c).ok())
-            .unwrap_or(src_channels);
-        crate::native_export::pcm_matroska::check_output_memory_budget(
-            source,
-            out_channels,
-            65536,
-            options,
-            Some(true),
-        )
-        .map_err(|e| e.to_string())?;
-        prechecked_channels = Some(out_channels);
+        if prechecked_channels.is_none() {
+            let mut clean_probe = options.clone();
+            clean_probe.metadata_set.clear();
+            clean_probe.metadata_delete.clear();
+            clean_probe.stream_metadata_set.clear();
+            clean_probe.stream_metadata_delete.clear();
+            let (_, src_channels) =
+                fvid_media::owned_audio_plan::source_geometry(source, &clean_probe)?;
+            let out_channels = transform
+                .channels
+                .and_then(|c| u16::try_from(c).ok())
+                .unwrap_or(src_channels);
+            crate::native_export::pcm_matroska::check_output_memory_budget(
+                source,
+                out_channels,
+                65536,
+                options,
+                Some(true),
+            )
+            .map_err(|e| e.to_string())?;
+            prechecked_channels = Some(out_channels);
+        }
     } else if let Some(limit) = options.max_controlled_bytes {
         let mut clean_probe = options.clone();
         clean_probe.metadata_set.clear();

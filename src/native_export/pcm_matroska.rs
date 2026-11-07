@@ -546,11 +546,10 @@ pub(crate) fn extract_source_wave_info(
     }
     input.seek(SeekFrom::Start(0))?;
     if matches!(&prefix[..4], b"RIFF" | b"RF64" | b"RIFX") {
-        let mut wave_file = std::fs::File::open(source)?;
-        if let Ok(info) = fvid_media::owned_wave_inspect::inspect(&mut wave_file, cancel) {
+        if let Ok(info) = fvid_media::owned_wave_inspect::inspect(&mut input, cancel) {
             if let Some(mem_limit) = options.max_controlled_bytes {
                 let info_bytes =
-                    fvid_media::owned_wave_inspect::info_chunks_bytes(&mut wave_file, &info, cancel)
+                    fvid_media::owned_wave_inspect::info_chunks_bytes(&mut input, &info, cancel)
                         .map_err(|e| invalid(&e.to_string()))?;
                 let needed =
                     fvid_media::owned_wave_metadata::wave_metadata_working_bytes(info_bytes, options)
@@ -561,8 +560,11 @@ pub(crate) fn extract_source_wave_info(
                         "controlled memory budget exceeded: need {needed} bytes, limit {mem_limit}"
                     )));
                 }
+                if info_bytes == 0 {
+                    return Ok(Vec::new());
+                }
             }
-            return fvid_media::owned_wave_inspect::info_chunks(&mut wave_file, &info, cancel)
+            return fvid_media::owned_wave_inspect::info_chunks(&mut input, &info, cancel)
                 .map_err(|e| invalid(&e.to_string()));
         }
     }

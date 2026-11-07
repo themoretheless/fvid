@@ -405,12 +405,13 @@ pub fn default_weights_with_options(
         ));
     }
     let selected = options.streams.first().copied();
-    let channels = if super::is_wave(source)? {
+    let mut file = std::fs::File::open(source)?;
+    let channels = if super::is_wave_reader(&mut file)? {
         if selected.is_some_and(|index| index != 0) {
             return Err(crate::invalid("WAVE has only stream 0"));
         }
         let info = super::inspect(
-            &mut std::fs::File::open(source)?,
+            &mut file,
             options.cancel.as_ref(),
         )?;
         let frame = usize::from(info.frame_bytes());

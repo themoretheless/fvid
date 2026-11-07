@@ -83,6 +83,8 @@ pub fn normalize_file_with_options(
     measure_options.metadata_delete.clear();
     measure_options.stream_metadata_set.clear();
     measure_options.stream_metadata_delete.clear();
+    let selected = options.streams.first().copied();
+    let mut prechecked_channels = None;
     if options.max_controlled_bytes.is_some() {
         let (_, channels) = fvid_media::owned_audio_plan::source_geometry(source, &measure_options)
             .map_err(|e| invalid(&e))?;
@@ -93,6 +95,7 @@ pub fn normalize_file_with_options(
             options,
             Some(matroska_out),
         )?;
+        prechecked_channels = Some(channels);
     }
     measure_options.progress = measure_hook;
     let measured = measure_loudness_file_with_options(source, weights, &measure_options)?;
@@ -103,7 +106,6 @@ pub fn normalize_file_with_options(
         return Err(invalid("source changed during loudness measurement"));
     }
     let export_hook = progress.map(|hook| hook.for_phase(NormalizationPhase::Export));
-    let selected = options.streams.first().copied();
     let use_native_export = options.max_controlled_bytes.is_none()
         && options.metadata_set.is_empty()
         && options.metadata_delete.is_empty()
@@ -131,9 +133,15 @@ pub fn normalize_file_with_options(
             volume: Some(plan.linear_gain),
             ..Default::default()
         };
-        crate::media::decode_fvid_media_audio_to_destination(source, destination, transform, &export_options)
-            .map_err(|e| invalid(&e))?
-            .sample_frames
+        crate::media::decode_fvid_media_audio_to_destination_with_prechecked_channels(
+            source,
+            destination,
+            transform,
+            &export_options,
+            prechecked_channels,
+        )
+        .map_err(|e| invalid(&e))?
+        .sample_frames
     };
     Ok(NormalizeReport {
         source: measured,

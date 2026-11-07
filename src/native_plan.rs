@@ -63,12 +63,12 @@ pub fn decode_audio_with_options(
     }
     // Reuse the library's dynamic-description planner and explicit PCE
     // destination rules; entry 1 is not necessarily the active decoder setup.
+    let mut file = std::fs::File::open(source).map_err(|e| e.to_string())?;
     {
         use std::io::{Read, Seek, SeekFrom};
-        let mut file = std::fs::File::open(source).map_err(|e|e.to_string())?;
-        let mut prefix = [0;8];
+        let mut prefix = [0; 8];
         if file.read_exact(&mut prefix).is_ok() && crate::container::mp4::recognizes_prefix(&prefix) {
-            file.seek(SeekFrom::Start(0)).map_err(|e|e.to_string())?;
+            file.seek(SeekFrom::Start(0)).map_err(|e| e.to_string())?;
             let limits = crate::container::mp4::Limits {
                 metadata_bytes: crate::container::mp4::Limits::default()
                     .metadata_bytes
@@ -78,7 +78,7 @@ pub fn decode_audio_with_options(
                     .min(options.max_controlled_bytes.unwrap_or(usize::MAX)),
                 ..Default::default()
             };
-            let reader = crate::container::mp4::Mp4Reader::open_indexed(file, limits).map_err(|e|e.to_string())?;
+            let reader = crate::container::mp4::Mp4Reader::open_indexed(&mut file, limits).map_err(|e| e.to_string())?;
             if let Some(mem_limit) = options.max_controlled_bytes
                 && reader
                     .estimated_index_payload_bytes()
@@ -87,26 +87,27 @@ pub fn decode_audio_with_options(
             {
                 return Err("controlled memory budget exceeded".into());
             }
-            let index = crate::native_media::mp4_audio_index(&reader,selected).map_err(|e|e.to_string())?;
+            let index = crate::native_media::mp4_audio_index(&reader, selected).map_err(|e| e.to_string())?;
             let track = &reader.tracks()[index];
             if track.ensure_constant_description().is_err()
-                || transform.channels.is_some_and(|n|track.description_for_sample(0).is_some_and(|d|d.channels>2 && n!=i32::from(d.channels)))
+                || transform.channels.is_some_and(|n| track.description_for_sample(0).is_some_and(|d| d.channels > 2 && n != i32::from(d.channels)))
             {
-                let mut forwarded=options.clone();
-                forwarded.streams=selected.into_iter().collect();
+                let mut forwarded = options.clone();
+                forwarded.streams = selected.into_iter().collect();
                 forwarded.metadata_set.clear();
                 forwarded.metadata_delete.clear();
                 forwarded.stream_metadata_set.clear();
                 forwarded.stream_metadata_delete.clear();
-                return fvid_media::plan_decode_audio(source,transform,&forwarded);
+                return fvid_media::plan_decode_audio(source, transform, &forwarded);
             }
         }
     }
-    let wave=crate::native_pcm::is_wave(source).map_err(|e|e.to_string())?;
-    let (index,input_rate,input_channels,codec,decode_detail)=if wave {
-        if selected.is_some_and(|n|n!=0) {return Err("WAVE has only stream 0".into());}
-        let mut file=std::fs::File::open(source).map_err(|e|e.to_string())?;
-        let info=crate::native_pcm::inspect(&mut file,options.cancel.as_ref()).map_err(|e|e.to_string())?;
+    let wave = crate::native_pcm::is_wave_reader(&mut file).map_err(|e| e.to_string())?;
+    let (index, input_rate, input_channels, codec, decode_detail) = if wave {
+        if selected.is_some_and(|n| n != 0) {
+            return Err("WAVE has only stream 0".into());
+        }
+        let info = crate::native_pcm::inspect(&mut file, options.cancel.as_ref()).map_err(|e| e.to_string())?;
         info.validate_decode().map_err(|e|e.to_string())?;
         let frame_bytes = usize::from(info.frame_bytes());
         if frame_bytes == 0
@@ -480,12 +481,11 @@ pub fn remux_with_options(
         if options.max_packet_bytes != fvid_media::CopyOptions::default().max_packet_bytes
             || options.max_controlled_bytes.is_some()
         {
-            let file = std::fs::File::open(source).map_err(|e| e.to_string())?;
             let effective_packet_bytes = options
                 .max_packet_bytes
                 .min(options.max_controlled_bytes.unwrap_or(usize::MAX));
             let reader = crate::container::mp4::Mp4Reader::open(
-                std::io::BufReader::new(file),
+                &mut input,
                 crate::container::mp4::Limits {
                     packet_bytes: effective_packet_bytes,
                     metadata_bytes: crate::container::mp4::Limits::default().metadata_bytes
@@ -526,6 +526,7 @@ pub fn remux_with_options(
                     return Err("controlled memory budget exceeded".into());
                 }
             }
+            input.seek(SeekFrom::Start(0)).map_err(|e| e.to_string())?;
         }
         crate::container::mp4_relocate::fast_start_with_memory_limit(
             &mut input,
@@ -1474,8 +1475,9 @@ pub fn loudness_with_options(
         return Err("owned loudness plan requires at most one audio stream and no metadata edits".into());
     }
     let selected = options.streams.first().copied();
+    let wave = crate::native_pcm::is_wave(source).map_err(|e| e.to_string())?;
     let mut plan = if options.max_controlled_bytes.is_none()
-        && (crate::native_pcm::is_wave(source).map_err(|e| e.to_string())?
+        && (wave
             || crate::native_media::constant_audio_source_info_selected_with_options(source, selected, options).is_ok())
     {
         decode_audio_with_options(source, &Default::default(), options)?
@@ -1487,7 +1489,7 @@ pub fn loudness_with_options(
         Some(weights)=>weights,
         None=>{defaults=crate::native_pcm::loudness_channel_weights_with_options(source,options).map_err(|e|e.to_string())?;&defaults},
     };
-    let (rate,channels)=if crate::native_pcm::is_wave(source).map_err(|e|e.to_string())? {
+    let (rate,channels)=if wave {
         let info=crate::native_pcm::inspect(&mut std::fs::File::open(source).map_err(|e|e.to_string())?,options.cancel.as_ref()).map_err(|e|e.to_string())?;
         let frame = usize::from(info.frame_bytes());
         let capacity = 65536usize.min(options.max_packet_bytes) / frame * frame;

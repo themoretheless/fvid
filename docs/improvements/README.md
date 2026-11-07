@@ -4446,6 +4446,17 @@ See `batch-603-validation.json`.
 
 See `batch-604-validation.json`.
 
+## Batch 605 — FVID-0755..0759: Single-pass Matroska budget check across `normalize_file_with_options` and `media`, single-open WAVE INFO inspection in `extract_source_wave_info`, and single-open WAVE/MP4 reader reuse in `native_plan` and `default_weights_with_options`
+
+- **FVID-0755** — Pass `prechecked_channels` from `normalize_file_with_options` into `decode_fvid_media_audio_to_destination_with_prechecked_channels` so Matroska output memory budget is not checked twice (`src/native_pcm/normalize.rs`, `src/media.rs`, `tests/normalize_wave_info_and_plan_single_open.rs`).
+- **FVID-0756** — Reuse the already-opened `BufReader<File>` and skip a redundant `info_chunks` RIFF scan when `info_bytes == 0` in `extract_source_wave_info` (`src/native_export/pcm_matroska.rs`, `tests/normalize_wave_info_and_plan_single_open.rs`).
+- **FVID-0757** — Reuse a single `File` handle across MP4 prefix inspection, `is_wave_reader`, and `native_pcm::inspect` in `native_plan::decode_audio_with_options` (`src/native_plan.rs`, `tests/normalize_wave_info_and_plan_single_open.rs`).
+- **FVID-0758** — Reuse the already-opened `BufReader<File>` in `native_plan::remux_with_options` and evaluate `is_wave(source)` once in `native_plan::loudness_with_options` (`src/native_plan.rs`, `tests/normalize_wave_info_and_plan_single_open.rs`).
+- **FVID-0759** — Open `source` once via `is_wave_reader` in `native_pcm::loudness::default_weights_with_options` (`src/native_pcm/loudness.rs`, `tests/normalize_wave_info_and_plan_single_open.rs`).
+
+See `batch-605-validation.json`.
+
+
 
 
 
