@@ -24,22 +24,51 @@ pub(crate) fn supports(
     {
         return false;
     }
-    let Ok((head, head_len)) = crate::owned_audio_plan::read_source_head(source) else {
+    use std::io::{Read, Seek, SeekFrom};
+    let Ok(file) = std::fs::File::open(source) else {
         return false;
     };
+    let mut head_file = Some(file);
+    let mut head = [0u8; 12];
+    let mut head_len = 0;
+    while head_len < head.len() {
+        match head_file.as_mut().unwrap().read(&mut head[head_len..]) {
+            Ok(0) => break,
+            Ok(n) => head_len += n,
+            Err(e) if e.kind() == std::io::ErrorKind::Interrupted => continue,
+            Err(_) => return false,
+        }
+    }
     let head_slice = &head[..head_len];
     if head_len == 12
         && &head[..4] == b"RIFF"
         && &head[8..12] == b"WAVE"
     {
-        if let Some(supported) =
-            crate::owned_g711_wave_export::try_supports(source, transform, options)
-        {
-            return supported;
+        let mut file = head_file.take().unwrap();
+        if file.seek(SeekFrom::Start(0)).is_err() {
+            return false;
+        }
+        match crate::owned_wave_inspect::g711_law(&mut file, options.cancel.as_ref()) {
+            Ok(Some(law)) => {
+                return crate::owned_g711_wave_export::supports_from_file_and_law(
+                    file, law, transform, options,
+                );
+            }
+            Ok(None) => {
+                if file.seek(SeekFrom::Start(0)).is_err() {
+                    return false;
+                }
+                head_file = Some(file);
+            }
+            Err(_) => return false,
         }
     }
     if head_slice.starts_with(b"OggS") {
-        return match crate::owned_ogg_audio_export::open_selected_ogg(source, options) {
+        let mut file = head_file.take().unwrap();
+        if file.seek(SeekFrom::Start(0)).is_err() {
+            return false;
+        }
+        return match crate::owned_ogg_audio_export::open_selected_ogg_from_file(file, options) {
             Ok((_, crate::owned_ogg_audio_export::Backend::Vorbis, ogg, index)) => {
                 crate::owned_ogg_vorbis_export::supports_from_ogg(ogg, index, transform, options)
             }
@@ -53,53 +82,96 @@ pub(crate) fn supports(
         };
     }
     if head_len >= 8 && crate::owned_mp4::recognizes_prefix(&head[..8]) {
+        let mut file = head_file.take().unwrap();
+        if file.seek(SeekFrom::Start(0)).is_err() {
+            return false;
+        }
         if let Some(supported) =
-            crate::owned_mp4_audio_export::try_supports(source, transform, options)
+            crate::owned_mp4_audio_export::try_supports_from_file(source, file, transform, options)
         {
             return supported;
         }
     }
     if head_slice.starts_with(&[0x1a, 0x45, 0xdf, 0xa3]) {
-        return match matroska_selected_codec(source, options) {
-            Ok(Some("A_PCM/INT/LIT" | "A_PCM/INT/BIG" | "A_PCM/FLOAT/IEEE")) => {
-                crate::owned_matroska_pcm_export::supports(source, transform, options)
+        let mut file = head_file.take().unwrap();
+        if file.seek(SeekFrom::Start(0)).is_err() {
+            return false;
+        }
+        return match matroska_selected_reader_and_codec_from_file(file, options) {
+            Ok(Some((
+                "A_PCM/INT/LIT" | "A_PCM/INT/BIG" | "A_PCM/FLOAT/IEEE",
+                reader,
+                index,
+            ))) => crate::owned_matroska_pcm_export::supports_from_reader(
+                source, reader, index, transform, options,
+            ),
+            Ok(Some(("A_AAC", reader, index))) => {
+                crate::owned_matroska_aac_export::supports_from_reader(
+                    source, reader, index, transform, options,
+                )
             }
-            Ok(Some("A_AAC")) => {
-                crate::owned_matroska_aac_export::supports(source, transform, options)
+            Ok(Some(("A_OPUS", reader, index))) => {
+                crate::owned_matroska_opus_export::supports_from_reader(
+                    source, reader, index, transform, options,
+                )
             }
-            Ok(Some("A_OPUS")) => {
-                crate::owned_matroska_opus_export::supports(source, transform, options)
+            Ok(Some(("A_FLAC", reader, index))) => {
+                crate::owned_matroska_flac_export::supports_from_reader(
+                    source, reader, index, transform, options,
+                )
             }
-            Ok(Some("A_FLAC")) => {
-                crate::owned_matroska_flac_export::supports(source, transform, options)
+            Ok(Some(("A_MPEG/L1" | "A_MPEG/L2" | "A_MPEG/L3", reader, index))) => {
+                crate::owned_matroska_mp3_export::supports_from_reader(
+                    source, reader, index, transform, options,
+                )
             }
-            Ok(Some("A_MPEG/L1" | "A_MPEG/L2" | "A_MPEG/L3")) => {
-                crate::owned_matroska_mp3_export::supports(source, transform, options)
-            }
-            Ok(Some("A_ALAC")) => {
-                crate::owned_matroska_alac_export::supports(source, transform, options)
+            Ok(Some(("A_ALAC", reader, index))) => {
+                crate::owned_matroska_alac_export::supports_from_reader(
+                    source, reader, index, transform, options,
+                )
             }
             Ok(_) => false,
             Err(error) => error.starts_with("controlled memory budget exceeded:"),
         };
     }
     if head_slice.starts_with(b"fLaC") {
-        return crate::owned_raw_flac::supports(source, transform, options);
+        let mut file = head_file.take().unwrap();
+        if file.seek(SeekFrom::Start(0)).is_err() {
+            return false;
+        }
+        return crate::owned_raw_flac::supports_from_file(file, transform, options);
     }
     if !(head_len >= 7 && crate::owned_aac::adts::header(&head[..7]).is_some())
         && crate::owned_mpeg_audio::has_signature(&head[..head_len.min(10)])
     {
-        return crate::owned_raw_mp3::supports(source, transform, options);
+        let mut file = head_file.take().unwrap();
+        if file.seek(SeekFrom::Start(0)).is_err() {
+            return false;
+        }
+        return crate::owned_raw_mp3::supports_from_file(file, transform, options);
     }
     if head_len >= 7 && crate::owned_aac::adts::header(&head[..7]).is_some() {
+        let mut file = head_file.take().unwrap();
+        if file.seek(SeekFrom::Start(0)).is_err() {
+            return false;
+        }
         return simple_options(options)
-            && crate::owned_adts_export::supports(source, transform, options);
+            && crate::owned_adts_export::supports_from_file(source, file, transform, options);
     }
     if !simple_options(options) {
         return false;
     }
-    let Ok(mut file) = std::fs::File::open(source) else {
-        return false;
+    let mut file = match head_file.take() {
+        Some(mut f) => {
+            if f.seek(SeekFrom::Start(0)).is_err() {
+                return false;
+            }
+            f
+        }
+        None => match std::fs::File::open(source) {
+            Ok(f) => f,
+            Err(_) => return false,
+        },
     };
     crate::owned_wave_inspect::inspect(&mut file, options.cancel.as_ref()).is_ok_and(|info| {
         if info.sample_frames == 0 || !(1..=255).contains(&info.channels) {
@@ -496,11 +568,18 @@ pub fn decode_audio_transformed(
         return crate::owned_raw_mp3::apply_from_file(file, destination, transform, options);
     }
     if head_len >= 7 && crate::owned_aac::adts::header(&head[..7]).is_some() {
-        drop(head_file.take());
+        let mut file = head_file.take().unwrap();
+        file.seek(SeekFrom::Start(0)).map_err(|e| e.to_string())?;
         if !simple_options(options) {
             return Err("ADTS has only stream 0".into());
         }
-        return crate::owned_adts_export::apply(source, destination, transform, options);
+        return crate::owned_adts_export::apply_from_file(
+            source,
+            file,
+            destination,
+            transform,
+            options,
+        );
     }
     if !simple_options(options) {
         return Err("WAVE has only stream 0".into());

@@ -499,14 +499,34 @@ pub(crate) fn try_supports(
     transform: AudioDecodeTransform,
     options: &CopyOptions,
 ) -> Option<bool> {
-    let (_, rate, channels, mask, _, precise, _, _) =
-        match try_descriptor_with_frames_for_decode(source, Some(transform), options) {
-            Ok(Some(value)) => value,
-            Ok(None) => return None,
+    let file = File::open(source).ok()?;
+    try_supports_from_file(source, file, transform, options)
+}
+pub(crate) fn try_supports_from_file(
+    source: &Path,
+    file: File,
+    transform: AudioDecodeTransform,
+    options: &CopyOptions,
+) -> Option<bool> {
+    let reader = match open_from_file(file, options) {
+        Ok(reader) => reader,
+        Err(error) => return Some(error.starts_with("controlled memory budget exceeded:")),
+    };
+    if !recognizes_reader(&reader, options) {
+        return None;
+    }
+    let (index, rate, channels, mask, _, precise, _, _, reader) =
+        match descriptor_with_frames_and_reader_from_reader_for_decode(
+            source,
+            reader,
+            Some(transform),
+            options,
+        ) {
+            Ok(value) => value,
             Err(error) => return Some(error.starts_with("controlled memory budget exceeded:")),
         };
-    Some(supports_from_geometry(
-        source, transform, options, rate, channels, mask, precise,
+    Some(supports_from_reader(
+        source, reader, index, transform, options, rate, channels, mask, precise,
     ))
 }
 pub(crate) fn supports(
@@ -514,14 +534,28 @@ pub(crate) fn supports(
     transform: AudioDecodeTransform,
     options: &CopyOptions,
 ) -> bool {
-    let (rate, channels, mask, precise) = match geometry_for_decode(source, Some(transform), options) {
-        Ok(value) => value,
+    let reader = match open(source, options) {
+        Ok(reader) => reader,
         Err(error) => return error.starts_with("controlled memory budget exceeded:"),
     };
-    supports_from_geometry(source, transform, options, rate, channels, mask, precise)
+    let (index, rate, channels, mask, _, precise, _, _, reader) =
+        match descriptor_with_frames_and_reader_from_reader_for_decode(
+            source,
+            reader,
+            Some(transform),
+            options,
+        ) {
+            Ok(value) => value,
+            Err(error) => return error.starts_with("controlled memory budget exceeded:"),
+        };
+    supports_from_reader(
+        source, reader, index, transform, options, rate, channels, mask, precise,
+    )
 }
-fn supports_from_geometry(
+fn supports_from_reader(
     source: &Path,
+    mut reader: crate::owned_mp4::Mp4Reader<BufReader<File>>,
+    index: usize,
     transform: AudioDecodeTransform,
     options: &CopyOptions,
     rate: u32,
@@ -529,7 +563,12 @@ fn supports_from_geometry(
     mask: u32,
     precise: bool,
 ) -> bool {
-    let target=match normalization_target(source,transform,options,rate,channels,mask) {Ok(t)=>t,Err(e)=>return e.starts_with("controlled memory budget exceeded:")};
+    let target = match normalization_target_from_reader(
+        &mut reader, index, transform, options, rate, channels, mask,
+    ) {
+        Ok(t) => t,
+        Err(e) => return e.starts_with("controlled memory budget exceeded:"),
+    };
     let output = transform.channels.unwrap_or(i32::from(channels));
     let aac_fold=if target.is_none() && output!=i32::from(channels)&&matches!(output,1|2){match crate::owned_aac_export_routing::router_for_decode(source,rate,channels,Some(transform),options){Ok(router)=>router.is_some(),Err(error)=>return error.starts_with("controlled memory budget exceeded:")}}else{false};
     if target.is_none() && output != i32::from(channels) && !aac_fold
@@ -540,9 +579,6 @@ fn supports_from_geometry(
     {
         return false;
     }
-    let Ok(file) = File::open(source) else {
-        return false;
-    };
     let mut probe = options.clone();
     probe.progress = None;
     probe.metadata_set.clear();
@@ -550,16 +586,16 @@ fn supports_from_geometry(
     probe.stream_metadata_set.clear();
     probe.stream_metadata_delete.clear();
     let result = if precise {
-        crate::owned_mp4_audio::decode_mp4_pcm_f64_targeted(
-            BufReader::new(file),
+        crate::owned_mp4_audio::decode_mp4_pcm_f64_reader_targeted(
+            reader,
             &mut std::io::sink(),
             prefix(transform, target.map_or(rate,|t|t.0)),
             &probe,
             target,
         )
     } else {
-        crate::owned_mp4_audio::decode_mp4_audio_pcm_targeted(
-            BufReader::new(file),
+        crate::owned_mp4_audio::decode_mp4_audio_reader_pcm_targeted(
+            reader,
             &mut std::io::sink(),
             prefix(transform, target.map_or(rate,|t|t.0)),
             &probe,

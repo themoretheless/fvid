@@ -21,7 +21,11 @@ struct Input {
 }
 pub(crate) fn recognizes(path: &Path, options: &CopyOptions) -> Result<bool> {
     check(options)?;
-    let mut file = File::open(path).map_err(|e| e.to_string())?;
+    let file = File::open(path).map_err(|e| e.to_string())?;
+    recognizes_from_file(file, options)
+}
+pub(crate) fn recognizes_from_file(mut file: File, options: &CopyOptions) -> Result<bool> {
+    check(options)?;
     crate::owned_wave_inspect::g711_law(&mut file, options.cancel.as_ref())
         .map(|law| law.is_some())
         .map_err(|e| e.to_string())
@@ -109,7 +113,14 @@ pub(crate) fn packet_work(source: &Path, options: &CopyOptions) -> Result<u64> {
 }
 
 pub(crate) fn try_packet_work(source: &Path, options: &CopyOptions) -> Result<Option<u64>> {
-    let Some((_, channels, _, _, frames, _)) = try_descriptor_for_decode(source, None, options)?
+    check(options)?;
+    let file = File::open(source).map_err(|e| e.to_string())?;
+    try_packet_work_from_file(file, options)
+}
+
+pub(crate) fn try_packet_work_from_file(file: File, options: &CopyOptions) -> Result<Option<u64>> {
+    let Some((_, channels, _, _, frames, _)) =
+        try_descriptor_from_file_for_decode(file, None, options)?
     else {
         return Ok(None);
     };
@@ -241,7 +252,15 @@ pub(crate) fn try_supports(
     transform: AudioDecodeTransform,
     options: &CopyOptions,
 ) -> Option<bool> {
-    match try_descriptor_for_decode(path, Some(transform), options) {
+    let file = File::open(path).ok()?;
+    try_supports_from_file(file, transform, options)
+}
+pub(crate) fn try_supports_from_file(
+    file: File,
+    transform: AudioDecodeTransform,
+    options: &CopyOptions,
+) -> Option<bool> {
+    match try_descriptor_from_file_for_decode(file, Some(transform), options) {
         Ok(Some((_rate, channels, mask, _codec, _frames, _info_len))) => {
             let target = transform.channels.unwrap_or(i32::from(channels));
             Some(
@@ -253,6 +272,23 @@ pub(crate) fn try_supports(
         }
         Ok(None) => None,
         Err(error) => Some(error.starts_with("controlled memory budget exceeded:")),
+    }
+}
+pub(crate) fn supports_from_file_and_law(
+    file: File,
+    law: fvid_codecs::g711::Law,
+    transform: AudioDecodeTransform,
+    options: &CopyOptions,
+) -> bool {
+    match descriptor_from_file_and_law_for_decode(file, law, Some(transform), options) {
+        Ok((_rate, channels, mask, _codec, _frames, _info_len)) => {
+            let target = transform.channels.unwrap_or(i32::from(channels));
+            target == i32::from(channels)
+                || (matches!(target, 1 | 2)
+                    && crate::owned_pcm_channels::rematrix_layout_supported(channels, mask))
+                || (channels <= 2 && (1..=8).contains(&target))
+        }
+        Err(error) => error.starts_with("controlled memory budget exceeded:"),
     }
 }
 pub(crate) fn supports(
@@ -323,7 +359,14 @@ pub(crate) fn try_decode_to_wave(
     options: &CopyOptions,
 ) -> Result<Option<crate::owned_adts_export::DecodedSpool>> {
     check(options)?;
-    let mut file = File::open(source).map_err(|e| e.to_string())?;
+    let file = File::open(source).map_err(|e| e.to_string())?;
+    try_decode_to_wave_from_file(file, options)
+}
+pub(crate) fn try_decode_to_wave_from_file(
+    mut file: File,
+    options: &CopyOptions,
+) -> Result<Option<crate::owned_adts_export::DecodedSpool>> {
+    check(options)?;
     let Some(law) = crate::owned_wave_inspect::g711_law(&mut file, options.cancel.as_ref())
         .map_err(|e| e.to_string())?
     else {

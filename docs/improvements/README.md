@@ -4806,3 +4806,11 @@ See `batch-628-validation.json`.
 - **FVID-0948**: Compute MP4 audio normalization target directly from the open `Mp4Reader` during `plan_decode_audio` (`crates/fvid-media/src/owned_mp4_audio_export.rs`).
 - **FVID-0949**: Reuse the open `File` handle across 12-byte header dispatch and format decoders in `owned_audio_export::decode_audio_transformed` (`crates/fvid-media/src/owned_audio_export.rs`).
 
+## Batch 644 (FVID-0950..0954)
+
+- **FVID-0950**: Reuse the open `File` handle and readers across `owned_audio_export::supports` (`crates/fvid-media/src/owned_audio_export.rs`).
+- **FVID-0951**: Reuse the indexed `Mp4Reader` across descriptor, normalization target, and dry-run decode in `owned_mp4_audio_export::supports` (`crates/fvid-media/src/owned_mp4_audio_export.rs`).
+- **FVID-0952**: Reuse the scanned `WebmReader` across geometry and dry-run decode in Matroska audio export `supports()` (`crates/fvid-media/src/owned_matroska_aac_export.rs`).
+- **FVID-0953**: Reuse the open `File` handle in `owned_container_loudness::decode_to_wave_from_geometry_with_info` and `recognizes_with_options` (`crates/fvid-media/src/owned_container_loudness.rs`).
+- **FVID-0954**: Reuse the open `File` handle in `owned_audio_plan::standalone_packet_work` and `owned_audio_mix::decode_owned_audio_with_controls` (`crates/fvid-media/src/owned_audio_plan.rs`).
+

@@ -1,8 +1,8 @@
 {
   "target": 1000,
   "counting_rule": "One independently confirmed problem or useful capability; fixture variants and baseline integration repairs are excluded. Only accepted entries count.",
-  "accepted_count": 949,
-  "next_id": "FVID-0950",
+  "accepted_count": 954,
+  "next_id": "FVID-0955",
   "entries": [
     {
       "id": "FVID-0001",
@@ -10630,6 +10630,61 @@
       "result": "Forwarded the rewound head_file into apply_from_file_and_law, open_selected_ogg_from_file, try_apply_from_file, matroska_selected_reader_and_codec_from_file, apply_from_file, and read_wave_from_file_with_admission.",
       "status": "accepted",
       "validation": "batch-643-validation.json"
+    },
+    {
+      "id": "FVID-0950",
+      "batch": 644,
+      "title": "Reuse the open File handle and readers across owned_audio_export::supports",
+      "source": "crates/fvid-media/src/owned_audio_export.rs",
+      "regression": "tests/ogg_flac_mp3_and_export_handle_reuse.rs",
+      "before": "owned_audio_export::supports opened source to read the 12-byte magic header and then reopened the file in G.711, Ogg, MP4, Matroska, raw FLAC, raw MP3, ADTS, and PCM WAVE qualification branches.",
+      "result": "Rewound and forwarded the open File handle into supports_from_file_and_law, open_selected_ogg_from_file, try_supports_from_file, matroska_selected_reader_and_codec_from_file, supports_from_file, and inspect.",
+      "status": "accepted",
+      "validation": "batch-644-validation.json"
+    },
+    {
+      "id": "FVID-0951",
+      "batch": 644,
+      "title": "Reuse the indexed Mp4Reader across descriptor, normalization target, and dry-run decode in owned_mp4_audio_export::supports",
+      "source": "crates/fvid-media/src/owned_mp4_audio_export.rs",
+      "regression": "tests/ogg_flac_mp3_and_export_handle_reuse.rs",
+      "before": "owned_mp4_audio_export::supports and try_supports opened and indexed the MP4 container three times: once in geometry_for_decode / try_descriptor_with_frames_for_decode, a second time in normalization_target, and a third time in decode_mp4_audio_pcm_targeted / decode_mp4_pcm_f64_targeted.",
+      "result": "Added supports_from_reader and try_supports_from_file to pass a single indexed Mp4Reader through descriptor_with_frames_and_reader_from_reader_for_decode, normalization_target_from_reader, and decode_mp4_audio_reader_pcm_targeted.",
+      "status": "accepted",
+      "validation": "batch-644-validation.json"
+    },
+    {
+      "id": "FVID-0952",
+      "batch": 644,
+      "title": "Reuse the scanned WebmReader across geometry and dry-run decode in Matroska audio export supports()",
+      "source": "crates/fvid-media/src/owned_matroska_aac_export.rs",
+      "regression": "tests/ogg_flac_mp3_and_export_handle_reuse.rs",
+      "before": "supports() across Matroska PCM, AAC, Opus, FLAC, MP3, and ALAC export modules opened and scanned the Matroska file in geometry_for_decode and then reopened and re-scanned the file in decode_matroska_*_pcm.",
+      "result": "Added supports_from_reader across all 6 Matroska audio export modules to reuse the scanned WebmReader returned by geometry_and_reader_for_decode.",
+      "status": "accepted",
+      "validation": "batch-644-validation.json"
+    },
+    {
+      "id": "FVID-0953",
+      "batch": 644,
+      "title": "Reuse the open File handle in owned_container_loudness::decode_to_wave_from_geometry_with_info and recognizes_with_options",
+      "source": "crates/fvid-media/src/owned_container_loudness.rs",
+      "regression": "tests/ogg_flac_mp3_and_export_handle_reuse.rs",
+      "before": "owned_container_loudness::decode_to_wave_from_geometry_with_info and recognizes_with_options opened source via read_source_head and then reopened the file in G.711, Ogg, raw FLAC, raw MP3, and MP4/Matroska spool decoding.",
+      "result": "Used open_source_head and forwarded the rewound File handle into try_decode_to_wave_from_file, open_selected_ogg_from_file, decode_to_wave_from_file, recognizes_from_file, and the MP4/Matroska spool closure.",
+      "status": "accepted",
+      "validation": "batch-644-validation.json"
+    },
+    {
+      "id": "FVID-0954",
+      "batch": 644,
+      "title": "Reuse the open File handle in owned_audio_plan::standalone_packet_work and owned_audio_mix::decode_owned_audio_with_controls",
+      "source": "crates/fvid-media/src/owned_audio_plan.rs",
+      "regression": "tests/ogg_flac_mp3_and_export_handle_reuse.rs",
+      "before": "owned_audio_plan::standalone_packet_work and owned_audio_mix::decode_owned_audio_with_controls opened source via read_source_head and then reopened the file in G.711, Ogg, raw FLAC, raw MP3, and float32 WAVE readers.",
+      "result": "Added open_source_head in owned_audio_plan and forwarded the rewound File handle into try_packet_work_from_file, open_selected_ogg_from_file, open_from_file, and read_wave_from_file_with_admission.",
+      "status": "accepted",
+      "validation": "batch-644-validation.json"
     }
   ],
   "pending_count": 126

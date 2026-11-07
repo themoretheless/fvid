@@ -190,18 +190,23 @@ pub fn source_geometry(source: &Path, options: &CopyOptions) -> Result<(u32, u16
 /// Uses the codec's admitted index or block geometry without decoding PCM.
 /// Returns None for formats whose container-specific caller owns the count.
 pub fn standalone_packet_work(source: &Path, options: &CopyOptions) -> Result<Option<u64>> {
+    use std::io::{Seek, SeekFrom};
     crate::owned_ogg_opus_export::check(options)?;
-    let (head, head_len) = read_source_head(source)?;
+    let (mut file, head, head_len) = open_source_head(source)?;
     let head_slice = &head[..head_len];
     let count = if head_len == 12 && &head[..4] == b"RIFF" && &head[8..12] == b"WAVE" {
-        let Some(work) = crate::owned_g711_wave_export::try_packet_work(source, options)? else {
+        file.seek(SeekFrom::Start(0)).map_err(|e| e.to_string())?;
+        let Some(work) =
+            crate::owned_g711_wave_export::try_packet_work_from_file(file, options)?
+        else {
             return Ok(None);
         };
         work
     } else if head_slice.starts_with(b"OggS") {
         use crate::owned_ogg_audio_export::Backend;
+        file.seek(SeekFrom::Start(0)).map_err(|e| e.to_string())?;
         let (_, backend, ogg, index) =
-            crate::owned_ogg_audio_export::open_selected_ogg(source, options)?;
+            crate::owned_ogg_audio_export::open_selected_ogg_from_file(file, options)?;
         match backend {
             Backend::Opus => u64::try_from(
                 crate::owned_ogg_opus_export::open_from_ogg_with_transform(
@@ -228,12 +233,14 @@ pub fn standalone_packet_work(source: &Path, options: &CopyOptions) -> Result<Op
             .map_err(|e| e.to_string())?,
         }
     } else if head_slice.starts_with(b"fLaC") {
-        u64::try_from(crate::owned_raw_flac::open(source, options)?.frames.len())
+        file.seek(SeekFrom::Start(0)).map_err(|e| e.to_string())?;
+        u64::try_from(crate::owned_raw_flac::open_from_file(file, options)?.frames.len())
             .map_err(|_| "FLAC packet work overflow")?
     } else if !(head_len >= 7 && crate::owned_aac::adts::header(&head[..7]).is_some())
         && crate::owned_mpeg_audio::has_signature(&head[..head_len.min(10)])
     {
-        let parsed = crate::owned_raw_mp3::open(source, options)?;
+        file.seek(SeekFrom::Start(0)).map_err(|e| e.to_string())?;
+        let parsed = crate::owned_raw_mp3::open_from_file(file, options)?;
         let pres = parsed.presentation_window();
         let active_frames = parsed.frames.iter().take_while(|f| f.pts < pres.end).count();
         let total = active_frames.saturating_add(usize::from(parsed.info_packet().is_some()));
@@ -243,6 +250,11 @@ pub fn standalone_packet_work(source: &Path, options: &CopyOptions) -> Result<Op
 }
 
 pub fn read_source_head(source: &Path) -> Result<([u8; 12], usize)> {
+    let (_, head, filled) = open_source_head(source)?;
+    Ok((head, filled))
+}
+
+pub fn open_source_head(source: &Path) -> Result<(File, [u8; 12], usize)> {
     let mut file = File::open(source).map_err(|e| e.to_string())?;
     let mut head = [0u8; 12];
     let mut filled = 0;
@@ -254,7 +266,7 @@ pub fn read_source_head(source: &Path) -> Result<([u8; 12], usize)> {
             Err(e) => return Err(e.to_string()),
         }
     }
-    Ok((head, filled))
+    Ok((file, head, filled))
 }
 
 /// Read-only audio source geometry and speaker mask (`rate`, `channels`, `mask`).

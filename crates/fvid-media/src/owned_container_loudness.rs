@@ -27,8 +27,8 @@ pub fn recognizes_standalone_audio_with_options(
         return Err("controlled memory limit must be positive".into());
     }
     crate::owned_budget::check_rss_budget(options)?;
-    let (head, head_len) = crate::owned_audio_plan::read_source_head(source)?;
-    recognizes_standalone_from_head(source, &head, head_len, options)
+    let (file, head, head_len) = crate::owned_audio_plan::open_source_head(source)?;
+    recognizes_standalone_from_file_and_head(file, &head, head_len, options)
 }
 
 pub fn recognizes_standalone_from_head(
@@ -45,6 +45,29 @@ pub fn recognizes_standalone_from_head(
     }
     if matches!(&head[..4], b"RIFF" | b"RIFX" | b"RF64") {
         return crate::owned_g711_wave_export::recognizes(source, options);
+    }
+    if head_len >= 7 && crate::owned_aac::adts::header(&head[..7]).is_some() {
+        return Ok(false);
+    }
+    Ok(crate::owned_mpeg_audio::has_signature(&head[..head_len.min(10)]))
+}
+
+fn recognizes_standalone_from_file_and_head(
+    mut file: File,
+    head: &[u8; 12],
+    head_len: usize,
+    options: &CopyOptions,
+) -> Result<bool> {
+    if head_len < 4 {
+        return Ok(false);
+    }
+    if &head[..4] == b"OggS" || &head[..4] == b"fLaC" {
+        return Ok(true);
+    }
+    if matches!(&head[..4], b"RIFF" | b"RIFX" | b"RF64") {
+        use std::io::{Seek, SeekFrom};
+        file.seek(SeekFrom::Start(0)).map_err(|e| e.to_string())?;
+        return crate::owned_g711_wave_export::recognizes_from_file(file, options);
     }
     if head_len >= 7 && crate::owned_aac::adts::header(&head[..7]).is_some() {
         return Ok(false);
@@ -69,6 +92,23 @@ pub(crate) fn recognizes_from_head(
     recognizes_standalone_from_head(source, head, head_len, options)
 }
 
+fn recognizes_from_file_and_head(
+    file: File,
+    head: &[u8; 12],
+    head_len: usize,
+    options: &CopyOptions,
+) -> Result<bool> {
+    if head_len < 4 {
+        return Ok(false);
+    }
+    if head[..4] == [0x1a, 0x45, 0xdf, 0xa3]
+        || (head_len >= 8 && crate::owned_mp4::recognizes_prefix(&head[..8]))
+    {
+        return Ok(true);
+    }
+    recognizes_standalone_from_file_and_head(file, head, head_len, options)
+}
+
 pub(crate) fn recognizes(source: &Path) -> Result<bool> {
     recognizes_with_options(source, &Default::default())
 }
@@ -86,8 +126,8 @@ pub(crate) fn recognizes_with_options(source: &Path, options: &CopyOptions) -> R
         return Err("controlled memory limit must be positive".into());
     }
     crate::owned_budget::check_rss_budget(options)?;
-    let (head, head_len) = crate::owned_audio_plan::read_source_head(source)?;
-    recognizes_from_head(source, &head, head_len, options)
+    let (file, head, head_len) = crate::owned_audio_plan::open_source_head(source)?;
+    recognizes_from_file_and_head(file, &head, head_len, options)
 }
 fn geometry_unqualified(source: &Path, options: &CopyOptions) -> Result<(u32, u16, u32, String)> {
     let (rate, channels, mask, codec, _, _) = geometry_with_frames_unqualified(source, options)?;
@@ -287,16 +327,26 @@ pub fn decode_to_wave_from_geometry_with_info(
     precomputed_info: Option<Vec<u8>>,
     options: &CopyOptions,
 ) -> Result<crate::owned_adts_export::DecodedSpool> {
-    let (head, head_len) = crate::owned_audio_plan::read_source_head(source)?;
+    use std::io::{Seek, SeekFrom};
+    let (mut head_file, head, head_len) = crate::owned_audio_plan::open_source_head(source)?;
     let head_slice = &head[..head_len];
     if head_len == 12 && &head[..4] == b"RIFF" && &head[8..12] == b"WAVE" {
-        if let Some(spool) = crate::owned_g711_wave_export::try_decode_to_wave(source, options)? {
+        head_file
+            .seek(SeekFrom::Start(0))
+            .map_err(|e| e.to_string())?;
+        if let Some(spool) =
+            crate::owned_g711_wave_export::try_decode_to_wave_from_file(head_file, options)?
+        {
             return Ok(spool);
         }
+        return Err("source is not an owned audio container".into());
     }
     if head_slice.starts_with(b"OggS") {
+        head_file
+            .seek(SeekFrom::Start(0))
+            .map_err(|e| e.to_string())?;
         let (_, backend, ogg, index) =
-            crate::owned_ogg_audio_export::open_selected_ogg(source, options)?;
+            crate::owned_ogg_audio_export::open_selected_ogg_from_file(head_file, options)?;
         return match backend {
             crate::owned_ogg_audio_export::Backend::Opus => {
                 crate::owned_ogg_opus_export::decode_to_wave_from_ogg(ogg, index, options)
@@ -310,12 +360,22 @@ pub fn decode_to_wave_from_geometry_with_info(
         };
     }
     if head_slice.starts_with(b"fLaC") {
-        return crate::owned_raw_flac::decode_to_wave(source, rate, channels, mask, options);
+        head_file
+            .seek(SeekFrom::Start(0))
+            .map_err(|e| e.to_string())?;
+        return crate::owned_raw_flac::decode_to_wave_from_file(
+            head_file, rate, channels, mask, options,
+        );
     }
     if !(head_len >= 7 && crate::owned_aac::adts::header(&head[..7]).is_some())
         && crate::owned_mpeg_audio::has_signature(&head[..head_len.min(10)])
     {
-        return crate::owned_raw_mp3::decode_to_wave(source, rate, channels, mask, options);
+        head_file
+            .seek(SeekFrom::Start(0))
+            .map_err(|e| e.to_string())?;
+        return crate::owned_raw_mp3::decode_to_wave_from_file(
+            head_file, rate, channels, mask, options,
+        );
     }
     let mp4 = head_len >= 8 && crate::owned_mp4::recognizes_prefix(&head[..8]);
     let info = match precomputed_info {
@@ -323,6 +383,9 @@ pub fn decode_to_wave_from_geometry_with_info(
         None if mp4 => crate::owned_wave_metadata::mp4_source_info(source, options)?,
         None => crate::owned_wave_metadata::matroska_source_info(source, options)?,
     };
+    head_file
+        .seek(SeekFrom::Start(0))
+        .map_err(|e| e.to_string())?;
     let precise = codec.starts_with("A_PCM/") || codec.starts_with("pcm_");
     let spool = crate::owned_adts_export::spool_decoded_with_precision(
         rate,
@@ -330,8 +393,8 @@ pub fn decode_to_wave_from_geometry_with_info(
         mask,
         if precise { 64 } else { 32 },
         options,
-        |writer, options| {
-            let file = BufReader::new(File::open(source).map_err(|e| e.to_string())?);
+        move |writer, options| {
+            let file = BufReader::new(head_file);
             let result = if mp4 && precise {
                 crate::owned_mp4_audio::decode_mp4_pcm_f64(file, writer, None, options)
             } else if mp4 {

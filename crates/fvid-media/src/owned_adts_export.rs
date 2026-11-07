@@ -138,6 +138,17 @@ pub(crate) fn supports(
     transform: AudioDecodeTransform,
     options: &CopyOptions,
 ) -> bool {
+    let Ok(file) = File::open(source) else {
+        return false;
+    };
+    supports_from_file(source, file, transform, options)
+}
+pub(crate) fn supports_from_file(
+    source: &Path,
+    file: File,
+    transform: AudioDecodeTransform,
+    options: &CopyOptions,
+) -> bool {
     let qualify = || -> Result<()> {
         if options.cancel.as_ref().is_some_and(|c| c.is_cancelled()) {
             return Err("media operation cancelled".into());
@@ -154,7 +165,7 @@ pub(crate) fn supports(
         crate::owned_budget::check_rss_budget(options)?;
         let reader = crate::owned_aac::adts::map_controlled_adts_packet_error(
             crate::owned_aac::adts::StreamReader::open_with_packet_limit(
-                BufReader::new(File::open(source).map_err(|e| e.to_string())?),
+                BufReader::new(file),
                 options
                     .max_packet_bytes
                     .min(options.max_controlled_bytes.unwrap_or(usize::MAX)),
@@ -301,6 +312,32 @@ pub(crate) fn apply(
     if destination.symlink_metadata().is_ok() {
         return Err("output already exists".into());
     }
+    let file = File::open(source).map_err(|e| e.to_string())?;
+    apply_from_file(source, file, destination, transform, options)
+}
+pub(crate) fn apply_from_file(
+    source: &Path,
+    file: File,
+    destination: &Path,
+    transform: AudioDecodeTransform,
+    options: &CopyOptions,
+) -> Result<AudioDecodeStats> {
+    if options.cancel.as_ref().is_some_and(|c| c.is_cancelled()) {
+        return Err("media operation cancelled".into());
+    }
+    if options.max_packet_bytes == 0 {
+        return Err("packet byte limit must be positive".into());
+    }
+    if options.max_packets == Some(0) {
+        return Err("packet work limit requires at least one packet".into());
+    }
+    if options.max_controlled_bytes == Some(0) {
+        return Err("controlled memory limit must be positive".into());
+    }
+    crate::owned_budget::check_rss_budget(options)?;
+    if destination.symlink_metadata().is_ok() {
+        return Err("output already exists".into());
+    }
     if options.max_controlled_bytes.is_some() {
         let _ = crate::owned_audio_plan::plan_decode_audio(source, &transform, options)?;
     }
@@ -310,7 +347,7 @@ pub(crate) fn apply(
             std::time::Duration::from_micros(to as u64),
         )
     });
-    let spool = decode_to_wave_with_rate(source, prefix, transform.sample_rate, options)?;
+    let spool = decode_to_wave_from_file_with_rate(file, prefix, transform.sample_rate, options)?;
     crate::owned_aac_export_routing::export(source,spool,destination,transform,options)
 }
 
@@ -375,8 +412,30 @@ fn decode_to_wave_with_rate(
         return Err("controlled memory limit must be positive".into());
     }
     crate::owned_budget::check_rss_budget(options)?;
+    let file = File::open(source).map_err(|e| e.to_string())?;
+    decode_to_wave_from_file_with_rate(file, interval, output_rate, options)
+}
+fn decode_to_wave_from_file_with_rate(
+    file: File,
+    interval: Option<(std::time::Duration, std::time::Duration)>,
+    output_rate: Option<i32>,
+    options: &CopyOptions,
+) -> Result<DecodedSpool> {
+    if options.cancel.as_ref().is_some_and(|c| c.is_cancelled()) {
+        return Err("media operation cancelled".into());
+    }
+    if options.max_packet_bytes == 0 {
+        return Err("packet byte limit must be positive".into());
+    }
+    if options.max_packets == Some(0) {
+        return Err("packet work limit requires at least one packet".into());
+    }
+    if options.max_controlled_bytes == Some(0) {
+        return Err("controlled memory limit must be positive".into());
+    }
+    crate::owned_budget::check_rss_budget(options)?;
     let reader = crate::owned_aac::adts::StreamReader::open_with_packet_limit(
-        BufReader::new(File::open(source).map_err(|e| e.to_string())?),
+        BufReader::new(file),
         options
             .max_packet_bytes
             .min(options.max_controlled_bytes.unwrap_or(usize::MAX)),

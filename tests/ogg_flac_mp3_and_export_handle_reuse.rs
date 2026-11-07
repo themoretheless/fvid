@@ -78,3 +78,55 @@ fn ogg_raw_flac_raw_mp3_and_audio_export_reuse_open_file_handles() {
     assert_eq!(stats.sample_rate, 48_000);
     std::fs::remove_file(&out_mp4).unwrap();
 }
+
+#[test]
+fn standalone_packet_work_loudness_spool_and_float_wave_mix_reuse_open_handles() {
+    let root = Path::new(env!("CARGO_MANIFEST_DIR")).join("tests/fixtures");
+    let options = CopyOptions {
+        max_controlled_bytes: Some(64 * 1024 * 1024),
+        ..Default::default()
+    };
+    for rel in [
+        "playback-errors/media-trim-loudness/g711-alaw-48k-450ms.wav",
+        "playback-errors/wave-ogg-flac-plan/ogg-vorbis-chained-5ch-0x37.ogg",
+        "playback-errors/wave-ogg-flac-plan/ogg-joint-chained-5ch-0x37.ogg",
+        "playback-errors/wave-ogg-flac-plan/flac-4ch-quad.flac",
+        "playback-errors/wave-ogg-flac-plan/raw-stereo.mp3",
+    ] {
+        let source = root.join(rel);
+        let work_default = fvid_media::owned_audio_plan::standalone_packet_work(
+            &source,
+            &CopyOptions::default(),
+        )
+        .unwrap();
+        let work_admitted =
+            fvid_media::owned_audio_plan::standalone_packet_work(&source, &options).unwrap();
+        assert!(work_default.is_some());
+        assert_eq!(work_default, work_admitted);
+        assert!(
+            fvid_media::owned_container_loudness::recognizes_standalone_audio_with_options(
+                &source, &options
+            )
+            .unwrap()
+        );
+    }
+
+    let dir = std::env::temp_dir().join(format!("fvid-b644-mix-{}", std::process::id()));
+    let _ = std::fs::remove_dir_all(&dir);
+    std::fs::create_dir(&dir).unwrap();
+    let wav_a = dir.join("a.wav");
+    let wav_b = dir.join("b.wav");
+    let wav_out = dir.join("out.wav");
+    let mp3_src = root.join("playback-errors/wave-ogg-flac-plan/raw-stereo.mp3");
+    decode_audio(&mp3_src, &wav_a, &options).unwrap();
+    decode_audio(&mp3_src, &wav_b, &options).unwrap();
+    let mix_stats = fvid_media::mix_audio_with_controls(
+        &[wav_a, wav_b],
+        &wav_out,
+        &fvid_media::MixAudioOptions::default(),
+        &options,
+    )
+    .unwrap();
+    assert!(mix_stats.sample_frames > 0);
+    std::fs::remove_dir_all(&dir).unwrap();
+}

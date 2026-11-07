@@ -40,10 +40,39 @@ pub(crate) fn supports(
     transform: AudioDecodeTransform,
     options: &CopyOptions,
 ) -> bool {
-    let (rate, channels, mask) = match geometry_for_decode(source, Some(transform), options) {
-        Ok(geometry) => geometry,
-        Err(error) => return error.starts_with("controlled memory budget exceeded:"),
+    let reader = match crate::owned_matroska_audio::open_aac_reader(
+        match File::open(source) {
+            Ok(f) => BufReader::new(f),
+            Err(_) => return false,
+        },
+        options,
+        options.max_packet_bytes,
+    ) {
+        Ok(reader) => reader,
+        Err(error) => return error.to_string().starts_with("controlled memory budget exceeded:"),
     };
+    let selected = match options.streams.as_slice() {
+        [] => None,
+        [index] => Some(*index),
+        _ => return false,
+    };
+    let Ok(index) = crate::owned_matroska_audio::matroska_audio_index(&reader, selected) else {
+        return false;
+    };
+    supports_from_reader(source, reader, index, transform, options)
+}
+pub(crate) fn supports_from_reader<R: Read + std::io::Seek>(
+    source: &Path,
+    reader: crate::owned_webm::WebmReader<R>,
+    index: usize,
+    transform: AudioDecodeTransform,
+    options: &CopyOptions,
+) -> bool {
+    let (rate, channels, mask, _, _, reader) =
+        match geometry_and_reader_for_decode(source, reader, index, Some(transform), options) {
+            Ok(geometry) => geometry,
+            Err(error) => return error.starts_with("controlled memory budget exceeded:"),
+        };
     if let Some(target) = transform.channels {
         if target != i32::from(channels) {
             let aac_fold = if matches!(target, 1 | 2) {
@@ -71,11 +100,8 @@ pub(crate) fn supports(
     }
     let mut probe = decode_options(options);
     probe.progress = None;
-    let result = crate::owned_matroska_aac::decode_matroska_aac_pcm(
-        match File::open(source) {
-            Ok(f) => BufReader::new(f),
-            Err(_) => return false,
-        },
+    let result = crate::owned_matroska_audio::decode_matroska_audio_reader_pcm(
+        reader,
         &mut std::io::sink(),
         prefix(transform, rate),
         &probe,

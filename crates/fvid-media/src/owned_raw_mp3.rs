@@ -34,6 +34,9 @@ pub(crate) fn recognizes(source: &Path) -> Result<bool> {
 pub(crate) fn open(source: &Path, options: &CopyOptions) -> Result<Mp3> {
     open_with_transform(source, None, options)
 }
+pub(crate) fn open_from_file(file: File, options: &CopyOptions) -> Result<Mp3> {
+    open_from_file_with_interval(file, None, options)
+}
 pub(crate) fn open_with_transform(
     source: &Path,
     transform: Option<AudioDecodeTransform>,
@@ -361,8 +364,22 @@ pub(crate) fn supports(
     transform: AudioDecodeTransform,
     options: &CopyOptions,
 ) -> bool {
-    match geometry_with_transform(source, Some(transform), options) {
-        Ok((_rate, channels)) => {
+    let Ok(file) = File::open(source) else {
+        return false;
+    };
+    supports_from_file(file, transform, options)
+}
+pub(crate) fn supports_from_file(
+    file: File,
+    transform: AudioDecodeTransform,
+    options: &CopyOptions,
+) -> bool {
+    match open_from_file_with_interval(file, Some((transform, None)), options) {
+        Ok(parsed) => {
+            if parsed.presentation_samples() == 0 {
+                return false;
+            }
+            let channels = parsed.channels;
             let target = transform.channels.unwrap_or(i32::from(channels));
             let mask = crate::owned_pcm_channels::standard_mask(channels).unwrap_or(0) as u32;
             target == i32::from(channels)
@@ -442,6 +459,17 @@ pub(crate) fn decode_to_wave(
     options: &CopyOptions,
 ) -> Result<crate::owned_adts_export::DecodedSpool> {
     check(options)?;
+    let file = File::open(source).map_err(|e| e.to_string())?;
+    decode_to_wave_from_file(file, rate, channels, mask, options)
+}
+pub(crate) fn decode_to_wave_from_file(
+    file: File,
+    rate: u32,
+    channels: u16,
+    mask: u32,
+    options: &CopyOptions,
+) -> Result<crate::owned_adts_export::DecodedSpool> {
+    check(options)?;
     if !options.metadata_set.is_empty()
         || !options.metadata_delete.is_empty()
         || !options.stream_metadata_set.is_empty()
@@ -449,8 +477,8 @@ pub(crate) fn decode_to_wave(
     {
         return Err("raw PCM stream cannot apply metadata mutations".into());
     }
-    let parsed = open_with_interval(
-        source,
+    let parsed = open_from_file_with_interval(
+        file,
         Some((AudioDecodeTransform::default(), None)),
         options,
     )?;

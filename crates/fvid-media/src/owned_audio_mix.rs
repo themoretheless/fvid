@@ -291,12 +291,15 @@ pub(crate) fn decode_owned_audio_with_controls(
     source: &Path,
     controls: &fvid_control::CopyOptions,
 ) -> Result<(AudioDecodeStats, Vec<u8>)> {
+    use std::io::{Seek, SeekFrom};
     validate_mix_controls(controls)?;
-    let (head, head_len) = crate::owned_audio_plan::read_source_head(source)?;
+    let (mut file, head, head_len) = crate::owned_audio_plan::open_source_head(source)?;
     if head_len == 12 && &head[..4] == b"RIFF" && &head[8..12] == b"WAVE" {
-        match read_float_wave_with_admission(
-            source,
+        file.seek(SeekFrom::Start(0)).map_err(|e| e.to_string())?;
+        match read_wave_from_file_with_admission(
+            file,
             Some(32),
+            true,
             controls.cancel.as_ref(),
             controls.max_packet_bytes,
             controls.max_packets,
@@ -318,6 +321,8 @@ pub(crate) fn decode_owned_audio_with_controls(
                     || err.starts_with("owned WAVE reader requires PCM or IEEE float") => {}
             Err(err) => return Err(err),
         }
+    } else {
+        drop(file);
     }
     let spool = crate::owned_adts_export::Spool::create()?;
     let wave = spool.0.join("decoded.wav");
