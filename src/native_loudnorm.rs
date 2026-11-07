@@ -234,7 +234,7 @@ pub fn try_plan(
             return Ok(None);
         }
         return Ok(Some(
-            fvid_media::owned_loudnorm::plan_loudnorm(
+            fvid_media::owned_loudnorm::plan_wave_loudnorm(
                 source, Some(&resolved), dual_pass, options,
             )
             .map_err(|e| crate::invalid(&e))?,

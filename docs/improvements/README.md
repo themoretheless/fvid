@@ -4774,5 +4774,14 @@ See `batch-628-validation.json`.
 - **FVID-0928**: Forward the already-opened `WebmReader` and audio track index from `decode_audio_transformed` into Matroska codec export modules (`crates/fvid-media/src/owned_audio_export.rs`).
 - **FVID-0929**: Derive default mono/stereo channel weights inline during `measure_file_default_weights_with_options` in `media::measure_loudness` (`src/native_pcm/loudness.rs`).
 
+## Batch 640 (FVID-0930..0934)
+
+- **FVID-0930**: Extract `owned_loudnorm::plan_wave_loudnorm` and call it directly for WAVE loudnorm planning and execution (`crates/fvid-media/src/owned_loudnorm.rs`).
+- **FVID-0931**: Read RIFF `INFO` chunks in a single pass in `owned_loudnorm::apply_resolved` when memory budget is unbounded and metadata edits are empty (`crates/fvid-media/src/owned_loudnorm.rs`).
+- **FVID-0932**: Read RIFF `INFO` chunks in a single pass in `owned_loudnorm::apply_dynamic` when memory budget is unbounded and metadata edits are empty (`crates/fvid-media/src/owned_loudnorm.rs`).
+- **FVID-0933**: Reuse the validated ADTS `StreamReader` across packet-budget and SBR prefix negotiation in `owned_adts_loudness::validate_configuration_and_channels` (`crates/fvid-media/src/owned_adts_loudness.rs`).
+- **FVID-0934**: Reuse the validated ADTS `StreamReader` and channel mask via `owned_adts_export::decode_reader_to_wave` in `owned_adts_loudness::measure_loudness` (`crates/fvid-media/src/owned_adts_export.rs`).
+
+
 
 

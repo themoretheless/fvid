@@ -1,8 +1,8 @@
 {
   "target": 1000,
   "counting_rule": "One independently confirmed problem or useful capability; fixture variants and baseline integration repairs are excluded. Only accepted entries count.",
-  "accepted_count": 929,
-  "next_id": "FVID-0930",
+  "accepted_count": 934,
+  "next_id": "FVID-0935",
   "entries": [
     {
       "id": "FVID-0001",
@@ -10410,6 +10410,61 @@
       "result": "measure_file_with_optional_weights_and_kind derives default unit weights once the input stream channels are known, eliminating the duplicate preflight container open",
       "status": "accepted",
       "validation": "batch-639-validation.json"
+    },
+    {
+      "id": "FVID-0930",
+      "batch": 640,
+      "title": "Extract plan_wave_loudnorm and call it directly for WAVE loudnorm planning and execution",
+      "source": "crates/fvid-media/src/owned_loudnorm.rs",
+      "regression": "tests/wave_and_adts_loudnorm_single_pass_inspect.rs",
+      "before": "owned_loudnorm::apply_loudnorm, apply_loudnorm_dual, and native_loudnorm::try_plan called plan_loudnorm on already-classified WAVE files, triggering redundant 12-byte head reads and container/ADTS recognition checks.",
+      "result": "Extracted owned_loudnorm::plan_wave_loudnorm and routed WAVE loudnorm planning and execution directly to it without redundant container/ADTS prefix reads.",
+      "status": "accepted",
+      "validation": "batch-640-validation.json"
+    },
+    {
+      "id": "FVID-0931",
+      "batch": 640,
+      "title": "Read RIFF INFO chunks in a single pass in owned_loudnorm::apply_resolved when memory budget is unbounded and metadata edits are empty",
+      "source": "crates/fvid-media/src/owned_loudnorm.rs",
+      "regression": "tests/wave_and_adts_loudnorm_single_pass_inspect.rs",
+      "before": "owned_loudnorm::apply_resolved always called info_chunks_bytes followed by info_chunks, opening and scanning the WAVE file twice even when max_controlled_bytes was None and metadata edits were empty.",
+      "result": "Read info_chunks in a single pass when max_controlled_bytes is None and metadata edits are empty in apply_resolved.",
+      "status": "accepted",
+      "validation": "batch-640-validation.json"
+    },
+    {
+      "id": "FVID-0932",
+      "batch": 640,
+      "title": "Read RIFF INFO chunks in a single pass in owned_loudnorm::apply_dynamic when memory budget is unbounded and metadata edits are empty",
+      "source": "crates/fvid-media/src/owned_loudnorm.rs",
+      "regression": "tests/wave_and_adts_loudnorm_single_pass_inspect.rs",
+      "before": "owned_loudnorm::apply_dynamic always called info_chunks_bytes followed by info_chunks, opening and scanning the WAVE file twice even when max_controlled_bytes was None and metadata edits were empty.",
+      "result": "Read info_chunks in a single pass when max_controlled_bytes is None and metadata edits are empty in apply_dynamic.",
+      "status": "accepted",
+      "validation": "batch-640-validation.json"
+    },
+    {
+      "id": "FVID-0933",
+      "batch": 640,
+      "title": "Reuse the validated ADTS StreamReader across packet-budget and SBR prefix negotiation in owned_adts_loudness::validate_configuration_and_channels",
+      "source": "crates/fvid-media/src/owned_adts_loudness.rs",
+      "regression": "tests/wave_and_adts_loudnorm_single_pass_inspect.rs",
+      "before": "validate_configuration_and_channels opened the ADTS source once in validate_header_configuration_and_channels, a second time in validate_packet_budget, and a third time for adts_prefix_info_for_transform.",
+      "result": "Returned the validated StreamReader from validate_header_configuration_channels_and_reader and reused it for packet-budget scanning or SBR prefix negotiation.",
+      "status": "accepted",
+      "validation": "batch-640-validation.json"
+    },
+    {
+      "id": "FVID-0934",
+      "batch": 640,
+      "title": "Reuse the validated ADTS StreamReader and channel mask via owned_adts_export::decode_reader_to_wave in owned_adts_loudness::measure_loudness",
+      "source": "crates/fvid-media/src/owned_adts_export.rs",
+      "regression": "tests/wave_and_adts_loudnorm_single_pass_inspect.rs",
+      "before": "owned_adts_loudness::measure_loudness validated the ADTS header and constructed a NativeAacDecoder to check the channel mask, then dropped both and called decode_to_wave which reopened the file and constructed another NativeAacDecoder.",
+      "result": "Added owned_adts_export::decode_reader_to_wave and forwarded the validated StreamReader, sample rate, channels, and channel mask from measure_loudness.",
+      "status": "accepted",
+      "validation": "batch-640-validation.json"
     }
   ],
   "pending_count": 126

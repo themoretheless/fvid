@@ -394,16 +394,28 @@ fn decode_to_wave_with_rate(
     let mask = crate::owned_aac::NativeAacDecoder::new(reader.audio_specific_config())
         .map_err(|e| e.to_string())?
         .channel_mask();
-    spool_decoded(
+    decode_reader_to_wave(
+        reader,
         config.sample_rate,
         config.channels,
         mask,
+        interval,
         options,
-        move |writer, options| {
-            crate::owned_aac::stream::decode_adts_reader_pcm(reader, writer, interval, options)
-                .map_err(|e| e.to_string())
-        },
     )
+}
+
+pub(crate) fn decode_reader_to_wave(
+    reader: crate::owned_aac::adts::StreamReader<BufReader<File>>,
+    rate: u32,
+    channels: u16,
+    mask: u32,
+    interval: Option<(std::time::Duration, std::time::Duration)>,
+    options: &CopyOptions,
+) -> Result<DecodedSpool> {
+    spool_decoded(rate, channels, mask, options, move |writer, options| {
+        crate::owned_aac::stream::decode_adts_reader_pcm(reader, writer, interval, options)
+            .map_err(|e| e.to_string())
+    })
 }
 
 pub(crate) fn spool_decoded(

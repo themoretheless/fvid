@@ -14,6 +14,19 @@ pub(crate) fn validate_header_configuration_and_channels(
     source: &Path,
     options: &CopyOptions,
 ) -> Result<(u32, u16)> {
+    let (rate, channels, _, _) =
+        validate_header_configuration_channels_and_reader(source, options)?;
+    Ok((rate, channels))
+}
+pub(crate) fn validate_header_configuration_channels_and_reader(
+    source: &Path,
+    options: &CopyOptions,
+) -> Result<(
+    u32,
+    u16,
+    u32,
+    crate::owned_aac::adts::StreamReader<BufReader<File>>,
+)> {
     if options.cancel.as_ref().is_some_and(|c| c.is_cancelled()) {
         return Err("media operation cancelled".into());
     }
@@ -45,7 +58,8 @@ pub(crate) fn validate_header_configuration_and_channels(
         .map_err(|e| e.to_string())?;
     let decoder = crate::owned_aac::NativeAacDecoder::new(reader.audio_specific_config())
         .map_err(|e| e.to_string())?;
-    if decoder.channel_mask() & !0x7ff != 0 {
+    let mask = decoder.channel_mask();
+    if mask & !0x7ff != 0 {
         return Err("owned loudness speaker positions are not yet qualified".into());
     }
     if !crate::owned_wave_loudness::qualified_rate(config.sample_rate)
@@ -55,26 +69,33 @@ pub(crate) fn validate_header_configuration_and_channels(
             "owned AAC true-peak measurement requires a qualified standard PCM rate".into(),
         );
     }
-    Ok((config.sample_rate, config.channels))
+    Ok((config.sample_rate, config.channels, mask, reader))
 }
 pub(crate) fn validate_header_configuration(source: &Path, options: &CopyOptions) -> Result<u32> {
     validate_header_configuration_and_channels(source, options).map(|(rate, _)| rate)
 }
-fn validate_packet_budget(source: &Path, options: &CopyOptions) -> Result<()> {
+fn validate_packet_budget(
+    source: &Path,
+    reader: Option<crate::owned_aac::adts::StreamReader<BufReader<File>>>,
+    options: &CopyOptions,
+) -> Result<()> {
     let packet_limit = options
         .max_packet_bytes
         .min(options.max_controlled_bytes.unwrap_or(usize::MAX));
     if packet_limit >= CopyOptions::default().max_packet_bytes {
         return Ok(());
     }
-    let mut reader = crate::owned_aac::adts::map_controlled_adts_packet_error(
-        crate::owned_aac::adts::StreamReader::open_with_packet_limit(
-            BufReader::new(File::open(source).map_err(|e| e.to_string())?),
-            packet_limit,
-        )
-        .map_err(|e| e.to_string()),
-        options,
-    )?;
+    let mut reader = match reader {
+        Some(r) => r,
+        None => crate::owned_aac::adts::map_controlled_adts_packet_error(
+            crate::owned_aac::adts::StreamReader::open_with_packet_limit(
+                BufReader::new(File::open(source).map_err(|e| e.to_string())?),
+                packet_limit,
+            )
+            .map_err(|e| e.to_string()),
+            options,
+        )?,
+    };
     let mut packets = 0u64;
     while !options.max_packets.is_some_and(|limit| packets >= limit) {
         if options.cancel.as_ref().is_some_and(|c| c.is_cancelled()) {
@@ -97,17 +118,21 @@ pub(crate) fn validate_configuration_and_channels(
     source: &Path,
     options: &CopyOptions,
 ) -> Result<(u32, u16)> {
-    let (header_rate, header_channels) = validate_header_configuration_and_channels(source, options)?;
-    validate_packet_budget(source, options)?;
+    let (header_rate, header_channels, _, reader) =
+        validate_header_configuration_channels_and_reader(source, options)?;
     if crate::owned_wave_loudness::qualified_rate(header_rate) {
+        validate_packet_budget(source, Some(reader), options)?;
         return Ok((header_rate, header_channels));
     }
-    let (rate, channels, mask) = crate::owned_aac::stream::adts_prefix_info(
-        BufReader::new(File::open(source).map_err(|e| e.to_string())?),
-        None,
-        options,
-    )
-    .map_err(|e| e.to_string())?;
+    validate_packet_budget(source, None, options)?;
+    let (rate, channels, mask, _) =
+        crate::owned_aac::stream::adts_prefix_info_from_reader_for_transform(
+            reader,
+            None,
+            None,
+            options,
+        )
+        .map_err(|e| e.to_string())?;
     if mask & !0x7ff != 0 {
         return Err("owned loudness speaker positions are not yet qualified".into());
     }
@@ -180,9 +205,17 @@ fn check_meter_budget(source: &Path, rate: u32, options: &CopyOptions) -> Result
     Ok(())
 }
 pub fn measure_loudness(source: &Path, options: &CopyOptions) -> Result<LoudnessStats> {
-    let header_rate = validate_header_configuration(source, options)?;
+    let (header_rate, header_channels, mask, reader) =
+        validate_header_configuration_channels_and_reader(source, options)?;
     check_meter_budget(source, header_rate, options)?;
-    let spool = crate::owned_adts_export::decode_to_wave(source, None, options)?;
+    let spool = crate::owned_adts_export::decode_reader_to_wave(
+        reader,
+        header_rate,
+        header_channels,
+        mask,
+        None,
+        options,
+    )?;
     if !crate::owned_wave_loudness::qualified_rate(spool.stats.sample_rate) {
         return Err(
             "owned AAC true-peak measurement requires a qualified standard PCM rate".into(),

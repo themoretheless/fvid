@@ -276,19 +276,50 @@ pub fn plan_loudnorm(
     if head_len >= 7 && crate::owned_aac::adts::header(&head[..7]).is_some() {
         return crate::owned_adts_loudnorm::plan_loudnorm(source, args, dual_pass, options);
     }
+    plan_wave_loudnorm(source, args, dual_pass, options)
+}
+
+pub fn plan_wave_loudnorm(
+    source: &Path,
+    args: Option<&str>,
+    dual_pass: bool,
+    options: &CopyOptions,
+) -> Result<fvid_media_info::MediaPlan> {
+    check_options(options)?;
     use fvid_media_info::{MediaPlan, PlanStep, PlanStream};
     let resolved = validate_request(args)?;
     let params = parse(&resolved)?;
     let mut wave_file = std::fs::File::open(source).map_err(|e| e.to_string())?;
     let wave_info = crate::owned_wave_inspect::inspect(&mut wave_file, options.cancel.as_ref())
         .map_err(|e| e.to_string())?;
-    if !((params.gain.is_some() || dynamic_input(&wave_info))
+    plan_wave_loudnorm_from_info(
+        source,
+        &mut wave_file,
+        &wave_info,
+        &resolved,
+        &params,
+        dual_pass,
+        options,
+    )
+}
+
+fn plan_wave_loudnorm_from_info(
+    source: &Path,
+    wave_file: &mut std::fs::File,
+    wave_info: &crate::owned_wave_inspect::WaveInfo,
+    resolved: &str,
+    params: &Parameters,
+    dual_pass: bool,
+    options: &CopyOptions,
+) -> Result<fvid_media_info::MediaPlan> {
+    use fvid_media_info::{MediaPlan, PlanStep, PlanStream};
+    if !((params.gain.is_some() || dynamic_input(wave_info))
         && (params.print == Print::None
             || (crate::owned_wave_loudness::qualified_rate(wave_info.sample_rate)
-                && crate::owned_wave_loudness::weights(&wave_info).is_ok()))
+                && crate::owned_wave_loudness::weights(wave_info).is_ok()))
         && (!dual_pass
             || (crate::owned_wave_loudness::qualified_rate(wave_info.sample_rate)
-                && crate::owned_wave_loudness::weights(&wave_info).is_ok())))
+                && crate::owned_wave_loudness::weights(wave_info).is_ok())))
     {
         return Err("request has no owned WAVE loudnorm route".into());
     }
@@ -313,15 +344,15 @@ pub fn plan_loudnorm(
     if size == 0 {
         return Err("packet limit leaves no decoded audio samples".into());
     }
-    let report = report_requested(Some(&resolved))?;
+    let report = params.print != Print::None;
     if dual_pass || report {
         let decode_options = crate::owned_adts_export::pcm_decode_options(options);
-        crate::owned_wave_loudness::check_preflight(&wave_info, &decode_options)?;
+        crate::owned_wave_loudness::check_preflight(wave_info, &decode_options)?;
     }
     if let Some(limit) = options.max_controlled_bytes {
         let metadata_bytes = crate::owned_wave_inspect::info_chunks_bytes(
-            &mut wave_file,
-            &wave_info,
+            wave_file,
+            wave_info,
             options.cancel.as_ref(),
         )
         .map_err(|e| e.to_string())?;
@@ -461,7 +492,7 @@ pub fn apply_loudnorm(
         if destination.symlink_metadata().is_ok() {
             return Err("output already exists".into());
         }
-        plan_loudnorm(source, Some(&args), false, options)?;
+        plan_wave_loudnorm(source, Some(&args), false, options)?;
         let (measurement, export_options) = measure_phase(source, params.dual_mono, options)?;
         return apply_resolved(
             source,
@@ -495,7 +526,7 @@ pub fn apply_loudnorm_dual(
     if destination.symlink_metadata().is_ok() {
         return Err("output already exists".into());
     }
-    plan_loudnorm(source, Some(&base), true, options)?;
+    plan_wave_loudnorm(source, Some(&base), true, options)?;
     let (measurement, export_options) = measure_phase(source, original.dual_mono, options)?;
     let clean = base
         .split(':')
@@ -590,55 +621,72 @@ fn apply_resolved(
             width = usize::from(info.bits_per_sample / 8);
             float = info.float;
             mask = info.channel_mask;
-            let metadata_bytes = crate::owned_wave_inspect::info_chunks_bytes(
-                file,
-                info,
-                options.cancel.as_ref(),
-            )
-            .map_err(|e| e.to_string())?;
-            let assignments = options.metadata_set.iter().try_fold(0usize, |sum, (_, v)| {
-                sum.checked_add(v.len().saturating_add(10))
-                    .ok_or("loudnorm metadata size overflow")
-            })?;
-            let metadata_working = metadata_bytes
-                .checked_add(assignments)
-                .and_then(|n| n.checked_add(12))
-                .and_then(|n| n.checked_mul(8))
-                .ok_or("loudnorm metadata size overflow")?;
-            let output = (size / width)
-                .checked_mul(4)
-                .ok_or("loudnorm output size overflow")?;
-            let report_bytes = if params.print == Print::None {
-                0
-            } else {
-                usize::try_from(report_memory(
-                    info.sample_rate,
-                    (size / usize::from(info.block)) as u64,
-                    info.channels,
-                ))
-                .map_err(|_| "loudnorm report memory overflow")?
-            };
-            let estimate = size
-                .checked_add(output)
-                .and_then(|n| n.checked_add(report_bytes))
-                .and_then(|n| n.checked_add(metadata_working))
-                .ok_or("loudnorm memory size overflow")?;
-            if options
+            let info_chunks = if options
                 .max_controlled_bytes
-                .is_some_and(|limit| estimate > limit)
+                .is_none_or(|limit| limit >= usize::MAX / 2)
+                && options.metadata_set.is_empty()
+                && options.metadata_delete.is_empty()
             {
-                return Err(format!(
-                    "controlled memory budget exceeded: need {estimate} bytes"
-                ));
-            }
-            if metadata_bytes > 0 {
-                cached_info_chunks = crate::owned_wave_inspect::info_chunks(
+                crate::owned_wave_inspect::info_chunks(
+                    file,
+                    info,
+                    options.cancel.as_ref(),
+                )
+                .map_err(|e| e.to_string())?
+            } else {
+                let metadata_bytes = crate::owned_wave_inspect::info_chunks_bytes(
                     file,
                     info,
                     options.cancel.as_ref(),
                 )
                 .map_err(|e| e.to_string())?;
-            }
+                let assignments = options.metadata_set.iter().try_fold(0usize, |sum, (_, v)| {
+                    sum.checked_add(v.len().saturating_add(10))
+                        .ok_or("loudnorm metadata size overflow")
+                })?;
+                let metadata_working = metadata_bytes
+                    .checked_add(assignments)
+                    .and_then(|n| n.checked_add(12))
+                    .and_then(|n| n.checked_mul(8))
+                    .ok_or("loudnorm metadata size overflow")?;
+                let output = (size / width)
+                    .checked_mul(4)
+                    .ok_or("loudnorm output size overflow")?;
+                let report_bytes = if params.print == Print::None {
+                    0
+                } else {
+                    usize::try_from(report_memory(
+                        info.sample_rate,
+                        (size / usize::from(info.block)) as u64,
+                        info.channels,
+                    ))
+                    .map_err(|_| "loudnorm report memory overflow")?
+                };
+                let estimate = size
+                    .checked_add(output)
+                    .and_then(|n| n.checked_add(report_bytes))
+                    .and_then(|n| n.checked_add(metadata_working))
+                    .ok_or("loudnorm memory size overflow")?;
+                if options
+                    .max_controlled_bytes
+                    .is_some_and(|limit| estimate > limit)
+                {
+                    return Err(format!(
+                        "controlled memory budget exceeded: need {estimate} bytes"
+                    ));
+                }
+                if metadata_bytes > 0 {
+                    crate::owned_wave_inspect::info_chunks(
+                        file,
+                        info,
+                        options.cancel.as_ref(),
+                    )
+                    .map_err(|e| e.to_string())?
+                } else {
+                    Vec::new()
+                }
+            };
+            cached_info_chunks = info_chunks;
             check()
         },
         |size| {
@@ -784,60 +832,75 @@ fn apply_dynamic(
             if params.dual_mono && info.channels == 1 {
                 weights[0] *= 2.;
             }
-            let metadata_bytes = crate::owned_wave_inspect::info_chunks_bytes(
-                file,
-                info,
-                options.cancel.as_ref(),
-            )
-            .map_err(|e| e.to_string())?;
-            let assignments = options.metadata_set.iter().try_fold(0u128, |sum, (_, v)| {
-                sum.checked_add(v.len() as u128 + 10)
-                    .ok_or("loudnorm metadata estimate overflow")
-            })?;
-            let metadata_working = 8 * (metadata_bytes as u128 + assignments + 12);
             let frames = size / usize::from(info.block);
             let resampled_frames = (frames as u128 * 192000).div_ceil(u128::from(info.sample_rate));
-            let report_bytes = if params.print == Print::None {
-                0
-            } else {
-                report_memory(
-                    192000,
-                    u64::try_from(resampled_frames).map_err(|_| "loudnorm report memory overflow")?,
-                    info.channels,
-                )
-            };
             samples = usize::try_from(resampled_frames * u128::from(info.channels))
                 .map_err(|_| "loudnorm output size overflow")?;
-            // Raw input + exact output double storage + f32 publication buffer,
-            // bounded resampler queues/scratch and the meter's 3.4 s energy rings.
-            let estimate = (size as u128)
-                + samples as u128 * 12
-                + 192000 * 34 / 10 * 8
-                + 512 * 1024
-                + 2 * frames.min(4096) as u128 * u128::from(info.channels) * 8
-                + samples as u128 / u128::from(info.channels) * 8
-                // Four anchor vectors plus both meter histograms (every block
-                // may occupy a distinct bin; 512 bytes per tree node/scratch).
-                + (samples as u128 / u128::from(info.channels)).div_ceil(19200) * (40 + 1024)
-                + 19200 * u128::from(info.channels) * 8
-                + report_bytes
-                + metadata_working;
-            if options
-                .max_controlled_bytes
-                .is_some_and(|limit| estimate > limit as u128)
+            let info_chunks = if options.max_controlled_bytes.is_none()
+                && options.metadata_set.is_empty()
+                && options.metadata_delete.is_empty()
             {
-                return Err(format!(
-                    "controlled memory budget exceeded: need {estimate} bytes"
-                ));
-            }
-            if metadata_bytes > 0 {
-                cached_info_chunks = crate::owned_wave_inspect::info_chunks(
+                crate::owned_wave_inspect::info_chunks(
+                    file,
+                    info,
+                    options.cancel.as_ref(),
+                )
+                .map_err(|e| e.to_string())?
+            } else {
+                let metadata_bytes = crate::owned_wave_inspect::info_chunks_bytes(
                     file,
                     info,
                     options.cancel.as_ref(),
                 )
                 .map_err(|e| e.to_string())?;
-            }
+                let assignments = options.metadata_set.iter().try_fold(0u128, |sum, (_, v)| {
+                    sum.checked_add(v.len() as u128 + 10)
+                        .ok_or("loudnorm metadata estimate overflow")
+                })?;
+                let metadata_working = 8 * (metadata_bytes as u128 + assignments + 12);
+                let report_bytes = if params.print == Print::None {
+                    0
+                } else {
+                    report_memory(
+                        192000,
+                        u64::try_from(resampled_frames).map_err(|_| "loudnorm report memory overflow")?,
+                        info.channels,
+                    )
+                };
+                // Raw input + exact output double storage + f32 publication buffer,
+                // bounded resampler queues/scratch and the meter's 3.4 s energy rings.
+                let estimate = (size as u128)
+                    + samples as u128 * 12
+                    + 192000 * 34 / 10 * 8
+                    + 512 * 1024
+                    + 2 * frames.min(4096) as u128 * u128::from(info.channels) * 8
+                    + samples as u128 / u128::from(info.channels) * 8
+                    // Four anchor vectors plus both meter histograms (every block
+                    // may occupy a distinct bin; 512 bytes per tree node/scratch).
+                    + (samples as u128 / u128::from(info.channels)).div_ceil(19200) * (40 + 1024)
+                    + 19200 * u128::from(info.channels) * 8
+                    + report_bytes
+                    + metadata_working;
+                if options
+                    .max_controlled_bytes
+                    .is_some_and(|limit| estimate > limit as u128)
+                {
+                    return Err(format!(
+                        "controlled memory budget exceeded: need {estimate} bytes"
+                    ));
+                }
+                if metadata_bytes > 0 {
+                    crate::owned_wave_inspect::info_chunks(
+                        file,
+                        info,
+                        options.cancel.as_ref(),
+                    )
+                    .map_err(|e| e.to_string())?
+                } else {
+                    Vec::new()
+                }
+            };
+            cached_info_chunks = info_chunks;
             check()
         },
         |size| {
