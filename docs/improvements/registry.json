@@ -1,8 +1,8 @@
 {
   "target": 1000,
   "counting_rule": "One independently confirmed problem or useful capability; fixture variants and baseline integration repairs are excluded. Only accepted entries count.",
-  "accepted_count": 729,
-  "next_id": "FVID-0730",
+  "accepted_count": 734,
+  "next_id": "FVID-0735",
   "entries": [
     {
       "id": "FVID-0001",
@@ -8210,6 +8210,62 @@
       "result": "Expose decode_adts_reader_pcm in owned_aac::stream and pass the already-opened AdtsStreamReader directly in supports and decode_to_wave_with_rate.",
       "status": "accepted",
       "validation": "batch-599-validation.json"
+    },
+    {
+      "id": "FVID-0730",
+      "batch": 600,
+      "title": "Return RIFF INFO bytes from Ogg Opus open_with_transform_and_info so decode_to_wave and apply do not re-parse OpusTags",
+      "source": "crates/fvid-media/src/owned_ogg_opus_export.rs",
+      "regression": "tests/loudnorm_and_aac_routing_single_open.rs",
+      "before": "owned_ogg_opus_export::decode_to_wave and apply called open/open_with_transform (which parsed OpusTags and built RIFF INFO chunks via source_info) and then called source_info a second time.",
+      "result": "Expose open_with_info and open_with_transform_and_info returning (Program, Vec<u8>) and reuse the computed RIFF INFO bytes in decode_to_wave and apply.",
+      "status": "accepted",
+      "validation": "batch-600-validation.json"
+    },
+    {
+      "id": "FVID-0731",
+      "batch": 600,
+      "title": "Return validated channels alongside sample rate in ADTS loudness preflight and eliminate redundant StreamReader opens in ADTS loudnorm",
+      "source": "crates/fvid-media/src/owned_adts_loudness.rs",
+      "regression": "tests/loudnorm_and_aac_routing_single_open.rs",
+      "before": "owned_adts_loudness::plan_loudness validated the ADTS configuration twice, and owned_adts_loudnorm::apply and plan_loudnorm opened StreamReader and validated configuration redundantly up to three times.",
+      "result": "Expose validate_configuration_and_channels, build_loudness_plan, and plan_loudness_with_validated_rate so ADTS loudness and loudnorm validate configuration and channels in a single pass.",
+      "status": "accepted",
+      "validation": "batch-600-validation.json"
+    },
+    {
+      "id": "FVID-0732",
+      "batch": 600,
+      "title": "Reuse validated container geometry in measure_loudness and container loudnorm via decode_to_wave_from_geometry and check_meter_budget",
+      "source": "crates/fvid-media/src/owned_container_loudness.rs",
+      "regression": "tests/loudnorm_and_aac_routing_single_open.rs",
+      "before": "owned_container_loudness::measure_loudness and owned_container_loudnorm::apply/plan_loudnorm re-ran container geometry preflight inside decode_to_wave and plan_loudness after already computing geometry and source_descriptor.",
+      "result": "Make decode_to_wave_from_geometry and check_meter_budget pub(crate) and reuse the validated (rate, channels, mask, codec) and stage2_frames directly.",
+      "status": "accepted",
+      "validation": "batch-600-validation.json"
+    },
+    {
+      "id": "FVID-0733",
+      "batch": 600,
+      "title": "Inspect WAVE headers once in owned_loudnorm::supports and supports_dual instead of opening and inspecting the source file twice",
+      "source": "crates/fvid-media/src/owned_loudnorm.rs",
+      "regression": "tests/loudnorm_and_aac_routing_single_open.rs",
+      "before": "owned_loudnorm::supports and supports_dual called owned_wave_loudness::supports (opening and inspecting the WAVE file) and then opened and inspected the same WAVE file a second time.",
+      "result": "Inspect the WAVE header once in owned_loudnorm::supports and supports_dual and check qualified_rate and weights on the same WaveInfo.",
+      "status": "accepted",
+      "validation": "batch-600-validation.json"
+    },
+    {
+      "id": "FVID-0734",
+      "batch": 600,
+      "title": "Seek and reuse the already-opened File handle after prefix inspection in owned_aac_export_routing::router_for_decode",
+      "source": "crates/fvid-media/src/owned_aac_export_routing.rs",
+      "regression": "tests/loudnorm_and_aac_routing_single_open.rs",
+      "before": "owned_aac_export_routing::router_for_decode opened the source file to read the 8-byte signature prefix and then opened the source file a second time for MP4, Matroska, or ADTS reader construction.",
+      "result": "Seek the already-opened File handle back to SeekFrom::Start(0) and pass it directly to the MP4, Matroska, or ADTS reader.",
+      "status": "accepted",
+      "validation": "batch-600-validation.json"
     }
-  ]
+  ],
+  "pending_count": 0
 }

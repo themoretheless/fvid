@@ -140,14 +140,17 @@ pub(crate) fn supports(
     policies(options)
         && destination.extension().and_then(|s| s.to_str()) == Some("wav")
         && parse(args).is_ok_and(|params| {
-            let pcm_options = crate::owned_adts_export::pcm_decode_options(options);
-            (params.print == Print::None || crate::owned_wave_loudness::supports(source, &pcm_options))
-                && std::fs::File::open(source).is_ok_and(|mut file| {
-                    crate::owned_wave_inspect::inspect(&mut file, options.cancel.as_ref()).is_ok_and(|info| {
+            std::fs::File::open(source).is_ok_and(|mut file| {
+                crate::owned_wave_inspect::inspect(&mut file, options.cancel.as_ref()).is_ok_and(
+                    |info| {
                         info.sample_frames > 0
                             && (params.gain.is_some() || dynamic_input(&info))
-                    })
-                })
+                            && (params.print == Print::None
+                                || (crate::owned_wave_loudness::qualified_rate(info.sample_rate)
+                                    && crate::owned_wave_loudness::weights(&info).is_ok()))
+                    },
+                )
+            })
         })
 }
 
@@ -529,13 +532,14 @@ pub(crate) fn supports_dual(
     policies(options)
         && destination.extension().and_then(|s| s.to_str()) == Some("wav")
         && parse(args).is_ok()
-        && crate::owned_wave_loudness::supports(
-            source,
-            &crate::owned_adts_export::pcm_decode_options(options),
-        )
         && std::fs::File::open(source).is_ok_and(|mut file| {
-            crate::owned_wave_inspect::inspect(&mut file, options.cancel.as_ref())
-                .is_ok_and(|info| info.sample_frames > 0)
+            crate::owned_wave_inspect::inspect(&mut file, options.cancel.as_ref()).is_ok_and(
+                |info| {
+                    info.sample_frames > 0
+                        && crate::owned_wave_loudness::qualified_rate(info.sample_rate)
+                        && crate::owned_wave_loudness::weights(&info).is_ok()
+                },
+            )
         })
 }
 fn apply_resolved(

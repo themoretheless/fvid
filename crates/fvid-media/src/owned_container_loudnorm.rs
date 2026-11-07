@@ -76,7 +76,8 @@ pub fn apply(
     let decode_options = crate::owned_adts_export::pcm_decode_options(options);
     // Read-only configuration/policy preflight; actual packet failures propagate
     // once execution starts, without retry through the legacy backend.
-    crate::owned_container_loudness::geometry(source, &decode_options)?;
+    let (rate, channels, mask, codec) =
+        crate::owned_container_loudness::geometry(source, &decode_options)?;
     let desc = crate::owned_audio_plan::source_descriptor(source, &decode_options)?;
     let (spool_rate, spool_channels, spool_frames, spool_meta_bytes) = (
         desc.rate,
@@ -85,7 +86,13 @@ pub fn apply(
         desc.stage2_meta_bytes,
     );
     if dual_pass || crate::owned_loudnorm::report_requested(Some(&resolved))? {
-        crate::owned_container_loudness::plan_loudness(source, &decode_options)?;
+        crate::owned_container_loudness::check_meter_budget(
+            rate,
+            channels,
+            &codec,
+            spool_frames,
+            &decode_options,
+        )?;
     }
     let precise = desc.precision == "float64";
     crate::owned_loudnorm::check_spool_loudnorm_budget(
@@ -98,7 +105,14 @@ pub fn apply(
         spool_meta_bytes,
         options,
     )?;
-    let spool = crate::owned_container_loudness::decode_to_wave(source, &decode_options)?;
+    let spool = crate::owned_container_loudness::decode_to_wave_from_geometry(
+        source,
+        rate,
+        channels,
+        mask,
+        &codec,
+        &decode_options,
+    )?;
     let mut pcm_options = options.clone();
     pcm_options.streams = vec![0];
     pcm_options.max_packets = None;
@@ -144,17 +158,29 @@ pub fn plan_loudnorm(
     let resolved = crate::owned_loudnorm::validate_request(args)?;
     crate::owned_adts_export::check_wave_metadata_budget(options)?;
     let decode_options = crate::owned_adts_export::pcm_decode_options(options);
-    crate::owned_container_loudness::geometry(source, &decode_options)?;
-    let mut plan = if dual_pass || crate::owned_loudnorm::report_requested(Some(&resolved))? {
-        let _ = crate::owned_audio_plan::plan_decode_audio(source, &Default::default(), options)?;
-        crate::owned_container_loudness::plan_loudness(source, &decode_options)?
-    } else {
-        let mut p = crate::owned_audio_plan::plan_decode_audio(source, &Default::default(), options)?;
-        p.steps.retain(|s| s.action != "write");
-        p.notes.push("private decoded WAVE is removed on success or failure; completion is emitted once after analysis".into());
-        p
-    };
+    let (rate, channels, _, codec) =
+        crate::owned_container_loudness::geometry(source, &decode_options)?;
     let desc = crate::owned_audio_plan::source_descriptor(source, &decode_options)?;
+    if dual_pass || crate::owned_loudnorm::report_requested(Some(&resolved))? {
+        crate::owned_container_loudness::check_meter_budget(
+            rate,
+            channels,
+            &codec,
+            desc.stage2_frames,
+            &decode_options,
+        )?;
+    }
+    let mut plan = crate::owned_audio_plan::plan_decode_audio(source, &Default::default(), options)?;
+    plan.steps.retain(|s| s.action != "write");
+    if dual_pass || crate::owned_loudnorm::report_requested(Some(&resolved))? {
+        plan.steps.push(PlanStep {
+            action: "analyze".into(),
+            detail: "owned streaming K-weighting, integrated gates, LRA and true-peak FIR; no published output".into(),
+        });
+    }
+    plan.notes.push(
+        "private decoded WAVE is removed on success or failure; completion is emitted once after analysis".into(),
+    );
     let (rate, channels) = (desc.rate, desc.channels);
     let precise = plan.streams[0].codec.starts_with("A_PCM/") || plan.streams[0].codec.starts_with("pcm_");
     crate::owned_loudnorm::check_spool_loudnorm_budget(

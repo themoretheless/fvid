@@ -144,11 +144,21 @@ pub(crate) fn check_nonempty_interval_prefix(
 pub(crate) fn open(source: &Path, options: &CopyOptions) -> Result<Program> {
     open_with_transform(source, None, options)
 }
+pub(crate) fn open_with_info(source: &Path, options: &CopyOptions) -> Result<(Program, Vec<u8>)> {
+    open_with_transform_and_info(source, None, options)
+}
 pub(crate) fn open_with_transform(
     source: &Path,
     transform: Option<AudioDecodeTransform>,
     options: &CopyOptions,
 ) -> Result<Program> {
+    open_with_transform_and_info(source, transform, options).map(|(p, _)| p)
+}
+pub(crate) fn open_with_transform_and_info(
+    source: &Path,
+    transform: Option<AudioDecodeTransform>,
+    options: &CopyOptions,
+) -> Result<(Program, Vec<u8>)> {
     check(options)?;
     let mut file = File::open(source).map_err(|e| e.to_string())?;
     let (limits, index) = preflight(&mut file, options)?;
@@ -164,7 +174,7 @@ pub(crate) fn open_with_transform(
     .map_err(|e| e.to_string())?;
     let ogg = crate::owned_ogg::Ogg::parse(&bytes, &limits).map_err(|e| e.to_string())?;
     drop(bytes);
-    open_from_ogg_with_transform(ogg, index, transform, options).map(|(p, _)| p)
+    open_from_ogg_with_transform(ogg, index, transform, options)
 }
 pub(crate) fn open_from_ogg_with_transform(
     ogg: crate::owned_ogg::Ogg,
@@ -415,10 +425,9 @@ pub(crate) fn decode_to_wave(
     options: &CopyOptions,
 ) -> Result<crate::owned_adts_export::DecodedSpool> {
     check(options)?;
-    let mut program = open(source, options)?;
+    let (mut program, info) = open_with_info(source, options)?;
     let channels = program.channels();
     let mask = program.output_channel_mask().unwrap_or(0);
-    let info = source_info(&program, options)?;
     let spool = crate::owned_adts_export::spool_decoded(
         48000,
         channels,
@@ -440,10 +449,9 @@ pub(crate) fn apply(
     if destination.symlink_metadata().is_ok() {
         return Err("output already exists".into());
     }
-    let mut program = open_with_transform(source, Some(transform), options)?;
+    let (mut program, info) = open_with_transform_and_info(source, Some(transform), options)?;
     let channels = program.channels();
     let mask = program.output_channel_mask().unwrap_or(0);
-    let info = source_info(&program, options)?;
     let until = crate::owned_adts_export::decoded_prefix(transform, 48000)
         .map(|(_, end)| {
             u64::try_from((end.as_nanos() * 48000).div_ceil(1_000_000_000))

@@ -72,23 +72,20 @@ pub fn apply(
     let decode_options = crate::owned_adts_export::pcm_decode_options(options);
     // Read-only configuration/policy preflight; actual packet failures propagate
     // once execution starts, without retry through the legacy backend.
-    let validated_rate = crate::owned_adts_loudness::validate_configuration(source, &decode_options)?;
+    let (validated_rate, validated_channels) =
+        crate::owned_adts_loudness::validate_configuration_and_channels(source, &decode_options)?;
     if dual_pass || crate::owned_loudnorm::report_requested(Some(&resolved))? {
-        crate::owned_adts_loudness::plan_loudness(source, &decode_options)?;
+        crate::owned_adts_loudness::plan_loudness_with_validated_rate(
+            source,
+            validated_rate,
+            &decode_options,
+        )?;
     }
     let (rate, channels, stage2_frames) = if options.max_controlled_bytes.is_some() {
         let desc = crate::owned_audio_plan::source_descriptor(source, &decode_options)?;
         (desc.rate, desc.channels, desc.stage2_frames)
     } else {
-        let reader = crate::owned_aac::adts::map_controlled_adts_packet_error(
-            crate::owned_aac::adts::StreamReader::open_with_packet_limit(
-                std::io::BufReader::new(std::fs::File::open(source).map_err(|e| e.to_string())?),
-                decode_options.max_packet_bytes.min(decode_options.max_controlled_bytes.unwrap_or(usize::MAX)),
-            )
-            .map_err(|e| e.to_string()),
-            &decode_options,
-        )?;
-        (validated_rate, reader.configuration().channels, 1024)
+        (validated_rate, validated_channels, 1024)
     };
     crate::owned_loudnorm::check_spool_loudnorm_budget(
         &resolved,
@@ -146,28 +143,20 @@ pub fn plan_loudnorm(
     }
     let resolved = crate::owned_loudnorm::validate_request(args)?;
     crate::owned_adts_export::check_wave_metadata_budget(options)?;
-    // Charge decoder plus output metadata without decoding packet contents.
-    let reader = crate::owned_aac::adts::map_controlled_adts_packet_error(
-        crate::owned_aac::adts::StreamReader::open_with_packet_limit(
-            std::io::BufReader::new(std::fs::File::open(source).map_err(|e| e.to_string())?),
-            options.max_packet_bytes.min(options.max_controlled_bytes.unwrap_or(usize::MAX)),
-        )
-        .map_err(|e| e.to_string()),
-        options,
-    )?;
-    crate::owned_aac::stream::check_adts_decode_admission(reader.audio_specific_config(), options)
-        .map_err(|e| e.to_string())?;
-    let channels = reader.configuration().channels;
-    drop(reader);
-    // Loudness preflight below validates configuration and encoded budgets.
+    // Loudness preflight below validates configuration, decoder admission, and encoded budgets.
     // A generic decode plan also negotiates PCM by decoding the ADTS stream;
     // normalization planning must leave packet-content validity to execution.
     let decode_options = crate::owned_adts_export::pcm_decode_options(options);
-    let validated_rate = crate::owned_adts_loudness::validate_configuration(source, &decode_options)?;
+    let (validated_rate, channels) =
+        crate::owned_adts_loudness::validate_configuration_and_channels(source, &decode_options)?;
     let mut plan = if dual_pass || crate::owned_loudnorm::report_requested(Some(&resolved))? {
-        crate::owned_adts_loudness::plan_loudness(source, &decode_options)?
+        crate::owned_adts_loudness::plan_loudness_with_validated_rate(
+            source,
+            validated_rate,
+            &decode_options,
+        )?
     } else {
-        crate::owned_adts_loudness::plan_loudness_without_meter_budget(source, &decode_options)?
+        crate::owned_adts_loudness::build_loudness_plan(source, &decode_options)
     };
     let (rate, channels, stage2_frames) = if options.max_controlled_bytes.is_some() {
         let desc = crate::owned_audio_plan::source_descriptor(source, &decode_options)?;

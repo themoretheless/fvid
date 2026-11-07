@@ -4396,11 +4396,13 @@ See `batch-598-validation.json`.
 
 See `batch-599-validation.json`.
 
+## Batch 600 — FVID-0730..0734: Single-pass Ogg Opus RIFF INFO reuse, single-pass ADTS loudness/loudnorm header validation, container loudness/loudnorm geometry reuse, single-pass WAVE loudnorm header inspection, and single-open AAC export routing
 
+- **FVID-0730** — Return RIFF `INFO` bytes from `open_with_transform_and_info` and `open_with_info` in `owned_ogg_opus_export` so `decode_to_wave` and `apply` do not re-parse `OpusTags` (`crates/fvid-media/src/owned_ogg_opus_export.rs`, `tests/loudnorm_and_aac_routing_single_open.rs`).
+- **FVID-0731** — Return validated channels alongside sample rate in ADTS loudness preflight and eliminate redundant `StreamReader` opens in ADTS loudnorm (`crates/fvid-media/src/owned_adts_loudness.rs`, `crates/fvid-media/src/owned_adts_loudnorm.rs`, `tests/loudnorm_and_aac_routing_single_open.rs`).
+- **FVID-0732** — Reuse validated container geometry in `measure_loudness` and container loudnorm via `decode_to_wave_from_geometry` and `check_meter_budget` (`crates/fvid-media/src/owned_container_loudness.rs`, `crates/fvid-media/src/owned_container_loudnorm.rs`, `tests/loudnorm_and_aac_routing_single_open.rs`).
+- **FVID-0733** — Inspect WAVE headers once in `owned_loudnorm::supports` and `supports_dual` instead of opening and inspecting the source file twice (`crates/fvid-media/src/owned_loudnorm.rs`, `tests/loudnorm_and_aac_routing_single_open.rs`).
+- **FVID-0734** — Seek and reuse the already-opened `File` handle after prefix inspection in `owned_aac_export_routing::router_for_decode` (`crates/fvid-media/src/owned_aac_export_routing.rs`, `tests/loudnorm_and_aac_routing_single_open.rs`).
 
-
-
-
-
-
+See `batch-600-validation.json`.
 

@@ -10,7 +10,10 @@ fn policies(options: &CopyOptions) -> bool {
         && options.stream_metadata_set.is_empty()
         && options.stream_metadata_delete.is_empty()
 }
-pub(crate) fn validate_header_configuration(source: &Path, options: &CopyOptions) -> Result<u32> {
+pub(crate) fn validate_header_configuration_and_channels(
+    source: &Path,
+    options: &CopyOptions,
+) -> Result<(u32, u16)> {
     if options.cancel.as_ref().is_some_and(|c| c.is_cancelled()) {
         return Err("media operation cancelled".into());
     }
@@ -52,7 +55,10 @@ pub(crate) fn validate_header_configuration(source: &Path, options: &CopyOptions
             "owned AAC true-peak measurement requires a qualified standard PCM rate".into(),
         );
     }
-    Ok(config.sample_rate)
+    Ok((config.sample_rate, config.channels))
+}
+pub(crate) fn validate_header_configuration(source: &Path, options: &CopyOptions) -> Result<u32> {
+    validate_header_configuration_and_channels(source, options).map(|(rate, _)| rate)
 }
 fn validate_packet_budget(source: &Path, options: &CopyOptions) -> Result<()> {
     let packet_limit = options
@@ -87,13 +93,16 @@ fn validate_packet_budget(source: &Path, options: &CopyOptions) -> Result<()> {
     }
     Ok(())
 }
-pub(crate) fn validate_configuration(source: &Path, options: &CopyOptions) -> Result<u32> {
-    let header_rate = validate_header_configuration(source, options)?;
+pub(crate) fn validate_configuration_and_channels(
+    source: &Path,
+    options: &CopyOptions,
+) -> Result<(u32, u16)> {
+    let (header_rate, header_channels) = validate_header_configuration_and_channels(source, options)?;
     validate_packet_budget(source, options)?;
     if crate::owned_wave_loudness::qualified_rate(header_rate) {
-        return Ok(header_rate);
+        return Ok((header_rate, header_channels));
     }
-    let (rate, _channels, mask) = crate::owned_aac::stream::adts_prefix_info(
+    let (rate, channels, mask) = crate::owned_aac::stream::adts_prefix_info(
         BufReader::new(File::open(source).map_err(|e| e.to_string())?),
         None,
         options,
@@ -107,7 +116,10 @@ pub(crate) fn validate_configuration(source: &Path, options: &CopyOptions) -> Re
             "owned AAC true-peak measurement requires a qualified standard PCM rate".into(),
         );
     }
-    Ok(rate)
+    Ok((rate, channels))
+}
+pub(crate) fn validate_configuration(source: &Path, options: &CopyOptions) -> Result<u32> {
+    validate_configuration_and_channels(source, options).map(|(rate, _)| rate)
 }
 pub(crate) fn supports_plan(source: &Path, options: &CopyOptions) -> bool {
     match validate_configuration(source, options) {
@@ -194,11 +206,7 @@ pub fn measure_loudness(source: &Path, options: &CopyOptions) -> Result<Loudness
     }
     Ok(stats)
 }
-pub(crate) fn plan_loudness_without_meter_budget(
-    source: &Path,
-    options: &CopyOptions,
-) -> Result<MediaPlan> {
-    validate_configuration(source, options)?;
+pub(crate) fn build_loudness_plan(source: &Path, options: &CopyOptions) -> MediaPlan {
     let mut notes = vec![
         "backend: owned fvid-media; no external demuxer, codec, resampler or muxer".into(),
         "read-only metadata preflight: packet tools, payload validity, DSP allocation admission and publication are checked during execution".into(),
@@ -224,7 +232,7 @@ pub(crate) fn plan_loudness_without_meter_budget(
                 .map_or_else(|| "unbounded".to_owned(), |n| n.to_string()),
         ));
     }
-    Ok(MediaPlan {
+    MediaPlan {
         command: "loudness".into(),
         input: source.into(),
         inputs: vec![source.into()],
@@ -246,13 +254,27 @@ pub(crate) fn plan_loudness_without_meter_budget(
         ],
         graph: None,
         notes,
-    })
+    }
+}
+pub(crate) fn plan_loudness_without_meter_budget(
+    source: &Path,
+    options: &CopyOptions,
+) -> Result<MediaPlan> {
+    validate_configuration(source, options)?;
+    Ok(build_loudness_plan(source, options))
+}
+pub(crate) fn plan_loudness_with_validated_rate(
+    source: &Path,
+    rate: u32,
+    options: &CopyOptions,
+) -> Result<MediaPlan> {
+    check_meter_budget(source, rate, options)?;
+    Ok(build_loudness_plan(source, options))
 }
 
 pub fn plan_loudness(source: &Path, options: &CopyOptions) -> Result<MediaPlan> {
     let rate = validate_configuration(source, options)?;
-    check_meter_budget(source, rate, options)?;
-    plan_loudness_without_meter_budget(source, options)
+    plan_loudness_with_validated_rate(source, rate, options)
 }
 
 #[cfg(test)]

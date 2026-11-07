@@ -33,11 +33,12 @@ pub(crate) fn router_for_decode(
         _ => return Err("select exactly one audio stream".into()),
     };
     let asc = if n >= 8 && crate::owned_mp4::recognizes_prefix(&prefix) {
+        file.seek(SeekFrom::Start(0)).map_err(|e| e.to_string())?;
         let metadata_bytes = crate::owned_mp4::Limits::default()
             .metadata_bytes
             .min(options.max_controlled_bytes.unwrap_or(usize::MAX));
         let mut reader = crate::owned_mp4::Mp4Reader::open_indexed(
-            BufReader::new(File::open(source).map_err(|e| e.to_string())?),
+            BufReader::new(file),
             crate::owned_mp4::Limits {
                 metadata_bytes,
                 ..Default::default()
@@ -94,8 +95,9 @@ pub(crate) fn router_for_decode(
         }
         return Ok(router);
     } else if n >= 4 && prefix[..4] == [0x1a, 0x45, 0xdf, 0xa3] {
+        file.seek(SeekFrom::Start(0)).map_err(|e| e.to_string())?;
         let mut reader = crate::owned_matroska_audio::open_aac_reader(
-            BufReader::new(File::open(source).map_err(|e| e.to_string())?),
+            BufReader::new(file),
             options,
             options.max_packet_bytes,
         )
@@ -113,8 +115,9 @@ pub(crate) fn router_for_decode(
         if selected.is_some_and(|i| i != 0) {
             return Err("ADTS has only stream 0".into());
         }
+        file.seek(SeekFrom::Start(0)).map_err(|e| e.to_string())?;
         let reader = crate::owned_aac::adts::StreamReader::open_with_packet_limit(
-            BufReader::new(File::open(source).map_err(|e| e.to_string())?),
+            BufReader::new(file),
             options
                 .max_packet_bytes
                 .min(options.max_controlled_bytes.unwrap_or(usize::MAX)),

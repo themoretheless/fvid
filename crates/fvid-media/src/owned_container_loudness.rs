@@ -189,7 +189,7 @@ pub fn decode_adts_to_wave(
 ) -> Result<crate::owned_adts_export::DecodedSpool> {
     crate::owned_adts_export::decode_to_wave(source, None, options)
 }
-fn decode_to_wave_from_geometry(
+pub(crate) fn decode_to_wave_from_geometry(
     source: &Path,
     rate: u32,
     channels: u16,
@@ -275,7 +275,7 @@ fn decode_to_wave_from_geometry(
     crate::owned_ogg_opus_export::append_info(&spool.wave, &info)?;
     Ok(spool)
 }
-fn check_meter_budget(
+pub(crate) fn check_meter_budget(
     rate: u32,
     channels: u16,
     codec: &str,
@@ -316,14 +316,14 @@ fn check_meter_budget(
     Ok(())
 }
 pub fn measure_loudness(source: &Path, options: &CopyOptions) -> Result<LoudnessStats> {
-    let (rate, channels, _, codec) = geometry(source, options)?;
+    let (rate, channels, mask, codec) = geometry(source, options)?;
     let sample_frames = if options.max_controlled_bytes.is_some() {
         crate::owned_audio_plan::source_descriptor(source, options)?.stage2_frames
     } else {
         1024
     };
     check_meter_budget(rate, channels, &codec, sample_frames, options)?;
-    let spool = decode_to_wave(source, options)?;
+    let spool = decode_to_wave_from_geometry(source, rate, channels, mask, &codec, options)?;
     let mut pcm_options = options.clone();
     pcm_options.streams = vec![0];
     pcm_options.max_packets = None;
