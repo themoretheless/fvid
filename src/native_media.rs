@@ -1075,20 +1075,35 @@ pub fn is_owned_audio_trim_source_with_interval_and_options(
     options: &fvid_media::CopyOptions,
 ) -> Result<bool> {
     use std::io::Read;
-    if is_owned_audio_source_with_interval_and_options(path, interval, options)? {
-        return Ok(true);
+    if options.cancel.as_ref().is_some_and(|c| c.is_cancelled()) {
+        return Err(invalid("media operation cancelled"));
     }
+    if options.max_packet_bytes == 0 {
+        return Err(invalid("packet byte limit must be positive"));
+    }
+    if options.max_packets == Some(0) {
+        return Err(invalid("packet work limit requires at least one packet"));
+    }
+    if options.max_controlled_bytes == Some(0) {
+        return Err(invalid("controlled memory limit must be positive"));
+    }
+    fvid_media::owned_budget::check_rss_budget(options).map_err(|e| invalid(&e))?;
     let mut prefix = [0u8; 8];
-    let is_container = match File::open(path)?.read_exact(&mut prefix) {
-        Ok(()) => {
-            crate::container::mp4::recognizes_prefix(&prefix)
-                || prefix.starts_with(&[0x1a, 0x45, 0xdf, 0xa3])
-        }
+    let has_prefix = match File::open(path)?.read_exact(&mut prefix) {
+        Ok(()) => true,
         Err(e) if e.kind() == std::io::ErrorKind::UnexpectedEof => false,
         Err(e) => return Err(e.into()),
     };
-    if !is_container {
+    if !has_prefix {
         return Ok(false);
+    }
+    let is_container = crate::container::mp4::recognizes_prefix(&prefix)
+        || prefix.starts_with(&[0x1a, 0x45, 0xdf, 0xa3]);
+    if !is_container {
+        return is_owned_audio_source_with_interval_and_options(path, interval, options);
+    }
+    if is_owned_audio_source_with_interval_and_options(path, interval, options)? {
+        return Ok(true);
     }
     let info = crate::native_probe::try_probe_metadata_with_options(path, options)
         .map_err(|e| invalid(&e))?

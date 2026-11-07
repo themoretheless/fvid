@@ -156,30 +156,33 @@ pub fn try_plan(
         );
         return Ok(Some(plan));
     }
-    if crate::native_export::is_adts_source(source)? {
-        if options.streams.first().is_some_and(|&s| s != 0) {
-            return Err("owned ADTS loudnorm requires stream 0 and valid WAVE INFO metadata edits".into());
-        }
+    {
         use std::io::Read;
-        let mut prefix = [0; 7];
-        std::fs::File::open(source)?.read_exact(&mut prefix)?;
-        let header = crate::container::adts::header(&prefix).ok_or("invalid ADTS header")?;
-        if header.frame_bytes - header.header_bytes
-            > options
-                .max_packet_bytes
-                .min(options.max_controlled_bytes.unwrap_or(usize::MAX))
+        let mut prefix = [0u8; 7];
+        if std::fs::File::open(source)?.read_exact(&mut prefix).is_ok()
+            && !prefix.starts_with(b"ID3")
+            && let Some(header) = crate::container::adts::header(&prefix)
         {
-            return Err("ADTS packet exceeds budget".into());
+            if options.streams.first().is_some_and(|&s| s != 0) {
+                return Err("owned ADTS loudnorm requires stream 0 and valid WAVE INFO metadata edits".into());
+            }
+            if header.frame_bytes - header.header_bytes
+                > options
+                    .max_packet_bytes
+                    .min(options.max_controlled_bytes.unwrap_or(usize::MAX))
+            {
+                return Err("ADTS packet exceeds budget".into());
+            }
+            return Ok(Some(
+                fvid_media::owned_adts_loudnorm::plan_loudnorm(
+                    source,
+                    Some(&resolved),
+                    dual_pass,
+                    options,
+                )
+                .map_err(|e| crate::invalid(&e))?,
+            ));
         }
-        return Ok(Some(
-            fvid_media::owned_adts_loudnorm::plan_loudnorm(
-                source,
-                Some(&resolved),
-                dual_pass,
-                options,
-            )
-            .map_err(|e| crate::invalid(&e))?,
-        ));
     }
     if fvid_media::owned_container_loudness::recognizes_standalone_audio_with_options(
         source, options,
@@ -619,15 +622,22 @@ pub fn try_apply(
     }
     // PCE bootstrap can read the first ADTS payload during metadata inspection.
     // Check its declared size before any such preflight allocation.
-    let adts_source = crate::native_export::is_adts_source(source)?;
-    if adts_source {
+    let adts_header = {
+        use std::io::Read;
+        let mut prefix = [0u8; 7];
+        if std::fs::File::open(source)?.read_exact(&mut prefix).is_ok()
+            && !prefix.starts_with(b"ID3")
+        {
+            crate::container::adts::header(&prefix)
+        } else {
+            None
+        }
+    };
+    let adts_source = adts_header.is_some();
+    if let Some(header) = adts_header {
         if options.streams.first().is_some_and(|&s| s != 0) {
             return Err("owned ADTS loudnorm requires stream 0 and valid WAVE INFO metadata edits".into());
         }
-        use std::io::Read;
-        let mut prefix = [0; 7];
-        std::fs::File::open(source)?.read_exact(&mut prefix)?;
-        let header = crate::container::adts::header(&prefix).ok_or("invalid ADTS header")?;
         if header.frame_bytes - header.header_bytes
             > options
                 .max_packet_bytes

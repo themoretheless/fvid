@@ -1,8 +1,8 @@
 {
   "target": 1000,
   "counting_rule": "One independently confirmed problem or useful capability; fixture variants and baseline integration repairs are excluded. Only accepted entries count.",
-  "accepted_count": 814,
-  "next_id": "FVID-0815",
+  "accepted_count": 819,
+  "next_id": "FVID-0820",
   "entries": [
     {
       "id": "FVID-0001",
@@ -9145,7 +9145,62 @@
       "result": "write_pcm_wave packs samples into a 4096-byte stack chunk before calling output.write_all.",
       "status": "accepted",
       "validation": "batch-616-validation.json"
+    },
+    {
+      "id": "FVID-0815",
+      "batch": 617,
+      "title": "Reuse the initial 8-byte header read and close the file before compressed audio inspection in native_plan::decode_audio_with_options",
+      "source": "src/native_plan.rs",
+      "regression": "tests/native_plan_and_loudnorm_single_open.rs",
+      "before": "native_plan::decode_audio_with_options read 8 bytes for MP4 detection, then re-read 4 bytes via is_wave_reader and kept the file handle open while constant_audio_source_info_selected_with_interval_and_options reopened the file.",
+      "result": "native_plan::decode_audio_with_options classifies both WAVE and MP4 from the single 8-byte prefix read and drops the file handle before compressed audio inspection.",
+      "status": "accepted",
+      "validation": "batch-617-validation.json"
+    },
+    {
+      "id": "FVID-0816",
+      "batch": 617,
+      "title": "Inspect WAVE once in native_plan::loudness_with_options instead of calling is_wave and re-opening for inspect",
+      "source": "src/native_plan.rs",
+      "regression": "tests/native_plan_and_loudnorm_single_open.rs",
+      "before": "native_plan::loudness_with_options opened the source via native_pcm::is_wave and then reopened it via File::open and native_pcm::inspect to compute WAVE loudness budget geometry.",
+      "result": "native_plan::loudness_with_options checks is_wave_reader and inspects WaveInfo on a single File handle, reusing the resulting WaveInfo for rate, channel count, and budget estimation.",
+      "status": "accepted",
+      "validation": "batch-617-validation.json"
+    },
+    {
+      "id": "FVID-0817",
+      "batch": 617,
+      "title": "Drop the container validation reader before delegating to native_probe in native_plan::remux_with_options",
+      "source": "src/native_plan.rs",
+      "regression": "tests/native_plan_and_loudnorm_single_open.rs",
+      "before": "native_plan::remux_with_options kept its BufReader<File> open across native_probe::matroska_with_options and native_probe::probe_with_options.",
+      "result": "native_plan::remux_with_options drops the validation BufReader<File> before invoking native_probe so only one file descriptor is held open at a time.",
+      "status": "accepted",
+      "validation": "batch-617-validation.json"
+    },
+    {
+      "id": "FVID-0818",
+      "batch": 617,
+      "title": "Combine ADTS detection and first-frame budget inspection into a single 7-byte read in native_loudnorm::{try_plan, try_apply}",
+      "source": "src/native_loudnorm.rs",
+      "regression": "tests/native_plan_and_loudnorm_single_open.rs",
+      "before": "native_loudnorm::try_plan and try_apply called native_export::is_adts_source(source) and then immediately reopened the file to read the same 7-byte ADTS header for packet budget checking.",
+      "result": "Both functions read the 7-byte prefix once, parse container::adts::header directly, and validate the first-frame payload budget without a second File::open.",
+      "status": "accepted",
+      "validation": "batch-617-validation.json"
+    },
+    {
+      "id": "FVID-0819",
+      "batch": 617,
+      "title": "Gate multi-track container fallback on a single 8-byte prefix read in native_media::is_owned_audio_trim_source_with_interval_and_options",
+      "source": "src/native_media.rs",
+      "regression": "tests/native_plan_and_loudnorm_single_open.rs",
+      "before": "is_owned_audio_trim_source_with_interval_and_options ran is_owned_audio_source first and then reopened the file to check whether it was an MP4 or Matroska container even for WAVE or short files.",
+      "result": "is_owned_audio_trim_source_with_interval_and_options reads the 8-byte prefix once up front, short-circuiting empty/short files and skipping the container fallback reopen for non-MP4/Matroska inputs.",
+      "status": "accepted",
+      "validation": "batch-617-validation.json"
     }
   ],
-  "pending_count": 186
+  "pending_count": 181
 }

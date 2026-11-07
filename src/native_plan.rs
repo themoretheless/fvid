@@ -64,50 +64,55 @@ pub fn decode_audio_with_options(
     // Reuse the library's dynamic-description planner and explicit PCE
     // destination rules; entry 1 is not necessarily the active decoder setup.
     let mut file = std::fs::File::open(source).map_err(|e| e.to_string())?;
-    {
-        use std::io::{Read, Seek, SeekFrom};
-        let mut prefix = [0; 8];
-        if file.read_exact(&mut prefix).is_ok() && crate::container::mp4::recognizes_prefix(&prefix) {
-            file.seek(SeekFrom::Start(0)).map_err(|e| e.to_string())?;
-            let limits = crate::container::mp4::Limits {
-                metadata_bytes: crate::container::mp4::Limits::default()
-                    .metadata_bytes
-                    .min(options.max_controlled_bytes.unwrap_or(usize::MAX)),
-                packet_bytes: options
-                    .max_packet_bytes
-                    .min(options.max_controlled_bytes.unwrap_or(usize::MAX)),
-                ..Default::default()
-            };
-            let reader = crate::container::mp4::Mp4Reader::open_indexed(&mut file, limits).map_err(|e| e.to_string())?;
-            if let Some(mem_limit) = options.max_controlled_bytes
-                && reader
-                    .estimated_index_payload_bytes()
-                    .map_err(|e| e.to_string())?
-                    > mem_limit
-            {
-                return Err("controlled memory budget exceeded".into());
-            }
-            let index = crate::native_media::mp4_audio_index(&reader, selected).map_err(|e| e.to_string())?;
-            let track = &reader.tracks()[index];
-            if track.ensure_constant_description().is_err()
-                || transform.channels.is_some_and(|n| track.description_for_sample(0).is_some_and(|d| d.channels > 2 && n != i32::from(d.channels)))
-            {
-                let mut forwarded = options.clone();
-                forwarded.streams = selected.into_iter().collect();
-                forwarded.metadata_set.clear();
-                forwarded.metadata_delete.clear();
-                forwarded.stream_metadata_set.clear();
-                forwarded.stream_metadata_delete.clear();
-                return fvid_media::plan_decode_audio(source, transform, &forwarded);
-            }
+    let mut prefix = [0u8; 8];
+    let has_prefix = {
+        use std::io::Read;
+        file.read_exact(&mut prefix).is_ok()
+    };
+    let wave = has_prefix && matches!(&prefix[..4], b"RIFF" | b"RF64" | b"RIFX");
+    if has_prefix && crate::container::mp4::recognizes_prefix(&prefix) {
+        use std::io::{Seek, SeekFrom};
+        file.seek(SeekFrom::Start(0)).map_err(|e| e.to_string())?;
+        let limits = crate::container::mp4::Limits {
+            metadata_bytes: crate::container::mp4::Limits::default()
+                .metadata_bytes
+                .min(options.max_controlled_bytes.unwrap_or(usize::MAX)),
+            packet_bytes: options
+                .max_packet_bytes
+                .min(options.max_controlled_bytes.unwrap_or(usize::MAX)),
+            ..Default::default()
+        };
+        let reader = crate::container::mp4::Mp4Reader::open_indexed(&mut file, limits).map_err(|e| e.to_string())?;
+        if let Some(mem_limit) = options.max_controlled_bytes
+            && reader
+                .estimated_index_payload_bytes()
+                .map_err(|e| e.to_string())?
+                > mem_limit
+        {
+            return Err("controlled memory budget exceeded".into());
+        }
+        let index = crate::native_media::mp4_audio_index(&reader, selected).map_err(|e| e.to_string())?;
+        let track = &reader.tracks()[index];
+        if track.ensure_constant_description().is_err()
+            || transform.channels.is_some_and(|n| track.description_for_sample(0).is_some_and(|d| d.channels > 2 && n != i32::from(d.channels)))
+        {
+            drop(reader);
+            drop(file);
+            let mut forwarded = options.clone();
+            forwarded.streams = selected.into_iter().collect();
+            forwarded.metadata_set.clear();
+            forwarded.metadata_delete.clear();
+            forwarded.stream_metadata_set.clear();
+            forwarded.stream_metadata_delete.clear();
+            return fvid_media::plan_decode_audio(source, transform, &forwarded);
         }
     }
-    let wave = crate::native_pcm::is_wave_reader(&mut file).map_err(|e| e.to_string())?;
     let (index, input_rate, input_channels, codec, decode_detail) = if wave {
         if selected.is_some_and(|n| n != 0) {
             return Err("WAVE has only stream 0".into());
         }
         let info = crate::native_pcm::inspect(&mut file, options.cancel.as_ref()).map_err(|e| e.to_string())?;
+        drop(file);
         info.validate_decode().map_err(|e|e.to_string())?;
         let frame_bytes = usize::from(info.frame_bytes());
         if frame_bytes == 0
@@ -119,6 +124,7 @@ pub fn decode_audio_with_options(
         info.decode_interval(transform.interval.map(|(a,b)|(std::time::Duration::from_micros(a as u64),std::time::Duration::from_micros(b as u64)))).map_err(|e|e.to_string())?;
         (0,info.sample_rate,info.channels,info.codec(),"FVid packed WAVE PCM conversion to interleaved float32".to_owned())
     } else {
+        drop(file);
         let interval = transform.interval.map(|(a, b)| {
             (
                 std::time::Duration::from_micros(a as u64),
@@ -548,7 +554,7 @@ pub fn remux_with_options(
             return Err("controlled memory budget exceeded".into());
         }
         let mut reader = crate::container::adts::StreamReader::open_with_packet_limit(
-            input,
+            &mut input,
             options
                 .max_packet_bytes
                 .min(options.max_controlled_bytes.unwrap_or(usize::MAX)),
@@ -581,6 +587,7 @@ pub fn remux_with_options(
         }
         "FVid ADTS AAC packet copy into MP4 or Matroska; preserve encoder priming"
     };
+    drop(input);
     let info = if matroska {
         crate::native_probe::matroska_with_options(source, options)?
     } else if adts {
@@ -1485,7 +1492,18 @@ pub fn loudness_with_options(
         return Err("owned loudness plan requires at most one audio stream and no metadata edits".into());
     }
     let selected = options.streams.first().copied();
-    let wave = crate::native_pcm::is_wave(source).map_err(|e| e.to_string())?;
+    let wave_info = {
+        let mut wave_file = std::fs::File::open(source).map_err(|e| e.to_string())?;
+        if crate::native_pcm::is_wave_reader(&mut wave_file).map_err(|e| e.to_string())? {
+            Some(
+                crate::native_pcm::inspect(&mut wave_file, options.cancel.as_ref())
+                    .map_err(|e| e.to_string())?,
+            )
+        } else {
+            None
+        }
+    };
+    let wave = wave_info.is_some();
     let cached_native_info = if !wave && options.max_controlled_bytes.is_none() {
         crate::native_media::constant_audio_source_info_selected_with_options(source, selected, options).ok()
     } else {
@@ -1503,8 +1521,7 @@ pub fn loudness_with_options(
         Some(weights)=>weights,
         None=>{defaults=crate::native_pcm::loudness_channel_weights_with_options(source,options).map_err(|e|e.to_string())?;&defaults},
     };
-    let (rate,channels)=if wave {
-        let info=crate::native_pcm::inspect(&mut std::fs::File::open(source).map_err(|e|e.to_string())?,options.cancel.as_ref()).map_err(|e|e.to_string())?;
+    let (rate,channels)=if let Some(info) = wave_info {
         let frame = usize::from(info.frame_bytes());
         let capacity = 65536usize.min(options.max_packet_bytes) / frame * frame;
         if capacity == 0 {
