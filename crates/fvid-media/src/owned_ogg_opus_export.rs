@@ -223,21 +223,33 @@ pub(crate) fn supports(
     options: &CopyOptions,
 ) -> bool {
     match open_with_transform(source, Some(transform), options) {
-        Ok(program) => {
-            let target = transform.channels.unwrap_or(i32::from(program.channels()));
-            let mask = program.output_channel_mask().unwrap_or(0);
-            target == i32::from(program.channels())
-                || (((program.channels() <= 8 && matches!(target, 1 | 2))
-                    || (program.channels() <= 2 && (1..=8).contains(&target)))
-                    && ((program.channels() <= 2 && mask == 0)
-                        || (mask != 0
-                            && crate::owned_pcm_channels::rematrix_layout_supported(
-                                program.channels(),
-                                mask,
-                            ))))
-        }
+        Ok(program) => supports_program(&program, transform),
         Err(e) => e.starts_with("controlled memory budget exceeded:"),
     }
+}
+pub(crate) fn supports_from_ogg(
+    ogg: crate::owned_ogg::Ogg,
+    index: usize,
+    transform: AudioDecodeTransform,
+    options: &CopyOptions,
+) -> bool {
+    match open_from_ogg_with_transform(ogg, index, Some(transform), options) {
+        Ok((program, _)) => supports_program(&program, transform),
+        Err(e) => e.starts_with("controlled memory budget exceeded:"),
+    }
+}
+fn supports_program(program: &Program, transform: AudioDecodeTransform) -> bool {
+    let target = transform.channels.unwrap_or(i32::from(program.channels()));
+    let mask = program.output_channel_mask().unwrap_or(0);
+    target == i32::from(program.channels())
+        || (((program.channels() <= 8 && matches!(target, 1 | 2))
+            || (program.channels() <= 2 && (1..=8).contains(&target)))
+            && ((program.channels() <= 2 && mask == 0)
+                || (mask != 0
+                    && crate::owned_pcm_channels::rematrix_layout_supported(
+                        program.channels(),
+                        mask,
+                    ))))
 }
 fn decode(
     program: &mut Program,
@@ -425,7 +437,23 @@ pub(crate) fn decode_to_wave(
     options: &CopyOptions,
 ) -> Result<crate::owned_adts_export::DecodedSpool> {
     check(options)?;
-    let (mut program, info) = open_with_info(source, options)?;
+    let (program, info) = open_with_info(source, options)?;
+    decode_program_to_wave(program, info, options)
+}
+pub(crate) fn decode_to_wave_from_ogg(
+    ogg: crate::owned_ogg::Ogg,
+    index: usize,
+    options: &CopyOptions,
+) -> Result<crate::owned_adts_export::DecodedSpool> {
+    check(options)?;
+    let (program, info) = open_from_ogg_with_transform(ogg, index, None, options)?;
+    decode_program_to_wave(program, info, options)
+}
+fn decode_program_to_wave(
+    mut program: Program,
+    info: Vec<u8>,
+    options: &CopyOptions,
+) -> Result<crate::owned_adts_export::DecodedSpool> {
     let channels = program.channels();
     let mask = program.output_channel_mask().unwrap_or(0);
     let spool = crate::owned_adts_export::spool_decoded(
@@ -449,7 +477,30 @@ pub(crate) fn apply(
     if destination.symlink_metadata().is_ok() {
         return Err("output already exists".into());
     }
-    let (mut program, info) = open_with_transform_and_info(source, Some(transform), options)?;
+    let (program, info) = open_with_transform_and_info(source, Some(transform), options)?;
+    apply_program(program, info, destination, transform, options)
+}
+pub(crate) fn apply_from_ogg(
+    ogg: crate::owned_ogg::Ogg,
+    index: usize,
+    destination: &Path,
+    transform: AudioDecodeTransform,
+    options: &CopyOptions,
+) -> Result<AudioDecodeStats> {
+    check(options)?;
+    if destination.symlink_metadata().is_ok() {
+        return Err("output already exists".into());
+    }
+    let (program, info) = open_from_ogg_with_transform(ogg, index, Some(transform), options)?;
+    apply_program(program, info, destination, transform, options)
+}
+fn apply_program(
+    mut program: Program,
+    info: Vec<u8>,
+    destination: &Path,
+    transform: AudioDecodeTransform,
+    options: &CopyOptions,
+) -> Result<AudioDecodeStats> {
     let channels = program.channels();
     let mask = program.output_channel_mask().unwrap_or(0);
     let until = crate::owned_adts_export::decoded_prefix(transform, 48000)

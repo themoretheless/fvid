@@ -4406,3 +4406,14 @@ See `batch-599-validation.json`.
 
 See `batch-600-validation.json`.
 
+## Batch 601 — FVID-0735..0739: Reuse `stage2_frames` in `audio_plan_with_controls`, single-open ADTS and Matroska in `owned_audio_plan`, single-pass WAVE header/INFO inspection in `decode_audio_transformed`, and single-pass Ogg `open_selected_ogg` across export and loudness
+
+- **FVID-0735** — Reuse `info.stage2_frames` from `source_descriptor` in `owned_audio_mix::audio_plan_with_controls` instead of re-opening and re-parsing G.711 WAVE, Ogg, FLAC, MP3, and Matroska inputs (`crates/fvid-media/src/owned_audio_mix.rs`, `tests/mix_plan_and_wave_ogg_single_pass.rs`).
+- **FVID-0736** — Reuse the opened ADTS `StreamReader` via `adts_prefix_info_from_reader_for_transform` in `owned_audio_plan::source_descriptor_for_decode` (`crates/fvid-media/src/owned_audio_plan.rs`, `crates/fvid-media/src/owned_aac/stream.rs`, `tests/mix_plan_and_wave_ogg_single_pass.rs`).
+- **FVID-0737** — Seek and reuse the already-opened `File` handle after EBML signature check in `owned_audio_plan::matroska_descriptor_for_decode` (`crates/fvid-media/src/owned_audio_plan.rs`, `tests/mix_plan_and_wave_ogg_single_pass.rs`).
+- **FVID-0738** — Retain `WaveInfo` and RIFF `INFO` chunks during `read_wave_with_admission` in `owned_audio_export::decode_audio_transformed` instead of opening and inspecting the WAVE file up to three times (`crates/fvid-media/src/owned_audio_export.rs`, `tests/mix_plan_and_wave_ogg_single_pass.rs`).
+- **FVID-0739** — Reuse the parsed `Ogg` container from `open_selected_ogg` across `owned_audio_export::supports`, `decode_audio_transformed`, and `owned_container_loudness::decode_to_wave_from_geometry` (`crates/fvid-media/src/owned_ogg_audio_export.rs`, `crates/fvid-media/src/owned_audio_export.rs`, `crates/fvid-media/src/owned_container_loudness.rs`, `crates/fvid-media/src/owned_ogg_opus_export.rs`, `crates/fvid-media/src/owned_ogg_vorbis_export.rs`, `crates/fvid-media/src/owned_ogg_joint_export.rs`, `tests/mix_plan_and_wave_ogg_single_pass.rs`).
+
+See `batch-601-validation.json`.
+
+

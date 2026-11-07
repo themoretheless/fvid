@@ -20,7 +20,7 @@ pub(crate) fn select_backend(
     let (stream_index, backend, _, _) = open_selected_ogg(source, options)?;
     Ok((stream_index, backend))
 }
-fn open_selected_ogg(
+pub(crate) fn open_selected_ogg(
     source: &Path,
     options: &CopyOptions,
 ) -> Result<(usize, Backend, crate::owned_ogg::Ogg, usize), String> {

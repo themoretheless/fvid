@@ -201,15 +201,17 @@ pub(crate) fn decode_to_wave_from_geometry(
         return crate::owned_g711_wave_export::decode_to_wave(source, options);
     }
     if crate::owned_ogg_opus_export::recognizes(source)? {
-        return match crate::owned_ogg_audio_export::coding(source, options)? {
+        let (_, backend, ogg, index) =
+            crate::owned_ogg_audio_export::open_selected_ogg(source, options)?;
+        return match backend {
             crate::owned_ogg_audio_export::Backend::Opus => {
-                crate::owned_ogg_opus_export::decode_to_wave(source, options)
+                crate::owned_ogg_opus_export::decode_to_wave_from_ogg(ogg, index, options)
             }
             crate::owned_ogg_audio_export::Backend::Vorbis => {
-                crate::owned_ogg_vorbis_export::decode_to_wave(source, options)
+                crate::owned_ogg_vorbis_export::decode_to_wave_from_ogg(ogg, index, options)
             }
             crate::owned_ogg_audio_export::Backend::Joint => {
-                crate::owned_ogg_joint_export::decode_to_wave(source, options)
+                crate::owned_ogg_joint_export::decode_to_wave_from_ogg(ogg, index, options)
             }
         };
     }

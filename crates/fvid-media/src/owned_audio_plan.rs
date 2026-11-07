@@ -21,13 +21,15 @@ pub(crate) fn matroska_descriptor_for_decode(
     transform: Option<AudioDecodeTransform>,
     options: &CopyOptions,
 ) -> Result<Option<(usize, u32, u16, u32, String, String, u64, usize)>> {
+    use std::io::{Seek, SeekFrom};
     let mut file = File::open(source).map_err(|e| e.to_string())?;
     let mut prefix = [0; 4];
     if file.read_exact(&mut prefix).is_err() || prefix != [0x1a, 0x45, 0xdf, 0xa3] {
         return Ok(None);
     }
+    file.seek(SeekFrom::Start(0)).map_err(|e| e.to_string())?;
     let reader = crate::owned_matroska_audio::open_audio_reader(
-        BufReader::new(File::open(source).map_err(|e| e.to_string())?),
+        BufReader::new(file),
         options,
         options.max_packet_bytes,
     )
@@ -328,14 +330,14 @@ fn source_descriptor_for_decode(source: &Path, options: &CopyOptions,
         let config = reader.configuration();
         let prefix = transform.and_then(|transform|
             crate::owned_adts_export::decoded_prefix(*transform, config.sample_rate));
-        drop(reader);
-        let (rate, channels, mask, frames) = crate::owned_aac::stream::adts_prefix_info_for_transform(
-            BufReader::new(File::open(source).map_err(|e| e.to_string())?),
-            prefix,
-            transform.copied(),
-            options,
-        )
-        .map_err(|e| e.to_string())?;
+        let (rate, channels, mask, frames) =
+            crate::owned_aac::stream::adts_prefix_info_from_reader_for_transform(
+                reader,
+                prefix,
+                transform.copied(),
+                options,
+            )
+            .map_err(|e| e.to_string())?;
         stage2_frames = frames;
         (
             rate,

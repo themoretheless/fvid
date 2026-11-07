@@ -126,7 +126,7 @@ fn audio_plan_with_controls(
         let (rate, channels) = if crate::owned_g711_wave_export::recognizes(source, controls)? {
             let info = crate::owned_audio_plan::source_descriptor(source, controls)?;
             crate::owned_audio_plan::plan_decode_audio(source, &Default::default(), controls)?;
-            let g711_frames = crate::owned_g711_wave_export::descriptor(source, controls)?.4;
+            let g711_frames = info.stage2_frames;
             if g711_frames == 0 {
                 return Err("audio mix/merge requires nonempty owned audio inputs".into());
             }
@@ -185,74 +185,12 @@ fn audio_plan_with_controls(
                 );
             }
             crate::owned_audio_plan::plan_decode_audio(source, &Default::default(), controls)?;
-            let est_frames: Option<u64> = if crate::owned_ogg_opus_export::recognizes(source)? {
-                match crate::owned_ogg_audio_export::coding(source, controls)? {
-                    crate::owned_ogg_audio_export::Backend::Opus => {
-                        let p = crate::owned_ogg_opus_export::open(source, controls)?;
-                        Some(p.prefix_end_samples(None, controls.max_packets))
-                    }
-                    crate::owned_ogg_audio_export::Backend::Vorbis => {
-                        let (p, _) = crate::owned_ogg_vorbis_export::open(source, controls)?;
-                        Some(p.prefix_end_samples(None, controls.max_packets))
-                    }
-                    crate::owned_ogg_audio_export::Backend::Joint => {
-                        let (p, _) = crate::owned_ogg_joint_export::open(source, controls)?;
-                        Some(p.prefix_end_samples(None, controls.max_packets))
-                    }
-                }
-            } else if !crate::owned_adts_export::recognizes(source)?
-                && crate::owned_raw_flac::recognizes(source)?
-            {
-                let parsed = crate::owned_raw_flac::open(source, controls)?;
-                let mut packets = 0u64;
-                let mut total = 0u64;
-                for frame in &parsed.frames {
-                    if controls.max_packets.is_some_and(|limit| packets >= limit) {
-                        break;
-                    }
-                    packets += 1;
-                    total = total.saturating_add(u64::from(frame.samples));
-                }
-                Some(total.min(parsed.samples()))
-            } else if !crate::owned_adts_export::recognizes(source)?
-                && crate::owned_raw_mp3::recognizes(source)?
-            {
-                let parsed = crate::owned_raw_mp3::open(source, controls)?;
-                let samples = if let Some(limit) = controls.max_packets {
-                    let window = parsed.presentation_window();
-                    let mut packets = u64::from(parsed.info_packet().is_some());
-                    let mut total = 0u64;
-                    for frame in &parsed.frames {
-                        if frame.pts >= window.end || packets >= limit {
-                            break;
-                        }
-                        packets += 1;
-                        let begin =
-                            window.start.saturating_sub(frame.pts).min(u64::from(frame.samples));
-                        let end =
-                            window.end.saturating_sub(frame.pts).min(u64::from(frame.samples));
-                        total = total.saturating_add(end.saturating_sub(begin));
-                    }
-                    total.min(parsed.presentation_samples())
-                } else {
-                    parsed.presentation_samples()
-                };
-                Some(samples)
-            } else if crate::owned_adts_export::recognizes(source)?
-                || crate::owned_mp4_audio_export::recognizes(source, controls)?
-                || crate::owned_audio_plan::matroska_descriptor(source, controls)?.is_some()
-            {
-                Some(info.stage2_frames)
-            } else {
-                None
-            };
-            if let Some(frames) = est_frames {
-                let decoded_bytes = u128::from(frames)
-                    .saturating_mul(u128::from(info.channels))
-                    .saturating_mul(4);
-                total_input_pcm_bytes = total_input_pcm_bytes.saturating_add(decoded_bytes);
-                min_frames = Some(min_frames.map_or(frames, |m| m.min(frames)));
-            }
+            let frames = info.stage2_frames;
+            let decoded_bytes = u128::from(frames)
+                .saturating_mul(u128::from(info.channels))
+                .saturating_mul(4);
+            total_input_pcm_bytes = total_input_pcm_bytes.saturating_add(decoded_bytes);
+            min_frames = Some(min_frames.map_or(frames, |m| m.min(frames)));
             (info.rate, info.channels)
         };
         if !(1..=255).contains(&channels) {

@@ -140,20 +140,32 @@ pub(crate) fn supports(
     options: &CopyOptions,
 ) -> bool {
     match open_with_transform(source, Some(transform), options) {
-        Ok((p, _)) => {
-            let target = transform.channels.unwrap_or(i32::from(p.channels()));
-            target == i32::from(p.channels())
-                || (((p.channels() <= 8 && matches!(target, 1 | 2))
-                    || (p.channels() <= 2 && (1..=8).contains(&target)))
-                    && ((p.channels() <= 2 && p.output_channel_mask() == 0)
-                        || (p.output_channel_mask() != 0
-                            && crate::owned_pcm_channels::rematrix_layout_supported(
-                                p.channels(),
-                                p.output_channel_mask(),
-                            ))))
-        }
+        Ok((p, _)) => supports_program(&p, transform),
         Err(e) => e.starts_with("controlled memory budget exceeded:"),
     }
+}
+pub(crate) fn supports_from_ogg(
+    ogg: crate::owned_ogg::Ogg,
+    index: usize,
+    transform: AudioDecodeTransform,
+    options: &CopyOptions,
+) -> bool {
+    match open_from_ogg_with_transform(ogg, index, Some(transform), options) {
+        Ok((p, _)) => supports_program(&p, transform),
+        Err(e) => e.starts_with("controlled memory budget exceeded:"),
+    }
+}
+fn supports_program(p: &Program, transform: AudioDecodeTransform) -> bool {
+    let target = transform.channels.unwrap_or(i32::from(p.channels()));
+    target == i32::from(p.channels())
+        || (((p.channels() <= 8 && matches!(target, 1 | 2))
+            || (p.channels() <= 2 && (1..=8).contains(&target)))
+            && ((p.channels() <= 2 && p.output_channel_mask() == 0)
+                || (p.output_channel_mask() != 0
+                    && crate::owned_pcm_channels::rematrix_layout_supported(
+                        p.channels(),
+                        p.output_channel_mask(),
+                    ))))
 }
 fn decode(
     program: &mut Program,
@@ -316,7 +328,23 @@ pub(crate) fn decode_to_wave(
     options: &CopyOptions,
 ) -> Result<crate::owned_adts_export::DecodedSpool> {
     check(options)?;
-    let (mut program, info) = open(source, options)?;
+    let (program, info) = open(source, options)?;
+    decode_program_to_wave(program, info, options)
+}
+pub(crate) fn decode_to_wave_from_ogg(
+    ogg: crate::owned_ogg::Ogg,
+    index: usize,
+    options: &CopyOptions,
+) -> Result<crate::owned_adts_export::DecodedSpool> {
+    check(options)?;
+    let (program, info) = open_from_ogg_with_transform(ogg, index, None, options)?;
+    decode_program_to_wave(program, info, options)
+}
+fn decode_program_to_wave(
+    mut program: Program,
+    info: Vec<u8>,
+    options: &CopyOptions,
+) -> Result<crate::owned_adts_export::DecodedSpool> {
     let rate = program.sample_rate();
     let channels = program.channels();
     let mask = program.output_channel_mask();
@@ -341,7 +369,30 @@ pub(crate) fn apply(
     if destination.symlink_metadata().is_ok() {
         return Err("destination already exists".into());
     }
-    let (mut program, info) = open_with_transform(source, Some(transform), options)?;
+    let (program, info) = open_with_transform(source, Some(transform), options)?;
+    apply_program(program, info, destination, transform, options)
+}
+pub(crate) fn apply_from_ogg(
+    ogg: crate::owned_ogg::Ogg,
+    index: usize,
+    destination: &Path,
+    transform: AudioDecodeTransform,
+    options: &CopyOptions,
+) -> Result<AudioDecodeStats> {
+    check(options)?;
+    if destination.symlink_metadata().is_ok() {
+        return Err("destination already exists".into());
+    }
+    let (program, info) = open_from_ogg_with_transform(ogg, index, Some(transform), options)?;
+    apply_program(program, info, destination, transform, options)
+}
+fn apply_program(
+    mut program: Program,
+    info: Vec<u8>,
+    destination: &Path,
+    transform: AudioDecodeTransform,
+    options: &CopyOptions,
+) -> Result<AudioDecodeStats> {
     let rate = program.sample_rate();
     let channels = program.channels();
     let until = crate::owned_adts_export::decoded_prefix(transform, rate)

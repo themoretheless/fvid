@@ -305,7 +305,7 @@ pub(crate) fn adts_prefix_info_for_transform<R: Read>(
 ) -> Result<(u32, u16, u32, u64)> {
     let mut quiet = crate::owned_adts_export::pcm_decode_options(options);
     quiet.progress = None;
-    let mut control = DecodeProgress {
+    let control = DecodeProgress {
         options: &quiet,
         event: ProgressEvent {
             packets: 0,
@@ -323,6 +323,29 @@ pub(crate) fn adts_prefix_info_for_transform<R: Read>(
             .max_packet_bytes
             .min(quiet.max_controlled_bytes.unwrap_or(usize::MAX)),
     )?;
+    adts_prefix_info_from_reader_for_transform(reader, interval, transform, options)
+}
+
+pub(crate) fn adts_prefix_info_from_reader_for_transform<R: Read>(
+    reader: AdtsStreamReader<R>,
+    interval: Option<(Duration, Duration)>,
+    transform: Option<fvid_media_info::AudioDecodeTransform>,
+    options: &CopyOptions,
+) -> Result<(u32, u16, u32, u64)> {
+    let mut quiet = crate::owned_adts_export::pcm_decode_options(options);
+    quiet.progress = None;
+    let mut control = DecodeProgress {
+        options: &quiet,
+        event: ProgressEvent {
+            packets: 0,
+            payload_bytes: 0,
+            done: false,
+        },
+    };
+    control.check()?;
+    if control.packet_limit_reached() {
+        return Err(invalid("audio interval contains no samples"));
+    }
     check_adts_decode_admission(reader.audio_specific_config(), options)?;
     let negotiated = negotiate_adts_aac_reader(reader, interval, &mut control)?;
     let rate = negotiated.sample_rate();

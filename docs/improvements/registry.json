@@ -1,8 +1,8 @@
 {
   "target": 1000,
   "counting_rule": "One independently confirmed problem or useful capability; fixture variants and baseline integration repairs are excluded. Only accepted entries count.",
-  "accepted_count": 734,
-  "next_id": "FVID-0735",
+  "accepted_count": 739,
+  "next_id": "FVID-0740",
   "entries": [
     {
       "id": "FVID-0001",
@@ -8265,6 +8265,61 @@
       "result": "Seek the already-opened File handle back to SeekFrom::Start(0) and pass it directly to the MP4, Matroska, or ADTS reader.",
       "status": "accepted",
       "validation": "batch-600-validation.json"
+    },
+    {
+      "id": "FVID-0735",
+      "batch": 601,
+      "title": "Reuse info.stage2_frames from source_descriptor in owned_audio_mix::audio_plan_with_controls instead of re-opening and re-parsing inputs",
+      "source": "crates/fvid-media/src/owned_audio_mix.rs",
+      "regression": "tests/mix_plan_and_wave_ogg_single_pass.rs",
+      "before": "owned_audio_mix::audio_plan_with_controls called source_descriptor (which already computed stage2_frames) and then re-opened and re-parsed G.711 WAVE, Ogg Opus/Vorbis/Joint, raw FLAC, raw MP3, and Matroska inputs to recompute frame counts.",
+      "result": "Use info.stage2_frames directly in audio_plan_with_controls after source_descriptor and plan_decode_audio.",
+      "status": "accepted",
+      "validation": "batch-601-validation.json"
+    },
+    {
+      "id": "FVID-0736",
+      "batch": 601,
+      "title": "Reuse the opened ADTS StreamReader via adts_prefix_info_from_reader_for_transform in owned_audio_plan::source_descriptor_for_decode",
+      "source": "crates/fvid-media/src/owned_audio_plan.rs",
+      "regression": "tests/mix_plan_and_wave_ogg_single_pass.rs",
+      "before": "owned_audio_plan::source_descriptor_for_decode opened ADTS StreamReader to read configuration().sample_rate, dropped it, and opened a second StreamReader on the same file inside adts_prefix_info_for_transform.",
+      "result": "Expose adts_prefix_info_from_reader_for_transform in owned_aac::stream and pass the already-opened StreamReader from source_descriptor_for_decode.",
+      "status": "accepted",
+      "validation": "batch-601-validation.json"
+    },
+    {
+      "id": "FVID-0737",
+      "batch": 601,
+      "title": "Seek and reuse the already-opened File handle after EBML signature check in owned_audio_plan::matroska_descriptor_for_decode",
+      "source": "crates/fvid-media/src/owned_audio_plan.rs",
+      "regression": "tests/mix_plan_and_wave_ogg_single_pass.rs",
+      "before": "owned_audio_plan::matroska_descriptor_for_decode opened the source file to read the 4-byte EBML prefix and then opened the source file a second time for open_audio_reader.",
+      "result": "Seek the already-opened File handle back to SeekFrom::Start(0) and pass it directly to open_audio_reader.",
+      "status": "accepted",
+      "validation": "batch-601-validation.json"
+    },
+    {
+      "id": "FVID-0738",
+      "batch": 601,
+      "title": "Retain WaveInfo and RIFF INFO chunks during read_wave_with_admission in owned_audio_export::decode_audio_transformed",
+      "source": "crates/fvid-media/src/owned_audio_export.rs",
+      "regression": "tests/mix_plan_and_wave_ogg_single_pass.rs",
+      "before": "owned_audio_export::decode_audio_transformed opened and inspected the WAVE source file inside read_wave_with_admission, opened and inspected it a second time for source_info and info_chunks, and opened and inspected it a third time when channels != input.channels.",
+      "result": "Capture WaveInfo and RIFF INFO chunks inside the read_wave_with_admission callback and reuse them for rematrix validation and metadata editing.",
+      "status": "accepted",
+      "validation": "batch-601-validation.json"
+    },
+    {
+      "id": "FVID-0739",
+      "batch": 601,
+      "title": "Reuse the parsed Ogg container from open_selected_ogg across owned_audio_export::supports, decode_audio_transformed, and owned_container_loudness",
+      "source": "crates/fvid-media/src/owned_ogg_audio_export.rs",
+      "regression": "tests/mix_plan_and_wave_ogg_single_pass.rs",
+      "before": "owned_audio_export::supports, decode_audio_transformed, and owned_container_loudness::decode_to_wave_from_geometry called coding(source, options) (which preflighted, read, and parsed the entire Ogg file) and then called backend open/apply/decode_to_wave which preflighted, read, and parsed the entire Ogg file a second time.",
+      "result": "Expose open_selected_ogg and *_from_ogg entrypoints in Ogg Opus, Vorbis, and Joint export modules so the parsed Ogg container and preflight index estimate are reused without re-reading the file.",
+      "status": "accepted",
+      "validation": "batch-601-validation.json"
     }
   ],
   "pending_count": 0
