@@ -24,10 +24,18 @@ pub(crate) fn supports(
     {
         return false;
     }
-    if crate::owned_g711_wave_export::recognizes(source,options).unwrap_or(false) {
-        return crate::owned_g711_wave_export::supports(source,transform,options);
+    let Ok((head, head_len)) = crate::owned_audio_plan::read_source_head(source) else {
+        return false;
+    };
+    let head_slice = &head[..head_len];
+    if head_len == 12
+        && &head[..4] == b"RIFF"
+        && &head[8..12] == b"WAVE"
+        && crate::owned_g711_wave_export::recognizes(source, options).unwrap_or(false)
+    {
+        return crate::owned_g711_wave_export::supports(source, transform, options);
     }
-    if crate::owned_ogg_opus_export::recognizes(source).unwrap_or(false) {
+    if head_slice.starts_with(b"OggS") {
         return match crate::owned_ogg_audio_export::open_selected_ogg(source, options) {
             Ok((_, crate::owned_ogg_audio_export::Backend::Vorbis, ogg, index)) => {
                 crate::owned_ogg_vorbis_export::supports_from_ogg(ogg, index, transform, options)
@@ -41,34 +49,41 @@ pub(crate) fn supports(
             Err(error) => error.starts_with("controlled memory budget exceeded:"),
         };
     }
-    if crate::owned_mp4_audio_export::recognizes(source, options).unwrap_or(false) {
+    if head_len >= 8
+        && crate::owned_mp4::recognizes_prefix(&head[..8])
+        && crate::owned_mp4_audio_export::recognizes(source, options).unwrap_or(false)
+    {
         return crate::owned_mp4_audio_export::supports(source, transform, options);
     }
-    if crate::owned_matroska_pcm_export::recognizes(source, options).unwrap_or(false) {
-        return crate::owned_matroska_pcm_export::supports(source, transform, options);
+    if head_slice.starts_with(&[0x1a, 0x45, 0xdf, 0xa3]) {
+        if crate::owned_matroska_pcm_export::recognizes(source, options).unwrap_or(false) {
+            return crate::owned_matroska_pcm_export::supports(source, transform, options);
+        }
+        if crate::owned_matroska_aac_export::recognizes(source, options).unwrap_or(false) {
+            return crate::owned_matroska_aac_export::supports(source, transform, options);
+        }
+        if crate::owned_matroska_opus_export::recognizes(source, options).unwrap_or(false) {
+            return crate::owned_matroska_opus_export::supports(source, transform, options);
+        }
+        if crate::owned_matroska_flac_export::recognizes(source, options).unwrap_or(false) {
+            return crate::owned_matroska_flac_export::supports(source, transform, options);
+        }
+        if crate::owned_matroska_mp3_export::recognizes(source, options).unwrap_or(false) {
+            return crate::owned_matroska_mp3_export::supports(source, transform, options);
+        }
+        if crate::owned_matroska_alac_export::recognizes(source, options).unwrap_or(false) {
+            return crate::owned_matroska_alac_export::supports(source, transform, options);
+        }
     }
-    if crate::owned_matroska_aac_export::recognizes(source, options).unwrap_or(false) {
-        return crate::owned_matroska_aac_export::supports(source, transform, options);
-    }
-    if crate::owned_matroska_opus_export::recognizes(source, options).unwrap_or(false) {
-        return crate::owned_matroska_opus_export::supports(source, transform, options);
-    }
-    if crate::owned_matroska_flac_export::recognizes(source, options).unwrap_or(false) {
-        return crate::owned_matroska_flac_export::supports(source, transform, options);
-    }
-    if crate::owned_matroska_mp3_export::recognizes(source, options).unwrap_or(false) {
-        return crate::owned_matroska_mp3_export::supports(source, transform, options);
-    }
-    if crate::owned_matroska_alac_export::recognizes(source, options).unwrap_or(false) {
-        return crate::owned_matroska_alac_export::supports(source, transform, options);
-    }
-    if crate::owned_raw_flac::recognizes(source).unwrap_or(false) {
+    if head_slice.starts_with(b"fLaC") {
         return crate::owned_raw_flac::supports(source, transform, options);
     }
-    if crate::owned_raw_mp3::recognizes(source).unwrap_or(false) {
+    if !(head_len >= 7 && crate::owned_aac::adts::header(&head[..7]).is_some())
+        && crate::owned_mpeg_audio::has_signature(&head[..head_len.min(10)])
+    {
         return crate::owned_raw_mp3::supports(source, transform, options);
     }
-    if crate::owned_adts_export::recognizes(source).unwrap_or(false) {
+    if head_len >= 7 && crate::owned_aac::adts::header(&head[..7]).is_some() {
         return simple_options(options)
             && crate::owned_adts_export::supports(source, transform, options);
     }
@@ -241,10 +256,16 @@ pub fn decode_audio_transformed(
     if destination.symlink_metadata().is_ok() {
         return Err("output already exists".into());
     }
-    if crate::owned_g711_wave_export::recognizes(source,options)? {
-        return crate::owned_g711_wave_export::apply(source,destination,transform,options);
+    let (head, head_len) = crate::owned_audio_plan::read_source_head(source)?;
+    let head_slice = &head[..head_len];
+    if head_len == 12
+        && &head[..4] == b"RIFF"
+        && &head[8..12] == b"WAVE"
+        && crate::owned_g711_wave_export::recognizes(source, options)?
+    {
+        return crate::owned_g711_wave_export::apply(source, destination, transform, options);
     }
-    if crate::owned_ogg_opus_export::recognizes(source)? {
+    if head_slice.starts_with(b"OggS") {
         let (_, backend, ogg, index) =
             crate::owned_ogg_audio_export::open_selected_ogg(source, options)?;
         return match backend {
@@ -277,34 +298,41 @@ pub fn decode_audio_transformed(
             }
         };
     }
-    if crate::owned_mp4_audio_export::recognizes(source, options)? {
+    if head_len >= 8
+        && crate::owned_mp4::recognizes_prefix(&head[..8])
+        && crate::owned_mp4_audio_export::recognizes(source, options)?
+    {
         return crate::owned_mp4_audio_export::apply(source, destination, transform, options);
     }
-    if crate::owned_matroska_pcm_export::recognizes(source, options)? {
-        return crate::owned_matroska_pcm_export::apply(source, destination, transform, options);
+    if head_slice.starts_with(&[0x1a, 0x45, 0xdf, 0xa3]) {
+        if crate::owned_matroska_pcm_export::recognizes(source, options)? {
+            return crate::owned_matroska_pcm_export::apply(source, destination, transform, options);
+        }
+        if crate::owned_matroska_aac_export::recognizes(source, options)? {
+            return crate::owned_matroska_aac_export::apply(source, destination, transform, options);
+        }
+        if crate::owned_matroska_opus_export::recognizes(source, options)? {
+            return crate::owned_matroska_opus_export::apply(source, destination, transform, options);
+        }
+        if crate::owned_matroska_flac_export::recognizes(source, options)? {
+            return crate::owned_matroska_flac_export::apply(source, destination, transform, options);
+        }
+        if crate::owned_matroska_mp3_export::recognizes(source, options)? {
+            return crate::owned_matroska_mp3_export::apply(source, destination, transform, options);
+        }
+        if crate::owned_matroska_alac_export::recognizes(source, options)? {
+            return crate::owned_matroska_alac_export::apply(source, destination, transform, options);
+        }
     }
-    if crate::owned_matroska_aac_export::recognizes(source, options)? {
-        return crate::owned_matroska_aac_export::apply(source, destination, transform, options);
+    if head_slice.starts_with(b"fLaC") {
+        return crate::owned_raw_flac::apply(source, destination, transform, options);
     }
-    if crate::owned_matroska_opus_export::recognizes(source, options)? {
-        return crate::owned_matroska_opus_export::apply(source, destination, transform, options);
-    }
-    if crate::owned_matroska_flac_export::recognizes(source, options)? {
-        return crate::owned_matroska_flac_export::apply(source, destination, transform, options);
-    }
-    if crate::owned_matroska_mp3_export::recognizes(source, options)? {
-        return crate::owned_matroska_mp3_export::apply(source, destination, transform, options);
-    }
-    if crate::owned_matroska_alac_export::recognizes(source, options)? {
-        return crate::owned_matroska_alac_export::apply(source, destination, transform, options);
-    }
-    if crate::owned_raw_flac::recognizes(source)? {
-        return crate::owned_raw_flac::apply(source,destination,transform,options);
-    }
-    if crate::owned_raw_mp3::recognizes(source)? {
+    if !(head_len >= 7 && crate::owned_aac::adts::header(&head[..7]).is_some())
+        && crate::owned_mpeg_audio::has_signature(&head[..head_len.min(10)])
+    {
         return crate::owned_raw_mp3::apply(source, destination, transform, options);
     }
-    if crate::owned_adts_export::recognizes(source)? {
+    if head_len >= 7 && crate::owned_aac::adts::header(&head[..7]).is_some() {
         if !simple_options(options) {
             return Err("ADTS has only stream 0".into());
         }

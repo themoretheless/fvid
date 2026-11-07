@@ -1,0 +1,15 @@
+{
+  "batch": 614,
+  "ids": [
+    "FVID-0800",
+    "FVID-0801",
+    "FVID-0802",
+    "FVID-0803",
+    "FVID-0804"
+  ],
+  "commands": [
+    "cargo test --test audio_plan_and_export_single_open",
+    "cargo test --test probe_single_open"
+  ],
+  "status": "accepted"
+}

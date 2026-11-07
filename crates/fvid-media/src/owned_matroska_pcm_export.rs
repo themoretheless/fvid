@@ -157,7 +157,7 @@ pub(crate) fn geometry_frames_and_info_for_decode(
     transform: Option<AudioDecodeTransform>,
     options: &CopyOptions,
 ) -> Result<(u32, u16, u64, Vec<u8>)> {
-    let mut reader = crate::owned_matroska_audio::open_audio_reader(
+    let reader = crate::owned_matroska_audio::open_audio_reader(
         BufReader::new(File::open(source).map_err(|e| e.to_string())?),
         options,
         options.max_packet_bytes,
@@ -170,6 +170,16 @@ pub(crate) fn geometry_frames_and_info_for_decode(
     };
     let index = crate::owned_matroska_audio::matroska_audio_index(&reader, selected)
         .map_err(|e| e.to_string())?;
+    geometry_from_reader_for_decode(source, reader, index, transform, options)
+}
+
+pub(crate) fn geometry_from_reader_for_decode<R: Read + std::io::Seek>(
+    source: &Path,
+    mut reader: crate::owned_webm::WebmReader<R>,
+    index: usize,
+    transform: Option<AudioDecodeTransform>,
+    options: &CopyOptions,
+) -> Result<(u32, u16, u64, Vec<u8>)> {
     let track = reader
         .tracks
         .get(index)
@@ -190,6 +200,7 @@ pub(crate) fn geometry_frames_and_info_for_decode(
     let info = crate::owned_wave_metadata::matroska_source_info_from_reader(
         &mut reader, index, interval, options,
     )?;
+    drop(reader);
     if transform.is_some_and(|t| t.interval.is_some()) {
         let mut probe = decode_options(options);
         probe.progress = None;
