@@ -79,6 +79,7 @@ pub fn probe_as_with_options(
             Err(e) => return Err(e.to_string()),
         }
     }
+    drop(signature_file);
     if read == 12
         && matches!(&signature[..4], b"RIFF" | b"RIFX" | b"RF64")
         && &signature[8..12] == b"WAVE"

@@ -22,9 +22,6 @@ pub fn probe_flac_with_options(
         return Err("controlled memory limit must be positive".into());
     }
     crate::owned_budget::check_rss_budget(options)?;
-    if !crate::owned_raw_flac::recognizes(path)? {
-        return Err("input does not have a bare FLAC audio signature".into());
-    }
     let source = crate::owned_raw_flac::open(path, options)?;
     if options
         .max_packets

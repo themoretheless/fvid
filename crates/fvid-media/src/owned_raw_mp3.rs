@@ -83,6 +83,10 @@ fn open_with_interval(
         }
         bytes.extend_from_slice(&chunk[..n]);
     }
+    drop(file);
+    if !crate::owned_mpeg_audio::has_signature(&bytes[..bytes.len().min(10)]) {
+        return Err("input does not have a bare MPEG audio signature".into());
+    }
     let prefix_bounded = options.max_packets.is_some()
         || window.is_some_and(|(transform, interval)| {
             interval.is_some() || transform.interval.is_some()

@@ -4526,3 +4526,13 @@ See `batch-611-validation.json`.
 
 See `batch-612-validation.json`.
 
+## Batch 613 — FVID-0795..0799: Single-open FLAC/MPEG/Y4M probing and early signature descriptor release in `media_probe` and `owned_probe`
+
+- **FVID-0795** — Drop the 12-byte signature `BufReader<File>` before delegating to container probes in `media_probe::try_probe_as_with_options` (`src/media_probe.rs`, `tests/probe_single_open.rs`).
+- **FVID-0796** — Drop `signature_file` before delegating to container probes in `owned_probe::probe_as_with_options` (`crates/fvid-media/src/owned_probe.rs`, `tests/probe_single_open.rs`).
+- **FVID-0797** — Validate the `fLaC` signature inside `owned_raw_flac::open_with_interval` and remove the redundant `recognizes(path)` open in `owned_flac_probe::probe_flac_with_options` (`crates/fvid-media/src/owned_flac_probe.rs`, `crates/fvid-media/src/owned_raw_flac.rs`, `tests/probe_single_open.rs`).
+- **FVID-0798** — Validate the MPEG audio signature inside `owned_raw_mp3::open_with_interval` and remove the redundant `recognizes(path)` open in `owned_mpeg_probe::probe_mpeg_with_options` (`crates/fvid-media/src/owned_mpeg_probe.rs`, `crates/fvid-media/src/owned_raw_mp3.rs`, `tests/probe_single_open.rs`).
+- **FVID-0799** — Read the Y4M header line once without seeking back to offset 0 in `owned_y4m_probe::try_y4m_with_options` (`crates/fvid-media/src/owned_y4m_probe.rs`, `tests/probe_single_open.rs`).
+
+See `batch-613-validation.json`.
+

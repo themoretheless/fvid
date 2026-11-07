@@ -83,6 +83,10 @@ fn open_with_interval(
         }
         bytes.extend_from_slice(&chunk[..n]);
     }
+    drop(file);
+    if !bytes.starts_with(b"fLaC") {
+        return Err("input does not have a bare FLAC audio signature".into());
+    }
     let prefix_bounded = options.max_packets.is_some()
         || window.is_some_and(|(transform, interval)| {
             interval.is_some() || transform.interval.is_some()

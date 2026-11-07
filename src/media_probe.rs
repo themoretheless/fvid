@@ -435,6 +435,7 @@ pub(crate) fn try_probe_as_with_options(
             Err(error) => return Err(error.to_string()),
         }
     }
+    drop(input);
     if format.is_none() {
         if signature[..count].starts_with(b"YUV4MPEG2") {
             return try_y4m_with_options(source, options);

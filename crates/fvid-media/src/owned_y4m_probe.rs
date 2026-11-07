@@ -2,7 +2,7 @@
 use fvid_media_info::{MediaInfo, StreamInfo};
 use std::{
     fs::File,
-    io::{BufReader, Read, Seek, SeekFrom},
+    io::{BufReader, Seek, SeekFrom},
     path::Path,
 };
 type Result<T> = std::result::Result<T, String>;
@@ -30,16 +30,12 @@ pub fn try_y4m_with_options(
     }
     crate::owned_budget::check_rss_budget(options)?;
     let mut input = BufReader::new(File::open(source).map_err(|e| e.to_string())?);
-    let mut signature = [0; 9];
-    match input.read_exact(&mut signature) {
-        Ok(()) if &signature == b"YUV4MPEG2" => {}
-        Ok(()) => return Ok(None),
-        Err(error) if error.kind() == std::io::ErrorKind::UnexpectedEof => return Ok(None),
-        Err(error) => return Err(error.to_string()),
-    }
-    input.seek(SeekFrom::Start(0)).map_err(|e| e.to_string())?;
     let mut header = Vec::new();
-    crate::owned_y4m::line(&mut input, &mut header).map_err(|e| e.to_string())?;
+    if !crate::owned_y4m::line(&mut input, &mut header).map_err(|e| e.to_string())?
+        || !header.starts_with(b"YUV4MPEG2")
+    {
+        return Ok(None);
+    }
     let text = std::str::from_utf8(&header).map_err(|_| "Y4M header is not UTF-8")?;
     for token in text.split_whitespace().skip(1) {
         if token.starts_with('C')
