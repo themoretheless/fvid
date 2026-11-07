@@ -72,11 +72,14 @@ pub fn apply(
         );
     }
     crate::owned_adts_export::check_wave_metadata_budget(options)?;
-    let _ = crate::owned_audio_plan::plan_decode_audio(source, &Default::default(), options)?;
-    let decode_options = crate::owned_adts_export::pcm_decode_options(options);
     // Read-only configuration/policy preflight; actual packet failures propagate
     // once execution starts, without retry through the legacy backend.
-    let desc = crate::owned_audio_plan::source_descriptor(source, &decode_options)?;
+    let (_, desc) = crate::owned_audio_plan::plan_decode_audio_with_descriptor(
+        source,
+        &Default::default(),
+        options,
+    )?;
+    let decode_options = crate::owned_adts_export::pcm_decode_options(options);
     let (rate, channels, mask, codec) = (
         desc.rate,
         desc.channels,
@@ -172,7 +175,11 @@ pub fn plan_loudnorm(
     let resolved = crate::owned_loudnorm::validate_request(args)?;
     crate::owned_adts_export::check_wave_metadata_budget(options)?;
     let decode_options = crate::owned_adts_export::pcm_decode_options(options);
-    let desc = crate::owned_audio_plan::source_descriptor(source, &decode_options)?;
+    let (mut plan, desc) = crate::owned_audio_plan::plan_decode_audio_with_descriptor(
+        source,
+        &Default::default(),
+        options,
+    )?;
     let (rate, channels, mask, codec) = (
         desc.rate,
         desc.channels,
@@ -198,7 +205,6 @@ pub fn plan_loudnorm(
             &decode_options,
         )?;
     }
-    let mut plan = crate::owned_audio_plan::plan_decode_audio(source, &Default::default(), options)?;
     plan.steps.retain(|s| s.action != "write");
     if dual_pass || crate::owned_loudnorm::report_requested(Some(&resolved))? {
         plan.steps.push(PlanStep {

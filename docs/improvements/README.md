@@ -4626,3 +4626,14 @@ See `batch-621-validation.json`.
 
 See `batch-622-validation.json`.
 
+## Batch 623 — FVID-0845..0849: Single-pass audio descriptor planning, Matroska codec dispatch, and loudness/normalize handle reuse
+
+- **FVID-0845** — Reuse 12-byte prefix and close probe handles before delegation in `native_pcm::loudness` (`src/native_pcm/loudness.rs`, `tests/loudness_audio_plan_and_matroska_export_single_open.rs`).
+- **FVID-0846** — Single-pass MP4, G.711, Matroska, ADTS, and WAVE descriptor inspection in `owned_audio_plan::source_descriptor_for_decode` (`crates/fvid-media/src/owned_audio_plan.rs`, `tests/loudness_audio_plan_and_matroska_export_single_open.rs`).
+- **FVID-0847** — Eliminate duplicate `source_descriptor` pass in `owned_container_loudnorm::apply` and `plan_loudnorm` (`crates/fvid-media/src/owned_container_loudnorm.rs`, `tests/loudness_audio_plan_and_matroska_export_single_open.rs`).
+- **FVID-0848** — Dispatch Matroska audio export by selected track codec in a single open in `owned_audio_export` (`crates/fvid-media/src/owned_audio_export.rs`, `tests/loudness_audio_plan_and_matroska_export_single_open.rs`).
+- **FVID-0849** — Reuse native measurement classification in `normalize_file_with_options_and_prechecked_channels` (`src/native_pcm/normalize.rs`, `tests/loudness_audio_plan_and_matroska_export_single_open.rs`).
+
+See `batch-623-validation.json`.
+
+

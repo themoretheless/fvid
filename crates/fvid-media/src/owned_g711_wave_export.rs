@@ -27,15 +27,22 @@ pub(crate) fn recognizes(path: &Path, options: &CopyOptions) -> Result<bool> {
         .map_err(|e| e.to_string())
 }
 fn open(path: &Path, options: &CopyOptions) -> Result<(Input, Vec<u8>)> {
+    let mut file = File::open(path).map_err(|e| e.to_string())?;
+    let law = crate::owned_wave_inspect::g711_law(&mut file, options.cancel.as_ref())
+        .map_err(|e| e.to_string())?
+        .ok_or("WAVE does not contain G.711")?;
+    open_from_file_and_law(file, law, options)
+}
+fn open_from_file_and_law(
+    mut file: File,
+    law: fvid_codecs::g711::Law,
+    options: &CopyOptions,
+) -> Result<(Input, Vec<u8>)> {
     check(options)?;
     if !crate::owned_audio_export::simple_options(options) {
         return Err("WAVE has only stream 0".into());
     }
     admit(256 * 1024, options)?;
-    let mut file = File::open(path).map_err(|e| e.to_string())?;
-    let law = crate::owned_wave_inspect::g711_law(&mut file, options.cancel.as_ref())
-        .map_err(|e| e.to_string())?
-        .ok_or("WAVE does not contain G.711")?;
     let shape = crate::owned_wave_inspect::inspect_g711(&mut file, options.cancel.as_ref(), law)
         .map_err(|e| e.to_string())?;
     if !(1..=255).contains(&shape.channels) {
@@ -113,6 +120,29 @@ pub(crate) fn descriptor_for_decode(
     options: &CopyOptions,
 ) -> Result<(u32, u16, u32, &'static str, u64, usize)> {
     let (input, info) = open(path, options)?;
+    descriptor_from_input_for_decode(input, info, transform, options)
+}
+pub(crate) fn try_descriptor_for_decode(
+    path: &Path,
+    transform: Option<AudioDecodeTransform>,
+    options: &CopyOptions,
+) -> Result<Option<(u32, u16, u32, &'static str, u64, usize)>> {
+    check(options)?;
+    let mut file = File::open(path).map_err(|e| e.to_string())?;
+    let Some(law) = crate::owned_wave_inspect::g711_law(&mut file, options.cancel.as_ref())
+        .map_err(|e| e.to_string())?
+    else {
+        return Ok(None);
+    };
+    let (input, info) = open_from_file_and_law(file, law, options)?;
+    descriptor_from_input_for_decode(input, info, transform, options).map(Some)
+}
+fn descriptor_from_input_for_decode(
+    input: Input,
+    info: Vec<u8>,
+    transform: Option<AudioDecodeTransform>,
+    options: &CopyOptions,
+) -> Result<(u32, u16, u32, &'static str, u64, usize)> {
     if input.shape.sample_frames == 0 {
         return Err("no decoded audio samples or invalid channel count (nonempty input required)".into());
     }

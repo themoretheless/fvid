@@ -33,6 +33,14 @@ pub fn measure_file_with_options(
     weights: &[f64],
     options: &fvid_media::CopyOptions,
 ) -> crate::Result<IntegratedLoudness> {
+    Ok(measure_file_with_options_and_kind(source, weights, options)?.0)
+}
+
+pub(super) fn measure_file_with_options_and_kind(
+    source: &std::path::Path,
+    weights: &[f64],
+    options: &fvid_media::CopyOptions,
+) -> crate::Result<(IntegratedLoudness, bool)> {
     use crate::{invalid, native_media};
     use std::io::{BufReader, Read, Seek, SeekFrom, Write};
     if options
@@ -71,10 +79,22 @@ pub fn measure_file_with_options(
         options.max_rss_bytes,
         options.max_packets,
     )?;
-    let mut input = BufReader::new(std::fs::File::open(source)?);
-    let mut prefix = [0u8; 8];
-    input.read_exact(&mut prefix)?;
-    input.seek(SeekFrom::Start(0))?;
+    let mut input = Some(BufReader::new(std::fs::File::open(source)?));
+    let mut head = [0u8; 12];
+    let mut head_len = 0;
+    while head_len < head.len() {
+        match input.as_mut().unwrap().read(&mut head[head_len..]) {
+            Ok(0) => break,
+            Ok(n) => head_len += n,
+            Err(e) if e.kind() == std::io::ErrorKind::Interrupted => continue,
+            Err(e) => return Err(e.into()),
+        }
+    }
+    if head_len < 8 {
+        return Err(std::io::Error::from(std::io::ErrorKind::UnexpectedEof).into());
+    }
+    let prefix: [u8; 8] = head[..8].try_into().unwrap();
+    input.as_mut().unwrap().seek(SeekFrom::Start(0))?;
     enum Input<'a> {
         Wave(BufReader<std::fs::File>, super::WaveInfo),
         Mp4(Box<crate::container::mp4::Mp4Reader<BufReader<std::fs::File>>>),
@@ -82,7 +102,8 @@ pub fn measure_file_with_options(
         Adts(Box<crate::native_media::NegotiatedAdts<BufReader<std::fs::File>>>),
         _Marker(std::marker::PhantomData<&'a ()>),
     }
-    let (input, rate, channels) = if super::is_wave_reader(&mut input)? {
+    let (input, rate, channels) = if super::is_wave_reader(input.as_mut().unwrap())? {
+        let mut input = input.take().unwrap();
         if selected.is_some_and(|s| s != 0) {
             return Err(invalid("WAVE has only stream 0"));
         }
@@ -127,13 +148,24 @@ pub fn measure_file_with_options(
         }
         let (rate, channels) = (info.sample_rate, info.channels);
         (Input::Wave(input, info), rate, channels)
-    } else if fvid_media::owned_container_loudness::recognizes_standalone_audio(source)
-        .map_err(|e| invalid(&e))?
-        || ((crate::container::mp4::recognizes_prefix(&prefix)
-            || prefix.starts_with(&[0x1a, 0x45, 0xdf, 0xa3]))
-            && (native_media::constant_audio_source_info_selected_with_options(source, selected, options).is_err()
-                || options.max_controlled_bytes.is_some()))
-    {
+    } else if {
+        let standalone = fvid_media::owned_container_loudness::recognizes_standalone_from_head(
+            source, &head, head_len, options,
+        )
+        .map_err(|e| invalid(&e))?;
+        standalone
+            || ((crate::container::mp4::recognizes_prefix(&prefix)
+                || prefix.starts_with(&[0x1a, 0x45, 0xdf, 0xa3]))
+                && (options.max_controlled_bytes.is_some()
+                    || {
+                        drop(input.take());
+                        native_media::constant_audio_source_info_selected_with_options(
+                            source, selected, options,
+                        )
+                        .is_err()
+                    }))
+    } {
+        drop(input.take());
         let (rate, channels) =
             fvid_media::owned_audio_plan::source_geometry(source, options)
                 .map_err(|e| invalid(&e))?;
@@ -172,8 +204,12 @@ pub fn measure_file_with_options(
                 ..spool.progress
             });
         }
-        return Ok(report);
+        return Ok((report, false));
     } else if crate::container::mp4::recognizes_prefix(&prefix) {
+        let input = match input.take() {
+            Some(r) => r,
+            None => BufReader::new(std::fs::File::open(source)?),
+        };
         let mut reader = crate::container::mp4::Mp4Reader::open(
             input,
             crate::container::mp4::Limits::default(),
@@ -190,6 +226,10 @@ pub fn measure_file_with_options(
         let (rate, channels) = (decoder.sample_rate(), decoder.channels());
         (Input::Mp4(Box::new(reader)), rate, channels)
     } else if prefix.starts_with(&[0x1a, 0x45, 0xdf, 0xa3]) {
+        let input = match input.take() {
+            Some(r) => r,
+            None => BufReader::new(std::fs::File::open(source)?),
+        };
         let limits = crate::container::webm::Limits::default();
         let mut reader = crate::container::webm::WebmReader::open(input, limits)?;
         reader.restrict_packet_bytes(options.max_packet_bytes);
@@ -216,6 +256,7 @@ pub fn measure_file_with_options(
             return Err(invalid("ADTS has only stream 0"));
         }
         if let Some(max) = options.max_controlled_bytes {
+            drop(input.take());
             let (rate, channels) =
                 fvid_media::owned_audio_plan::source_geometry(source, options)
                     .map_err(|e| invalid(&e))?;
@@ -255,10 +296,10 @@ pub fn measure_file_with_options(
                     ..spool.progress
                 });
             }
-            return Ok(report);
+            return Ok((report, false));
         }
         let reader = crate::container::adts::StreamReader::open_with_packet_limit(
-            input,
+            input.take().unwrap(),
             options.max_packet_bytes,
         )?;
         let negotiated = native_media::negotiate_adts_aac_reader(reader, None, &mut control)?;
@@ -358,7 +399,7 @@ pub fn measure_file_with_options(
     control.emit(false);
     control.check()?;
     control.emit(true);
-    Ok(report)
+    Ok((report, true))
 }
 
 
@@ -405,13 +446,13 @@ pub fn default_weights_with_options(
         ));
     }
     let selected = options.streams.first().copied();
-    let mut file = std::fs::File::open(source)?;
-    let channels = if super::is_wave_reader(&mut file)? {
+    let mut file = Some(std::fs::File::open(source)?);
+    let channels = if super::is_wave_reader(file.as_mut().unwrap())? {
         if selected.is_some_and(|index| index != 0) {
             return Err(crate::invalid("WAVE has only stream 0"));
         }
         let info = super::inspect(
-            &mut file,
+            file.as_mut().unwrap(),
             options.cancel.as_ref(),
         )?;
         let frame = usize::from(info.frame_bytes());
@@ -421,8 +462,10 @@ pub fn default_weights_with_options(
             ));
         }
         info.channels
-    } else if options.max_controlled_bytes.is_none()
-        && let Ok(info) = crate::native_media::constant_audio_source_info_selected_with_options(source, selected, options)
+    } else if {
+        drop(file.take());
+        options.max_controlled_bytes.is_none()
+    } && let Ok(info) = crate::native_media::constant_audio_source_info_selected_with_options(source, selected, options)
     {
         if options.max_packet_bytes != fvid_media::CopyOptions::default().max_packet_bytes {
             use std::io::{BufReader, Read, Seek, SeekFrom};

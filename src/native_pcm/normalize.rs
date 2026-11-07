@@ -1,5 +1,4 @@
 //! Constant-gain loudness normalization through owned PCM decoding and export.
-use super::measure_loudness_file_with_options;
 pub use crate::media_info::{NormalizeReport, NormalizeTarget};
 use crate::{invalid, Result};
 use std::path::Path;
@@ -103,7 +102,6 @@ pub(crate) fn normalize_file_with_options_and_prechecked_channels(
     measure_options.metadata_delete.clear();
     measure_options.stream_metadata_set.clear();
     measure_options.stream_metadata_delete.clear();
-    let selected = options.streams.first().copied();
     let mut prechecked_channels = known_channels;
     if options.max_controlled_bytes.is_some() {
         let channels = match prechecked_channels {
@@ -124,7 +122,8 @@ pub(crate) fn normalize_file_with_options_and_prechecked_channels(
         )?;
     }
     measure_options.progress = measure_hook;
-    let measured = measure_loudness_file_with_options(source, weights, &measure_options)?;
+    let (measured, native_measured) =
+        super::loudness::measure_file_with_options_and_kind(source, weights, &measure_options)?;
     let plan = fvid_media::owned_normalize::GainPlan::new(&measured, target)
         .map_err(|e| invalid(&e))?;
     let after = std::fs::metadata(source)?;
@@ -132,13 +131,12 @@ pub(crate) fn normalize_file_with_options_and_prechecked_channels(
         return Err(invalid("source changed during loudness measurement"));
     }
     let export_hook = progress.map(|hook| hook.for_phase(NormalizationPhase::Export));
-    let use_native_export = options.max_controlled_bytes.is_none()
+    let use_native_export = native_measured
+        && options.max_controlled_bytes.is_none()
         && options.metadata_set.is_empty()
         && options.metadata_delete.is_empty()
         && options.stream_metadata_set.is_empty()
-        && options.stream_metadata_delete.is_empty()
-        && (super::is_wave(source)?
-            || crate::native_media::constant_audio_source_info_selected_with_options(source, selected, options).is_ok());
+        && options.stream_metadata_delete.is_empty();
     let sample_frames = if use_native_export {
         let mut export_options = options.clone();
         export_options.progress = export_hook;

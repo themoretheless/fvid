@@ -56,24 +56,28 @@ pub(crate) fn supports(
         return crate::owned_mp4_audio_export::supports(source, transform, options);
     }
     if head_slice.starts_with(&[0x1a, 0x45, 0xdf, 0xa3]) {
-        if crate::owned_matroska_pcm_export::recognizes(source, options).unwrap_or(false) {
-            return crate::owned_matroska_pcm_export::supports(source, transform, options);
-        }
-        if crate::owned_matroska_aac_export::recognizes(source, options).unwrap_or(false) {
-            return crate::owned_matroska_aac_export::supports(source, transform, options);
-        }
-        if crate::owned_matroska_opus_export::recognizes(source, options).unwrap_or(false) {
-            return crate::owned_matroska_opus_export::supports(source, transform, options);
-        }
-        if crate::owned_matroska_flac_export::recognizes(source, options).unwrap_or(false) {
-            return crate::owned_matroska_flac_export::supports(source, transform, options);
-        }
-        if crate::owned_matroska_mp3_export::recognizes(source, options).unwrap_or(false) {
-            return crate::owned_matroska_mp3_export::supports(source, transform, options);
-        }
-        if crate::owned_matroska_alac_export::recognizes(source, options).unwrap_or(false) {
-            return crate::owned_matroska_alac_export::supports(source, transform, options);
-        }
+        return match matroska_selected_codec(source, options) {
+            Ok(Some("A_PCM/INT/LIT" | "A_PCM/INT/BIG" | "A_PCM/FLOAT/IEEE")) => {
+                crate::owned_matroska_pcm_export::supports(source, transform, options)
+            }
+            Ok(Some("A_AAC")) => {
+                crate::owned_matroska_aac_export::supports(source, transform, options)
+            }
+            Ok(Some("A_OPUS")) => {
+                crate::owned_matroska_opus_export::supports(source, transform, options)
+            }
+            Ok(Some("A_FLAC")) => {
+                crate::owned_matroska_flac_export::supports(source, transform, options)
+            }
+            Ok(Some("A_MPEG/L1" | "A_MPEG/L2" | "A_MPEG/L3")) => {
+                crate::owned_matroska_mp3_export::supports(source, transform, options)
+            }
+            Ok(Some("A_ALAC")) => {
+                crate::owned_matroska_alac_export::supports(source, transform, options)
+            }
+            Ok(_) => false,
+            Err(error) => error.starts_with("controlled memory budget exceeded:"),
+        };
     }
     if head_slice.starts_with(b"fLaC") {
         return crate::owned_raw_flac::supports(source, transform, options);
@@ -163,6 +167,44 @@ pub(crate) fn supports(
 }
 pub(crate) fn simple_options(options: &CopyOptions) -> bool {
     (options.streams.is_empty() || options.streams == [0]) && single_audio_options(options)
+}
+fn matroska_selected_codec(source: &Path, options: &CopyOptions) -> Result<Option<&'static str>> {
+    let reader = crate::owned_matroska_audio::open_audio_reader(
+        std::io::BufReader::new(std::fs::File::open(source).map_err(|e| e.to_string())?),
+        options,
+        options.max_packet_bytes,
+    )
+    .map_err(|e| e.to_string())?;
+    let preferred = reader.preferred_track_numbers(
+        &reader
+            .tracks
+            .iter()
+            .filter(|t| t.kind == 2)
+            .map(|t| t.number)
+            .collect::<Vec<_>>(),
+    );
+    for codec in [
+        "A_PCM/INT/LIT",
+        "A_PCM/INT/BIG",
+        "A_PCM/FLOAT/IEEE",
+        "A_AAC",
+        "A_OPUS",
+        "A_FLAC",
+        "A_MPEG/L1",
+        "A_MPEG/L2",
+        "A_MPEG/L3",
+        "A_ALAC",
+    ] {
+        if reader.tracks.iter().enumerate().any(|(index, t)| {
+            ((options.streams.is_empty() && preferred.contains(&t.number))
+                || options.streams.contains(&index))
+                && t.kind == 2
+                && t.codec == codec
+        }) {
+            return Ok(Some(codec));
+        }
+    }
+    Ok(None)
 }
 pub(crate) fn single_audio_options(options: &CopyOptions) -> bool {
     options.streams.len() <= 1
@@ -305,23 +347,56 @@ pub fn decode_audio_transformed(
         return crate::owned_mp4_audio_export::apply(source, destination, transform, options);
     }
     if head_slice.starts_with(&[0x1a, 0x45, 0xdf, 0xa3]) {
-        if crate::owned_matroska_pcm_export::recognizes(source, options)? {
-            return crate::owned_matroska_pcm_export::apply(source, destination, transform, options);
-        }
-        if crate::owned_matroska_aac_export::recognizes(source, options)? {
-            return crate::owned_matroska_aac_export::apply(source, destination, transform, options);
-        }
-        if crate::owned_matroska_opus_export::recognizes(source, options)? {
-            return crate::owned_matroska_opus_export::apply(source, destination, transform, options);
-        }
-        if crate::owned_matroska_flac_export::recognizes(source, options)? {
-            return crate::owned_matroska_flac_export::apply(source, destination, transform, options);
-        }
-        if crate::owned_matroska_mp3_export::recognizes(source, options)? {
-            return crate::owned_matroska_mp3_export::apply(source, destination, transform, options);
-        }
-        if crate::owned_matroska_alac_export::recognizes(source, options)? {
-            return crate::owned_matroska_alac_export::apply(source, destination, transform, options);
+        match matroska_selected_codec(source, options)? {
+            Some("A_PCM/INT/LIT" | "A_PCM/INT/BIG" | "A_PCM/FLOAT/IEEE") => {
+                return crate::owned_matroska_pcm_export::apply(
+                    source,
+                    destination,
+                    transform,
+                    options,
+                );
+            }
+            Some("A_AAC") => {
+                return crate::owned_matroska_aac_export::apply(
+                    source,
+                    destination,
+                    transform,
+                    options,
+                );
+            }
+            Some("A_OPUS") => {
+                return crate::owned_matroska_opus_export::apply(
+                    source,
+                    destination,
+                    transform,
+                    options,
+                );
+            }
+            Some("A_FLAC") => {
+                return crate::owned_matroska_flac_export::apply(
+                    source,
+                    destination,
+                    transform,
+                    options,
+                );
+            }
+            Some("A_MPEG/L1" | "A_MPEG/L2" | "A_MPEG/L3") => {
+                return crate::owned_matroska_mp3_export::apply(
+                    source,
+                    destination,
+                    transform,
+                    options,
+                );
+            }
+            Some("A_ALAC") => {
+                return crate::owned_matroska_alac_export::apply(
+                    source,
+                    destination,
+                    transform,
+                    options,
+                );
+            }
+            _ => {}
         }
     }
     if head_slice.starts_with(b"fLaC") {

@@ -1,8 +1,8 @@
 {
   "target": 1000,
   "counting_rule": "One independently confirmed problem or useful capability; fixture variants and baseline integration repairs are excluded. Only accepted entries count.",
-  "accepted_count": 844,
-  "next_id": "FVID-0845",
+  "accepted_count": 849,
+  "next_id": "FVID-0850",
   "entries": [
     {
       "id": "FVID-0001",
@@ -9475,7 +9475,62 @@
       "result": "native_loudnorm::try_plan explicitly drops wave_file as soon as WAVE header/info inspection finishes.",
       "status": "accepted",
       "validation": "batch-622-validation.json"
+    },
+    {
+      "id": "FVID-0845",
+      "batch": 623,
+      "title": "Reuse 12-byte prefix and close probe handles before delegation in native_pcm::loudness",
+      "source": "src/native_pcm/loudness.rs",
+      "regression": "tests/loudness_audio_plan_and_matroska_export_single_open.rs",
+      "before": "measure_file_with_options read an 8-byte prefix and then called recognizes_standalone_audio(source) (which reopened the file to read 12 bytes) while keeping the BufReader<File> open across standalone/container delegation; default_weights_with_options also kept its WAVE probe File open across constant_audio_source_info_selected_with_options and source_geometry.",
+      "result": "measure_file_with_options_and_kind reads 12 bytes up front, passes them to recognizes_standalone_from_head, and drops the probe reader before delegating; default_weights_with_options drops the WAVE probe File immediately after is_wave_reader.",
+      "status": "accepted",
+      "validation": "batch-623-validation.json"
+    },
+    {
+      "id": "FVID-0846",
+      "batch": 623,
+      "title": "Single-pass MP4, G.711, Matroska, ADTS, and WAVE descriptor inspection in owned_audio_plan::source_descriptor_for_decode",
+      "source": "crates/fvid-media/src/owned_audio_plan.rs",
+      "regression": "tests/loudness_audio_plan_and_matroska_export_single_open.rs",
+      "before": "source_descriptor_for_decode called read_source_head(source) and then reopened the file multiple times: for MP4 it called recognizes(source) followed by descriptor_with_frames_for_decode(source); for G.711 WAVE it called recognizes(source) followed by descriptor_for_decode(source); and for Matroska, ADTS, and WAVE it opened a fresh File instead of reusing the head file handle.",
+      "result": "source_descriptor_for_decode reuses the open File across Matroska, ADTS, and WAVE inspection and uses single-pass try_descriptor_with_frames_for_decode and try_descriptor_for_decode helpers for MP4 and G.711 WAVE.",
+      "status": "accepted",
+      "validation": "batch-623-validation.json"
+    },
+    {
+      "id": "FVID-0847",
+      "batch": 623,
+      "title": "Eliminate duplicate source_descriptor pass in owned_container_loudnorm::apply and plan_loudnorm",
+      "source": "crates/fvid-media/src/owned_container_loudnorm.rs",
+      "regression": "tests/loudness_audio_plan_and_matroska_export_single_open.rs",
+      "before": "owned_container_loudnorm::apply and plan_loudnorm called plan_decode_audio(source, ...) (which computes source_descriptor_for_decode) and also called source_descriptor(source, ...) a second time on the same source.",
+      "result": "plan_decode_audio_with_descriptor returns both (MediaPlan, AudioDescriptor) in a single pass and is used by both owned_container_loudnorm::apply and plan_loudnorm.",
+      "status": "accepted",
+      "validation": "batch-623-validation.json"
+    },
+    {
+      "id": "FVID-0848",
+      "batch": 623,
+      "title": "Dispatch Matroska audio export by selected track codec in a single open in owned_audio_export",
+      "source": "crates/fvid-media/src/owned_audio_export.rs",
+      "regression": "tests/loudness_audio_plan_and_matroska_export_single_open.rs",
+      "before": "owned_audio_export::supports and decode_audio_transformed sequentially called recognizes(source, options) across up to six Matroska codec exporters (PCM, AAC, Opus, FLAC, MP3, ALAC), opening and scanning the Matroska container up to six times before dispatching.",
+      "result": "matroska_selected_codec opens the Matroska audio reader once, inspects the selected or preferred audio track codec, and dispatches directly to the matching codec exporter.",
+      "status": "accepted",
+      "validation": "batch-623-validation.json"
+    },
+    {
+      "id": "FVID-0849",
+      "batch": 623,
+      "title": "Reuse native measurement classification in normalize_file_with_options_and_prechecked_channels",
+      "source": "src/native_pcm/normalize.rs",
+      "regression": "tests/loudness_audio_plan_and_matroska_export_single_open.rs",
+      "before": "After measuring loudness, normalize_file_with_options_and_prechecked_channels re-probed is_wave(source) and constant_audio_source_info_selected_with_options(source, ...) to decide whether to use native export.",
+      "result": "measure_file_with_options_and_kind returns whether the source was measured by the native WAVE/MP4/MKA/ADTS path, and normalize_file_with_options_and_prechecked_channels reuses that flag directly.",
+      "status": "accepted",
+      "validation": "batch-623-validation.json"
     }
   ],
-  "pending_count": 156
+  "pending_count": 151
 }

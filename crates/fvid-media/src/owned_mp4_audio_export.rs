@@ -57,9 +57,16 @@ pub(crate) fn recognizes(source: &Path, options: &CopyOptions) -> Result<bool> {
     if file.read_exact(&mut prefix).is_err() || !crate::owned_mp4::recognizes_prefix(&prefix) {
         return Ok(false);
     }
+    drop(file);
     let reader = open(source, options)?;
+    Ok(recognizes_reader(&reader, options))
+}
+pub(crate) fn recognizes_reader(
+    reader: &crate::owned_mp4::Mp4Reader<BufReader<File>>,
+    options: &CopyOptions,
+) -> bool {
     let automatic = reader.automatic_track_indices(&[*b"soun"]);
-    Ok(reader.tracks().iter().enumerate().any(|(index, t)| {
+    reader.tracks().iter().enumerate().any(|(index, t)| {
         ((options.streams.is_empty() && automatic.contains(&index)) || options.streams.contains(&index))
             && t.handler == *b"soun"
             && matches!(
@@ -81,7 +88,18 @@ pub(crate) fn recognizes(source: &Path, options: &CopyOptions) -> Result<bool> {
                     | b"ms\x00\x11"
                     | b"ms\x00\x02"
             )
-    }))
+    })
+}
+pub(crate) fn try_descriptor_with_frames_for_decode(
+    source: &Path,
+    transform: Option<AudioDecodeTransform>,
+    options: &CopyOptions,
+) -> Result<Option<(usize, u32, u16, u32, String, bool, u64, Vec<u8>)>> {
+    let reader = open(source, options)?;
+    if !recognizes_reader(&reader, options) {
+        return Ok(None);
+    }
+    descriptor_with_frames_from_reader_for_decode(source, reader, transform, options).map(Some)
 }
 pub(crate) fn descriptor(
     source: &Path,
@@ -111,7 +129,22 @@ fn descriptor_and_reader_for_decode(
     Vec<u8>,
     crate::owned_mp4::Mp4Reader<BufReader<File>>,
 )> {
-    let mut reader = open(source, options)?;
+    let reader = open(source, options)?;
+    descriptor_and_reader_from_reader_for_decode(reader, transform, options)
+}
+fn descriptor_and_reader_from_reader_for_decode(
+    mut reader: crate::owned_mp4::Mp4Reader<BufReader<File>>,
+    transform: Option<AudioDecodeTransform>,
+    options: &CopyOptions,
+) -> Result<(
+    usize,
+    u32,
+    u16,
+    u32,
+    String,
+    Vec<u8>,
+    crate::owned_mp4::Mp4Reader<BufReader<File>>,
+)> {
     if !reader.refused().is_empty() {
         return Err("MP4 stream selection requires every track to be represented".into());
     }
@@ -229,8 +262,17 @@ pub(crate) fn descriptor_with_frames_for_decode(
     transform: Option<AudioDecodeTransform>,
     options: &CopyOptions,
 ) -> Result<(usize, u32, u16, u32, String, bool, u64, Vec<u8>)> {
+    let reader = open(source, options)?;
+    descriptor_with_frames_from_reader_for_decode(source, reader, transform, options)
+}
+fn descriptor_with_frames_from_reader_for_decode(
+    source: &Path,
+    reader: crate::owned_mp4::Mp4Reader<BufReader<File>>,
+    transform: Option<AudioDecodeTransform>,
+    options: &CopyOptions,
+) -> Result<(usize, u32, u16, u32, String, bool, u64, Vec<u8>)> {
     let (index, rate, channels, mask, codec, info, mut reader) =
-        descriptor_and_reader_for_decode(source, transform, options)?;
+        descriptor_and_reader_from_reader_for_decode(reader, transform, options)?;
     let track = &reader.tracks()[index];
     let interval = transform.and_then(|t| prefix(t, rate));
     let active_samples = crate::owned_mp4_audio::mp4_active_samples(track, reader.movie_timescale(), interval, options.max_packets);
