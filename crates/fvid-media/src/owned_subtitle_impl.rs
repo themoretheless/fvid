@@ -919,16 +919,26 @@ fn try_convert_matroska_inner(
             let text =
                 std::str::from_utf8(&payload).map_err(|_| invalid("Matroska ASS is not UTF-8"))?;
             let fields: Vec<&str> = text.splitn(9, ',').collect();
-            if text.is_empty() || text.contains('\0') || fields.len() != 9 {
+            if text.is_empty()
+                || text.contains('\0')
+                || fields.len() != 9
+                || fields[0].trim().parse::<u64>().is_err()
+            {
                 return Err(invalid("invalid Matroska ASS event"));
             }
-            let payload = if let Some((key, val)) = fields[1].trim().split_once('=')
-                && key.trim().eq_ignore_ascii_case("marked")
-                && !val.trim().is_empty()
-                && val.trim().bytes().all(|b| b.is_ascii_digit())
-            {
-                format!("{},{},{}", fields[0], val.trim(), fields[2..].join(",")).into_bytes()
+            let raw_layer = fields[1].trim();
+            let payload = if let Some((key, val)) = raw_layer.split_once('=') {
+                if !key.trim().eq_ignore_ascii_case("marked")
+                    || val.trim().parse::<i32>().is_err()
+                {
+                    return Err(invalid("invalid Matroska ASS event"));
+                }
+                format!("{},{},{}", fields[0].trim(), val.trim(), fields[2..].join(","))
+                    .into_bytes()
             } else {
+                if raw_layer.parse::<i32>().is_err() {
+                    return Err(invalid("invalid Matroska ASS event"));
+                }
                 payload
             };
             // Validate and charge hidden input before omitting its output.
@@ -1403,6 +1413,9 @@ fn try_convert_srt_inner(
                 let Some(arrow_pos) = rest.iter().position(|line| line.contains("-->")) else {
                     continue;
                 };
+                if max_packets.is_some_and(|limit| cues.len() as u64 >= limit) {
+                    return Err(invalid("packet work limit exceeded"));
+                }
                 let timing = if arrow_pos == 0 {
                     rest[0]
                 } else {
@@ -1429,6 +1442,19 @@ fn try_convert_srt_inner(
                     return Err(invalid("subtitle packet exceeds packet byte limit"));
                 }
                 event_bytes = event_bytes.saturating_add(formatted_len);
+                if let Some(limit) = max_controlled_bytes {
+                    let working = bytes
+                        .len()
+                        .saturating_add(text.len())
+                        .saturating_add(HEADER.len())
+                        .saturating_add(event_bytes)
+                        .saturating_add(cues.len().saturating_add(1).saturating_mul(80))
+                        .saturating_add(meta_working_bytes)
+                        .saturating_add(16384);
+                    if working > limit {
+                        return Err(invalid("controlled memory budget exceeded"));
+                    }
+                }
                 cues.push((start, end, body));
                 continue;
             }

@@ -4206,6 +4206,16 @@ See `batch-579-validation.json`.
 
 See `batch-580-validation.json`.
 
+## Batch 581 — FVID-0635..0639: `WAVEFORMATEXTENSIBLE` 4-bit ADPCM storage width validation, `max_packets`-bounded bare MP3 mix/merge planning, Matroska `S_TEXT/ASS` `ReadOrder`/`Layer` validation, inline `WEBVTT` header cue resource limits, and strict `subtitles::clock` range checks
+
+- **FVID-0635** — Require 4-bit storage and precision for `WAVEFORMATEXTENSIBLE` G.722 and Creative ADPCM in `Wav::parse` (`src/playback/audio/wav.rs`, `tests/wav_adpcm_mp3_plan_and_subtitle_validation.rs`).
+- **FVID-0636** — Bound bare MP3 frame estimation by `controls.max_packets` in `audio_plan_with_controls` (`crates/fvid-media/src/owned_audio_mix.rs`, `tests/wav_adpcm_mp3_plan_and_subtitle_validation.rs`).
+- **FVID-0637** — Validate `ReadOrder` and `Layer` integer fields in Matroska `S_TEXT/ASS` and `S_TEXT/SSA` conversion (`crates/fvid-media/src/owned_subtitle_impl.rs`, `tests/wav_adpcm_mp3_plan_and_subtitle_validation.rs`).
+- **FVID-0638** — Enforce `max_packets` and `max_controlled_bytes` on WebVTT cues sharing the `WEBVTT` header block (`crates/fvid-media/src/owned_subtitle_impl.rs`, `tests/wav_adpcm_mp3_plan_and_subtitle_validation.rs`).
+- **FVID-0639** — Require colon-separated `MM:SS` or `HH:MM:SS` with `minutes < 60` and `seconds < 60` in `subtitles::clock` (`src/subtitles.rs`, `tests/wav_adpcm_mp3_plan_and_subtitle_validation.rs`).
+
+See `batch-581-validation.json`.
+
 
 
 

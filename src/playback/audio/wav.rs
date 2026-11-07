@@ -671,6 +671,14 @@ pub(crate) fn parse_fmt(body: &[u8], limits: &Limits) -> Result<(Pcm, Option<u32
                     return Err(invalid("extensible G.711 requires eight-bit storage and precision"));
                 }
             }
+            0x0011 => {}
+            G722_ADPCM | ADPCM_CT => {
+                if bits != 4 || valid_bits != 4 {
+                    return Err(invalid(
+                        "extensible four-bit ADPCM requires four-bit storage and precision",
+                    ));
+                }
+            }
             // The union describes samples per block for compressed formats.
             // Retain their existing admission until separately qualified.
             _ => bits = valid_bits,

@@ -211,7 +211,26 @@ fn audio_plan_with_controls(
                 && crate::owned_raw_mp3::recognizes(source)?
             {
                 let parsed = crate::owned_raw_mp3::open(source, controls)?;
-                Some(parsed.presentation_samples())
+                let samples = if let Some(limit) = controls.max_packets {
+                    let window = parsed.presentation_window();
+                    let mut packets = u64::from(parsed.info_packet().is_some());
+                    let mut total = 0u64;
+                    for frame in &parsed.frames {
+                        if frame.pts >= window.end || packets >= limit {
+                            break;
+                        }
+                        packets += 1;
+                        let begin =
+                            window.start.saturating_sub(frame.pts).min(u64::from(frame.samples));
+                        let end =
+                            window.end.saturating_sub(frame.pts).min(u64::from(frame.samples));
+                        total = total.saturating_add(end.saturating_sub(begin));
+                    }
+                    total.min(parsed.presentation_samples())
+                } else {
+                    parsed.presentation_samples()
+                };
+                Some(samples)
             } else {
                 None
             };

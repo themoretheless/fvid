@@ -73,9 +73,9 @@ fn clock(text: &str) -> Option<Duration> {
     }
     let mut parts = times.split(':').rev();
     let seconds = parts.next()?.parse::<u64>().ok()?;
-    let minutes = parts.next().unwrap_or("0").parse::<u64>().ok()?;
+    let minutes = parts.next()?.parse::<u64>().ok()?;
     let hours = parts.next().unwrap_or("0").parse::<u64>().ok()?;
-    if parts.next().is_some() {
+    if parts.next().is_some() || seconds >= 60 || minutes >= 60 {
         return None;
     }
     Duration::from_secs(

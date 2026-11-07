@@ -1,8 +1,8 @@
 {
   "target": 1000,
   "counting_rule": "One independently confirmed problem or useful capability; fixture variants and baseline integration repairs are excluded. Only accepted entries count.",
-  "accepted_count": 634,
-  "next_id": "FVID-0635",
+  "accepted_count": 639,
+  "next_id": "FVID-0640",
   "entries": [
     {
       "id": "FVID-0001",
@@ -7165,6 +7165,61 @@
       "result": "Use self.timeline.last().map_or((self.bpm, self.speed), |row| (row.bpm, row.speed)) when serializing the XM tail packet header in Module::packet.",
       "status": "accepted",
       "validation": "batch-580-validation.json"
+    },
+    {
+      "id": "FVID-0635",
+      "batch": 581,
+      "title": "Require 4-bit storage and precision for WAVEFORMATEXTENSIBLE G.722 and Creative ADPCM in Wav::parse",
+      "source": "src/playback/audio/wav.rs",
+      "regression": "tests/wav_adpcm_mp3_plan_and_subtitle_validation.rs",
+      "before": "parse_fmt in src/playback/audio/wav.rs overwrote bits (container wBitsPerSample) with valid_bits (wValidBitsPerSample / wSamplesPerBlock) in the WAVEFORMATEXTENSIBLE wildcard arm before checking bits == 4, accepting malformed extensible G.722 and Creative ADPCM headers with 16-bit container storage and breaking IMA ADPCM wBitsPerSample validation.",
+      "result": "Keep container wBitsPerSample for IMA ADPCM (0x0011) and require bits == 4 && valid_bits == 4 for G722_ADPCM | ADPCM_CT in the WAVEFORMATEXTENSIBLE match of parse_fmt.",
+      "status": "accepted",
+      "validation": "batch-581-validation.json"
+    },
+    {
+      "id": "FVID-0636",
+      "batch": 581,
+      "title": "Bound bare MP3 frame estimation by controls.max_packets in audio_plan_with_controls",
+      "source": "crates/fvid-media/src/owned_audio_mix.rs",
+      "regression": "tests/wav_adpcm_mp3_plan_and_subtitle_validation.rs",
+      "before": "audio_plan_with_controls ignored controls.max_packets for bare MP3 inputs and always estimated parsed.presentation_samples(), overestimating input and output PCM working bytes and falsely failing max_controlled_bytes during plan_mix_audio_with_controls and plan_merge_audio_with_controls.",
+      "result": "Bound bare MP3 sample estimation in audio_plan_with_controls by controls.max_packets (counting any leading Info packet) to match decode_raw_mpeg_pcm execution.",
+      "status": "accepted",
+      "validation": "batch-581-validation.json"
+    },
+    {
+      "id": "FVID-0637",
+      "batch": 581,
+      "title": "Validate ReadOrder and Layer integer fields in Matroska S_TEXT/ASS and S_TEXT/SSA conversion",
+      "source": "crates/fvid-media/src/owned_subtitle_impl.rs",
+      "regression": "tests/wav_adpcm_mp3_plan_and_subtitle_validation.rs",
+      "before": "try_convert_matroska_inner only rewrote SSA Marked=<digits> layers and passed all other 9-field S_TEXT/ASS and S_TEXT/SSA packet payloads through without validating that ReadOrder and Layer were valid integers, emitting malformed ASS events when ReadOrder or Layer was non-numeric (e.g. 'Marked=abc').",
+      "result": "Validate fields[0] as u64 and fields[1] (or the value after 'Marked=') as i32 in try_convert_matroska_inner before accepting Matroska ASS/SSA subtitle packets.",
+      "status": "accepted",
+      "validation": "batch-581-validation.json"
+    },
+    {
+      "id": "FVID-0638",
+      "batch": 581,
+      "title": "Enforce max_packets and max_controlled_bytes on WebVTT cues sharing the WEBVTT header block",
+      "source": "crates/fvid-media/src/owned_subtitle_impl.rs",
+      "regression": "tests/wav_adpcm_mp3_plan_and_subtitle_validation.rs",
+      "before": "When a WebVTT file placed its first cue in the same paragraph block as the opening WEBVTT header line, try_convert_srt_inner pushed the cue and continued without checking max_packets or max_controlled_bytes.",
+      "result": "Check max_packets before parsing and max_controlled_bytes after accumulating event_bytes in the inline WEBVTT header cue branch of try_convert_srt_inner.",
+      "status": "accepted",
+      "validation": "batch-581-validation.json"
+    },
+    {
+      "id": "FVID-0639",
+      "batch": 581,
+      "title": "Require colon-separated MM:SS or HH:MM:SS with minutes < 60 and seconds < 60 in subtitles::clock",
+      "source": "src/subtitles.rs",
+      "regression": "tests/wav_adpcm_mp3_plan_and_subtitle_validation.rs",
+      "before": "subtitles::clock defaulted missing minutes to 0 and did not check seconds < 60 or minutes < 60, accepting bare numbers without colons (e.g. '12,000') and invalid 60+ minute/second fields as valid subtitle timestamps.",
+      "result": "Require at least minutes and seconds separated by ':' and enforce seconds < 60 && minutes < 60 in subtitles::clock.",
+      "status": "accepted",
+      "validation": "batch-581-validation.json"
     }
   ]
 }

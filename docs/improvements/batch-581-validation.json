@@ -1,0 +1,29 @@
+{
+  "status": "accepted",
+  "accepted_ids": [
+    "FVID-0635",
+    "FVID-0636",
+    "FVID-0637",
+    "FVID-0638",
+    "FVID-0639"
+  ],
+  "count_delta": 5,
+  "accepted_count": 639,
+  "next_id": "FVID-0640",
+  "qualification": [
+    {
+      "name": "wav-adpcm-mp3-plan-and-subtitle-validation",
+      "command": [
+        "cargo",
+        "test",
+        "--features",
+        "player",
+        "--test",
+        "wav_adpcm_mp3_plan_and_subtitle_validation"
+      ],
+      "exit_code": 0,
+      "passed": 5,
+      "ignored": 0
+    }
+  ]
+}
