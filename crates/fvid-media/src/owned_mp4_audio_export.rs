@@ -107,6 +107,13 @@ pub(crate) fn descriptor(
 ) -> Result<(usize, u32, u16, u32, String)> {
     descriptor_for_decode(source, None, options)
 }
+pub(crate) fn try_descriptor(
+    source: &Path,
+    options: &CopyOptions,
+) -> Result<Option<(usize, u32, u16, u32, String)>> {
+    try_descriptor_with_frames_for_decode(source, None, options)
+        .map(|opt| opt.map(|(index, rate, channels, mask, codec, _, _, _)| (index, rate, channels, mask, codec)))
+}
 pub(crate) fn descriptor_for_decode(
     source: &Path,
     transform: Option<AudioDecodeTransform>,
@@ -408,6 +415,21 @@ pub(crate) fn normalization_target(source:&Path,transform:AudioDecodeTransform,o
     Ok(Some((rate,output,mask)))
 }
 use crate::owned_adts_export::decoded_prefix as prefix;
+pub(crate) fn try_supports(
+    source: &Path,
+    transform: AudioDecodeTransform,
+    options: &CopyOptions,
+) -> Option<bool> {
+    let (_, rate, channels, mask, _, precise, _, _) =
+        match try_descriptor_with_frames_for_decode(source, Some(transform), options) {
+            Ok(Some(value)) => value,
+            Ok(None) => return None,
+            Err(error) => return Some(error.starts_with("controlled memory budget exceeded:")),
+        };
+    Some(supports_from_geometry(
+        source, transform, options, rate, channels, mask, precise,
+    ))
+}
 pub(crate) fn supports(
     source: &Path,
     transform: AudioDecodeTransform,
@@ -417,6 +439,17 @@ pub(crate) fn supports(
         Ok(value) => value,
         Err(error) => return error.starts_with("controlled memory budget exceeded:"),
     };
+    supports_from_geometry(source, transform, options, rate, channels, mask, precise)
+}
+fn supports_from_geometry(
+    source: &Path,
+    transform: AudioDecodeTransform,
+    options: &CopyOptions,
+    rate: u32,
+    channels: u16,
+    mask: u32,
+    precise: bool,
+) -> bool {
     let target=match normalization_target(source,transform,options,rate,channels,mask) {Ok(t)=>t,Err(e)=>return e.starts_with("controlled memory budget exceeded:")};
     let output = transform.channels.unwrap_or(i32::from(channels));
     let aac_fold=if target.is_none() && output!=i32::from(channels)&&matches!(output,1|2){match crate::owned_aac_export_routing::router_for_decode(source,rate,channels,Some(transform),options){Ok(router)=>router.is_some(),Err(error)=>return error.starts_with("controlled memory budget exceeded:")}}else{false};
@@ -483,6 +516,72 @@ pub(crate) fn apply(
     }
     let (_, source_rate, channels, mask, _, precise, source_frames, info) =
         descriptor_with_frames_for_decode(source, Some(transform), options)?;
+    apply_from_descriptor(
+        source,
+        destination,
+        transform,
+        options,
+        source_rate,
+        channels,
+        mask,
+        precise,
+        source_frames,
+        info,
+    )
+}
+pub(crate) fn try_apply(
+    source: &Path,
+    destination: &Path,
+    transform: AudioDecodeTransform,
+    options: &CopyOptions,
+) -> Result<Option<AudioDecodeStats>> {
+    if options.cancel.as_ref().is_some_and(|c| c.is_cancelled()) {
+        return Err("media operation cancelled".into());
+    }
+    if options.max_packet_bytes == 0 {
+        return Err("packet byte limit must be positive".into());
+    }
+    if options.max_packets == Some(0) {
+        return Err("packet work limit requires at least one packet".into());
+    }
+    if options.max_controlled_bytes == Some(0) {
+        return Err("controlled memory limit must be positive".into());
+    }
+    crate::owned_budget::check_rss_budget(options)?;
+    let Some((_, source_rate, channels, mask, _, precise, source_frames, info)) =
+        try_descriptor_with_frames_for_decode(source, Some(transform), options)?
+    else {
+        return Ok(None);
+    };
+    if destination.symlink_metadata().is_ok() {
+        return Err("output already exists".into());
+    }
+    apply_from_descriptor(
+        source,
+        destination,
+        transform,
+        options,
+        source_rate,
+        channels,
+        mask,
+        precise,
+        source_frames,
+        info,
+    )
+    .map(Some)
+}
+fn apply_from_descriptor(
+    source: &Path,
+    destination: &Path,
+    transform: AudioDecodeTransform,
+    options: &CopyOptions,
+    source_rate: u32,
+    channels: u16,
+    mask: u32,
+    precise: bool,
+    source_frames: u64,
+    info: Vec<u8>,
+) -> Result<AudioDecodeStats> {
     let target=normalization_target(source,transform,options,source_rate,channels,mask)?;
     let (rate,channels,mask)=target.unwrap_or((source_rate,channels,mask));
     let stage2_frames = if rate != source_rate && source_rate > 0 {

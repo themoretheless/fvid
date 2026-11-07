@@ -210,26 +210,31 @@ pub(crate) fn descriptor_with_transform(
         descriptor_for_decode(path, transform, options)?;
     Ok((rate, channels, mask, codec, frames_read))
 }
+pub(crate) fn try_supports(
+    path: &Path,
+    transform: AudioDecodeTransform,
+    options: &CopyOptions,
+) -> Option<bool> {
+    match try_descriptor_for_decode(path, Some(transform), options) {
+        Ok(Some((_rate, channels, mask, _codec, _frames, _info_len))) => {
+            let target = transform.channels.unwrap_or(i32::from(channels));
+            Some(
+                target == i32::from(channels)
+                    || (matches!(target, 1 | 2)
+                        && crate::owned_pcm_channels::rematrix_layout_supported(channels, mask))
+                    || (channels <= 2 && (1..=8).contains(&target)),
+            )
+        }
+        Ok(None) => None,
+        Err(error) => Some(error.starts_with("controlled memory budget exceeded:")),
+    }
+}
 pub(crate) fn supports(
     path: &Path,
     transform: AudioDecodeTransform,
     options: &CopyOptions,
 ) -> bool {
-    match descriptor_with_transform(path, Some(transform), options) {
-        Ok((_rate, channels, mask, _codec, _frames)) => {
-            let target = transform
-                .channels
-                .unwrap_or(i32::from(channels));
-            target == i32::from(channels)
-                || (matches!(target, 1 | 2)
-                    && crate::owned_pcm_channels::rematrix_layout_supported(
-                        channels,
-                        mask,
-                    ))
-                || (channels <= 2 && (1..=8).contains(&target))
-        }
-        Err(error) => error.starts_with("controlled memory budget exceeded:"),
-    }
+    try_supports(path, transform, options).unwrap_or(false)
 }
 fn decode(
     input: &mut Input,
@@ -284,7 +289,28 @@ pub(crate) fn decode_to_wave(
     options: &CopyOptions,
 ) -> Result<crate::owned_adts_export::DecodedSpool> {
     check(options)?;
-    let (mut input, info) = open(source, options)?;
+    let (input, info) = open(source, options)?;
+    decode_input_to_wave(input, info, options)
+}
+pub(crate) fn try_decode_to_wave(
+    source: &Path,
+    options: &CopyOptions,
+) -> Result<Option<crate::owned_adts_export::DecodedSpool>> {
+    check(options)?;
+    let mut file = File::open(source).map_err(|e| e.to_string())?;
+    let Some(law) = crate::owned_wave_inspect::g711_law(&mut file, options.cancel.as_ref())
+        .map_err(|e| e.to_string())?
+    else {
+        return Ok(None);
+    };
+    let (input, info) = open_from_file_and_law(file, law, options)?;
+    decode_input_to_wave(input, info, options).map(Some)
+}
+fn decode_input_to_wave(
+    mut input: Input,
+    info: Vec<u8>,
+    options: &CopyOptions,
+) -> Result<crate::owned_adts_export::DecodedSpool> {
     let rate = input.shape.sample_rate;
     let channels = input.shape.channels;
     let mask = input.mask;
@@ -309,7 +335,35 @@ pub(crate) fn apply(
     if destination.symlink_metadata().is_ok() {
         return Err("destination already exists".into());
     }
-    let (mut input, info) = open(source, options)?;
+    let (input, info) = open(source, options)?;
+    apply_input(input, info, destination, transform, options)
+}
+pub(crate) fn try_apply(
+    source: &Path,
+    destination: &Path,
+    transform: AudioDecodeTransform,
+    options: &CopyOptions,
+) -> Result<Option<AudioDecodeStats>> {
+    check(options)?;
+    let mut file = File::open(source).map_err(|e| e.to_string())?;
+    let Some(law) = crate::owned_wave_inspect::g711_law(&mut file, options.cancel.as_ref())
+        .map_err(|e| e.to_string())?
+    else {
+        return Ok(None);
+    };
+    if destination.symlink_metadata().is_ok() {
+        return Err("destination already exists".into());
+    }
+    let (input, info) = open_from_file_and_law(file, law, options)?;
+    apply_input(input, info, destination, transform, options).map(Some)
+}
+fn apply_input(
+    mut input: Input,
+    info: Vec<u8>,
+    destination: &Path,
+    transform: AudioDecodeTransform,
+    options: &CopyOptions,
+) -> Result<AudioDecodeStats> {
     let rate = input.shape.sample_rate;
     let channels = input.shape.channels;
     let mask = input.mask;

@@ -31,9 +31,12 @@ pub(crate) fn supports(
     if head_len == 12
         && &head[..4] == b"RIFF"
         && &head[8..12] == b"WAVE"
-        && crate::owned_g711_wave_export::recognizes(source, options).unwrap_or(false)
     {
-        return crate::owned_g711_wave_export::supports(source, transform, options);
+        if let Some(supported) =
+            crate::owned_g711_wave_export::try_supports(source, transform, options)
+        {
+            return supported;
+        }
     }
     if head_slice.starts_with(b"OggS") {
         return match crate::owned_ogg_audio_export::open_selected_ogg(source, options) {
@@ -49,11 +52,12 @@ pub(crate) fn supports(
             Err(error) => error.starts_with("controlled memory budget exceeded:"),
         };
     }
-    if head_len >= 8
-        && crate::owned_mp4::recognizes_prefix(&head[..8])
-        && crate::owned_mp4_audio_export::recognizes(source, options).unwrap_or(false)
-    {
-        return crate::owned_mp4_audio_export::supports(source, transform, options);
+    if head_len >= 8 && crate::owned_mp4::recognizes_prefix(&head[..8]) {
+        if let Some(supported) =
+            crate::owned_mp4_audio_export::try_supports(source, transform, options)
+        {
+            return supported;
+        }
     }
     if head_slice.starts_with(&[0x1a, 0x45, 0xdf, 0xa3]) {
         return match matroska_selected_codec(source, options) {
@@ -303,9 +307,12 @@ pub fn decode_audio_transformed(
     if head_len == 12
         && &head[..4] == b"RIFF"
         && &head[8..12] == b"WAVE"
-        && crate::owned_g711_wave_export::recognizes(source, options)?
     {
-        return crate::owned_g711_wave_export::apply(source, destination, transform, options);
+        if let Some(stats) =
+            crate::owned_g711_wave_export::try_apply(source, destination, transform, options)?
+        {
+            return Ok(stats);
+        }
     }
     if head_slice.starts_with(b"OggS") {
         let (_, backend, ogg, index) =
@@ -340,11 +347,12 @@ pub fn decode_audio_transformed(
             }
         };
     }
-    if head_len >= 8
-        && crate::owned_mp4::recognizes_prefix(&head[..8])
-        && crate::owned_mp4_audio_export::recognizes(source, options)?
-    {
-        return crate::owned_mp4_audio_export::apply(source, destination, transform, options);
+    if head_len >= 8 && crate::owned_mp4::recognizes_prefix(&head[..8]) {
+        if let Some(stats) =
+            crate::owned_mp4_audio_export::try_apply(source, destination, transform, options)?
+        {
+            return Ok(stats);
+        }
     }
     if head_slice.starts_with(&[0x1a, 0x45, 0xdf, 0xa3]) {
         match matroska_selected_codec(source, options)? {

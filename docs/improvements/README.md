@@ -4636,4 +4636,15 @@ See `batch-622-validation.json`.
 
 See `batch-623-validation.json`.
 
+## Batch 624 — FVID-0850..0854: Single-pass container loudness geometry, MP4/G.711 export dispatch, and float32 WAVE mix fast path
+
+- **FVID-0850** — Single-pass MP4 and G.711 WAVE descriptor lookup in `owned_container_loudness::geometry_with_frames_unqualified` (`crates/fvid-media/src/owned_container_loudness.rs`, `tests/container_loudness_and_mp4_g711_export_single_open.rs`).
+- **FVID-0851** — Single-open G.711 WAVE spooling and direct MP4 dispatch in `owned_container_loudness::decode_to_wave_from_geometry` (`crates/fvid-media/src/owned_container_loudness.rs`, `tests/container_loudness_and_mp4_g711_export_single_open.rs`).
+- **FVID-0852** — Return `sample_frames` from `geometry_with_frames` to eliminate second `source_descriptor` pass in `owned_container_loudness` (`crates/fvid-media/src/owned_container_loudness.rs`, `tests/container_loudness_and_mp4_g711_export_single_open.rs`).
+- **FVID-0853** — Single-open `try_supports` and `try_apply` for G.711 WAVE and MP4 in `owned_audio_export` (`crates/fvid-media/src/owned_audio_export.rs`, `tests/container_loudness_and_mp4_g711_export_single_open.rs`).
+- **FVID-0854** — Eliminate redundant G.711 WAVE pre-probe before float32 WAVE fast path in `owned_audio_mix::decode_owned_audio_with_controls` (`crates/fvid-media/src/owned_audio_mix.rs`, `tests/container_loudness_and_mp4_g711_export_single_open.rs`).
+
+See `batch-624-validation.json`.
+
+
 

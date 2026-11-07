@@ -264,11 +264,7 @@ pub(crate) fn decode_owned_audio_with_controls(
 ) -> Result<(AudioDecodeStats, Vec<u8>)> {
     validate_mix_controls(controls)?;
     let (head, head_len) = crate::owned_audio_plan::read_source_head(source)?;
-    if head_len == 12
-        && &head[..4] == b"RIFF"
-        && &head[8..12] == b"WAVE"
-        && !crate::owned_g711_wave_export::recognizes(source, controls)?
-    {
+    if head_len == 12 && &head[..4] == b"RIFF" && &head[8..12] == b"WAVE" {
         match read_float_wave_with_admission(
             source,
             Some(32),
@@ -288,7 +284,9 @@ pub(crate) fn decode_owned_audio_with_controls(
             |_| crate::owned_budget::check_rss_budget(controls),
         ) {
             Ok(result) => return Ok(result),
-            Err(err) if err.starts_with("mix-audio requires float PCM inputs") => {}
+            Err(err)
+                if err.starts_with("mix-audio requires float PCM inputs")
+                    || err.starts_with("owned WAVE reader requires PCM or IEEE float") => {}
             Err(err) => return Err(err),
         }
     }

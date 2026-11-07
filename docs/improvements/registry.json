@@ -1,8 +1,8 @@
 {
   "target": 1000,
   "counting_rule": "One independently confirmed problem or useful capability; fixture variants and baseline integration repairs are excluded. Only accepted entries count.",
-  "accepted_count": 849,
-  "next_id": "FVID-0850",
+  "accepted_count": 854,
+  "next_id": "FVID-0855",
   "entries": [
     {
       "id": "FVID-0001",
@@ -9530,7 +9530,62 @@
       "result": "measure_file_with_options_and_kind returns whether the source was measured by the native WAVE/MP4/MKA/ADTS path, and normalize_file_with_options_and_prechecked_channels reuses that flag directly.",
       "status": "accepted",
       "validation": "batch-623-validation.json"
+    },
+    {
+      "id": "FVID-0850",
+      "batch": 624,
+      "title": "Single-pass MP4 and G.711 WAVE descriptor lookup in owned_container_loudness::geometry_with_frames_unqualified",
+      "source": "crates/fvid-media/src/owned_container_loudness.rs",
+      "regression": "tests/container_loudness_and_mp4_g711_export_single_open.rs",
+      "before": "geometry_with_frames_unqualified called recognizes(source, options) followed by descriptor(source, options) for both G.711 WAVE and MP4 sources, opening and indexing the container twice.",
+      "result": "geometry_with_frames_unqualified uses try_descriptor_for_decode and try_descriptor to inspect G.711 WAVE and MP4 sources in a single open.",
+      "status": "accepted",
+      "validation": "batch-624-validation.json"
+    },
+    {
+      "id": "FVID-0851",
+      "batch": 624,
+      "title": "Single-open G.711 WAVE spooling and direct MP4 dispatch in owned_container_loudness::decode_to_wave_from_geometry",
+      "source": "crates/fvid-media/src/owned_container_loudness.rs",
+      "regression": "tests/container_loudness_and_mp4_g711_export_single_open.rs",
+      "before": "decode_to_wave_from_geometry called owned_g711_wave_export::recognizes followed by decode_to_wave, and called owned_mp4_audio_export::recognizes a second time after geometry_with_frames had already verified container support.",
+      "result": "decode_to_wave_from_geometry calls owned_g711_wave_export::try_decode_to_wave in one open and dispatches MP4 inputs directly from the 8-byte prefix after geometry validation.",
+      "status": "accepted",
+      "validation": "batch-624-validation.json"
+    },
+    {
+      "id": "FVID-0852",
+      "batch": 624,
+      "title": "Return sample_frames from geometry_with_frames to eliminate second source_descriptor pass in owned_container_loudness",
+      "source": "crates/fvid-media/src/owned_container_loudness.rs",
+      "regression": "tests/container_loudness_and_mp4_g711_export_single_open.rs",
+      "before": "When options.max_controlled_bytes was set, measure_loudness and plan_loudness called geometry_with_frames(source, options) and then called owned_audio_plan::source_descriptor(source, options) a second time just to read sample_frames.",
+      "result": "geometry_with_frames returns (rate, channels, mask, sample_frames) directly so measure_loudness and plan_loudness check the spool WAVE budget without a second descriptor pass.",
+      "status": "accepted",
+      "validation": "batch-624-validation.json"
+    },
+    {
+      "id": "FVID-0853",
+      "batch": 624,
+      "title": "Single-open try_supports and try_apply for G.711 WAVE and MP4 in owned_audio_export",
+      "source": "crates/fvid-media/src/owned_audio_export.rs",
+      "regression": "tests/container_loudness_and_mp4_g711_export_single_open.rs",
+      "before": "owned_audio_export::supports and decode_audio_transformed called recognizes(source, options) followed by supports/apply for G.711 WAVE and MP4 inputs, opening and indexing each file twice.",
+      "result": "owned_audio_export::supports and decode_audio_transformed call try_supports and try_apply on G.711 WAVE and MP4 inputs, falling through to linear PCM WAVE or other handlers when None is returned.",
+      "status": "accepted",
+      "validation": "batch-624-validation.json"
+    },
+    {
+      "id": "FVID-0854",
+      "batch": 624,
+      "title": "Eliminate redundant G.711 WAVE pre-probe before float32 WAVE fast path in owned_audio_mix::decode_owned_audio_with_controls",
+      "source": "crates/fvid-media/src/owned_audio_mix.rs",
+      "regression": "tests/container_loudness_and_mp4_g711_export_single_open.rs",
+      "before": "decode_owned_audio_with_controls called owned_g711_wave_export::recognizes(source, controls) before attempting read_float_wave_with_admission on every RIFF/WAVE input, opening every float32 WAVE file an extra time.",
+      "result": "decode_owned_audio_with_controls calls read_float_wave_with_admission directly on RIFF/WAVE inputs and falls back to the general decode spool when the WAVE format is G.711 or integer PCM.",
+      "status": "accepted",
+      "validation": "batch-624-validation.json"
     }
   ],
-  "pending_count": 151
+  "pending_count": 146
 }
