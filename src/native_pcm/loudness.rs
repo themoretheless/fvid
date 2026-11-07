@@ -195,11 +195,18 @@ pub(super) fn measure_file_with_optional_weights_and_kind(
                 || prefix.starts_with(&[0x1a, 0x45, 0xdf, 0xa3]))
                 && (options.max_controlled_bytes.is_some()
                     || {
-                        drop(input.take());
-                        native_media::constant_audio_source_info_selected_with_options(
-                            source, selected, options,
-                        )
-                        .is_err()
+                        let check_res = match input.as_ref().and_then(|r| r.get_ref().try_clone().ok()) {
+                            Some(dup) => native_media::constant_audio_source_info_selected_from_file_with_interval_and_options(
+                                dup, selected, None, options,
+                            ),
+                            None => {
+                                drop(input.take());
+                                native_media::constant_audio_source_info_selected_with_options(
+                                    source, selected, options,
+                                )
+                            }
+                        };
+                        check_res.is_err()
                     }))
     } {
         drop(input.take());
@@ -499,13 +506,17 @@ pub fn default_weights_with_options(
             ));
         }
         info.channels
-    } else if {
-        drop(file.take());
-        options.max_controlled_bytes.is_none()
-    } && let Ok(info) = crate::native_media::constant_audio_source_info_selected_with_options(source, selected, options)
+    } else if options.max_controlled_bytes.is_none()
+        && let Ok(info) = crate::native_media::constant_audio_source_info_selected_from_file_with_interval_and_options(
+            file.take().unwrap(),
+            selected,
+            None,
+            options,
+        )
     {
         info.channels
     } else {
+        drop(file.take());
         let mut geom_options = options.clone();
         geom_options.metadata_set.clear();
         geom_options.metadata_delete.clear();

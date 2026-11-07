@@ -124,14 +124,13 @@ pub fn decode_audio_with_options(
         info.decode_interval(transform.interval.map(|(a,b)|(std::time::Duration::from_micros(a as u64),std::time::Duration::from_micros(b as u64)))).map_err(|e|e.to_string())?;
         (0,info.sample_rate,info.channels,info.codec(),"FVid packed WAVE PCM conversion to interleaved float32".to_owned())
     } else {
-        drop(file);
         let interval = transform.interval.map(|(a, b)| {
             (
                 std::time::Duration::from_micros(a as u64),
                 std::time::Duration::from_micros(b as u64),
             )
         });
-        let info=crate::native_media::constant_audio_source_info_selected_with_interval_and_options(source,selected,interval,options).map_err(|e|e.to_string())?;
+        let info=crate::native_media::constant_audio_source_info_selected_from_file_with_interval_and_options(file,selected,interval,options).map_err(|e|e.to_string())?;
         if let Some(mem_limit) = options.max_controlled_bytes
             && let Some(needed) = info.max_packet_and_index_bytes
             && needed > mem_limit

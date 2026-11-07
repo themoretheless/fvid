@@ -129,12 +129,22 @@ pub(crate) fn validate_first_mp4_frame_with_reader(
             "owned FFV1 export requires one AVC/HEVC video and supported AAC companion tracks",
         ));
     }
+    let reader_file = input.reader_ref().get_ref().try_clone();
     let tracks = input.tracks().to_vec();
     let video = tracks.iter().position(|t| t.handler == *b"vide").unwrap();
     for t in &tracks {
         mp4_matroska::plan(t, input.movie_timescale(), None)?;
     }
-    let mut reader = NativeReader::software(BufReader::new(File::open(source)?), usize::MAX)?;
+    let mut reader = NativeReader::software(
+        BufReader::new(match reader_file {
+            Ok(mut dup) => {
+                dup.seek(std::io::SeekFrom::Start(0))?;
+                dup
+            }
+            Err(_) => File::open(source)?,
+        }),
+        usize::MAX,
+    )?;
     let first = reader
         .read_frame_raw()?
         .ok_or_else(|| invalid("input has no decoded video frames"))?;
@@ -223,13 +233,23 @@ pub(crate) fn write_mp4_selected_with_reader<W: Write + Seek>(
             "owned FFV1 export requires one AVC/HEVC video and supported AAC companion tracks",
         ));
     }
+    let reader_file = input.reader_ref().get_ref().try_clone();
     let tracks = input.tracks().to_vec();
     let video = tracks.iter().position(|t| t.handler == *b"vide").unwrap();
     let plans = tracks
         .iter()
         .map(|t| mp4_matroska::plan(t, input.movie_timescale(), cancel))
         .collect::<Result<Vec<_>>>()?;
-    let mut reader = NativeReader::software(BufReader::new(File::open(source)?), usize::MAX)?;
+    let mut reader = NativeReader::software(
+        BufReader::new(match reader_file {
+            Ok(mut dup) => {
+                dup.seek(std::io::SeekFrom::Start(0))?;
+                dup
+            }
+            Err(_) => File::open(source)?,
+        }),
+        usize::MAX,
+    )?;
     let first = reader
         .read_frame_raw()?
         .ok_or_else(|| invalid("input has no decoded video frames"))?;

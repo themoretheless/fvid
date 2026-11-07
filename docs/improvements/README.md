@@ -4862,6 +4862,11 @@ See `batch-628-validation.json`.
 - **FVID-0983**: Reuse open `File` handle across 8-byte prefix inspection, MP4 budget validation, and `remux`/`plan_remux` execution (`src/media.rs`).
 - **FVID-0984**: Reuse open `File` handles across `probe` and `NativeReader::software` in `overlay::Source::open` and `native_plan::decode_overlay_with_geometry_and_filters` (`src/native_export/overlay.rs`).
 
+## Batch 651 (FVID-0985..0989)
 
-
+- **FVID-0985**: Reuse open `File` handle across `is_wave_reader` and `constant_audio_source_info_selected_from_file_with_interval_and_options` in `native_audio_mix::concat::geometry_with_options` (`src/native_audio_mix/concat.rs`).
+- **FVID-0986**: Reuse open `File` handle across `is_wave_reader`, `constant_audio_source_info_selected_from_file_with_interval_and_options`, and MP4/Matroska loudness readers in `native_pcm::loudness` (`src/native_pcm/loudness.rs`).
+- **FVID-0987**: Reuse open `File` handle across MP4 constant-description check and `constant_audio_source_info_selected_from_file_with_interval_and_options` in `native_plan::decode_audio_with_options` (`src/native_plan.rs`).
+- **FVID-0988**: Reuse open `File` handle across 8-byte WAVE prefix check and `probe_from_file_with_options` in `pcm_matroska::extract_source_pcm_metadata_with_interval_packet_and_memory_limit` (`src/native_export/pcm_matroska.rs`).
+- **FVID-0989**: Reuse open `File` handle from `Mp4Reader::reader_ref` for `NativeReader::software` in `native_lossless::validate_first_mp4_frame_with_reader` and `write_mp4_selected_with_reader` (`src/native_lossless.rs`).
 

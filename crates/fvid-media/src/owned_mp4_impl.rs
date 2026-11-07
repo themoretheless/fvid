@@ -1237,6 +1237,10 @@ impl<R: Read + Seek> Mp4Reader<R> {
     pub fn invalidate_position(&mut self) {
         self.position = u64::MAX;
     }
+    /// Borrow the underlying reader.
+    pub fn reader_ref(&self) -> &R {
+        &self.reader
+    }
 }
 
 /// The uncompressed PCM tags whose sample entry is the whole description.

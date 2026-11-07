@@ -32,8 +32,12 @@ fn geometry_with_options(source: &Path, options: &fvid_media::CopyOptions) -> Re
             let info = crate::native_pcm::inspect(&mut wave_file, options.cancel.as_ref())?;
             return Ok((info.sample_rate, info.channels));
         }
-        drop(wave_file);
-        if let Ok(info) = crate::native_media::constant_audio_source_info_selected_with_options(source, None, options) {
+        if let Ok(info) = crate::native_media::constant_audio_source_info_selected_from_file_with_interval_and_options(
+            wave_file,
+            None,
+            None,
+            options,
+        ) {
             return Ok((info.sample_rate, info.channels));
         }
     }

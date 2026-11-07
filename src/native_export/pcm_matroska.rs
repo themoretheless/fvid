@@ -153,7 +153,7 @@ pub(crate) fn extract_source_pcm_metadata_with_interval_packet_and_memory_limit(
     }
     input.seek(SeekFrom::Start(0))?;
     if allow_wave && matches!(&prefix[..4], b"RIFF" | b"RF64" | b"RIFX") {
-        drop(input);
+        let file = input.into_inner();
         let mut base = default_matroska_pcm_metadata();
         let mut probe_opts = fvid_media::CopyOptions::default();
         probe_opts.max_controlled_bytes = max_controlled_bytes;
@@ -162,7 +162,7 @@ pub(crate) fn extract_source_pcm_metadata_with_interval_packet_and_memory_limit(
             probe_opts.max_packet_bytes = maximum;
         }
         probe_opts.max_packets = max_packets;
-        let info = crate::native_probe::probe_with_options(source, &probe_opts)
+        let info = crate::native_probe::probe_from_file_with_options(source, file, &probe_opts)
             .map_err(|e| invalid(&e))?;
         for (key, value) in info.metadata {
             if value.is_empty() || value.contains('\0') || value.len() > 1024 {

@@ -427,6 +427,14 @@ pub(crate) fn probe_with_options(
     try_probe_as_with_options(source, None, options)?
         .ok_or_else(|| "native probe does not yet support this container".into())
 }
+pub(crate) fn probe_from_file_with_options(
+    source: &Path,
+    file: File,
+    options: &fvid_media::CopyOptions,
+) -> Result<MediaInfo> {
+    try_probe_from_file_with_options(source, file, None, options)?
+        .ok_or_else(|| "native probe does not yet support this container".into())
+}
 pub fn probe_as(source: &Path, format: Option<&str>) -> Result<MediaInfo> {
     try_probe_as(source, format)?
         .ok_or_else(|| "native probe does not yet support this container".into())
@@ -476,7 +484,6 @@ pub(crate) fn try_probe_as_with_options(
     format: Option<&str>,
     options: &fvid_media::CopyOptions,
 ) -> Result<Option<MediaInfo>> {
-    use std::io::{Read, Seek, SeekFrom};
     validate_probe_options(options)?;
     match format {
         Some("mov" | "mp4" | "m4a" | "3gp" | "3g2" | "mj2" | "mov,mp4,m4a,3gp,3g2,mj2") => {

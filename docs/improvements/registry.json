@@ -1,8 +1,8 @@
 {
   "target": 1000,
   "counting_rule": "One independently confirmed problem or useful capability; fixture variants and baseline integration repairs are excluded. Only accepted entries count.",
-  "accepted_count": 984,
-  "next_id": "FVID-0985",
+  "accepted_count": 989,
+  "next_id": "FVID-0990",
   "entries": [
     {
       "id": "FVID-0001",
@@ -11015,6 +11015,61 @@
       "result": "Added probe_from_file and validate_pair_from_main_file_with_geometry_and_filters and reused the open main and foreground File handles across probing and NativeReader::software.",
       "status": "accepted",
       "validation": "batch-650-validation.json"
+    },
+    {
+      "id": "FVID-0985",
+      "batch": 651,
+      "title": "Reuse open File handle across is_wave_reader and constant_audio_source_info_selected_from_file_with_interval_and_options in native_audio_mix::concat::geometry_with_options",
+      "source": "src/native_audio_mix/concat.rs",
+      "regression": "tests/audio_concat_loudness_and_lossless_handle_reuse.rs",
+      "before": "native_audio_mix::concat::geometry_with_options opened source for is_wave_reader, dropped the File handle on non-WAVE inputs, and immediately reopened source in constant_audio_source_info_selected_with_options.",
+      "result": "Passed the open File handle directly to constant_audio_source_info_selected_from_file_with_interval_and_options in geometry_with_options.",
+      "status": "accepted",
+      "validation": "batch-651-validation.json"
+    },
+    {
+      "id": "FVID-0986",
+      "batch": 651,
+      "title": "Reuse open File handle across is_wave_reader, constant_audio_source_info_selected_from_file_with_interval_and_options, and MP4/Matroska loudness readers in native_pcm::loudness",
+      "source": "src/native_pcm/loudness.rs",
+      "regression": "tests/audio_concat_loudness_and_lossless_handle_reuse.rs",
+      "before": "measure_file_with_optional_weights_and_kind and default_weights_with_options dropped the open File handle before calling constant_audio_source_info_selected_with_options, and measure_file_with_optional_weights_and_kind then had to reopen the file a third time to open Mp4Reader or WebmReader.",
+      "result": "Used constant_audio_source_info_selected_from_file_with_interval_and_options in default_weights_with_options and measure_file_with_optional_weights_and_kind (preserving input via try_clone) so Mp4Reader and WebmReader reuse the already-open BufReader<File>.",
+      "status": "accepted",
+      "validation": "batch-651-validation.json"
+    },
+    {
+      "id": "FVID-0987",
+      "batch": 651,
+      "title": "Reuse open File handle across MP4 constant-description check and constant_audio_source_info_selected_from_file_with_interval_and_options in native_plan::decode_audio_with_options",
+      "source": "src/native_plan.rs",
+      "regression": "tests/audio_concat_loudness_and_lossless_handle_reuse.rs",
+      "before": "native_plan::decode_audio_with_options opened source to read the 8-byte prefix and inspect MP4 track headers, dropped the File handle on non-WAVE inputs, and immediately reopened source in constant_audio_source_info_selected_with_interval_and_options.",
+      "result": "Passed the open File handle directly to constant_audio_source_info_selected_from_file_with_interval_and_options in decode_audio_with_options.",
+      "status": "accepted",
+      "validation": "batch-651-validation.json"
+    },
+    {
+      "id": "FVID-0988",
+      "batch": 651,
+      "title": "Reuse open File handle across 8-byte WAVE prefix check and probe_from_file_with_options in pcm_matroska::extract_source_pcm_metadata_with_interval_packet_and_memory_limit",
+      "source": "src/native_export/pcm_matroska.rs",
+      "regression": "tests/audio_concat_loudness_and_lossless_handle_reuse.rs",
+      "before": "extract_source_pcm_metadata_with_interval_packet_and_memory_limit opened source to read the 8-byte prefix, dropped the BufReader<File> on WAVE inputs, and reopened source in native_probe::probe_with_options.",
+      "result": "Added probe_from_file_with_options in media_probe.rs and passed input.into_inner() from extract_source_pcm_metadata_with_interval_packet_and_memory_limit.",
+      "status": "accepted",
+      "validation": "batch-651-validation.json"
+    },
+    {
+      "id": "FVID-0989",
+      "batch": 651,
+      "title": "Reuse open File handle from Mp4Reader::reader_ref for NativeReader::software in native_lossless::validate_first_mp4_frame_with_reader and write_mp4_selected_with_reader",
+      "source": "src/native_lossless.rs",
+      "regression": "tests/audio_concat_loudness_and_lossless_handle_reuse.rs",
+      "before": "validate_first_mp4_frame_with_reader and write_mp4_selected_with_reader received a pre-opened Mp4Reader<BufReader<File>> but still called File::open(source) to open NativeReader::software.",
+      "result": "Added Mp4Reader::reader_ref and reused a cloned, rewound File handle from the pre-opened Mp4Reader for NativeReader::software.",
+      "status": "accepted",
+      "validation": "batch-651-validation.json"
     }
   ],
   "pending_count": 116
