@@ -1,0 +1,27 @@
+{
+  "status": "accepted",
+  "accepted_ids": [
+    "FVID-0670",
+    "FVID-0671",
+    "FVID-0672",
+    "FVID-0673",
+    "FVID-0674"
+  ],
+  "count_delta": 5,
+  "accepted_count": 674,
+  "next_id": "FVID-0675",
+  "qualification": [
+    {
+      "name": "standalone-loudnorm-gray-shuffleplanes-and-subtitles",
+      "command": [
+        "cargo",
+        "test",
+        "--test",
+        "standalone_loudnorm_gray_shuffleplanes_and_subtitles"
+      ],
+      "exit_code": 0,
+      "passed": 5,
+      "ignored": 0
+    }
+  ]
+}

@@ -1,8 +1,8 @@
 {
   "target": 1000,
   "counting_rule": "One independently confirmed problem or useful capability; fixture variants and baseline integration repairs are excluded. Only accepted entries count.",
-  "accepted_count": 669,
-  "next_id": "FVID-0670",
+  "accepted_count": 674,
+  "next_id": "FVID-0675",
   "entries": [
     {
       "id": "FVID-0001",
@@ -7550,6 +7550,61 @@
       "result": "Call plan_decode_audio(source, &Default::default(), controls) in the G.711 WAVE branch of audio_plan_with_controls.",
       "status": "accepted",
       "validation": "batch-587-validation.json"
+    },
+    {
+      "id": "FVID-0670",
+      "batch": 588,
+      "title": "Support standalone audio containers in owned_container_loudnorm::apply",
+      "source": "crates/fvid-media/src/owned_container_loudnorm.rs",
+      "regression": "tests/standalone_loudnorm_gray_shuffleplanes_and_subtitles.rs",
+      "before": "owned_container_loudnorm::apply branched only on MP4 vs Matroska when computing source geometry and Stage-2 spool budgets, causing apply_loudnorm and apply_loudnorm_dual to fail with 'Matroska audio stream is absent' on standalone audio containers (G.711 WAVE, Ogg, bare FLAC, bare MPEG) even though plan_loudnorm and supports accepted them.",
+      "result": "Query owned_container_loudness::geometry and owned_audio_plan::source_descriptor in owned_container_loudnorm::apply so all standalone audio containers execute single-pass and dual-pass loudnorm cleanly.",
+      "status": "accepted",
+      "validation": "batch-588-validation.json"
+    },
+    {
+      "id": "FVID-0671",
+      "batch": 588,
+      "title": "Refuse shuffleplanes on monochrome video frames consistently in process_frame_with_overlay",
+      "source": "crates/fvid-media/src/owned_video_decode.rs",
+      "regression": "tests/standalone_loudnorm_gray_shuffleplanes_and_subtitles.rs",
+      "before": "process_frame_with_overlay synthesized a 3-plane Y4M header for monochrome video frames and invoked transform_frame_requested_clock when shuffleplanes was set, failing with 'Y4M frame size mismatch' or misformatting pixel_format instead of refusing monochrome shuffleplanes cleanly.",
+      "result": "Return Ok(None) when monochrome && transform.shuffleplanes.is_some() in process_frame_with_overlay.",
+      "status": "accepted",
+      "validation": "batch-588-validation.json"
+    },
+    {
+      "id": "FVID-0672",
+      "batch": 588,
+      "title": "Charge alpha, display-geometry, and mask working memory in subtitle burn planning and execution and reject existing outputs upfront",
+      "source": "crates/fvid-media/src/owned_subtitle_burn.rs",
+      "regression": "tests/standalone_loudnorm_gray_shuffleplanes_and_subtitles.rs",
+      "before": "plan_burn_subtitles omitted view.alpha and view.extra_working_bytes from frame_working_bytes, burn_subtitles passed only cues_only_bytes (without mask_bytes) to export_processed, and burn_subtitles ran prepare (including MP4 video bridging and subtitle parsing) before checking if destination already existed.",
+      "result": "Include view.alpha and view.extra_working_bytes in plan_burn_subtitles frame_working_bytes, pass cues_only_bytes.saturating_add(mask_bytes) to export_processed in burn_subtitles, and check destination.symlink_metadata().is_ok() before prepare in burn_subtitles.",
+      "status": "accepted",
+      "validation": "batch-588-validation.json"
+    },
+    {
+      "id": "FVID-0673",
+      "batch": 588,
+      "title": "Filter overlong or NUL-containing source Matroska tags in subtitle conversion and validate PacketWriter metadata during dry_run",
+      "source": "crates/fvid-media/src/owned_subtitle_impl.rs",
+      "regression": "tests/standalone_loudnorm_gray_shuffleplanes_and_subtitles.rs",
+      "before": "try_convert_matroska_inner copied source Matroska writing_app, container metadata, and track tags into output metadata without filtering >128-byte keys, >1024-byte values, or embedded NULs, and publish_events_with_metadata skipped PacketWriter::new_with_text_metadata validation when dry_run was true.",
+      "result": "Filter overlong and NUL-containing source writing_app, container tags, and track tags in try_convert_matroska_inner and validate PacketWriter::new_with_text_metadata on an in-memory Cursor during dry_run in publish_events_with_metadata.",
+      "status": "accepted",
+      "validation": "batch-588-validation.json"
+    },
+    {
+      "id": "FVID-0674",
+      "batch": 588,
+      "title": "Enforce 256-tag Matroska stream metadata cap in extract_adts_matroska_metadata and defer 0-packet ADTS progress until packet admission",
+      "source": "crates/fvid-media/src/owned_matroska_adts_impl.rs",
+      "regression": "tests/standalone_loudnorm_gray_shuffleplanes_and_subtitles.rs",
+      "before": "extract_adts_matroska_metadata did not check the 256-tag Matroska stream tag limit (allowing plan_remux and plan_concat to accept >256 stream tags on ADTS inputs that fail at execution), and write_aac_packets emitted a 0-packet ProgressEvent before reading and budget-checking the first ADTS packet.",
+      "result": "Reject >256 stream tags in extract_adts_matroska_metadata and emit the initial 0-packet ProgressEvent in write_aac_packets only after the first packet passes max_controlled_bytes admission (or when the stream is empty).",
+      "status": "accepted",
+      "validation": "batch-588-validation.json"
     }
   ]
 }

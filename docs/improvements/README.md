@@ -4276,6 +4276,17 @@ See `batch-586-validation.json`.
 
 See `batch-587-validation.json`.
 
+## Batch 588 — FVID-0670..0674: Standalone audio container execution in `owned_container_loudnorm::apply`, monochrome `shuffleplanes` refusal in `process_frame_with_overlay`, alpha/crop/mask working memory and upfront destination check in `owned_subtitle_burn`, source Matroska tag sanitization and dry-run metadata validation in `owned_subtitle`, and ADTS stream tag cap and deferred 0-packet progress in `owned_matroska_adts_impl`
+
+- **FVID-0670** — Support standalone audio containers (`G.711 WAVE`, `Ogg`, `bare FLAC`, `bare MPEG`) in `owned_container_loudnorm::apply` (`crates/fvid-media/src/owned_container_loudnorm.rs`, `tests/standalone_loudnorm_gray_shuffleplanes_and_subtitles.rs`).
+- **FVID-0671** — Refuse `shuffleplanes` on monochrome video frames consistently in `process_frame_with_overlay` (`crates/fvid-media/src/owned_video_decode.rs`, `tests/standalone_loudnorm_gray_shuffleplanes_and_subtitles.rs`).
+- **FVID-0672** — Charge alpha, display-geometry, and mask working memory in subtitle burn planning and execution and reject existing outputs upfront (`crates/fvid-media/src/owned_subtitle_burn.rs`, `tests/standalone_loudnorm_gray_shuffleplanes_and_subtitles.rs`).
+- **FVID-0673** — Filter overlong or NUL-containing source Matroska tags in subtitle conversion and validate `PacketWriter` metadata during `dry_run` (`crates/fvid-media/src/owned_subtitle_impl.rs`, `tests/standalone_loudnorm_gray_shuffleplanes_and_subtitles.rs`).
+- **FVID-0674** — Enforce 256-tag Matroska stream metadata cap in `extract_adts_matroska_metadata` and defer 0-packet ADTS progress until packet admission (`crates/fvid-media/src/owned_matroska_adts_impl.rs`, `tests/standalone_loudnorm_gray_shuffleplanes_and_subtitles.rs`).
+
+See `batch-588-validation.json`.
+
+
 
 
 

@@ -160,6 +160,9 @@ pub(crate) fn extract_adts_matroska_metadata(
                 let entries = scoped.entry(0).or_default();
                 entries.retain(|k: &String, _| !k.eq_ignore_ascii_case(key));
                 if !value.is_empty() {
+                    if entries.len() >= 256 {
+                        return Err(invalid("Matroska text tag count exceeds limit"));
+                    }
                     entries.insert(key.to_ascii_uppercase(), value.clone());
                 }
             }
@@ -262,9 +265,6 @@ fn write_aac_packets<W: Write + Seek>(
     check()?;
     let mut writer =
         PacketWriter::new_with_text_metadata(output, &[spec], &[], &metadata, &text, &scoped)?;
-    if let Some(h) = progress {
-        h.emit(writer.event());
-    }
     let mut negotiated_rate = None;
     loop {
         check()?;
@@ -290,11 +290,21 @@ fn write_aac_packets<W: Write + Seek>(
         {
             return Err(invalid("controlled memory budget exceeded"));
         }
+        if index == 0
+            && let Some(h) = progress
+        {
+            h.emit(writer.event());
+        }
         let start = time(index)?;
         writer.write_packet(0, start, time(next)? - start, true, &packet)?;
         if let Some(h) = progress {
             h.emit(writer.event());
         }
+    }
+    if writer.event().packets == 0
+        && let Some(h) = progress
+    {
+        h.emit(writer.event());
     }
     check()?;
     if let Some(rate) = negotiated_rate {

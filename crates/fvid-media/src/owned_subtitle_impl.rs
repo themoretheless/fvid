@@ -823,16 +823,32 @@ fn try_convert_matroska_inner(
     let mut base_text = reader.metadata.clone();
     if !reader.writing_app.is_empty()
         && reader.writing_app != "FVid"
+        && !reader.writing_app.contains('\0')
+        && reader.writing_app.len() <= 1024
         && !base_text.keys().any(|k| k.eq_ignore_ascii_case("encoder"))
     {
         base_text.insert("ENCODER".into(), reader.writing_app.clone());
     }
+    base_text.retain(|k, v| {
+        !k.is_empty()
+            && k.len() <= 128
+            && v.len() <= 1024
+            && !k.contains('\0')
+            && !v.contains('\0')
+    });
     let mut base_track_tags = reader.track_metadata.get(&0).cloned().unwrap_or_default();
     if let Some(uid) = reader.track_uids.get(&track.number)
         && let Some(scoped) = reader.track_metadata.get(uid)
     {
         base_track_tags.extend(scoped.clone());
     }
+    base_track_tags.retain(|k, v| {
+        !k.is_empty()
+            && k.len() <= 128
+            && v.len() <= 1024
+            && !k.contains('\0')
+            && !v.contains('\0')
+    });
     let source_language = reader
         .track_languages
         .get(&track.number)
@@ -1571,6 +1587,19 @@ fn publish_events_with_metadata(
         total_payload_bytes = total_payload_bytes.saturating_add(payload.len() as u64);
     }
     if dry_run {
+        let mut preview = std::io::Cursor::new(Vec::new());
+        let _ = PacketWriter::new_with_text_metadata(
+            &mut preview,
+            &[TrackSpec {
+                encoding: Encoding::Ass { configuration },
+                name: &name,
+                language: &language,
+            }],
+            &[],
+            &metadata,
+            &text,
+            &scoped,
+        )?;
         return Ok(Some(SubtitleStats {
             backend: "fvid",
             encoder: "ass".into(),

@@ -752,6 +752,9 @@ fn process_frame_with_overlay(
     if (transform.hue.is_some() || transform.colorize.is_some() || transform.monochrome.is_some()) && (monochrome || !(8..=16).contains(&depth)) {
         return Ok(None);
     }
+    if monochrome && transform.shuffleplanes.is_some() {
+        return Ok(None);
+    }
     let (format, layout) = match frame.subsampling {
         Some([1, 1]) => (PixelFormat::Yuv444, "444"),
         Some([2, 1]) => (PixelFormat::Yuv422, "422"),

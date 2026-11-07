@@ -76,37 +76,18 @@ pub fn apply(
     let decode_options = crate::owned_adts_export::pcm_decode_options(options);
     // Read-only configuration/policy preflight; actual packet failures propagate
     // once execution starts, without retry through the legacy backend.
-    let (spool_rate, spool_channels, _, codec, spool_frames, spool_meta_bytes) =
-        if crate::owned_mp4_audio_export::recognizes(source, &decode_options)? {
-            let (rate, channels, _, _, frames) =
-                crate::owned_mp4_audio_export::geometry_and_frames_for_decode(
-                    source,
-                    None,
-                    &decode_options,
-                )?;
-            let (_, _, _, _, codec) =
-                crate::owned_mp4_audio_export::descriptor(source, &decode_options)?;
-            let info = crate::owned_wave_metadata::mp4_source_info(source, &decode_options)?;
-            (rate, channels, 0u32, codec, frames, info.len())
-        } else {
-            let (_, rate, channels, mask, codec, _, frames) =
-                crate::owned_audio_plan::matroska_descriptor_for_decode(
-                    source,
-                    None,
-                    &decode_options,
-                )?
-                .ok_or("Matroska audio stream is absent")?;
-            let info = crate::owned_wave_metadata::matroska_source_info_with_interval(
-                source,
-                None,
-                &decode_options,
-            )?;
-            (rate, channels, mask, codec, frames, info.len())
-        };
+    crate::owned_container_loudness::geometry(source, &decode_options)?;
+    let desc = crate::owned_audio_plan::source_descriptor(source, &decode_options)?;
+    let (spool_rate, spool_channels, spool_frames, spool_meta_bytes) = (
+        desc.rate,
+        desc.channels,
+        desc.stage2_frames,
+        desc.stage2_meta_bytes,
+    );
     if dual_pass || crate::owned_loudnorm::report_requested(Some(&resolved))? {
         crate::owned_container_loudness::plan_loudness(source, &decode_options)?;
     }
-    let precise = codec.starts_with("A_PCM/") || codec.starts_with("pcm_");
+    let precise = desc.precision == "float64";
     crate::owned_loudnorm::check_spool_loudnorm_budget(
         &resolved,
         dual_pass,

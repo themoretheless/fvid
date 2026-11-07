@@ -369,6 +369,8 @@ pub fn plan_burn_subtitles(
                 .pixels
                 .len()
                 .saturating_mul(2)
+                .saturating_add(view.alpha.map_or(0, <[u8]>::len))
+                .saturating_add(view.extra_working_bytes)
                 .saturating_add(mask_bytes)
                 .saturating_add(container_base_bytes);
             if options
@@ -541,6 +543,9 @@ pub fn burn_subtitles(
     {
         return Err("owned FFV1 export requires .mkv".into());
     }
+    if destination.symlink_metadata().is_ok() {
+        return Err("output already exists".into());
+    }
     let (header, cues, bridge, cues_and_meta_bytes) = prepare(source, subs, options)?;
     let font_size = (header.height as f32 / 18.0).clamp(12.0, 64.0);
     if !crate::owned_y4m_decode::supports(source) {
@@ -548,27 +553,8 @@ pub fn burn_subtitles(
         let options_meta_bytes =
             crate::owned_lossless::options_matroska_metadata_working_bytes(options)?;
         let cues_only_bytes = cues_and_meta_bytes.saturating_sub(options_meta_bytes);
-        let source_index_and_meta_bytes =
-            crate::owned_lossless::check_source_matroska_metadata_budget(
-                container_source,
-                None,
-                options,
-            )?;
-        let container_base_bytes = cues_only_bytes.saturating_add(source_index_and_meta_bytes);
         let mut process =
             |frame: &mut crate::owned_frame::GeometryFrame, depth, pts, full_range| -> Result<()> {
-                let mask_bytes = frame.width.saturating_mul(frame.height);
-                if options.max_controlled_bytes.is_some_and(|limit| {
-                    frame
-                        .data
-                        .len()
-                        .saturating_mul(2)
-                        .saturating_add(mask_bytes)
-                        .saturating_add(container_base_bytes)
-                        > limit
-                }) {
-                    return Err("subtitle burn frame exceeds controlled memory budget".into());
-                }
                 let text = active_text(&cues, pts);
                 if !text.is_empty() {
                     let mask = crate::owned_text_raster::rasterize(
@@ -581,13 +567,14 @@ pub fn burn_subtitles(
                 }
                 Ok(())
             };
+        let mask_bytes = header.width.saturating_mul(header.height);
         let (stats, event, consumed) = crate::owned_ffv1_export::export_processed(
             container_source,
             destination,
             &Default::default(),
             options,
             Some(&mut process),
-            cues_only_bytes,
+            cues_only_bytes.saturating_add(mask_bytes),
         )?;
         return Ok(fvid_media_info::LosslessStats {
             backend: "owned SRT burn-in FFV1 export",
