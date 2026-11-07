@@ -1,0 +1,15 @@
+{
+  "batch": 612,
+  "ids": [
+    "FVID-0790",
+    "FVID-0791",
+    "FVID-0792",
+    "FVID-0793",
+    "FVID-0794"
+  ],
+  "commands": [
+    "cargo test --test subtitle_plan_and_convert_single_open",
+    "cargo test --test native_audio_mix_single_open"
+  ],
+  "status": "accepted"
+}

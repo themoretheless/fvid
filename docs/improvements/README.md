@@ -4516,3 +4516,13 @@ See `batch-610-validation.json`.
 
 See `batch-611-validation.json`.
 
+## Batch 612 — FVID-0790..0794: Single-pass Matroska subtitle planning, single-open ASS/SRT fstat, zero-allocation LF normalization, and early descriptor release in `pcm_matroska`
+
+- **FVID-0790** — Return `(stream_index, codec_name, stats)` from `try_convert_matroska_inner` so `try_plan_with_controls` scans Matroska subtitle sources only once (`crates/fvid-media/src/owned_subtitle_impl.rs`, `tests/subtitle_plan_and_convert_single_open.rs`).
+- **FVID-0791** — Open `source` once and use `source_file.metadata()` in `try_convert_ass_inner` (`crates/fvid-media/src/owned_subtitle_impl.rs`, `tests/subtitle_plan_and_convert_single_open.rs`).
+- **FVID-0792** — Open `source` once and use `source_file.metadata()` in `try_convert_srt_inner` (`crates/fvid-media/src/owned_subtitle_impl.rs`, `tests/subtitle_plan_and_convert_single_open.rs`).
+- **FVID-0793** — Add `normalize_line_endings` with a zero-allocation `Cow::Borrowed` fast path for LF-only text and single-pass CRLF/CR normalization in `owned_subtitle_impl.rs` (`crates/fvid-media/src/owned_subtitle_impl.rs`, `tests/subtitle_plan_and_convert_single_open.rs`).
+- **FVID-0794** — Drop the prefix `BufReader<File>` before delegating to `native_probe` in `pcm_matroska::extract_source_pcm_metadata_with_interval_packet_and_memory_limit` (`src/native_export/pcm_matroska.rs`, `tests/native_audio_mix_single_open.rs`).
+
+See `batch-612-validation.json`.
+

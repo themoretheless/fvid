@@ -61,6 +61,33 @@ fn timestamp(value: &str) -> Result<u64> {
         .ok_or_else(|| invalid("SRT timestamp overflow"))
 }
 
+fn normalize_line_endings(text: &str) -> std::borrow::Cow<'_, str> {
+    let trimmed = text.trim_start_matches('\u{feff}');
+    if !trimmed.contains('\r') {
+        return std::borrow::Cow::Borrowed(trimmed);
+    }
+    let mut out = String::with_capacity(trimmed.len());
+    let bytes = trimmed.as_bytes();
+    let mut i = 0;
+    let mut start = 0;
+    while i < bytes.len() {
+        if bytes[i] == b'\r' {
+            out.push_str(&trimmed[start..i]);
+            out.push('\n');
+            if i + 1 < bytes.len() && bytes[i + 1] == b'\n' {
+                i += 2;
+            } else {
+                i += 1;
+            }
+            start = i;
+        } else {
+            i += 1;
+        }
+    }
+    out.push_str(&trimmed[start..]);
+    std::borrow::Cow::Owned(out)
+}
+
 fn webvtt_packet_body(text: &str) -> String {
     let normalized = text.trim_matches('\n');
     let lines: Vec<&str> = normalized.lines().collect();
@@ -382,60 +409,7 @@ pub fn try_plan_with_controls(
             (0usize, codec, stats.cues)
         }
     } else {
-        let effective_packet_bytes =
-            max_packet_bytes.min(controls.max_controlled_bytes.unwrap_or(usize::MAX));
-        let memory_packets = controls
-            .max_controlled_bytes
-            .map(|limit| limit / std::mem::size_of::<webm::Packet>());
-        let mut limits = webm::Limits::default();
-        limits.packet_bytes = limits.packet_bytes.min(effective_packet_bytes);
-        if let Some(maximum) = memory_packets {
-            limits.packets = limits.packets.min(maximum);
-        }
-        let map_packet_limit = |error: Error| {
-            if memory_packets.is_some_and(|max| max < webm::Limits::default().packets)
-                && error
-                    .to_string()
-                    .contains("WebM packet count exceeds limit")
-            {
-                invalid("controlled memory budget exceeded: Matroska packet index limit")
-            } else {
-                error
-            }
-        };
-        let mut reader = webm::WebmReader::open(
-            std::io::BufReader::new(File::open(source)?),
-            limits,
-        )
-        .map_err(|e| map_packet_limit(e.into()))?;
-        reader.restrict_packet_bytes(effective_packet_bytes);
-        reader.scan_all().map_err(|e| map_packet_limit(e.into()))?;
-        if let Some(limit) = controls.max_controlled_bytes {
-            let index_bytes = reader
-                .estimated_index_payload_bytes()
-                .map_err(|e| invalid(&e.to_string()))?
-                .saturating_add(reader.packets.len().saturating_mul(64))
-                .saturating_add(16384);
-            if index_bytes > limit {
-                return Err(invalid("controlled memory budget exceeded"));
-            }
-        }
-        let idx = match streams {
-            [] => reader
-                .tracks
-                .iter()
-                .position(|track| track.kind == 17)
-                .unwrap_or(0),
-            [idx] => *idx,
-            _ => 0,
-        };
-        let codec_name = match reader.tracks.get(idx).map(|t| t.codec.as_str()) {
-            Some("S_TEXT/ASS" | "S_ASS") => "ass",
-            Some("S_TEXT/SSA" | "S_SSA") => "ssa",
-            Some("S_TEXT/WEBVTT") => "webvtt",
-            _ => "subrip",
-        };
-        let Some(stats) = try_convert_matroska_inner(
+        let Some((idx, codec_name, stats)) = try_convert_matroska_inner(
             source,
             planned_dest,
             streams,
@@ -579,6 +553,7 @@ pub fn try_convert_with_controls(
             &check_controls,
             false,
         )?
+        .map(|(_, _, stats)| stats)
     };
     let Some(stats) = stats else {
         return Ok(None);
@@ -755,7 +730,7 @@ fn try_convert_matroska_inner(
     controls: Option<&media_control::CopyOptions>,
     check_controls: &impl Fn() -> Result<()>,
     dry_run: bool,
-) -> Result<Option<SubtitleStats>> {
+) -> Result<Option<(usize, &'static str, SubtitleStats)>> {
     let max_controlled_bytes = controls.and_then(|c| c.max_controlled_bytes);
     if !dry_run
         && destination.extension().and_then(|s| s.to_str()) == Some("mkv")
@@ -822,6 +797,12 @@ fn try_convert_matroska_inner(
     if track.kind != 17 {
         return Err(invalid("selected stream is not a subtitle"));
     }
+    let codec_name = match track.codec.as_str() {
+        "S_TEXT/ASS" | "S_ASS" => "ass",
+        "S_TEXT/SSA" | "S_SSA" => "ssa",
+        "S_TEXT/WEBVTT" => "webvtt",
+        _ => "subrip",
+    };
     let base_file = FileMetadata {
         tags: reader.tags.clone(),
         chapters: Vec::new(),
@@ -982,7 +963,8 @@ fn try_convert_matroska_inner(
             meta,
             max_packet_bytes,
             dry_run,
-        );
+        )
+        .map(|opt| opt.map(|stats| (index, codec_name, stats)));
     }
     let is_webvtt = track.codec == "S_TEXT/WEBVTT";
     if !matches!(
@@ -1065,9 +1047,9 @@ fn try_convert_matroska_inner(
         let data = reader.read_packet(i)?;
         let text =
             std::str::from_utf8(&data).map_err(|_| invalid("Matroska SubRip is not UTF-8"))?;
-        let normalized_packet = text.replace("\r\n", "\n").replace('\r', "\n");
+        let normalized_packet = normalize_line_endings(text);
         let cue_source = if is_webvtt {
-            webvtt_packet_body(&normalized_packet)
+            std::borrow::Cow::Owned(webvtt_packet_body(&normalized_packet))
         } else {
             normalized_packet
         };
@@ -1107,6 +1089,7 @@ fn try_convert_matroska_inner(
         return Err(invalid("selected subtitle stream has no cues"));
     }
     publish_with_metadata(cues, destination, meta, max_packet_bytes, dry_run)
+        .map(|opt| opt.map(|stats| (index, codec_name, stats)))
 }
 /// `None` preserves the adapter for unsupported text encodings or markup.
 /// Recognized invalid timing never publishes a partial output.
@@ -1156,7 +1139,8 @@ fn try_convert_ass_inner(
     {
         return Err(invalid("controlled memory budget exceeded"));
     }
-    let file_len = std::fs::metadata(source)?.len();
+    let source_file = File::open(source)?;
+    let file_len = source_file.metadata()?.len();
     if file_len > 64 << 20 {
         return Err(invalid("ASS metadata exceeds 64 MiB"));
     }
@@ -1174,7 +1158,7 @@ fn try_convert_ass_inner(
     bytes
         .try_reserve_exact(usize::try_from(file_len).unwrap_or(0))
         .map_err(|_| invalid("cannot allocate ASS subtitle buffer"))?;
-    File::open(source)?
+    source_file
         .take((64 << 20) + 1)
         .read_to_end(&mut bytes)?;
     if bytes.len() > 64 << 20 {
@@ -1193,10 +1177,7 @@ fn try_convert_ass_inner(
     let Ok(text) = std::str::from_utf8(&bytes) else {
         return Ok(None);
     };
-    let normalized = text
-        .trim_start_matches('\u{feff}')
-        .replace("\r\n", "\n")
-        .replace('\r', "\n");
+    let normalized = normalize_line_endings(text);
     if normalized.contains('\0') {
         return Err(invalid("NUL in ASS script"));
     }
@@ -1382,7 +1363,8 @@ fn try_convert_srt_inner(
     {
         return Err(invalid("controlled memory budget exceeded"));
     }
-    let file_len = std::fs::metadata(source)?.len();
+    let source_file = File::open(source)?;
+    let file_len = source_file.metadata()?.len();
     if file_len > 64 << 20 {
         return Err(invalid("SRT metadata exceeds 64 MiB"));
     }
@@ -1400,7 +1382,7 @@ fn try_convert_srt_inner(
     bytes
         .try_reserve_exact(usize::try_from(file_len).unwrap_or(0))
         .map_err(|_| invalid("cannot allocate SRT subtitle buffer"))?;
-    File::open(source)?
+    source_file
         .take((64 << 20) + 1)
         .read_to_end(&mut bytes)?;
     if bytes.len() > 64 << 20 {
@@ -1419,10 +1401,7 @@ fn try_convert_srt_inner(
     let Ok(text) = std::str::from_utf8(&bytes) else {
         return Ok(None);
     };
-    let normalized = text
-        .trim_start_matches('\u{feff}')
-        .replace("\r\n", "\n")
-        .replace('\r', "\n");
+    let normalized = normalize_line_endings(text);
     let text = normalized
         .lines()
         .map(|line| if line.trim().is_empty() { "" } else { line })

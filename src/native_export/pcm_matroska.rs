@@ -153,6 +153,7 @@ pub(crate) fn extract_source_pcm_metadata_with_interval_packet_and_memory_limit(
     }
     input.seek(SeekFrom::Start(0))?;
     if allow_wave && matches!(&prefix[..4], b"RIFF" | b"RF64" | b"RIFX") {
+        drop(input);
         let mut base = default_matroska_pcm_metadata();
         let mut probe_opts = fvid_media::CopyOptions::default();
         probe_opts.max_controlled_bytes = max_controlled_bytes;
@@ -449,6 +450,7 @@ pub(crate) fn extract_source_pcm_metadata_with_interval_packet_and_memory_limit(
         }
         return Ok(default_matroska_pcm_metadata());
     }
+    drop(input);
     let mut base = default_matroska_pcm_metadata();
     let mut probe_opts = fvid_media::CopyOptions::default();
     probe_opts.max_controlled_bytes = max_controlled_bytes;

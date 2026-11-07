@@ -1,8 +1,8 @@
 {
   "target": 1000,
   "counting_rule": "One independently confirmed problem or useful capability; fixture variants and baseline integration repairs are excluded. Only accepted entries count.",
-  "accepted_count": 789,
-  "next_id": "FVID-0790",
+  "accepted_count": 794,
+  "next_id": "FVID-0795",
   "entries": [
     {
       "id": "FVID-0001",
@@ -8870,6 +8870,61 @@
       "result": "merge_audio_with_controls interleaves each 4096-frame block into a preallocated contiguous buffer and performs a single sink.write_all per block.",
       "status": "accepted",
       "validation": "batch-611-validation.json"
+    },
+    {
+      "id": "FVID-0790",
+      "batch": 612,
+      "title": "owned_subtitle_impl::try_plan_with_controls single-pass Matroska subtitle scan",
+      "source": "crates/fvid-media/src/owned_subtitle_impl.rs",
+      "regression": "tests/subtitle_plan_and_convert_single_open.rs",
+      "before": "try_plan_with_controls opened and scanned the Matroska file with WebmReader::scan_all() to find the subtitle track and codec, and then called try_convert_matroska_inner which opened and scanned the entire file a second time.",
+      "result": "try_convert_matroska_inner returns (stream_index, codec_name, stats) directly so try_plan_with_controls scans Matroska subtitle sources only once.",
+      "status": "accepted",
+      "validation": "batch-612-validation.json"
+    },
+    {
+      "id": "FVID-0791",
+      "batch": 612,
+      "title": "owned_subtitle_impl::try_convert_ass_inner single File::open and fstat metadata check",
+      "source": "crates/fvid-media/src/owned_subtitle_impl.rs",
+      "regression": "tests/subtitle_plan_and_convert_single_open.rs",
+      "before": "try_convert_ass_inner called std::fs::metadata(source) and then File::open(source), performing two path lookups.",
+      "result": "try_convert_ass_inner opens source once and queries source_file.metadata() on the open descriptor.",
+      "status": "accepted",
+      "validation": "batch-612-validation.json"
+    },
+    {
+      "id": "FVID-0792",
+      "batch": 612,
+      "title": "owned_subtitle_impl::try_convert_srt_inner single File::open and fstat metadata check",
+      "source": "crates/fvid-media/src/owned_subtitle_impl.rs",
+      "regression": "tests/subtitle_plan_and_convert_single_open.rs",
+      "before": "try_convert_srt_inner called std::fs::metadata(source) and then File::open(source), performing two path lookups.",
+      "result": "try_convert_srt_inner opens source once and queries source_file.metadata() on the open descriptor.",
+      "status": "accepted",
+      "validation": "batch-612-validation.json"
+    },
+    {
+      "id": "FVID-0793",
+      "batch": 612,
+      "title": "owned_subtitle_impl::normalize_line_endings zero-allocation LF fast path and single-pass CR/CRLF normalization",
+      "source": "crates/fvid-media/src/owned_subtitle_impl.rs",
+      "regression": "tests/subtitle_plan_and_convert_single_open.rs",
+      "before": "Matroska SubRip/WebVTT packet parsing, ASS script parsing, and SRT/VTT parsing each chained .replace(\"\\r\\n\", \"\\n\").replace('\\r', '\\n'), allocating two intermediate Strings even when no '\\r' was present.",
+      "result": "normalize_line_endings borrows the slice without allocation when no '\\r' is present and normalizes CRLF/CR in a single pass otherwise.",
+      "status": "accepted",
+      "validation": "batch-612-validation.json"
+    },
+    {
+      "id": "FVID-0794",
+      "batch": 612,
+      "title": "pcm_matroska::extract_source_pcm_metadata_with_interval_packet_and_memory_limit early descriptor release before probe",
+      "source": "src/native_export/pcm_matroska.rs",
+      "regression": "tests/native_audio_mix_single_open.rs",
+      "before": "extract_source_pcm_metadata_with_interval_packet_and_memory_limit kept its BufReader<File> open while calling native_probe::probe_with_options or try_probe_metadata_with_options.",
+      "result": "extract_source_pcm_metadata_with_interval_packet_and_memory_limit drops the prefix reader before delegating to native_probe.",
+      "status": "accepted",
+      "validation": "batch-612-validation.json"
     }
   ],
   "pending_count": 0
