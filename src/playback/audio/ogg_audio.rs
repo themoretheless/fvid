@@ -119,6 +119,12 @@ impl AudioStream for OggAudioReader {
     fn seek_to(&mut self, pts: i64) -> i64 {
         self.program.seek_to(pts)
     }
+    fn seek_time(&mut self, target: Duration) -> i64 {
+        let wanted = (target.as_nanos() * u128::from(self.sample_rate()))
+            .div_ceil(1_000_000_000)
+            .min(i64::MAX as u128) as i64;
+        self.seek_to(wanted)
+    }
     fn preroll_target(&self) -> Option<i64> {
         self.program.preroll_target()
     }

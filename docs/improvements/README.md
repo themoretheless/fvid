@@ -4146,3 +4146,14 @@ See `batch-573-validation.json`.
 
 See `batch-574-validation.json`.
 
+## Batch 575 — FVID-0605..0609: `Ac3AudioReader`, `WavpackAudioReader`, and Ogg Vorbis/Opus/Catalog sub-sample `seek_time`, ID3v2.4 `3DI` footer parsing, and numeric `TCON` genre normalization
+
+- **FVID-0605** — Implement sub-sample `div_ceil` `seek_time(Duration)` and `sample_duration` in `Ac3AudioReader` (`src/playback/audio/ac3.rs`, `tests/ac3_wavpack_ogg_seek_and_id3_tags.rs`).
+- **FVID-0606** — Implement sub-sample `div_ceil` `seek_time(Duration)` in `WavpackAudioReader` (`src/playback/audio/wavpack.rs`, `tests/ac3_wavpack_ogg_seek_and_id3_tags.rs`).
+- **FVID-0607** — Implement sub-sample `div_ceil` `seek_time(Duration)` in `OggAudioReader`, `OggOpusAudioReader`, and `playback_ogg_catalog` (`src/playback/audio/ogg_audio.rs`, `src/playback/audio/ogg_opus.rs`, `src/playback/audio/ogg_catalog.rs`, `tests/ac3_wavpack_ogg_seek_and_id3_tags.rs`).
+- **FVID-0608** — Support ID3v2.4 10-byte `3DI` footer in `id3v2_bytes` and `parse_id3v2_into` for bare MPEG audio (`crates/fvid-media/src/owned_mpeg_audio.rs`, `tests/ac3_wavpack_ogg_seek_and_id3_tags.rs`).
+- **FVID-0609** — Normalize numeric ID3v2 `TCON` genre codes (e.g. `"(17)"` or `"17"`) via `id3v1_genre_name` (`crates/fvid-media/src/owned_mpeg_audio.rs`, `tests/ac3_wavpack_ogg_seek_and_id3_tags.rs`).
+
+See `batch-575-validation.json`.
+
+

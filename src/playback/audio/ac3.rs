@@ -488,9 +488,10 @@ impl AudioStream for Ac3AudioReader {
     }
 
     fn duration(&self) -> Option<Duration> {
-        let samples = self.audible_samples();
-        let rate = u64::from(self.ac3.sample_rate);
-        Some(Duration::new(samples / rate, ((samples % rate) * 1_000_000_000 / rate) as u32))
+        Some(crate::audio::sample_duration(
+            self.audible_samples(),
+            self.ac3.sample_rate,
+        ))
     }
 
     fn present_decoded(&self, mut packet: crate::audio::AudioPacket, source_pts: i64) -> Result<Option<crate::audio::AudioPacket>> {
@@ -563,6 +564,13 @@ impl AudioStream for Ac3AudioReader {
         // Replay history for overlap/dither fidelity, then hide PCM before target.
         self.packet = 0;
         target as i64
+    }
+
+    fn seek_time(&mut self, target: Duration) -> i64 {
+        let wanted = (target.as_nanos() * u128::from(self.ac3.sample_rate))
+            .div_ceil(1_000_000_000)
+            .min(u128::from(self.audible_samples())) as i64;
+        self.seek_to(wanted)
     }
 }
 

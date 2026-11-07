@@ -559,6 +559,12 @@ impl AudioStream for WavpackAudioReader {
         };
         target as i64
     }
+    fn seek_time(&mut self, target: Duration) -> i64 {
+        let wanted = (target.as_nanos() * u128::from(self.info.sample_rate))
+            .div_ceil(1_000_000_000)
+            .min(i64::MAX as u128) as i64;
+        self.seek_to(wanted)
+    }
     fn present_decoded(
         &self,
         mut packet: AudioPacket,

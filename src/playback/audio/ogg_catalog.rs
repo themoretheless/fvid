@@ -112,6 +112,9 @@ impl AudioStream for Reader {
     fn seek_to(&mut self, target: i64) -> i64 {
         self.inner.seek_to(target)
     }
+    fn seek_time(&mut self, target: Duration) -> i64 {
+        self.inner.seek_time(target)
+    }
     fn preroll_target(&self) -> Option<i64> {
         self.inner.preroll_target()
     }
@@ -215,5 +218,11 @@ impl AudioStream for Joint {
     }
     fn seek_to(&mut self, target: i64) -> i64 {
         self.program.seek_to(target)
+    }
+    fn seek_time(&mut self, target: Duration) -> i64 {
+        let wanted = (target.as_nanos() * u128::from(self.sample_rate()))
+            .div_ceil(1_000_000_000)
+            .min(i64::MAX as u128) as i64;
+        self.seek_to(wanted)
     }
 }

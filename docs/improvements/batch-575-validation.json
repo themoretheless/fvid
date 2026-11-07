@@ -1,0 +1,29 @@
+{
+  "status": "accepted",
+  "accepted_ids": [
+    "FVID-0605",
+    "FVID-0606",
+    "FVID-0607",
+    "FVID-0608",
+    "FVID-0609"
+  ],
+  "count_delta": 5,
+  "accepted_count": 609,
+  "next_id": "FVID-0610",
+  "qualification": [
+    {
+      "name": "ac3-wavpack-ogg-seek-and-id3-tags",
+      "command": [
+        "cargo",
+        "test",
+        "--features",
+        "player",
+        "--test",
+        "ac3_wavpack_ogg_seek_and_id3_tags"
+      ],
+      "exit_code": 0,
+      "passed": 4,
+      "ignored": 0
+    }
+  ]
+}

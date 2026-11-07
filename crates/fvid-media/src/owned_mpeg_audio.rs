@@ -813,14 +813,29 @@ fn parse_id3v2_into(
             | (usize::from(b) << 14)
             | (usize::from(c) << 7)
             | usize::from(d);
-        let Some(tag_end) = (total + 10).checked_add(tag_len) else {
+        let footer_bytes = if head[3] == 4 && (head[5] & 0x10) != 0 {
+            10
+        } else {
+            0
+        };
+        let Some(tag_end) = (total + 10)
+            .checked_add(tag_len)
+            .and_then(|end| end.checked_add(footer_bytes))
+        else {
             break;
         };
         if tag_end > bytes.len() {
             break;
         }
+        if footer_bytes == 10 {
+            let footer = &bytes[tag_end - 10..tag_end];
+            if &footer[..3] != b"3DI" || footer[3..] != head[3..] {
+                break;
+            }
+        }
         if flags & 0x80 == 0 && matches!(version, 3 | 4) {
             let mut cursor = total + 10;
+            let effective_end = tag_end - footer_bytes;
             if flags & 0x40 != 0 {
                 let Some(ext) = bytes.get(cursor..cursor + 4) else {
                     total = tag_end;
@@ -839,9 +854,9 @@ fn parse_id3v2_into(
                 } else {
                     4usize.saturating_add(u32::from_be_bytes(ext.try_into().unwrap()) as usize)
                 };
-                cursor = cursor.saturating_add(ext_size).min(tag_end);
+                cursor = cursor.saturating_add(ext_size).min(effective_end);
             }
-            while cursor + 10 <= tag_end {
+            while cursor + 10 <= effective_end {
                 let fhead = &bytes[cursor..cursor + 10];
                 if fhead[..4] == [0; 4]
                     || !fhead[..4]
@@ -866,7 +881,7 @@ fn parse_id3v2_into(
                 let Some(fend) = (cursor + 10).checked_add(fsize) else {
                     break;
                 };
-                if fsize == 0 || fend > tag_end {
+                if fsize == 0 || fend > effective_end {
                     break;
                 }
                 let fflags_low = fhead[9];
@@ -926,7 +941,18 @@ fn parse_id3v2_into(
                         _ => None,
                     } {
                         if let Some((&enc, rest)) = body.split_first() {
-                            if let Some(val) = decode_id3_text(enc, rest) {
+                            if let Some(mut val) = decode_id3_text(enc, rest) {
+                                if key == "genre" {
+                                    let inner = val
+                                        .strip_prefix('(')
+                                        .and_then(|s| s.strip_suffix(')'))
+                                        .unwrap_or(&val);
+                                    if let Ok(code) = inner.parse::<u8>() {
+                                        if let Some(name) = id3v1_genre_name(code) {
+                                            val = name.to_owned();
+                                        }
+                                    }
+                                }
                                 container.entry(key.into()).or_insert(val);
                             }
                         }
@@ -1032,20 +1058,33 @@ fn id3v2_bytes(bytes: &[u8]) -> usize {
         .get(total..total + 10)
         .is_some_and(|head| head[..3] == *b"ID3" && head[3] != 0xff && head[5] & 0x0f == 0)
     {
+        let head = &bytes[total..total + 10];
         // The length is synchsafe: seven bits per byte, most significant first.
-        let [a, b, c, d]: [u8; 4] = bytes[total + 6..total + 10]
+        let [a, b, c, d]: [u8; 4] = head[6..10]
             .try_into()
             .expect("four length bytes");
         if (a | b | c | d) & 0x80 != 0 {
             return total;
         }
+        let footer = if head[3] == 4 && (head[5] & 0x10) != 0 {
+            10
+        } else {
+            0
+        };
         let next = 10
             + ((usize::from(a) << 21)
                 | (usize::from(b) << 14)
                 | (usize::from(c) << 7)
-                | usize::from(d));
+                | usize::from(d))
+            + footer;
         if total + next > bytes.len() {
             return total;
+        }
+        if footer == 10 {
+            let foot = &bytes[total + next - 10..total + next];
+            if &foot[..3] != b"3DI" || foot[3..] != head[3..] {
+                return total;
+            }
         }
         total += next;
     }

@@ -1,8 +1,8 @@
 {
   "target": 1000,
   "counting_rule": "One independently confirmed problem or useful capability; fixture variants and baseline integration repairs are excluded. Only accepted entries count.",
-  "accepted_count": 604,
-  "next_id": "FVID-0605",
+  "accepted_count": 609,
+  "next_id": "FVID-0610",
   "entries": [
     {
       "id": "FVID-0001",
@@ -6835,6 +6835,61 @@
       "result": "Override seek_time(Duration) in Mp3AudioReader with div_ceil(1_000_000_000) clamped to presentation_samples() / samples() and compute duration() via crate::audio::sample_duration.",
       "status": "accepted",
       "validation": "batch-574-validation.json"
+    },
+    {
+      "id": "FVID-0605",
+      "batch": 575,
+      "title": "Implement sub-sample div_ceil seek_time(Duration) and sample_duration in Ac3AudioReader",
+      "source": "src/playback/audio/ac3.rs",
+      "regression": "tests/ac3_wavpack_ogg_seek_and_id3_tags.rs",
+      "before": "Ac3AudioReader relied on the default AudioStream::seek_time floor division, landing at sample 0 (0 ns) for seek_time(Duration::from_nanos(1)) instead of ceiling to sample 1, and computed duration() via manual 64-bit remainder multiplication instead of sample_duration.",
+      "result": "Override seek_time(Duration) in Ac3AudioReader with div_ceil(1_000_000_000) clamped to audible_samples() and compute duration() via crate::audio::sample_duration.",
+      "status": "accepted",
+      "validation": "batch-575-validation.json"
+    },
+    {
+      "id": "FVID-0606",
+      "batch": 575,
+      "title": "Implement sub-sample div_ceil seek_time(Duration) in WavpackAudioReader",
+      "source": "src/playback/audio/wavpack.rs",
+      "regression": "tests/ac3_wavpack_ogg_seek_and_id3_tags.rs",
+      "before": "WavpackAudioReader relied on the default AudioStream::seek_time floor division, landing at sample 0 (0 ns) for seek_time(Duration::from_nanos(1)) instead of ceiling to sample 1.",
+      "result": "Override seek_time(Duration) in WavpackAudioReader with div_ceil(1_000_000_000) in sample_rate units.",
+      "status": "accepted",
+      "validation": "batch-575-validation.json"
+    },
+    {
+      "id": "FVID-0607",
+      "batch": 575,
+      "title": "Implement sub-sample div_ceil seek_time(Duration) in OggAudioReader, OggOpusAudioReader, and playback_ogg_catalog",
+      "source": "src/playback/audio/ogg_audio.rs",
+      "regression": "tests/ac3_wavpack_ogg_seek_and_id3_tags.rs",
+      "before": "OggAudioReader, OggOpusAudioReader, and playback_ogg_catalog::Reader / Joint lacked seek_time(Duration) overrides, flooring sub-sample targets such as Duration::from_nanos(1) to sample 0 instead of ceiling to sample 1.",
+      "result": "Override seek_time(Duration) with div_ceil(1_000_000_000) in OggAudioReader, OggOpusAudioReader, and Joint, and delegate seek_time in playback_ogg_catalog::Reader.",
+      "status": "accepted",
+      "validation": "batch-575-validation.json"
+    },
+    {
+      "id": "FVID-0608",
+      "batch": 575,
+      "title": "Support ID3v2.4 10-byte 3DI footer in id3v2_bytes and parse_id3v2_into for bare MPEG audio",
+      "source": "crates/fvid-media/src/owned_mpeg_audio.rs",
+      "regression": "tests/ac3_wavpack_ogg_seek_and_id3_tags.rs",
+      "before": "owned_mpeg_audio::id3v2_bytes and parse_id3v2_into ignored the ID3v2.4 footer flag (flags & 0x10), under-counting tag_bytes by 10 bytes when a 3DI footer followed the tag body.",
+      "result": "Account for and validate the 10-byte 3DI footer when version == 4 and flags & 0x10 != 0 in id3v2_bytes and parse_id3v2_into.",
+      "status": "accepted",
+      "validation": "batch-575-validation.json"
+    },
+    {
+      "id": "FVID-0609",
+      "batch": 575,
+      "title": "Normalize numeric ID3v2 TCON genre codes (e.g. '(17)' or '17') via id3v1_genre_name",
+      "source": "crates/fvid-media/src/owned_mpeg_audio.rs",
+      "regression": "tests/ac3_wavpack_ogg_seek_and_id3_tags.rs",
+      "before": "parse_id3v2_into stored numeric ID3v2 TCON genre strings such as '(17)' or '17' verbatim instead of resolving them through id3v1_genre_name ('Rock').",
+      "result": "Resolve parenthesized or bare numeric ID3v1 genre indices in ID3v2 TCON frames via id3v1_genre_name.",
+      "status": "accepted",
+      "validation": "batch-575-validation.json"
     }
   ]
 }
