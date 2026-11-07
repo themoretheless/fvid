@@ -26,16 +26,20 @@ fn geometry_with_options(source: &Path, options: &fvid_media::CopyOptions) -> Re
     let mut default_probe = fvid_media::CopyOptions::default();
     default_probe.cancel = options.cancel.clone();
     default_probe.max_rss_bytes = options.max_rss_bytes;
-    if options.max_controlled_bytes.is_none() && crate::native_pcm::is_wave(source)? {
-        let info = crate::native_pcm::inspect(&mut File::open(source)?, options.cancel.as_ref())?;
-        Ok((info.sample_rate, info.channels))
-    } else if options.max_controlled_bytes.is_none() && crate::native_media::is_owned_audio_source_with_options(source, options)? {
-        let info = crate::native_media::constant_audio_source_info_selected_with_options(source, None, options)?;
-        Ok((info.sample_rate, info.channels))
-    } else {
-        fvid_media::owned_audio_plan::source_geometry(source, options)
-            .map_err(|e| invalid(&e))
+    if options.max_controlled_bytes.is_none() {
+        let mut wave_file = File::open(source)?;
+        if crate::native_pcm::is_wave_reader(&mut wave_file)? {
+            wave_file.seek(SeekFrom::Start(0))?;
+            let info = crate::native_pcm::inspect(&mut wave_file, options.cancel.as_ref())?;
+            return Ok((info.sample_rate, info.channels));
+        }
+        drop(wave_file);
+        if let Ok(info) = crate::native_media::constant_audio_source_info_selected_with_options(source, None, options) {
+            return Ok((info.sample_rate, info.channels));
+        }
     }
+    fvid_media::owned_audio_plan::source_geometry(source, options)
+        .map_err(|e| invalid(&e))
 }
 
 fn segment_packet_count(source: &Path, options: &fvid_media::CopyOptions) -> Result<u64> {
@@ -52,8 +56,10 @@ fn segment_packet_count(source: &Path, options: &fvid_media::CopyOptions) -> Res
         return Err(invalid("controlled memory limit must be positive"));
     }
     fvid_media::owned_budget::check_rss_budget(options).map_err(|e| invalid(&e))?;
-    if crate::native_pcm::is_wave(source)? {
-        let info = crate::native_pcm::inspect(&mut File::open(source)?, options.cancel.as_ref())?;
+    let mut raw_file = File::open(source)?;
+    if crate::native_pcm::is_wave_reader(&mut raw_file)? {
+        raw_file.seek(SeekFrom::Start(0))?;
+        let info = crate::native_pcm::inspect(&mut raw_file, options.cancel.as_ref())?;
         let frame = usize::from(info.frame_bytes());
         if frame == 0 {
             return Err(invalid("packet byte limit is smaller than one PCM sample frame"));
@@ -69,7 +75,8 @@ fn segment_packet_count(source: &Path, options: &fvid_media::CopyOptions) -> Res
         }
         return Ok(info.sample_frames.div_ceil(chunk_frames));
     }
-    let mut input = std::io::BufReader::new(File::open(source)?);
+    raw_file.seek(SeekFrom::Start(0))?;
+    let mut input = std::io::BufReader::new(raw_file);
     let mut prefix = [0u8; 8];
     input.read_exact(&mut prefix)?;
     input.seek(SeekFrom::Start(0))?;

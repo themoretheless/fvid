@@ -4505,3 +4505,14 @@ See `batch-609-validation.json`.
 - **FVID-0784** — Dispatch directly to owned FFV1 exporters in `media::transcode` instead of repeating option, deband, and eligibility checks via `transcode_lossless` (`src/media.rs`, `tests/media_dispatch_single_open.rs`).
 
 See `batch-610-validation.json`.
+
+## Batch 611 — FVID-0785..0789: Single-open WAVE/owned-audio source inspection and blockwise channel interleaving in `native_audio_mix`
+
+- **FVID-0785** — Reuse a single `File` handle across `is_wave_reader` and `native_pcm::inspect` in `native_audio_mix::validate_and_inspect_source_with_options` (`src/native_audio_mix.rs`, `tests/native_audio_mix_single_open.rs`).
+- **FVID-0786** — Reuse a single `File` handle across `is_wave_reader` and `native_pcm::inspect` in `native_audio_mix::eligible_with_options` (`src/native_audio_mix.rs`, `tests/native_audio_mix_single_open.rs`).
+- **FVID-0787** — Inspect WAVE and owned-audio sources in a single pass in `native_audio_mix::concat::geometry_with_options` (`src/native_audio_mix/concat.rs`, `tests/native_audio_mix_single_open.rs`).
+- **FVID-0788** — Reuse a single `File` handle across `is_wave_reader`, `native_pcm::inspect`, and MP4/Matroska/ADTS readers in `native_audio_mix::concat::segment_packet_count` (`src/native_audio_mix/concat.rs`, `tests/native_audio_mix_single_open.rs`).
+- **FVID-0789** — Interleave channels into a contiguous block buffer and issue a single `sink.write_all` per 4096-frame block in `native_audio_mix::merge_audio_with_controls` (`src/native_audio_mix.rs`, `tests/native_audio_mix_single_open.rs`).
+
+See `batch-611-validation.json`.
+

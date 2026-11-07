@@ -144,12 +144,16 @@ fn validate_and_inspect_source_with_options(
     }
     fvid_media::owned_budget::check_rss_budget(options).map_err(|e| invalid(&e))?;
     validate_output_controls(options, None)?;
-    if options.max_controlled_bytes.is_none() && crate::native_pcm::is_wave(source)? {
+    let mut wave_file = File::open(source)?;
+    if options.max_controlled_bytes.is_none()
+        && crate::native_pcm::is_wave_reader(&mut wave_file)?
+    {
+        use std::io::{Seek, SeekFrom};
         let probe_opts = strip_output_controls(options);
         crate::native_plan::decode_audio_with_options(source, &Default::default(), &probe_opts)
             .map_err(|e| invalid(&e))?;
-        let mut input = File::open(source)?;
-        let info = crate::native_pcm::inspect(&mut input, options.cancel.as_ref())?;
+        wave_file.seek(SeekFrom::Start(0))?;
+        let info = crate::native_pcm::inspect(&mut wave_file, options.cancel.as_ref())?;
         let frame = usize::from(info.frame_bytes());
         if frame == 0 || (65536usize.min(options.max_packet_bytes) / frame * frame) == 0 {
             return Err(invalid(
@@ -158,6 +162,7 @@ fn validate_and_inspect_source_with_options(
         }
         Ok((info.sample_rate, info.channels, info.channel_mask))
     } else if options.max_controlled_bytes.is_none() && crate::native_media::is_owned_audio_source_with_options(source, options)? {
+        drop(wave_file);
         let probe_opts = strip_output_controls(options);
         crate::native_plan::decode_audio_with_options(source, &Default::default(), &probe_opts)
             .map_err(|e| invalid(&e))?;
@@ -353,11 +358,14 @@ pub fn eligible_with_options(
         {
             return Ok(false);
         }
-        if crate::native_pcm::is_wave(source)? {
-            let mut input = File::open(source)?;
-            let Ok(info) = crate::native_pcm::inspect(&mut input, options.cancel.as_ref()) else {
+        let mut wave_file = File::open(source)?;
+        if crate::native_pcm::is_wave_reader(&mut wave_file)? {
+            use std::io::{Seek, SeekFrom};
+            wave_file.seek(SeekFrom::Start(0))?;
+            let Ok(info) = crate::native_pcm::inspect(&mut wave_file, options.cancel.as_ref()) else {
                 return Ok(false);
             };
+            drop(wave_file);
             if info.validate_decode().is_err() {
                 return Ok(false);
             }
@@ -371,7 +379,10 @@ pub fn eligible_with_options(
             {
                 return Ok(false);
             }
-        } else if crate::native_media::is_owned_audio_source_with_options(source, &clean_opts)? {
+        } else if {
+            drop(wave_file);
+            crate::native_media::is_owned_audio_source_with_options(source, &clean_opts)?
+        } {
             let Ok(info) = crate::native_media::constant_audio_source_info_selected_with_options(source, None, &clean_opts) else {
                 return Ok(false);
             };
@@ -1106,14 +1117,19 @@ pub fn merge_audio_with_controls(
         source_matroska_metadata,
         Some(controls),
     )?;
-    let mut buffers = descriptions
-        .iter()
-        .map(|s| crate::buffer(4096 * usize::from(s.channels) * 4))
-        .collect::<Result<Vec<_>>>()?;
+    let mut buffer = crate::buffer(4096 * usize::from(channels) * 4)?;
     let strides = descriptions
         .iter()
         .map(|s| usize::from(s.channels) * 4)
         .collect::<Vec<_>>();
+    let mut interleave_offsets = Vec::with_capacity(strides.len());
+    let mut running_offset = 0usize;
+    for &stride in &strides {
+        interleave_offsets.push(running_offset);
+        running_offset += stride;
+    }
+    let out_frame_stride = running_offset;
+    let mut interleaved = crate::buffer(4096 * out_frame_stride)?;
     let mut remaining = frames;
     let mut event = crate::media_control::ProgressEvent {
         packets: 0,
@@ -1126,16 +1142,21 @@ pub fn merge_audio_with_controls(
         }
         fvid_media::owned_budget::check_rss_budget(controls).map_err(|e| invalid(&e))?;
         let count = remaining.min(4096) as usize;
-        for ((input, buffer), stride) in inputs.iter_mut().zip(&mut buffers).zip(&strides) {
+        for ((input, &stride), &col_offset) in inputs
+            .iter_mut()
+            .zip(&strides)
+            .zip(&interleave_offsets)
+        {
             input.read_exact(&mut buffer[..count * stride])?;
-        }
-        for frame in 0..count {
-            for (buffer, stride) in buffers.iter().zip(&strides) {
-                sink.write_all(&buffer[frame * stride..(frame + 1) * stride])?;
+            for frame in 0..count {
+                let dst_start = frame * out_frame_stride + col_offset;
+                interleaved[dst_start..dst_start + stride]
+                    .copy_from_slice(&buffer[frame * stride..(frame + 1) * stride]);
             }
         }
+        sink.write_all(&interleaved[..count * out_frame_stride])?;
         event.packets += 1;
-        event.payload_bytes += (count * usize::from(channels) * 4) as u64;
+        event.payload_bytes += (count * out_frame_stride) as u64;
         if let Some(hook) = &controls.progress {
             hook.emit(event);
         }

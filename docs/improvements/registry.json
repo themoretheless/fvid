@@ -1,8 +1,8 @@
 {
   "target": 1000,
   "counting_rule": "One independently confirmed problem or useful capability; fixture variants and baseline integration repairs are excluded. Only accepted entries count.",
-  "accepted_count": 784,
-  "next_id": "FVID-0785",
+  "accepted_count": 789,
+  "next_id": "FVID-0790",
   "entries": [
     {
       "id": "FVID-0001",
@@ -8815,6 +8815,61 @@
       "result": "media::transcode dispatches directly to the owned FFV1 exporters after a single eligibility and deband check.",
       "status": "accepted",
       "validation": "batch-610-validation.json"
+    },
+    {
+      "id": "FVID-0785",
+      "batch": 611,
+      "title": "native_audio_mix::validate_and_inspect_source_with_options single File::open across WAVE check and inspect",
+      "source": "src/native_audio_mix.rs",
+      "regression": "tests/native_audio_mix_single_open.rs",
+      "before": "validate_and_inspect_source_with_options called native_pcm::is_wave(source) and then opened source a second time for native_pcm::inspect.",
+      "result": "validate_and_inspect_source_with_options opens source once and reuses the same file handle across is_wave_reader and native_pcm::inspect.",
+      "status": "accepted",
+      "validation": "batch-611-validation.json"
+    },
+    {
+      "id": "FVID-0786",
+      "batch": 611,
+      "title": "native_audio_mix::eligible_with_options single File::open for WAVE admission and inspect",
+      "source": "src/native_audio_mix.rs",
+      "regression": "tests/native_audio_mix_single_open.rs",
+      "before": "eligible_with_options opened each WAVE source twice: once in native_pcm::is_wave(source) and once in native_pcm::inspect.",
+      "result": "eligible_with_options reuses a single File handle across is_wave_reader and native_pcm::inspect.",
+      "status": "accepted",
+      "validation": "batch-611-validation.json"
+    },
+    {
+      "id": "FVID-0787",
+      "batch": 611,
+      "title": "native_audio_mix::concat::geometry_with_options single-pass WAVE and owned-audio inspection",
+      "source": "src/native_audio_mix/concat.rs",
+      "regression": "tests/native_audio_mix_single_open.rs",
+      "before": "geometry_with_options opened WAVE sources twice and called both is_owned_audio_source_with_options and constant_audio_source_info_selected_with_options on non-WAVE sources.",
+      "result": "geometry_with_options reuses one File handle for WAVE sources and queries constant_audio_source_info_selected_with_options directly once for non-WAVE sources.",
+      "status": "accepted",
+      "validation": "batch-611-validation.json"
+    },
+    {
+      "id": "FVID-0788",
+      "batch": 611,
+      "title": "native_audio_mix::concat::segment_packet_count single File::open across WAVE and container readers",
+      "source": "src/native_audio_mix/concat.rs",
+      "regression": "tests/native_audio_mix_single_open.rs",
+      "before": "segment_packet_count opened source in is_wave(source) and then opened it a second time for native_pcm::inspect or container prefix inspection.",
+      "result": "segment_packet_count opens source once and reuses the same File handle across is_wave_reader, native_pcm::inspect, and MP4/Matroska/ADTS readers.",
+      "status": "accepted",
+      "validation": "batch-611-validation.json"
+    },
+    {
+      "id": "FVID-0789",
+      "batch": 611,
+      "title": "native_audio_mix::merge_audio_with_controls blockwise channel interleaving and single write_all per block",
+      "source": "src/native_audio_mix.rs",
+      "regression": "tests/native_audio_mix_single_open.rs",
+      "before": "merge_audio_with_controls called sink.write_all for every individual sample frame and input (up to 8192 calls per 4096-frame block).",
+      "result": "merge_audio_with_controls interleaves each 4096-frame block into a preallocated contiguous buffer and performs a single sink.write_all per block.",
+      "status": "accepted",
+      "validation": "batch-611-validation.json"
     }
   ],
   "pending_count": 0
