@@ -1018,16 +1018,6 @@ pub fn is_alac_source(path: &Path) -> Result<bool> {
         .any(|t| t.handler == *b"soun" && t.codec == *b"alac"))
 }
 
-fn is_mp4_audio_container(path: &Path) -> Result<bool> {
-    use std::io::Read;
-    let mut prefix = [0;8];
-    match File::open(path)?.read_exact(&mut prefix) {
-        Ok(()) => Ok(crate::container::mp4::recognizes_prefix(&prefix)),
-        Err(e) if e.kind()==std::io::ErrorKind::UnexpectedEof => Ok(false),
-        Err(e) => Err(e.into()),
-    }
-}
-
 /// Admission for compressed sources with an owned export implementation.
 /// Unsupported ALAC layouts and ambiguous default selection retain the adapter.
 /// Packed WAVE is detected separately by native_pcm::is_wave.
@@ -1063,10 +1053,7 @@ pub fn is_owned_audio_source_with_interval_and_options(
     if is_aac_source_with_metadata_limit(path, options.max_controlled_bytes)? {
         return Ok(true);
     }
-    Ok(
-        (is_mp4_audio_container(path)? || crate::native_export::is_matroska_source(path)?)
-            && constant_audio_source_info_selected_with_interval_and_options(path, None, interval, options).is_ok(),
-    )
+    Ok(constant_audio_source_info_selected_with_interval_and_options(path, None, interval, options).is_ok())
 }
 
 /// Trim can select one supported audio track even when default decoding is
@@ -1087,10 +1074,20 @@ pub fn is_owned_audio_trim_source_with_interval_and_options(
     interval: Option<(Duration, Duration)>,
     options: &fvid_media::CopyOptions,
 ) -> Result<bool> {
+    use std::io::Read;
     if is_owned_audio_source_with_interval_and_options(path, interval, options)? {
         return Ok(true);
     }
-    if !is_mp4_audio_container(path)? && !crate::native_export::is_matroska_source(path)? {
+    let mut prefix = [0u8; 8];
+    let is_container = match File::open(path)?.read_exact(&mut prefix) {
+        Ok(()) => {
+            crate::container::mp4::recognizes_prefix(&prefix)
+                || prefix.starts_with(&[0x1a, 0x45, 0xdf, 0xa3])
+        }
+        Err(e) if e.kind() == std::io::ErrorKind::UnexpectedEof => false,
+        Err(e) => return Err(e.into()),
+    };
+    if !is_container {
         return Ok(false);
     }
     let info = crate::native_probe::try_probe_metadata_with_options(path, options)
@@ -1260,10 +1257,15 @@ fn inspect_audio_source_selected(
         options.max_packets,
     )?;
     control.check()?;
-    if is_mp4_audio_container(source)? || crate::native_export::is_matroska_source(source)? {
-        use std::io::{Read,Seek,SeekFrom};
-        let mut input=File::open(source)?;let mut prefix=[0;4];input.read_exact(&mut prefix)?;input.seek(SeekFrom::Start(0))?;
-        if prefix==[0x1a,0x45,0xdf,0xa3] {
+    use std::io::{Read, Seek, SeekFrom};
+    let mut input = BufReader::new(File::open(source)?);
+    let mut prefix = [0u8; 8];
+    let read = input.read(&mut prefix)?;
+    input.seek(SeekFrom::Start(0))?;
+    let is_matroska = read >= 4 && prefix[..4] == [0x1a, 0x45, 0xdf, 0xa3];
+    let is_mp4 = read == 8 && crate::container::mp4::recognizes_prefix(&prefix);
+    if is_mp4 || is_matroska {
+        if is_matroska {
             let mut limits = crate::container::webm::Limits::default();
             let memory_packets = options
                 .max_controlled_bytes
@@ -1283,7 +1285,7 @@ fn inspect_audio_source_selected(
                     error
                 }
             };
-            let mut reader = crate::container::webm::WebmReader::open(BufReader::new(input), limits)
+            let mut reader = crate::container::webm::WebmReader::open(input, limits)
                 .map_err(map_packet_limit)?;
             reader.scan_all().map_err(map_packet_limit)?;
             if let Some(limit) = options.max_controlled_bytes
@@ -1336,7 +1338,7 @@ fn inspect_audio_source_selected(
             });
         }
         let mut reader = crate::container::mp4::Mp4Reader::open_indexed(
-            BufReader::new(File::open(source)?),
+            input,
             crate::container::mp4::Limits {
                 metadata_bytes: crate::container::mp4::Limits::default().metadata_bytes
                     .min(options.max_controlled_bytes.unwrap_or(usize::MAX)),

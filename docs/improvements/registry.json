@@ -1,8 +1,8 @@
 {
   "target": 1000,
   "counting_rule": "One independently confirmed problem or useful capability; fixture variants and baseline integration repairs are excluded. Only accepted entries count.",
-  "accepted_count": 769,
-  "next_id": "FVID-0770",
+  "accepted_count": 774,
+  "next_id": "FVID-0775",
   "entries": [
     {
       "id": "FVID-0001",
@@ -8650,6 +8650,61 @@
       "result": "Compute planar_eligible = crate::native_lossless_y4m::eligible(main)? once and reuse it to dispatch between write_processed and write_mp4_processed.",
       "status": "accepted",
       "validation": "batch-607-validation.json"
+    },
+    {
+      "id": "FVID-0770",
+      "batch": 608,
+      "title": "Open source once in native_media::inspect_audio_source_selected instead of up to four times",
+      "source": "src/native_media.rs",
+      "regression": "tests/native_media_and_loudnorm_single_open.rs",
+      "before": "inspect_audio_source_selected called is_mp4_audio_container(source) (opening source), then native_export::is_matroska_source(source) (opening source again), then opened source a third time for the 4-byte prefix check, and for MP4 opened source a fourth time in Mp4Reader::open_indexed.",
+      "result": "Open BufReader::new(File::open(source)?) once, read the 8-byte prefix, seek back to 0, and pass input directly to WebmReader::open or Mp4Reader::open_indexed.",
+      "status": "accepted",
+      "validation": "batch-608-validation.json"
+    },
+    {
+      "id": "FVID-0771",
+      "batch": 608,
+      "title": "Remove redundant is_mp4_audio_container and is_matroska_source pre-opens in native_media::is_owned_audio_source_with_interval_and_options",
+      "source": "src/native_media.rs",
+      "regression": "tests/native_media_and_loudnorm_single_open.rs",
+      "before": "is_owned_audio_source_with_interval_and_options opened path twice for is_mp4_audio_container and is_matroska_source before calling constant_audio_source_info_selected_with_interval_and_options, which already inspects the container prefix.",
+      "result": "Call constant_audio_source_info_selected_with_interval_and_options(path, None, interval, options).is_ok() directly after the AAC check.",
+      "status": "accepted",
+      "validation": "batch-608-validation.json"
+    },
+    {
+      "id": "FVID-0772",
+      "batch": 608,
+      "title": "Combine MP4 and Matroska container prefix checks into a single File::open in native_media::is_owned_audio_trim_source_with_interval_and_options",
+      "source": "src/native_media.rs",
+      "regression": "tests/native_media_and_loudnorm_single_open.rs",
+      "before": "is_owned_audio_trim_source_with_interval_and_options called is_mp4_audio_container(path) and native_export::is_matroska_source(path) separately, opening path twice.",
+      "result": "Read the 8-byte prefix in one File::open(path) and check recognizes_prefix(&prefix) || prefix.starts_with(&[0x1a, 0x45, 0xdf, 0xa3]).",
+      "status": "accepted",
+      "validation": "batch-608-validation.json"
+    },
+    {
+      "id": "FVID-0773",
+      "batch": 608,
+      "title": "Reuse a single File handle across is_wave_reader and native_pcm::inspect in native_loudnorm::try_plan",
+      "source": "src/native_loudnorm.rs",
+      "regression": "tests/native_media_and_loudnorm_single_open.rs",
+      "before": "native_loudnorm::try_plan called native_pcm::is_wave(source) (opening source) and then opened source a second time for native_pcm::inspect.",
+      "result": "Open File::open(source) once and reuse &mut wave_file across native_pcm::is_wave_reader and native_pcm::inspect.",
+      "status": "accepted",
+      "validation": "batch-608-validation.json"
+    },
+    {
+      "id": "FVID-0774",
+      "batch": 608,
+      "title": "Cache and reuse (selected, AudioSourceInfo) across admission and execution in native_loudnorm::try_apply",
+      "source": "src/native_loudnorm.rs",
+      "regression": "tests/native_media_and_loudnorm_single_open.rs",
+      "before": "native_loudnorm::try_apply called selected_audio(source, options) and constant_audio_source_info_selected_with_options(source, Some(idx), &default_opts) during native_supported admission and then called both functions a second time immediately afterwards.",
+      "result": "Capture native_info = Some((idx, info)) during admission and reuse both selected and cached_info when packet budgets match defaults.",
+      "status": "accepted",
+      "validation": "batch-608-validation.json"
     }
   ],
   "pending_count": 0

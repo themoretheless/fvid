@@ -196,7 +196,8 @@ pub fn try_plan(
             .map_err(|e| crate::invalid(&e))?,
         ));
     }
-    let wave = crate::native_pcm::is_wave(source)?;
+    let mut wave_file = std::fs::File::open(source)?;
+    let wave = crate::native_pcm::is_wave_reader(&mut wave_file)?;
     if wave {
         if options.streams.len() > 1 {
             return Err("loudnorm requires one selected audio stream".into());
@@ -205,7 +206,7 @@ pub fn try_plan(
             return Err("WAVE has only stream 0".into());
         }
         if let Ok(info) = crate::native_pcm::inspect(
-            &mut std::fs::File::open(source)?,
+            &mut wave_file,
             options.cancel.as_ref(),
         ) {
             if info.sample_frames == 0 {
@@ -643,19 +644,24 @@ pub fn try_apply(
     }
     default_opts.cancel = options.cancel.clone();
     default_opts.max_rss_bytes = options.max_rss_bytes;
-    let native_supported = options.max_controlled_bytes.is_none()
+    let native_info = if options.max_controlled_bytes.is_none()
         && options.metadata_set.is_empty()
         && options.metadata_delete.is_empty()
         && crate::native_media::is_owned_audio_trim_source_with_options(source, &default_opts)?
-        && selected_audio(source, options).is_ok_and(|idx| {
+    {
+        selected_audio(source, options).ok().and_then(|idx| {
             crate::native_media::constant_audio_source_info_selected_with_options(
                 source,
                 Some(idx),
                 &default_opts,
             )
-            .is_ok()
-        });
-    if !native_supported {
+            .ok()
+            .map(|info| (idx, info))
+        })
+    } else {
+        None
+    };
+    if native_info.is_none() {
         // Container normalizers require an explicit stream for multi-audio
         // inputs; preserve loudnorm's default of the first audio stream.
         let mut selected_options = options.clone();
@@ -697,12 +703,22 @@ pub fn try_apply(
     }
     // Preserve the established loudnorm default: first audio, rather than
     // choosing the first container stream when video precedes audio.
-    let selected = selected_audio(source, options)?;
+    let (selected, cached_info) = native_info.unwrap();
     let mut plan_options = options.clone();
     plan_options.streams = vec![selected];
     crate::native_plan::decode_audio_with_options(source, &Default::default(), &plan_options)
         .map_err(|e| crate::invalid(&e))?;
-    let info = crate::native_media::constant_audio_source_info_selected_with_options(source, Some(selected), options)?;
+    let info = if options.max_packet_bytes == CopyOptions::default().max_packet_bytes
+        && options.max_packets.is_none()
+    {
+        cached_info
+    } else {
+        crate::native_media::constant_audio_source_info_selected_with_options(
+            source,
+            Some(selected),
+            options,
+        )?
+    };
     if !fvid_media::owned_wave_loudness::qualified_rate(info.sample_rate) {
         return Ok(None);
     }

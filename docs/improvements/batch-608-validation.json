@@ -1,0 +1,15 @@
+{
+  "batch": 608,
+  "ids": [
+    "FVID-0770",
+    "FVID-0771",
+    "FVID-0772",
+    "FVID-0773",
+    "FVID-0774"
+  ],
+  "commands": [
+    "cargo test --test native_media_and_loudnorm_single_open",
+    "cargo test --lib native_loudnorm"
+  ],
+  "status": "accepted"
+}

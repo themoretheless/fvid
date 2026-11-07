@@ -4476,4 +4476,15 @@ See `batch-606-validation.json`.
 
 See `batch-607-validation.json`.
 
+## Batch 608 — FVID-0770..0774: Single-open MP4/Matroska audio source inspection in `native_media` and single-open WAVE inspection + cached `AudioSourceInfo` reuse in `native_loudnorm`
+
+- **FVID-0770** — Open `source` once in `native_media::inspect_audio_source_selected` instead of up to four times (`src/native_media.rs`, `tests/native_media_and_loudnorm_single_open.rs`).
+- **FVID-0771** — Remove redundant `is_mp4_audio_container` and `is_matroska_source` pre-opens in `native_media::is_owned_audio_source_with_interval_and_options` (`src/native_media.rs`, `tests/native_media_and_loudnorm_single_open.rs`).
+- **FVID-0772** — Combine MP4 and Matroska container prefix checks into a single `File::open` in `native_media::is_owned_audio_trim_source_with_interval_and_options` (`src/native_media.rs`, `tests/native_media_and_loudnorm_single_open.rs`).
+- **FVID-0773** — Reuse a single `File` handle across `is_wave_reader` and `native_pcm::inspect` in `native_loudnorm::try_plan` (`src/native_loudnorm.rs`, `tests/native_media_and_loudnorm_single_open.rs`).
+- **FVID-0774** — Cache and reuse `(selected, AudioSourceInfo)` across admission and execution in `native_loudnorm::try_apply` (`src/native_loudnorm.rs`, `tests/native_media_and_loudnorm_single_open.rs`).
+
+See `batch-608-validation.json`.
+
+
 
