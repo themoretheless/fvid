@@ -231,6 +231,8 @@ fn audio_plan_with_controls(
                     parsed.presentation_samples()
                 };
                 Some(samples)
+            } else if crate::owned_adts_export::recognizes(source)? {
+                Some(info.stage2_frames)
             } else {
                 None
             };

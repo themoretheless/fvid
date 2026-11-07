@@ -371,19 +371,9 @@ fn retain_raw_block(mut body: Vec<u8>, range: std::ops::Range<usize>) -> Vec<u8>
 
 pub(crate) fn map_controlled_adts_packet_error<T>(
     result: std::result::Result<T, String>,
-    options: &fvid_control::CopyOptions,
+    _options: &fvid_control::CopyOptions,
 ) -> std::result::Result<T, String> {
-    match result {
-        Err(error)
-            if error.contains("ADTS packet exceeds budget")
-                && options
-                    .max_controlled_bytes
-                    .is_some_and(|limit| limit < options.max_packet_bytes) =>
-        {
-            Err(format!("controlled memory budget exceeded: {error}"))
-        }
-        other => other,
-    }
+    result
 }
 
 /// Sequential ADTS reader. Retains blocks from at most one transport frame

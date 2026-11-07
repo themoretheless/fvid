@@ -4256,4 +4256,15 @@ See `batch-584-validation.json`.
 
 See `batch-585-validation.json`.
 
+## Batch 586 — FVID-0660..0664: Loudness histogram bin memory and negotiated ADTS geometry in `check_meter_budget`, negotiated ADTS geometry and prefix sample frames in `owned_adts_loudnorm`, G.711 / MP4 / Matroska Stage-2 metadata working set in `source_descriptor_for_decode`, and ADTS mix/merge output buffer budget in `audio_plan_with_controls`
+
+- **FVID-0660** — Include loudness histogram bin memory and negotiated ADTS geometry in `check_meter_budget` (`crates/fvid-media/src/owned_container_loudness.rs`, `crates/fvid-media/src/owned_adts_loudness.rs`, `tests/loudness_histogram_adts_and_spool_meta.rs`).
+- **FVID-0661** — Enforce negotiated ADTS geometry and actual prefix sample frames in `owned_adts_loudnorm` spool budget (`crates/fvid-media/src/owned_aac/stream.rs`, `crates/fvid-media/src/owned_adts_loudnorm.rs`, `tests/loudness_histogram_adts_and_spool_meta.rs`).
+- **FVID-0662** — Propagate G.711 WAVE RIFF `INFO` metadata size into `source_descriptor_for_decode` Stage-2 budget (`crates/fvid-media/src/owned_g711_wave_export.rs`, `crates/fvid-media/src/owned_audio_plan.rs`, `tests/loudness_histogram_adts_and_spool_meta.rs`).
+- **FVID-0663** — Populate Stage-2 WAVE metadata bytes for MP4 and Matroska audio inputs in `source_descriptor_for_decode` (`crates/fvid-media/src/owned_audio_plan.rs`, `tests/loudness_histogram_adts_and_spool_meta.rs`).
+- **FVID-0664** — Include ADTS decoded prefix frame estimates in `audio_plan_with_controls` mix and merge budget (`crates/fvid-media/src/owned_audio_mix.rs`, `tests/loudness_histogram_adts_and_spool_meta.rs`).
+
+See `batch-586-validation.json`.
+
+
 

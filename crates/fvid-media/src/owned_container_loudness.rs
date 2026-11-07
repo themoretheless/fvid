@@ -275,17 +275,37 @@ fn decode_to_wave_from_geometry(
     crate::owned_ogg_opus_export::append_info(&spool.wave, &info)?;
     Ok(spool)
 }
-fn check_meter_budget(rate: u32, channels: u16, codec: &str, options: &CopyOptions) -> Result<()> {
+fn check_meter_budget(
+    rate: u32,
+    channels: u16,
+    codec: &str,
+    sample_frames: u64,
+    options: &CopyOptions,
+) -> Result<()> {
     if let Some(limit) = options.max_controlled_bytes {
         let precise = codec.starts_with("A_PCM/") || codec.starts_with("pcm_");
         let ch = u128::from(channels.max(1));
+        let rate_u64 = u64::from(rate);
         let rate_u128 = u128::from(rate);
+        let frames = sample_frames.max(1024);
+        let hop = (rate_u64 / 10).max(1);
+        let integrated_blocks = if frames < rate_u64 * 2 / 5 {
+            0
+        } else {
+            1 + (frames - rate_u64 * 2 / 5) / hop
+        };
+        let short_blocks = if frames < rate_u64 * 3 {
+            0
+        } else {
+            1 + (frames - rate_u64 * 3) / hop
+        };
         let frame = ch * if precise { 8 } else { 4 };
         let capacity = 4096 * frame;
         let estimated = (rate_u128 * 3 + rate_u128 * 2 / 5) * 8
             + capacity
             + 4096 * ch * 8
             + ch * 512
+            + u128::from(integrated_blocks + short_blocks) * 512
             + 16384;
         if estimated > limit as u128 {
             return Err(format!(
@@ -297,7 +317,12 @@ fn check_meter_budget(rate: u32, channels: u16, codec: &str, options: &CopyOptio
 }
 pub fn measure_loudness(source: &Path, options: &CopyOptions) -> Result<LoudnessStats> {
     let (rate, channels, _, codec) = geometry(source, options)?;
-    check_meter_budget(rate, channels, &codec, options)?;
+    let sample_frames = if options.max_controlled_bytes.is_some() {
+        crate::owned_audio_plan::source_descriptor(source, options)?.stage2_frames
+    } else {
+        1024
+    };
+    check_meter_budget(rate, channels, &codec, sample_frames, options)?;
     let spool = decode_to_wave(source, options)?;
     let mut pcm_options = options.clone();
     pcm_options.streams = vec![0];
@@ -329,7 +354,12 @@ pub fn measure_loudness(source: &Path, options: &CopyOptions) -> Result<Loudness
 }
 pub fn plan_loudness(source: &Path, options: &CopyOptions) -> Result<MediaPlan> {
     let (rate, channels, _, codec) = geometry(source, options)?;
-    check_meter_budget(rate, channels, &codec, options)?;
+    let sample_frames = if options.max_controlled_bytes.is_some() {
+        crate::owned_audio_plan::source_descriptor(source, options)?.stage2_frames
+    } else {
+        1024
+    };
+    check_meter_budget(rate, channels, &codec, sample_frames, options)?;
     let mut plan =
         crate::owned_audio_plan::plan_decode_audio(source, &Default::default(), options)?;
     plan.command = "loudness".into();

@@ -123,24 +123,41 @@ pub(crate) fn supports(source: &Path, options: &CopyOptions) -> bool {
 }
 fn check_meter_budget(source: &Path, rate: u32, options: &CopyOptions) -> Result<()> {
     if let Some(limit) = options.max_controlled_bytes {
-        let reader = crate::owned_aac::adts::map_controlled_adts_packet_error(
-            crate::owned_aac::adts::StreamReader::open_with_packet_limit(
+        let (negotiated_rate, negotiated_channels, _, sample_frames) =
+            crate::owned_aac::stream::adts_prefix_info_for_transform(
                 BufReader::new(File::open(source).map_err(|e| e.to_string())?),
-                options.max_packet_bytes.min(limit),
+                None,
+                None,
+                options,
             )
-            .map_err(|e| e.to_string()),
-            options,
-        )?;
-        let decoder = crate::owned_aac::NativeAacDecoder::new(reader.audio_specific_config())
             .map_err(|e| e.to_string())?;
-        let channels = u128::from(decoder.channels().max(1));
-        let rate_u128 = u128::from(rate);
+        let eff_rate = if crate::owned_wave_loudness::qualified_rate(negotiated_rate) {
+            negotiated_rate
+        } else {
+            rate
+        };
+        let channels = u128::from(negotiated_channels.max(1));
+        let rate_u64 = u64::from(eff_rate);
+        let rate_u128 = u128::from(eff_rate);
+        let frames = sample_frames.max(1024);
+        let hop = (rate_u64 / 10).max(1);
+        let integrated_blocks = if frames < rate_u64 * 2 / 5 {
+            0
+        } else {
+            1 + (frames - rate_u64 * 2 / 5) / hop
+        };
+        let short_blocks = if frames < rate_u64 * 3 {
+            0
+        } else {
+            1 + (frames - rate_u64 * 3) / hop
+        };
         let frame = channels * 4;
         let capacity = 4096 * frame;
         let estimated = (rate_u128 * 3 + rate_u128 * 2 / 5) * 8
             + capacity
             + 4096 * channels * 8
             + channels * 512
+            + u128::from(integrated_blocks + short_blocks) * 512
             + 16384;
         if estimated > limit as u128 {
             return Err(format!(

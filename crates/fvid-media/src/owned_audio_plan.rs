@@ -194,13 +194,14 @@ fn source_descriptor_for_decode(source: &Path, options: &CopyOptions,
     let mut stage2_frames = 1024;
     let mut stage2_meta_bytes = 0;
     let (rate, channels, mask, codec, precision) = if g711_wave {
-        let (rate, channels, mask, codec, frames) =
-            crate::owned_g711_wave_export::descriptor_with_transform(
+        let (rate, channels, mask, codec, frames, info_len) =
+            crate::owned_g711_wave_export::descriptor_for_decode(
                 source,
                 transform.copied(),
                 options,
             )?;
         stage2_frames = frames;
+        stage2_meta_bytes = info_len;
         (rate, channels, mask, codec.to_owned(), "float32".to_owned())
     } else if ogg {
         let (index, rate, channels, mask, codec, frames, info_len) =
@@ -224,6 +225,7 @@ fn source_descriptor_for_decode(source: &Path, options: &CopyOptions,
             )?;
         }
         stream_index = index;
+        stage2_meta_bytes = crate::owned_wave_metadata::mp4_source_info(source, options)?.len();
         let precision = if codec.starts_with("pcm_") {
             "float64"
         } else {
@@ -232,6 +234,10 @@ fn source_descriptor_for_decode(source: &Path, options: &CopyOptions,
         (rate, channels, mask, codec, precision.to_owned())
     } else if let Some((index, rate, channels, mask, codec, precision)) = matroska {
         stream_index = index;
+        let interval = transform.and_then(|t| crate::owned_adts_export::decoded_prefix(*t, rate));
+        stage2_meta_bytes =
+            crate::owned_wave_metadata::matroska_source_info_with_interval(source, interval, options)?
+                .len();
         (rate, channels, mask, codec, precision)
     } else if raw_flac {
         let _ = crate::owned_raw_flac::source_info(source, options)?;

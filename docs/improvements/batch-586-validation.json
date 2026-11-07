@@ -1,0 +1,27 @@
+{
+  "status": "accepted",
+  "accepted_ids": [
+    "FVID-0660",
+    "FVID-0661",
+    "FVID-0662",
+    "FVID-0663",
+    "FVID-0664"
+  ],
+  "count_delta": 5,
+  "accepted_count": 664,
+  "next_id": "FVID-0665",
+  "qualification": [
+    {
+      "name": "loudness-histogram-adts-and-spool-meta",
+      "command": [
+        "cargo",
+        "test",
+        "--test",
+        "loudness_histogram_adts_and_spool_meta"
+      ],
+      "exit_code": 0,
+      "passed": 4,
+      "ignored": 0
+    }
+  ]
+}

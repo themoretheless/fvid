@@ -106,12 +106,12 @@ pub(crate) fn descriptor(
 ) -> Result<(u32, u16, u32, &'static str, u64)> {
     descriptor_with_transform(path, None, options)
 }
-pub(crate) fn descriptor_with_transform(
+pub(crate) fn descriptor_for_decode(
     path: &Path,
     transform: Option<AudioDecodeTransform>,
     options: &CopyOptions,
-) -> Result<(u32, u16, u32, &'static str, u64)> {
-    let (input, _) = open(path, options)?;
+) -> Result<(u32, u16, u32, &'static str, u64, usize)> {
+    let (input, info) = open(path, options)?;
     if input.shape.sample_frames == 0 {
         return Err("no decoded audio samples or invalid channel count (nonempty input required)".into());
     }
@@ -176,7 +176,17 @@ pub(crate) fn descriptor_with_transform(
         input.mask,
         codec,
         frames_read,
+        info.len(),
     ))
+}
+pub(crate) fn descriptor_with_transform(
+    path: &Path,
+    transform: Option<AudioDecodeTransform>,
+    options: &CopyOptions,
+) -> Result<(u32, u16, u32, &'static str, u64)> {
+    let (rate, channels, mask, codec, frames_read, _) =
+        descriptor_for_decode(path, transform, options)?;
+    Ok((rate, channels, mask, codec, frames_read))
 }
 pub(crate) fn supports(
     path: &Path,

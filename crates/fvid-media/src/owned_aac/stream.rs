@@ -245,18 +245,7 @@ pub fn decode_adts_pcm<R: Read>(
         options
             .max_packet_bytes
             .min(options.max_controlled_bytes.unwrap_or(usize::MAX)),
-    )
-    .map_err(|e| {
-        if e.0.contains("ADTS packet exceeds budget")
-            && options
-                .max_controlled_bytes
-                .is_some_and(|limit| limit < options.max_packet_bytes)
-        {
-            invalid(&format!("controlled memory budget exceeded: {}", e.0))
-        } else {
-            e
-        }
-    })?;
+    )?;
     decode_adts_aac_reader_controlled(reader, output, interval, &mut control)
 }
 /// Read-only clock/layout negotiation for file plans and loudness admission.
@@ -296,34 +285,24 @@ pub(crate) fn adts_prefix_info_for_transform<R: Read>(
         quiet
             .max_packet_bytes
             .min(quiet.max_controlled_bytes.unwrap_or(usize::MAX)),
-    )
-    .map_err(|e| {
-        if e.0.contains("ADTS packet exceeds budget")
-            && quiet
-                .max_controlled_bytes
-                .is_some_and(|limit| limit < quiet.max_packet_bytes)
-        {
-            invalid(&format!("controlled memory budget exceeded: {}", e.0))
-        } else {
-            e
-        }
-    })?;
+    )?;
     check_adts_decode_admission(reader.audio_specific_config(), options)?;
     let negotiated = negotiate_adts_aac_reader(reader, interval, &mut control)?;
     let rate = negotiated.sample_rate();
     let channels = negotiated.channels();
     let mask = negotiated.channel_mask();
-    let need_frames = transform.is_some_and(|t| {
-        t.interval.is_some()
-            || (options.max_controlled_bytes.is_some()
-                && (t.sample_rate.is_some()
-                    || t.channels.is_some()
-                    || t.volume.is_some()
-                    || !options.metadata_set.is_empty()
-                    || !options.metadata_delete.is_empty()
-                    || !options.stream_metadata_set.is_empty()
-                    || !options.stream_metadata_delete.is_empty()))
-    });
+    let need_frames = (transform.is_none() && options.max_controlled_bytes.is_some())
+        || transform.is_some_and(|t| {
+            t.interval.is_some()
+                || (options.max_controlled_bytes.is_some()
+                    && (t.sample_rate.is_some()
+                        || t.channels.is_some()
+                        || t.volume.is_some()
+                        || !options.metadata_set.is_empty()
+                        || !options.metadata_delete.is_empty()
+                        || !options.stream_metadata_set.is_empty()
+                        || !options.stream_metadata_delete.is_empty()))
+        });
     let frames = if need_frames {
         let stats = negotiated.decode(&mut std::io::sink(), &mut control)?;
         if transform.is_some_and(|t| t.interval.is_some()) {

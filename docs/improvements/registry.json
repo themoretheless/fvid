@@ -1,8 +1,8 @@
 {
   "target": 1000,
   "counting_rule": "One independently confirmed problem or useful capability; fixture variants and baseline integration repairs are excluded. Only accepted entries count.",
-  "accepted_count": 659,
-  "next_id": "FVID-0660",
+  "accepted_count": 664,
+  "next_id": "FVID-0665",
   "entries": [
     {
       "id": "FVID-0001",
@@ -7440,6 +7440,61 @@
       "result": "Thread stage2_frames and stage2_meta_bytes from source_descriptor into check_spool_loudnorm_budget for owned_container_loudnorm::plan_loudnorm and apply.",
       "status": "accepted",
       "validation": "batch-585-validation.json"
+    },
+    {
+      "id": "FVID-0660",
+      "batch": 586,
+      "title": "Include loudness histogram bin memory and negotiated ADTS geometry in check_meter_budget",
+      "source": "crates/fvid-media/src/owned_container_loudness.rs",
+      "regression": "tests/loudness_histogram_adts_and_spool_meta.rs",
+      "before": "owned_container_loudness::check_meter_budget and owned_adts_loudness::check_meter_budget omitted the (integrated_blocks + short_blocks) * 512 loudness histogram bin memory charged by owned_wave_loudness::preflight, and owned_adts_loudness::check_meter_budget used un-negotiated ADTS header rate/channels instead of negotiated SBR+PS geometry.",
+      "result": "Pass prefix sample frames to owned_container_loudness::check_meter_budget, negotiate ADTS prefix geometry in owned_adts_loudness::check_meter_budget, and include (integrated_blocks + short_blocks) * 512 in both meter budget checks.",
+      "status": "accepted",
+      "validation": "batch-586-validation.json"
+    },
+    {
+      "id": "FVID-0661",
+      "batch": 586,
+      "title": "Enforce negotiated ADTS geometry and actual prefix sample frames in owned_adts_loudnorm spool budget",
+      "source": "crates/fvid-media/src/owned_adts_loudnorm.rs",
+      "regression": "tests/loudness_histogram_adts_and_spool_meta.rs",
+      "before": "adts_prefix_info_for_transform returned a hardcoded 1024 frames whenever transform was None, and owned_adts_loudnorm::plan_loudnorm and apply passed un-negotiated ADTS header (rate, channels) and 1024 frames to check_spool_loudnorm_budget.",
+      "result": "Decode prefix sample frames in adts_prefix_info_for_transform when transform is None and max_controlled_bytes is set, and pass negotiated (rate, channels, stage2_frames) from source_descriptor into check_spool_loudnorm_budget in owned_adts_loudnorm.",
+      "status": "accepted",
+      "validation": "batch-586-validation.json"
+    },
+    {
+      "id": "FVID-0662",
+      "batch": 586,
+      "title": "Propagate G.711 WAVE RIFF INFO metadata size into source_descriptor_for_decode Stage-2 budget",
+      "source": "crates/fvid-media/src/owned_g711_wave_export.rs",
+      "regression": "tests/loudness_histogram_adts_and_spool_meta.rs",
+      "before": "owned_g711_wave_export::descriptor_with_transform discarded the RIFF INFO metadata Vec<u8> returned by open, leaving stage2_meta_bytes = 0 for G.711 WAVE sources in source_descriptor_for_decode and allowing plan_decode_audio with a default transform to skip check_spool_wave_export_budget completely.",
+      "result": "Expose owned_g711_wave_export::descriptor_for_decode returning info.len() and set stage2_meta_bytes = info_len for G.711 WAVE inputs in source_descriptor_for_decode.",
+      "status": "accepted",
+      "validation": "batch-586-validation.json"
+    },
+    {
+      "id": "FVID-0663",
+      "batch": 586,
+      "title": "Populate Stage-2 WAVE metadata bytes for MP4 and Matroska audio inputs in source_descriptor_for_decode",
+      "source": "crates/fvid-media/src/owned_audio_plan.rs",
+      "regression": "tests/loudness_histogram_adts_and_spool_meta.rs",
+      "before": "source_descriptor_for_decode left stage2_meta_bytes = 0 for MP4 and Matroska audio inputs even though apply and decode_to_wave append mp4_source_info / matroska_source_info_with_interval to the intermediate WAVE spool, causing plan_decode_audio and container loudnorm to underestimate Stage-2 memory.",
+      "result": "Set stage2_meta_bytes from mp4_source_info and matroska_source_info_with_interval in source_descriptor_for_decode.",
+      "status": "accepted",
+      "validation": "batch-586-validation.json"
+    },
+    {
+      "id": "FVID-0664",
+      "batch": 586,
+      "title": "Include ADTS decoded prefix frame estimates in audio_plan_with_controls mix and merge budget",
+      "source": "crates/fvid-media/src/owned_audio_mix.rs",
+      "regression": "tests/loudness_histogram_adts_and_spool_meta.rs",
+      "before": "audio_plan_with_controls set est_frames = None for ADTS inputs, skipping the total_input_pcm_bytes + out_bytes working buffer budget check in plan_mix_audio_with_controls and plan_merge_audio_with_controls for ADTS sources.",
+      "result": "Use Some(info.stage2_frames) as est_frames for ADTS inputs in audio_plan_with_controls.",
+      "status": "accepted",
+      "validation": "batch-586-validation.json"
     }
   ]
 }
