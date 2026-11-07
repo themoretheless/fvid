@@ -458,13 +458,44 @@ pub(crate) fn apply(
     if destination.symlink_metadata().is_ok() {
         return Err("output already exists".into());
     }
-    let (rate, channels) = geometry_with_transform(source, Some(transform), options)?;
+    let parsed = open_with_transform(source, Some(transform), options)?;
+    if parsed.presentation_samples() == 0 {
+        return Err("MPEG audio stream contains no audible samples".into());
+    }
+    let (rate, channels) = (parsed.sample_rate, parsed.channels);
     let info = source_info(source, options)?;
+    let pres = parsed.presentation_window();
+    let until = crate::owned_adts_export::decoded_prefix(transform, rate);
+    let last = match until {
+        Some((_from, at)) => u64::try_from(
+            (at.as_nanos() * u128::from(rate)).div_ceil(1_000_000_000),
+        )
+        .unwrap_or(u64::MAX),
+        None => parsed.presentation_samples(),
+    };
+    let to = pres.start.saturating_add(last).min(pres.end);
+    let mut packets = u64::from(parsed.info_packet().is_some());
+    let mut packet_end = pres.start;
+    for frame in &parsed.frames {
+        if frame.pts >= to {
+            break;
+        }
+        if options.max_packets.is_some_and(|limit| packets >= limit) {
+            break;
+        }
+        packets += 1;
+        packet_end = frame.pts.saturating_add(u64::from(frame.samples)).min(to);
+    }
+    let prefix_samples = if options.max_packets.is_some() {
+        packet_end.saturating_sub(pres.start)
+    } else {
+        last.min(parsed.presentation_samples())
+    };
     crate::owned_adts_export::check_spool_wave_export_budget(
         rate,
         channels,
         32,
-        1024,
+        prefix_samples.max(1024),
         info.len(),
         false,
         transform,

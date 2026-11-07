@@ -419,13 +419,37 @@ pub(crate) fn apply(
     if destination.symlink_metadata().is_ok() {
         return Err("output already exists".into());
     }
-    let (rate, channels, mask) = descriptor_with_transform(source, Some(transform), options)?;
+    let parsed = open_with_transform(source, Some(transform), options)?;
+    if parsed.samples() == 0 {
+        return Err("FLAC stream contains no audible samples".into());
+    }
+    let (rate, channels, mask) = (parsed.sample_rate, parsed.channels, parsed.channel_mask);
     let info = source_info(source, options)?;
+    let until = crate::owned_adts_export::decoded_prefix(transform, rate);
+    let to = match until {
+        Some((_from, at)) => u64::try_from(
+            (at.as_nanos() * u128::from(rate)).div_ceil(1_000_000_000),
+        )
+        .unwrap_or(u64::MAX)
+        .min(parsed.samples()),
+        None => parsed.samples(),
+    };
+    let prefix_frames = match options.max_packets {
+        Some(limit) => parsed
+            .frames
+            .iter()
+            .take_while(|f| f.pts < to)
+            .take(usize::try_from(limit).unwrap_or(usize::MAX))
+            .map(|f| u64::from(f.samples))
+            .sum::<u64>()
+            .min(to),
+        None => to,
+    };
     crate::owned_adts_export::check_spool_wave_export_budget(
         rate,
         channels,
         32,
-        1024,
+        prefix_frames.max(1024),
         info.len(),
         false,
         transform,

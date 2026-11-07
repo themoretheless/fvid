@@ -164,7 +164,8 @@ pub fn wave_info_from_extra(extra: &[u8]) -> std::result::Result<Vec<u8>, String
         }
     }
     if entries.len() > 64 {
-        entries.truncate(64);
+        let excess = entries.len() - 64;
+        entries.drain(0..excess);
     }
     crate::owned_wave_metadata::edit_info_chunks(&[], &[], &entries)
 }

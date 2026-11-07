@@ -4236,11 +4236,13 @@ See `batch-582-validation.json`.
 
 See `batch-583-validation.json`.
 
+## Batch 584 — FVID-0650..0654: Canonical RIFF `INFO` preservation past 64 custom Vorbis comments in FLAC and Ogg WAVE exports, and actual prefix sample-frame Stage-2 WAVE spool budget admission for Ogg, bare FLAC/MPEG, and ADTS AAC
 
+- **FVID-0650** — Preserve canonical RIFF `INFO` tags past 64 custom Vorbis comments in bare FLAC WAVE export (`crates/fvid-media/src/owned_flac_layout.rs`, `tests/flac_ogg_info_cap_and_spool_budget.rs`).
+- **FVID-0651** — Preserve canonical RIFF `INFO` tags past 64 custom Vorbis comments in Ogg WAVE export (`crates/fvid-media/src/owned_ogg_opus_export.rs`, `tests/flac_ogg_info_cap_and_spool_budget.rs`).
+- **FVID-0652** — Enforce actual prefix sample frames and metadata size in Ogg Stage-2 WAVE spool budget (`crates/fvid-media/src/owned_ogg_audio_export.rs`, `crates/fvid-media/src/owned_ogg_opus_export.rs`, `crates/fvid-media/src/owned_ogg_vorbis_export.rs`, `crates/fvid-media/src/owned_ogg_joint_export.rs`, `crates/fvid-media/src/owned_audio_plan.rs`, `tests/flac_ogg_info_cap_and_spool_budget.rs`).
+- **FVID-0653** — Enforce actual prefix sample frames in bare FLAC and bare MPEG Stage-2 WAVE spool budget in `apply` (`crates/fvid-media/src/owned_raw_flac.rs`, `crates/fvid-media/src/owned_raw_mp3.rs`, `tests/flac_ogg_info_cap_and_spool_budget.rs`).
+- **FVID-0654** — Enforce actual decoded prefix sample frames in ADTS AAC Stage-2 WAVE spool budget (`crates/fvid-media/src/owned_aac/stream.rs`, `crates/fvid-media/src/owned_audio_plan.rs`, `tests/flac_ogg_info_cap_and_spool_budget.rs`).
 
-
-
-
-
-
+See `batch-584-validation.json`.
 

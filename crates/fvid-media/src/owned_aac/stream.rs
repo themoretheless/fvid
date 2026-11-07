@@ -268,6 +268,7 @@ pub(crate) fn adts_prefix_info<R: Read>(
     options: &CopyOptions,
 ) -> Result<(u32, u16, u32)> {
     adts_prefix_info_for_transform(source, interval, None, options)
+        .map(|(rate, channels, mask, _)| (rate, channels, mask))
 }
 
 pub(crate) fn adts_prefix_info_for_transform<R: Read>(
@@ -275,7 +276,7 @@ pub(crate) fn adts_prefix_info_for_transform<R: Read>(
     interval: Option<(Duration, Duration)>,
     transform: Option<fvid_media_info::AudioDecodeTransform>,
     options: &CopyOptions,
-) -> Result<(u32, u16, u32)> {
+) -> Result<(u32, u16, u32, u64)> {
     let mut quiet = crate::owned_adts_export::pcm_decode_options(options);
     quiet.progress = None;
     let mut control = DecodeProgress {
@@ -312,16 +313,32 @@ pub(crate) fn adts_prefix_info_for_transform<R: Read>(
     let rate = negotiated.sample_rate();
     let channels = negotiated.channels();
     let mask = negotiated.channel_mask();
-    if transform.is_some_and(|t| t.interval.is_some()) {
+    let need_frames = transform.is_some_and(|t| {
+        t.interval.is_some()
+            || (options.max_controlled_bytes.is_some()
+                && (t.sample_rate.is_some()
+                    || t.channels.is_some()
+                    || t.volume.is_some()
+                    || !options.metadata_set.is_empty()
+                    || !options.metadata_delete.is_empty()
+                    || !options.stream_metadata_set.is_empty()
+                    || !options.stream_metadata_delete.is_empty()))
+    });
+    let frames = if need_frames {
         let stats = negotiated.decode(&mut std::io::sink(), &mut control)?;
-        crate::owned_ogg_opus_export::check_nonempty_interval_prefix(
-            transform,
-            stats.sample_rate,
-            stats.sample_frames,
-        )
-        .map_err(|e| invalid(&e))?;
-    }
-    Ok((rate, channels, mask))
+        if transform.is_some_and(|t| t.interval.is_some()) {
+            crate::owned_ogg_opus_export::check_nonempty_interval_prefix(
+                transform,
+                stats.sample_rate,
+                stats.sample_frames,
+            )
+            .map_err(|e| invalid(&e))?;
+        }
+        stats.sample_frames
+    } else {
+        1024
+    };
+    Ok((rate, channels, mask, frames))
 }
 include!("stream_impl.rs");
 

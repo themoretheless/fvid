@@ -1,8 +1,8 @@
 {
   "target": 1000,
   "counting_rule": "One independently confirmed problem or useful capability; fixture variants and baseline integration repairs are excluded. Only accepted entries count.",
-  "accepted_count": 649,
-  "next_id": "FVID-0650",
+  "accepted_count": 654,
+  "next_id": "FVID-0655",
   "entries": [
     {
       "id": "FVID-0001",
@@ -7330,6 +7330,61 @@
       "result": "Preserve g711_frames in AudioDescriptor and pass g711_frames.max(1024) to check_spool_wave_export_budget in plan_decode_audio.",
       "status": "accepted",
       "validation": "batch-583-validation.json"
+    },
+    {
+      "id": "FVID-0650",
+      "batch": 584,
+      "title": "Preserve canonical RIFF INFO tags past 64 custom Vorbis comments in bare FLAC WAVE export",
+      "source": "crates/fvid-media/src/owned_flac_layout.rs",
+      "regression": "tests/flac_ogg_info_cap_and_spool_budget.rs",
+      "before": "wave_info_from_extra appended canonical RIFF INFO tags (TITLE, ARTIST, ALBUM, COMMENT, DATE, GENRE, TRACKNUMBER, LANGUAGE, ENCODER) after custom 4-character Vorbis comments and then called entries.truncate(64), dropping canonical metadata whenever 64 or more custom 4-char tags preceded them.",
+      "result": "Drain excess leading custom entries via entries.drain(0..excess) when entries.len() > 64 so canonical RIFF INFO tags appended at the end are preserved.",
+      "status": "accepted",
+      "validation": "batch-584-validation.json"
+    },
+    {
+      "id": "FVID-0651",
+      "batch": 584,
+      "title": "Preserve canonical RIFF INFO tags past 64 custom Vorbis comments in Ogg WAVE export",
+      "source": "crates/fvid-media/src/owned_ogg_opus_export.rs",
+      "regression": "tests/flac_ogg_info_cap_and_spool_budget.rs",
+      "before": "info_for_tags appended canonical RIFF INFO tags after custom 4-character Vorbis comments and then called entries.truncate(64), dropping canonical metadata in Ogg Opus, Vorbis, and linked Joint WAVE exports whenever 64 or more custom 4-char tags preceded them.",
+      "result": "Drain excess leading custom entries via entries.drain(0..excess) when entries.len() > 64 so canonical RIFF INFO tags appended at the end are preserved.",
+      "status": "accepted",
+      "validation": "batch-584-validation.json"
+    },
+    {
+      "id": "FVID-0652",
+      "batch": 584,
+      "title": "Enforce actual prefix sample frames and metadata size in Ogg Stage-2 WAVE spool budget",
+      "source": "crates/fvid-media/src/owned_ogg_audio_export.rs",
+      "regression": "tests/flac_ogg_info_cap_and_spool_budget.rs",
+      "before": "Ogg Opus, Vorbis, and Joint WAVE export apply and plan_decode_audio passed a hardcoded 1024 sample frames (and 0 metadata bytes in plan_decode_audio) to check_spool_wave_export_budget, underestimating Stage-2 WAVE DSP memory for multi-packet Ogg streams until export_spool failed after decoding.",
+      "result": "Compute prefix_end_samples(until, options.max_packets) and info.len() in descriptor_for_decode and apply across Ogg Opus, Vorbis, and Joint exports and wire them into plan_decode_audio and apply Stage-2 budget admission.",
+      "status": "accepted",
+      "validation": "batch-584-validation.json"
+    },
+    {
+      "id": "FVID-0653",
+      "batch": 584,
+      "title": "Enforce actual prefix sample frames in bare FLAC and bare MPEG Stage-2 WAVE spool budget in apply",
+      "source": "crates/fvid-media/src/owned_raw_flac.rs",
+      "regression": "tests/flac_ogg_info_cap_and_spool_budget.rs",
+      "before": "owned_raw_flac::apply and owned_raw_mp3::apply passed a hardcoded 1024 sample frames to their direct check_spool_wave_export_budget preflight instead of the max_packets- and interval-bounded prefix frame count.",
+      "result": "Compute the interval- and max_packets-bounded prefix sample frame count in owned_raw_flac::apply and owned_raw_mp3::apply and pass prefix.max(1024) to check_spool_wave_export_budget.",
+      "status": "accepted",
+      "validation": "batch-584-validation.json"
+    },
+    {
+      "id": "FVID-0654",
+      "batch": 584,
+      "title": "Enforce actual decoded prefix sample frames in ADTS AAC Stage-2 WAVE spool budget",
+      "source": "crates/fvid-media/src/owned_aac/stream.rs",
+      "regression": "tests/flac_ogg_info_cap_and_spool_budget.rs",
+      "before": "plan_decode_audio and owned_adts_export::apply passed a hardcoded 1024 sample frames to check_spool_wave_export_budget for ADTS AAC inputs, allowing plan_decode_audio to admit multi-frame ADTS streams whose Stage-2 WAVE DSP buffers exceed max_controlled_bytes.",
+      "result": "Return the decoded prefix sample_frames from adts_prefix_info_for_transform when max_controlled_bytes and Stage-2 WAVE DSP or metadata edits are active, and pass stage2_frames.max(1024) to check_spool_wave_export_budget in plan_decode_audio.",
+      "status": "accepted",
+      "validation": "batch-584-validation.json"
     }
   ]
 }

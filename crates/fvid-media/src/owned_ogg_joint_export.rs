@@ -191,11 +191,12 @@ pub(crate) fn apply(
                 .map_err(|_| "Ogg PCM prefix overflow")
         })
         .transpose()?;
+    let prefix_samples = program.prefix_end_samples(until, options.max_packets);
     crate::owned_adts_export::check_spool_wave_export_budget(
         rate,
         channels,
         32,
-        1024,
+        prefix_samples.max(1024),
         info.len(),
         false,
         transform,

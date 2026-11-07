@@ -61,12 +61,13 @@ pub(crate) fn descriptor(
     options: &CopyOptions,
 ) -> Result<(usize, u32, u16, u32, &'static str), String> {
     descriptor_for_decode(source, None, options)
+        .map(|(index, rate, channels, mask, codec, _, _)| (index, rate, channels, mask, codec))
 }
 pub(crate) fn descriptor_for_decode(
     source: &Path,
     transform: Option<AudioDecodeTransform>,
     options: &CopyOptions,
-) -> Result<(usize, u32, u16, u32, &'static str), String> {
+) -> Result<(usize, u32, u16, u32, &'static str, u64, usize), String> {
     let (stream_index, backend) = select_backend(source, options)?;
     match backend {
         Backend::Opus => {
@@ -74,34 +75,66 @@ pub(crate) fn descriptor_for_decode(
             if p.end_samples() <= 0 {
                 return Err("Ogg Opus audio stream contains no audible samples".into());
             }
+            let until = transform
+                .and_then(|t| crate::owned_adts_export::decoded_prefix(t, 48000))
+                .map(|(_, end)| {
+                    u64::try_from((end.as_nanos() * 48000).div_ceil(1_000_000_000))
+                        .map_err(|_| "Opus prefix duration overflow".to_string())
+                })
+                .transpose()?;
+            let prefix_samples = p.prefix_end_samples(until, options.max_packets);
+            let tags = p.source_tags().map_err(|e| e.to_string())?;
+            let info_len = crate::owned_ogg_opus_export::info_for_tags(&tags)?.len();
             Ok((
                 stream_index,
                 p.sample_rate(),
                 p.channels(),
                 p.output_channel_mask().unwrap_or(0),
                 "opus",
+                prefix_samples,
+                info_len,
             ))
         }
         Backend::Vorbis => {
-            let (p, _) =
+            let (p, info) =
                 crate::owned_ogg_vorbis_export::open_with_transform(source, transform, options)?;
             if p.duration().is_none_or(|d| d.is_zero()) {
                 return Err("Ogg Vorbis audio stream contains no audible samples".into());
             }
+            let rate = p.sample_rate();
+            let until = transform
+                .and_then(|t| crate::owned_adts_export::decoded_prefix(t, rate))
+                .map(|(_, end)| {
+                    u64::try_from((end.as_nanos() * u128::from(rate)).div_ceil(1_000_000_000))
+                        .map_err(|_| "Vorbis prefix overflow".to_string())
+                })
+                .transpose()?;
+            let prefix_samples = p.prefix_end_samples(until, options.max_packets);
             Ok((
                 stream_index,
-                p.sample_rate(),
+                rate,
                 p.channels(),
                 p.output_channel_mask(),
                 "vorbis",
+                prefix_samples,
+                info.len(),
             ))
         }
         Backend::Joint => {
-            let (p, _) =
+            let (p, info) =
                 crate::owned_ogg_joint_export::open_with_transform(source, transform, options)?;
             if p.end_samples() <= 0 {
                 return Err("Ogg linked audio stream contains no audible samples".into());
             }
+            let rate = p.sample_rate();
+            let until = transform
+                .and_then(|t| crate::owned_adts_export::decoded_prefix(t, rate))
+                .map(|(_, end)| {
+                    u64::try_from((end.as_nanos() * u128::from(rate)).div_ceil(1_000_000_000))
+                        .map_err(|_| "Ogg PCM prefix overflow".to_string())
+                })
+                .transpose()?;
+            let prefix_samples = p.prefix_end_samples(until, options.max_packets);
             let codec = match p.codec() {
                 "A_OGG/VORBIS_OPUS" => "vorbis_opus",
                 "A_VORBIS" => "vorbis",
@@ -109,10 +142,12 @@ pub(crate) fn descriptor_for_decode(
             };
             Ok((
                 stream_index,
-                p.sample_rate(),
+                rate,
                 p.channels(),
                 p.output_channel_mask(),
                 codec,
+                prefix_samples,
+                info.len(),
             ))
         }
     }

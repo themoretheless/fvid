@@ -370,7 +370,8 @@ pub(crate) fn info_for_tags(tags: &fvid_opus::OpusTags) -> Result<Vec<u8>> {
         }
     }
     if entries.len() > 64 {
-        entries.truncate(64);
+        let excess = entries.len() - 64;
+        entries.drain(0..excess);
     }
     crate::owned_wave_metadata::edit_info_chunks(&[], &[], &entries)
 }
@@ -438,11 +439,12 @@ pub(crate) fn apply(
                 .map_err(|_| "Opus prefix duration overflow")
         })
         .transpose()?;
+    let prefix_samples = program.prefix_end_samples(until, options.max_packets);
     crate::owned_adts_export::check_spool_wave_export_budget(
         48000,
         channels,
         32,
-        1024,
+        prefix_samples.max(1024),
         info.len(),
         false,
         transform,

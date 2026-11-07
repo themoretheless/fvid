@@ -1,0 +1,27 @@
+{
+  "status": "accepted",
+  "accepted_ids": [
+    "FVID-0650",
+    "FVID-0651",
+    "FVID-0652",
+    "FVID-0653",
+    "FVID-0654"
+  ],
+  "count_delta": 5,
+  "accepted_count": 654,
+  "next_id": "FVID-0655",
+  "qualification": [
+    {
+      "name": "flac-ogg-info-cap-and-spool-budget",
+      "command": [
+        "cargo",
+        "test",
+        "--test",
+        "flac_ogg_info_cap_and_spool_budget"
+      ],
+      "exit_code": 0,
+      "passed": 4,
+      "ignored": 0
+    }
+  ]
+}

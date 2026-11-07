@@ -114,7 +114,8 @@ pub(crate) struct AudioDescriptor {
     raw_encoded_audio: bool,
     ogg: bool,
     g711_wave: bool,
-    g711_frames: u64,
+    stage2_frames: u64,
+    stage2_meta_bytes: usize,
 }
 
 /// Read-only audio source geometry (`rate`, `channels`) for native loudness and planning.
@@ -190,7 +191,8 @@ fn source_descriptor_for_decode(source: &Path, options: &CopyOptions,
     let ogg = crate::owned_ogg_opus_export::recognizes(source)?;
     let g711_wave = crate::owned_g711_wave_export::recognizes(source, options)?;
     let mut stream_index = 0;
-    let mut g711_frames = 1024;
+    let mut stage2_frames = 1024;
+    let mut stage2_meta_bytes = 0;
     let (rate, channels, mask, codec, precision) = if g711_wave {
         let (rate, channels, mask, codec, frames) =
             crate::owned_g711_wave_export::descriptor_with_transform(
@@ -198,16 +200,18 @@ fn source_descriptor_for_decode(source: &Path, options: &CopyOptions,
                 transform.copied(),
                 options,
             )?;
-        g711_frames = frames;
+        stage2_frames = frames;
         (rate, channels, mask, codec.to_owned(), "float32".to_owned())
     } else if ogg {
-        let (index, rate, channels, mask, codec) =
+        let (index, rate, channels, mask, codec, frames, info_len) =
             crate::owned_ogg_audio_export::descriptor_for_decode(
                 source,
                 transform.copied(),
                 options,
             )?;
         stream_index = index;
+        stage2_frames = frames;
+        stage2_meta_bytes = info_len;
         (rate, channels, mask, codec.to_owned(), "float32".to_owned())
     } else if mp4 {
         let (index, rate, channels, mask, codec) =
@@ -258,13 +262,14 @@ fn source_descriptor_for_decode(source: &Path, options: &CopyOptions,
         let prefix = transform.and_then(|transform|
             crate::owned_adts_export::decoded_prefix(*transform, config.sample_rate));
         drop(reader);
-        let (rate, channels, mask) = crate::owned_aac::stream::adts_prefix_info_for_transform(
+        let (rate, channels, mask, frames) = crate::owned_aac::stream::adts_prefix_info_for_transform(
             BufReader::new(File::open(source).map_err(|e| e.to_string())?),
             prefix,
             transform.copied(),
             options,
         )
         .map_err(|e| e.to_string())?;
+        stage2_frames = frames;
         (
             rate,
             channels,
@@ -371,7 +376,8 @@ fn source_descriptor_for_decode(source: &Path, options: &CopyOptions,
     };
     Ok(AudioDescriptor {
         rate, channels, mask, codec, precision, stream_index,
-        adts, mp4, is_matroska, raw_encoded_audio, ogg, g711_wave, g711_frames,
+        adts, mp4, is_matroska, raw_encoded_audio, ogg, g711_wave,
+        stage2_frames, stage2_meta_bytes,
     })
 }
 
@@ -388,7 +394,8 @@ pub fn plan_decode_audio(
     crate::owned_adts_export::check_wave_metadata_budget(options)?;
     let AudioDescriptor {
         rate, channels, mask, codec, precision, stream_index,
-        adts, mp4, is_matroska, raw_encoded_audio, ogg, g711_wave, g711_frames,
+        adts, mp4, is_matroska, raw_encoded_audio, ogg, g711_wave,
+        stage2_frames, stage2_meta_bytes,
     } = source_descriptor_for_decode(source, options, Some(transform))?;
     let mp4_target=if mp4 {crate::owned_mp4_audio_export::normalization_target(source,*transform,options,rate,channels,mask)?}else{None};
     let output_channels = transform.channels.unwrap_or(i32::from(channels));
@@ -408,13 +415,17 @@ pub fn plan_decode_audio(
     if adts || mp4 || is_matroska || raw_encoded_audio || ogg || g711_wave {
         let (stage2_rate, stage2_channels, _) = mp4_target.unwrap_or((rate, channels, mask));
         let stage2_bits = if precision == "float64" { 64 } else { 32 };
-        let stage2_frames = if g711_wave { g711_frames.max(1024) } else { 1024 };
+        let stage2_frames = if g711_wave || ogg || adts {
+            stage2_frames.max(1024)
+        } else {
+            1024
+        };
         crate::owned_adts_export::check_spool_wave_export_budget(
             stage2_rate,
             stage2_channels,
             stage2_bits,
             stage2_frames,
-            0,
+            stage2_meta_bytes,
             aac_fold,
             *transform,
             options,
