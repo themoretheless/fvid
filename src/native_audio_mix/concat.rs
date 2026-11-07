@@ -109,11 +109,12 @@ fn segment_packet_count(source: &Path, options: &fvid_media::CopyOptions) -> Res
             // edits can stop early, replay media, or retain decoder preroll.
             // Count through the same bounded decoder as execution, discarding
             // PCM instead of allocating a spool or publishing progress.
-            drop(reader);
+            let mut file = reader.into_inner().into_inner();
+            file.seek(SeekFrom::Start(0))?;
             let mut count_options = super::strip_output_controls(options);
             count_options.progress = None;
             return fvid_media::owned_mp4_audio::decode_mp4_audio_pcm(
-                File::open(source)?,
+                file,
                 &mut std::io::sink(),
                 None,
                 &count_options,
@@ -184,8 +185,8 @@ fn segment_packet_count(source: &Path, options: &fvid_media::CopyOptions) -> Res
         }
         return Ok(count);
     }
-    drop(input);
-    fvid_media::owned_audio_plan::standalone_packet_work(source, options)
+    let file = input.into_inner();
+    fvid_media::owned_audio_plan::standalone_packet_work_from_file(file, options)
         .map(|count| count.unwrap_or(u64::MAX))
         .map_err(|error| invalid(&error))
 }

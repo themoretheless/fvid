@@ -201,9 +201,38 @@ pub fn source_geometry(source: &Path, options: &CopyOptions) -> Result<(u32, u16
 /// Uses the codec's admitted index or block geometry without decoding PCM.
 /// Returns None for formats whose container-specific caller owns the count.
 pub fn standalone_packet_work(source: &Path, options: &CopyOptions) -> Result<Option<u64>> {
+    crate::owned_ogg_opus_export::check(options)?;
+    let (file, head, head_len) = open_source_head(source)?;
+    standalone_packet_work_from_file_and_head(file, head, head_len, options)
+}
+
+pub fn standalone_packet_work_from_file(
+    mut file: File,
+    options: &CopyOptions,
+) -> Result<Option<u64>> {
     use std::io::{Seek, SeekFrom};
     crate::owned_ogg_opus_export::check(options)?;
-    let (mut file, head, head_len) = open_source_head(source)?;
+    file.seek(SeekFrom::Start(0)).map_err(|e| e.to_string())?;
+    let mut head = [0u8; 12];
+    let mut filled = 0;
+    while filled < head.len() {
+        match file.read(&mut head[filled..]) {
+            Ok(0) => break,
+            Ok(n) => filled += n,
+            Err(e) if e.kind() == std::io::ErrorKind::Interrupted => continue,
+            Err(e) => return Err(e.to_string()),
+        }
+    }
+    standalone_packet_work_from_file_and_head(file, head, filled, options)
+}
+
+fn standalone_packet_work_from_file_and_head(
+    mut file: File,
+    head: [u8; 12],
+    head_len: usize,
+    options: &CopyOptions,
+) -> Result<Option<u64>> {
+    use std::io::{Seek, SeekFrom};
     let head_slice = &head[..head_len];
     let count = if head_len == 12 && &head[..4] == b"RIFF" && &head[8..12] == b"WAVE" {
         file.seek(SeekFrom::Start(0)).map_err(|e| e.to_string())?;

@@ -1337,7 +1337,11 @@ fn finish_trim_aac_plan(
     cached_info: Option<&crate::native_media::AudioSourceInfo>,
     options: &fvid_media::CopyOptions,
 ) -> Result<MediaPlan> {
-    if crate::native_export::is_adts_source(source).map_err(|e|e.to_string())? {
+    let is_adts = match cached_info {
+        Some(info) => info.max_packet_and_index_bytes.is_none(),
+        None => crate::native_export::is_adts_source(source).map_err(|e| e.to_string())?,
+    };
+    if is_adts {
         return trim_adts_with_options(source,from,to,options);
     }
     let mut scoped = options.clone();
@@ -1879,21 +1883,31 @@ fn loudness_plan_and_channels_with_options(
         return Err("owned loudness plan requires at most one audio stream and no metadata edits".into());
     }
     let selected = options.streams.first().copied();
-    let wave_info = {
+    let (wave_info, non_wave_file) = {
         let mut wave_file = std::fs::File::open(source).map_err(|e| e.to_string())?;
         if crate::native_pcm::is_wave_reader(&mut wave_file).map_err(|e| e.to_string())? {
-            Some(
-                crate::native_pcm::inspect(&mut wave_file, options.cancel.as_ref())
-                    .map_err(|e| e.to_string())?,
+            (
+                Some(
+                    crate::native_pcm::inspect(&mut wave_file, options.cancel.as_ref())
+                        .map_err(|e| e.to_string())?,
+                ),
+                None,
             )
         } else {
-            None
+            (None, Some(wave_file))
         }
     };
     let wave = wave_info.is_some();
     let cached_native_info = if !wave && options.max_controlled_bytes.is_none() {
-        crate::native_media::constant_audio_source_info_selected_with_options(source, selected, options).ok()
+        crate::native_media::constant_audio_source_info_selected_from_file_with_interval_and_options(
+            non_wave_file.unwrap(),
+            selected,
+            None,
+            options,
+        )
+        .ok()
     } else {
+        drop(non_wave_file);
         None
     };
     let mut fvid_media_geometry = None;

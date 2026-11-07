@@ -157,11 +157,23 @@ pub(crate) fn validate_first_frame_with_webm(
     filters: &PixelFilters,
     processed: bool,
 ) -> Result<Option<crate::container::webm::WebmReader<BufReader<File>>>> {
+    let reader_file = webm
+        .as_ref()
+        .and_then(|r| r.reader_ref().get_ref().try_clone().ok());
     let video_index = webm
         .as_ref()
         .and_then(|r| r.tracks.iter().position(|t| t.kind == 1))
         .unwrap_or(0);
-    let mut reader = NativeReader::software(BufReader::new(File::open(source)?), usize::MAX)?;
+    let mut reader = NativeReader::software(
+        BufReader::new(match reader_file {
+            Some(mut dup) => {
+                dup.seek(std::io::SeekFrom::Start(0))?;
+                dup
+            }
+            None => File::open(source)?,
+        }),
+        usize::MAX,
+    )?;
     let first = reader
         .read_frame_raw()?
         .ok_or_else(|| invalid("input has no video frames"))?;
@@ -279,6 +291,9 @@ pub(crate) fn write_selected_with_webm<W: Write + Seek>(
     step:fvid_media::owned_framestep::FrameStep,
 )->Result<(crate::media_info::LosslessStats,ProgressEvent)> {
     check(cancel)?;
+    let reader_file = webm
+        .as_ref()
+        .and_then(|r| r.reader_ref().get_ref().try_clone().ok());
     let video_index = webm
         .as_ref()
         .and_then(|r| r.tracks.iter().position(|t| t.kind == 1))
@@ -293,7 +308,16 @@ pub(crate) fn write_selected_with_webm<W: Write + Seek>(
                 .min()
         })
         .unwrap_or(0) as u64;
-    let mut reader = NativeReader::software(BufReader::new(File::open(source)?), usize::MAX)?;
+    let mut reader = NativeReader::software(
+        BufReader::new(match reader_file {
+            Some(mut dup) => {
+                dup.seek(std::io::SeekFrom::Start(0))?;
+                dup
+            }
+            None => File::open(source)?,
+        }),
+        usize::MAX,
+    )?;
     let first = reader
         .read_frame_raw()?
         .ok_or_else(|| invalid("input has no video frames"))?;

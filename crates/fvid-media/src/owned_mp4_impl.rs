@@ -1241,6 +1241,10 @@ impl<R: Read + Seek> Mp4Reader<R> {
     pub fn reader_ref(&self) -> &R {
         &self.reader
     }
+    /// Consume the MP4 reader and return the underlying reader.
+    pub fn into_inner(self) -> R {
+        self.reader
+    }
 }
 
 /// The uncompressed PCM tags whose sample entry is the whole description.

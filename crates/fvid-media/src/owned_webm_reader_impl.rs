@@ -279,6 +279,14 @@ fn read_colour<R: Read + Seek>(
     Ok(())
 }
 impl<R: Read + Seek> WebmReader<R> {
+    /// Borrow the underlying reader.
+    pub fn reader_ref(&self) -> &R {
+        &self.reader
+    }
+    /// Consume the WebM reader and return the underlying reader.
+    pub fn into_inner(self) -> R {
+        self.reader
+    }
     /// Precision of block timestamps; CodecDelay and DiscardPadding use ns.
     pub fn timestamp_scale_ns(&self) -> u64 { self.scale }
     /// The track's exact IEEE TrackTimestampScale; absent tracks return None.

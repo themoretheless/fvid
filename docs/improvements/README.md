@@ -4870,3 +4870,12 @@ See `batch-628-validation.json`.
 - **FVID-0988**: Reuse open `File` handle across 8-byte WAVE prefix check and `probe_from_file_with_options` in `pcm_matroska::extract_source_pcm_metadata_with_interval_packet_and_memory_limit` (`src/native_export/pcm_matroska.rs`).
 - **FVID-0989**: Reuse open `File` handle from `Mp4Reader::reader_ref` for `NativeReader::software` in `native_lossless::validate_first_mp4_frame_with_reader` and `write_mp4_selected_with_reader` (`src/native_lossless.rs`).
 
+## Batch 652 (FVID-0990..0994)
+
+- **FVID-0990**: Reuse open `File` handle across MP4 edited-track frame counting and standalone packet work in `native_audio_mix::concat::segment_packet_count` (`src/native_audio_mix/concat.rs`).
+- **FVID-0991**: Reuse open `File` handle from `WebmReader::reader_ref` for `NativeReader::software` in `native_lossless_y4m::validate_first_frame_with_webm` and `write_selected_with_webm` (`src/native_lossless_y4m.rs`).
+- **FVID-0992**: Reuse open `BufReader<File>` from `Mp4Reader::into_inner` and `WebmReader::into_inner` for first-frame Y4M inspection in `native_export::validate_video_packet_budget_and_layout` (`src/native_export.rs`).
+- **FVID-0993**: Reuse open `File` handle across `is_wave_reader` and `constant_audio_source_info_selected_from_file_with_interval_and_options` in `native_plan::loudness_plan_and_channels_with_options` (`src/native_plan.rs`).
+- **FVID-0994**: Derive ADTS container status from `cached_info` instead of reopening the file in `native_plan::finish_trim_aac_plan` (`src/native_plan.rs`).
+
+

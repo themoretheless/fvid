@@ -1,8 +1,8 @@
 {
   "target": 1000,
   "counting_rule": "One independently confirmed problem or useful capability; fixture variants and baseline integration repairs are excluded. Only accepted entries count.",
-  "accepted_count": 989,
-  "next_id": "FVID-0990",
+  "accepted_count": 994,
+  "next_id": "FVID-0995",
   "entries": [
     {
       "id": "FVID-0001",
@@ -11070,6 +11070,61 @@
       "result": "Added Mp4Reader::reader_ref and reused a cloned, rewound File handle from the pre-opened Mp4Reader for NativeReader::software.",
       "status": "accepted",
       "validation": "batch-651-validation.json"
+    },
+    {
+      "id": "FVID-0990",
+      "batch": 652,
+      "title": "Reuse open File handle across MP4 edited-track frame counting and standalone packet work in native_audio_mix::concat::segment_packet_count",
+      "source": "src/native_audio_mix/concat.rs",
+      "regression": "tests/video_budget_webm_lossless_and_loudness_plan_handle_reuse.rs",
+      "before": "segment_packet_count dropped Mp4Reader and called File::open(source) for edited MP4 audio tracks, and dropped input before calling standalone_packet_work(source, options) on standalone audio inputs.",
+      "result": "Added Mp4Reader::into_inner and standalone_packet_work_from_file and reused the already-open File handle in both branches of segment_packet_count.",
+      "status": "accepted",
+      "validation": "batch-652-validation.json"
+    },
+    {
+      "id": "FVID-0991",
+      "batch": 652,
+      "title": "Reuse open File handle from WebmReader::reader_ref for NativeReader::software in native_lossless_y4m::validate_first_frame_with_webm and write_selected_with_webm",
+      "source": "src/native_lossless_y4m.rs",
+      "regression": "tests/video_budget_webm_lossless_and_loudness_plan_handle_reuse.rs",
+      "before": "validate_first_frame_with_webm and write_selected_with_webm received a pre-opened WebmReader<BufReader<File>> for Matroska/WebM inputs but still called File::open(source) to open NativeReader::software.",
+      "result": "Added WebmReader::reader_ref and reused a cloned, rewound File handle from the pre-opened WebmReader for NativeReader::software.",
+      "status": "accepted",
+      "validation": "batch-652-validation.json"
+    },
+    {
+      "id": "FVID-0992",
+      "batch": 652,
+      "title": "Reuse open BufReader<File> from Mp4Reader::into_inner and WebmReader::into_inner for first-frame Y4M inspection in native_export::validate_video_packet_budget_and_layout",
+      "source": "src/native_export.rs",
+      "regression": "tests/video_budget_webm_lossless_and_loudness_plan_handle_reuse.rs",
+      "before": "validate_video_packet_budget_and_layout dropped Mp4Reader and WebmReader and called inspect_first_y4m_frame_with_filters_and_options(source, ...), reopening the file on every MP4 or Matroska video export and concat validation.",
+      "result": "Recovered the underlying File via Mp4Reader::into_inner and WebmReader::into_inner, rewound it to offset 0, and passed it to inspect_first_y4m_frame_from_reader_with_filters_and_options.",
+      "status": "accepted",
+      "validation": "batch-652-validation.json"
+    },
+    {
+      "id": "FVID-0993",
+      "batch": 652,
+      "title": "Reuse open File handle across is_wave_reader and constant_audio_source_info_selected_from_file_with_interval_and_options in native_plan::loudness_plan_and_channels_with_options",
+      "source": "src/native_plan.rs",
+      "regression": "tests/video_budget_webm_lossless_and_loudness_plan_handle_reuse.rs",
+      "before": "loudness_plan_and_channels_with_options opened source for is_wave_reader, dropped the File handle on non-WAVE inputs, and immediately reopened source in constant_audio_source_info_selected_with_options.",
+      "result": "Retained the open File handle when is_wave_reader returned false and passed it directly to constant_audio_source_info_selected_from_file_with_interval_and_options.",
+      "status": "accepted",
+      "validation": "batch-652-validation.json"
+    },
+    {
+      "id": "FVID-0994",
+      "batch": 652,
+      "title": "Derive ADTS container status from cached_info instead of reopening the file in native_plan::finish_trim_aac_plan",
+      "source": "src/native_plan.rs",
+      "regression": "tests/video_budget_webm_lossless_and_loudness_plan_handle_reuse.rs",
+      "before": "finish_trim_aac_plan unconditionally called native_export::is_adts_source(source) even when cached_info: Some(&AudioSourceInfo) had already been computed.",
+      "result": "Checked info.max_packet_and_index_bytes.is_none() when cached_info is Some(info) to distinguish ADTS from MP4/Matroska without reopening the file.",
+      "status": "accepted",
+      "validation": "batch-652-validation.json"
     }
   ],
   "pending_count": 116

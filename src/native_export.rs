@@ -764,9 +764,14 @@ pub(crate) fn validate_video_packet_budget_and_layout(
                 return Err(invalid("input has no decoded video frames"));
             }
         }
-        drop(reader);
-        let (rate, layout, bytes) =
-            inspect_first_y4m_frame_with_filters_and_options(source, geometry, filters, options)?;
+        let mut file = reader.into_inner().into_inner();
+        file.seek(SeekFrom::Start(0))?;
+        let (rate, layout, bytes) = inspect_first_y4m_frame_from_reader_with_filters_and_options(
+            BufReader::new(file),
+            geometry,
+            filters,
+            options,
+        )?;
         let depth = layout.3;
         if bytes > options.max_packet_bytes {
             return Err(invalid("Y4M frame exceeds byte limit"));
@@ -874,9 +879,14 @@ pub(crate) fn validate_video_packet_budget_and_layout(
                 }
             }
         }
-        drop(reader);
-        let (rate, layout, bytes) =
-            inspect_first_y4m_frame_with_filters_and_options(source, geometry, filters, options)?;
+        let mut file = reader.into_inner().into_inner();
+        file.seek(SeekFrom::Start(0))?;
+        let (rate, layout, bytes) = inspect_first_y4m_frame_from_reader_with_filters_and_options(
+            BufReader::new(file),
+            geometry,
+            filters,
+            options,
+        )?;
         let depth = layout.3;
         if bytes > options.max_packet_bytes {
             return Err(invalid("Y4M frame exceeds byte limit"));
