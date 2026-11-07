@@ -4830,5 +4830,11 @@ See `batch-628-validation.json`.
 - **FVID-0963**: Dispatch by single 12-byte header read and reuse open `File` handle in `owned_remux` and `owned_remux_plan` (`crates/fvid-media/src/owned_remux_plan.rs`).
 - **FVID-0964**: Reuse opened ADTS `File` handles across qualification and `SequenceReader` in `owned_concat` (`crates/fvid-media/src/owned_concat.rs`).
 
+## Batch 647 (FVID-0965..0969)
 
+- **FVID-0965**: Read WAVE `INFO` chunks in a single pass when memory budget is unbounded and reuse open `File` handle across WAVE/G.711 dispatch in `owned_wave_remux` and `owned_wave_plan` (`crates/fvid-media/src/owned_wave_remux.rs`).
+- **FVID-0966**: Reuse open `File` handle across Matroska signature check and subtitle conversion readers in `owned_subtitle_impl` (`crates/fvid-media/src/owned_subtitle_impl.rs`).
+- **FVID-0967**: Reuse open `File` and `Mp4Reader` across `owned_mp4_video_bridge::prepare_selected` and `owned_mp4_video_decode::decode_presented_from_reader` (`crates/fvid-media/src/owned_mp4_video_bridge.rs`).
+- **FVID-0968**: Reuse open `File` handle across 4-byte EBML signature check and `WebmReader::open` in `owned_video_decode::decode_webm` (`crates/fvid-media/src/owned_video_decode.rs`).
+- **FVID-0969**: Reuse open Y4M `BufReader<File>` and remove redundant `recognizes`/`supports` opens in `owned_subtitle_burn` (`crates/fvid-media/src/owned_subtitle_burn.rs`).
 

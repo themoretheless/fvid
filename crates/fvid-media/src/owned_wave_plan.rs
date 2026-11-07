@@ -8,11 +8,13 @@ pub(crate) fn supports(source: &Path, options: &CopyOptions) -> bool {
 }
 fn plan(
     sources: &[&Path],
+    first_file: Option<std::fs::File>,
     command: &str,
     interval: Option<(i64, i64)>,
     options: &CopyOptions,
 ) -> Result<MediaPlan> {
-    let (stats, frames, info) = crate::owned_wave_remux::inspect_copy(sources, interval, options)?;
+    let (stats, frames, info) =
+        crate::owned_wave_remux::inspect_copy_with_first_file(sources, first_file, interval, options)?;
     let codec = info.codec();
     let mut steps = Vec::new();
     if let Some((from, to)) = interval {
@@ -51,9 +53,10 @@ fn plan(
     })
 }
 pub fn plan_remux(source: &Path, options: &CopyOptions) -> Result<MediaPlan> {
-    plan(&[source], "remux", None, options)
+    plan(&[source], None, "remux", None, options)
 }
 pub fn plan_trim(source: &Path, from: i64, to: i64, options: &CopyOptions) -> Result<MediaPlan> {
+    use std::io::Read;
     if options.cancel.as_ref().is_some_and(|c| c.is_cancelled()) {
         return Err("media operation cancelled".into());
     }
@@ -71,14 +74,24 @@ pub fn plan_trim(source: &Path, from: i64, to: i64, options: &CopyOptions) -> Re
         interval: Some((from, to)),
         ..Default::default()
     };
-    if !crate::owned_wave_inspect::is_wave(source).unwrap_or(false)
-        || crate::owned_g711_wave_export::recognizes(source, options).unwrap_or(false)
-    {
+    let mut file = std::fs::File::open(source).map_err(|e| e.to_string())?;
+    let mut prefix = [0u8; 12];
+    let is_wave = match file.read_exact(&mut prefix) {
+        Ok(()) => matches!(&prefix[..4], b"RIFF" | b"RIFX" | b"RF64") && &prefix[8..] == b"WAVE",
+        Err(e) if e.kind() == std::io::ErrorKind::UnexpectedEof => false,
+        Err(e) => return Err(e.to_string()),
+    };
+    let is_g711 = is_wave
+        && crate::owned_wave_inspect::g711_law(&mut file, options.cancel.as_ref())
+            .map(|law| law.is_some())
+            .unwrap_or(false);
+    if !is_wave || is_g711 {
+        drop(file);
         let mut planned = crate::owned_audio_plan::plan_decode_audio(source, &transform, options)?;
         planned.command = "trim".into();
         return Ok(planned);
     }
-    plan(&[source], "trim", Some((from, to)), options)
+    plan(&[source], Some(file), "trim", Some((from, to)), options)
 }
 pub fn plan_trim_pcm(
     source: &Path,
@@ -86,7 +99,7 @@ pub fn plan_trim_pcm(
     to: i64,
     options: &CopyOptions,
 ) -> Result<MediaPlan> {
-    plan(&[source], "trim-pcm", Some((from, to)), options)
+    plan(&[source], None, "trim-pcm", Some((from, to)), options)
 }
 pub fn plan_concat(sources: &[PathBuf], options: &CopyOptions) -> Result<MediaPlan> {
     if options.cancel.as_ref().is_some_and(|c| c.is_cancelled()) {
@@ -106,7 +119,7 @@ pub fn plan_concat(sources: &[PathBuf], options: &CopyOptions) -> Result<MediaPl
         return Err("plan concat requires 2..=256 inputs".into());
     }
     let paths: Vec<_> = sources.iter().map(|p| p.as_path()).collect();
-    plan(&paths, "concat", None, options)
+    plan(&paths, None, "concat", None, options)
 }
 #[cfg(test)]
 mod tests {

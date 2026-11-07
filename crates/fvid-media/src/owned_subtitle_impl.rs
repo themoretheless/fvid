@@ -13,6 +13,18 @@ impl Drop for Temporary {
         let _ = std::fs::remove_file(&self.0);
     }
 }
+fn open_subtitle_source(source: &Path) -> Result<(bool, File)> {
+    use std::io::{Seek, SeekFrom};
+    let mut input = File::open(source)?;
+    let mut signature = [0; 4];
+    let is_mkv = match input.read_exact(&mut signature) {
+        Ok(()) => signature == [0x1a, 0x45, 0xdf, 0xa3],
+        Err(e) if e.kind() == std::io::ErrorKind::UnexpectedEof => false,
+        Err(e) => return Err(e.into()),
+    };
+    input.seek(SeekFrom::Start(0))?;
+    Ok((is_mkv, input))
+}
 fn timestamp(value: &str) -> Result<u64> {
     let trimmed = value.trim();
     let (clock, fraction) = trimmed
@@ -365,11 +377,13 @@ pub fn try_plan_with_controls(
     };
     check_controls()?;
     let planned_dest = destination.unwrap_or_else(|| Path::new("planned-subtitle.mkv"));
-    let (stream_index, source_codec, cues) = if !is_matroska_source(source)? {
+    let (is_mkv, source_file) = open_subtitle_source(source)?;
+    let (stream_index, source_codec, cues) = if !is_mkv {
         let ext = source.extension().and_then(|s| s.to_str());
         if ext.is_some_and(|s| s.eq_ignore_ascii_case("ass") || s.eq_ignore_ascii_case("ssa")) {
             let Some(stats) = try_convert_ass_inner(
                 source,
+                Some(source_file),
                 planned_dest,
                 streams,
                 max_packet_bytes,
@@ -390,6 +404,7 @@ pub fn try_plan_with_controls(
         } else {
             let Some(stats) = try_convert_srt_inner(
                 source,
+                Some(source_file),
                 planned_dest,
                 streams,
                 max_packet_bytes,
@@ -411,6 +426,7 @@ pub fn try_plan_with_controls(
     } else {
         let Some((idx, codec_name, stats)) = try_convert_matroska_inner(
             source,
+            Some(source_file),
             planned_dest,
             streams,
             max_packet_bytes,
@@ -514,7 +530,8 @@ pub fn try_convert_with_controls(
         Ok(())
     };
     check_controls()?;
-    let stats = if !is_matroska_source(source)? {
+    let (is_mkv, source_file) = open_subtitle_source(source)?;
+    let stats = if !is_mkv {
         if source
             .extension()
             .and_then(|s| s.to_str())
@@ -522,6 +539,7 @@ pub fn try_convert_with_controls(
         {
             try_convert_ass_inner(
                 source,
+                Some(source_file),
                 destination,
                 streams,
                 max_packet_bytes,
@@ -533,6 +551,7 @@ pub fn try_convert_with_controls(
         } else {
             try_convert_srt_inner(
                 source,
+                Some(source_file),
                 destination,
                 streams,
                 max_packet_bytes,
@@ -545,6 +564,7 @@ pub fn try_convert_with_controls(
     } else {
         try_convert_matroska_inner(
             source,
+            Some(source_file),
             destination,
             streams,
             max_packet_bytes,
@@ -723,6 +743,7 @@ fn matroska_subtitle_span(raw_start: u64, duration: u64, delay: u64) -> Result<O
 
 fn try_convert_matroska_inner(
     source: &Path,
+    source_file: Option<File>,
     destination: &Path,
     streams: &[usize],
     max_packet_bytes: usize,
@@ -757,8 +778,12 @@ fn try_convert_matroska_inner(
             error
         }
     };
+    let file = match source_file {
+        Some(f) => f,
+        None => File::open(source)?,
+    };
     let mut reader = webm::WebmReader::open(
-        std::io::BufReader::new(File::open(source)?),
+        std::io::BufReader::new(file),
         limits,
     )
     .map_err(|e| map_packet_limit(e.into()))?;
@@ -1102,6 +1127,7 @@ pub fn try_convert_ass(
 ) -> Result<Option<SubtitleStats>> {
     try_convert_ass_inner(
         source,
+        None,
         destination,
         streams,
         usize::MAX,
@@ -1114,6 +1140,7 @@ pub fn try_convert_ass(
 
 fn try_convert_ass_inner(
     source: &Path,
+    source_file: Option<File>,
     destination: &Path,
     streams: &[usize],
     max_packet_bytes: usize,
@@ -1139,7 +1166,10 @@ fn try_convert_ass_inner(
     {
         return Err(invalid("controlled memory budget exceeded"));
     }
-    let source_file = File::open(source)?;
+    let source_file = match source_file {
+        Some(f) => f,
+        None => File::open(source)?,
+    };
     let file_len = source_file.metadata()?.len();
     if file_len > 64 << 20 {
         return Err(invalid("ASS metadata exceeds 64 MiB"));
@@ -1318,6 +1348,7 @@ pub fn try_convert_srt(
 ) -> Result<Option<SubtitleStats>> {
     try_convert_srt_inner(
         source,
+        None,
         destination,
         streams,
         usize::MAX,
@@ -1330,6 +1361,7 @@ pub fn try_convert_srt(
 
 fn try_convert_srt_inner(
     source: &Path,
+    source_file: Option<File>,
     destination: &Path,
     streams: &[usize],
     max_packet_bytes: usize,
@@ -1363,7 +1395,10 @@ fn try_convert_srt_inner(
     {
         return Err(invalid("controlled memory budget exceeded"));
     }
-    let source_file = File::open(source)?;
+    let source_file = match source_file {
+        Some(f) => f,
+        None => File::open(source)?,
+    };
     let file_len = source_file.metadata()?.len();
     if file_len > 64 << 20 {
         return Err(invalid("SRT metadata exceeds 64 MiB"));

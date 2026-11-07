@@ -19,6 +19,55 @@ pub(crate) type Visitor<'a> = dyn FnMut(&FrameMetadata, &[u8], u64, u64) -> Resu
 pub(crate) fn decode_presented(
     source: &Path,
     transform: &DecodeTransform,
+    visit: Option<&mut Visitor<'_>>,
+    options: Option<&fvid_control::CopyOptions>,
+) -> Result<Option<DecodeStats>> {
+    if options
+        .and_then(|o| o.cancel.as_ref())
+        .is_some_and(fvid_control::CancelFlag::is_cancelled)
+    {
+        return Err("media operation cancelled".into());
+    }
+    if options.is_some_and(|o| o.max_packet_bytes == 0) {
+        return Err("packet byte limit must be positive".into());
+    }
+    if options.is_some_and(|o| o.max_packets == Some(0)) {
+        return Err("packet work limit requires at least one packet".into());
+    }
+    if options.is_some_and(|o| o.max_controlled_bytes == Some(0)) {
+        return Err("controlled memory limit must be positive".into());
+    }
+    if let Some(options) = options {
+        crate::owned_budget::check_rss_budget(options)?;
+    }
+    if transform
+        .input_format
+        .as_deref()
+        .is_some_and(|v| !matches!(v, "mp4" | "mov"))
+    {
+        return Ok(None);
+    }
+    let reader = match crate::owned_mp4::Mp4Reader::open(
+        BufReader::new(File::open(source).map_err(|e| e.to_string())?),
+        crate::owned_mp4::Limits {
+            metadata_bytes: crate::owned_mp4::Limits::default().metadata_bytes.min(
+                options
+                    .and_then(|o| o.max_controlled_bytes)
+                    .unwrap_or(usize::MAX),
+            ),
+            ..Default::default()
+        },
+    ) {
+        Ok(value) => value,
+        Err(error) if error.is_unsupported() => return Ok(None),
+        Err(error) => return Err(error.to_string()),
+    };
+    decode_presented_from_reader(reader, transform, visit, options)
+}
+
+pub(crate) fn decode_presented_from_reader<R: std::io::Read + std::io::Seek>(
+    mut reader: crate::owned_mp4::Mp4Reader<R>,
+    transform: &DecodeTransform,
     mut visit: Option<&mut Visitor<'_>>,
     options: Option<&fvid_control::CopyOptions>,
 ) -> Result<Option<DecodeStats>> {
@@ -47,21 +96,6 @@ pub(crate) fn decode_presented(
     {
         return Ok(None);
     }
-    let mut reader = match crate::owned_mp4::Mp4Reader::open(
-        BufReader::new(File::open(source).map_err(|e| e.to_string())?),
-        crate::owned_mp4::Limits {
-            metadata_bytes: crate::owned_mp4::Limits::default().metadata_bytes.min(
-                options
-                    .and_then(|o| o.max_controlled_bytes)
-                    .unwrap_or(usize::MAX),
-            ),
-            ..Default::default()
-        },
-    ) {
-        Ok(value) => value,
-        Err(error) if error.is_unsupported() => return Ok(None),
-        Err(error) => return Err(error.to_string()),
-    };
     let Some(index) = reader.automatic_track_indices(&[*b"vide"]).first().copied()
     else {
         return Ok(None);

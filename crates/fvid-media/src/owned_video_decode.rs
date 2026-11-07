@@ -139,6 +139,7 @@ pub(crate) fn decode_webm(
     {
         return Ok(None);
     }
+    std::io::Seek::seek(&mut file, std::io::SeekFrom::Start(0)).map_err(|e| e.to_string())?;
     let mut reader_limits = crate::owned_webm::Limits::default();
     let memory_packets = options.and_then(|o| {
         o.max_controlled_bytes
@@ -159,7 +160,7 @@ pub(crate) fn decode_webm(
         }
     };
     let mut reader = crate::owned_webm::WebmReader::open(
-        BufReader::new(File::open(source).map_err(|e| e.to_string())?),
+        BufReader::new(file),
         reader_limits,
     )
     .map_err(map_packet_limit)?;

@@ -84,9 +84,19 @@ pub fn trim(
         interval: Some((from, to)),
         ..Default::default()
     };
-    if !crate::owned_wave_inspect::is_wave(source).unwrap_or(false)
-        || crate::owned_g711_wave_export::recognizes(source, options).unwrap_or(false)
-    {
+    let mut file = std::fs::File::open(source).map_err(|e| e.to_string())?;
+    let mut prefix = [0u8; 12];
+    let is_wave = match file.read_exact(&mut prefix) {
+        Ok(()) => matches!(&prefix[..4], b"RIFF" | b"RIFX" | b"RF64") && &prefix[8..] == b"WAVE",
+        Err(e) if e.kind() == std::io::ErrorKind::UnexpectedEof => false,
+        Err(e) => return Err(e.to_string()),
+    };
+    let is_g711 = is_wave
+        && crate::owned_wave_inspect::g711_law(&mut file, options.cancel.as_ref())
+            .map(|law| law.is_some())
+            .unwrap_or(false);
+    if !is_wave || is_g711 {
+        drop(file);
         let stats = crate::owned_audio_export::decode_audio_transformed(
             source,
             destination,
@@ -104,7 +114,14 @@ pub fn trim(
             fvid_payload_copies: 0,
         });
     }
-    copy_wave(source, destination, Some((from, to)), options).map(|(stats, _)| stats)
+    copy_waves_with_first_file(
+        &[source],
+        Some(file),
+        Some(destination),
+        Some((from, to)),
+        options,
+    )
+    .map(|(stats, _, _)| stats)
 }
 /// Concatenate compatible PCM WAVE streams without decoding or seam rounding.
 /// Metadata and fmt parameters come from the first input; packet limits span
@@ -151,14 +168,31 @@ pub(crate) fn inspect_copy(
     interval: Option<(i64, i64)>,
     options: &CopyOptions,
 ) -> Result<(CopyStats, u64, crate::owned_wave_inspect::WaveInfo)> {
+    inspect_copy_with_first_file(sources, None, interval, options)
+}
+pub(crate) fn inspect_copy_with_first_file(
+    sources: &[&Path],
+    first_file: Option<std::fs::File>,
+    interval: Option<(i64, i64)>,
+    options: &CopyOptions,
+) -> Result<(CopyStats, u64, crate::owned_wave_inspect::WaveInfo)> {
     check_options(options)?;
     if !(1..=256).contains(&sources.len()) {
         return Err("WAVE plan requires 1..=256 inputs".into());
     }
-    copy_waves(sources, None, interval, options)
+    copy_waves_with_first_file(sources, first_file, None, interval, options)
 }
 fn copy_waves(
     sources: &[&Path],
+    destination: Option<&Path>,
+    interval: Option<(i64, i64)>,
+    options: &CopyOptions,
+) -> Result<(CopyStats, u64, crate::owned_wave_inspect::WaveInfo)> {
+    copy_waves_with_first_file(sources, None, destination, interval, options)
+}
+fn copy_waves_with_first_file(
+    sources: &[&Path],
+    first_file: Option<std::fs::File>,
     destination: Option<&Path>,
     interval: Option<(i64, i64)>,
     options: &CopyOptions,
@@ -198,7 +232,10 @@ fn copy_waves(
     };
     check()?;
     let source = sources[0];
-    let mut input = std::fs::File::open(source).map_err(|e| e.to_string())?;
+    let mut input = match first_file {
+        Some(file) => file,
+        None => std::fs::File::open(source).map_err(|e| e.to_string())?,
+    };
     let info = crate::owned_wave_inspect::inspect(&mut input, options.cancel.as_ref())
         .map_err(|e| e.to_string())?;
     let frame = usize::from(info.block);
@@ -276,34 +313,47 @@ fn copy_waves(
     if size == 0 && segments.iter().any(|(_, info, _, _)| info.data_bytes != 0) {
         return Err("no WAVE samples selected".into());
     }
-    let metadata_bytes =
-        crate::owned_wave_inspect::info_chunks_bytes(&mut input, &info, options.cancel.as_ref())
-            .map_err(|e| e.to_string())?;
     let assignments = options.metadata_set.iter().try_fold(0usize, |n, (_, v)| {
         n.checked_add(v.len())
             .and_then(|n| n.checked_add(10))
             .ok_or("metadata size overflow")
     })?;
-    let estimate = metadata_bytes
-        .checked_add(assignments)
-        .and_then(|n| n.checked_add(12))
-        .and_then(|n| n.checked_mul(8))
-        .and_then(|n| n.checked_add(capacity))
-        .and_then(|n| n.checked_add(geometry_bytes))
-        .and_then(|n| n.checked_add(16384))
-        .ok_or("WAVE memory estimate overflow")?;
-    if options
-        .max_controlled_bytes
-        .is_some_and(|max| estimate > max)
-    {
-        return Err(format!(
-            "controlled memory budget exceeded: need {estimate} bytes"
-        ));
-    }
-    check()?;
-    let metadata =
+    let metadata = if let Some(max) = options.max_controlled_bytes {
+        let metadata_bytes =
+            crate::owned_wave_inspect::info_chunks_bytes(&mut input, &info, options.cancel.as_ref())
+                .map_err(|e| e.to_string())?;
+        let estimate = metadata_bytes
+            .checked_add(assignments)
+            .and_then(|n| n.checked_add(12))
+            .and_then(|n| n.checked_mul(8))
+            .and_then(|n| n.checked_add(capacity))
+            .and_then(|n| n.checked_add(geometry_bytes))
+            .and_then(|n| n.checked_add(16384))
+            .ok_or("WAVE memory estimate overflow")?;
+        if estimate > max {
+            return Err(format!(
+                "controlled memory budget exceeded: need {estimate} bytes"
+            ));
+        }
+        check()?;
         crate::owned_wave_inspect::info_chunks(&mut input, &info, options.cancel.as_ref())
-            .map_err(|e| e.to_string())?;
+            .map_err(|e| e.to_string())?
+    } else {
+        check()?;
+        let metadata =
+            crate::owned_wave_inspect::info_chunks(&mut input, &info, options.cancel.as_ref())
+                .map_err(|e| e.to_string())?;
+        let _ = metadata
+            .len()
+            .checked_add(assignments)
+            .and_then(|n| n.checked_add(12))
+            .and_then(|n| n.checked_mul(8))
+            .and_then(|n| n.checked_add(capacity))
+            .and_then(|n| n.checked_add(geometry_bytes))
+            .and_then(|n| n.checked_add(16384))
+            .ok_or("WAVE memory estimate overflow")?;
+        metadata
+    };
     let metadata = crate::owned_wave_metadata::edit_info_chunks(
         &metadata,
         &options.metadata_delete,

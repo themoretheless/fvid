@@ -12,15 +12,18 @@ fn prepare(
     Vec<crate::owned_play_controls::SubtitleCue>,
     Option<crate::owned_mp4_video_bridge::Temporary>,
     usize,
+    Option<BufReader<File>>,
 )> {
+    use std::io::Seek;
     let mut bridge = None;
+    let mut y4m_reader = None;
     let meta_working_bytes = crate::owned_lossless::options_matroska_metadata_working_bytes(options)?;
-    let (header, base_working_bytes) = if crate::owned_y4m_decode::supports(source) {
-        let mut reader = BufReader::new(File::open(source).map_err(|e| e.to_string())?);
-        let mut line = Vec::new();
-        if !y4m::line(&mut reader, &mut line)? {
-            return Err("empty subtitle burn input".into());
-        }
+    let first_file = File::open(source).map_err(|e| e.to_string())?;
+    let mut maybe_y4m = BufReader::new(first_file);
+    let mut line = Vec::new();
+    let is_y4m = y4m::line(&mut maybe_y4m, &mut line).is_ok_and(|present| present)
+        && y4m::Header::parse(&line).is_ok();
+    let (header, base_working_bytes) = if is_y4m {
         let header = y4m::Header::parse(&line)?;
         header.frame_rate()?;
         let frame_len = header.frame_len()?;
@@ -38,11 +41,14 @@ fn prepare(
         {
             return Err("subtitle burn frame exceeds controlled memory budget".into());
         }
+        maybe_y4m
+            .seek(std::io::SeekFrom::Start(0))
+            .map_err(|e| e.to_string())?;
+        y4m_reader = Some(maybe_y4m);
         (header, base_working)
     } else {
-        if crate::owned_mp4_video_bridge::recognizes(source) {
-            bridge = crate::owned_mp4_video_bridge::prepare(source, Some(options))?;
-        }
+        drop(maybe_y4m);
+        bridge = crate::owned_mp4_video_bridge::prepare(source, Some(options))?;
         let container_source = bridge.as_ref().map_or(source, |t| t.path.as_path());
         let mut limits = crate::owned_webm::Limits::default();
         let effective_packet_limit = options
@@ -181,6 +187,7 @@ fn prepare(
         cues,
         bridge,
         cues_only_bytes.saturating_add(meta_working_bytes),
+        y4m_reader,
     ))
 }
 fn policy(options: &CopyOptions) -> Result<()> {
@@ -256,17 +263,16 @@ pub fn plan_burn_subtitles(
         return Err("media operation cancelled".into());
     }
     policy(options)?;
-    let (header, cues, bridge, cues_and_meta_bytes) = prepare(source, subs, options)?;
+    let (header, cues, bridge, cues_and_meta_bytes, y4m_reader) = prepare(source, subs, options)?;
     let font_size = (header.height as f32 / 18.0).clamp(12.0, 64.0);
     // Qualify font coverage in the same renderer that execution uses.
     for cue in &cues {
         crate::owned_text_raster::rasterize(&cue.text, header.width, header.height, font_size)?;
     }
-    if crate::owned_y4m_decode::supports(source) {
+    if let Some(mut reader) = y4m_reader {
         let encode_packets =
             options.max_packet_bytes != CopyOptions::default().max_packet_bytes
                 || options.max_controlled_bytes.is_some();
-        let mut reader = BufReader::new(File::open(source).map_err(|e| e.to_string())?);
         let mut visit = |h: &y4m::Header, bytes: &[u8], pts: u64, _: u64| {
             if options
                 .cancel
@@ -548,9 +554,9 @@ pub fn burn_subtitles(
     if destination.symlink_metadata().is_ok() {
         return Err("output already exists".into());
     }
-    let (header, cues, bridge, cues_and_meta_bytes) = prepare(source, subs, options)?;
+    let (header, cues, bridge, cues_and_meta_bytes, y4m_reader) = prepare(source, subs, options)?;
     let font_size = (header.height as f32 / 18.0).clamp(12.0, 64.0);
-    if !crate::owned_y4m_decode::supports(source) {
+    let Some(input) = y4m_reader else {
         let container_source = bridge.as_ref().map_or(source, |t| t.path.as_path());
         let options_meta_bytes =
             crate::owned_lossless::options_matroska_metadata_working_bytes(options)?;
@@ -592,7 +598,7 @@ pub fn burn_subtitles(
             vertical_flip: false,
             horizontal_flip: false,
         });
-    }
+    };
     let file_metadata = crate::owned_lossless::metadata(options)?;
     let mut text_tags = std::collections::BTreeMap::new();
     for (key, value) in &options.metadata_set {
@@ -633,7 +639,6 @@ pub fn burn_subtitles(
     {
         return Err("Matroska metadata working set exceeds controlled memory budget".into());
     }
-    let input = BufReader::new(File::open(source).map_err(|e| e.to_string())?);
     let (stats, event, consumed) = mkv::export_atomic(
         destination,
         options.cancel.as_ref(),

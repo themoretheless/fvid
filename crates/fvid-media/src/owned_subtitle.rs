@@ -13,16 +13,6 @@ impl From<crate::owned_matroska::Error> for Error { fn from(e: crate::owned_matr
 impl From<crate::owned_ebml::Error> for Error { fn from(e: crate::owned_ebml::Error) -> Self { Self(e.to_string()) } }
 pub type Result<T> = std::result::Result<T, Error>;
 fn invalid(message: &str) -> Error { Error(message.into()) }
-fn is_matroska_source(source: &std::path::Path) -> Result<bool> {
-    use std::io::Read;
-    let mut input = std::fs::File::open(source)?;
-    let mut signature = [0; 4];
-    match input.read_exact(&mut signature) {
-        Ok(()) => Ok(signature == [0x1a, 0x45, 0xdf, 0xa3]),
-        Err(e) if e.kind() == std::io::ErrorKind::UnexpectedEof => Ok(false),
-        Err(e) => Err(e.into()),
-    }
-}
 include!("owned_subtitle_impl.rs");
 
 impl From<crate::owned_webm::Error> for Error {

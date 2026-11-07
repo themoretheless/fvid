@@ -1,8 +1,8 @@
 {
   "target": 1000,
   "counting_rule": "One independently confirmed problem or useful capability; fixture variants and baseline integration repairs are excluded. Only accepted entries count.",
-  "accepted_count": 964,
-  "next_id": "FVID-0965",
+  "accepted_count": 969,
+  "next_id": "FVID-0970",
   "entries": [
     {
       "id": "FVID-0001",
@@ -10795,6 +10795,61 @@
       "result": "Added open_supported_files and open_readers_from_files in owned_concat so ADTS segment files opened during qualification are rewound and passed directly into StreamReader::open_for_sequence_with_packet_limit.",
       "status": "accepted",
       "validation": "batch-646-validation.json"
+    },
+    {
+      "id": "FVID-0965",
+      "batch": 647,
+      "title": "Read WAVE INFO chunks in a single pass when memory budget is unbounded and reuse open File handle across WAVE/G.711 dispatch in owned_wave_remux and owned_wave_plan",
+      "source": "crates/fvid-media/src/owned_wave_remux.rs",
+      "regression": "tests/wave_subtitle_and_burn_handle_reuse.rs",
+      "before": "owned_wave_remux::copy_waves always scanned RIFF chunks twice (info_chunks_bytes followed by info_chunks) even when max_controlled_bytes was unbounded, and trim / plan_trim opened source 3 times across is_wave, g711_wave_export::recognizes, and copy_waves.",
+      "result": "Read INFO chunks in a single pass when max_controlled_bytes is None and inspected the open File handle once in trim and plan_trim before forwarding it to copy_waves_with_first_file.",
+      "status": "accepted",
+      "validation": "batch-647-validation.json"
+    },
+    {
+      "id": "FVID-0966",
+      "batch": 647,
+      "title": "Reuse open File handle across Matroska signature check and subtitle conversion readers in owned_subtitle_impl",
+      "source": "crates/fvid-media/src/owned_subtitle_impl.rs",
+      "regression": "tests/wave_subtitle_and_burn_handle_reuse.rs",
+      "before": "try_plan_with_controls and try_convert_with_controls opened source in is_matroska_source to check the 4-byte EBML signature, dropped the handle, and reopened source in try_convert_{matroska,ass,srt}_inner.",
+      "result": "Added open_subtitle_source returning (is_mkv, File) rewound to offset 0 and passed the open File handle into try_convert_{matroska,ass,srt}_inner.",
+      "status": "accepted",
+      "validation": "batch-647-validation.json"
+    },
+    {
+      "id": "FVID-0967",
+      "batch": 647,
+      "title": "Reuse open File and Mp4Reader across owned_mp4_video_bridge::prepare_selected and owned_mp4_video_decode::decode_presented_from_reader",
+      "source": "crates/fvid-media/src/owned_mp4_video_bridge.rs",
+      "regression": "tests/wave_subtitle_and_burn_handle_reuse.rs",
+      "before": "owned_mp4_video_bridge::prepare_selected opened source 3 times and built Mp4Reader twice (once for prefix check, once for track/metadata inspection, and once inside owned_mp4_video_decode::decode_presented).",
+      "result": "Rewound the initial File handle in prepare_selected and added owned_mp4_video_decode::decode_presented_from_reader so prepare_selected opens source and builds Mp4Reader only once.",
+      "status": "accepted",
+      "validation": "batch-647-validation.json"
+    },
+    {
+      "id": "FVID-0968",
+      "batch": 647,
+      "title": "Reuse open File handle across 4-byte EBML signature check and WebmReader::open in owned_video_decode::decode_webm",
+      "source": "crates/fvid-media/src/owned_video_decode.rs",
+      "regression": "tests/wave_subtitle_and_burn_handle_reuse.rs",
+      "before": "owned_video_decode::decode_webm opened source to read the 4-byte EBML signature, dropped the File handle, and immediately reopened source for WebmReader::open.",
+      "result": "Rewound the open File handle to offset 0 after verifying the 4-byte EBML signature and passed it directly into BufReader::new(file) for WebmReader::open.",
+      "status": "accepted",
+      "validation": "batch-647-validation.json"
+    },
+    {
+      "id": "FVID-0969",
+      "batch": 647,
+      "title": "Reuse open Y4M BufReader<File> and remove redundant recognizes/supports opens in owned_subtitle_burn",
+      "source": "crates/fvid-media/src/owned_subtitle_burn.rs",
+      "regression": "tests/wave_subtitle_and_burn_handle_reuse.rs",
+      "before": "owned_subtitle_burn::prepare, plan_burn_subtitles, and burn_subtitles opened Y4M inputs 4 times across supports() and header parsing and called owned_mp4_video_bridge::recognizes before prepare.",
+      "result": "Returned the rewound Y4M BufReader<File> from owned_subtitle_burn::prepare and removed redundant supports() and recognizes() pre-opens in prepare, plan_burn_subtitles, and burn_subtitles.",
+      "status": "accepted",
+      "validation": "batch-647-validation.json"
     }
   ],
   "pending_count": 126

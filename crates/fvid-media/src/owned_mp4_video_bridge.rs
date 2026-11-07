@@ -3,7 +3,7 @@
 use crate::{owned_matroska as mkv, owned_mp4_video_decode as decode};
 use std::{
     fs::{File, OpenOptions},
-    io::{BufReader, Read, Write},
+    io::{BufReader, Read, Seek, SeekFrom, Write},
     path::{Path, PathBuf},
     sync::atomic::{AtomicU64, Ordering},
 };
@@ -99,8 +99,9 @@ fn prepare_selected(
     {
         return Ok(None);
     }
+    file.seek(SeekFrom::Start(0)).map_err(|e| e.to_string())?;
     let reader = match crate::owned_mp4::Mp4Reader::open(
-        BufReader::new(File::open(source).map_err(|e| e.to_string())?),
+        BufReader::new(file),
         crate::owned_mp4::Limits {
             packet_bytes: if video_only {
                 32 << 20
@@ -183,7 +184,6 @@ fn prepare_selected(
     {
         return Err("controlled memory budget exceeded: MP4 index and metadata".into());
     }
-    drop(reader);
     let mut temporary = Temporary::new()?;
     let mut output = Some(temporary.file.as_mut().unwrap());
     let mut writer = None;
@@ -286,7 +286,12 @@ fn prepare_selected(
                 .write_packet(0, pts, duration, true, &packet)
                 .map_err(|e| e.to_string())
         };
-    let result = decode::decode_presented(source, &Default::default(), Some(&mut visitor), options);
+    let result = decode::decode_presented_from_reader(
+        reader,
+        &Default::default(),
+        Some(&mut visitor),
+        options,
+    );
     drop(visitor);
     match result {
         Ok(None) => return Ok(None),

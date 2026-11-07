@@ -1,0 +1,14 @@
+{
+  "batch": 647,
+  "ids": [
+    "FVID-0965",
+    "FVID-0966",
+    "FVID-0967",
+    "FVID-0968",
+    "FVID-0969"
+  ],
+  "commands": [
+    "cargo test --test wave_subtitle_and_burn_handle_reuse"
+  ],
+  "status": "accepted"
+}
