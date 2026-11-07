@@ -4701,3 +4701,11 @@ See `batch-628-validation.json`.
 - **FVID-0882**: Build overlay plan stream descriptors directly from `open_eligible_source` in `native_plan::overlay_with_geometry_and_filters` (`src/native_plan.rs`).
 - **FVID-0883**: Construct `MatroskaPcmMetadata` directly from the already-opened `Mp4Reader` in `export_pcm_selected` (`src/native_export.rs`).
 - **FVID-0884**: Skip redundant `decode_audio_with_options` preflight in `native_loudnorm::try_apply` when `cached_info` is already verified with default packet limits (`src/native_loudnorm.rs`).
+
+## Batch 631 (FVID-0885..0889)
+
+- **FVID-0885**: Build `MatroskaPcmMetadata` directly from the already-opened `WebmReader` in `export_pcm_selected` (`src/native_export.rs`).
+- **FVID-0886**: Verify packet and memory budgets inside `inspect_audio_source_selected` and eliminate duplicate `validate_encoded_audio_packet_budget` pass (`src/native_media.rs`, `src/native_plan.rs`).
+- **FVID-0887**: Eliminate recursive `transcode_lossless` invocation for overlay transforms in `native_plan::transcode_lossless` (`src/native_plan.rs`).
+- **FVID-0888**: Single-open `LosslessSource` dispatch in `media::transcode_lossless` and `media::transcode` (`src/media.rs`, `src/native_export.rs`, `src/native_export/overlay.rs`).
+- **FVID-0889**: Single-open `LosslessSource` dispatch in `media::plan_transcode_lossless` (`src/media.rs`, `src/native_plan.rs`).

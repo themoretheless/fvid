@@ -132,8 +132,11 @@ pub fn decode_audio_with_options(
             )
         });
         let info=crate::native_media::constant_audio_source_info_selected_with_interval_and_options(source,selected,interval,options).map_err(|e|e.to_string())?;
-        if options.max_packet_bytes != fvid_media::CopyOptions::default().max_packet_bytes {
-            validate_encoded_audio_packet_budget(source, info.stream_index, interval, options)?;
+        if let Some(mem_limit) = options.max_controlled_bytes
+            && let Some(needed) = info.max_packet_and_index_bytes
+            && needed > mem_limit
+        {
+            return Err("controlled memory budget exceeded".into());
         }
         if transform.channels.is_some_and(|n| n != i32::from(info.channels)) {
             if info.codec.starts_with("pcm_") && info.channel_mask.is_none() && info.channels > 2 {
@@ -227,6 +230,7 @@ pub fn decode_audio_with_options(
     })
 }
 
+#[allow(dead_code)]
 fn validate_encoded_audio_packet_budget(
     source: &std::path::Path,
     stream_index: usize,
@@ -1458,23 +1462,70 @@ pub fn export_y4m_with_options(
 
 /// Metadata-only plan for the same admission used by owned lossless export.
 pub fn transcode_lossless(source: &std::path::Path, transform: &crate::media_info::LosslessTransform) -> Result<MediaPlan> {
-    if crate::native_lossless::supports_overlay(transform) {
-        let spec=transform.overlay.as_ref().unwrap();let mut remaining=transform.clone();remaining.overlay=None;
-        let (geometry,filters)=crate::native_lossless::configuration(&remaining).map_err(|e|e.to_string())?;
-        let spatial=transcode_lossless(source,&remaining)?;
-        let mut plan=overlay_with_geometry_and_filters(source,&spec.path,i64::from(spec.x),i64::from(spec.y),&geometry,&filters)?;
-        let mut index=1;
-        for step in spatial.steps.iter().filter(|s|s.action=="geometry") {plan.steps.insert(index,step.clone());index+=1;}
-        index+=1;
-        for step in spatial.steps.iter().filter(|s|s.action=="filter") {plan.steps.insert(index,step.clone());index+=1;}
-        plan.command="transcode-lossless".into();return Ok(plan);
-    }
-    if (!crate::native_lossless::supports(transform) && !crate::native_lossless::supports_framestep(transform)) {
+    if !crate::native_lossless::supports_overlay(transform)
+        && !crate::native_lossless::supports(transform)
+        && !crate::native_lossless::supports_framestep(transform)
+    {
         return Err("request is not supported by the owned lossless planner".into());
     }
     let Some(lossless_source) = crate::native_lossless::open_eligible_source(source).map_err(|e| e.to_string())? else {
         return Err("request is not supported by the owned lossless planner".into());
     };
+    transcode_lossless_with_source(source, lossless_source, transform)
+}
+
+pub(crate) fn transcode_lossless_with_source(
+    source: &std::path::Path,
+    lossless_source: crate::native_lossless::LosslessSource,
+    transform: &crate::media_info::LosslessTransform,
+) -> Result<MediaPlan> {
+    if crate::native_lossless::supports_overlay(transform) {
+        let spec=transform.overlay.as_ref().unwrap();let mut remaining=transform.clone();remaining.overlay=None;
+        let (geometry,filters)=crate::native_lossless::configuration(&remaining).map_err(|e|e.to_string())?;
+        let mut plan=overlay_with_geometry_and_filters_with_source(source,lossless_source,&spec.path,i64::from(spec.x),i64::from(spec.y),&geometry,&filters)?;
+        let mut index=1;
+        if !geometry.is_identity() {
+            plan.steps.insert(
+                index,
+                PlanStep {
+                    action: "geometry".into(),
+                    detail: format!(
+                        "crop {:?}; horizontal flip {}; vertical flip {}; transpose {:?}; rotate {:?}; pad {:?}; scale {:?}; normalize stored rotation first",
+                        geometry.crop,
+                        geometry.horizontal_flip,
+                        geometry.vertical_flip,
+                        geometry.transpose,
+                        geometry.rotate,
+                        geometry.pad,
+                        geometry.scale
+                    ),
+                },
+            );
+            index += 1;
+        }
+        index += 1;
+        if !filters.is_empty() {
+            for step in lossless_filter_steps(&remaining) {
+                plan.steps.insert(index, step);
+                index += 1;
+            }
+        }
+        if let Some(args) = &remaining.framestep {
+            plan.steps.insert(
+                index,
+                PlanStep {
+                    action: "filter".into(),
+                    detail: format!(
+                        "FVid framestep={args}; decode every reference frame and emit selected presentation frames"
+                    ),
+                },
+            );
+        }
+        plan.command="transcode-lossless".into();return Ok(plan);
+    }
+    if !crate::native_lossless::supports(transform) && !crate::native_lossless::supports_framestep(transform) {
+        return Err("request is not supported by the owned lossless planner".into());
+    }
     let mut spatial_transform=transform.clone();
     spatial_transform.framestep=None;
     let (geometry,filters)=crate::native_lossless::configuration(&spatial_transform).map_err(|e|e.to_string())?;
@@ -1524,22 +1575,7 @@ pub fn transcode_lossless(source: &std::path::Path, transform: &crate::media_inf
     let mut steps=vec![PlanStep{action:"decode".into(),detail:"FVid owned demuxer and video decoder; retain supported companion audio packets without audio re-encoding".into()}];
     if !geometry.is_identity() {steps.push(PlanStep{action:"geometry".into(),detail:format!("crop {:?}; horizontal flip {}; vertical flip {}; transpose {:?}; rotate {:?}; pad {:?}; scale {:?}; normalize stored rotation first",geometry.crop,geometry.horizontal_flip,geometry.vertical_flip,geometry.transpose,geometry.rotate,geometry.pad,geometry.scale)});}
     if !filters.is_empty() {
-        for (name,args) in [("tmix",&transform.tmix),("hqdn3d",&transform.hqdn3d),("eq",&transform.eq),("unsharp",&transform.unsharp),("hue",&transform.hue),
-            ("gblur",&transform.gblur),("avgblur",&transform.avgblur),("boxblur",&transform.boxblur),
-            ("negate",&transform.negate),("sobel",&transform.sobel),("prewitt",&transform.prewitt),
-            ("roberts",&transform.roberts),("kirsch",&transform.kirsch),("scharr",&transform.scharr),
-            ("smartblur",&transform.smartblur),("sab",&transform.sab),("bilateral",&transform.bilateral),
-            ("cas",&transform.cas),("vignette",&transform.vignette),("curves",&transform.curves),
-            ("colorbalance",&transform.colorbalance),("colorlevels",&transform.colorlevels),("colorchannelmixer",&transform.colorchannelmixer),
-            ("monochrome",&transform.monochrome),("grayworld",&transform.grayworld),("drawbox",&transform.drawbox),("drawgrid",&transform.drawgrid),
-            ("lagfun",&transform.lagfun),("bitplanenoise",&transform.bitplanenoise),("deband",&transform.deband),("gradfun",&transform.gradfun),
-            ("lenscorrection",&transform.lenscorrection),("pixelize",&transform.pixelize),("removegrain",&transform.removegrain),
-            ("yaepblur",&transform.yaepblur),("vibrance",&transform.vibrance),("dilation",&transform.dilation),("erosion",&transform.erosion),
-            ("colorize",&transform.colorize),("exposure",&transform.exposure),("chromashift",&transform.chromashift),
-            ("colorcontrast",&transform.colorcontrast),("colorcorrect",&transform.colorcorrect),("shuffleplanes",&transform.shuffleplanes),
-            ("lutyuv",&transform.lutyuv),("colorhold",&transform.colorhold),("fade",&transform.fade),("perspective",&transform.perspective)] {
-            if let Some(args)=args {steps.push(PlanStep{action:"filter".into(),detail:format!("FVid {name}={args}; operate on sample planes at source precision")});}
-        }
+        steps.extend(lossless_filter_steps(transform));
     }
     if let Some(args)=&transform.framestep {
         steps.push(PlanStep{action:"filter".into(),detail:format!("FVid framestep={args}; decode every reference frame and emit selected presentation frames")});
@@ -1548,6 +1584,27 @@ pub fn transcode_lossless(source: &std::path::Path, transform: &crate::media_inf
     steps.push(PlanStep{action:"write".into(),detail:"FVid Matroska muxer; atomic publication without overwrite; cancellation removes temporary output".into()});
     Ok(MediaPlan {command:"transcode-lossless".into(),input:source.to_path_buf(),inputs:vec![source.to_path_buf()],streams,steps,graph:None,
         notes:vec!["backend: fvid; no external demuxer, decoder, encoder or muxer".into(),"metadata-only plan: frame geometry, filter plane compatibility and payload correctness are validated during execution".into()]})
+}
+
+fn lossless_filter_steps(transform: &crate::media_info::LosslessTransform) -> Vec<PlanStep> {
+    let mut steps = Vec::new();
+    for (name,args) in [("tmix",&transform.tmix),("hqdn3d",&transform.hqdn3d),("eq",&transform.eq),("unsharp",&transform.unsharp),("hue",&transform.hue),
+        ("gblur",&transform.gblur),("avgblur",&transform.avgblur),("boxblur",&transform.boxblur),
+        ("negate",&transform.negate),("sobel",&transform.sobel),("prewitt",&transform.prewitt),
+        ("roberts",&transform.roberts),("kirsch",&transform.kirsch),("scharr",&transform.scharr),
+        ("smartblur",&transform.smartblur),("sab",&transform.sab),("bilateral",&transform.bilateral),
+        ("cas",&transform.cas),("vignette",&transform.vignette),("curves",&transform.curves),
+        ("colorbalance",&transform.colorbalance),("colorlevels",&transform.colorlevels),("colorchannelmixer",&transform.colorchannelmixer),
+        ("monochrome",&transform.monochrome),("grayworld",&transform.grayworld),("drawbox",&transform.drawbox),("drawgrid",&transform.drawgrid),
+        ("lagfun",&transform.lagfun),("bitplanenoise",&transform.bitplanenoise),("deband",&transform.deband),("gradfun",&transform.gradfun),
+        ("lenscorrection",&transform.lenscorrection),("pixelize",&transform.pixelize),("removegrain",&transform.removegrain),
+        ("yaepblur",&transform.yaepblur),("vibrance",&transform.vibrance),("dilation",&transform.dilation),("erosion",&transform.erosion),
+        ("colorize",&transform.colorize),("exposure",&transform.exposure),("chromashift",&transform.chromashift),
+        ("colorcontrast",&transform.colorcontrast),("colorcorrect",&transform.colorcorrect),("shuffleplanes",&transform.shuffleplanes),
+        ("lutyuv",&transform.lutyuv),("colorhold",&transform.colorhold),("fade",&transform.fade),("perspective",&transform.perspective)] {
+        if let Some(args)=args {steps.push(PlanStep{action:"filter".into(),detail:format!("FVid {name}={args}; operate on sample planes at source precision")});}
+    }
+    steps
 }
 
 /// Plan owned loudness measurement without decoding or claiming true peak.
@@ -1665,8 +1722,11 @@ fn loudness_plan_and_channels_with_options(
         }
         (info.sample_rate,info.channels)
     } else if let Some(info) = cached_native_info {
-        if options.max_packet_bytes != fvid_media::CopyOptions::default().max_packet_bytes {
-            validate_encoded_audio_packet_budget(source, info.stream_index, None, options)?;
+        if let Some(mem_limit) = options.max_controlled_bytes
+            && let Some(needed) = info.max_packet_and_index_bytes
+            && needed > mem_limit
+        {
+            return Err("controlled memory budget exceeded".into());
         }
         (info.sample_rate, info.channels)
     } else {
@@ -2085,6 +2145,18 @@ pub fn overlay_with_geometry_and_filters(
     let Some(lossless_source) = crate::native_lossless::open_eligible_source(source).map_err(|e| e.to_string())? else {
         return Err("owned overlay requires a supported owned lossless main input".into());
     };
+    overlay_with_geometry_and_filters_with_source(source, lossless_source, foreground, x, y, geometry, filters)
+}
+
+pub(crate) fn overlay_with_geometry_and_filters_with_source(
+    source: &std::path::Path,
+    lossless_source: crate::native_lossless::LosslessSource,
+    foreground: &std::path::Path,
+    x: i64,
+    y: i64,
+    geometry: &crate::native_geometry::VideoGeometry,
+    filters: &crate::native_pixels::PixelFilters,
+) -> Result<MediaPlan> {
     let streams = match lossless_source {
         crate::native_lossless::LosslessSource::Planar(Some(webm)) => {
             webm.tracks.iter().enumerate().map(|(index, track)| PlanStream {

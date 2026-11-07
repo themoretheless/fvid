@@ -7,7 +7,7 @@ use crate::{
 };
 use std::{
     fs::{File, OpenOptions},
-    io::{BufReader, BufWriter, Read, Write},
+    io::{BufReader, BufWriter, Write},
     path::Path,
     sync::atomic::Ordering,
 };
@@ -326,6 +326,42 @@ pub fn overlay_video_transformed(
             "owned overlay requires a supported owned lossless main input",
         ));
     };
+    overlay_video_transformed_with_source(
+        main,
+        lossless_source,
+        foreground,
+        destination,
+        x,
+        y,
+        cancel,
+        progress,
+        geometry,
+        filters,
+    )
+}
+
+#[expect(clippy::too_many_arguments, reason = "Internal helper forwarding pre-opened LosslessSource")]
+pub(crate) fn overlay_video_transformed_with_source(
+    main: &Path,
+    lossless_source: crate::native_lossless::LosslessSource,
+    foreground: &Path,
+    destination: &Path,
+    x: i64,
+    y: i64,
+    cancel: Option<&CancelFlag>,
+    progress: Option<&ProgressHook>,
+    geometry: &VideoGeometry,
+    filters: &crate::native_pixels::PixelFilters,
+) -> Result<crate::media_info::LosslessStats> {
+    if cancel.is_some_and(|c| c.is_cancelled()) {
+        return Err(invalid("media operation cancelled"));
+    }
+    if destination.extension().and_then(|s| s.to_str()) != Some("mkv") {
+        return Err(invalid("owned overlay output requires .mkv"));
+    }
+    if destination.symlink_metadata().is_ok() {
+        return Err(invalid("overlay destination already exists"));
+    }
     let mut compositor = TimedOverlay::new(foreground, x, y)?;
     let mut main_reader = NativeReader::software(BufReader::new(File::open(main)?), usize::MAX)?;
     let first_frame = main_reader

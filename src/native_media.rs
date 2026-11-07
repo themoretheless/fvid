@@ -1194,6 +1194,7 @@ pub struct AudioSourceInfo {
     pub sample_rate: u32,
     pub channels: u16,
     pub codec: &'static str,
+    pub max_packet_and_index_bytes: Option<usize>,
 }
 /// Inspect the initial decoder setup, including streams with later changes.
 /// Use `constant_audio_source_info_selected` to qualify a constant-format DSP route.
@@ -1319,6 +1320,11 @@ fn inspect_audio_source_selected(
             }
             let index=matroska_audio_index(&reader,selected)?;
             if options.max_packet_bytes != fvid_media::CopyOptions::default().max_packet_bytes {
+                let index_bytes = if options.max_controlled_bytes.is_some() {
+                    reader.estimated_index_payload_bytes()?
+                } else {
+                    0
+                };
                 let track_number = reader.tracks[index].number;
                 let active_limit = matroska_active_track_packets(&reader, index, interval, options.max_packets);
                 let mut track_packets = 0usize;
@@ -1327,8 +1333,19 @@ fn inspect_audio_source_selected(
                         if track_packets >= active_limit {
                             break;
                         }
-                        if reader.packet_payload_size(packet_index)? > options.max_packet_bytes {
+                        let pkt_bytes = reader.packet_payload_size(packet_index)?;
+                        if pkt_bytes > options.max_packet_bytes {
                             return Err(invalid("WebM packet exceeds budget"));
+                        }
+                        if let Some(mem_limit) = options.max_controlled_bytes {
+                            let overhead = reader.packet_read_overhead(packet_index)?;
+                            if index_bytes
+                                .saturating_add(pkt_bytes)
+                                .saturating_add(overhead)
+                                > mem_limit
+                            {
+                                return Err(invalid("controlled memory budget exceeded"));
+                            }
                         }
                         track_packets += 1;
                     }
@@ -1357,6 +1374,7 @@ fn inspect_audio_source_selected(
                     ("A_PCM/FLOAT/IEEE", 64) => "pcm_f64le",
                     _ => "aac",
                 },
+                max_packet_and_index_bytes: None,
             });
         }
         let mut reader = crate::container::mp4::Mp4Reader::open_indexed(
@@ -1379,23 +1397,48 @@ fn inspect_audio_source_selected(
         if require_constant_description {
             reader.tracks()[index].ensure_constant_description()?;
         }
+        let mut max_packet_and_index_bytes = None;
         if options.max_packet_bytes != fvid_media::CopyOptions::default().max_packet_bytes {
+            let index_bytes = if options.max_controlled_bytes.is_some() {
+                reader.estimated_index_payload_bytes()?
+            } else {
+                0
+            };
             let track = &reader.tracks()[index];
             let max_samples = mp4_active_samples(track, reader.movie_timescale(), interval, options.max_packets);
+            let mut max_sample_bytes = 0usize;
             let exceeds = match &track.samples {
-                crate::container::mp4::SampleIndex::Expanded(samples) => samples
-                    .iter()
-                    .take(max_samples)
-                    .any(|s| (s.size as usize) > options.max_packet_bytes),
+                crate::container::mp4::SampleIndex::Expanded(samples) => {
+                    let mut over = false;
+                    for s in samples.iter().take(max_samples) {
+                        let sz = s.size as usize;
+                        if sz > options.max_packet_bytes {
+                            over = true;
+                            break;
+                        }
+                        max_sample_bytes = max_sample_bytes.max(sz);
+                    }
+                    over
+                }
                 crate::container::mp4::SampleIndex::Uniform(uniform) => {
-                    uniform.count > 0
-                        && max_samples > 0
-                        && (uniform.bytes_per_frame as usize) > options.max_packet_bytes
+                    if uniform.count > 0 && max_samples > 0 {
+                        let sz = uniform.bytes_per_frame as usize;
+                        max_sample_bytes = sz;
+                        sz > options.max_packet_bytes
+                    } else {
+                        false
+                    }
                 }
             };
             if exceeds {
                 return Err(invalid("MP4 packet exceeds budget"));
             }
+            if let Some(mem_limit) = options.max_controlled_bytes
+                && index_bytes.saturating_add(max_sample_bytes) > mem_limit
+            {
+                return Err(invalid("controlled memory budget exceeded"));
+            }
+            max_packet_and_index_bytes = Some(index_bytes.saturating_add(max_sample_bytes));
         }
         let in_band_ps = negotiate_mp4_ps_with_interval(&mut reader,index,interval,options.max_packets,||control.check())?;
         let source_track = &reader.tracks()[index];
@@ -1433,6 +1476,7 @@ fn inspect_audio_source_selected(
                 (b"fl64", true) => "pcm_f64le",
                 _ => "aac",
             },
+            max_packet_and_index_bytes,
         })
     } else {
         let info = aac_source_info_selected_with_options(source, selected, interval, options)?;
@@ -1442,6 +1486,7 @@ fn inspect_audio_source_selected(
             sample_rate: info.sample_rate,
             channels: info.channels,
             codec: "aac",
+            max_packet_and_index_bytes: None,
         })
     }
 }

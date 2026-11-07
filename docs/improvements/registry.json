@@ -1,8 +1,8 @@
 {
   "target": 1000,
   "counting_rule": "One independently confirmed problem or useful capability; fixture variants and baseline integration repairs are excluded. Only accepted entries count.",
-  "accepted_count": 884,
-  "next_id": "FVID-0885",
+  "accepted_count": 889,
+  "next_id": "FVID-0890",
   "entries": [
     {
       "id": "FVID-0001",
@@ -9915,7 +9915,62 @@
       "result": "try_apply reuses cached_info directly when default packet limits are active and only invokes decode_audio_with_options when custom packet limits need validation.",
       "status": "accepted",
       "validation": "batch-630-validation.json"
+    },
+    {
+      "id": "FVID-0885",
+      "batch": 631,
+      "title": "Build Matroska PCM metadata directly from already-opened WebmReader in export_pcm_selected",
+      "source": "src/native_export.rs",
+      "regression": "tests/matroska_pcm_and_lossless_overlay_reuse.rs",
+      "before": "When exporting Matroska audio to .mka/.mkv without pre-extracted metadata, export_pcm_selected called extract_source_pcm_metadata_with_interval_packet_and_memory_limit, reopening and re-scanning the Matroska file.",
+      "result": "export_pcm_selected constructs MatroskaPcmMetadata and verifies packet/memory budgets directly from the already-opened matroska WebmReader.",
+      "status": "accepted",
+      "validation": "batch-631-validation.json"
+    },
+    {
+      "id": "FVID-0886",
+      "batch": 631,
+      "title": "Verify packet and memory budgets inside inspect_audio_source_selected and eliminate duplicate validate_encoded_audio_packet_budget pass",
+      "source": "src/native_media.rs",
+      "regression": "tests/matroska_pcm_and_lossless_overlay_reuse.rs",
+      "before": "native_plan::decode_audio_with_options and loudness_plan_and_channels_with_options called constant_audio_source_info_selected_with_interval_and_options and then validate_encoded_audio_packet_budget, opening and scanning MP4/Matroska/ADTS files twice when custom packet limits were active.",
+      "result": "inspect_audio_source_selected verifies packet read overhead and records max_packet_and_index_bytes on AudioSourceInfo so decode_audio_with_options and loudness_plan_and_channels_with_options validate budgets in a single container open.",
+      "status": "accepted",
+      "validation": "batch-631-validation.json"
+    },
+    {
+      "id": "FVID-0887",
+      "batch": 631,
+      "title": "Eliminate recursive transcode_lossless invocation for overlay transforms in native_plan::transcode_lossless",
+      "source": "src/native_plan.rs",
+      "regression": "tests/matroska_pcm_and_lossless_overlay_reuse.rs",
+      "before": "When transform.overlay was present, native_plan::transcode_lossless recursively called transcode_lossless(source, &remaining) (opening and decoding the first frame of source) and then called overlay_with_geometry_and_filters (opening and decoding source a second time) just to collect geometry and filter plan steps.",
+      "result": "native_plan::transcode_lossless constructs geometry and filter PlanStep entries directly via lossless_filter_steps without calling transcode_lossless recursively.",
+      "status": "accepted",
+      "validation": "batch-631-validation.json"
+    },
+    {
+      "id": "FVID-0888",
+      "batch": 631,
+      "title": "Single-open LosslessSource dispatch in media::transcode_lossless and media::transcode",
+      "source": "src/media.rs",
+      "regression": "tests/matroska_pcm_and_lossless_overlay_reuse.rs",
+      "before": "media::transcode_lossless and media::transcode called native_lossless::eligible(source) or overlay_eligible(source) and then called transcode_ffv1_selected, transcode_ffv1_transformed, or overlay_video_transformed, which immediately called open_eligible_source(source) again.",
+      "result": "media::transcode_lossless and media::transcode call open_eligible_source(source) once and pass the opened LosslessSource into transcode_ffv1_selected_with_source or overlay_video_transformed_with_source.",
+      "status": "accepted",
+      "validation": "batch-631-validation.json"
+    },
+    {
+      "id": "FVID-0889",
+      "batch": 631,
+      "title": "Single-open LosslessSource dispatch in media::plan_transcode_lossless",
+      "source": "src/media.rs",
+      "regression": "tests/matroska_pcm_and_lossless_overlay_reuse.rs",
+      "before": "media::plan_transcode_lossless called native_lossless::eligible(source) or overlay_eligible(source) and then called native_plan::transcode_lossless(source, transform), opening and indexing the container twice.",
+      "result": "media::plan_transcode_lossless calls open_eligible_source(source) once and passes the opened LosslessSource into native_plan::transcode_lossless_with_source.",
+      "status": "accepted",
+      "validation": "batch-631-validation.json"
     }
   ],
-  "pending_count": 131
+  "pending_count": 126
 }

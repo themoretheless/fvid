@@ -1252,24 +1252,26 @@ pub fn transcode_lossless(source:&std::path::Path,destination:&std::path::Path,t
     {
         return fvid_media::transcode_lossless(source,destination,transform,options);
     }
-    if crate::native_lossless::supports_framestep(&transform)
-        && crate::native_lossless::eligible(source).map_err(|e|e.to_string())? {
-        let step=fvid_media::owned_framestep::FrameStep::parse(transform.framestep.as_deref().unwrap())?;
-        let mut spatial=transform.clone(); spatial.framestep=None;
-        let (geometry,filters)=crate::native_lossless::configuration(&spatial).map_err(|e|e.to_string())?;
-        return crate::native_export::transcode_ffv1_selected(source,destination,&geometry,&filters,options.cancel.as_ref(),options.progress.as_ref(),Some(step)).map_err(|e|e.to_string());
-    }
-    if crate::native_lossless::supports_overlay(&transform) {
-        let spec=transform.overlay.as_ref().unwrap();
-        if crate::native_export::overlay_eligible(source).map_err(|e|e.to_string())? {
-            let mut remaining=transform.clone();remaining.overlay=None;
-            let (geometry,filters)=crate::native_lossless::configuration(&remaining).map_err(|e|e.to_string())?;
-            return crate::native_export::overlay_video_transformed(source,&spec.path,destination,i64::from(spec.x),i64::from(spec.y),options.cancel.as_ref(),options.progress.as_ref(),&geometry,&filters).map_err(|e|e.to_string());
+    let supports_framestep = crate::native_lossless::supports_framestep(&transform);
+    let supports_overlay = crate::native_lossless::supports_overlay(&transform);
+    let supports_spatial = crate::native_lossless::supports(&transform);
+    if supports_framestep || supports_overlay || supports_spatial {
+        if let Some(lossless_source) = crate::native_lossless::open_eligible_source(source).map_err(|e| e.to_string())? {
+            if supports_framestep {
+                let step=fvid_media::owned_framestep::FrameStep::parse(transform.framestep.as_deref().unwrap())?;
+                let mut spatial=transform.clone(); spatial.framestep=None;
+                let (geometry,filters)=crate::native_lossless::configuration(&spatial).map_err(|e|e.to_string())?;
+                return crate::native_export::transcode_ffv1_selected_with_source(source,lossless_source,destination,&geometry,&filters,options.cancel.as_ref(),options.progress.as_ref(),Some(step)).map_err(|e|e.to_string());
+            }
+            if supports_overlay {
+                let spec=transform.overlay.as_ref().unwrap();
+                let mut remaining=transform.clone();remaining.overlay=None;
+                let (geometry,filters)=crate::native_lossless::configuration(&remaining).map_err(|e|e.to_string())?;
+                return crate::native_export::overlay_video_transformed_with_source(source,lossless_source,&spec.path,destination,i64::from(spec.x),i64::from(spec.y),options.cancel.as_ref(),options.progress.as_ref(),&geometry,&filters).map_err(|e|e.to_string());
+            }
+            let (geometry,filters)=crate::native_lossless::configuration(&transform).map_err(|e|e.to_string())?;
+            return crate::native_export::transcode_ffv1_selected_with_source(source,lossless_source,destination,&geometry,&filters,options.cancel.as_ref(),options.progress.as_ref(),None).map_err(|e|e.to_string());
         }
-    }
-    if crate::native_lossless::supports(&transform) && crate::native_lossless::eligible(source).map_err(|e|e.to_string())? {
-        let (geometry,filters)=crate::native_lossless::configuration(&transform).map_err(|e|e.to_string())?;
-        return crate::native_export::transcode_ffv1_transformed(source,destination,&geometry,&filters,options.cancel.as_ref(),options.progress.as_ref()).map_err(|e|e.to_string());
     }
     fvid_media::transcode_lossless(source,destination,transform,options)
 }
@@ -1288,23 +1290,23 @@ pub fn transcode(source: &std::path::Path, destination: &std::path::Path,
         let supports_framestep = crate::native_lossless::supports_framestep(&transform);
         let supports_overlay = crate::native_lossless::supports_overlay(&transform);
         let supports_spatial = crate::native_lossless::supports(&transform);
-        if (supports_framestep || supports_overlay || supports_spatial)
-            && crate::native_lossless::eligible(source).map_err(|e|e.to_string())?
-        {
-            if supports_framestep {
-                let step=fvid_media::owned_framestep::FrameStep::parse(transform.framestep.as_deref().unwrap())?;
-                let mut spatial=transform.clone(); spatial.framestep=None;
-                let (geometry,filters)=crate::native_lossless::configuration(&spatial).map_err(|e|e.to_string())?;
-                return crate::native_export::transcode_ffv1_selected(source,destination,&geometry,&filters,options.cancel.as_ref(),options.progress.as_ref(),Some(step)).map_err(|e|e.to_string());
+        if supports_framestep || supports_overlay || supports_spatial {
+            if let Some(lossless_source) = crate::native_lossless::open_eligible_source(source).map_err(|e| e.to_string())? {
+                if supports_framestep {
+                    let step=fvid_media::owned_framestep::FrameStep::parse(transform.framestep.as_deref().unwrap())?;
+                    let mut spatial=transform.clone(); spatial.framestep=None;
+                    let (geometry,filters)=crate::native_lossless::configuration(&spatial).map_err(|e|e.to_string())?;
+                    return crate::native_export::transcode_ffv1_selected_with_source(source,lossless_source,destination,&geometry,&filters,options.cancel.as_ref(),options.progress.as_ref(),Some(step)).map_err(|e|e.to_string());
+                }
+                if supports_overlay {
+                    let spec=transform.overlay.as_ref().unwrap();
+                    let mut remaining=transform.clone(); remaining.overlay=None;
+                    let (geometry,filters)=crate::native_lossless::configuration(&remaining).map_err(|e|e.to_string())?;
+                    return crate::native_export::overlay_video_transformed_with_source(source,lossless_source,&spec.path,destination,i64::from(spec.x),i64::from(spec.y),options.cancel.as_ref(),options.progress.as_ref(),&geometry,&filters).map_err(|e|e.to_string());
+                }
+                let (geometry,filters)=crate::native_lossless::configuration(&transform).map_err(|e|e.to_string())?;
+                return crate::native_export::transcode_ffv1_selected_with_source(source,lossless_source,destination,&geometry,&filters,options.cancel.as_ref(),options.progress.as_ref(),None).map_err(|e|e.to_string());
             }
-            if supports_overlay {
-                let spec=transform.overlay.as_ref().unwrap();
-                let mut remaining=transform.clone(); remaining.overlay=None;
-                let (geometry,filters)=crate::native_lossless::configuration(&remaining).map_err(|e|e.to_string())?;
-                return crate::native_export::overlay_video_transformed(source,&spec.path,destination,i64::from(spec.x),i64::from(spec.y),options.cancel.as_ref(),options.progress.as_ref(),&geometry,&filters).map_err(|e|e.to_string());
-            }
-            let (geometry,filters)=crate::native_lossless::configuration(&transform).map_err(|e|e.to_string())?;
-            return crate::native_export::transcode_ffv1_transformed(source,destination,&geometry,&filters,options.cancel.as_ref(),options.progress.as_ref()).map_err(|e|e.to_string());
         }
     }
     fvid_media::transcode(source,destination,transform,options,settings)
@@ -1319,23 +1321,23 @@ pub fn plan_transcode_lossless(source: &std::path::Path, transform: &LosslessTra
     {
         return fvid_media::plan_transcode_lossless(source,transform,options,encoder);
     }
-    if matches!(encoder,None|Some("ffv1")) && crate::native_lossless::supports_framestep(transform)
-        && crate::native_lossless::eligible(source).map_err(|e|e.to_string())? {
-        let mut spatial=transform.clone(); spatial.framestep=None;
-        let mut plan=crate::native_plan::transcode_lossless(source,&spatial)?;
-        let position=plan.steps.iter().position(|s|s.action=="encode").unwrap_or(plan.steps.len());
-        plan.steps.insert(position,crate::native_plan::PlanStep { action:"filter".into(), detail:format!("owned framestep {} after spatial filters",transform.framestep.as_deref().unwrap()) });
-        plan.notes.push(format!("owned framestep {}; retain selected frame PTS/duration and every AAC packet",transform.framestep.as_deref().unwrap()));
-        return Ok(plan);
-    }
-    if matches!(encoder,None|Some("ffv1"))
-        && crate::native_lossless::supports_overlay(transform)
-            && crate::native_export::overlay_eligible(source).map_err(|e|e.to_string())? {
-                return crate::native_plan::transcode_lossless(source,transform);
+    if matches!(encoder, None | Some("ffv1")) {
+        let supports_framestep = crate::native_lossless::supports_framestep(transform);
+        let supports_overlay = crate::native_lossless::supports_overlay(transform);
+        let supports_spatial = crate::native_lossless::supports(transform);
+        if supports_framestep || supports_overlay || supports_spatial {
+            if let Some(lossless_source) = crate::native_lossless::open_eligible_source(source).map_err(|e| e.to_string())? {
+                if supports_framestep {
+                    let mut spatial=transform.clone(); spatial.framestep=None;
+                    let mut plan=crate::native_plan::transcode_lossless_with_source(source,lossless_source,&spatial)?;
+                    let position=plan.steps.iter().position(|s|s.action=="encode").unwrap_or(plan.steps.len());
+                    plan.steps.insert(position,crate::native_plan::PlanStep { action:"filter".into(), detail:format!("owned framestep {} after spatial filters",transform.framestep.as_deref().unwrap()) });
+                    plan.notes.push(format!("owned framestep {}; retain selected frame PTS/duration and every AAC packet",transform.framestep.as_deref().unwrap()));
+                    return Ok(plan);
+                }
+                return crate::native_plan::transcode_lossless_with_source(source,lossless_source,transform);
             }
-    if matches!(encoder,None|Some("ffv1")) && crate::native_lossless::supports(transform)
-        && crate::native_lossless::eligible(source).map_err(|e|e.to_string())? {
-        return crate::native_plan::transcode_lossless(source,transform);
+        }
     }
     fvid_media::plan_transcode_lossless(source,transform,options,encoder)
 }

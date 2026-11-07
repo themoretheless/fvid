@@ -1,7 +1,7 @@
 //! Native planar Y4M export. No foreign decoder, encoder or muxer is used.
 pub(crate) mod pcm_matroska;
 mod overlay;
-pub(crate) use overlay::TimedOverlay;
+pub(crate) use overlay::{TimedOverlay, overlay_video_transformed_with_source};
 pub use overlay::{overlay_video, overlay_eligible, overlay_video_transformed};
 use crate::{
     Result, invalid,
@@ -2027,6 +2027,134 @@ fn export_pcm_selected(    source: &Path,
                 }
             }
             Some(base)
+        } else if let Some(reader) = &mut matroska {
+            let memory_packets = options
+                .and_then(|o| o.max_controlled_bytes)
+                .map(|bytes| bytes / std::mem::size_of::<crate::container::webm::Packet>());
+            reader.scan_all().map_err(|error| {
+                if memory_packets
+                    .is_some_and(|max| max < crate::container::webm::Limits::default().packets)
+                    && error
+                        .to_string()
+                        .contains("WebM packet count exceeds limit")
+                {
+                    invalid("controlled memory budget exceeded: Matroska packet index limit")
+                } else {
+                    error
+                }
+            })?;
+            if let Some(mem_limit) = options.and_then(|o| o.max_controlled_bytes)
+                && reader.estimated_index_payload_bytes()? > mem_limit
+            {
+                return Err(invalid("controlled memory budget exceeded"));
+            }
+            let index = if allow_wave {
+                crate::native_media::matroska_audio_index(reader, selected)?
+            } else {
+                crate::native_media::matroska_aac_index(reader, selected)?
+            };
+            let track = &reader.tracks[index];
+            if let Some(maximum) = max_packet_bytes {
+                let track_number = track.number;
+                let active_limit = crate::native_media::matroska_active_track_packets(
+                    reader,
+                    index,
+                    interval,
+                    options.and_then(|o| o.max_packets),
+                );
+                let mut track_packets = 0usize;
+                for (packet_index, packet) in reader.packets.iter().enumerate() {
+                    if packet.track == track_number {
+                        if track_packets >= active_limit {
+                            break;
+                        }
+                        if reader.packet_payload_size(packet_index)? > maximum {
+                            return Err(invalid("WebM packet exceeds budget"));
+                        }
+                        track_packets += 1;
+                    }
+                }
+            }
+            let mut base = pcm_matroska::default_matroska_pcm_metadata();
+            if !track.name.contains('\0') && track.name.len() <= 1024 {
+                base.0.clone_from(&track.name);
+            }
+            let lang = reader
+                .track_languages
+                .get(&track.number)
+                .unwrap_or(&track.language);
+            if !lang.is_empty() && !lang.contains('\0') && lang.len() <= 128 {
+                base.1.clone_from(lang);
+            }
+            base.2.tags = reader.tags.clone();
+            for (k, v) in &reader.metadata {
+                if !k.is_empty()
+                    && k.len() <= 128
+                    && v.len() <= 1024
+                    && !k.contains('\0')
+                    && !v.contains('\0')
+                    && !crate::container::FileTags::supports_key(k)
+                {
+                    base.3.insert(k.clone(), v.clone());
+                }
+            }
+            if !reader.writing_app.is_empty()
+                && !reader.writing_app.contains('\0')
+                && reader.writing_app.len() <= 1024
+                && !base.3.keys().any(|k| k.eq_ignore_ascii_case("encoder"))
+            {
+                base.3.insert("ENCODER".into(), reader.writing_app.clone());
+            }
+            let mut track_tags = reader.track_metadata.get(&0).cloned().unwrap_or_default();
+            if let Some(uid) = reader.track_uids.get(&track.number)
+                && let Some(scoped) = reader.track_metadata.get(uid)
+            {
+                track_tags.extend(scoped.clone());
+            }
+            track_tags.retain(|k, v| {
+                !k.is_empty()
+                    && k.len() <= 128
+                    && v.len() <= 1024
+                    && !k.contains('\0')
+                    && !v.contains('\0')
+                    && !matches!(
+                        k.to_ascii_lowercase().as_str(),
+                        "title" | "language" | "rotate" | "stereo_mode" | "alpha_mode"
+                    )
+            });
+            if !track_tags.is_empty() {
+                base.4.insert(0, track_tags);
+            }
+            if let Some(mem_limit) = options.and_then(|o| o.max_controlled_bytes) {
+                let mut tag_bytes = base.0.len().saturating_add(base.1.len()).saturating_add(64);
+                for (_, val) in base.2.tags.entries() {
+                    if !val.is_empty() {
+                        tag_bytes = tag_bytes.saturating_add(val.len().saturating_add(32));
+                    }
+                }
+                for (k, v) in &base.3 {
+                    tag_bytes = tag_bytes
+                        .saturating_add(k.len())
+                        .saturating_add(v.len())
+                        .saturating_add(32);
+                }
+                for entries in base.4.values() {
+                    for (k, v) in entries {
+                        tag_bytes = tag_bytes
+                            .saturating_add(k.len())
+                            .saturating_add(v.len())
+                            .saturating_add(32);
+                    }
+                }
+                let needed = reader
+                    .estimated_index_payload_bytes()?
+                    .saturating_add(8usize.saturating_mul(tag_bytes.saturating_add(12)))
+                    .saturating_add(16 * 1024);
+                if needed > mem_limit {
+                    return Err(invalid("controlled memory budget exceeded"));
+                }
+            }
+            Some(base)
         } else {
             Some(
                 pcm_matroska::extract_source_pcm_metadata_with_interval_packet_and_memory_limit(
@@ -2663,6 +2791,38 @@ pub fn transcode_ffv1_selected(source:&Path,destination:&Path,
     if destination.symlink_metadata().is_ok() {
         return Err(invalid("lossless export destination already exists"));
     }
+    let Some(lossless_source) = crate::native_lossless::open_eligible_source(source)? else {
+        return Err(invalid(
+            "owned FFV1 export requires one AVC/HEVC video and supported AAC companion tracks",
+        ));
+    };
+    transcode_ffv1_selected_with_source(
+        source,
+        lossless_source,
+        destination,
+        geometry,
+        filters,
+        cancel,
+        progress,
+        step,
+    )
+}
+
+pub(crate) fn transcode_ffv1_selected_with_source(
+    source: &Path,
+    lossless_source: crate::native_lossless::LosslessSource,
+    destination: &Path,
+    geometry: &crate::native_geometry::VideoGeometry,
+    filters: &crate::native_pixels::PixelFilters,
+    cancel: Option<&crate::media_control::CancelFlag>,
+    progress: Option<&crate::media_control::ProgressHook>,
+    step: Option<fvid_media::owned_framestep::FrameStep>,
+) -> Result<crate::media_info::LosslessStats> {
+    if destination.extension().and_then(|s|s.to_str())!=Some("mkv"){return Err(invalid("lossless export requires FFV1 in .mkv"));}
+    if cancel.is_some_and(|c|c.is_cancelled()){return Err(invalid("media operation cancelled"));}
+    if destination.symlink_metadata().is_ok() {
+        return Err(invalid("lossless export destination already exists"));
+    }
     let directory=destination.parent().filter(|p|!p.as_os_str().is_empty()).unwrap_or(Path::new("."));
     let (temporary,file)=(0..100).find_map(|_|{
         let path=directory.join(format!(".fvid-ffv1-{}-{}.tmp",std::process::id(),NEXT.fetch_add(1,Ordering::Relaxed)));
@@ -2673,8 +2833,8 @@ pub fn transcode_ffv1_selected(source:&Path,destination:&Path,
         Some(step) => step,
         None => fvid_media::owned_framestep::FrameStep::parse("").map_err(|e| invalid(&e))?,
     };
-    let (stats, event) = match crate::native_lossless::open_eligible_source(source)? {
-        Some(crate::native_lossless::LosslessSource::Planar(webm)) => {
+    let (stats, event) = match lossless_source {
+        crate::native_lossless::LosslessSource::Planar(webm) => {
             crate::native_lossless_y4m::write_selected_with_webm(
                 source,
                 webm,
@@ -2687,7 +2847,7 @@ pub fn transcode_ffv1_selected(source:&Path,destination:&Path,
                 step,
             )?
         }
-        Some(crate::native_lossless::LosslessSource::Mp4(mp4)) => {
+        crate::native_lossless::LosslessSource::Mp4(mp4) => {
             crate::native_lossless::write_mp4_selected_with_reader(
                 source,
                 mp4,
@@ -2699,11 +2859,6 @@ pub fn transcode_ffv1_selected(source:&Path,destination:&Path,
                 None,
                 step,
             )?
-        }
-        None => {
-            return Err(invalid(
-                "owned FFV1 export requires one AVC/HEVC video and supported AAC companion tracks",
-            ));
         }
     };
     output.flush()?;output.get_ref().sync_all()?;drop(output);
