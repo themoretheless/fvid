@@ -1,8 +1,8 @@
 {
   "target": 1000,
   "counting_rule": "One independently confirmed problem or useful capability; fixture variants and baseline integration repairs are excluded. Only accepted entries count.",
-  "accepted_count": 694,
-  "next_id": "FVID-0695",
+  "accepted_count": 699,
+  "next_id": "FVID-0700",
   "entries": [
     {
       "id": "FVID-0001",
@@ -7825,6 +7825,61 @@
       "result": "Check destination.symlink_metadata().is_ok() upfront before opening or reading inputs in native_pcm::trim_wave, concat_wave, write_wave, native_export ADTS remux/concat, owned_adts_remux::remux, owned_concat::concat, and owned_audio_export::decode_audio_transformed.",
       "status": "accepted",
       "validation": "batch-592-validation.json"
+    },
+    {
+      "id": "FVID-0695",
+      "batch": 593,
+      "title": "Reject existing destinations before container recognition and use fallible allocations in decode_audio_transformed",
+      "source": "crates/fvid-media/src/owned_audio_export.rs",
+      "regression": "tests/audio_export_preflight_and_resampler_fallible.rs",
+      "before": "decode_audio_transformed ran up to 11 container recognizes/coding probes (opening and indexing Matroska, MP4, and Ogg files) before checking destination.symlink_metadata(), allocated per-block normalized buffers with infallible Vec::with_capacity inside the loop, and built final output sample buffers with infallible Vec::with_capacity / .collect().",
+      "result": "Check destination.symlink_metadata().is_ok() upfront right after the .wav extension check in decode_audio_transformed, reuse a single fallibly reserved normalized block buffer outside the loop, and pre-reserve output sample buffers with try_reserve_exact.",
+      "status": "accepted",
+      "validation": "batch-593-validation.json"
+    },
+    {
+      "id": "FVID-0696",
+      "batch": 593,
+      "title": "Use fallible buffers and reusable packet scratch in G.711 WAVE and Ogg Vorbis/joint audio exports",
+      "source": "crates/fvid-media/src/owned_g711_wave_export.rs",
+      "regression": "tests/audio_export_preflight_and_resampler_fallible.rs",
+      "before": "owned_g711_wave_export::decode allocated input bytes with infallible vec! and allocated a new output Vec<u8> per packet with .collect(); owned_ogg_audio_export::select_backend, owned_ogg_vorbis_export::open_with_transform, and owned_ogg_joint_export::open_with_transform read the entire Ogg file into an unreserved Vec::new(); and Vorbis/joint decode allocated silence and packet buffers with infallible vec! / .collect().",
+      "result": "Use owned_frame::buffer and try_reserve_exact for G.711 packet input/output scratch buffers, pre-reserve limits.file_bytes in Ogg backend selection and Vorbis/joint open_with_transform, and use fallible buffers in Vorbis and joint decode.",
+      "status": "accepted",
+      "validation": "batch-593-validation.json"
+    },
+    {
+      "id": "FVID-0697",
+      "batch": 593,
+      "title": "Eliminate redundant full-file re-reads for WAVE metadata in raw FLAC and MP3 export and audio planning",
+      "source": "crates/fvid-media/src/owned_raw_flac.rs",
+      "regression": "tests/audio_export_preflight_and_resampler_fallible.rs",
+      "before": "owned_raw_flac::apply, owned_raw_mp3::apply, and owned_audio_plan::source_descriptor_for_decode called source_info(source, options) in addition to open_with_transform / descriptor_for_decode, reading and parsing the entire raw FLAC or MP3 file from disk a second time just to extract WAVE INFO metadata.",
+      "result": "Extract WAVE INFO metadata directly from the already-parsed Flac / Mp3 structure via source_info_from_parsed in apply and validate descriptor info_len in source_descriptor_for_decode without re-reading the file.",
+      "status": "accepted",
+      "validation": "batch-593-validation.json"
+    },
+    {
+      "id": "FVID-0698",
+      "batch": 593,
+      "title": "Reject invalid args, non-.wav extensions, and existing destinations before policy checks in container and ADTS loudnorm",
+      "source": "crates/fvid-media/src/owned_container_loudnorm.rs",
+      "regression": "tests/audio_export_preflight_and_resampler_fallible.rs",
+      "before": "owned_container_loudnorm::apply and owned_adts_loudnorm::apply checked stream/metadata policies before validating loudnorm args, .wav output extension, and destination.symlink_metadata(), returning stream/metadata errors instead of rejecting an existing destination first.",
+      "result": "Validate loudnorm args, .wav extension, and destination.symlink_metadata().is_ok() upfront before checking stream/metadata policies in owned_container_loudnorm::apply and owned_adts_loudnorm::apply.",
+      "status": "accepted",
+      "validation": "batch-593-validation.json"
+    },
+    {
+      "id": "FVID-0699",
+      "batch": 593,
+      "title": "Use fallible Vec<u8> output reservation in float32 and float64 streaming resamplers",
+      "source": "crates/fvid-media/src/owned_resample.rs",
+      "regression": "tests/audio_export_preflight_and_resampler_fallible.rs",
+      "before": "owned_resample::Resampler and owned_resample_f64::Resampler checked try_reserve(1) on their internal history VecDeque, but wrote resampled output bytes into Vec<u8> via std::io::Write::write_all, which uses infallible reserve and aborts on OOM.",
+      "result": "Introduce ResamplerOutput with fallible try_reserve for Vec<u8> outputs and use write_sample_bytes in both float32 and float64 Resampler implementations.",
+      "status": "accepted",
+      "validation": "batch-593-validation.json"
     }
   ]
 }

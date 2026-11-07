@@ -1,5 +1,5 @@
 //! Double-precision streaming resampling with an exact rational clock.
-use crate::owned_resample::input_radius;
+use crate::owned_resample::{ResamplerOutput, input_radius};
 use std::{
     collections::VecDeque,
     io::{self, Write},
@@ -22,7 +22,7 @@ pub struct Resampler<W> {
     start: u64,
     phase: (u128, u128),
 }
-impl<W: Write> Resampler<W> {
+impl<W: ResamplerOutput> Resampler<W> {
     pub fn new(output: W, input_rate: u32, output_rate: u32, channels: u16) -> io::Result<Self> {
         Self::new_with_origin(output, input_rate, output_rate, channels, 0, (0, 1))
     }
@@ -152,7 +152,7 @@ impl<W: Write> Resampler<W> {
                 if !value.is_finite() {
                     return Err(io::Error::other("non-finite resampled PCM"));
                 }
-                self.output.write_all(&value.to_le_bytes())?;
+                self.output.write_sample_bytes(&value.to_le_bytes())?;
             }
             self.emitted += 1;
             let next = self.position()?.0 as u64;
@@ -182,7 +182,7 @@ impl Resampler<Vec<u8>> {
     }
 }
 
-impl<W: Write> Write for Resampler<W> {
+impl<W: ResamplerOutput> Write for Resampler<W> {
     fn write(&mut self, bytes: &[u8]) -> io::Result<usize> {
         if bytes.len() % 8 != 0 {
             return Err(io::Error::other("partial resampler PCM sample"));
@@ -197,7 +197,7 @@ impl<W: Write> Write for Resampler<W> {
             if self.filled == self.channels {
                 if self.passthrough() {
                     for value in &self.frame[..self.channels] {
-                        self.output.write_all(&value.to_le_bytes())?;
+                        self.output.write_sample_bytes(&value.to_le_bytes())?;
                     }
                     self.emitted += 1;
                 } else {

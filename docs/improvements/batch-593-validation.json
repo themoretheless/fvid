@@ -1,0 +1,27 @@
+{
+  "status": "accepted",
+  "accepted_ids": [
+    "FVID-0695",
+    "FVID-0696",
+    "FVID-0697",
+    "FVID-0698",
+    "FVID-0699"
+  ],
+  "count_delta": 5,
+  "accepted_count": 699,
+  "next_id": "FVID-0700",
+  "qualification": [
+    {
+      "name": "audio-export-preflight-and-resampler-fallible",
+      "command": [
+        "cargo",
+        "test",
+        "--test",
+        "audio_export_preflight_and_resampler_fallible"
+      ],
+      "exit_code": 0,
+      "passed": 4,
+      "ignored": 0
+    }
+  ]
+}

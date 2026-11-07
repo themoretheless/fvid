@@ -57,16 +57,16 @@ pub fn apply(
     dual_pass: bool,
     options: &CopyOptions,
 ) -> Result<LoudnormStats> {
-    check_options(options)?;
-    if !policies(options) {
-        return Err("owned ADTS loudnorm requires stream 0 and valid WAVE INFO metadata edits".into());
-    }
     let resolved = crate::owned_loudnorm::validate_request(args)?;
     if destination.extension().and_then(|s| s.to_str()) != Some("wav") {
         return Err("owned ADTS loudnorm requires .wav output".into());
     }
     if destination.symlink_metadata().is_ok() {
         return Err("output already exists".into());
+    }
+    check_options(options)?;
+    if !policies(options) {
+        return Err("owned ADTS loudnorm requires stream 0 and valid WAVE INFO metadata edits".into());
     }
     crate::owned_adts_export::check_wave_metadata_budget(options)?;
     let decode_options = crate::owned_adts_export::pcm_decode_options(options);

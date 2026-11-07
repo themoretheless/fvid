@@ -4326,6 +4326,17 @@ See `batch-591-validation.json`.
 
 See `batch-592-validation.json`.
 
+## Batch 593 — FVID-0695..0699: Upfront destination check and fallible buffers in `decode_audio_transformed`, fallible buffers in G.711 WAVE and Ogg Vorbis/joint audio exports, single-pass metadata extraction in raw FLAC/MP3 export and planning, upfront destination check in container/ADTS loudnorm, and fallible `Vec<u8>` output reservation in `Resampler`
+
+- **FVID-0695** — Reject existing destinations before container recognition and use fallible allocations in `decode_audio_transformed` (`crates/fvid-media/src/owned_audio_export.rs`, `tests/audio_export_preflight_and_resampler_fallible.rs`).
+- **FVID-0696** — Use fallible buffers and reusable packet scratch in G.711 WAVE and Ogg Vorbis/joint audio exports (`crates/fvid-media/src/owned_g711_wave_export.rs`, `crates/fvid-media/src/owned_ogg_audio_export.rs`, `crates/fvid-media/src/owned_ogg_vorbis_export.rs`, `crates/fvid-media/src/owned_ogg_joint_export.rs`, `tests/audio_export_preflight_and_resampler_fallible.rs`).
+- **FVID-0697** — Eliminate redundant full-file re-reads for WAVE metadata in raw FLAC and MP3 export and audio planning (`crates/fvid-media/src/owned_raw_flac.rs`, `crates/fvid-media/src/owned_raw_mp3.rs`, `crates/fvid-media/src/owned_audio_plan.rs`, `tests/audio_export_preflight_and_resampler_fallible.rs`).
+- **FVID-0698** — Reject invalid args, non-`.wav` extensions, and existing destinations before policy checks in container and ADTS loudnorm (`crates/fvid-media/src/owned_container_loudnorm.rs`, `crates/fvid-media/src/owned_adts_loudnorm.rs`, `tests/audio_export_preflight_and_resampler_fallible.rs`).
+- **FVID-0699** — Use fallible `Vec<u8>` output reservation in float32 and float64 streaming resamplers (`crates/fvid-media/src/owned_resample.rs`, `crates/fvid-media/src/owned_resample_f64.rs`, `tests/audio_export_preflight_and_resampler_fallible.rs`).
+
+See `batch-593-validation.json`.
+
+
 
 
 

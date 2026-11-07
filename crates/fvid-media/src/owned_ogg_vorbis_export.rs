@@ -22,6 +22,9 @@ pub(crate) fn open_with_transform(
     let mut file = File::open(source).map_err(|e| e.to_string())?;
     let (limits, index) = preflight(&mut file, options)?;
     let mut bytes = Vec::new();
+    bytes
+        .try_reserve_exact(limits.file_bytes)
+        .map_err(|_| "Vorbis input allocation failed")?;
     CheckedRead {
         input: BufReader::new(file),
         options,
@@ -173,7 +176,7 @@ fn decode(
     let channels = usize::from(program.channels());
     let width = channels * 4;
     let permutation = program.wave_channel_order().to_vec();
-    let silence = vec![0u8; 1024 * width];
+    let silence = crate::owned_frame::buffer(1024 * width)?;
     loop {
         check(options)?;
         if options.max_packets.is_some_and(|n| event.packets >= n) {
@@ -224,7 +227,12 @@ fn decode(
                 if samples.is_empty() {
                     continue;
                 }
-                let data: Vec<u8> = samples.iter().flat_map(|s| s.to_le_bytes()).collect();
+                let mut data = Vec::new();
+                data.try_reserve_exact(samples.len() * 4)
+                    .map_err(|_| "Vorbis PCM packet allocation failed")?;
+                for s in &samples {
+                    data.extend_from_slice(&s.to_le_bytes());
+                }
                 if let Some(pcm) = program
                     .present_decoded(
                         AudioPacket {

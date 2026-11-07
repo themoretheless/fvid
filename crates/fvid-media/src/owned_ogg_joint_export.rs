@@ -23,6 +23,9 @@ pub(crate) fn open_with_transform(
     let mut file = File::open(path).map_err(|e| e.to_string())?;
     let (limits, index) = preflight(&mut file, options)?;
     let mut bytes = Vec::new();
+    bytes
+        .try_reserve_exact(limits.file_bytes)
+        .map_err(|_| "Ogg input allocation failed")?;
     CheckedRead {
         input: BufReader::new(file),
         options,
@@ -122,7 +125,7 @@ fn decode(
     options: &CopyOptions,
 ) -> Result<crate::owned_matroska_audio::AudioDecodeStats> {
     let width = usize::from(program.channels()) * 4;
-    let silence = vec![0; 1024 * width];
+    let silence = crate::owned_frame::buffer(1024 * width)?;
     let mut frames = 0;
     while !until.is_some_and(|end| frames >= end) {
         let Some(mut pcm) = program.next_pcm_with(options).map_err(|e| e.to_string())? else {

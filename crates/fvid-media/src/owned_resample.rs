@@ -9,6 +9,23 @@ pub(crate) fn input_radius(input_rate: u32, output_rate: u32) -> u64 {
     (32.0 / ratio).ceil() as u64
 }
 
+pub trait ResamplerOutput: Write {
+    fn write_sample_bytes(&mut self, bytes: &[u8]) -> io::Result<()>;
+}
+impl<W: Write> ResamplerOutput for &mut W {
+    fn write_sample_bytes(&mut self, bytes: &[u8]) -> io::Result<()> {
+        self.write_all(bytes)
+    }
+}
+impl ResamplerOutput for Vec<u8> {
+    fn write_sample_bytes(&mut self, bytes: &[u8]) -> io::Result<()> {
+        self.try_reserve(bytes.len())
+            .map_err(|_| io::Error::other("cannot allocate resampler output"))?;
+        self.extend_from_slice(bytes);
+        Ok(())
+    }
+}
+
 pub struct Resampler<W> {
     output: W,
     input_rate: u32,
@@ -27,7 +44,7 @@ pub struct Resampler<W> {
     start: u64,
     phase: (u128, u128),
 }
-impl<W: Write> Resampler<W> {
+impl<W: ResamplerOutput> Resampler<W> {
     pub fn new(output: W, input_rate: u32, output_rate: u32, channels: u16) -> io::Result<Self> {
         Self::new_with_origin(output, input_rate, output_rate, channels, 0, (0, 1))
     }
@@ -157,7 +174,7 @@ impl<W: Write> Resampler<W> {
                 if !value.is_finite() {
                     return Err(io::Error::other("non-finite resampled PCM"));
                 }
-                self.output.write_all(&value.to_le_bytes())?;
+                self.output.write_sample_bytes(&value.to_le_bytes())?;
             }
             self.emitted += 1;
             let next = self.position()?.0 as u64;
@@ -187,7 +204,7 @@ impl Resampler<Vec<u8>> {
     }
 }
 
-impl<W: Write> Write for Resampler<W> {
+impl<W: ResamplerOutput> Write for Resampler<W> {
     fn write(&mut self, bytes: &[u8]) -> io::Result<usize> {
         if bytes.len() % 4 != 0 {
             return Err(io::Error::other("partial resampler PCM sample"));
@@ -202,7 +219,7 @@ impl<W: Write> Write for Resampler<W> {
             if self.filled == self.channels {
                 if self.passthrough() {
                     for value in &self.frame[..self.channels] {
-                        self.output.write_all(&value.to_le_bytes())?;
+                        self.output.write_sample_bytes(&value.to_le_bytes())?;
                     }
                     self.emitted += 1;
                 } else {

@@ -304,11 +304,7 @@ pub(crate) fn geometry_with_transform(
     }
     Ok((parsed.sample_rate, parsed.channels))
 }
-pub(crate) fn source_info(source: &Path, options: &CopyOptions) -> Result<Vec<u8>> {
-    let mut inspect_opts = crate::owned_adts_export::pcm_decode_options(options);
-    inspect_opts.max_packets = None;
-    inspect_opts.max_packet_bytes = usize::MAX;
-    let parsed = open(source, &inspect_opts)?;
+fn source_info_from_parsed(parsed: &Mp3, options: &CopyOptions) -> Result<Vec<u8>> {
     let info = parsed.wave_info()?;
     if let Some(max) = options.max_controlled_bytes {
         let wave_meta_bytes =
@@ -318,6 +314,13 @@ pub(crate) fn source_info(source: &Path, options: &CopyOptions) -> Result<Vec<u8
         }
     }
     Ok(info)
+}
+pub(crate) fn source_info(source: &Path, options: &CopyOptions) -> Result<Vec<u8>> {
+    let mut inspect_opts = crate::owned_adts_export::pcm_decode_options(options);
+    inspect_opts.max_packets = None;
+    inspect_opts.max_packet_bytes = usize::MAX;
+    let parsed = open(source, &inspect_opts)?;
+    source_info_from_parsed(&parsed, options)
 }
 pub(crate) fn supports(
     source: &Path,
@@ -501,7 +504,7 @@ pub(crate) fn apply(
         return Err("MPEG audio stream contains no audible samples".into());
     }
     let (rate, channels) = (parsed.sample_rate, parsed.channels);
-    let info = source_info(source, options)?;
+    let info = source_info_from_parsed(&parsed, options)?;
     let pres = parsed.presentation_window();
     let until = crate::owned_adts_export::decoded_prefix(transform, rate);
     let last = match until {

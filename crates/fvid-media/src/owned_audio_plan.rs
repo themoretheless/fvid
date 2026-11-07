@@ -285,16 +285,28 @@ fn source_descriptor_for_decode(source: &Path, options: &CopyOptions,
                 .len();
         (rate, channels, mask, codec, precision)
     } else if raw_flac {
-        let _ = crate::owned_raw_flac::source_info(source, options)?;
         let (rate, channels, mask, frames, info_len) =
             crate::owned_raw_flac::descriptor_for_decode(source, transform.copied(), options)?;
+        if let Some(max) = options.max_controlled_bytes {
+            let wave_meta_bytes =
+                crate::owned_wave_metadata::wave_metadata_working_bytes(info_len, options)?;
+            if wave_meta_bytes > max {
+                return Err("controlled memory budget exceeded: WAVE metadata limit".into());
+            }
+        }
         stage2_frames = frames;
         stage2_meta_bytes = info_len;
         (rate, channels, mask, "flac".to_owned(), "float32".to_owned())
     } else if raw_encoded_audio {
-        let _ = crate::owned_raw_mp3::source_info(source, options)?;
         let (rate, channels, raw_codec, frames, info_len) =
             crate::owned_raw_mp3::descriptor_for_decode(source, transform.copied(), options)?;
+        if let Some(max) = options.max_controlled_bytes {
+            let wave_meta_bytes =
+                crate::owned_wave_metadata::wave_metadata_working_bytes(info_len, options)?;
+            if wave_meta_bytes > max {
+                return Err("controlled memory budget exceeded: WAVE metadata limit".into());
+            }
+        }
         stage2_frames = frames;
         stage2_meta_bytes = info_len;
         (rate, channels, crate::owned_pcm_channels::standard_mask(channels).unwrap_or(0) as u32,

@@ -21,6 +21,9 @@ pub(crate) fn select_backend(
     let mut file = File::open(source).map_err(|e| e.to_string())?;
     let (limits, _) = preflight(&mut file, options)?;
     let mut bytes = Vec::new();
+    bytes
+        .try_reserve_exact(limits.file_bytes)
+        .map_err(|_| "Ogg input allocation failed")?;
     CheckedRead {
         input: BufReader::new(file),
         options,

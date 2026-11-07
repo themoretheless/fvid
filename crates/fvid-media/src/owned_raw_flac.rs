@@ -429,11 +429,7 @@ fn decode_raw_checked(
     }
     Ok(stats)
 }
-pub(crate) fn source_info(source: &Path, options: &CopyOptions) -> Result<Vec<u8>> {
-    let mut inspect_opts = crate::owned_adts_export::pcm_decode_options(options);
-    inspect_opts.max_packets = None;
-    inspect_opts.max_packet_bytes = usize::MAX;
-    let parsed = open(source, &inspect_opts)?;
+fn source_info_from_parsed(parsed: &Flac, options: &CopyOptions) -> Result<Vec<u8>> {
     let info = crate::owned_flac_layout::wave_info_from_extra(parsed.metadata_blocks())?;
     if let Some(max) = options.max_controlled_bytes {
         let wave_meta_bytes =
@@ -443,6 +439,13 @@ pub(crate) fn source_info(source: &Path, options: &CopyOptions) -> Result<Vec<u8
         }
     }
     Ok(info)
+}
+pub(crate) fn source_info(source: &Path, options: &CopyOptions) -> Result<Vec<u8>> {
+    let mut inspect_opts = crate::owned_adts_export::pcm_decode_options(options);
+    inspect_opts.max_packets = None;
+    inspect_opts.max_packet_bytes = usize::MAX;
+    let parsed = open(source, &inspect_opts)?;
+    source_info_from_parsed(&parsed, options)
 }
 pub(crate) fn apply(
     source: &Path,
@@ -459,7 +462,7 @@ pub(crate) fn apply(
         return Err("FLAC stream contains no audible samples".into());
     }
     let (rate, channels, mask) = (parsed.sample_rate, parsed.channels, parsed.channel_mask);
-    let info = source_info(source, options)?;
+    let info = source_info_from_parsed(&parsed, options)?;
     let until = crate::owned_adts_export::decoded_prefix(transform, rate);
     let to = match until {
         Some((_from, at)) => u64::try_from(

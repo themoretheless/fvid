@@ -220,7 +220,11 @@ fn decode(
     let end = until.map_or(input.shape.sample_frames, |n| {
         n.min(input.shape.sample_frames)
     });
-    let mut bytes = vec![0; window * channels];
+    let mut bytes = crate::owned_frame::buffer(window * channels)?;
+    let mut output = Vec::new();
+    output
+        .try_reserve_exact(window * channels * 4)
+        .map_err(|_| "G.711 PCM output allocation failed")?;
     let mut frames = 0;
     let mut event = ProgressEvent {
         packets: 0,
@@ -239,7 +243,10 @@ fn decode(
             hook.emit(event);
         }
         check(options)?;
-        let output: Vec<u8> = samples.iter().flat_map(|s| s.to_le_bytes()).collect();
+        output.clear();
+        for s in &samples {
+            output.extend_from_slice(&s.to_le_bytes());
+        }
         writer.write_all(&output).map_err(|e| e.to_string())?;
         frames += count as u64;
     }

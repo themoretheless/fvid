@@ -238,6 +238,9 @@ pub fn decode_audio_transformed(
     if destination.extension().and_then(|s| s.to_str()) != Some("wav") {
         return Err("owned WAVE export requires .wav output".into());
     }
+    if destination.symlink_metadata().is_ok() {
+        return Err("output already exists".into());
+    }
     if crate::owned_g711_wave_export::recognizes(source,options)? {
         return crate::owned_g711_wave_export::apply(source,destination,transform,options);
     }
@@ -419,13 +422,19 @@ pub fn decode_audio_transformed(
             channels as u16,
             source_info.effective_channel_mask(),
         )?;
+        let mut normalized = Vec::new();
+        if integer.is_some() {
+            normalized
+                .try_reserve_exact(4096 * input.channels as usize * 8)
+                .map_err(|_| "WAVE normalization allocation failed")?;
+        }
         for block in pcm.chunks(4096 * input.channels as usize * input_width) {
             if let Some(hook) = &options.progress {
                 hook.emit(event);
             }
             check()?;
             if let Some(format) = integer {
-                let mut normalized = Vec::with_capacity(block.len() / input_width * 8);
+                normalized.clear();
                 for sample in block.chunks_exact(input_width) {
                     let value = if input_width == 3 {
                         // Packed signed 24-bit PCM is decoded as left-aligned S32.
@@ -496,7 +505,10 @@ pub fn decode_audio_transformed(
         hook.emit(event);
     }
     if let Some(format) = integer {
-        let mut samples = Vec::with_capacity(selected.len() / 8 * format.bytes());
+        let mut samples = Vec::new();
+        samples
+            .try_reserve_exact(selected.len() / 8 * format.bytes())
+            .map_err(|_| "WAVE output allocation failed")?;
         for block in selected.chunks(4096 * channels as usize * 8) {
             check()?;
             for sample in block.chunks_exact(8) {
@@ -519,12 +531,16 @@ pub fn decode_audio_transformed(
             check,
         )?;
     } else if width == 8 {
-        let samples: Vec<_> = selected
-            .chunks_exact(8)
-            .map(|b| f64::from_le_bytes(b.try_into().unwrap()) * gain)
-            .collect();
-        if samples.iter().any(|s| !s.is_finite()) {
-            return Err("PCM gain overflow".into());
+        let mut samples = Vec::new();
+        samples
+            .try_reserve_exact(selected.len() / 8)
+            .map_err(|_| "WAVE output allocation failed")?;
+        for b in selected.chunks_exact(8) {
+            let s = f64::from_le_bytes(b.try_into().unwrap()) * gain;
+            if !s.is_finite() {
+                return Err("PCM gain overflow".into());
+            }
+            samples.push(s);
         }
         crate::owned_wav_file::write_wav_f64le_with_side_data_checked(
             destination,
@@ -536,12 +552,16 @@ pub fn decode_audio_transformed(
             check,
         )?;
     } else {
-        let samples: Vec<_> = selected
-            .chunks_exact(4)
-            .map(|b| f32::from_le_bytes(b.try_into().unwrap()) * gain as f32)
-            .collect();
-        if samples.iter().any(|s| !s.is_finite()) {
-            return Err("PCM gain overflow".into());
+        let mut samples = Vec::new();
+        samples
+            .try_reserve_exact(selected.len() / 4)
+            .map_err(|_| "WAVE output allocation failed")?;
+        for b in selected.chunks_exact(4) {
+            let s = f32::from_le_bytes(b.try_into().unwrap()) * gain as f32;
+            if !s.is_finite() {
+                return Err("PCM gain overflow".into());
+            }
+            samples.push(s);
         }
         crate::owned_wav_file::write_wav_f32le_with_side_data_checked(
             destination,
