@@ -68,15 +68,24 @@ pub fn probe_as_with_options(
         Some(_) => return Err("format has no owned media-library probe yet".into()),
         None => {}
     }
-    if crate::owned_wave_inspect::is_wave(path).map_err(|e| e.to_string())? {
+    let mut signature = [0; 12];
+    let mut signature_file = File::open(path).map_err(|e| e.to_string())?;
+    let mut read = 0usize;
+    while read < signature.len() {
+        match signature_file.read(&mut signature[read..]) {
+            Ok(0) => break,
+            Ok(n) => read += n,
+            Err(e) if e.kind() == std::io::ErrorKind::Interrupted => continue,
+            Err(e) => return Err(e.to_string()),
+        }
+    }
+    if read == 12
+        && matches!(&signature[..4], b"RIFF" | b"RIFX" | b"RF64")
+        && &signature[8..12] == b"WAVE"
+    {
         return probe_wave_with_options(path, options).map_err(|e| e.to_string());
     }
-    let mut signature = [0; 9];
-    let mut signature_file = File::open(path).map_err(|e| e.to_string())?;
-    let read = signature_file
-        .read(&mut signature)
-        .map_err(|e| e.to_string())?;
-    if read == 9 && &signature == b"YUV4MPEG2" {
+    if read >= 9 && &signature[..9] == b"YUV4MPEG2" {
         return crate::owned_y4m_probe::probe_y4m_with_options(path, options);
     }
     if read >= 8 && crate::owned_mp4::recognizes_prefix(&signature[..8]) {
@@ -91,7 +100,7 @@ pub fn probe_as_with_options(
     if read >= 4 && signature.starts_with(b"OggS") {
         return probe_ogg_with_options(path, options);
     }
-    if read >= 4 && crate::owned_mpeg_audio::has_signature(&signature[..read]) {
+    if read >= 4 && crate::owned_mpeg_audio::has_signature(&signature[..read.min(9)]) {
         return crate::owned_mpeg_probe::probe_mpeg_with_options(path, options);
     }
     if read >= 7 && crate::owned_aac::adts::header(&signature[..7]).is_some() {
@@ -300,7 +309,8 @@ pub fn probe_wave_with_options(
         .map_err(|e| std::io::Error::new(std::io::ErrorKind::InvalidData, e))?;
     let mut file = File::open(path)?;
     let law = crate::owned_wave_inspect::g711_law(&mut file, options.cancel.as_ref())?;
-    let wave = crate::owned_wave_inspect::inspect_probe(&mut file)?;
+    let wave =
+        crate::owned_wave_inspect::inspect_probe_with_law(&mut file, options.cancel.as_ref(), law)?;
     if options.max_packet_bytes < usize::from(wave.block) {
         return Err(invalid(
             "packet byte limit is smaller than one PCM sample frame",
@@ -470,10 +480,12 @@ pub fn probe_ogg_with_options(
         return Err("controlled memory limit must be positive".into());
     }
     crate::owned_budget::check_rss_budget(options)?;
-    if !crate::owned_ogg_opus_export::recognizes(path)? {
+    let mut file = File::open(path).map_err(|e| e.to_string())?;
+    let mut sig = [0u8; 4];
+    if file.read_exact(&mut sig).is_err() || &sig != b"OggS" {
         return Err("input does not have an Ogg signature".into());
     }
-    let mut file = File::open(path).map_err(|e| e.to_string())?;
+    file.seek(SeekFrom::Start(0)).map_err(|e| e.to_string())?;
     let (limits, index_estimate) = crate::owned_ogg_opus_export::preflight(&mut file, options)?;
     let mut bytes = Vec::new();
     bytes
@@ -486,6 +498,7 @@ pub fn probe_ogg_with_options(
     .read_to_end(&mut bytes)
     .map_err(|e| e.to_string())?;
     let ogg = crate::owned_ogg::Ogg::parse(&bytes, &limits).map_err(|e| e.to_string())?;
+    drop(bytes);
     if ogg
         .chains()
         .iter()
@@ -534,9 +547,8 @@ pub fn probe_ogg_with_options(
         } else {
             match entry.coding {
                 crate::owned_ogg::Coding::Opus => {
-                    let program = crate::owned_ogg_opus::Program::open_source_track(
-                        std::io::Cursor::new(&bytes),
-                        limits,
+                    let program = crate::owned_ogg_opus::Program::from_ogg_source_track(
+                        ogg.clone(),
                         Some(entry.source_index),
                     )
                     .map_err(|e| e.to_string())?;
@@ -588,9 +600,8 @@ pub fn probe_ogg_with_options(
                             .ok_or("Ogg Vorbis probe admission overflow")?,
                         options,
                     )?;
-                    let program = crate::owned_ogg_vorbis::Program::open_source_track(
-                        std::io::Cursor::new(&bytes),
-                        limits,
+                    let program = crate::owned_ogg_vorbis::Program::from_ogg_source_track(
+                        ogg.clone(),
                         Some(entry.source_index),
                     )
                     .map_err(|e| e.to_string())?;

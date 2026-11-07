@@ -80,9 +80,6 @@ pub fn trim(
     {
         return Err("output already exists".into());
     }
-    if supports(source, destination, options) {
-        return copy_wave(source, destination, Some((from, to)), options).map(|(stats, _)| stats);
-    }
     let transform = fvid_media_info::AudioDecodeTransform {
         interval: Some((from, to)),
         ..Default::default()

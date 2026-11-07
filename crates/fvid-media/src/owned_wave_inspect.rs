@@ -148,7 +148,14 @@ pub fn inspect<R: Read + Seek>(input: &mut R, cancel: Option<&CancelFlag>) -> Re
 /// All chunk extents and audio geometry remain strictly validated.
 pub(crate) fn inspect_probe<R: Read + Seek>(input: &mut R) -> Result<WaveInfo> {
     let law = g711_law(input, None)?;
-    inspect_impl(input, None, false, law)
+    inspect_probe_with_law(input, None, law)
+}
+pub(crate) fn inspect_probe_with_law<R: Read + Seek>(
+    input: &mut R,
+    cancel: Option<&CancelFlag>,
+    law: Option<fvid_codecs::g711::Law>,
+) -> Result<WaveInfo> {
+    inspect_impl(input, cancel, false, law)
 }
 fn inspect_impl<R: Read + Seek>(
     input: &mut R,

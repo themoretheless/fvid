@@ -1,8 +1,8 @@
 {
   "target": 1000,
   "counting_rule": "One independently confirmed problem or useful capability; fixture variants and baseline integration repairs are excluded. Only accepted entries count.",
-  "accepted_count": 739,
-  "next_id": "FVID-0740",
+  "accepted_count": 744,
+  "next_id": "FVID-0745",
   "entries": [
     {
       "id": "FVID-0001",
@@ -8320,6 +8320,61 @@
       "result": "Expose open_selected_ogg and *_from_ogg entrypoints in Ogg Opus, Vorbis, and Joint export modules so the parsed Ogg container and preflight index estimate are reused without re-reading the file.",
       "status": "accepted",
       "validation": "batch-601-validation.json"
+    },
+    {
+      "id": "FVID-0740",
+      "batch": 602,
+      "title": "Reuse the already-parsed Ogg container via Program::from_ogg_source_track and drop raw file bytes early in owned_probe::probe_ogg_with_options",
+      "source": "crates/fvid-media/src/owned_probe.rs",
+      "regression": "tests/probe_and_wave_remux_single_pass.rs",
+      "before": "owned_probe::probe_ogg_with_options opened the source file twice (once in recognizes and once for preflight/read) and then called Program::open_source_track(Cursor::new(&bytes), ...) for every Opus or Vorbis stream, re-parsing Ogg::parse(&bytes, &limits) from scratch for each stream while holding the full raw file buffer in memory.",
+      "result": "Verify the 4-byte OggS signature on the opened File handle, drop the raw file bytes immediately after Ogg::parse, and construct Opus and Vorbis programs via Program::from_ogg_source_track(ogg.clone(), Some(entry.source_index)).",
+      "status": "accepted",
+      "validation": "batch-602-validation.json"
+    },
+    {
+      "id": "FVID-0741",
+      "batch": 602,
+      "title": "Pass the already-evaluated G.711 law and options.cancel into inspect_probe_with_law in owned_probe::probe_wave_with_options",
+      "source": "crates/fvid-media/src/owned_wave_inspect.rs",
+      "regression": "tests/probe_and_wave_remux_single_pass.rs",
+      "before": "owned_probe::probe_wave_with_options called g711_law(&mut file, options.cancel.as_ref()) and then inspect_probe(&mut file), which called g711_law(input, None) a second time and passed None for cancel during inspect_impl.",
+      "result": "Expose inspect_probe_with_law(input, cancel, law) in owned_wave_inspect and call it from probe_wave_with_options so g711_law is evaluated once and options.cancel is honored throughout WAVE header inspection.",
+      "status": "accepted",
+      "validation": "batch-602-validation.json"
+    },
+    {
+      "id": "FVID-0742",
+      "batch": 602,
+      "title": "Reuse source.file_bytes() in owned_flac_probe::probe_flac_with_options and owned_mpeg_probe::probe_mpeg_with_options instead of calling std::fs::metadata(path) a second time",
+      "source": "crates/fvid-media/src/owned_flac_probe.rs",
+      "regression": "tests/probe_and_wave_remux_single_pass.rs",
+      "before": "probe_flac_with_options and probe_mpeg_with_options called std::fs::metadata(path) after owned_raw_flac::open and owned_raw_mp3::open had already queried file.metadata() and stored the exact file byte count in source.file_bytes().",
+      "result": "Use u128::from(source.file_bytes() as u64) directly in probe_flac_with_options and probe_mpeg_with_options.",
+      "status": "accepted",
+      "validation": "batch-602-validation.json"
+    },
+    {
+      "id": "FVID-0743",
+      "batch": 602,
+      "title": "Remove the redundant supports(source, destination, options) header inspection before copy_wave in owned_wave_remux::trim",
+      "source": "crates/fvid-media/src/owned_wave_remux.rs",
+      "regression": "tests/probe_and_wave_remux_single_pass.rs",
+      "before": "owned_wave_remux::trim called supports(source, destination, options) (which opened and inspected the entire WAVE header) and then immediately called copy_wave (which opened and inspected the WAVE header a second time).",
+      "result": "Check !is_wave(source) || owned_g711_wave_export::recognizes(source, options) for non-PCM delegation and call copy_wave once for PCM WAVE inputs.",
+      "status": "accepted",
+      "validation": "batch-602-validation.json"
+    },
+    {
+      "id": "FVID-0744",
+      "batch": 602,
+      "title": "Unify RIFF/RIFX/RF64 WAVE and other container prefix checks into a single 12-byte read in owned_probe::probe_as_with_options",
+      "source": "crates/fvid-media/src/owned_probe.rs",
+      "regression": "tests/probe_and_wave_remux_single_pass.rs",
+      "before": "When format was None, owned_probe::probe_as_with_options opened the source file once inside is_wave(path) to read 12 bytes, and if not WAVE, opened the source file a second time to read 9 signature bytes.",
+      "result": "Read up to 12 signature bytes from a single File::open(path) and dispatch WAVE, Y4M, MP4, WebM/Matroska, FLAC, Ogg, MPEG audio, and ADTS from that single prefix.",
+      "status": "accepted",
+      "validation": "batch-602-validation.json"
     }
   ],
   "pending_count": 0

@@ -57,7 +57,7 @@ pub fn probe_mpeg_with_options(
             i64::try_from(bytes * 8 * u128::from(rate) / u128::from(samples)).ok()
         }
     };
-    let file_bytes = u128::from(std::fs::metadata(path).map_err(|e| e.to_string())?.len());
+    let file_bytes = u128::from(source.file_bytes() as u64);
     let codec = match source.tag {
         LAYER_I => "mp1",
         LAYER_II => "mp2",

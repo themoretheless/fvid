@@ -4416,4 +4416,15 @@ See `batch-600-validation.json`.
 
 See `batch-601-validation.json`.
 
+## Batch 602 — FVID-0740..0744: Single-pass Ogg probe container reuse, single-pass WAVE probe G.711 law and cancellation propagation, reuse `source.file_bytes()` in FLAC/MPEG probes, eliminate redundant WAVE remux `supports` check in `trim`, and single-open unhinted signature probing
+
+- **FVID-0740** — Reuse the already-parsed `Ogg` container via `Program::from_ogg_source_track` and drop raw file `bytes` early in `owned_probe::probe_ogg_with_options` (`crates/fvid-media/src/owned_probe.rs`, `tests/probe_and_wave_remux_single_pass.rs`).
+- **FVID-0741** — Pass the already-evaluated G.711 law and `options.cancel` into `inspect_probe_with_law` in `owned_probe::probe_wave_with_options` instead of scanning the WAVE header a second time (`crates/fvid-media/src/owned_wave_inspect.rs`, `crates/fvid-media/src/owned_probe.rs`, `tests/probe_and_wave_remux_single_pass.rs`).
+- **FVID-0742** — Reuse `source.file_bytes()` in `owned_flac_probe::probe_flac_with_options` and `owned_mpeg_probe::probe_mpeg_with_options` instead of calling `std::fs::metadata(path)` a second time (`crates/fvid-media/src/owned_flac_probe.rs`, `crates/fvid-media/src/owned_mpeg_probe.rs`, `tests/probe_and_wave_remux_single_pass.rs`).
+- **FVID-0743** — Remove the redundant `supports(source, destination, options)` header inspection before `copy_wave` in `owned_wave_remux::trim` (`crates/fvid-media/src/owned_wave_remux.rs`, `tests/probe_and_wave_remux_single_pass.rs`).
+- **FVID-0744** — Unify RIFF/RIFX/RF64 WAVE and other container prefix checks into a single 12-byte read in `owned_probe::probe_as_with_options` (`crates/fvid-media/src/owned_probe.rs`, `tests/probe_and_wave_remux_single_pass.rs`).
+
+See `batch-602-validation.json`.
+
+
 
