@@ -158,11 +158,9 @@ pub fn wave_info_from_extra(extra: &[u8]) -> std::result::Result<Vec<u8>, String
         }
         if let Some((_, value)) = comments
             .iter()
-            .find(|(k, _)| k.eq_ignore_ascii_case(source))
+            .find(|(k, v)| k.eq_ignore_ascii_case(source) && !v.is_empty() && !v.contains('\0'))
         {
-            if !value.contains('\0') {
-                entries.push((target.to_string(), value.clone()));
-            }
+            entries.push((target.to_string(), value.clone()));
         }
     }
     if entries.len() > 64 {

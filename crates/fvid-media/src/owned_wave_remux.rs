@@ -243,7 +243,7 @@ fn copy_waves(
             || current.bits_per_sample != info.bits_per_sample
             || current.valid_bits != info.valid_bits
             || current.float != info.float
-            || current.channel_mask != info.channel_mask
+            || current.effective_channel_mask() != info.effective_channel_mask()
             || current.block != info.block
         {
             return Err("concat WAVE inputs have incompatible PCM formats/layouts".into());

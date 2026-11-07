@@ -133,8 +133,16 @@ impl AviAudioReader {
                     ..Default::default()
                 };
                 match crate::playback_wav::parse_fmt(&stream.setup, &wave_limits) {
-                    Ok((pcm, mask, padding)) if matches!(pcm.coding, crate::playback_wav::Coding::Pcm(_)) =>
-                        (pcm.codec(), mask, padding),
+                    Ok((pcm, mask, padding))
+                        if matches!(
+                            pcm.coding,
+                            crate::playback_wav::Coding::Pcm(_)
+                                | crate::playback_wav::Coding::ALaw
+                                | crate::playback_wav::Coding::MuLaw
+                        ) =>
+                    {
+                        (pcm.codec(), mask, padding)
+                    }
                     Ok(_) | Err(Error::Unsupported(_)) => continue,
                     Err(error) => return Err(error),
                 }

@@ -76,15 +76,7 @@ fn open(path: &Path, options: &CopyOptions) -> Result<(Input, Vec<u8>)> {
     };
     let decoder =
         PcmDecoder::new(format, shape.sample_rate, shape.channels).map_err(|e| e.to_string())?;
-    let mask = if shape.channel_mask != 0 {
-        shape.channel_mask
-    } else {
-        match shape.channels {
-            1 => 4,
-            2 => 3,
-            _ => 0,
-        }
-    };
+    let mask = shape.effective_channel_mask();
     file.seek(SeekFrom::Start(shape.data_offset))
         .map_err(|e| e.to_string())?;
     Ok((

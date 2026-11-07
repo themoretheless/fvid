@@ -1,8 +1,8 @@
 {
   "target": 1000,
   "counting_rule": "One independently confirmed problem or useful capability; fixture variants and baseline integration repairs are excluded. Only accepted entries count.",
-  "accepted_count": 619,
-  "next_id": "FVID-0620",
+  "accepted_count": 624,
+  "next_id": "FVID-0625",
   "entries": [
     {
       "id": "FVID-0001",
@@ -7000,6 +7000,61 @@
       "result": "Validate header.pixel_aspect() and header.full_range() in owned_y4m_probe::try_y4m_with_options and probe_y4m_with_options.",
       "status": "accepted",
       "validation": "batch-577-validation.json"
+    },
+    {
+      "id": "FVID-0620",
+      "batch": 578,
+      "title": "Compare effective_channel_mask() when validating WAVE concat input compatibility",
+      "source": "crates/fvid-media/src/owned_wave_remux.rs",
+      "regression": "tests/wave_remux_g711_avi_and_flac_info.rs",
+      "before": "owned_wave_remux::copy_waves compared raw channel_mask instead of effective_channel_mask(), allowing classic 16-byte fmt stereo/mono files (implicit speaker mask 0x3/0x4, channel_mask == 0) to concatenate with WAVEFORMATEXTENSIBLE DirectOut files (explicit dwChannelMask == 0, unassigned speakers) and silently relabel speaker assignments.",
+      "result": "Compare effective_channel_mask() in owned_wave_remux::copy_waves so classic stereo/mono and WAVEFORMATEXTENSIBLE DirectOut layouts are rejected as incompatible during WAVE concat.",
+      "status": "accepted",
+      "validation": "batch-578-validation.json"
+    },
+    {
+      "id": "FVID-0621",
+      "batch": 578,
+      "title": "Preserve explicit DirectOut zero speaker mask in owned_g711_wave_export via effective_channel_mask()",
+      "source": "crates/fvid-media/src/owned_g711_wave_export.rs",
+      "regression": "tests/wave_remux_g711_avi_and_flac_info.rs",
+      "before": "owned_g711_wave_export::open replaced any zero channel_mask on 1- or 2-channel G.711 WAVE inputs with standard masks 4 (FC) or 3 (FL|FR), ignoring channel_mask_explicit on WAVEFORMATEXTENSIBLE DirectOut G.711 files.",
+      "result": "Use shape.effective_channel_mask() in owned_g711_wave_export::open so WAVEFORMATEXTENSIBLE G.711 inputs with explicit dwChannelMask == 0 retain unassigned channel mask 0.",
+      "status": "accepted",
+      "validation": "batch-578-validation.json"
+    },
+    {
+      "id": "FVID-0622",
+      "batch": 578,
+      "title": "Require wValidBitsPerSample == 8 for WAVEFORMATEXTENSIBLE G.711 in owned_wave_inspect",
+      "source": "crates/fvid-media/src/owned_wave_inspect.rs",
+      "regression": "tests/wave_remux_g711_avi_and_flac_info.rs",
+      "before": "owned_wave_inspect::inspect_impl rewrote the WAVEFORMATEXTENSIBLE G.711 subformat GUID to linear PCM (1) before calling format(), allowing wValidBitsPerSample values 1..=7 on 8-bit G.711 WAVE files.",
+      "result": "Require wValidBitsPerSample == 8 (bytes[18..20] == 8) when inspecting 40-byte WAVEFORMATEXTENSIBLE G.711 fmt chunks in owned_wave_inspect::inspect_impl.",
+      "status": "accepted",
+      "validation": "batch-578-validation.json"
+    },
+    {
+      "id": "FVID-0623",
+      "batch": 578,
+      "title": "Admit WAVEFORMATEXTENSIBLE G.711 (Coding::ALaw and Coding::MuLaw) in AviAudioReader::open_at",
+      "source": "src/playback/audio/avi_audio.rs",
+      "regression": "tests/wave_remux_g711_avi_and_flac_info.rs",
+      "before": "AviAudioReader::open_at only accepted Coding::Pcm(_) when parsing 0xfffe WAVEFORMATEXTENSIBLE strf headers via playback_wav::parse_fmt, skipping valid WAVEFORMATEXTENSIBLE A-law and mu-law AVI audio tracks.",
+      "result": "Match Coding::ALaw and Coding::MuLaw alongside Coding::Pcm(_) for 0xfffe WAVEFORMATEXTENSIBLE audio streams in AviAudioReader::open_at.",
+      "status": "accepted",
+      "validation": "batch-578-validation.json"
+    },
+    {
+      "id": "FVID-0624",
+      "batch": 578,
+      "title": "Skip empty Vorbis comment values when mapping standard FLAC tags to RIFF INFO in wave_info_from_extra",
+      "source": "crates/fvid-media/src/owned_flac_layout.rs",
+      "regression": "tests/wave_remux_g711_avi_and_flac_info.rs",
+      "before": "owned_flac_layout::wave_info_from_extra matched the first Vorbis comment with key source even when its value was empty, emitting empty RIFF INFO tags and blocking fallback aliases such as YEAR -> date when preceded by an empty DATE= field.",
+      "result": "Require !v.is_empty() && !v.contains('\\0') when searching Vorbis comments in owned_flac_layout::wave_info_from_extra.",
+      "status": "accepted",
+      "validation": "batch-578-validation.json"
     }
   ]
 }

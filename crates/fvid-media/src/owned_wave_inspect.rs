@@ -198,6 +198,8 @@ fn inspect_impl<R: Read + Seek>(
                     };
                     if actual != expected
                         || u16::from_le_bytes(bytes[14..16].try_into().unwrap()) != 8
+                        || (size == 40
+                            && u16::from_le_bytes(bytes[18..20].try_into().unwrap()) != 8)
                     {
                         return Err(invalid("G.711 WAVE format disagrees with its code width"));
                     }

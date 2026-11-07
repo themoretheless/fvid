@@ -1,0 +1,29 @@
+{
+  "status": "accepted",
+  "accepted_ids": [
+    "FVID-0620",
+    "FVID-0621",
+    "FVID-0622",
+    "FVID-0623",
+    "FVID-0624"
+  ],
+  "count_delta": 5,
+  "accepted_count": 624,
+  "next_id": "FVID-0625",
+  "qualification": [
+    {
+      "name": "wave-remux-g711-avi-and-flac-info",
+      "command": [
+        "cargo",
+        "test",
+        "--features",
+        "player",
+        "--test",
+        "wave_remux_g711_avi_and_flac_info"
+      ],
+      "exit_code": 0,
+      "passed": 5,
+      "ignored": 0
+    }
+  ]
+}

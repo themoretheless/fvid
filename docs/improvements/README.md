@@ -4176,6 +4176,17 @@ See `batch-576-validation.json`.
 
 See `batch-577-validation.json`.
 
+## Batch 578 — FVID-0620..0624: WAVE `concat` `effective_channel_mask()` validation, `WAVEFORMATEXTENSIBLE` DirectOut and `wValidBitsPerSample` G.711 WAVE handling, `WAVEFORMATEXTENSIBLE` G.711 in `AviAudioReader`, and non-empty FLAC Vorbis comment selection for RIFF `INFO`
+
+- **FVID-0620** — Compare `effective_channel_mask()` when validating WAVE `concat` input compatibility (`crates/fvid-media/src/owned_wave_remux.rs`, `tests/wave_remux_g711_avi_and_flac_info.rs`).
+- **FVID-0621** — Preserve explicit DirectOut zero speaker mask in `owned_g711_wave_export` via `effective_channel_mask()` (`crates/fvid-media/src/owned_g711_wave_export.rs`, `tests/wave_remux_g711_avi_and_flac_info.rs`).
+- **FVID-0622** — Require `wValidBitsPerSample == 8` for `WAVEFORMATEXTENSIBLE` G.711 in `owned_wave_inspect` (`crates/fvid-media/src/owned_wave_inspect.rs`, `tests/wave_remux_g711_avi_and_flac_info.rs`).
+- **FVID-0623** — Admit `WAVEFORMATEXTENSIBLE` G.711 (`Coding::ALaw` and `Coding::MuLaw`) in `AviAudioReader::open_at` (`src/playback/audio/avi_audio.rs`, `tests/wave_remux_g711_avi_and_flac_info.rs`).
+- **FVID-0624** — Skip empty Vorbis comment values when mapping standard FLAC tags to RIFF `INFO` in `wave_info_from_extra` (`crates/fvid-media/src/owned_flac_layout.rs`, `tests/wave_remux_g711_avi_and_flac_info.rs`).
+
+See `batch-578-validation.json`.
+
+
 
 
 
