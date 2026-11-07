@@ -4693,3 +4693,11 @@ See `batch-628-validation.json`.
 - **FVID-0877**: Reuse cached RIFF `INFO` and `MatroskaPcmMetadata` from `merge_geometry_with_options` in `merge_audio_with_controls` (`src/native_audio_mix.rs`).
 - **FVID-0878**: Remove redundant fourth container packet-budget scan in `validate_and_inspect_source_with_options` (`src/native_audio_mix.rs`).
 - **FVID-0879**: Skip duplicate `validate_concat_segments_with_options` pass in `native_plan::concat_mp4_matroska_with_options` when default controls were already validated (`src/native_plan.rs`).
+
+## Batch 630 (FVID-0880..0884)
+
+- **FVID-0880**: Return opened `WebmReader` or `Mp4Reader` from `open_eligible_source` and reuse across `transcode_lossless` and `transcode_ffv1_selected` (`src/native_lossless.rs`, `src/native_lossless_y4m.rs`, `src/native_plan.rs`, `src/native_export.rs`).
+- **FVID-0881**: Forward opened `LosslessSource` into `overlay_video_transformed` without reopening the main container (`src/native_export/overlay.rs`).
+- **FVID-0882**: Build overlay plan stream descriptors directly from `open_eligible_source` in `native_plan::overlay_with_geometry_and_filters` (`src/native_plan.rs`).
+- **FVID-0883**: Construct `MatroskaPcmMetadata` directly from the already-opened `Mp4Reader` in `export_pcm_selected` (`src/native_export.rs`).
+- **FVID-0884**: Skip redundant `decode_audio_with_options` preflight in `native_loudnorm::try_apply` when `cached_info` is already verified with default packet limits (`src/native_loudnorm.rs`).

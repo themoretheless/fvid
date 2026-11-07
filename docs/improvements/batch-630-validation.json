@@ -1,0 +1,15 @@
+{
+  "batch": 630,
+  "ids": [
+    "FVID-0880",
+    "FVID-0881",
+    "FVID-0882",
+    "FVID-0883",
+    "FVID-0884"
+  ],
+  "commands": [
+    "cargo test --test lossless_mp4_overlay_and_pcm_reader_reuse --test y4m_lossless_and_loudness_plan_reuse",
+    "python3 scripts/check_improvements_registry.py"
+  ],
+  "status": "accepted"
+}

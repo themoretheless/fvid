@@ -28,8 +28,15 @@ fn check(cancel: Option<&CancelFlag>) -> Result<()> {
 pub fn eligible(source: &Path) -> Result<bool> {
     Ok(classify_eligible(source)?.is_some())
 }
+pub(crate) enum LosslessSource {
+    Planar(Option<crate::container::webm::WebmReader<BufReader<File>>>),
+    Mp4(Mp4Reader<BufReader<File>>),
+}
 /// Returns `Some(true)` for planar/Matroska lossless sources and `Some(false)` for MP4 lossless sources.
 pub(crate) fn classify_eligible(source: &Path) -> Result<Option<bool>> {
+    Ok(open_eligible_source(source)?.map(|s| matches!(s, LosslessSource::Planar(_))))
+}
+pub(crate) fn open_eligible_source(source: &Path) -> Result<Option<LosslessSource>> {
     use std::io::SeekFrom;
     let mut input = BufReader::new(File::open(source)?);
     let mut prefix = [0; 9];
@@ -38,7 +45,7 @@ pub(crate) fn classify_eligible(source: &Path) -> Result<Option<bool>> {
         || (n >= 4 && prefix[..4] == [0x1a, 0x45, 0xdf, 0xa3])
     {
         input.seek(SeekFrom::Start(0))?;
-        return Ok(crate::native_lossless_y4m::classify_eligible_reader(input, &prefix, n)?.is_some().then_some(true));
+        return Ok(crate::native_lossless_y4m::open_eligible_reader(input, &prefix, n)?.map(LosslessSource::Planar));
     }
     if n < 8 || !crate::container::mp4::recognizes_prefix(&prefix[..8]) {
         return Ok(None);
@@ -52,7 +59,7 @@ pub(crate) fn classify_eligible(source: &Path) -> Result<Option<bool>> {
             .filter(|t| t.handler == *b"vide")
             .count()
             == 1)
-        .then_some(false))
+        .then_some(LosslessSource::Mp4(input)))
 }
 /// Caller owns atomic publication. Progress never reports done before publication.
 pub fn write_mp4<W: Write + Seek>(
@@ -103,13 +110,13 @@ pub fn write_mp4_processed<W: Write + Seek>(
 }
 
 /// Validate first-frame presence, geometry, and filter sample planes on MP4 input without writing output.
-pub(crate) fn validate_first_mp4_frame(
+pub(crate) fn validate_first_mp4_frame_with_reader(
     source: &Path,
+    input: Mp4Reader<BufReader<File>>,
     geometry: &crate::native_geometry::VideoGeometry,
     filters: &crate::native_pixels::PixelFilters,
     processed: bool,
 ) -> Result<()> {
-    let input = Mp4Reader::open(BufReader::new(File::open(source)?), Default::default())?;
     if !mp4_matroska::eligible(&input)
         || input
             .tracks()
@@ -174,11 +181,36 @@ pub fn write_mp4_selected<W: Write + Seek>(
     geometry: &crate::native_geometry::VideoGeometry,
     filters: &crate::native_pixels::PixelFilters,
     cancel: Option<&CancelFlag>, progress: Option<&ProgressHook>,
+    processor: Option<&mut FrameProcessor<'_>>,
+    step: fvid_media::owned_framestep::FrameStep,
+) -> Result<(crate::media_info::LosslessStats, ProgressEvent)> {
+    check(cancel)?;
+    let input = Mp4Reader::open(BufReader::new(File::open(source)?), Default::default())?;
+    write_mp4_selected_with_reader(
+        source,
+        input,
+        output,
+        geometry,
+        filters,
+        cancel,
+        progress,
+        processor,
+        step,
+    )
+}
+
+#[expect(clippy::too_many_arguments, reason = "Internal helper forwarding pre-opened Mp4Reader")]
+pub(crate) fn write_mp4_selected_with_reader<W: Write + Seek>(
+    source: &Path,
+    mut input: Mp4Reader<BufReader<File>>,
+    output: &mut W,
+    geometry: &crate::native_geometry::VideoGeometry,
+    filters: &crate::native_pixels::PixelFilters,
+    cancel: Option<&CancelFlag>, progress: Option<&ProgressHook>,
     mut processor: Option<&mut FrameProcessor<'_>>,
     step: fvid_media::owned_framestep::FrameStep,
 ) -> Result<(crate::media_info::LosslessStats, ProgressEvent)> {
     check(cancel)?;
-    let mut input = Mp4Reader::open(BufReader::new(File::open(source)?), Default::default())?;
     if !mp4_matroska::eligible(&input)
         || input
             .tracks()

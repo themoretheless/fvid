@@ -722,13 +722,13 @@ pub fn try_apply(
     let (selected, cached_info) = native_info.unwrap();
     let mut plan_options = options.clone();
     plan_options.streams = vec![selected];
-    crate::native_plan::decode_audio_with_options(source, &Default::default(), &plan_options)
-        .map_err(|e| crate::invalid(&e))?;
     let info = if options.max_packet_bytes == CopyOptions::default().max_packet_bytes
         && options.max_packets.is_none()
     {
         cached_info
     } else {
+        crate::native_plan::decode_audio_with_options(source, &Default::default(), &plan_options)
+            .map_err(|e| crate::invalid(&e))?;
         crate::native_media::constant_audio_source_info_selected_with_options(
             source,
             Some(selected),

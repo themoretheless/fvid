@@ -1,8 +1,8 @@
 {
   "target": 1000,
   "counting_rule": "One independently confirmed problem or useful capability; fixture variants and baseline integration repairs are excluded. Only accepted entries count.",
-  "accepted_count": 879,
-  "next_id": "FVID-0880",
+  "accepted_count": 884,
+  "next_id": "FVID-0885",
   "entries": [
     {
       "id": "FVID-0001",
@@ -9860,6 +9860,61 @@
       "result": "concat_mp4_matroska_with_options only invokes validate_concat_segments_with_options when non-default stream selection or budget limits are active.",
       "status": "accepted",
       "validation": "batch-629-validation.json"
+    },
+    {
+      "id": "FVID-0880",
+      "batch": 630,
+      "title": "Return opened WebmReader or Mp4Reader from open_eligible_source and reuse across transcode_lossless and transcode_ffv1_selected",
+      "source": "src/native_lossless.rs",
+      "regression": "tests/lossless_mp4_overlay_and_pcm_reader_reuse.rs",
+      "before": "native_plan::transcode_lossless opened MP4 sources 3 times (classify_eligible, validate_first_mp4_frame, and native_probe::probe) and transcode_ffv1_selected opened MP4 sources twice.",
+      "result": "open_eligible_source returns LosslessSource::Planar(Option<WebmReader>) or LosslessSource::Mp4(Mp4Reader), reused by validate_first_mp4_frame_with_reader, write_mp4_selected_with_reader, and stream descriptor construction.",
+      "status": "accepted",
+      "validation": "batch-630-validation.json"
+    },
+    {
+      "id": "FVID-0881",
+      "batch": 630,
+      "title": "Forward opened LosslessSource into overlay_video_transformed without reopening main container",
+      "source": "src/native_export/overlay.rs",
+      "regression": "tests/lossless_mp4_overlay_and_pcm_reader_reuse.rs",
+      "before": "overlay_video_transformed called classify_eligible(main) and then reopened and re-scanned main in write_processed or write_mp4_processed.",
+      "result": "overlay_video_transformed calls open_eligible_source(main) once and passes the opened WebmReader or Mp4Reader to write_selected_with_webm or write_mp4_selected_with_reader.",
+      "status": "accepted",
+      "validation": "batch-630-validation.json"
+    },
+    {
+      "id": "FVID-0882",
+      "batch": 630,
+      "title": "Build overlay plan streams directly from open_eligible_source in native_plan::overlay_with_geometry_and_filters",
+      "source": "src/native_plan.rs",
+      "regression": "tests/lossless_mp4_overlay_and_pcm_reader_reuse.rs",
+      "before": "overlay_with_geometry_and_filters called overlay_eligible(source) and then native_probe::probe(source), opening and scanning Matroska/MP4 inputs twice before pair validation.",
+      "result": "overlay_with_geometry_and_filters calls open_eligible_source(source) once and derives PlanStream descriptors directly from the opened reader.",
+      "status": "accepted",
+      "validation": "batch-630-validation.json"
+    },
+    {
+      "id": "FVID-0883",
+      "batch": 630,
+      "title": "Build Matroska PCM metadata directly from already-opened Mp4Reader in export_pcm_selected",
+      "source": "src/native_export.rs",
+      "regression": "tests/lossless_mp4_overlay_and_pcm_reader_reuse.rs",
+      "before": "When exporting MP4 audio to .mka/.mkv without pre-extracted metadata, export_pcm_selected called extract_source_pcm_metadata_with_interval_packet_and_memory_limit, reopening and re-indexing the MP4 file.",
+      "result": "export_pcm_selected constructs MatroskaPcmMetadata and verifies packet/memory budgets directly from the already-opened mp4 reader.",
+      "status": "accepted",
+      "validation": "batch-630-validation.json"
+    },
+    {
+      "id": "FVID-0884",
+      "batch": 630,
+      "title": "Skip redundant decode_audio_with_options preflight in native_loudnorm::try_apply when cached_info is already verified",
+      "source": "src/native_loudnorm.rs",
+      "regression": "tests/lossless_mp4_overlay_and_pcm_reader_reuse.rs",
+      "before": "native_loudnorm::try_apply called native_plan::decode_audio_with_options unconditionally after constant_audio_source_info_selected_with_options had already validated the stream with default packet limits.",
+      "result": "try_apply reuses cached_info directly when default packet limits are active and only invokes decode_audio_with_options when custom packet limits need validation.",
+      "status": "accepted",
+      "validation": "batch-630-validation.json"
     }
   ],
   "pending_count": 131

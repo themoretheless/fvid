@@ -1472,43 +1472,54 @@ pub fn transcode_lossless(source: &std::path::Path, transform: &crate::media_inf
     if (!crate::native_lossless::supports(transform) && !crate::native_lossless::supports_framestep(transform)) {
         return Err("request is not supported by the owned lossless planner".into());
     }
-    let Some(planar_eligible) = crate::native_lossless::classify_eligible(source).map_err(|e| e.to_string())? else {
+    let Some(lossless_source) = crate::native_lossless::open_eligible_source(source).map_err(|e| e.to_string())? else {
         return Err("request is not supported by the owned lossless planner".into());
     };
     let mut spatial_transform=transform.clone();
     spatial_transform.framestep=None;
     let (geometry,filters)=crate::native_lossless::configuration(&spatial_transform).map_err(|e|e.to_string())?;
-    let streams=if planar_eligible {
-        let webm = crate::native_lossless_y4m::validate_first_frame(source, &geometry, &filters, false)
-            .map_err(|e| e.to_string())?;
-        if let Some(webm) = webm {
-            webm.tracks.iter().enumerate().map(|(index, track)| PlanStream {
-                index,
-                media_type: if track.kind == 1 { "video".into() } else { "audio".into() },
-                codec: match track.codec.as_str() {
-                    "V_MPEG4/ISO/AVC" => "h264",
-                    "V_MPEGH/ISO/HEVC" => "hevc",
-                    "V_VP8" => "vp8",
-                    "V_VP9" => "vp9",
-                    "V_AV1" => "av1",
-                    "V_FFV1" => "ffv1",
-                    "A_AAC" => "aac",
-                    "A_OPUS" => "opus",
-                    other => other,
-                }.into(),
-                disposition: if track.kind == 1 { "primary_video".into() } else { "copy".into() },
-            }).collect()
-        } else {
-            vec![PlanStream {index:0,media_type:"video".into(),codec:"rawvideo".into(),disposition:"primary_video".into()}]
+    let streams=match lossless_source {
+        crate::native_lossless::LosslessSource::Planar(webm) => {
+            let webm = crate::native_lossless_y4m::validate_first_frame_with_webm(source, webm, &geometry, &filters, false)
+                .map_err(|e| e.to_string())?;
+            if let Some(webm) = webm {
+                webm.tracks.iter().enumerate().map(|(index, track)| PlanStream {
+                    index,
+                    media_type: if track.kind == 1 { "video".into() } else { "audio".into() },
+                    codec: match track.codec.as_str() {
+                        "V_MPEG4/ISO/AVC" => "h264",
+                        "V_MPEGH/ISO/HEVC" => "hevc",
+                        "V_VP8" => "vp8",
+                        "V_VP9" => "vp9",
+                        "V_AV1" => "av1",
+                        "V_FFV1" => "ffv1",
+                        "A_AAC" => "aac",
+                        "A_OPUS" => "opus",
+                        other => other,
+                    }.into(),
+                    disposition: if track.kind == 1 { "primary_video".into() } else { "copy".into() },
+                }).collect()
+            } else {
+                vec![PlanStream {index:0,media_type:"video".into(),codec:"rawvideo".into(),disposition:"primary_video".into()}]
+            }
         }
-    } else {
-        crate::native_lossless::validate_first_mp4_frame(source, &geometry, &filters, false)
-            .map_err(|e| e.to_string())?;
-        let info=crate::native_probe::probe(source)?;
-        info.streams.iter().map(|stream| PlanStream {
-            index:stream.index,media_type:stream.media_type.clone(),codec:stream.codec.clone(),
-            disposition:if stream.media_type=="video" {"primary_video"} else {"copy"}.into(),
-        }).collect()
+        crate::native_lossless::LosslessSource::Mp4(mp4) => {
+            let streams = mp4.tracks().iter().enumerate().map(|(index, track)| PlanStream {
+                index,
+                media_type: if track.handler == *b"vide" { "video".into() } else { "audio".into() },
+                codec: match &track.codec {
+                    b"avc1" | b"avc3" => "h264",
+                    b"hvc1" | b"hev1" => "hevc",
+                    b"mp4a" => "aac",
+                    b"alac" => "alac",
+                    _ => "unknown",
+                }.into(),
+                disposition: if track.handler == *b"vide" { "primary_video".into() } else { "copy".into() },
+            }).collect();
+            crate::native_lossless::validate_first_mp4_frame_with_reader(source, mp4, &geometry, &filters, false)
+                .map_err(|e| e.to_string())?;
+            streams
+        }
     };
     let mut steps=vec![PlanStep{action:"decode".into(),detail:"FVid owned demuxer and video decoder; retain supported companion audio packets without audio re-encoding".into()}];
     if !geometry.is_identity() {steps.push(PlanStep{action:"geometry".into(),detail:format!("crop {:?}; horizontal flip {}; vertical flip {}; transpose {:?}; rotate {:?}; pad {:?}; scale {:?}; normalize stored rotation first",geometry.crop,geometry.horizontal_flip,geometry.vertical_flip,geometry.transpose,geometry.rotate,geometry.pad,geometry.scale)});}
@@ -2071,12 +2082,54 @@ pub fn overlay_with_geometry_and_filters(
     geometry: &crate::native_geometry::VideoGeometry,
     filters: &crate::native_pixels::PixelFilters,
 ) -> Result<MediaPlan> {
-    if !crate::native_export::overlay_eligible(source).map_err(|e|e.to_string())? {return Err("owned overlay requires a supported owned lossless main input".into());}
-    let info=crate::native_probe::probe(source)?;
+    let Some(lossless_source) = crate::native_lossless::open_eligible_source(source).map_err(|e| e.to_string())? else {
+        return Err("owned overlay requires a supported owned lossless main input".into());
+    };
+    let streams = match lossless_source {
+        crate::native_lossless::LosslessSource::Planar(Some(webm)) => {
+            webm.tracks.iter().enumerate().map(|(index, track)| PlanStream {
+                index,
+                media_type: if track.kind == 1 { "video".into() } else { "audio".into() },
+                codec: match track.codec.as_str() {
+                    "V_MPEG4/ISO/AVC" => "h264",
+                    "V_MPEGH/ISO/HEVC" => "hevc",
+                    "V_VP8" => "vp8",
+                    "V_VP9" => "vp9",
+                    "V_AV1" => "av1",
+                    "V_FFV1" => "ffv1",
+                    "A_AAC" => "aac",
+                    "A_OPUS" => "opus",
+                    other => other,
+                }.into(),
+                disposition: if track.kind == 1 { "decode_overlay".into() } else { "copy".into() },
+            }).collect()
+        }
+        crate::native_lossless::LosslessSource::Planar(None) => {
+            vec![PlanStream {
+                index: 0,
+                media_type: "video".into(),
+                codec: "rawvideo".into(),
+                disposition: "decode_overlay".into(),
+            }]
+        }
+        crate::native_lossless::LosslessSource::Mp4(mp4) => {
+            mp4.tracks().iter().enumerate().map(|(index, track)| PlanStream {
+                index,
+                media_type: if track.handler == *b"vide" { "video".into() } else { "audio".into() },
+                codec: match &track.codec {
+                    b"avc1" | b"avc3" => "h264",
+                    b"hvc1" | b"hev1" => "hevc",
+                    b"mp4a" => "aac",
+                    b"alac" => "alac",
+                    _ => "unknown",
+                }.into(),
+                disposition: if track.handler == *b"vide" { "decode_overlay".into() } else { "copy".into() },
+            }).collect()
+        }
+    };
     crate::native_export::TimedOverlay::validate_pair_with_geometry_and_filters(source,foreground,x,y,geometry,filters).map_err(|e|e.to_string())?;
     Ok(MediaPlan {command:"overlay".into(),input:source.to_owned(),inputs:vec![source.to_owned(),foreground.to_owned()],
-        streams:info.streams.into_iter().map(|s|PlanStream {index:s.index,media_type:s.media_type.clone(),codec:s.codec,
-            disposition:if s.media_type=="video" {"decode_overlay"}else{"copy"}.into()}).collect(),graph:None,
+        streams,graph:None,
         steps:vec![PlanStep {action:"decode".into(),detail:"owned main and foreground software decoders; normalize stored display transforms".into()},
             PlanStep {action:"overlay".into(),detail:format!("opaque sample-plane overlay at {x},{y}; align first presentation origins; retain latest foreground at each main PTS; hold foreground EOF")},
             PlanStep {action:"encode".into(),detail:"owned lossless FFV1 at main sample depth; preserve main timing and supported AAC/Opus packets".into()},

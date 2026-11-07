@@ -321,7 +321,7 @@ pub fn overlay_video_transformed(
     if destination.symlink_metadata().is_ok() {
         return Err(invalid("overlay destination already exists"));
     }
-    let Some(planar_eligible) = crate::native_lossless::classify_eligible(main)? else {
+    let Some(lossless_source) = crate::native_lossless::open_eligible_source(main)? else {
         return Err(invalid(
             "owned overlay requires a supported owned lossless main input",
         ));
@@ -373,26 +373,34 @@ pub fn overlay_video_transformed(
         compositor.apply(frame, depth, pts, cancel)
     };
     let mut output = BufWriter::new(file);
-    let (stats, event) = if planar_eligible {
-        crate::native_lossless_y4m::write_processed(
-            main,
-            &mut output,
-            geometry,
-            filters,
-            cancel,
-            progress,
-            Some(&mut processor),
-        )?
-    } else {
-        crate::native_lossless::write_mp4_processed(
-            main,
-            &mut output,
-            geometry,
-            filters,
-            cancel,
-            progress,
-            Some(&mut processor),
-        )?
+    let step = fvid_media::owned_framestep::FrameStep::parse("").map_err(|e| invalid(&e))?;
+    let (stats, event) = match lossless_source {
+        crate::native_lossless::LosslessSource::Planar(webm) => {
+            crate::native_lossless_y4m::write_selected_with_webm(
+                main,
+                webm,
+                &mut output,
+                geometry,
+                filters,
+                cancel,
+                progress,
+                Some(&mut processor),
+                step,
+            )?
+        }
+        crate::native_lossless::LosslessSource::Mp4(mp4) => {
+            crate::native_lossless::write_mp4_selected_with_reader(
+                main,
+                mp4,
+                &mut output,
+                geometry,
+                filters,
+                cancel,
+                progress,
+                Some(&mut processor),
+                step,
+            )?
+        }
     };
     output.flush()?;
     output.get_ref().sync_all()?;

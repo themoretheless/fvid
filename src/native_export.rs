@@ -1961,6 +1961,72 @@ fn export_pcm_selected(    source: &Path,
     let matroska_base_metadata = if matroska_output {
         if let Some(meta) = source_matroska_metadata {
             Some(meta)
+        } else if let Some(reader) = &mp4 {
+            let index = if allow_wave {
+                crate::native_media::mp4_audio_index(reader, selected)?
+            } else {
+                crate::native_media::mp4_aac_index(reader, selected)?
+            };
+            let track = &reader.tracks()[index];
+            if let Some(maximum) = max_packet_bytes {
+                let max_samples = crate::native_media::mp4_active_samples(
+                    track,
+                    reader.movie_timescale(),
+                    interval,
+                    options.and_then(|o| o.max_packets),
+                );
+                let exceeds = match &track.samples {
+                    crate::container::mp4::SampleIndex::Expanded(samples) => samples
+                        .iter()
+                        .take(max_samples)
+                        .any(|s| (s.size as usize) > maximum),
+                    crate::container::mp4::SampleIndex::Uniform(uniform) => {
+                        uniform.count > 0
+                            && max_samples > 0
+                            && (uniform.bytes_per_frame as usize) > maximum
+                    }
+                };
+                if exceeds {
+                    return Err(invalid("MP4 packet exceeds budget"));
+                }
+            }
+            let mut base = pcm_matroska::default_matroska_pcm_metadata();
+            base.0.clone_from(&track.name);
+            if !track.language.is_empty()
+                && track.language.len() <= 128
+                && !track.language.contains('\0')
+            {
+                base.1.clone_from(&track.language);
+            }
+            base.2.tags = reader.tags().clone();
+            if !reader.encoder().is_empty()
+                && !reader.encoder().contains('\0')
+                && reader.encoder().len() <= 1024
+            {
+                base.3.insert("ENCODER".into(), reader.encoder().to_owned());
+            }
+            if let Some(mem_limit) = options.and_then(|o| o.max_controlled_bytes) {
+                let mut tag_bytes = base.0.len().saturating_add(base.1.len()).saturating_add(64);
+                for (_, val) in base.2.tags.entries() {
+                    if !val.is_empty() {
+                        tag_bytes = tag_bytes.saturating_add(val.len().saturating_add(32));
+                    }
+                }
+                for (k, v) in &base.3 {
+                    tag_bytes = tag_bytes
+                        .saturating_add(k.len())
+                        .saturating_add(v.len())
+                        .saturating_add(32);
+                }
+                let needed = reader
+                    .estimated_index_payload_bytes()?
+                    .saturating_add(8usize.saturating_mul(tag_bytes.saturating_add(12)))
+                    .saturating_add(16 * 1024);
+                if needed > mem_limit {
+                    return Err(invalid("controlled memory budget exceeded"));
+                }
+            }
+            Some(base)
         } else {
             Some(
                 pcm_matroska::extract_source_pcm_metadata_with_interval_packet_and_memory_limit(
@@ -2607,28 +2673,38 @@ pub fn transcode_ffv1_selected(source:&Path,destination:&Path,
         Some(step) => step,
         None => fvid_media::owned_framestep::FrameStep::parse("").map_err(|e| invalid(&e))?,
     };
-    let (stats,event)=match crate::native_lossless_y4m::open_lossless_source(source) {
-        Ok(webm) => crate::native_lossless_y4m::write_selected_with_webm(
-            source,
-            webm,
-            &mut output,
-            geometry,
-            filters,
-            cancel,
-            progress,
-            None,
-            step,
-        )?,
-        Err(_) => crate::native_lossless::write_mp4_selected(
-            source,
-            &mut output,
-            geometry,
-            filters,
-            cancel,
-            progress,
-            None,
-            step,
-        )?,
+    let (stats, event) = match crate::native_lossless::open_eligible_source(source)? {
+        Some(crate::native_lossless::LosslessSource::Planar(webm)) => {
+            crate::native_lossless_y4m::write_selected_with_webm(
+                source,
+                webm,
+                &mut output,
+                geometry,
+                filters,
+                cancel,
+                progress,
+                None,
+                step,
+            )?
+        }
+        Some(crate::native_lossless::LosslessSource::Mp4(mp4)) => {
+            crate::native_lossless::write_mp4_selected_with_reader(
+                source,
+                mp4,
+                &mut output,
+                geometry,
+                filters,
+                cancel,
+                progress,
+                None,
+                step,
+            )?
+        }
+        None => {
+            return Err(invalid(
+                "owned FFV1 export requires one AVC/HEVC video and supported AAC companion tracks",
+            ));
+        }
     };
     output.flush()?;output.get_ref().sync_all()?;drop(output);
     if cancel.is_some_and(|c|c.is_cancelled()){return Err(invalid("media operation cancelled"));}

@@ -33,20 +33,20 @@ pub(crate) fn classify_eligible(source: &Path) -> Result<Option<bool>> {
     let mut prefix = [0u8; 9];
     let read = input.read(&mut prefix)?;
     input.seek(SeekFrom::Start(0))?;
-    classify_eligible_reader(input, &prefix, read)
+    Ok(open_eligible_reader(input, &prefix, read)?.map(|w| w.is_none()))
 }
-pub(crate) fn classify_eligible_reader(
+pub(crate) fn open_eligible_reader(
     mut input: BufReader<File>,
     prefix: &[u8; 9],
     read: usize,
-) -> Result<Option<bool>> {
+) -> Result<Option<Option<crate::container::webm::WebmReader<BufReader<File>>>>> {
     if read != 9 || prefix != b"YUV4MPEG2" {
         if read < 4 || prefix[..4] != [0x1a, 0x45, 0xdf, 0xa3] {
             return Ok(None);
         }
         let mut input = crate::container::webm::WebmReader::open(input, Default::default())?;
         input.scan_all()?;
-        return Ok(eligible_webm(&input).then_some(false));
+        return Ok(eligible_webm(&input).then_some(Some(input)));
     }
     let mut line = Vec::new();
     crate::line(&mut input, &mut line)?;
@@ -57,7 +57,7 @@ pub(crate) fn classify_eligible_reader(
         .tokens
         .iter()
         .any(|t| matches!(t.as_str(), "C420mpeg2" | "C420paldv")))
-    .then_some(true))
+    .then_some(None))
 }
 fn check(cancel: Option<&CancelFlag>) -> Result<()> {
     if cancel.is_some_and(CancelFlag::is_cancelled) {
@@ -150,13 +150,13 @@ pub(crate) fn open_lossless_source(
 }
 
 /// Validate first-frame presence, geometry, and filter sample planes without writing output.
-pub(crate) fn validate_first_frame(
+pub(crate) fn validate_first_frame_with_webm(
     source: &Path,
+    webm: Option<crate::container::webm::WebmReader<BufReader<File>>>,
     geometry: &VideoGeometry,
     filters: &PixelFilters,
     processed: bool,
 ) -> Result<Option<crate::container::webm::WebmReader<BufReader<File>>>> {
-    let webm = open_lossless_source(source)?;
     let video_index = webm
         .as_ref()
         .and_then(|r| r.tracks.iter().position(|t| t.kind == 1))
