@@ -4496,6 +4496,12 @@ See `batch-608-validation.json`.
 
 See `batch-609-validation.json`.
 
+## Batch 610 — FVID-0780..0784: Single-open audio route & remux prefix classification, cached WAVE concat scan, and direct FFV1 transcode dispatch in `media`
 
+- **FVID-0780** — Reuse a single `File::open` across `native_pcm::is_wave_reader` and the MP4 prefix/constant-description check in `media::uses_native_audio_route` (`src/media.rs`, `tests/media_dispatch_single_open.rs`).
+- **FVID-0781** — Read the 8-byte source prefix once in `media::remux` across `max_packets == Some(0)` validation and container routing (`src/media.rs`, `tests/media_dispatch_single_open.rs`).
+- **FVID-0782** — Classify Matroska, ADTS, and MP4 prefixes in a single `File::open` pass in `media::plan_remux` (`src/media.rs`, `tests/media_dispatch_single_open.rs`).
+- **FVID-0783** — Cache `first_wave` during the `all_wave` scan in `media::plan_concat` instead of reopening `sources.first()` on fallback (`src/media.rs`, `tests/media_dispatch_single_open.rs`).
+- **FVID-0784** — Dispatch directly to owned FFV1 exporters in `media::transcode` instead of repeating option, deband, and eligibility checks via `transcode_lossless` (`src/media.rs`, `tests/media_dispatch_single_open.rs`).
 
-
+See `batch-610-validation.json`.

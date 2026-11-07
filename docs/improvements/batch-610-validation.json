@@ -1,0 +1,15 @@
+{
+  "batch": 610,
+  "ids": [
+    "FVID-0780",
+    "FVID-0781",
+    "FVID-0782",
+    "FVID-0783",
+    "FVID-0784"
+  ],
+  "commands": [
+    "cargo test --test media_dispatch_single_open",
+    "cargo test --test native_plan_lossless_overlay_and_trim_single_pass"
+  ],
+  "status": "accepted"
+}
