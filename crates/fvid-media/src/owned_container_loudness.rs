@@ -161,9 +161,13 @@ pub fn geometry_with_frames_unqualified(
             }
             (0, rate, channels, mask, codec.into(), frames, None)
         } else if head_slice.starts_with(b"OggS") {
-            drop(head_file);
+            head_file
+                .seek(SeekFrom::Start(0))
+                .map_err(|e| e.to_string())?;
             let (index, rate, channels, mask, codec, frames, _) =
-                crate::owned_ogg_audio_export::descriptor_for_decode(source, None, options)?;
+                crate::owned_ogg_audio_export::descriptor_from_file_for_decode(
+                    head_file, None, options,
+                )?;
             let effective_mask = if mask == 0 && channels <= 2 {
                 crate::owned_pcm_channels::standard_mask(channels).unwrap_or(0) as u32
             } else {
@@ -171,9 +175,11 @@ pub fn geometry_with_frames_unqualified(
             };
             (index, rate, channels, effective_mask, codec.into(), frames, None)
         } else if head_slice.starts_with(b"fLaC") {
-            drop(head_file);
+            head_file
+                .seek(SeekFrom::Start(0))
+                .map_err(|e| e.to_string())?;
             let (rate, channels, mask, frames, _) =
-                crate::owned_raw_flac::descriptor_for_decode(source, None, options)?;
+                crate::owned_raw_flac::descriptor_from_file_for_decode(head_file, None, options)?;
             let effective_mask = if mask == 0 && channels <= 2 {
                 crate::owned_pcm_channels::standard_mask(channels).unwrap_or(0) as u32
             } else {
@@ -183,9 +189,11 @@ pub fn geometry_with_frames_unqualified(
         } else if !(head_len >= 7 && crate::owned_aac::adts::header(&head[..7]).is_some())
             && crate::owned_mpeg_audio::has_signature(&head[..head_len.min(10)])
         {
-            drop(head_file);
+            head_file
+                .seek(SeekFrom::Start(0))
+                .map_err(|e| e.to_string())?;
             let (rate, channels, codec, frames, _) =
-                crate::owned_raw_mp3::descriptor_for_decode(source, None, options)?;
+                crate::owned_raw_mp3::descriptor_from_file_for_decode(head_file, None, options)?;
             let mask = crate::owned_pcm_channels::standard_mask(channels).unwrap_or(0) as u32;
             (0, rate, channels, mask, codec.into(), frames, None)
         } else if head[..4] == [0x1a, 0x45, 0xdf, 0xa3] {

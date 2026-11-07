@@ -112,11 +112,48 @@ pub(crate) fn try_descriptor_with_frames_from_file_for_decode(
     transform: Option<AudioDecodeTransform>,
     options: &CopyOptions,
 ) -> Result<Option<(usize, u32, u16, u32, String, bool, u64, Vec<u8>)>> {
+    try_descriptor_with_frames_and_target_from_file_for_decode(source, file, transform, options)
+        .map(|opt| {
+            opt.map(|(index, rate, channels, mask, codec, precise, frames, info, _)| {
+                (index, rate, channels, mask, codec, precise, frames, info)
+            })
+        })
+}
+pub(crate) fn try_descriptor_with_frames_and_target_from_file_for_decode(
+    source: &Path,
+    file: File,
+    transform: Option<AudioDecodeTransform>,
+    options: &CopyOptions,
+) -> Result<
+    Option<(
+        usize,
+        u32,
+        u16,
+        u32,
+        String,
+        bool,
+        u64,
+        Vec<u8>,
+        Option<(u32, u16, u32)>,
+    )>,
+> {
     let reader = open_from_file(file, options)?;
     if !recognizes_reader(&reader, options) {
         return Ok(None);
     }
-    descriptor_with_frames_from_reader_for_decode(source, reader, transform, options).map(Some)
+    let (index, rate, channels, mask, codec, precise, frames, info, mut reader) =
+        descriptor_with_frames_and_reader_from_reader_for_decode(
+            source, reader, transform, options,
+        )?;
+    let target = match transform {
+        Some(transform) => normalization_target_from_reader(
+            &mut reader, index, transform, options, rate, channels, mask,
+        )?,
+        None => None,
+    };
+    Ok(Some((
+        index, rate, channels, mask, codec, precise, frames, info, target,
+    )))
 }
 pub(crate) fn descriptor(
     source: &Path,
@@ -585,6 +622,16 @@ pub(crate) fn try_apply(
     transform: AudioDecodeTransform,
     options: &CopyOptions,
 ) -> Result<Option<AudioDecodeStats>> {
+    let file = File::open(source).map_err(|e| e.to_string())?;
+    try_apply_from_file(source, file, destination, transform, options)
+}
+pub(crate) fn try_apply_from_file(
+    source: &Path,
+    file: File,
+    destination: &Path,
+    transform: AudioDecodeTransform,
+    options: &CopyOptions,
+) -> Result<Option<AudioDecodeStats>> {
     if options.cancel.as_ref().is_some_and(|c| c.is_cancelled()) {
         return Err("media operation cancelled".into());
     }
@@ -598,7 +645,7 @@ pub(crate) fn try_apply(
         return Err("controlled memory limit must be positive".into());
     }
     crate::owned_budget::check_rss_budget(options)?;
-    let reader = open(source, options)?;
+    let reader = open_from_file(file, options)?;
     if !recognizes_reader(&reader, options) {
         return Ok(None);
     }

@@ -185,8 +185,21 @@ fn matroska_selected_reader_and_codec(
         usize,
     )>,
 > {
+    let file = std::fs::File::open(source).map_err(|e| e.to_string())?;
+    matroska_selected_reader_and_codec_from_file(file, options)
+}
+fn matroska_selected_reader_and_codec_from_file(
+    file: std::fs::File,
+    options: &CopyOptions,
+) -> Result<
+    Option<(
+        &'static str,
+        crate::owned_webm::WebmReader<std::io::BufReader<std::fs::File>>,
+        usize,
+    )>,
+> {
     let reader = crate::owned_matroska_audio::open_audio_reader(
-        std::io::BufReader::new(std::fs::File::open(source).map_err(|e| e.to_string())?),
+        std::io::BufReader::new(file),
         options,
         options.max_packet_bytes,
     )
@@ -321,21 +334,45 @@ pub fn decode_audio_transformed(
     if destination.symlink_metadata().is_ok() {
         return Err("output already exists".into());
     }
-    let (head, head_len) = crate::owned_audio_plan::read_source_head(source)?;
+    use std::io::{Read, Seek, SeekFrom};
+    let mut head_file = Some(std::fs::File::open(source).map_err(|e| e.to_string())?);
+    let mut head = [0u8; 12];
+    let mut head_len = 0;
+    while head_len < head.len() {
+        match head_file.as_mut().unwrap().read(&mut head[head_len..]) {
+            Ok(0) => break,
+            Ok(n) => head_len += n,
+            Err(e) if e.kind() == std::io::ErrorKind::Interrupted => continue,
+            Err(e) => return Err(e.to_string()),
+        }
+    }
     let head_slice = &head[..head_len];
     if head_len == 12
         && &head[..4] == b"RIFF"
         && &head[8..12] == b"WAVE"
     {
-        if let Some(stats) =
-            crate::owned_g711_wave_export::try_apply(source, destination, transform, options)?
+        let mut file = head_file.take().unwrap();
+        file.seek(SeekFrom::Start(0)).map_err(|e| e.to_string())?;
+        if let Some(law) =
+            crate::owned_wave_inspect::g711_law(&mut file, options.cancel.as_ref())
+                .map_err(|e| e.to_string())?
         {
-            return Ok(stats);
+            return crate::owned_g711_wave_export::apply_from_file_and_law(
+                file,
+                law,
+                destination,
+                transform,
+                options,
+            );
         }
+        file.seek(SeekFrom::Start(0)).map_err(|e| e.to_string())?;
+        head_file = Some(file);
     }
     if head_slice.starts_with(b"OggS") {
+        let mut file = head_file.take().unwrap();
+        file.seek(SeekFrom::Start(0)).map_err(|e| e.to_string())?;
         let (_, backend, ogg, index) =
-            crate::owned_ogg_audio_export::open_selected_ogg(source, options)?;
+            crate::owned_ogg_audio_export::open_selected_ogg_from_file(file, options)?;
         return match backend {
             crate::owned_ogg_audio_export::Backend::Vorbis => {
                 crate::owned_ogg_vorbis_export::apply_from_ogg(
@@ -367,14 +404,22 @@ pub fn decode_audio_transformed(
         };
     }
     if head_len >= 8 && crate::owned_mp4::recognizes_prefix(&head[..8]) {
-        if let Some(stats) =
-            crate::owned_mp4_audio_export::try_apply(source, destination, transform, options)?
-        {
+        let mut file = head_file.take().unwrap();
+        file.seek(SeekFrom::Start(0)).map_err(|e| e.to_string())?;
+        if let Some(stats) = crate::owned_mp4_audio_export::try_apply_from_file(
+            source,
+            file,
+            destination,
+            transform,
+            options,
+        )? {
             return Ok(stats);
         }
     }
     if head_slice.starts_with(&[0x1a, 0x45, 0xdf, 0xa3]) {
-        match matroska_selected_reader_and_codec(source, options)? {
+        let mut file = head_file.take().unwrap();
+        file.seek(SeekFrom::Start(0)).map_err(|e| e.to_string())?;
+        match matroska_selected_reader_and_codec_from_file(file, options)? {
             Some(("A_PCM/INT/LIT" | "A_PCM/INT/BIG" | "A_PCM/FLOAT/IEEE", reader, index)) => {
                 return crate::owned_matroska_pcm_export::apply_from_reader(
                     source,
@@ -439,14 +484,19 @@ pub fn decode_audio_transformed(
         }
     }
     if head_slice.starts_with(b"fLaC") {
-        return crate::owned_raw_flac::apply(source, destination, transform, options);
+        let mut file = head_file.take().unwrap();
+        file.seek(SeekFrom::Start(0)).map_err(|e| e.to_string())?;
+        return crate::owned_raw_flac::apply_from_file(file, destination, transform, options);
     }
     if !(head_len >= 7 && crate::owned_aac::adts::header(&head[..7]).is_some())
         && crate::owned_mpeg_audio::has_signature(&head[..head_len.min(10)])
     {
-        return crate::owned_raw_mp3::apply(source, destination, transform, options);
+        let mut file = head_file.take().unwrap();
+        file.seek(SeekFrom::Start(0)).map_err(|e| e.to_string())?;
+        return crate::owned_raw_mp3::apply_from_file(file, destination, transform, options);
     }
     if head_len >= 7 && crate::owned_aac::adts::header(&head[..7]).is_some() {
+        drop(head_file.take());
         if !simple_options(options) {
             return Err("ADTS has only stream 0".into());
         }
@@ -477,8 +527,15 @@ pub fn decode_audio_transformed(
     check()?;
     let mut saved_source_info = None;
     let mut saved_info_chunks = Vec::new();
-    let (input, pcm) = crate::owned_audio_mix::read_wave_with_admission(
-        source,
+    let wave_file = match head_file.take() {
+        Some(mut f) => {
+            f.seek(SeekFrom::Start(0)).map_err(|e| e.to_string())?;
+            f
+        }
+        None => std::fs::File::open(source).map_err(|e| e.to_string())?,
+    };
+    let (input, pcm) = crate::owned_audio_mix::read_wave_from_file_with_admission(
+        wave_file,
         None,
         false,
         options.cancel.as_ref(),

@@ -1,8 +1,8 @@
 {
   "target": 1000,
   "counting_rule": "One independently confirmed problem or useful capability; fixture variants and baseline integration repairs are excluded. Only accepted entries count.",
-  "accepted_count": 944,
-  "next_id": "FVID-0945",
+  "accepted_count": 949,
+  "next_id": "FVID-0950",
   "entries": [
     {
       "id": "FVID-0001",
@@ -10575,6 +10575,61 @@
       "result": "Rewound the open File handle to offset 0 and passed it directly into owned_matroska_audio::open_audio_reader in owned_audio_plan and owned_container_loudness.",
       "status": "accepted",
       "validation": "batch-642-validation.json"
+    },
+    {
+      "id": "FVID-0945",
+      "batch": 643,
+      "title": "Reuse the open File handle when inspecting Ogg audio descriptors in owned_audio_plan and owned_container_loudness",
+      "source": "crates/fvid-media/src/owned_ogg_audio_export.rs",
+      "regression": "tests/ogg_flac_mp3_and_export_handle_reuse.rs",
+      "before": "owned_audio_plan::source_descriptor_for_decode and owned_container_loudness::geometry_with_frames_unqualified read the 4-byte OggS capture pattern from an open File handle and then reopened the file in owned_ogg_audio_export::descriptor_for_decode.",
+      "result": "Added open_selected_ogg_from_file and descriptor_from_file_for_decode in owned_ogg_audio_export and reused the rewound File handle in owned_audio_plan and owned_container_loudness.",
+      "status": "accepted",
+      "validation": "batch-643-validation.json"
+    },
+    {
+      "id": "FVID-0946",
+      "batch": 643,
+      "title": "Reuse the open File handle when inspecting and decoding raw FLAC in owned_audio_plan, owned_container_loudness, and owned_audio_export",
+      "source": "crates/fvid-media/src/owned_raw_flac.rs",
+      "regression": "tests/ogg_flac_mp3_and_export_handle_reuse.rs",
+      "before": "owned_audio_plan::source_descriptor_for_decode, owned_container_loudness::geometry_with_frames_unqualified, and owned_audio_export::decode_audio_transformed read the 4-byte fLaC marker from an open File handle and then reopened the file in owned_raw_flac::{descriptor_for_decode, apply}.",
+      "result": "Added open_from_file_with_interval, descriptor_from_file_for_decode, and apply_from_file in owned_raw_flac and reused the rewound File handle across planning, loudness geometry, and export.",
+      "status": "accepted",
+      "validation": "batch-643-validation.json"
+    },
+    {
+      "id": "FVID-0947",
+      "batch": 643,
+      "title": "Reuse the open File handle when inspecting and decoding bare MPEG audio in owned_audio_plan, owned_container_loudness, and owned_audio_export",
+      "source": "crates/fvid-media/src/owned_raw_mp3.rs",
+      "regression": "tests/ogg_flac_mp3_and_export_handle_reuse.rs",
+      "before": "owned_audio_plan::source_descriptor_for_decode, owned_container_loudness::geometry_with_frames_unqualified, and owned_audio_export::decode_audio_transformed read the bare MPEG audio header from an open File handle and then reopened the file in owned_raw_mp3::{descriptor_for_decode, apply}.",
+      "result": "Added open_from_file_with_interval, descriptor_from_file_for_decode, and apply_from_file in owned_raw_mp3 and reused the rewound File handle across planning, loudness geometry, and export.",
+      "status": "accepted",
+      "validation": "batch-643-validation.json"
+    },
+    {
+      "id": "FVID-0948",
+      "batch": 643,
+      "title": "Compute MP4 audio normalization target directly from the open Mp4Reader during plan_decode_audio",
+      "source": "crates/fvid-media/src/owned_mp4_audio_export.rs",
+      "regression": "tests/ogg_flac_mp3_and_export_handle_reuse.rs",
+      "before": "owned_audio_plan::plan_decode_audio_with_descriptor opened and indexed the MP4 container inside source_descriptor_for_decode and then reopened and re-indexed the MP4 file in owned_mp4_audio_export::normalization_target to validate target sample rate and channel conversion.",
+      "result": "Added try_descriptor_with_frames_and_target_from_file_for_decode in owned_mp4_audio_export and stored mp4_target on AudioDescriptor so plan_decode_audio validates normalization targets on the already-open Mp4Reader.",
+      "status": "accepted",
+      "validation": "batch-643-validation.json"
+    },
+    {
+      "id": "FVID-0949",
+      "batch": 643,
+      "title": "Reuse the open File handle across 12-byte header dispatch and format decoders in owned_audio_export::decode_audio_transformed",
+      "source": "crates/fvid-media/src/owned_audio_export.rs",
+      "regression": "tests/ogg_flac_mp3_and_export_handle_reuse.rs",
+      "before": "owned_audio_export::decode_audio_transformed opened source to read the 12-byte magic header via read_source_head and then reopened the file in G.711 WAVE, Ogg, MP4, Matroska, raw FLAC, raw MP3, and PCM WAVE export branches.",
+      "result": "Forwarded the rewound head_file into apply_from_file_and_law, open_selected_ogg_from_file, try_apply_from_file, matroska_selected_reader_and_codec_from_file, apply_from_file, and read_wave_from_file_with_admission.",
+      "status": "accepted",
+      "validation": "batch-643-validation.json"
     }
   ],
   "pending_count": 126

@@ -4798,3 +4798,11 @@ See `batch-628-validation.json`.
 - **FVID-0943**: Reuse the open `File` handle when inspecting G.711 WAVE descriptors in `owned_audio_plan` and `owned_container_loudness` (`crates/fvid-media/src/owned_g711_wave_export.rs`).
 - **FVID-0944**: Reuse the open `File` handle when opening Matroska audio readers in `owned_audio_plan` and `owned_container_loudness` (`crates/fvid-media/src/owned_container_loudness.rs`).
 
+## Batch 643 (FVID-0945..0949)
+
+- **FVID-0945**: Reuse the open `File` handle when inspecting Ogg audio descriptors in `owned_audio_plan` and `owned_container_loudness` (`crates/fvid-media/src/owned_ogg_audio_export.rs`).
+- **FVID-0946**: Reuse the open `File` handle when inspecting and decoding raw FLAC in `owned_audio_plan`, `owned_container_loudness`, and `owned_audio_export` (`crates/fvid-media/src/owned_raw_flac.rs`).
+- **FVID-0947**: Reuse the open `File` handle when inspecting and decoding bare MPEG audio in `owned_audio_plan`, `owned_container_loudness`, and `owned_audio_export` (`crates/fvid-media/src/owned_raw_mp3.rs`).
+- **FVID-0948**: Compute MP4 audio normalization target directly from the open `Mp4Reader` during `plan_decode_audio` (`crates/fvid-media/src/owned_mp4_audio_export.rs`).
+- **FVID-0949**: Reuse the open `File` handle across 12-byte header dispatch and format decoders in `owned_audio_export::decode_audio_transformed` (`crates/fvid-media/src/owned_audio_export.rs`).
+

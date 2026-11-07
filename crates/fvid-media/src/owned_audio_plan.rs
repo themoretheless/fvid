@@ -170,6 +170,7 @@ pub(crate) struct AudioDescriptor {
     stream_index: usize,
     pub(crate) adts: bool,
     pub(crate) mp4: bool,
+    pub(crate) mp4_target: Option<(u32, u16, u32)>,
     pub(crate) is_matroska: bool,
     pub(crate) raw_encoded_audio: bool,
     pub(crate) ogg: bool,
@@ -304,7 +305,7 @@ fn source_descriptor_for_decode(source: &Path, options: &CopyOptions,
     let mp4_desc = if head_len >= 8 && crate::owned_mp4::recognizes_prefix(&head[..8]) {
         let mut file = head_file.take().unwrap();
         file.seek(SeekFrom::Start(0)).map_err(|e| e.to_string())?;
-        crate::owned_mp4_audio_export::try_descriptor_with_frames_from_file_for_decode(
+        crate::owned_mp4_audio_export::try_descriptor_with_frames_and_target_from_file_for_decode(
             source,
             file,
             transform.copied(),
@@ -359,15 +360,17 @@ fn source_descriptor_for_decode(source: &Path, options: &CopyOptions,
     let mut stage2_frames = 1024;
     let mut stage2_meta_bytes = 0;
     let mut stage2_info = None;
+    let mut mp4_target = None;
     let (rate, channels, mask, codec, precision) = if let Some((rate, channels, mask, codec, frames, info_len)) = g711_desc {
         stage2_frames = frames;
         stage2_meta_bytes = info_len;
         (rate, channels, mask, codec.to_owned(), "float32".to_owned())
     } else if ogg {
-        drop(head_file.take());
+        let mut file = head_file.take().unwrap();
+        file.seek(SeekFrom::Start(0)).map_err(|e| e.to_string())?;
         let (index, rate, channels, mask, codec, frames, info_len) =
-            crate::owned_ogg_audio_export::descriptor_for_decode(
-                source,
+            crate::owned_ogg_audio_export::descriptor_from_file_for_decode(
+                file,
                 transform.copied(),
                 options,
             )?;
@@ -375,11 +378,12 @@ fn source_descriptor_for_decode(source: &Path, options: &CopyOptions,
         stage2_frames = frames;
         stage2_meta_bytes = info_len;
         (rate, channels, mask, codec.to_owned(), "float32".to_owned())
-    } else if let Some((index, rate, channels, mask, codec, precise, frames, info)) = mp4_desc {
+    } else if let Some((index, rate, channels, mask, codec, precise, frames, info, target)) = mp4_desc {
         stream_index = index;
         stage2_frames = frames;
         stage2_meta_bytes = info.len();
         stage2_info = Some(info);
+        mp4_target = target;
         let precision = if precise || codec.starts_with("pcm_") {
             "float64"
         } else {
@@ -393,9 +397,14 @@ fn source_descriptor_for_decode(source: &Path, options: &CopyOptions,
         stage2_info = Some(info);
         (rate, channels, mask, codec, precision)
     } else if raw_flac {
-        drop(head_file.take());
+        let mut file = head_file.take().unwrap();
+        file.seek(SeekFrom::Start(0)).map_err(|e| e.to_string())?;
         let (rate, channels, mask, frames, info_len) =
-            crate::owned_raw_flac::descriptor_for_decode(source, transform.copied(), options)?;
+            crate::owned_raw_flac::descriptor_from_file_for_decode(
+                file,
+                transform.copied(),
+                options,
+            )?;
         if let Some(max) = options.max_controlled_bytes {
             let wave_meta_bytes =
                 crate::owned_wave_metadata::wave_metadata_working_bytes(info_len, options)?;
@@ -407,9 +416,14 @@ fn source_descriptor_for_decode(source: &Path, options: &CopyOptions,
         stage2_meta_bytes = info_len;
         (rate, channels, mask, "flac".to_owned(), "float32".to_owned())
     } else if raw_encoded_audio {
-        drop(head_file.take());
+        let mut file = head_file.take().unwrap();
+        file.seek(SeekFrom::Start(0)).map_err(|e| e.to_string())?;
         let (rate, channels, raw_codec, frames, info_len) =
-            crate::owned_raw_mp3::descriptor_for_decode(source, transform.copied(), options)?;
+            crate::owned_raw_mp3::descriptor_from_file_for_decode(
+                file,
+                transform.copied(),
+                options,
+            )?;
         if let Some(max) = options.max_controlled_bytes {
             let wave_meta_bytes =
                 crate::owned_wave_metadata::wave_metadata_working_bytes(info_len, options)?;
@@ -561,7 +575,7 @@ fn source_descriptor_for_decode(source: &Path, options: &CopyOptions,
     };
     Ok(AudioDescriptor {
         rate, channels, mask, codec, precision, stream_index,
-        adts, mp4, is_matroska, raw_encoded_audio, ogg, g711_wave,
+        adts, mp4, mp4_target, is_matroska, raw_encoded_audio, ogg, g711_wave,
         stage2_frames, stage2_meta_bytes, stage2_info,
     })
 }
@@ -598,10 +612,9 @@ pub(crate) fn plan_decode_audio_with_descriptor(
     let descriptor = source_descriptor_for_decode(source, options, Some(transform))?;
     let AudioDescriptor {
         rate, channels, mask, codec, precision, stream_index,
-        adts, mp4, is_matroska, raw_encoded_audio, ogg, g711_wave,
+        adts, mp4, mp4_target, is_matroska, raw_encoded_audio, ogg, g711_wave,
         stage2_frames, stage2_meta_bytes, stage2_info: _,
     } = descriptor.clone();
-    let mp4_target=if mp4 {crate::owned_mp4_audio_export::normalization_target(source,*transform,options,rate,channels,mask)?}else{None};
     let output_channels = transform.channels.unwrap_or(i32::from(channels));
     let aac_fold=mp4_target.is_none()&&codec=="aac"&&output_channels!=i32::from(channels)&&matches!(output_channels,1|2)&&crate::owned_aac_export_routing::router_for_decode(source,rate,channels,Some(*transform),options)?.is_some();
     if mp4_target.is_none() && output_channels != i32::from(channels) && !aac_fold {

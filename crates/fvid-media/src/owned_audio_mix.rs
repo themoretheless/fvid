@@ -408,6 +408,35 @@ pub(crate) fn read_wave_with_admission<F, A>(
     cancel: Option<&fvid_control::CancelFlag>,
     max_packet_bytes: usize,
     max_packets: Option<u64>,
+    admit: A,
+    block: F,
+) -> Result<(AudioDecodeStats, Vec<u8>)>
+where
+    F: FnMut(usize) -> Result<()>,
+    A: FnMut(&mut std::fs::File, &crate::owned_wave_inspect::WaveInfo, usize) -> Result<()>,
+{
+    if cancel.is_some_and(|flag| flag.is_cancelled()) {
+        return Err("media operation cancelled".to_owned());
+    }
+    let file = std::fs::File::open(source).map_err(|e| e.to_string())?;
+    read_wave_from_file_with_admission(
+        file,
+        bits,
+        float_only,
+        cancel,
+        max_packet_bytes,
+        max_packets,
+        admit,
+        block,
+    )
+}
+pub(crate) fn read_wave_from_file_with_admission<F, A>(
+    mut file: std::fs::File,
+    bits: Option<u16>,
+    float_only: bool,
+    cancel: Option<&fvid_control::CancelFlag>,
+    max_packet_bytes: usize,
+    max_packets: Option<u64>,
     mut admit: A,
     mut block: F,
 ) -> Result<(AudioDecodeStats, Vec<u8>)>
@@ -424,7 +453,6 @@ where
     };
     check()?;
     use std::io::{Read, Seek, SeekFrom};
-    let mut file = std::fs::File::open(source).map_err(|e| e.to_string())?;
     let info = crate::owned_wave_inspect::inspect(&mut file, cancel).map_err(|e| e.to_string())?;
     if (float_only && !info.float) || bits.is_some_and(|bits| info.bits_per_sample != bits) {
         return Err(

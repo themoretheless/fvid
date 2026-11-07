@@ -54,7 +54,18 @@ fn open_with_interval(
     if !crate::owned_audio_export::simple_options(options) {
         return Err("raw MP3 has only stream 0".into());
     }
-    let mut file = File::open(source).map_err(|e| e.to_string())?;
+    let file = File::open(source).map_err(|e| e.to_string())?;
+    open_from_file_with_interval(file, window, options)
+}
+fn open_from_file_with_interval(
+    mut file: File,
+    window: Option<(AudioDecodeTransform, Option<(Duration, Duration)>)>,
+    options: &CopyOptions,
+) -> Result<Mp3> {
+    check(options)?;
+    if !crate::owned_audio_export::simple_options(options) {
+        return Err("raw MP3 has only stream 0".into());
+    }
     let size = usize::try_from(file.metadata().map_err(|e| e.to_string())?.len())
         .map_err(|_| "MPEG input size overflow")?;
     let estimated = size
@@ -218,6 +229,25 @@ pub(crate) fn descriptor_for_decode(
     options: &CopyOptions,
 ) -> Result<(u32, u16, &'static str, u64, usize)> {
     let parsed = open_with_transform(source, transform, options)?;
+    descriptor_from_parsed(parsed, transform, options)
+}
+pub(crate) fn descriptor_from_file_for_decode(
+    file: File,
+    transform: Option<AudioDecodeTransform>,
+    options: &CopyOptions,
+) -> Result<(u32, u16, &'static str, u64, usize)> {
+    let parsed = open_from_file_with_interval(
+        file,
+        transform.map(|transform| (transform, None)),
+        options,
+    )?;
+    descriptor_from_parsed(parsed, transform, options)
+}
+fn descriptor_from_parsed(
+    parsed: Mp3,
+    transform: Option<AudioDecodeTransform>,
+    options: &CopyOptions,
+) -> Result<(u32, u16, &'static str, u64, usize)> {
     if parsed.presentation_samples() == 0 {
         return Err("MPEG audio stream contains no audible samples".into());
     }
@@ -549,7 +579,20 @@ pub(crate) fn apply(
     if destination.symlink_metadata().is_ok() {
         return Err("output already exists".into());
     }
-    let parsed = open_with_transform(source, Some(transform), options)?;
+    let file = File::open(source).map_err(|e| e.to_string())?;
+    apply_from_file(file, destination, transform, options)
+}
+pub(crate) fn apply_from_file(
+    file: File,
+    destination: &Path,
+    transform: AudioDecodeTransform,
+    options: &CopyOptions,
+) -> Result<ExportStats> {
+    check(options)?;
+    if destination.symlink_metadata().is_ok() {
+        return Err("output already exists".into());
+    }
+    let parsed = open_from_file_with_interval(file, Some((transform, None)), options)?;
     if parsed.presentation_samples() == 0 {
         return Err("MPEG audio stream contains no audible samples".into());
     }

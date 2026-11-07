@@ -25,7 +25,14 @@ pub(crate) fn open_selected_ogg(
     options: &CopyOptions,
 ) -> Result<(usize, Backend, crate::owned_ogg::Ogg, usize), String> {
     check(options)?;
-    let mut file = File::open(source).map_err(|e| e.to_string())?;
+    let file = File::open(source).map_err(|e| e.to_string())?;
+    open_selected_ogg_from_file(file, options)
+}
+pub(crate) fn open_selected_ogg_from_file(
+    mut file: File,
+    options: &CopyOptions,
+) -> Result<(usize, Backend, crate::owned_ogg::Ogg, usize), String> {
+    check(options)?;
     let (limits, index) = preflight(&mut file, options)?;
     let mut bytes = Vec::new();
     bytes
@@ -83,7 +90,15 @@ pub(crate) fn descriptor_for_decode(
     transform: Option<AudioDecodeTransform>,
     options: &CopyOptions,
 ) -> Result<(usize, u32, u16, u32, &'static str, u64, usize), String> {
-    let (stream_index, backend, ogg, index) = open_selected_ogg(source, options)?;
+    let file = File::open(source).map_err(|e| e.to_string())?;
+    descriptor_from_file_for_decode(file, transform, options)
+}
+pub(crate) fn descriptor_from_file_for_decode(
+    file: File,
+    transform: Option<AudioDecodeTransform>,
+    options: &CopyOptions,
+) -> Result<(usize, u32, u16, u32, &'static str, u64, usize), String> {
+    let (stream_index, backend, ogg, index) = open_selected_ogg_from_file(file, options)?;
     match backend {
         Backend::Opus => {
             let (p, info) = crate::owned_ogg_opus_export::open_from_ogg_with_transform(

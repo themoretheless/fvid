@@ -371,7 +371,16 @@ pub(crate) fn try_apply(
     options: &CopyOptions,
 ) -> Result<Option<AudioDecodeStats>> {
     check(options)?;
-    let mut file = File::open(source).map_err(|e| e.to_string())?;
+    let file = File::open(source).map_err(|e| e.to_string())?;
+    try_apply_from_file(file, destination, transform, options)
+}
+pub(crate) fn try_apply_from_file(
+    mut file: File,
+    destination: &Path,
+    transform: AudioDecodeTransform,
+    options: &CopyOptions,
+) -> Result<Option<AudioDecodeStats>> {
+    check(options)?;
     let Some(law) = crate::owned_wave_inspect::g711_law(&mut file, options.cancel.as_ref())
         .map_err(|e| e.to_string())?
     else {
@@ -382,6 +391,20 @@ pub(crate) fn try_apply(
     }
     let (input, info) = open_from_file_and_law(file, law, options)?;
     apply_input(input, info, destination, transform, options).map(Some)
+}
+pub(crate) fn apply_from_file_and_law(
+    file: File,
+    law: fvid_codecs::g711::Law,
+    destination: &Path,
+    transform: AudioDecodeTransform,
+    options: &CopyOptions,
+) -> Result<AudioDecodeStats> {
+    check(options)?;
+    if destination.symlink_metadata().is_ok() {
+        return Err("destination already exists".into());
+    }
+    let (input, info) = open_from_file_and_law(file, law, options)?;
+    apply_input(input, info, destination, transform, options)
 }
 fn apply_input(
     mut input: Input,
