@@ -1,8 +1,8 @@
 {
   "target": 1000,
   "counting_rule": "One independently confirmed problem or useful capability; fixture variants and baseline integration repairs are excluded. Only accepted entries count.",
-  "accepted_count": 774,
-  "next_id": "FVID-0775",
+  "accepted_count": 779,
+  "next_id": "FVID-0780",
   "entries": [
     {
       "id": "FVID-0001",
@@ -8705,6 +8705,61 @@
       "result": "Capture native_info = Some((idx, info)) during admission and reuse both selected and cached_info when packet budgets match defaults.",
       "status": "accepted",
       "validation": "batch-608-validation.json"
+    },
+    {
+      "id": "FVID-0775",
+      "batch": 609,
+      "title": "Cache planar_eligible in native_plan::transcode_lossless instead of calling native_lossless_y4m::eligible twice",
+      "source": "src/native_plan.rs",
+      "regression": "tests/native_plan_lossless_overlay_and_trim_single_pass.rs",
+      "before": "native_plan::transcode_lossless called native_lossless::eligible(source) (which called native_lossless_y4m::eligible(source)) and then called native_lossless_y4m::eligible(source) a second time to dispatch between validate_first_frame and validate_first_mp4_frame.",
+      "result": "Compute planar_eligible = crate::native_lossless_y4m::eligible(source)? once and reuse it to dispatch first-frame validation.",
+      "status": "accepted",
+      "validation": "batch-609-validation.json"
+    },
+    {
+      "id": "FVID-0776",
+      "batch": 609,
+      "title": "Cache constant_audio_source_info_selected_with_options in native_plan::loudness_with_options",
+      "source": "src/native_plan.rs",
+      "regression": "tests/native_plan_lossless_overlay_and_trim_single_pass.rs",
+      "before": "native_plan::loudness_with_options called constant_audio_source_info_selected_with_options(source, selected, options) twice when max_controlled_bytes.is_none() and !wave.",
+      "result": "Cache cached_native_info once and reuse it both to select decode_audio_with_options and to extract (sample_rate, channels).",
+      "status": "accepted",
+      "validation": "batch-609-validation.json"
+    },
+    {
+      "id": "FVID-0777",
+      "batch": 609,
+      "title": "Remove redundant foreground probe(foreground) calls in native_plan::overlay_with_geometry_and_filters and decode_overlay_with_geometry_and_filters",
+      "source": "src/native_plan.rs",
+      "regression": "tests/native_plan_lossless_overlay_and_trim_single_pass.rs",
+      "before": "overlay_with_geometry_and_filters and decode_overlay_with_geometry_and_filters called native_probe::probe(foreground) before calling TimedOverlay::validate_pair_with_geometry_and_filters, which immediately called Source::open(foreground) and ran native_probe::probe(foreground) a second time.",
+      "result": "Delegate foreground video-track count validation to TimedOverlay::validate_pair_with_geometry_and_filters so foreground is probed once.",
+      "status": "accepted",
+      "validation": "batch-609-validation.json"
+    },
+    {
+      "id": "FVID-0778",
+      "batch": 609,
+      "title": "Eliminate duplicate audio_stream_index_from_metadata and constant_audio_source_info_selected_with_interval_and_options calls in native_export::trim_audio_pcm_with_controls",
+      "source": "src/native_export.rs",
+      "regression": "tests/native_plan_lossless_overlay_and_trim_single_pass.rs",
+      "before": "trim_audio_pcm_with_controls called is_aac_trim_source_with_interval_and_options and then called aac_trim_selection_with_interval_and_options or audio_trim_selection_with_interval_and_options, inspecting the container index and stream setup twice.",
+      "result": "Resolve index via audio_stream_index_from_metadata once and inspect constant_audio_source_info_selected_with_interval_and_options once to determine allow_wave = info.codec != \"aac\".",
+      "status": "accepted",
+      "validation": "batch-609-validation.json"
+    },
+    {
+      "id": "FVID-0779",
+      "batch": 609,
+      "title": "Eliminate duplicate container inspection for non-AAC sources in native_plan::trim_audio_with_options",
+      "source": "src/native_plan.rs",
+      "regression": "tests/native_plan_lossless_overlay_and_trim_single_pass.rs",
+      "before": "native_plan::trim_audio_with_options called is_aac_trim_source_with_interval_and_options (which inspected constant_audio_source_info_selected_with_interval_and_options when selected.is_some()) and then called audio_trim_selection_with_interval_and_options which inspected it a second time.",
+      "result": "Resolve index via audio_stream_index_from_metadata and inspect constant_audio_source_info_selected_with_interval_and_options once before branching to trim_aac_with_options when info.codec == \"aac\".",
+      "status": "accepted",
+      "validation": "batch-609-validation.json"
     }
   ],
   "pending_count": 0

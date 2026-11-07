@@ -2316,11 +2316,23 @@ pub fn trim_audio_pcm_with_controls(
         std::time::Duration::from_micros(from as u64),
         std::time::Duration::from_micros(to as u64),
     );
-    let (index, allow_wave) = if crate::native_media::is_aac_trim_source_with_interval_and_options(source, selected, Some(interval), options)? {
-        (crate::native_plan::aac_trim_selection_with_interval_and_options(source, selected, Some(interval), options).map_err(|e| invalid(&e))?, false)
-    } else {
-        (crate::native_plan::audio_trim_selection_with_interval_and_options(source, selected, Some(interval), options).map_err(|e| invalid(&e))?, true)
-    };
+    let index = crate::native_plan::audio_stream_index_from_metadata(source, selected, options)
+        .map_err(|e| invalid(&e))?;
+    let info = crate::native_media::constant_audio_source_info_selected_with_interval_and_options(
+        source,
+        Some(index),
+        Some(interval),
+        options,
+    )?;
+    let allow_wave = info.codec != "aac";
+    if !allow_wave {
+        crate::native_media::aac_source_info_selected_with_options(
+            source,
+            Some(index),
+            Some(interval),
+            options,
+        )?;
+    }
     export_pcm_selected(
         source,
         destination,

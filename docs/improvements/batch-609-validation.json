@@ -1,0 +1,15 @@
+{
+  "batch": 609,
+  "ids": [
+    "FVID-0775",
+    "FVID-0776",
+    "FVID-0777",
+    "FVID-0778",
+    "FVID-0779"
+  ],
+  "commands": [
+    "cargo test --test native_plan_lossless_overlay_and_trim_single_pass",
+    "cargo test --test normalize_wave_info_and_plan_single_open"
+  ],
+  "status": "accepted"
+}

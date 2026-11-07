@@ -4486,5 +4486,16 @@ See `batch-607-validation.json`.
 
 See `batch-608-validation.json`.
 
+## Batch 609 — FVID-0775..0779: Single-pass lossless/overlay planning, cached loudness source info, and single-pass audio trim selection in `native_plan` and `native_export`
+
+- **FVID-0775** — Cache `planar_eligible` in `native_plan::transcode_lossless` instead of calling `native_lossless_y4m::eligible` twice (`src/native_plan.rs`, `tests/native_plan_lossless_overlay_and_trim_single_pass.rs`).
+- **FVID-0776** — Cache `constant_audio_source_info_selected_with_options` in `native_plan::loudness_with_options` (`src/native_plan.rs`, `tests/native_plan_lossless_overlay_and_trim_single_pass.rs`).
+- **FVID-0777** — Remove redundant `probe(foreground)` calls in `native_plan::overlay_with_geometry_and_filters` and `decode_overlay_with_geometry_and_filters` (`src/native_plan.rs`, `tests/native_plan_lossless_overlay_and_trim_single_pass.rs`).
+- **FVID-0778** — Eliminate duplicate `audio_stream_index_from_metadata` and `constant_audio_source_info_selected_with_interval_and_options` calls in `native_export::trim_audio_pcm_with_controls` (`src/native_export.rs`, `tests/native_plan_lossless_overlay_and_trim_single_pass.rs`).
+- **FVID-0779** — Eliminate duplicate container inspection for non-AAC sources in `native_plan::trim_audio_with_options` (`src/native_plan.rs`, `tests/native_plan_lossless_overlay_and_trim_single_pass.rs`).
+
+See `batch-609-validation.json`.
+
+
 
 

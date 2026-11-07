@@ -1100,10 +1100,17 @@ pub fn trim_audio_with_options(
             std::time::Duration::from_micros(to as u64),
         )
     });
-    if crate::native_media::is_aac_trim_source_with_interval_and_options(source, selected, interval, options).map_err(|e| e.to_string())? {
+    let index = audio_stream_index_from_metadata(source, selected, options)?;
+    let info = crate::native_media::constant_audio_source_info_selected_with_interval_and_options(
+        source,
+        Some(index),
+        interval,
+        options,
+    )
+    .map_err(|e| e.to_string())?;
+    if info.codec == "aac" {
         return trim_aac_with_options(source, from, to, options);
     }
-    let index = audio_trim_selection_with_interval_and_options(source, selected, interval, options)?;
     let mut scoped = options.clone();
     scoped.streams = vec![index];
     let mut plan = decode_audio_with_options(source, &AudioDecodeTransform {
@@ -1389,14 +1396,17 @@ pub fn transcode_lossless(source: &std::path::Path, transform: &crate::media_inf
         for step in spatial.steps.iter().filter(|s|s.action=="filter") {plan.steps.insert(index,step.clone());index+=1;}
         plan.command="transcode-lossless".into();return Ok(plan);
     }
-    if (!crate::native_lossless::supports(transform) && !crate::native_lossless::supports_framestep(transform))
-        || !crate::native_lossless::eligible(source).map_err(|e|e.to_string())? {
+    if (!crate::native_lossless::supports(transform) && !crate::native_lossless::supports_framestep(transform)) {
+        return Err("request is not supported by the owned lossless planner".into());
+    }
+    let planar_eligible = crate::native_lossless_y4m::eligible(source).map_err(|e| e.to_string())?;
+    if !planar_eligible && !crate::native_lossless::eligible(source).map_err(|e| e.to_string())? {
         return Err("request is not supported by the owned lossless planner".into());
     }
     let mut spatial_transform=transform.clone();
     spatial_transform.framestep=None;
     let (geometry,filters)=crate::native_lossless::configuration(&spatial_transform).map_err(|e|e.to_string())?;
-    if crate::native_lossless_y4m::eligible(source).map_err(|e|e.to_string())? {
+    if planar_eligible {
         crate::native_lossless_y4m::validate_first_frame(source, &geometry, &filters, false)
             .map_err(|e| e.to_string())?;
     } else {
@@ -1476,9 +1486,13 @@ pub fn loudness_with_options(
     }
     let selected = options.streams.first().copied();
     let wave = crate::native_pcm::is_wave(source).map_err(|e| e.to_string())?;
+    let cached_native_info = if !wave && options.max_controlled_bytes.is_none() {
+        crate::native_media::constant_audio_source_info_selected_with_options(source, selected, options).ok()
+    } else {
+        None
+    };
     let mut plan = if options.max_controlled_bytes.is_none()
-        && (wave
-            || crate::native_media::constant_audio_source_info_selected_with_options(source, selected, options).is_ok())
+        && (wave || cached_native_info.is_some())
     {
         decode_audio_with_options(source, &Default::default(), options)?
     } else {
@@ -1529,9 +1543,7 @@ pub fn loudness_with_options(
             }
         }
         (info.sample_rate,info.channels)
-    } else if options.max_controlled_bytes.is_none()
-        && let Ok(info) = crate::native_media::constant_audio_source_info_selected_with_options(source, selected, options)
-    {
+    } else if let Some(info) = cached_native_info {
         if options.max_packet_bytes != fvid_media::CopyOptions::default().max_packet_bytes {
             validate_encoded_audio_packet_budget(source, info.stream_index, None, options)?;
         }
@@ -1922,8 +1934,7 @@ pub fn overlay_with_geometry_and_filters(
     filters: &crate::native_pixels::PixelFilters,
 ) -> Result<MediaPlan> {
     if !crate::native_export::overlay_eligible(source).map_err(|e|e.to_string())? {return Err("owned overlay requires a supported owned lossless main input".into());}
-    let info=crate::native_probe::probe(source)?;let second=crate::native_probe::probe(foreground)?;
-    if second.streams.iter().filter(|s|s.media_type=="video").count()!=1 {return Err("foreground requires exactly one video track".into());}
+    let info=crate::native_probe::probe(source)?;
     crate::native_export::TimedOverlay::validate_pair_with_geometry_and_filters(source,foreground,x,y,geometry,filters).map_err(|e|e.to_string())?;
     Ok(MediaPlan {command:"overlay".into(),input:source.to_owned(),inputs:vec![source.to_owned(),foreground.to_owned()],
         streams:info.streams.into_iter().map(|s|PlanStream {index:s.index,media_type:s.media_type.clone(),codec:s.codec,
@@ -1954,12 +1965,17 @@ pub fn decode_overlay_with_geometry_and_filters(
     filters: &crate::native_pixels::PixelFilters,
 ) -> Result<MediaPlan> {
     let info = crate::native_probe::probe(source)?;
-    let second = crate::native_probe::probe(foreground)?;
-    if !info.streams.iter().any(|s| s.media_type == "video")
-        || second.streams.iter().filter(|s| s.media_type == "video").count() != 1 {
+    if !info.streams.iter().any(|s| s.media_type == "video") {
         return Err("decode overlay requires main video and exactly one foreground video track".into());
     }
-    crate::native_export::TimedOverlay::validate_pair_with_geometry_and_filters(source, foreground, x, y, geometry, filters).map_err(|e| e.to_string())?;
+    crate::native_export::TimedOverlay::validate_pair_with_geometry_and_filters(source, foreground, x, y, geometry, filters).map_err(|e| {
+        let msg = e.to_string();
+        if msg == "foreground requires exactly one video track" {
+            "decode overlay requires main video and exactly one foreground video track".into()
+        } else {
+            msg
+        }
+    })?;
     Ok(MediaPlan {
         command: "decode".into(), input: source.to_owned(), inputs: vec![source.to_owned(), foreground.to_owned()],
         streams: info.streams.into_iter().map(|s| PlanStream { index: s.index, media_type: s.media_type.clone(), codec: s.codec,
