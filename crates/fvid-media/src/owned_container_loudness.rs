@@ -27,22 +27,31 @@ pub fn recognizes_standalone_audio_with_options(
         return Err("controlled memory limit must be positive".into());
     }
     crate::owned_budget::check_rss_budget(options)?;
-    let mut prefix = [0; 4];
-    let mut file = File::open(source).map_err(|e| e.to_string())?;
-    if file.read_exact(&mut prefix).is_err() {
+    let (head, head_len) = crate::owned_audio_plan::read_source_head(source)?;
+    recognizes_standalone_from_head(source, &head, head_len, options)
+}
+
+fn recognizes_standalone_from_head(
+    source: &Path,
+    head: &[u8; 12],
+    head_len: usize,
+    options: &CopyOptions,
+) -> Result<bool> {
+    if head_len < 4 {
         return Ok(false);
     }
-    if &prefix == b"OggS" || &prefix == b"fLaC" {
+    if &head[..4] == b"OggS" || &head[..4] == b"fLaC" {
         return Ok(true);
     }
-    if matches!(&prefix, b"RIFF" | b"RIFX" | b"RF64") {
+    if matches!(&head[..4], b"RIFF" | b"RIFX" | b"RF64") {
         return crate::owned_g711_wave_export::recognizes(source, options);
     }
-    if crate::owned_adts_export::recognizes(source)? {
+    if head_len >= 7 && crate::owned_aac::adts::header(&head[..7]).is_some() {
         return Ok(false);
     }
-    crate::owned_raw_mp3::recognizes(source)
+    Ok(crate::owned_mpeg_audio::has_signature(&head[..head_len.min(10)]))
 }
+
 pub(crate) fn recognizes(source: &Path) -> Result<bool> {
     recognizes_with_options(source, &Default::default())
 }
@@ -60,18 +69,16 @@ pub(crate) fn recognizes_with_options(source: &Path, options: &CopyOptions) -> R
         return Err("controlled memory limit must be positive".into());
     }
     crate::owned_budget::check_rss_budget(options)?;
-    let mut prefix = [0; 10];
-    let mut file = File::open(source).map_err(|e| e.to_string())?;
-    let count = file.read(&mut prefix).map_err(|e| e.to_string())?;
-    if count < 4 {
+    let (head, head_len) = crate::owned_audio_plan::read_source_head(source)?;
+    if head_len < 4 {
         return Ok(false);
     }
-    if prefix[..4] == [0x1a, 0x45, 0xdf, 0xa3]
-        || (count >= 8 && crate::owned_mp4::recognizes_prefix(&prefix[..8]))
+    if head[..4] == [0x1a, 0x45, 0xdf, 0xa3]
+        || (head_len >= 8 && crate::owned_mp4::recognizes_prefix(&head[..8]))
     {
         return Ok(true);
     }
-    recognizes_standalone_audio_with_options(source, options)
+    recognizes_standalone_from_head(source, &head, head_len, options)
 }
 fn geometry_unqualified(source: &Path, options: &CopyOptions) -> Result<(u32, u16, u32, String)> {
     if options.cancel.as_ref().is_some_and(|c| c.is_cancelled()) {
@@ -97,20 +104,28 @@ fn geometry_unqualified(source: &Path, options: &CopyOptions) -> Result<(u32, u1
             "owned container loudness requires one audio stream and no metadata edits".into(),
         );
     }
-    if !recognizes_with_options(source, options)? {
+    let (head, head_len) = crate::owned_audio_plan::read_source_head(source)?;
+    if head_len < 4 {
         return Err("source is not an owned audio container".into());
     }
+    let head_slice = &head[..head_len];
     let (_, rate, channels, mask, codec) =
-        if crate::owned_mp4_audio_export::recognizes(source, options)? {
+        if head_len >= 8 && crate::owned_mp4::recognizes_prefix(&head[..8]) {
+            if !crate::owned_mp4_audio_export::recognizes(source, options)? {
+                return Err("source is not a supported Matroska audio container".into());
+            }
             crate::owned_mp4_audio_export::descriptor(source, options)?
-        } else if crate::owned_g711_wave_export::recognizes(source, options)? {
+        } else if matches!(&head[..4], b"RIFF" | b"RIFX" | b"RF64") {
+            if !crate::owned_g711_wave_export::recognizes(source, options)? {
+                return Err("source is not an owned audio container".into());
+            }
             let (rate, channels, mask, codec, frames) =
                 crate::owned_g711_wave_export::descriptor(source, options)?;
             if frames == 0 {
                 return Err("loudness requires at least one audio frame".into());
             }
             (0, rate, channels, mask, codec.into())
-        } else if crate::owned_ogg_opus_export::recognizes(source)? {
+        } else if head_slice.starts_with(b"OggS") {
             let (index, rate, channels, mask, codec) =
                 crate::owned_ogg_audio_export::descriptor(source, options)?;
             let effective_mask = if mask == 0 && channels <= 2 {
@@ -119,7 +134,7 @@ fn geometry_unqualified(source: &Path, options: &CopyOptions) -> Result<(u32, u1
                 mask
             };
             (index, rate, channels, effective_mask, codec.into())
-        } else if crate::owned_raw_flac::recognizes(source)? {
+        } else if head_slice.starts_with(b"fLaC") {
             let (rate, channels, mask) = crate::owned_raw_flac::descriptor(source, options)?;
             let effective_mask = if mask == 0 && channels <= 2 {
                 crate::owned_pcm_channels::standard_mask(channels).unwrap_or(0) as u32
@@ -127,15 +142,19 @@ fn geometry_unqualified(source: &Path, options: &CopyOptions) -> Result<(u32, u1
                 mask
             };
             (0, rate, channels, effective_mask, "flac".into())
-        } else if crate::owned_raw_mp3::recognizes(source)? {
+        } else if !(head_len >= 7 && crate::owned_aac::adts::header(&head[..7]).is_some())
+            && crate::owned_mpeg_audio::has_signature(&head[..head_len.min(10)])
+        {
             let (rate, channels, codec) = crate::owned_raw_mp3::descriptor(source, options)?;
             let mask = crate::owned_pcm_channels::standard_mask(channels).unwrap_or(0) as u32;
             (0, rate, channels, mask, codec.into())
-        } else {
+        } else if head[..4] == [0x1a, 0x45, 0xdf, 0xa3] {
             let (index, rate, channels, mask, codec, _) =
                 crate::owned_audio_plan::matroska_descriptor(source, options)?
                     .ok_or("source is not a supported Matroska audio container")?;
             (index, rate, channels, mask, codec)
+        } else {
+            return Err("source is not an owned audio container".into());
         };
     Ok((rate, channels, mask, codec))
 }
@@ -197,10 +216,16 @@ pub(crate) fn decode_to_wave_from_geometry(
     codec: &str,
     options: &CopyOptions,
 ) -> Result<crate::owned_adts_export::DecodedSpool> {
-    if crate::owned_g711_wave_export::recognizes(source, options)? {
+    let (head, head_len) = crate::owned_audio_plan::read_source_head(source)?;
+    let head_slice = &head[..head_len];
+    if head_len == 12
+        && &head[..4] == b"RIFF"
+        && &head[8..12] == b"WAVE"
+        && crate::owned_g711_wave_export::recognizes(source, options)?
+    {
         return crate::owned_g711_wave_export::decode_to_wave(source, options);
     }
-    if crate::owned_ogg_opus_export::recognizes(source)? {
+    if head_slice.starts_with(b"OggS") {
         let (_, backend, ogg, index) =
             crate::owned_ogg_audio_export::open_selected_ogg(source, options)?;
         return match backend {
@@ -215,13 +240,17 @@ pub(crate) fn decode_to_wave_from_geometry(
             }
         };
     }
-    if crate::owned_raw_flac::recognizes(source)? {
+    if head_slice.starts_with(b"fLaC") {
         return crate::owned_raw_flac::decode_to_wave(source, rate, channels, mask, options);
     }
-    if crate::owned_raw_mp3::recognizes(source)? {
+    if !(head_len >= 7 && crate::owned_aac::adts::header(&head[..7]).is_some())
+        && crate::owned_mpeg_audio::has_signature(&head[..head_len.min(10)])
+    {
         return crate::owned_raw_mp3::decode_to_wave(source, rate, channels, mask, options);
     }
-    let mp4 = crate::owned_mp4_audio_export::recognizes(source, options)?;
+    let mp4 = head_len >= 8
+        && crate::owned_mp4::recognizes_prefix(&head[..8])
+        && crate::owned_mp4_audio_export::recognizes(source, options)?;
     let info = if mp4 {
         crate::owned_wave_metadata::mp4_source_info(source, options)?
     } else {

@@ -1,8 +1,8 @@
 {
   "target": 1000,
   "counting_rule": "One independently confirmed problem or useful capability; fixture variants and baseline integration repairs are excluded. Only accepted entries count.",
-  "accepted_count": 804,
-  "next_id": "FVID-0805",
+  "accepted_count": 809,
+  "next_id": "FVID-0810",
   "entries": [
     {
       "id": "FVID-0001",
@@ -9035,7 +9035,62 @@
       "result": "decode_audio_transformed reads the 12-byte prefix once via read_source_head and dispatches directly to the matching container/codec exporter.",
       "status": "accepted",
       "validation": "batch-614-validation.json"
+    },
+    {
+      "id": "FVID-0805",
+      "batch": 615,
+      "title": "Classify standalone audio from a single 12-byte header read in recognizes_standalone_audio_with_options",
+      "source": "crates/fvid-media/src/owned_container_loudness.rs",
+      "regression": "tests/loudness_and_loudnorm_single_open.rs",
+      "before": "recognizes_standalone_audio_with_options read 4 bytes, then reopened the source file in owned_adts_export::recognizes and owned_raw_mp3::recognizes.",
+      "result": "recognizes_standalone_from_head inspects ADTS and MPEG signatures directly from a single 12-byte read_source_head buffer.",
+      "status": "accepted",
+      "validation": "batch-615-validation.json"
+    },
+    {
+      "id": "FVID-0806",
+      "batch": 615,
+      "title": "Share the 12-byte header buffer in owned_container_loudness::recognizes_with_options",
+      "source": "crates/fvid-media/src/owned_container_loudness.rs",
+      "regression": "tests/loudness_and_loudnorm_single_open.rs",
+      "before": "recognizes_with_options opened the source to read 10 bytes and then delegated to recognizes_standalone_audio_with_options, which reopened the source again.",
+      "result": "recognizes_with_options reads 12 bytes once via read_source_head and passes the buffer directly to recognizes_standalone_from_head.",
+      "status": "accepted",
+      "validation": "batch-615-validation.json"
+    },
+    {
+      "id": "FVID-0807",
+      "batch": 615,
+      "title": "Dispatch owned_container_loudness::geometry_unqualified from a single 12-byte prefix read",
+      "source": "crates/fvid-media/src/owned_container_loudness.rs",
+      "regression": "tests/loudness_and_loudnorm_single_open.rs",
+      "before": "geometry_unqualified called recognizes_with_options and then sequentially invoked recognizes across MP4, G.711 WAVE, Ogg, FLAC, MP3, and Matroska, opening the source up to 8 times.",
+      "result": "geometry_unqualified reads 12 bytes once via read_source_head and dispatches directly to the matching container descriptor.",
+      "status": "accepted",
+      "validation": "batch-615-validation.json"
+    },
+    {
+      "id": "FVID-0808",
+      "batch": 615,
+      "title": "Dispatch owned_container_loudness::decode_to_wave_from_geometry from a single 12-byte prefix read",
+      "source": "crates/fvid-media/src/owned_container_loudness.rs",
+      "regression": "tests/loudness_and_loudnorm_single_open.rs",
+      "before": "decode_to_wave_from_geometry sequentially called recognizes across G.711 WAVE, Ogg, FLAC, MP3, and MP4, opening the source up to 5 times before decoding.",
+      "result": "decode_to_wave_from_geometry reads 12 bytes once via read_source_head and dispatches directly to the matching container decoder.",
+      "status": "accepted",
+      "validation": "batch-615-validation.json"
+    },
+    {
+      "id": "FVID-0809",
+      "batch": 615,
+      "title": "Inspect WAVE once in owned_loudnorm::plan_loudnorm instead of re-opening via supports_request and probe_wave_with_options",
+      "source": "crates/fvid-media/src/owned_loudnorm.rs",
+      "regression": "tests/loudness_and_loudnorm_single_open.rs",
+      "before": "plan_loudnorm opened and inspected the WAVE source three times: once in supports_request, once in inspect, and once in probe_wave_with_options.",
+      "result": "plan_loudnorm opens and inspects the WAVE source once, validates loudnorm eligibility on wave_info, and derives the codec name via wave_info.codec().",
+      "status": "accepted",
+      "validation": "batch-615-validation.json"
     }
   ],
-  "pending_count": 196
+  "pending_count": 191
 }

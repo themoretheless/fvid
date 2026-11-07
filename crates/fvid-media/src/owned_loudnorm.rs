@@ -278,18 +278,19 @@ pub fn plan_loudnorm(
     use fvid_media_info::{MediaPlan, PlanStep, PlanStream};
     let resolved = validate_request(args)?;
     let params = parse(&resolved)?;
-    if !supports_request(
-        source,
-        Path::new("output.wav"),
-        Some(&resolved),
-        dual_pass,
-        options,
-    ) {
-        return Err("request has no owned WAVE loudnorm route".into());
-    }
     let mut wave_file = std::fs::File::open(source).map_err(|e| e.to_string())?;
     let wave_info = crate::owned_wave_inspect::inspect(&mut wave_file, options.cancel.as_ref())
         .map_err(|e| e.to_string())?;
+    if !((params.gain.is_some() || dynamic_input(&wave_info))
+        && (params.print == Print::None
+            || (crate::owned_wave_loudness::qualified_rate(wave_info.sample_rate)
+                && crate::owned_wave_loudness::weights(&wave_info).is_ok()))
+        && (!dual_pass
+            || (crate::owned_wave_loudness::qualified_rate(wave_info.sample_rate)
+                && crate::owned_wave_loudness::weights(&wave_info).is_ok())))
+    {
+        return Err("request has no owned WAVE loudnorm route".into());
+    }
     if wave_info.sample_frames == 0 {
         return Err("no decoded audio samples or invalid channel count".into());
     }
@@ -377,8 +378,7 @@ pub fn plan_loudnorm(
             ));
         }
     }
-    let info = crate::owned_probe::probe_wave_with_options(source, options)
-        .map_err(|e| e.to_string())?;
+    let codec_name = wave_info.codec();
     let mut steps = vec![PlanStep {
         action: "decode".into(),
         detail: "owned WAVE reader retaining PCM precision and speaker layout for f64 processing"
@@ -431,7 +431,7 @@ pub fn plan_loudnorm(
         streams: vec![PlanStream {
             index: 0,
             media_type: "audio".into(),
-            codec: info.streams[0].codec.clone(),
+            codec: codec_name,
             disposition: "decode".into(),
         }],
         steps,
