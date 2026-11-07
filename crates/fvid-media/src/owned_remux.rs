@@ -1,5 +1,9 @@
 //! Owned container remux dispatch.
-use std::path::Path;
+use std::{
+    fs::File,
+    io::{Read, Seek, SeekFrom},
+    path::Path,
+};
 pub fn remux(
     source: &Path,
     destination: &Path,
@@ -15,46 +19,41 @@ pub fn remux(
         return Err("controlled memory limit must be positive".into());
     }
     crate::owned_budget::check_rss_budget(options)?;
-    if crate::owned_mp4_remux::supports(source, destination, options) {
-        return crate::owned_mp4_remux::remux(source, destination, options);
-    }
-    if options.max_packets == Some(0) {
-        return Err("packet work limit requires at least one packet".into());
-    }
-    if crate::owned_adts_remux::supports(source, destination, options) {
-        return crate::owned_adts_remux::remux(source, destination, options);
-    }
-    if crate::owned_matroska_remux::supports(source, destination, options) {
-        return crate::owned_matroska_remux::remux(source, destination, options);
-    }
-    if !crate::owned_wave_inspect::is_wave(source).unwrap_or(false) {
-        if options.max_packet_bytes == 0 {
-            return Err("packet byte limit must be positive".into());
+    if let Ok(mut file) = File::open(source) {
+        let mut sig = [0u8; 12];
+        let mut read = 0usize;
+        while read < sig.len() {
+            match file.read(&mut sig[read..]) {
+                Ok(0) => break,
+                Ok(n) => read += n,
+                Err(e) if e.kind() == std::io::ErrorKind::Interrupted => continue,
+                Err(_) => break,
+            }
         }
-        if options.max_packets == Some(0) {
+        let is_wave = read == 12
+            && matches!(&sig[..4], b"RIFF" | b"RIFX" | b"RF64")
+            && &sig[8..12] == b"WAVE";
+        if !is_wave {
+            if read >= 8 && crate::owned_mp4::recognizes_prefix(&sig[..8]) {
+                let _ = file.seek(SeekFrom::Start(0));
+                return crate::owned_mp4_remux::remux_from_file(file, destination, options);
+            }
+            if options.max_packets == Some(0) {
+                return Err("packet work limit requires at least one packet".into());
+            }
+            if read >= 4 && sig[..4] == [0x1a, 0x45, 0xdf, 0xa3] {
+                let _ = file.seek(SeekFrom::Start(0));
+                return crate::owned_matroska_remux::remux_from_file(file, destination, options);
+            }
+            if read >= 7 && crate::owned_aac::adts::header(&sig[..7]).is_some() {
+                let _ = file.seek(SeekFrom::Start(0));
+                return crate::owned_adts_remux::remux_from_file(file, destination, options);
+            }
+        } else if options.max_packets == Some(0) {
             return Err("packet work limit requires at least one packet".into());
         }
-        if options.max_controlled_bytes == Some(0) {
-            return Err("controlled memory limit must be positive".into());
-        }
-        crate::owned_budget::check_rss_budget(options)?;
-        if std::fs::File::open(source).is_ok_and(|mut f| {
-            use std::io::Read;
-            let mut prefix = [0u8; 8];
-            f.read_exact(&mut prefix).is_ok() && crate::owned_mp4::recognizes_prefix(&prefix)
-        }) {
-            return crate::owned_mp4_remux::remux(source, destination, options);
-        }
-        if std::fs::File::open(source).is_ok_and(|mut f| {
-            use std::io::Read;
-            let mut prefix = [0u8; 4];
-            f.read_exact(&mut prefix).is_ok() && prefix == [0x1a, 0x45, 0xdf, 0xa3]
-        }) {
-            return crate::owned_matroska_remux::remux(source, destination, options);
-        }
-        if crate::owned_adts_export::recognizes(source).unwrap_or(false) {
-            return crate::owned_adts_remux::remux(source, destination, options);
-        }
+    } else if options.max_packets == Some(0) {
+        return Err("packet work limit requires at least one packet".into());
     }
     crate::owned_wave_remux::remux(source, destination, options)
 }

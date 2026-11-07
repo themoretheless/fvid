@@ -1,6 +1,6 @@
 //! Canonical bare FLAC header/index inspection; no compressed PCM decoding.
 use fvid_media_info::{MediaInfo, StreamInfo};
-use std::path::Path;
+use std::{fs::File, path::Path};
 pub fn probe_flac(path: &Path) -> Result<MediaInfo, String> {
     probe_flac_with_options(path, &Default::default())
 }
@@ -23,6 +23,36 @@ pub fn probe_flac_with_options(
     }
     crate::owned_budget::check_rss_budget(options)?;
     let source = crate::owned_raw_flac::open(path, options)?;
+    probe_flac_from_source(path, source, options)
+}
+
+pub fn probe_flac_from_file_with_options(
+    path: &Path,
+    file: File,
+    options: &fvid_control::CopyOptions,
+) -> Result<MediaInfo, String> {
+    if options.cancel.as_ref().is_some_and(|c| c.is_cancelled()) {
+        return Err("media operation cancelled".into());
+    }
+    if options.max_packet_bytes == 0 {
+        return Err("packet byte limit must be positive".into());
+    }
+    if options.max_packets == Some(0) {
+        return Err("packet work limit requires at least one packet".into());
+    }
+    if options.max_controlled_bytes == Some(0) {
+        return Err("controlled memory limit must be positive".into());
+    }
+    crate::owned_budget::check_rss_budget(options)?;
+    let source = crate::owned_raw_flac::open_from_file(file, options)?;
+    probe_flac_from_source(path, source, options)
+}
+
+fn probe_flac_from_source(
+    path: &Path,
+    source: crate::owned_flac::Flac,
+    options: &fvid_control::CopyOptions,
+) -> Result<MediaInfo, String> {
     if options
         .max_packets
         .is_some_and(|max| (source.frames.len() as u64) > max)

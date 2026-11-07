@@ -2,7 +2,7 @@
 use fvid_control::CopyOptions;
 use std::{
     fs::File,
-    io::{BufReader, Read},
+    io::{BufReader, Read, Seek, SeekFrom},
     path::Path,
 };
 type Result<T> = std::result::Result<T, String>;
@@ -124,6 +124,13 @@ fn open(
     options: &CopyOptions,
 ) -> crate::owned_mp4::Result<crate::owned_mp4::Mp4Reader<BufReader<File>>> {
     let file = File::open(source)?;
+    open_from_file(file, options)
+}
+
+fn open_from_file(
+    file: File,
+    options: &CopyOptions,
+) -> crate::owned_mp4::Result<crate::owned_mp4::Mp4Reader<BufReader<File>>> {
     if !file.metadata()?.is_file() {
         return Err(crate::owned_mp4::invalid("MP4 remux requires a regular file"));
     }
@@ -139,23 +146,13 @@ fn open(
     );
     Ok(reader)
 }
+
 fn validate_selected_prefix_packet_budget<R: std::io::Read + std::io::Seek>(
     reader: &crate::owned_mp4::Mp4Reader<R>,
     selected: &[usize],
+    plans: &[crate::owned_mp4_matroska::TrackPlan],
     options: &CopyOptions,
 ) -> Result<(u64, u64)> {
-    let plans = selected
-        .iter()
-        .map(|&index| {
-            let track = &reader.tracks()[index];
-            crate::owned_mp4_matroska::plan(
-                track,
-                reader.movie_timescale(),
-                options.cancel.as_ref(),
-            )
-            .map_err(|e| e.to_string())
-        })
-        .collect::<Result<Vec<_>>>()?;
     let plan_bytes = if let Some(mem_limit) = options.max_controlled_bytes {
         let (file_meta, text_tags) = metadata(reader, options);
         let (overrides, scoped_tags) = track_metadata(options, selected);
@@ -280,44 +277,85 @@ fn validate_selected_prefix_packet_budget<R: std::io::Read + std::io::Seek>(
     }
     Ok((packets, payload))
 }
-pub(crate) fn supports(source: &Path, destination: &Path, options: &CopyOptions) -> bool {
+enum Qualification {
+    NotEligible,
+    ParseOrResourceFailure(String),
+    Qualified(
+        crate::owned_mp4::Mp4Reader<BufReader<File>>,
+        Vec<usize>,
+        Vec<crate::owned_mp4_matroska::TrackPlan>,
+    ),
+}
+
+fn qualify_from_file(
+    mut file: File,
+    destination: &Path,
+    options: &CopyOptions,
+) -> Qualification {
     if !policies(options)
         || !matches!(
             destination.extension().and_then(|s| s.to_str()),
             Some("mkv" | "mka")
         )
     {
-        return false;
+        return Qualification::NotEligible;
     }
     let mut prefix = [0; 8];
-    if !File::open(source).is_ok_and(|mut f| {
-        f.read_exact(&mut prefix).is_ok() && crate::owned_mp4::recognizes_prefix(&prefix)
-    }) {
-        return false;
+    if file.read_exact(&mut prefix).is_err() || !crate::owned_mp4::recognizes_prefix(&prefix) {
+        return Qualification::NotEligible;
     }
-    let reader = match open(source, options) {
+    if file.seek(SeekFrom::Start(0)).is_err() {
+        return Qualification::NotEligible;
+    }
+    let reader = match open_from_file(file, options) {
         Ok(reader) => reader,
         // Recognized MP4 parse/resource failures belong to this route. Keep
         // unsupported sample entries available to other owned adapters.
-        Err(error) => return !error.is_unsupported(),
+        Err(error) if error.is_unsupported() => return Qualification::NotEligible,
+        Err(error) => return Qualification::ParseOrResourceFailure(error.to_string()),
     };
-    let Ok(selected) = crate::owned_mp4_matroska::selection(reader.tracks().len(), &options.streams) else {
-        return false;
+    let Ok(selected) =
+        crate::owned_mp4_matroska::selection(reader.tracks().len(), &options.streams)
+    else {
+        return Qualification::NotEligible;
     };
-    if !track_policy(options, &selected) { return false; }
+    if !track_policy(options, &selected) {
+        return Qualification::NotEligible;
+    }
     if !crate::owned_mp4_matroska::eligible(&reader)
         || (destination.extension().and_then(|s| s.to_str()) == Some("mka")
-            && selected.iter().any(|&index| reader.tracks()[index].handler != *b"soun"))
+            && selected
+                .iter()
+                .any(|&index| reader.tracks()[index].handler != *b"soun"))
     {
-        return false;
+        return Qualification::NotEligible;
     }
-    selected.iter().all(|&index| {
+    let mut plans = Vec::with_capacity(selected.len());
+    for &index in &selected {
         let t = &reader.tracks()[index];
-        crate::owned_mp4_matroska::plan(t, reader.movie_timescale(), options.cancel.as_ref())
-            .is_ok()
-            && crate::owned_mp4_matroska::spec(t).is_ok()
-    })
+        if crate::owned_mp4_matroska::spec(t).is_err() {
+            return Qualification::NotEligible;
+        }
+        let Ok(plan) =
+            crate::owned_mp4_matroska::plan(t, reader.movie_timescale(), options.cancel.as_ref())
+        else {
+            return Qualification::NotEligible;
+        };
+        plans.push(plan);
+    }
+    Qualification::Qualified(reader, selected, plans)
 }
+
+pub(crate) fn supports(source: &Path, destination: &Path, options: &CopyOptions) -> bool {
+    let Ok(file) = File::open(source) else {
+        return false;
+    };
+    !matches!(
+        qualify_from_file(file, destination, options),
+        Qualification::NotEligible
+    )
+}
+
 /// Copy supported AVC/HEVC/AAC packets unchanged with their presentation edits.
 /// Known container tags and track title/language may be deleted/set; aggregate/RSS policies
 /// remain outside this owned route.
@@ -339,13 +377,39 @@ pub fn remux(
     if destination.symlink_metadata().is_ok() {
         return Err("Matroska remux destination already exists".into());
     }
-    if !supports(source, destination, options) {
+    let Ok(file) = File::open(source) else {
         return Err("request is not an owned MP4 Matroska remux".into());
+    };
+    remux_from_file(file, destination, options)
+}
+
+pub(crate) fn remux_from_file(
+    file: File,
+    destination: &Path,
+    options: &CopyOptions,
+) -> Result<fvid_media_info::CopyStats> {
+    if options.cancel.as_ref().is_some_and(|c| c.is_cancelled()) {
+        return Err("media operation cancelled".into());
     }
-    let mut reader = open(source, options).map_err(|e| e.to_string())?;
+    if options.max_packet_bytes == 0 {
+        return Err("packet byte limit must be positive".into());
+    }
+    if options.max_controlled_bytes == Some(0) {
+        return Err("controlled memory limit must be positive".into());
+    }
+    crate::owned_budget::check_rss_budget(options)?;
+    if destination.symlink_metadata().is_ok() {
+        return Err("Matroska remux destination already exists".into());
+    }
+    let (mut reader, selected, plans) = match qualify_from_file(file, destination, options) {
+        Qualification::NotEligible => {
+            return Err("request is not an owned MP4 Matroska remux".into())
+        }
+        Qualification::ParseOrResourceFailure(err) => return Err(err),
+        Qualification::Qualified(reader, selected, plans) => (reader, selected, plans),
+    };
     let (metadata, text) = metadata(&reader, options);
-    let selected = crate::owned_mp4_matroska::selection(reader.tracks().len(), &options.streams).map_err(|e| e.to_string())?;
-    validate_selected_prefix_packet_budget(&reader, &selected, options)?;
+    validate_selected_prefix_packet_budget(&reader, &selected, &plans, options)?;
     let (tracks, scoped) = track_metadata(options, &selected);
     crate::owned_matroska_remux::publish(destination, options, |output| {
         crate::owned_mp4_matroska::write_selected_with_text_metadata_overrides(
@@ -365,6 +429,27 @@ pub fn remux(
 
 /// Metadata-only MP4 packet-copy plan; no output or progress callbacks.
 pub fn plan_remux(source: &Path, options: &CopyOptions) -> Result<fvid_media_info::MediaPlan> {
+    if options.cancel.as_ref().is_some_and(|c| c.is_cancelled()) {
+        return Err("media operation cancelled".into());
+    }
+    if options.max_packet_bytes == 0 {
+        return Err("packet byte limit must be positive".into());
+    }
+    if options.max_controlled_bytes == Some(0) {
+        return Err("controlled memory limit must be positive".into());
+    }
+    crate::owned_budget::check_rss_budget(options)?;
+    let Ok(file) = File::open(source) else {
+        return Err("request is not an owned MP4 Matroska remux".into());
+    };
+    plan_remux_from_file(source, file, options)
+}
+
+pub(crate) fn plan_remux_from_file(
+    source: &Path,
+    file: File,
+    options: &CopyOptions,
+) -> Result<fvid_media_info::MediaPlan> {
     use fvid_media_info::{MediaPlan, PlanStep, PlanStream};
     if options.cancel.as_ref().is_some_and(|c| c.is_cancelled()) {
         return Err("media operation cancelled".into());
@@ -376,12 +461,16 @@ pub fn plan_remux(source: &Path, options: &CopyOptions) -> Result<fvid_media_inf
         return Err("controlled memory limit must be positive".into());
     }
     crate::owned_budget::check_rss_budget(options)?;
-    if !supports(source, Path::new("planned.mkv"), options) {
-        return Err("request is not an owned MP4 Matroska remux".into());
-    }
-    let reader = open(source, options).map_err(|e| e.to_string())?;
-    let selected = crate::owned_mp4_matroska::selection(reader.tracks().len(), &options.streams).map_err(|e| e.to_string())?;
-    let (packets, payload) = validate_selected_prefix_packet_budget(&reader, &selected, options)?;
+    let (reader, selected, plans) = match qualify_from_file(file, Path::new("planned.mkv"), options)
+    {
+        Qualification::NotEligible => {
+            return Err("request is not an owned MP4 Matroska remux".into())
+        }
+        Qualification::ParseOrResourceFailure(err) => return Err(err),
+        Qualification::Qualified(reader, selected, plans) => (reader, selected, plans),
+    };
+    let (packets, payload) =
+        validate_selected_prefix_packet_budget(&reader, &selected, &plans, options)?;
     let mut notes = vec![
         "backend: owned MP4/Matroska; no external demuxer or muxer".into(),
         "destination must be .mkv or audio-only .mka; publication and packet payload reads are verified during execution".into(),

@@ -37,18 +37,55 @@ pub fn probe_webm_with_options(
         return Err("controlled memory limit must be positive".into());
     }
     crate::owned_budget::check_rss_budget(options)?;
-    try_probe_webm_with_limits(
+    let file = File::open(path).map_err(|e| e.to_string())?;
+    probe_webm_from_file_with_options(path, file, options)
+}
+
+pub(crate) fn probe_webm_from_file_with_options(
+    path: &Path,
+    file: File,
+    options: &fvid_control::CopyOptions,
+) -> Result<MediaInfo, String> {
+    if options
+        .cancel
+        .as_ref()
+        .is_some_and(fvid_control::CancelFlag::is_cancelled)
+    {
+        return Err("media operation cancelled".into());
+    }
+    if options.max_packet_bytes == 0 {
+        return Err("packet byte limit must be positive".into());
+    }
+    if options.max_packets == Some(0) {
+        return Err("packet work limit requires at least one packet".into());
+    }
+    if options.max_controlled_bytes == Some(0) {
+        return Err("controlled memory limit must be positive".into());
+    }
+    crate::owned_budget::check_rss_budget(options)?;
+    try_probe_webm_from_file_with_limits(
         path,
+        file,
         options.max_packet_bytes,
         options.max_controlled_bytes,
         options.max_packets,
     )?
     .ok_or_else(|| "Matroska probe requires supported content encoding and block lacing".into())
 }
+
 /// None marks content encodings or block lacing that need parser support; malformed
 /// container data stays an error and cannot request a fallback.
 pub fn try_probe_webm(path: &Path) -> Result<Option<MediaInfo>, String> {
     try_probe_webm_with_packet_limit(path, Limits::default().packet_bytes)
+}
+pub(crate) fn try_probe_webm_from_file(path: &Path, file: File) -> Result<Option<MediaInfo>, String> {
+    try_probe_webm_from_file_with_limits(
+        path,
+        file,
+        Limits::default().packet_bytes,
+        None,
+        None,
+    )
 }
 pub fn try_probe_webm_with_packet_limit(path: &Path, packet_bytes: usize) -> Result<Option<MediaInfo>, String> {
     try_probe_webm_with_packet_and_memory_limit(path, packet_bytes, None)
@@ -62,6 +99,31 @@ pub fn try_probe_webm_with_packet_and_memory_limit(
 }
 fn try_probe_webm_with_limits(
     path: &Path,
+    packet_bytes: usize,
+    max_controlled_bytes: Option<usize>,
+    max_packets: Option<u64>,
+) -> Result<Option<MediaInfo>, String> {
+    if packet_bytes == 0 {
+        return Err("packet byte limit must be positive".into());
+    }
+    if max_packets == Some(0) {
+        return Err("packet work limit requires at least one packet".into());
+    }
+    if max_controlled_bytes == Some(0) {
+        return Err("controlled memory limit must be positive".into());
+    }
+    let file = File::open(path).map_err(|e| e.to_string())?;
+    try_probe_webm_from_file_with_limits(
+        path,
+        file,
+        packet_bytes,
+        max_controlled_bytes,
+        max_packets,
+    )
+}
+fn try_probe_webm_from_file_with_limits(
+    path: &Path,
+    file: File,
     packet_bytes: usize,
     max_controlled_bytes: Option<usize>,
     max_packets: Option<u64>,
@@ -100,7 +162,7 @@ fn try_probe_webm_with_limits(
         }
     };
     let mut reader = match WebmReader::open(
-        BufReader::new(File::open(path).map_err(|e| e.to_string())?),
+        BufReader::new(file),
         limits,
     ) {
         Ok(reader) => reader,

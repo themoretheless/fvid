@@ -92,8 +92,65 @@ pub(crate) fn matroska_with_options(
     )
 }
 
+pub(crate) fn matroska_from_file_with_options(
+    path: &Path,
+    file: File,
+    options: &fvid_media::CopyOptions,
+) -> Result<MediaInfo> {
+    if options
+        .cancel
+        .as_ref()
+        .is_some_and(fvid_media::CancelFlag::is_cancelled)
+    {
+        return Err("media operation cancelled".into());
+    }
+    if options.max_packet_bytes == 0 {
+        return Err("packet byte limit must be positive".into());
+    }
+    if options.max_packets == Some(0) {
+        return Err("packet work limit requires at least one packet".into());
+    }
+    if options.max_controlled_bytes == Some(0) {
+        return Err("controlled memory limit must be positive".into());
+    }
+    fvid_media::owned_budget::check_rss_budget(options)?;
+    matroska_from_file_with_limits(
+        path,
+        file,
+        options.max_packet_bytes,
+        options.max_controlled_bytes,
+        options.max_packets,
+    )
+}
+
 fn matroska_with_limits(
     path: &Path,
+    packet_bytes: usize,
+    max_controlled_bytes: Option<usize>,
+    max_packets: Option<u64>,
+) -> Result<MediaInfo> {
+    if packet_bytes == 0 {
+        return Err("packet byte limit must be positive".into());
+    }
+    if max_packets == Some(0) {
+        return Err("packet work limit requires at least one packet".into());
+    }
+    if max_controlled_bytes == Some(0) {
+        return Err("controlled memory limit must be positive".into());
+    }
+    let file = File::open(path).map_err(|e| e.to_string())?;
+    matroska_from_file_with_limits(
+        path,
+        file,
+        packet_bytes,
+        max_controlled_bytes,
+        max_packets,
+    )
+}
+
+fn matroska_from_file_with_limits(
+    path: &Path,
+    file: File,
     packet_bytes: usize,
     max_controlled_bytes: Option<usize>,
     max_packets: Option<u64>,
@@ -132,7 +189,7 @@ fn matroska_with_limits(
         }
     };
     let mut reader = crate::container::webm::WebmReader::open(
-        BufReader::new(File::open(path).map_err(|e| e.to_string())?),
+        BufReader::new(file),
         limits,
     )
     .map_err(map_packet_limit)?;
@@ -332,11 +389,28 @@ fn wave_with_options(source: &Path, options: &fvid_media::CopyOptions) -> Result
     fvid_media::owned_probe::probe_wave_with_options(source, options).map_err(|e| e.to_string())
 }
 
+fn wave_from_file_with_options(
+    source: &Path,
+    file: File,
+    options: &fvid_media::CopyOptions,
+) -> Result<MediaInfo> {
+    fvid_media::owned_probe::probe_wave_from_file_with_options(source, file, options)
+        .map_err(|e| e.to_string())
+}
+
 fn try_y4m_with_options(
     source: &Path,
     options: &fvid_media::CopyOptions,
 ) -> Result<Option<MediaInfo>> {
     fvid_media::owned_y4m_probe::try_y4m_with_options(source, options)
+}
+
+fn try_y4m_from_file_with_options(
+    source: &Path,
+    file: File,
+    options: &fvid_media::CopyOptions,
+) -> Result<Option<MediaInfo>> {
+    fvid_media::owned_y4m_probe::try_y4m_from_file_with_options(source, file, options)
 }
 
 pub fn probe(source: &Path) -> Result<MediaInfo> {
@@ -398,7 +472,7 @@ pub(crate) fn try_probe_as_with_options(
     format: Option<&str>,
     options: &fvid_media::CopyOptions,
 ) -> Result<Option<MediaInfo>> {
-    use std::io::Read;
+    use std::io::{Read, Seek, SeekFrom};
     validate_probe_options(options)?;
     match format {
         Some("mov" | "mp4" | "m4a" | "3gp" | "3g2" | "mj2" | "mov,mp4,m4a,3gp,3g2,mj2") => {
@@ -423,50 +497,68 @@ pub(crate) fn try_probe_as_with_options(
         Some("aac") | None => {}
         Some(_) => return Ok(None),
     }
-    let mut input = BufReader::new(File::open(source).map_err(|e| e.to_string())?);
+    let mut file = File::open(source).map_err(|e| e.to_string())?;
     let mut signature = [0; 12];
     // Read up to twelve bytes, retaining a valid seven-byte ADTS header at EOF.
     let mut count = 0;
     while count < signature.len() {
-        match input.read(&mut signature[count..]) {
+        match file.read(&mut signature[count..]) {
             Ok(0) => break,
             Ok(n) => count += n,
             Err(error) if error.kind() == std::io::ErrorKind::Interrupted => continue,
             Err(error) => return Err(error.to_string()),
         }
     }
-    drop(input);
     if format.is_none() {
         if signature[..count].starts_with(b"YUV4MPEG2") {
-            return try_y4m_with_options(source, options);
+            file.seek(SeekFrom::Start(0)).map_err(|e| e.to_string())?;
+            return try_y4m_from_file_with_options(source, file, options);
         }
         if count == 12
             && &signature[8..12] == b"WAVE"
             && matches!(&signature[..4], b"RIFF" | b"RIFX" | b"RF64")
         {
-            return wave_with_options(source, options).map(Some);
+            file.seek(SeekFrom::Start(0)).map_err(|e| e.to_string())?;
+            return wave_from_file_with_options(source, file, options).map(Some);
         }
         if crate::container::mp4::recognizes_prefix(&signature[..count]) {
-            return mp4_with_options(source, options).map(Some);
+            file.seek(SeekFrom::Start(0)).map_err(|e| e.to_string())?;
+            return mp4_from_file_with_options(source, file, options).map(Some);
         }
         if signature[..count].starts_with(&[0x1a, 0x45, 0xdf, 0xa3]) {
-            return matroska_with_options(source, options).map(Some);
+            file.seek(SeekFrom::Start(0)).map_err(|e| e.to_string())?;
+            return matroska_from_file_with_options(source, file, options).map(Some);
         }
         if signature[..count].starts_with(b"fLaC") {
-            return fvid_media::owned_flac_probe::probe_flac_with_options(source, options)
-                .map(Some);
+            file.seek(SeekFrom::Start(0)).map_err(|e| e.to_string())?;
+            return fvid_media::owned_flac_probe::probe_flac_from_file_with_options(
+                source, file, options,
+            )
+            .map(Some);
         }
         if signature[..count].starts_with(b"OggS") {
-            return fvid_media::owned_probe::probe_ogg_with_options(source, options).map(Some);
+            file.seek(SeekFrom::Start(0)).map_err(|e| e.to_string())?;
+            return fvid_media::owned_probe::probe_ogg_from_file_with_options(
+                source, file, options,
+            )
+            .map(Some);
         }
         if fvid_media::owned_aac::adts::header(&signature[..count]).is_some() {
-            return fvid_media::owned_probe::probe_adts_with_options(source, options).map(Some);
+            file.seek(SeekFrom::Start(0)).map_err(|e| e.to_string())?;
+            return fvid_media::owned_probe::probe_adts_from_file_with_options(
+                source, file, options,
+            )
+            .map(Some);
         }
         if fvid_media::owned_mpeg_audio::has_signature(&signature[..count]) {
-            return fvid_media::owned_mpeg_probe::probe_mpeg_with_options(source, options)
-                .map(Some);
+            file.seek(SeekFrom::Start(0)).map_err(|e| e.to_string())?;
+            return fvid_media::owned_mpeg_probe::probe_mpeg_from_file_with_options(
+                source, file, options,
+            )
+            .map(Some);
         }
         return Ok(None);
     }
-    fvid_media::owned_probe::probe_adts_with_options(source, options).map(Some)
+    file.seek(SeekFrom::Start(0)).map_err(|e| e.to_string())?;
+    fvid_media::owned_probe::probe_adts_from_file_with_options(source, file, options).map(Some)
 }

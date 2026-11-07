@@ -79,33 +79,73 @@ pub fn probe_as_with_options(
             Err(e) => return Err(e.to_string()),
         }
     }
-    drop(signature_file);
     if read == 12
         && matches!(&signature[..4], b"RIFF" | b"RIFX" | b"RF64")
         && &signature[8..12] == b"WAVE"
     {
-        return probe_wave_with_options(path, options).map_err(|e| e.to_string());
+        signature_file
+            .seek(SeekFrom::Start(0))
+            .map_err(|e| e.to_string())?;
+        return probe_wave_from_file_with_options(path, signature_file, options)
+            .map_err(|e| e.to_string());
     }
     if read >= 9 && &signature[..9] == b"YUV4MPEG2" {
-        return crate::owned_y4m_probe::probe_y4m_with_options(path, options);
+        signature_file
+            .seek(SeekFrom::Start(0))
+            .map_err(|e| e.to_string())?;
+        return crate::owned_y4m_probe::probe_y4m_from_file_with_options(
+            path,
+            signature_file,
+            options,
+        );
     }
     if read >= 8 && crate::owned_mp4::recognizes_prefix(&signature[..8]) {
-        return crate::owned_mp4_probe::mp4_with_options(path, options);
+        signature_file
+            .seek(SeekFrom::Start(0))
+            .map_err(|e| e.to_string())?;
+        return crate::owned_mp4_probe::mp4_from_file_with_options(path, signature_file, options);
     }
     if read >= 4 && signature[..4] == [0x1a, 0x45, 0xdf, 0xa3] {
-        return crate::owned_webm_probe::probe_webm_with_options(path, options);
+        signature_file
+            .seek(SeekFrom::Start(0))
+            .map_err(|e| e.to_string())?;
+        return crate::owned_webm_probe::probe_webm_from_file_with_options(
+            path,
+            signature_file,
+            options,
+        );
     }
     if read >= 4 && signature.starts_with(b"fLaC") {
-        return crate::owned_flac_probe::probe_flac_with_options(path, options);
+        signature_file
+            .seek(SeekFrom::Start(0))
+            .map_err(|e| e.to_string())?;
+        return crate::owned_flac_probe::probe_flac_from_file_with_options(
+            path,
+            signature_file,
+            options,
+        );
     }
     if read >= 4 && signature.starts_with(b"OggS") {
-        return probe_ogg_with_options(path, options);
+        signature_file
+            .seek(SeekFrom::Start(0))
+            .map_err(|e| e.to_string())?;
+        return probe_ogg_from_file_with_options(path, signature_file, options);
     }
     if read >= 4 && crate::owned_mpeg_audio::has_signature(&signature[..read.min(9)]) {
-        return crate::owned_mpeg_probe::probe_mpeg_with_options(path, options);
+        signature_file
+            .seek(SeekFrom::Start(0))
+            .map_err(|e| e.to_string())?;
+        return crate::owned_mpeg_probe::probe_mpeg_from_file_with_options(
+            path,
+            signature_file,
+            options,
+        );
     }
     if read >= 7 && crate::owned_aac::adts::header(&signature[..7]).is_some() {
-        return probe_adts_with_options(path, options);
+        signature_file
+            .seek(SeekFrom::Start(0))
+            .map_err(|e| e.to_string())?;
+        return probe_adts_from_file_with_options(path, signature_file, options);
     }
     Err("container has no owned media-library probe yet".into())
 }
@@ -121,17 +161,18 @@ pub(crate) fn try_mp4_as(path: &Path, format: Option<&str>) -> Result<Option<Med
         ) {
             return Ok(None);
         }
-    } else {
-        let mut prefix = [0; 8];
-        let mut file = File::open(path).map_err(|e| e.to_string())?;
-        match file.read_exact(&mut prefix) {
-            Ok(()) if crate::owned_mp4::recognizes_prefix(&prefix) => {}
-            Ok(()) => return Ok(None),
-            Err(e) if e.kind() == std::io::ErrorKind::UnexpectedEof => return Ok(None),
-            Err(e) => return Err(e.to_string()),
-        }
+        return crate::owned_mp4_probe::try_probe_mp4(path);
     }
-    crate::owned_mp4_probe::try_probe_mp4(path)
+    let mut prefix = [0; 8];
+    let mut file = File::open(path).map_err(|e| e.to_string())?;
+    match file.read_exact(&mut prefix) {
+        Ok(()) if crate::owned_mp4::recognizes_prefix(&prefix) => {}
+        Ok(()) => return Ok(None),
+        Err(e) if e.kind() == std::io::ErrorKind::UnexpectedEof => return Ok(None),
+        Err(e) => return Err(e.to_string()),
+    }
+    file.seek(SeekFrom::Start(0)).map_err(|e| e.to_string())?;
+    crate::owned_mp4_probe::try_mp4_from_file(path, file)
 }
 
 pub(crate) fn try_webm_as(path: &Path, format: Option<&str>) -> Result<Option<MediaInfo>, String> {
@@ -139,17 +180,18 @@ pub(crate) fn try_webm_as(path: &Path, format: Option<&str>) -> Result<Option<Me
         if !matches!(hint, "webm" | "matroska" | "matroska,webm") {
             return Ok(None);
         }
-    } else {
-        let mut prefix = [0; 4];
-        let mut file = File::open(path).map_err(|e| e.to_string())?;
-        match file.read_exact(&mut prefix) {
-            Ok(()) if prefix == [0x1a, 0x45, 0xdf, 0xa3] => {}
-            Ok(()) => return Ok(None),
-            Err(e) if e.kind() == std::io::ErrorKind::UnexpectedEof => return Ok(None),
-            Err(e) => return Err(e.to_string()),
-        }
+        return crate::owned_webm_probe::try_probe_webm(path);
     }
-    crate::owned_webm_probe::try_probe_webm(path)
+    let mut prefix = [0; 4];
+    let mut file = File::open(path).map_err(|e| e.to_string())?;
+    match file.read_exact(&mut prefix) {
+        Ok(()) if prefix == [0x1a, 0x45, 0xdf, 0xa3] => {}
+        Ok(()) => return Ok(None),
+        Err(e) if e.kind() == std::io::ErrorKind::UnexpectedEof => return Ok(None),
+        Err(e) => return Err(e.to_string()),
+    }
+    file.seek(SeekFrom::Start(0)).map_err(|e| e.to_string())?;
+    crate::owned_webm_probe::try_probe_webm_from_file(path, file)
 }
 
 /// Select supported AAC ADTS framing before legacy inspection. Once a
@@ -171,7 +213,8 @@ pub(crate) fn try_adts_as(path: &Path, format: Option<&str>) -> Result<Option<Me
     if !matches!(header.asc[0] >> 3, 1..=4) {
         return Ok(None);
     }
-    probe_adts(path).map(Some)
+    file.seek(SeekFrom::Start(0)).map_err(|e| e.to_string())?;
+    probe_adts_from_file_with_options(path, file, &Default::default()).map(Some)
 }
 
 /// Count AAC ADTS packets using owned framing, without decoding PCM.
@@ -202,6 +245,31 @@ pub fn probe_adts_with_options(
     }
     crate::owned_budget::check_rss_budget(options)?;
     let file = File::open(path).map_err(|e| e.to_string())?;
+    probe_adts_from_file_with_options(path, file, options)
+}
+
+pub fn probe_adts_from_file_with_options(
+    path: &Path,
+    file: File,
+    options: &fvid_control::CopyOptions,
+) -> Result<MediaInfo, String> {
+    if options
+        .cancel
+        .as_ref()
+        .is_some_and(fvid_control::CancelFlag::is_cancelled)
+    {
+        return Err("media operation cancelled".into());
+    }
+    if options.max_packet_bytes == 0 {
+        return Err("packet byte limit must be positive".into());
+    }
+    if options.max_packets == Some(0) {
+        return Err("packet work limit requires at least one packet".into());
+    }
+    if options.max_controlled_bytes == Some(0) {
+        return Err("controlled memory limit must be positive".into());
+    }
+    crate::owned_budget::check_rss_budget(options)?;
     let mut reader = crate::owned_aac::adts::StreamReader::open_with_packet_limit(
         std::io::BufReader::new(file),
         options
@@ -308,7 +376,37 @@ pub fn probe_wave_with_options(
     }
     crate::owned_budget::check_rss_budget(options)
         .map_err(|e| std::io::Error::new(std::io::ErrorKind::InvalidData, e))?;
-    let mut file = File::open(path)?;
+    let file = File::open(path)?;
+    probe_wave_from_file_with_options(path, file, options)
+}
+
+pub fn probe_wave_from_file_with_options(
+    path: &Path,
+    mut file: File,
+    options: &fvid_control::CopyOptions,
+) -> std::io::Result<MediaInfo> {
+    let invalid = |message| std::io::Error::new(std::io::ErrorKind::InvalidData, message);
+    if options
+        .cancel
+        .as_ref()
+        .is_some_and(fvid_control::CancelFlag::is_cancelled)
+    {
+        return Err(std::io::Error::new(
+            std::io::ErrorKind::Interrupted,
+            "media operation cancelled",
+        ));
+    }
+    if options.max_packet_bytes == 0 {
+        return Err(invalid("packet byte limit must be positive"));
+    }
+    if options.max_packets == Some(0) {
+        return Err(invalid("packet work limit requires at least one packet"));
+    }
+    if options.max_controlled_bytes == Some(0) {
+        return Err(invalid("controlled memory limit must be positive"));
+    }
+    crate::owned_budget::check_rss_budget(options)
+        .map_err(|e| std::io::Error::new(std::io::ErrorKind::InvalidData, e))?;
     let law = crate::owned_wave_inspect::g711_law(&mut file, options.cancel.as_ref())?;
     let wave =
         crate::owned_wave_inspect::inspect_probe_with_law(&mut file, options.cancel.as_ref(), law)?;
@@ -481,7 +579,28 @@ pub fn probe_ogg_with_options(
         return Err("controlled memory limit must be positive".into());
     }
     crate::owned_budget::check_rss_budget(options)?;
-    let mut file = File::open(path).map_err(|e| e.to_string())?;
+    let file = File::open(path).map_err(|e| e.to_string())?;
+    probe_ogg_from_file_with_options(path, file, options)
+}
+
+pub fn probe_ogg_from_file_with_options(
+    path: &Path,
+    mut file: File,
+    options: &fvid_control::CopyOptions,
+) -> Result<MediaInfo, String> {
+    if options.cancel.as_ref().is_some_and(|c| c.is_cancelled()) {
+        return Err("media operation cancelled".into());
+    }
+    if options.max_packet_bytes == 0 {
+        return Err("packet byte limit must be positive".into());
+    }
+    if options.max_packets == Some(0) {
+        return Err("packet work limit requires at least one packet".into());
+    }
+    if options.max_controlled_bytes == Some(0) {
+        return Err("controlled memory limit must be positive".into());
+    }
+    crate::owned_budget::check_rss_budget(options)?;
     let mut sig = [0u8; 4];
     if file.read_exact(&mut sig).is_err() || &sig != b"OggS" {
         return Err("input does not have an Ogg signature".into());

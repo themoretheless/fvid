@@ -3,7 +3,7 @@ use fvid_control::CopyOptions;
 use fvid_media_info::CopyStats;
 use std::{
     fs::File,
-    io::{BufReader, Read},
+    io::{BufReader, Read, Seek, SeekFrom},
     path::Path,
 };
 pub(crate) fn adts_matroska_policies(options: &CopyOptions) -> bool {
@@ -47,9 +47,44 @@ pub fn remux(
         return Err("controlled memory limit must be positive".into());
     }
     crate::owned_budget::check_rss_budget(options)?;
-    if !supports(source, destination, options) {
+    let Ok(file) = File::open(source) else {
+        return Err("request is not an owned ADTS Matroska remux".into());
+    };
+    remux_from_file(file, destination, options)
+}
+
+pub(crate) fn remux_from_file(
+    mut file: File,
+    destination: &Path,
+    options: &CopyOptions,
+) -> Result<CopyStats, String> {
+    if options.cancel.as_ref().is_some_and(|c| c.is_cancelled()) {
+        return Err("media operation cancelled".into());
+    }
+    if options.max_packet_bytes == 0 {
+        return Err("packet byte limit must be positive".into());
+    }
+    if options.max_packets == Some(0) {
+        return Err("packet work limit requires at least one packet".into());
+    }
+    if options.max_controlled_bytes == Some(0) {
+        return Err("controlled memory limit must be positive".into());
+    }
+    crate::owned_budget::check_rss_budget(options)?;
+    if !(options.streams.is_empty() || options.streams == [0])
+        || !adts_matroska_policies(options)
+        || !matches!(
+            destination.extension().and_then(|s| s.to_str()),
+            Some("mkv" | "mka")
+        )
+    {
         return Err("request is not an owned ADTS Matroska remux".into());
     }
+    let mut prefix = [0; 7];
+    if file.read_exact(&mut prefix).is_err() || crate::owned_aac::adts::header(&prefix).is_none() {
+        return Err("request is not an owned ADTS Matroska remux".into());
+    }
+    file.seek(SeekFrom::Start(0)).map_err(|e| e.to_string())?;
     if destination.symlink_metadata().is_ok() {
         return Err("output already exists".into());
     }
@@ -61,7 +96,6 @@ pub fn remux(
     {
         return Err("controlled memory budget exceeded".into());
     }
-    let file = File::open(source).map_err(|e| e.to_string())?;
     if !file.metadata().map_err(|e| e.to_string())?.is_file() {
         return Err("ADTS remux requires a regular file".into());
     }
@@ -89,6 +123,30 @@ pub fn plan_remux(
     source: &Path,
     options: &CopyOptions,
 ) -> Result<fvid_media_info::MediaPlan, String> {
+    if options.cancel.as_ref().is_some_and(|c| c.is_cancelled()) {
+        return Err("media operation cancelled".into());
+    }
+    if options.max_packet_bytes == 0 {
+        return Err("packet byte limit must be positive".into());
+    }
+    if options.max_packets == Some(0) {
+        return Err("packet work limit requires at least one packet".into());
+    }
+    if options.max_controlled_bytes == Some(0) {
+        return Err("controlled memory limit must be positive".into());
+    }
+    crate::owned_budget::check_rss_budget(options)?;
+    let Ok(file) = File::open(source) else {
+        return Err("request is not an owned ADTS Matroska remux".into());
+    };
+    plan_remux_from_file(source, file, options)
+}
+
+pub(crate) fn plan_remux_from_file(
+    source: &Path,
+    mut file: File,
+    options: &CopyOptions,
+) -> Result<fvid_media_info::MediaPlan, String> {
     use fvid_media_info::{MediaPlan, PlanStep, PlanStream};
     let check = || {
         if options.cancel.as_ref().is_some_and(|c| c.is_cancelled()) {
@@ -110,9 +168,15 @@ pub fn plan_remux(
         return Err("controlled memory limit must be positive".into());
     }
     check()?;
-    if !supports(source, Path::new("planned.mka"), options) {
+    if !(options.streams.is_empty() || options.streams == [0]) || !adts_matroska_policies(options)
+    {
         return Err("request is not an owned ADTS Matroska remux".into());
     }
+    let mut prefix = [0; 7];
+    if file.read_exact(&mut prefix).is_err() || crate::owned_aac::adts::header(&prefix).is_none() {
+        return Err("request is not an owned ADTS Matroska remux".into());
+    }
+    file.seek(SeekFrom::Start(0)).map_err(|e| e.to_string())?;
     let meta_bytes = crate::owned_matroska::estimate_adts_matroska_metadata_bytes(Some(options))
         .map_err(|e| e.to_string())?;
     if options
@@ -121,7 +185,6 @@ pub fn plan_remux(
     {
         return Err("controlled memory budget exceeded".into());
     }
-    let file = File::open(source).map_err(|e| e.to_string())?;
     if !file.metadata().map_err(|e| e.to_string())?.is_file() {
         return Err("ADTS remux requires a regular file".into());
     }

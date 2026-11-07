@@ -1,0 +1,14 @@
+{
+  "batch": 646,
+  "ids": [
+    "FVID-0960",
+    "FVID-0961",
+    "FVID-0962",
+    "FVID-0963",
+    "FVID-0964"
+  ],
+  "commands": [
+    "cargo test --test probe_remux_and_concat_handle_reuse"
+  ],
+  "status": "accepted"
+}

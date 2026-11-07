@@ -1,8 +1,8 @@
 {
   "target": 1000,
   "counting_rule": "One independently confirmed problem or useful capability; fixture variants and baseline integration repairs are excluded. Only accepted entries count.",
-  "accepted_count": 959,
-  "next_id": "FVID-0960",
+  "accepted_count": 964,
+  "next_id": "FVID-0965",
   "entries": [
     {
       "id": "FVID-0001",
@@ -10740,6 +10740,61 @@
       "result": "Returned negotiated (rate, channels, sample_frames) from plan_loudness_with_validated_info and reused it for check_spool_loudnorm_budget in owned_adts_loudnorm::apply and plan_loudnorm without calling source_descriptor again.",
       "status": "accepted",
       "validation": "batch-645-validation.json"
+    },
+    {
+      "id": "FVID-0960",
+      "batch": 646,
+      "title": "Reuse open File handle across signature dispatch and container probes in owned_probe",
+      "source": "crates/fvid-media/src/owned_probe.rs",
+      "regression": "tests/probe_remux_and_concat_handle_reuse.rs",
+      "before": "owned_probe::probe_as_with_options, try_mp4_as, try_webm_as, and try_adts_as opened path to read the container signature and then dropped the handle and reopened path inside the selected container probe.",
+      "result": "Added *_from_file_with_options helpers across WAVE, Y4M, MP4, WebM/Matroska, FLAC, Ogg, MPEG audio, and ADTS probes and rewound the open signature File handle in owned_probe.",
+      "status": "accepted",
+      "validation": "batch-646-validation.json"
+    },
+    {
+      "id": "FVID-0961",
+      "batch": 646,
+      "title": "Reuse open File handle across signature dispatch and container probes in src/media_probe.rs",
+      "source": "src/media_probe.rs",
+      "regression": "tests/probe_remux_and_concat_handle_reuse.rs",
+      "before": "src/media_probe::try_probe_as_with_options opened source to read the 12-byte container signature, dropped the reader, and reopened source in the selected Y4M, WAVE, MP4, Matroska, FLAC, Ogg, ADTS, or MPEG audio probe.",
+      "result": "Added matroska_from_file_with_options, wave_from_file_with_options, and try_y4m_from_file_with_options in src/media_probe.rs and rewound and forwarded the open File handle into each format probe.",
+      "status": "accepted",
+      "validation": "batch-646-validation.json"
+    },
+    {
+      "id": "FVID-0962",
+      "batch": 646,
+      "title": "Reuse open File, Mp4Reader, and TrackPlans across qualification, planning, and remux in owned_mp4_remux",
+      "source": "crates/fvid-media/src/owned_mp4_remux.rs",
+      "regression": "tests/probe_remux_and_concat_handle_reuse.rs",
+      "before": "owned_mp4_remux::remux and plan_remux called supports() (which opened source twice and built Mp4Reader and TrackPlans) and then reopened source, rebuilt Mp4Reader, and recomputed TrackPlans in validate_selected_prefix_packet_budget.",
+      "result": "Added qualify_from_file returning the opened Mp4Reader, selected tracks, and TrackPlans, plus remux_from_file and plan_remux_from_file that reuse them directly without redundant file opens or index rebuilds.",
+      "status": "accepted",
+      "validation": "batch-646-validation.json"
+    },
+    {
+      "id": "FVID-0963",
+      "batch": 646,
+      "title": "Dispatch by single 12-byte header read and reuse open File handle in owned_remux and owned_remux_plan",
+      "source": "crates/fvid-media/src/owned_remux_plan.rs",
+      "regression": "tests/probe_remux_and_concat_handle_reuse.rs",
+      "before": "owned_remux::remux and owned_remux_plan::plan_remux probed source up to 7 times via supports() and signature fallbacks before reopening source in the selected remuxer or planner (and reopened Matroska again in probe_webm_with_options).",
+      "result": "Dispatched owned_remux::remux and owned_remux_plan::plan_remux from a single 12-byte header read and forwarded the rewound File handle into remux_from_file, plan_remux_from_file, and probe_webm_from_file_with_options.",
+      "status": "accepted",
+      "validation": "batch-646-validation.json"
+    },
+    {
+      "id": "FVID-0964",
+      "batch": 646,
+      "title": "Reuse opened ADTS File handles across qualification and SequenceReader in owned_concat",
+      "source": "crates/fvid-media/src/owned_concat.rs",
+      "regression": "tests/probe_remux_and_concat_handle_reuse.rs",
+      "before": "owned_concat::concat and plan_concat opened every segment in supports() to verify the 7-byte ADTS header and then reopened every segment in open_readers().",
+      "result": "Added open_supported_files and open_readers_from_files in owned_concat so ADTS segment files opened during qualification are rewound and passed directly into StreamReader::open_for_sequence_with_packet_limit.",
+      "status": "accepted",
+      "validation": "batch-646-validation.json"
     }
   ],
   "pending_count": 126

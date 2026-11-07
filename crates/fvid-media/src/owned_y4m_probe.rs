@@ -29,7 +29,29 @@ pub fn try_y4m_with_options(
         return Err("controlled memory limit must be positive".into());
     }
     crate::owned_budget::check_rss_budget(options)?;
-    let mut input = BufReader::new(File::open(source).map_err(|e| e.to_string())?);
+    let file = File::open(source).map_err(|e| e.to_string())?;
+    try_y4m_from_file_with_options(source, file, options)
+}
+
+pub fn try_y4m_from_file_with_options(
+    source: &Path,
+    file: File,
+    options: &fvid_control::CopyOptions,
+) -> Result<Option<MediaInfo>> {
+    if options.cancel.as_ref().is_some_and(|c| c.is_cancelled()) {
+        return Err("media operation cancelled".into());
+    }
+    if options.max_packet_bytes == 0 {
+        return Err("packet byte limit must be positive".into());
+    }
+    if options.max_packets == Some(0) {
+        return Err("packet work limit requires at least one packet".into());
+    }
+    if options.max_controlled_bytes == Some(0) {
+        return Err("controlled memory limit must be positive".into());
+    }
+    crate::owned_budget::check_rss_budget(options)?;
+    let mut input = BufReader::new(file);
     let mut header = Vec::new();
     if !crate::owned_y4m::line(&mut input, &mut header).map_err(|e| e.to_string())?
         || !header.starts_with(b"YUV4MPEG2")
@@ -94,7 +116,29 @@ pub fn probe_y4m_with_options(
         return Err("controlled memory limit must be positive".into());
     }
     crate::owned_budget::check_rss_budget(options)?;
-    let mut input = BufReader::new(File::open(source).map_err(|e| e.to_string())?);
+    let file = File::open(source).map_err(|e| e.to_string())?;
+    probe_y4m_from_file_with_options(source, file, options)
+}
+
+pub(crate) fn probe_y4m_from_file_with_options(
+    source: &Path,
+    file: File,
+    options: &fvid_control::CopyOptions,
+) -> Result<MediaInfo> {
+    if options.cancel.as_ref().is_some_and(|c| c.is_cancelled()) {
+        return Err("media operation cancelled".into());
+    }
+    if options.max_packet_bytes == 0 {
+        return Err("packet byte limit must be positive".into());
+    }
+    if options.max_packets == Some(0) {
+        return Err("packet work limit requires at least one packet".into());
+    }
+    if options.max_controlled_bytes == Some(0) {
+        return Err("controlled memory limit must be positive".into());
+    }
+    crate::owned_budget::check_rss_budget(options)?;
+    let mut input = BufReader::new(file);
     let mut line = Vec::new();
     if !crate::owned_y4m::line(&mut input, &mut line).map_err(|e| e.to_string())? {
         return Err("empty Y4M input".into());

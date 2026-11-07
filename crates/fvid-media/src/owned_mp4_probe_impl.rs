@@ -68,10 +68,24 @@ pub(crate) fn mp4_with_options(
     })
 }
 
+pub(crate) fn mp4_from_file_with_options(
+    path: &Path,
+    file: File,
+    options: &fvid_control::CopyOptions,
+) -> Result<MediaInfo> {
+    try_mp4_from_file_with_options(path, file, options)?.ok_or_else(|| {
+        "native MP4 probe cannot yet describe every sample entry in this file".into()
+    })
+}
+
 // None denotes valid tracks whose sample entries are not represented yet.
 // Parser errors remain errors, rather than requesting a permissive fallback.
 pub(crate) fn try_mp4(path: &Path) -> Result<Option<MediaInfo>> {
     try_mp4_with_metadata_limit(path, None)
+}
+
+pub(crate) fn try_mp4_from_file(path: &Path, file: File) -> Result<Option<MediaInfo>> {
+    try_mp4_from_file_with_options(path, file, &fvid_control::CopyOptions::default())
 }
 
 pub(crate) fn try_mp4_with_metadata_limit(
@@ -105,6 +119,31 @@ pub(crate) fn try_mp4_with_options(
     }
     owned_budget::check_rss_budget(options)?;
     let file = File::open(path).map_err(|e| e.to_string())?;
+    try_mp4_from_file_with_options(path, file, options)
+}
+
+pub(crate) fn try_mp4_from_file_with_options(
+    path: &Path,
+    file: File,
+    options: &fvid_control::CopyOptions,
+) -> Result<Option<MediaInfo>> {
+    if options
+        .cancel
+        .as_ref()
+        .is_some_and(fvid_control::CancelFlag::is_cancelled)
+    {
+        return Err("media operation cancelled".into());
+    }
+    if options.max_packet_bytes == 0 {
+        return Err("packet byte limit must be positive".into());
+    }
+    if options.max_packets == Some(0) {
+        return Err("packet work limit requires at least one packet".into());
+    }
+    if options.max_controlled_bytes == Some(0) {
+        return Err("controlled memory limit must be positive".into());
+    }
+    owned_budget::check_rss_budget(options)?;
     let file_bytes = file.metadata().map_err(|e| e.to_string())?.len();
     let limits = Mp4ProbeLimits {
         metadata_bytes: Mp4ProbeLimits::default()

@@ -4822,4 +4822,13 @@ See `batch-628-validation.json`.
 - **FVID-0958**: Reuse negotiated ADTS prefix geometry across `validate_configuration` and `check_meter_budget` in `owned_adts_loudness` (`crates/fvid-media/src/owned_adts_loudness.rs`).
 - **FVID-0959**: Reuse negotiated ADTS prefix geometry across meter and spool budget checks in `owned_adts_loudnorm` (`crates/fvid-media/src/owned_adts_loudnorm.rs`).
 
+## Batch 646 (FVID-0960..0964)
+
+- **FVID-0960**: Reuse open `File` handle across signature dispatch and container probes in `owned_probe` (`crates/fvid-media/src/owned_probe.rs`).
+- **FVID-0961**: Reuse open `File` handle across signature dispatch and container probes in `src/media_probe.rs` (`src/media_probe.rs`).
+- **FVID-0962**: Reuse open `File`, `Mp4Reader`, and `TrackPlan`s across qualification, planning, and remux in `owned_mp4_remux` (`crates/fvid-media/src/owned_mp4_remux.rs`).
+- **FVID-0963**: Dispatch by single 12-byte header read and reuse open `File` handle in `owned_remux` and `owned_remux_plan` (`crates/fvid-media/src/owned_remux_plan.rs`).
+- **FVID-0964**: Reuse opened ADTS `File` handles across qualification and `SequenceReader` in `owned_concat` (`crates/fvid-media/src/owned_concat.rs`).
+
+
 

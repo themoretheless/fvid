@@ -3,7 +3,7 @@ use fvid_control::CopyOptions;
 use fvid_media_info::CopyStats;
 use std::{
     fs::{File, OpenOptions},
-    io::{Read, Write},
+    io::{Read, Seek, SeekFrom, Write},
     path::{Path, PathBuf},
     sync::atomic::{AtomicU64, Ordering},
 };
@@ -46,6 +46,33 @@ pub fn remux(
     destination: &Path,
     options: &CopyOptions,
 ) -> Result<CopyStats, String> {
+    if options.cancel.as_ref().is_some_and(|c| c.is_cancelled()) {
+        return Err("media operation cancelled".into());
+    }
+    if options.max_packet_bytes == 0 {
+        return Err("packet byte limit must be positive".into());
+    }
+    if options.max_packets == Some(0) {
+        return Err("packet work limit requires at least one packet".into());
+    }
+    if options.max_controlled_bytes == Some(0) {
+        return Err("controlled memory limit must be positive".into());
+    }
+    crate::owned_budget::check_rss_budget(options)?;
+    if std::fs::symlink_metadata(destination).is_ok() {
+        return Err("output already exists".into());
+    }
+    let Ok(input) = File::open(source) else {
+        return Err("request is not an owned Matroska identity remux".into());
+    };
+    remux_from_file(input, destination, options)
+}
+
+pub(crate) fn remux_from_file(
+    mut input: File,
+    destination: &Path,
+    options: &CopyOptions,
+) -> Result<CopyStats, String> {
     let check = || {
         if options.cancel.as_ref().is_some_and(|c| c.is_cancelled()) {
             Err("media operation cancelled".to_string())
@@ -69,10 +96,19 @@ pub fn remux(
     if std::fs::symlink_metadata(destination).is_ok() {
         return Err("output already exists".into());
     }
-    if !supports(source, destination, options) {
+    if !policies(options)
+        || !matches!(
+            destination.extension().and_then(|s| s.to_str()),
+            Some("mkv" | "mka")
+        )
+    {
         return Err("request is not an owned Matroska identity remux".into());
     }
-    let mut input = File::open(source).map_err(|e| e.to_string())?;
+    let mut bytes = [0; 4];
+    if input.read_exact(&mut bytes).is_err() || bytes != [0x1a, 0x45, 0xdf, 0xa3] {
+        return Err("request is not an owned Matroska identity remux".into());
+    }
+    input.seek(SeekFrom::Start(0)).map_err(|e| e.to_string())?;
     if !input.metadata().map_err(|e| e.to_string())?.is_file() {
         return Err("Matroska remux requires a regular file".into());
     }

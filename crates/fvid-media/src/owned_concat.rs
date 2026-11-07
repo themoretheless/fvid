@@ -3,7 +3,7 @@ use fvid_control::CopyOptions;
 use fvid_media_info::CopyStats;
 use std::{
     fs::File,
-    io::BufReader,
+    io::{BufReader, Read, Seek, SeekFrom},
     path::{Path, PathBuf},
 };
 pub(crate) fn supports(sources: &[PathBuf], destination: &Path, options: &CopyOptions) -> bool {
@@ -11,6 +11,36 @@ pub(crate) fn supports(sources: &[PathBuf], destination: &Path, options: &CopyOp
         && sources
             .iter()
             .all(|source| crate::owned_adts_remux::supports(source, destination, options))
+}
+fn open_supported_files(
+    sources: &[PathBuf],
+    destination: &Path,
+    options: &CopyOptions,
+) -> Option<Vec<File>> {
+    if !(2..=256).contains(&sources.len())
+        || options.cancel.as_ref().is_some_and(|c| c.is_cancelled())
+        || !(options.streams.is_empty() || options.streams == [0])
+        || !crate::owned_adts_remux::adts_matroska_policies(options)
+        || !matches!(
+            destination.extension().and_then(|s| s.to_str()),
+            Some("mkv" | "mka")
+        )
+    {
+        return None;
+    }
+    let mut files = Vec::with_capacity(sources.len());
+    for source in sources {
+        let mut file = File::open(source).ok()?;
+        let mut prefix = [0; 7];
+        if file.read_exact(&mut prefix).is_err()
+            || crate::owned_aac::adts::header(&prefix).is_none()
+            || file.seek(SeekFrom::Start(0)).is_err()
+        {
+            return None;
+        }
+        files.push(file);
+    }
+    Some(files)
 }
 pub fn concat(
     sources: &[PathBuf],
@@ -33,7 +63,7 @@ pub fn concat(
     if destination.symlink_metadata().is_ok() {
         return Err("output already exists".into());
     }
-    if !supports(sources, destination, options) {
+    let Some(files) = open_supported_files(sources, destination, options) else {
         if sources
             .first()
             .is_some_and(|p| !crate::owned_wave_inspect::is_wave(p).unwrap_or(false))
@@ -41,8 +71,8 @@ pub fn concat(
             return Err("request is not an owned ADTS Matroska concat".into());
         }
         return crate::owned_wave_remux::concat(sources, destination, options);
-    }
-    let readers = open_readers(sources, options)?;
+    };
+    let readers = open_readers_from_files(files, options)?;
     let mut stats = crate::owned_matroska_remux::publish(destination, options, |output| {
         crate::owned_matroska::concat_adts_with_options(
             readers,
@@ -58,14 +88,14 @@ pub fn concat(
     Ok(stats)
 }
 
-fn open_readers(
-    sources: &[PathBuf],
+fn open_readers_from_files(
+    files: Vec<File>,
     options: &CopyOptions,
 ) -> Result<Vec<crate::owned_aac::adts::StreamReader<BufReader<File>>>, String> {
     let meta_bytes = crate::owned_matroska::estimate_adts_matroska_metadata_bytes(Some(options))
         .map_err(|e| e.to_string())?;
     if options.max_controlled_bytes.is_some_and(|limit| {
-        sources
+        files
             .len()
             .saturating_mul(8192)
             .saturating_add(16384)
@@ -76,13 +106,12 @@ fn open_readers(
     }
     let mut readers = Vec::new();
     readers
-        .try_reserve_exact(sources.len())
+        .try_reserve_exact(files.len())
         .map_err(|_| "cannot allocate ADTS concat readers".to_string())?;
-    for source in sources {
+    for file in files {
         if options.cancel.as_ref().is_some_and(|c| c.is_cancelled()) {
             return Err("media operation cancelled".into());
         }
-        let file = File::open(source).map_err(|e| e.to_string())?;
         if !file.metadata().map_err(|e| e.to_string())?.is_file() {
             return Err("ADTS concat requires regular files".into());
         }
@@ -117,7 +146,7 @@ pub fn plan_concat(
         return Err("controlled memory limit must be positive".into());
     }
     crate::owned_budget::check_rss_budget(options)?;
-    if !supports(sources, Path::new("planned.mka"), options) {
+    let Some(files) = open_supported_files(sources, Path::new("planned.mka"), options) else {
         if sources
             .first()
             .is_some_and(|p| !crate::owned_wave_inspect::is_wave(p).unwrap_or(false))
@@ -125,12 +154,13 @@ pub fn plan_concat(
             return Err("request is not an owned ADTS Matroska concat".into());
         }
         return crate::owned_wave_plan::plan_concat(sources, options);
-    }
+    };
     let meta_bytes = crate::owned_matroska::estimate_adts_matroska_metadata_bytes(Some(options))
         .map_err(|e| e.to_string())?;
     let base_bytes = sources.len().saturating_mul(8192).saturating_add(16384);
-    let mut sequence = crate::owned_aac::adts::SequenceReader::new(open_readers(sources, options)?)
-        .map_err(|e| e.to_string())?;
+    let mut sequence =
+        crate::owned_aac::adts::SequenceReader::new(open_readers_from_files(files, options)?)
+            .map_err(|e| e.to_string())?;
     let config = sequence.configuration();
     let asc = sequence.audio_specific_config().to_vec();
     let mut negotiated_rate = None;
