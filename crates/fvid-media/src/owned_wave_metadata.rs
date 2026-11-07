@@ -308,6 +308,10 @@ pub(crate) fn matroska_source_info_with_interval(
         .map_err(|e| e.to_string())?;
     }
     let track = &reader.tracks[index];
+    let language = reader
+        .track_languages
+        .get(&track.number)
+        .unwrap_or(&track.language);
     let mut extra = reader.metadata.clone();
     if let Some(global_track_tags) = reader.track_metadata.get(&0) {
         extra.extend(global_track_tags.clone());
@@ -320,7 +324,7 @@ pub(crate) fn matroska_source_info_with_interval(
     let info = info_for_file_tags(
         &reader.tags,
         &track.name,
-        &track.language,
+        language,
         Some(&reader.writing_app),
         &extra,
     )?;

@@ -4216,6 +4216,17 @@ See `batch-580-validation.json`.
 
 See `batch-581-validation.json`.
 
+## Batch 582 — FVID-0640..0644: Bare MP3 `standalone_packet_work` Info/window accounting, `max_packets`-bounded interval checks for bare FLAC and bare MP3, non-empty `transform.interval` validation in Matroska PCM `geometry_for_decode`, and Matroska `LanguageIETF` preservation in WAVE `ILNG` export
+
+- **FVID-0640** — Count leading Info packet and active presentation window frames in `standalone_packet_work` for bare MP3 (`crates/fvid-media/src/owned_audio_plan.rs`, `tests/audio_plan_mp3_flac_and_matroska_pcm.rs`).
+- **FVID-0641** — Bound bare FLAC interval prefix check by `options.max_packets` in `open_with_interval` (`crates/fvid-media/src/owned_raw_flac.rs`, `tests/audio_plan_mp3_flac_and_matroska_pcm.rs`).
+- **FVID-0642** — Bound bare MP3 interval prefix and spool budget by `options.max_packets` in `open_with_interval` (`crates/fvid-media/src/owned_raw_mp3.rs`, `tests/audio_plan_mp3_flac_and_matroska_pcm.rs`).
+- **FVID-0643** — Validate non-empty `transform.interval` during Matroska PCM `geometry_for_decode` (`crates/fvid-media/src/owned_matroska_pcm_export.rs`, `tests/audio_plan_mp3_flac_and_matroska_pcm.rs`).
+- **FVID-0644** — Use `track_languages` (`LanguageIETF`) in `matroska_source_info_with_interval` for WAVE export (`crates/fvid-media/src/owned_wave_metadata.rs`, `tests/audio_plan_mp3_flac_and_matroska_pcm.rs`).
+
+See `batch-582-validation.json`.
+
+
 
 
 

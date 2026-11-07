@@ -1,8 +1,8 @@
 {
   "target": 1000,
   "counting_rule": "One independently confirmed problem or useful capability; fixture variants and baseline integration repairs are excluded. Only accepted entries count.",
-  "accepted_count": 639,
-  "next_id": "FVID-0640",
+  "accepted_count": 644,
+  "next_id": "FVID-0645",
   "entries": [
     {
       "id": "FVID-0001",
@@ -7220,6 +7220,61 @@
       "result": "Require at least minutes and seconds separated by ':' and enforce seconds < 60 && minutes < 60 in subtitles::clock.",
       "status": "accepted",
       "validation": "batch-581-validation.json"
+    },
+    {
+      "id": "FVID-0640",
+      "batch": 582,
+      "title": "Count leading Info packet and active presentation window frames in standalone_packet_work for bare MP3",
+      "source": "crates/fvid-media/src/owned_audio_plan.rs",
+      "regression": "tests/audio_plan_mp3_flac_and_matroska_pcm.rs",
+      "before": "standalone_packet_work returned parsed.frames.len() for bare MP3 inputs, omitting any leading Info/Xing packet (which decode_raw_mpeg_pcm counts toward ProgressEvent.packets and max_packets) and including trailing frames past presentation_window().end.",
+      "result": "Count frames with pts < presentation_window().end plus usize::from(parsed.info_packet().is_some()) in standalone_packet_work.",
+      "status": "accepted",
+      "validation": "batch-582-validation.json"
+    },
+    {
+      "id": "FVID-0641",
+      "batch": 582,
+      "title": "Bound bare FLAC interval prefix check by options.max_packets in open_with_interval",
+      "source": "crates/fvid-media/src/owned_raw_flac.rs",
+      "regression": "tests/audio_plan_mp3_flac_and_matroska_pcm.rs",
+      "before": "owned_raw_flac::open_with_interval passed the unclipped sample count to check_nonempty_interval_prefix even when options.max_packets restricted decoding to an earlier packet prefix, allowing plan_decode_audio and supports to accept intervals that fall entirely after the max_packets prefix.",
+      "result": "Bound prefix_samples by options.max_packets before calling check_nonempty_interval_prefix in owned_raw_flac::open_with_interval.",
+      "status": "accepted",
+      "validation": "batch-582-validation.json"
+    },
+    {
+      "id": "FVID-0642",
+      "batch": 582,
+      "title": "Bound bare MP3 interval prefix and spool budget by options.max_packets in open_with_interval",
+      "source": "crates/fvid-media/src/owned_raw_mp3.rs",
+      "regression": "tests/audio_plan_mp3_flac_and_matroska_pcm.rs",
+      "before": "owned_raw_mp3::open_with_interval did not bound prefix_samples by options.max_packets (nor reject max_packets == Some(1) when consumed by a leading Info packet), allowing plan_decode_audio and supports to accept intervals or Info-only packet limits that decode zero audio samples.",
+      "result": "Reject packet limits that decode zero audio frames and bound prefix_samples by options.max_packets in owned_raw_mp3::open_with_interval.",
+      "status": "accepted",
+      "validation": "batch-582-validation.json"
+    },
+    {
+      "id": "FVID-0643",
+      "batch": 582,
+      "title": "Validate non-empty transform.interval during Matroska PCM geometry_for_decode",
+      "source": "crates/fvid-media/src/owned_matroska_pcm_export.rs",
+      "regression": "tests/audio_plan_mp3_flac_and_matroska_pcm.rs",
+      "before": "Unlike all other Matroska audio export modules, owned_matroska_pcm_export::geometry_for_decode omitted the decode_matroska_pcm_f64 + check_nonempty_interval_prefix check when transform.interval was set, causing plan_decode_audio to accept out-of-range or empty intervals on Matroska PCM tracks.",
+      "result": "Probe decode_matroska_pcm_f64 into sink and call check_nonempty_interval_prefix when transform.interval is present in owned_matroska_pcm_export::geometry_for_decode.",
+      "status": "accepted",
+      "validation": "batch-582-validation.json"
+    },
+    {
+      "id": "FVID-0644",
+      "batch": 582,
+      "title": "Use track_languages (LanguageIETF) in matroska_source_info_with_interval for WAVE export",
+      "source": "crates/fvid-media/src/owned_wave_metadata.rs",
+      "regression": "tests/audio_plan_mp3_flac_and_matroska_pcm.rs",
+      "before": "matroska_source_info_with_interval passed &track.language directly to info_for_file_tags instead of consulting reader.track_languages, ignoring Matroska LanguageIETF (0x22B59D) when building RIFF INFO (ILNG) metadata for WAVE export.",
+      "result": "Resolve reader.track_languages.get(&track.number).unwrap_or(&track.language) in matroska_source_info_with_interval before calling info_for_file_tags.",
+      "status": "accepted",
+      "validation": "batch-582-validation.json"
     }
   ]
 }

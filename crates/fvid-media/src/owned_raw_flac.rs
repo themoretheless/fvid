@@ -192,10 +192,21 @@ fn open_with_interval(
             .min(parsed.samples()),
             None => parsed.samples(),
         };
+        let prefix_samples = match options.max_packets {
+            Some(limit) => parsed
+                .frames
+                .iter()
+                .take_while(|f| f.pts < to)
+                .take(usize::try_from(limit).unwrap_or(usize::MAX))
+                .map(|f| u64::from(f.samples))
+                .sum::<u64>()
+                .min(to),
+            None => to,
+        };
         crate::owned_ogg_opus_export::check_nonempty_interval_prefix(
             Some(transform),
             parsed.sample_rate,
-            to,
+            prefix_samples,
         )?;
     }
     Ok(parsed)

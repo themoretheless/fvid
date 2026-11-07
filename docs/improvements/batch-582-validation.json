@@ -1,0 +1,27 @@
+{
+  "status": "accepted",
+  "accepted_ids": [
+    "FVID-0640",
+    "FVID-0641",
+    "FVID-0642",
+    "FVID-0643",
+    "FVID-0644"
+  ],
+  "count_delta": 5,
+  "accepted_count": 644,
+  "next_id": "FVID-0645",
+  "qualification": [
+    {
+      "name": "audio-plan-mp3-flac-and-matroska-pcm",
+      "command": [
+        "cargo",
+        "test",
+        "--test",
+        "audio_plan_mp3_flac_and_matroska_pcm"
+      ],
+      "exit_code": 0,
+      "passed": 5,
+      "ignored": 0
+    }
+  ]
+}

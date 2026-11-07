@@ -143,8 +143,11 @@ pub fn standalone_packet_work(source: &Path, options: &CopyOptions) -> Result<Op
         u64::try_from(crate::owned_raw_flac::open(source, options)?.frames.len())
             .map_err(|_| "FLAC packet work overflow")?
     } else if crate::owned_raw_mp3::recognizes(source)? {
-        u64::try_from(crate::owned_raw_mp3::open(source, options)?.frames.len())
-            .map_err(|_| "MPEG packet work overflow")?
+        let parsed = crate::owned_raw_mp3::open(source, options)?;
+        let pres = parsed.presentation_window();
+        let active_frames = parsed.frames.iter().take_while(|f| f.pts < pres.end).count();
+        let total = active_frames.saturating_add(usize::from(parsed.info_packet().is_some()));
+        u64::try_from(total).map_err(|_| "MPEG packet work overflow")?
     } else { return Ok(None); };
     Ok(Some(options.max_packets.map_or(count, |limit| count.min(limit))))
 }

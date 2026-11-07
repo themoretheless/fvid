@@ -114,31 +114,46 @@ fn open_with_interval(
     if parsed.max_packet_size_in_prefix(until, options.max_packets) > options.max_packet_bytes {
         return Err("MPEG packet bytes exceed limit".into());
     }
+    let pres = parsed.presentation_window();
+    let last = match until {
+        Some(at) => u64::try_from(
+            (at.as_nanos() * u128::from(parsed.sample_rate)).div_ceil(1_000_000_000),
+        )
+        .unwrap_or(u64::MAX),
+        None => parsed.presentation_samples(),
+    };
+    let to = pres.start.saturating_add(last).min(pres.end);
+    let mut packets = 0u64;
+    if parsed.info_packet().is_some() {
+        if options.max_packets.is_some_and(|limit| packets >= limit) {
+            return Err("MP3 packet limit contains no samples".into());
+        }
+        packets += 1;
+    }
+    let mut max_frame_samples = 0usize;
+    let mut packet_end = pres.start;
+    let mut decoded_frames = 0usize;
+    for frame in &parsed.frames {
+        if frame.pts >= to {
+            break;
+        }
+        if options.max_packets.is_some_and(|limit| packets >= limit) {
+            break;
+        }
+        packets += 1;
+        decoded_frames += 1;
+        max_frame_samples = max_frame_samples.max(frame.samples as usize);
+        packet_end = frame.pts.saturating_add(u64::from(frame.samples)).min(to);
+    }
+    if decoded_frames == 0 && options.max_packets.is_some() && !parsed.frames.is_empty() && pres.start < to {
+        return Err("MP3 packet limit contains no samples".into());
+    }
+    let prefix_samples = if options.max_packets.is_some() {
+        packet_end.saturating_sub(pres.start)
+    } else {
+        last.min(parsed.presentation_samples())
+    };
     if let Some(max) = options.max_controlled_bytes {
-        let pres = parsed.presentation_window();
-        let last = match until {
-            Some(at) => u64::try_from(
-                (at.as_nanos() * u128::from(parsed.sample_rate)).div_ceil(1_000_000_000),
-            )
-            .unwrap_or(u64::MAX),
-            None => parsed.presentation_samples(),
-        };
-        let to = pres.start.saturating_add(last).min(pres.end);
-        let mut packets = 0u64;
-        if parsed.info_packet().is_some() {
-            packets += 1;
-        }
-        let mut max_frame_samples = 0usize;
-        for frame in &parsed.frames {
-            if frame.pts >= to {
-                break;
-            }
-            if options.max_packets.is_some_and(|limit| packets >= limit) {
-                break;
-            }
-            packets += 1;
-            max_frame_samples = max_frame_samples.max(frame.samples as usize);
-        }
         let pcm_bytes = max_frame_samples
             .checked_mul(usize::from(parsed.channels))
             .and_then(|n| n.checked_mul(std::mem::size_of::<f32>()))
@@ -161,12 +176,11 @@ fn open_with_interval(
             return Err("controlled memory budget exceeded: MPEG decoded PCM".into());
         }
         if let Some((transform, None)) = window {
-            let prefix_frames = last.min(parsed.presentation_samples());
             crate::owned_adts_export::check_spool_wave_export_budget(
                 parsed.sample_rate,
                 parsed.channels,
                 32,
-                prefix_frames.max(1024),
+                prefix_samples.max(1024),
                 info.len(),
                 false,
                 transform,
@@ -175,14 +189,6 @@ fn open_with_interval(
         }
     }
     if let Some((transform, None)) = window {
-        let last = match until {
-            Some(at) => u64::try_from(
-                (at.as_nanos() * u128::from(parsed.sample_rate)).div_ceil(1_000_000_000),
-            )
-            .unwrap_or(u64::MAX),
-            None => parsed.presentation_samples(),
-        };
-        let prefix_samples = last.min(parsed.presentation_samples());
         crate::owned_ogg_opus_export::check_nonempty_interval_prefix(
             Some(transform),
             parsed.sample_rate,
