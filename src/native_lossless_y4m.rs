@@ -115,7 +115,7 @@ fn eligible_webm(input: &crate::container::webm::WebmReader<BufReader<File>>) ->
         && input.packets.iter().all(|p| p.pts_ns >= 0)
 }
 
-fn open_lossless_source(
+pub(crate) fn open_lossless_source(
     source: &Path,
 ) -> Result<Option<crate::container::webm::WebmReader<BufReader<File>>>> {
     use std::io::SeekFrom;
@@ -155,7 +155,7 @@ pub(crate) fn validate_first_frame(
     geometry: &VideoGeometry,
     filters: &PixelFilters,
     processed: bool,
-) -> Result<()> {
+) -> Result<Option<crate::container::webm::WebmReader<BufReader<File>>>> {
     let webm = open_lossless_source(source)?;
     let video_index = webm
         .as_ref()
@@ -243,7 +243,7 @@ pub(crate) fn validate_first_frame(
     }
     u32::try_from(samples.width).map_err(|_| invalid("FFV1 width overflow"))?;
     u32::try_from(samples.height).map_err(|_| invalid("FFV1 height overflow"))?;
-    Ok(())
+    Ok(webm)
 }
 
 /// Decode every source frame, then encode selected frames with original clocks.
@@ -251,11 +251,34 @@ pub(crate) fn validate_first_frame(
 pub fn write_selected<W: Write + Seek>(
     source:&Path,output:&mut W,geometry:&VideoGeometry,filters:&PixelFilters,
     cancel:Option<&CancelFlag>,progress:Option<&ProgressHook>,
+    processor:Option<&mut crate::native_lossless::FrameProcessor<'_>>,
+    step:fvid_media::owned_framestep::FrameStep,
+)->Result<(crate::media_info::LosslessStats,ProgressEvent)> {
+    check(cancel)?;
+    let webm = open_lossless_source(source)?;
+    write_selected_with_webm(
+        source,
+        webm,
+        output,
+        geometry,
+        filters,
+        cancel,
+        progress,
+        processor,
+        step,
+    )
+}
+
+#[expect(clippy::too_many_arguments, reason = "Internal helper forwarding pre-opened WebmReader")]
+pub(crate) fn write_selected_with_webm<W: Write + Seek>(
+    source:&Path,
+    mut webm:Option<crate::container::webm::WebmReader<BufReader<File>>>,
+    output:&mut W,geometry:&VideoGeometry,filters:&PixelFilters,
+    cancel:Option<&CancelFlag>,progress:Option<&ProgressHook>,
     mut processor:Option<&mut crate::native_lossless::FrameProcessor<'_>>,
     step:fvid_media::owned_framestep::FrameStep,
 )->Result<(crate::media_info::LosslessStats,ProgressEvent)> {
     check(cancel)?;
-    let mut webm = open_lossless_source(source)?;
     let video_index = webm
         .as_ref()
         .and_then(|r| r.tracks.iter().position(|t| t.kind == 1))

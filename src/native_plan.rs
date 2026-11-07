@@ -1231,19 +1231,24 @@ pub fn concat_y4m_with_options(
     }
     let mut remaining_packets = options.max_packets;
     let mut active_sources = 0usize;
+    let mut cached_layouts = Vec::with_capacity(sources.len());
     for source in sources {
-        crate::native_export::validate_video_packet_budget_with_geometry_and_limit(
+        let (layout, upper_bound) = crate::native_export::validate_video_packet_budget_and_layout(
             source,
             &Default::default(),
+            &Default::default(),
             options,
+            None,
+            false,
             remaining_packets,
         )
         .map_err(|e| e.to_string())?;
+        if let Some(layout) = layout {
+            cached_layouts.push(layout);
+        }
         active_sources += 1;
         if let Some(rem) = remaining_packets {
-            if let Some(seg_frames) = crate::native_export::y4m_segment_frame_upper_bound_with_options(source, selected, options)
-                .map_err(|e| e.to_string())?
-            {
+            if let Some(seg_frames) = upper_bound {
                 let next_rem = rem.saturating_sub(seg_frames);
                 remaining_packets = Some(next_rem);
                 if next_rem == 0 {
@@ -1254,11 +1259,17 @@ pub fn concat_y4m_with_options(
             }
         }
     }
-    crate::native_export::validate_y4m_concat_compatibility_with_options(
-        &sources[..active_sources.max(1)],
-        options,
-    )
-    .map_err(|e| e.to_string())?;
+    let active_len = active_sources.max(1);
+    if cached_layouts.len() == active_len {
+        crate::native_export::validate_y4m_concat_compatibility_from_layouts(&cached_layouts)
+            .map_err(|e| e.to_string())?;
+    } else {
+        crate::native_export::validate_y4m_concat_compatibility_with_options(
+            &sources[..active_len],
+            options,
+        )
+        .map_err(|e| e.to_string())?;
+    }
     if options.max_packets == Some(0) {
         return Err("input has no decoded video frames".into());
     }
@@ -1461,24 +1472,38 @@ pub fn transcode_lossless(source: &std::path::Path, transform: &crate::media_inf
     if (!crate::native_lossless::supports(transform) && !crate::native_lossless::supports_framestep(transform)) {
         return Err("request is not supported by the owned lossless planner".into());
     }
-    let planar_kind = crate::native_lossless_y4m::classify_eligible(source).map_err(|e| e.to_string())?;
-    let planar_eligible = planar_kind.is_some();
-    if !planar_eligible && !crate::native_lossless::eligible(source).map_err(|e| e.to_string())? {
+    let Some(planar_eligible) = crate::native_lossless::classify_eligible(source).map_err(|e| e.to_string())? else {
         return Err("request is not supported by the owned lossless planner".into());
-    }
+    };
     let mut spatial_transform=transform.clone();
     spatial_transform.framestep=None;
     let (geometry,filters)=crate::native_lossless::configuration(&spatial_transform).map_err(|e|e.to_string())?;
-    if planar_eligible {
-        crate::native_lossless_y4m::validate_first_frame(source, &geometry, &filters, false)
+    let streams=if planar_eligible {
+        let webm = crate::native_lossless_y4m::validate_first_frame(source, &geometry, &filters, false)
             .map_err(|e| e.to_string())?;
+        if let Some(webm) = webm {
+            webm.tracks.iter().enumerate().map(|(index, track)| PlanStream {
+                index,
+                media_type: if track.kind == 1 { "video".into() } else { "audio".into() },
+                codec: match track.codec.as_str() {
+                    "V_MPEG4/ISO/AVC" => "h264",
+                    "V_MPEGH/ISO/HEVC" => "hevc",
+                    "V_VP8" => "vp8",
+                    "V_VP9" => "vp9",
+                    "V_AV1" => "av1",
+                    "V_FFV1" => "ffv1",
+                    "A_AAC" => "aac",
+                    "A_OPUS" => "opus",
+                    other => other,
+                }.into(),
+                disposition: if track.kind == 1 { "primary_video".into() } else { "copy".into() },
+            }).collect()
+        } else {
+            vec![PlanStream {index:0,media_type:"video".into(),codec:"rawvideo".into(),disposition:"primary_video".into()}]
+        }
     } else {
         crate::native_lossless::validate_first_mp4_frame(source, &geometry, &filters, false)
             .map_err(|e| e.to_string())?;
-    }
-    let streams=if planar_kind == Some(true) {
-        vec![PlanStream {index:0,media_type:"video".into(),codec:"rawvideo".into(),disposition:"primary_video".into()}]
-    } else {
         let info=crate::native_probe::probe(source)?;
         info.streams.iter().map(|stream| PlanStream {
             index:stream.index,media_type:stream.media_type.clone(),codec:stream.codec.clone(),
@@ -1573,12 +1598,21 @@ fn loudness_plan_and_channels_with_options(
     } else {
         None
     };
+    let mut fvid_media_geometry = None;
     let mut plan = if options.max_controlled_bytes.is_none()
         && (wave || cached_native_info.is_some())
     {
         decode_audio_with_options(source, &Default::default(), options)?
-    } else {
+    } else if wave || cached_native_info.is_some() {
         fvid_media::plan_decode_audio(source, &Default::default(), options)?
+    } else {
+        let (plan, (rate, channels, _)) = fvid_media::owned_audio_plan::plan_decode_audio_with_geometry(
+            source,
+            &Default::default(),
+            options,
+        )?;
+        fvid_media_geometry = Some((rate, channels));
+        plan
     };
     let (rate,channels)=if let Some(info) = wave_info {
         let frame = usize::from(info.frame_bytes());
@@ -1625,7 +1659,10 @@ fn loudness_plan_and_channels_with_options(
         }
         (info.sample_rate, info.channels)
     } else {
-        let (rate, channels) = fvid_media::owned_audio_plan::source_geometry(source, options)?;
+        let (rate, channels) = match fvid_media_geometry {
+            Some(geom) => geom,
+            None => fvid_media::owned_audio_plan::source_geometry(source, options)?,
+        };
         if let Some(max) = options.max_controlled_bytes {
             let frame = usize::from(channels.max(1)) * 4;
             let capacity = 65536 / frame * frame;

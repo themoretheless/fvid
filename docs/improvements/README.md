@@ -4676,3 +4676,14 @@ See `batch-626-validation.json`.
 
 See `batch-627-validation.json`.
 
+## Batch 628 — FVID-0870..0874: Y4M concat layout/bound reuse, lossless plan/export `WebmReader` reuse, and loudness plan geometry reuse
+
+- **FVID-0870** — Reuse first-frame Y4M rate and layout plus segment upper bounds across packet-budget and concat-compatibility validation (`src/native_export.rs`, `tests/y4m_lossless_and_loudness_plan_reuse.rs`).
+- **FVID-0871** — Compute Y4M segment frame upper bound during initial header inspection in `validate_video_packet_budget_and_layout` (`src/native_export.rs`, `tests/y4m_lossless_and_loudness_plan_reuse.rs`).
+- **FVID-0872** — Single-pass planar/MP4 eligibility classification and `WebmReader` reuse in `native_plan::transcode_lossless` (`src/native_plan.rs`, `tests/y4m_lossless_and_loudness_plan_reuse.rs`).
+- **FVID-0873** — Forward opened `WebmReader` from `open_lossless_source` into `write_selected_with_webm` in `transcode_ffv1_selected` (`src/native_lossless_y4m.rs`, `tests/y4m_lossless_and_loudness_plan_reuse.rs`).
+- **FVID-0874** — Single-pass plan and geometry extraction via `plan_decode_audio_with_geometry` in `loudness_plan_and_channels_with_options` (`src/native_plan.rs`, `tests/y4m_lossless_and_loudness_plan_reuse.rs`).
+
+See `batch-628-validation.json`.
+
+

@@ -386,23 +386,22 @@ pub(crate) fn inspect_first_y4m_frame_with_filters_and_options(
     ))
 }
 
+pub(crate) type Y4mFirstFrameLayout = (
+    (u128, u128),
+    (usize, usize, &'static str, u8, bool, (u32, u32)),
+);
+
 pub(crate) fn validate_y4m_concat_compatibility(sources: &[PathBuf]) -> Result<()> {
     validate_y4m_concat_compatibility_with_options(sources, &fvid_media::CopyOptions::default())
 }
 
-pub(crate) fn validate_y4m_concat_compatibility_with_options(
-    sources: &[PathBuf],
-    options: &fvid_media::CopyOptions,
+pub(crate) fn validate_y4m_concat_compatibility_from_layouts(
+    layouts: &[Y4mFirstFrameLayout],
 ) -> Result<()> {
     let mut first_rate: Option<(u128, u128)> = None;
     let mut first_layout = None;
-    for source in sources {
-        let ((duration, scale), layout, _) = inspect_first_y4m_frame_with_filters_and_options(
-            source,
-            &Default::default(),
-            &Default::default(),
-            options,
-        )?;
+    for &(rate, layout) in layouts {
+        let (duration, scale) = rate;
         if let Some((first_duration, first_scale)) = first_rate {
             if product(duration, first_scale)? != product(first_duration, scale)? {
                 return Err(invalid("Y4M concat requires identical frame rates"));
@@ -419,6 +418,23 @@ pub(crate) fn validate_y4m_concat_compatibility_with_options(
         }
     }
     Ok(())
+}
+
+pub(crate) fn validate_y4m_concat_compatibility_with_options(
+    sources: &[PathBuf],
+    options: &fvid_media::CopyOptions,
+) -> Result<()> {
+    let mut layouts = Vec::with_capacity(sources.len());
+    for source in sources {
+        let (rate, layout, _) = inspect_first_y4m_frame_with_filters_and_options(
+            source,
+            &Default::default(),
+            &Default::default(),
+            options,
+        )?;
+        layouts.push((rate, layout));
+    }
+    validate_y4m_concat_compatibility_from_layouts(&layouts)
 }
 
 pub(crate) fn validate_video_selection(source: &Path, selected: Option<usize>) -> Result<()> {
@@ -524,6 +540,27 @@ pub(crate) fn validate_video_packet_budget_with_geometry_filters_interval_and_li
     relative_interval: bool,
     max_packets: Option<u64>,
 ) -> Result<()> {
+    validate_video_packet_budget_and_layout(
+        source,
+        geometry,
+        filters,
+        options,
+        interval,
+        relative_interval,
+        max_packets,
+    )
+    .map(|_| ())
+}
+
+pub(crate) fn validate_video_packet_budget_and_layout(
+    source: &Path,
+    geometry: &crate::native_geometry::VideoGeometry,
+    filters: &crate::native_pixels::PixelFilters,
+    options: &fvid_media::CopyOptions,
+    interval: Option<(std::time::Duration, std::time::Duration)>,
+    relative_interval: bool,
+    max_packets: Option<u64>,
+) -> Result<(Option<Y4mFirstFrameLayout>, Option<u64>)> {
     use std::io::{Read, Seek, SeekFrom};
     if options.max_packet_bytes == 0 {
         return Err(invalid("packet byte limit must be positive"));
@@ -533,10 +570,12 @@ pub(crate) fn validate_video_packet_budget_with_geometry_filters_interval_and_li
     let read = input.read(&mut prefix)?;
     input.seek(SeekFrom::Start(0))?;
     if read == 9 && &prefix == b"YUV4MPEG2" {
+        let metadata_len = input.get_ref().metadata()?.len();
         let mut frame_len = 0usize;
         let mut rgb_len = 0usize;
         let mut line = Vec::new();
-        if crate::line(&mut input, &mut line)? {
+        let has_line = crate::line(&mut input, &mut line)?;
+        if has_line {
             let header = crate::Header::parse(&line)?;
             frame_len = header.frame_len()?;
             rgb_len = header
@@ -553,9 +592,17 @@ pub(crate) fn validate_video_packet_budget_with_geometry_filters_interval_and_li
                 return Err(invalid("Y4M frame exceeds controlled memory budget"));
             }
         }
+        let upper_bound = if !has_line {
+            Some(0)
+        } else {
+            let stride = (frame_len as u64).saturating_add(6);
+            let payload = metadata_len.saturating_sub(line.len() as u64);
+            (stride > 0 && payload % stride == 0).then_some(payload / stride)
+        };
         drop(input);
-        let ((duration, scale), (_, _, _, depth, _, _), bytes) =
+        let ((duration, scale), layout, bytes) =
             inspect_first_y4m_frame_with_filters_and_options(source, geometry, filters, options)?;
+        let depth = layout.3;
         if bytes > options.max_packet_bytes {
             return Err(invalid("Y4M frame exceeds byte limit"));
         }
@@ -576,7 +623,7 @@ pub(crate) fn validate_video_packet_budget_with_geometry_filters_interval_and_li
             }
         }
         if let Some((from, to)) = interval {
-            if let Some(frame_count) = y4m_segment_frame_upper_bound_with_options(source, None, options)? {
+            if let Some(frame_count) = upper_bound {
                 let mut selected_in_interval = 0u64;
                 for index in 0..frame_count {
                     let start = u128::from(index).saturating_mul(duration);
@@ -593,7 +640,7 @@ pub(crate) fn validate_video_packet_budget_with_geometry_filters_interval_and_li
                 }
             }
         }
-        return Ok(());
+        return Ok((Some(((duration, scale), layout)), upper_bound));
     }
     let selected = options.streams.first().copied();
     let max_samples = max_packets
@@ -622,9 +669,13 @@ pub(crate) fn validate_video_packet_budget_with_geometry_filters_interval_and_li
             effective_packet_limit,
             |mem_limit| effective_packet_limit.min(mem_limit.saturating_sub(index_bytes)),
         );
+        let mut upper_bound = None;
         for (idx, track) in reader.tracks().iter().enumerate() {
             if track.handler != *b"vide" || selected.is_some_and(|sel| sel != idx) {
                 continue;
+            }
+            if upper_bound.is_none() && track.edits.is_empty() {
+                upper_bound = Some(track.samples.len() as u64);
             }
             let non_reordered = track.edits.is_empty()
                 && track.timescale > 0
@@ -694,8 +745,9 @@ pub(crate) fn validate_video_packet_budget_with_geometry_filters_interval_and_li
             }
         }
         drop(reader);
-        let (_, (_, _, _, depth, _, _), bytes) =
+        let (rate, layout, bytes) =
             inspect_first_y4m_frame_with_filters_and_options(source, geometry, filters, options)?;
+        let depth = layout.3;
         if bytes > options.max_packet_bytes {
             return Err(invalid("Y4M frame exceeds byte limit"));
         }
@@ -705,7 +757,7 @@ pub(crate) fn validate_video_packet_budget_with_geometry_filters_interval_and_li
         {
             return Err(invalid("Y4M frame exceeds controlled memory budget"));
         }
-        return Ok(());
+        return Ok((Some((rate, layout)), upper_bound));
     }
     if read >= 4 && prefix[..4] == [0x1a, 0x45, 0xdf, 0xa3] {
         let mut limits = crate::container::webm::Limits::default();
@@ -754,6 +806,13 @@ pub(crate) fn validate_video_packet_budget_with_geometry_filters_interval_and_li
                 )
             })
             .collect();
+        let upper_bound = selected_tracks.first().map(|&(number, _)| {
+            reader
+                .packets
+                .iter()
+                .filter(|p| p.track == number && !p.invisible)
+                .count() as u64
+        });
         let mut visible_on_track = 0usize;
         let mut first_pts_on_track: Option<i64> = None;
         for index in 0..reader.packets.len() {
@@ -796,8 +855,9 @@ pub(crate) fn validate_video_packet_budget_with_geometry_filters_interval_and_li
             }
         }
         drop(reader);
-        let (_, (_, _, _, depth, _, _), bytes) =
+        let (rate, layout, bytes) =
             inspect_first_y4m_frame_with_filters_and_options(source, geometry, filters, options)?;
+        let depth = layout.3;
         if bytes > options.max_packet_bytes {
             return Err(invalid("Y4M frame exceeds byte limit"));
         }
@@ -814,8 +874,9 @@ pub(crate) fn validate_video_packet_budget_with_geometry_filters_interval_and_li
         {
             return Err(invalid("input has no decoded video frames"));
         }
+        return Ok((Some((rate, layout)), upper_bound));
     }
-    Ok(())
+    Ok((None, None))
 }
 
 pub(crate) fn y4m_segment_frame_upper_bound(
@@ -968,12 +1029,13 @@ fn export_y4m_sources_with_options(
     }
     fvid_media::owned_budget::check_rss_budget(options).map_err(|e| invalid(&e))?;
     let max_packets = options.max_packets;
+    let mut cached_layouts = Vec::with_capacity(if sources.len() > 1 { sources.len() } else { 0 });
     for source in sources {
         if options.cancel.as_ref().is_some_and(|c| c.is_cancelled()) {
             return Err(invalid("media operation cancelled"));
         }
         fvid_media::owned_budget::check_rss_budget(options).map_err(|e| invalid(&e))?;
-        validate_video_packet_budget_with_geometry_filters_interval_and_limit(
+        let (layout, _) = validate_video_packet_budget_and_layout(
             source,
             geometry,
             filters,
@@ -982,9 +1044,18 @@ fn export_y4m_sources_with_options(
             relative_interval,
             max_packets,
         )?;
+        if sources.len() > 1
+            && let Some(layout) = layout
+        {
+            cached_layouts.push(layout);
+        }
     }
     if sources.len() > 1 {
-        validate_y4m_concat_compatibility_with_options(sources, options)?;
+        if geometry.is_identity() && filters.is_empty() && cached_layouts.len() == sources.len() {
+            validate_y4m_concat_compatibility_from_layouts(&cached_layouts)?;
+        } else {
+            validate_y4m_concat_compatibility_with_options(sources, options)?;
+        }
     }
     let directory = destination
         .parent()
@@ -2532,13 +2603,33 @@ pub fn transcode_ffv1_selected(source:&Path,destination:&Path,
         match OpenOptions::new().write(true).create_new(true).open(&path){Ok(file)=>Some(Ok((Temporary(path),file))),Err(error) if error.kind()==std::io::ErrorKind::AlreadyExists=>None,Err(error)=>Some(Err(error))}
     }).ok_or_else(||invalid("cannot reserve FFV1 output"))??;
     let mut output=BufWriter::new(file);
-    let (stats,event)=if crate::native_lossless_y4m::eligible(source)? {
-        if let Some(step)=step {
-            crate::native_lossless_y4m::write_selected(source,&mut output,geometry,filters,cancel,progress,None,step)?
-        } else { crate::native_lossless_y4m::write(source,&mut output,geometry,filters,cancel,progress)? }
-    } else if let Some(step)=step {
-        crate::native_lossless::write_mp4_selected(source,&mut output,geometry,filters,cancel,progress,None,step)?
-    } else { crate::native_lossless::write_mp4_transformed(source,&mut output,geometry,filters,cancel,progress)? };
+    let step = match step {
+        Some(step) => step,
+        None => fvid_media::owned_framestep::FrameStep::parse("").map_err(|e| invalid(&e))?,
+    };
+    let (stats,event)=match crate::native_lossless_y4m::open_lossless_source(source) {
+        Ok(webm) => crate::native_lossless_y4m::write_selected_with_webm(
+            source,
+            webm,
+            &mut output,
+            geometry,
+            filters,
+            cancel,
+            progress,
+            None,
+            step,
+        )?,
+        Err(_) => crate::native_lossless::write_mp4_selected(
+            source,
+            &mut output,
+            geometry,
+            filters,
+            cancel,
+            progress,
+            None,
+            step,
+        )?,
+    };
     output.flush()?;output.get_ref().sync_all()?;drop(output);
     if cancel.is_some_and(|c|c.is_cancelled()){return Err(invalid("media operation cancelled"));}
     std::fs::hard_link(&temporary.0,destination)?;

@@ -1,8 +1,8 @@
 {
   "target": 1000,
   "counting_rule": "One independently confirmed problem or useful capability; fixture variants and baseline integration repairs are excluded. Only accepted entries count.",
-  "accepted_count": 869,
-  "next_id": "FVID-0870",
+  "accepted_count": 874,
+  "next_id": "FVID-0875",
   "entries": [
     {
       "id": "FVID-0001",
@@ -9750,6 +9750,61 @@
       "result": "check_output_memory_budget_with_metadata returns the extracted Option<MatroskaPcmMetadata>, which native_loudnorm::try_apply reuses for export_audio_pcm_transformed_with_source_metadata.",
       "status": "accepted",
       "validation": "batch-627-validation.json"
+    },
+    {
+      "id": "FVID-0870",
+      "batch": 628,
+      "title": "Reuse first-frame Y4M rate and layout plus segment upper bounds across packet-budget and concat-compatibility validation",
+      "source": "src/native_export.rs",
+      "regression": "tests/y4m_lossless_and_loudness_plan_reuse.rs",
+      "before": "Multi-source Y4M concat planning and export decoded the first frame of every segment during packet-budget validation and then reopened and decoded the first frame of every segment again in validate_y4m_concat_compatibility_with_options, plus reopened each segment in y4m_segment_frame_upper_bound_with_options.",
+      "result": "validate_video_packet_budget_and_layout returns the inspected first-frame rate/layout and segment frame upper bound so concat planning and export validate compatibility without a second first-frame decode or container reopen.",
+      "status": "accepted",
+      "validation": "batch-628-validation.json"
+    },
+    {
+      "id": "FVID-0871",
+      "batch": 628,
+      "title": "Compute Y4M segment frame upper bound during initial header inspection in validate_video_packet_budget_and_layout",
+      "source": "src/native_export.rs",
+      "regression": "tests/y4m_lossless_and_loudness_plan_reuse.rs",
+      "before": "Interval-bounded Y4M packet-budget validation opened the Y4M source to parse its header line, dropped the file, and then reopened the file in y4m_segment_frame_upper_bound_with_options to read metadata.len() and parse the exact same header line again.",
+      "result": "The Y4M branch computes the segment frame upper bound directly from the already-opened file metadata and parsed header line.",
+      "status": "accepted",
+      "validation": "batch-628-validation.json"
+    },
+    {
+      "id": "FVID-0872",
+      "batch": 628,
+      "title": "Single-pass planar/MP4 eligibility classification and WebmReader reuse in native_plan::transcode_lossless",
+      "source": "src/native_plan.rs",
+      "regression": "tests/y4m_lossless_and_loudness_plan_reuse.rs",
+      "before": "native_plan::transcode_lossless called native_lossless_y4m::classify_eligible followed by native_lossless::eligible, and for Matroska inputs reopened and rescanned the entire packet index again in native_probe::probe.",
+      "result": "native_plan::transcode_lossless classifies eligibility once via native_lossless::classify_eligible and reuses the WebmReader returned by validate_first_frame to build plan stream descriptors without re-probing Matroska.",
+      "status": "accepted",
+      "validation": "batch-628-validation.json"
+    },
+    {
+      "id": "FVID-0873",
+      "batch": 628,
+      "title": "Forward opened WebmReader from open_lossless_source into write_selected_with_webm in transcode_ffv1_selected",
+      "source": "src/native_lossless_y4m.rs",
+      "regression": "tests/y4m_lossless_and_loudness_plan_reuse.rs",
+      "before": "native_export::transcode_ffv1_selected called native_lossless_y4m::eligible (which opened and scanned the entire Matroska file) and then called write_selected/write which immediately called open_lossless_source to reopen and rescan the Matroska file a second time.",
+      "result": "transcode_ffv1_selected calls open_lossless_source once and passes the resulting WebmReader directly to write_selected_with_webm.",
+      "status": "accepted",
+      "validation": "batch-628-validation.json"
+    },
+    {
+      "id": "FVID-0874",
+      "batch": 628,
+      "title": "Single-pass plan and geometry extraction via plan_decode_audio_with_geometry in loudness_plan_and_channels_with_options",
+      "source": "src/native_plan.rs",
+      "regression": "tests/y4m_lossless_and_loudness_plan_reuse.rs",
+      "before": "When delegating to fvid_media, loudness_plan_and_channels_with_options called fvid_media::plan_decode_audio and then called fvid_media::owned_audio_plan::source_geometry, opening and inspecting the audio container twice.",
+      "result": "loudness_plan_and_channels_with_options calls fvid_media::owned_audio_plan::plan_decode_audio_with_geometry to obtain both the MediaPlan and (rate, channels) in a single pass.",
+      "status": "accepted",
+      "validation": "batch-628-validation.json"
     }
   ],
   "pending_count": 131

@@ -1,0 +1,15 @@
+{
+  "batch": 628,
+  "ids": [
+    "FVID-0870",
+    "FVID-0871",
+    "FVID-0872",
+    "FVID-0873",
+    "FVID-0874"
+  ],
+  "commands": [
+    "cargo test --test y4m_lossless_and_loudness_plan_reuse",
+    "python3 scripts/check_improvements_registry.py"
+  ],
+  "status": "accepted"
+}
