@@ -123,7 +123,13 @@ fn audio_plan_with_controls(
     let mut total_out_channels = 0u32;
     for source in sources {
         validate_mix_controls(controls)?;
-        let (rate, channels) = if crate::owned_g711_wave_export::recognizes(source, controls)? {
+        let (head, head_len) = crate::owned_audio_plan::read_source_head(source)?;
+        let is_wave_header = matches!(&head[..head_len.min(4)], b"RIFF" | b"RIFX" | b"RF64")
+            && head_len == 12
+            && &head[8..12] == b"WAVE";
+        let (rate, channels) = if is_wave_header
+            && crate::owned_g711_wave_export::recognizes(source, controls)?
+        {
             let info = crate::owned_audio_plan::source_descriptor(source, controls)?;
             crate::owned_audio_plan::plan_decode_audio(source, &Default::default(), controls)?;
             let g711_frames = info.stage2_frames;
@@ -136,7 +142,7 @@ fn audio_plan_with_controls(
             total_input_pcm_bytes = total_input_pcm_bytes.saturating_add(decoded_bytes);
             min_frames = Some(min_frames.map_or(g711_frames, |m| m.min(g711_frames)));
             (info.rate, info.channels)
-        } else if crate::owned_wave_inspect::is_wave(source).map_err(|e| e.to_string())? {
+        } else if is_wave_header {
             let mut file = std::fs::File::open(source).map_err(|e| e.to_string())?;
             let wave_info = crate::owned_wave_inspect::inspect(&mut file, controls.cancel.as_ref())
                 .map_err(|e| e.to_string())?;
@@ -257,32 +263,33 @@ pub(crate) fn decode_owned_audio_with_controls(
     controls: &fvid_control::CopyOptions,
 ) -> Result<(AudioDecodeStats, Vec<u8>)> {
     validate_mix_controls(controls)?;
-    if crate::owned_wave_inspect::is_wave(source).map_err(|e| e.to_string())?
+    let (head, head_len) = crate::owned_audio_plan::read_source_head(source)?;
+    if head_len == 12
+        && &head[..4] == b"RIFF"
+        && &head[8..12] == b"WAVE"
         && !crate::owned_g711_wave_export::recognizes(source, controls)?
     {
-        let mut wave_file = std::fs::File::open(source).map_err(|e| e.to_string())?;
-        let wave_info =
-            crate::owned_wave_inspect::inspect(&mut wave_file, controls.cancel.as_ref())
-                .map_err(|e| e.to_string())?;
-        if wave_info.float && wave_info.bits_per_sample == 32 {
-            return read_float_wave_with_admission(
-                source,
-                Some(32),
-                controls.cancel.as_ref(),
-                controls.max_packet_bytes,
-                controls.max_packets,
-                |_, _, size| {
-                    if let Some(limit) = controls.max_controlled_bytes {
-                        if size > limit {
-                            return Err(
-                                "controlled memory budget exceeded by WAVE PCM input".into()
-                            );
-                        }
+        match read_float_wave_with_admission(
+            source,
+            Some(32),
+            controls.cancel.as_ref(),
+            controls.max_packet_bytes,
+            controls.max_packets,
+            |_, _, size| {
+                if let Some(limit) = controls.max_controlled_bytes {
+                    if size > limit {
+                        return Err(
+                            "controlled memory budget exceeded by WAVE PCM input".into()
+                        );
                     }
-                    Ok(())
-                },
-                |_| crate::owned_budget::check_rss_budget(controls),
-            );
+                }
+                Ok(())
+            },
+            |_| crate::owned_budget::check_rss_budget(controls),
+        ) {
+            Ok(result) => return Ok(result),
+            Err(err) if err.starts_with("mix-audio requires float PCM inputs") => {}
+            Err(err) => return Err(err),
         }
     }
     let spool = crate::owned_adts_export::Spool::create()?;

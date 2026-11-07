@@ -164,10 +164,11 @@ fn preflight(source: &Path, options: &CopyOptions) -> Result<Input> {
 /// from another implementation's interpolation filter; bit equivalence is not promised.
 pub fn measure_loudness(source: &Path, options: &CopyOptions) -> Result<LoudnessStats> {
     check_options(options)?;
-    if crate::owned_container_loudness::recognizes_with_options(source, options)? {
+    let (head, head_len) = crate::owned_audio_plan::read_source_head(source)?;
+    if crate::owned_container_loudness::recognizes_from_head(source, &head, head_len, options)? {
         return crate::owned_container_loudness::measure_loudness(source, options);
     }
-    if crate::owned_adts_export::recognizes(source)? {
+    if head_len >= 7 && crate::owned_aac::adts::header(&head[..7]).is_some() {
         return crate::owned_adts_loudness::measure_loudness(source, options);
     }
     Ok(measure_for_normalization(source, false, options)?.stats)
@@ -286,10 +287,11 @@ pub(crate) fn measure_for_normalization(
 }
 pub fn plan_loudness(source: &Path, options: &CopyOptions) -> Result<MediaPlan> {
     check_options(options)?;
-    if crate::owned_container_loudness::recognizes_with_options(source, options)? {
+    let (head, head_len) = crate::owned_audio_plan::read_source_head(source)?;
+    if crate::owned_container_loudness::recognizes_from_head(source, &head, head_len, options)? {
         return crate::owned_container_loudness::plan_loudness(source, options);
     }
-    if crate::owned_adts_export::recognizes(source)? {
+    if head_len >= 7 && crate::owned_aac::adts::header(&head[..7]).is_some() {
         return crate::owned_adts_loudness::plan_loudness(source, options);
     }
     let input = preflight(source, options)?;

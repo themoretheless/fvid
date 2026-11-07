@@ -1,8 +1,8 @@
 {
   "target": 1000,
   "counting_rule": "One independently confirmed problem or useful capability; fixture variants and baseline integration repairs are excluded. Only accepted entries count.",
-  "accepted_count": 809,
-  "next_id": "FVID-0810",
+  "accepted_count": 814,
+  "next_id": "FVID-0815",
   "entries": [
     {
       "id": "FVID-0001",
@@ -9090,7 +9090,62 @@
       "result": "plan_loudnorm opens and inspects the WAVE source once, validates loudnorm eligibility on wave_info, and derives the codec name via wave_info.codec().",
       "status": "accepted",
       "validation": "batch-615-validation.json"
+    },
+    {
+      "id": "FVID-0810",
+      "batch": 616,
+      "title": "Share a single 12-byte prefix read across container and ADTS checks in owned_wave_loudness",
+      "source": "crates/fvid-media/src/owned_wave_loudness.rs",
+      "regression": "tests/wave_loudness_and_mix_single_open.rs",
+      "before": "measure_loudness and plan_loudness in owned_wave_loudness called recognizes_with_options and then reopened the source for owned_adts_export::recognizes.",
+      "result": "measure_loudness and plan_loudness read 12 bytes once via read_source_head and check both container loudness and ADTS headers on the shared prefix.",
+      "status": "accepted",
+      "validation": "batch-616-validation.json"
+    },
+    {
+      "id": "FVID-0811",
+      "batch": 616,
+      "title": "Share a single 12-byte prefix read across container and ADTS checks in owned_loudnorm",
+      "source": "crates/fvid-media/src/owned_loudnorm.rs",
+      "regression": "tests/wave_loudness_and_mix_single_open.rs",
+      "before": "plan_loudnorm, apply_loudnorm, and apply_loudnorm_dual in owned_loudnorm called recognizes_with_options and then reopened the source for owned_adts_export::recognizes.",
+      "result": "plan_loudnorm, apply_loudnorm, and apply_loudnorm_dual read 12 bytes once via read_source_head and inspect both container and ADTS signatures in memory.",
+      "status": "accepted",
+      "validation": "batch-616-validation.json"
+    },
+    {
+      "id": "FVID-0812",
+      "batch": 616,
+      "title": "Gate G.711 and WAVE inspection on a single 12-byte header read in owned_audio_mix::audio_plan_with_controls",
+      "source": "crates/fvid-media/src/owned_audio_mix.rs",
+      "regression": "tests/wave_loudness_and_mix_single_open.rs",
+      "before": "audio_plan_with_controls opened every source twice for non-WAVE inputs by calling owned_g711_wave_export::recognizes and owned_wave_inspect::is_wave sequentially.",
+      "result": "audio_plan_with_controls reads the 12-byte header once and only invokes G.711 or WAVE inspection when the RIFF/WAVE signature is present.",
+      "status": "accepted",
+      "validation": "batch-616-validation.json"
+    },
+    {
+      "id": "FVID-0813",
+      "batch": 616,
+      "title": "Read float32 WAVE inputs in a single pass in owned_audio_mix::decode_owned_audio_with_controls",
+      "source": "crates/fvid-media/src/owned_audio_mix.rs",
+      "regression": "tests/wave_loudness_and_mix_single_open.rs",
+      "before": "decode_owned_audio_with_controls opened WAVE inputs four times: is_wave, g711 recognizes, inspect to check float32, and read_float_wave_with_admission.",
+      "result": "decode_owned_audio_with_controls checks the 12-byte RIFF/WAVE header once and attempts read_float_wave_with_admission directly without a separate inspect open.",
+      "status": "accepted",
+      "validation": "batch-616-validation.json"
+    },
+    {
+      "id": "FVID-0814",
+      "batch": 616,
+      "title": "Batch PCM sample bytes into 4096-byte stack chunks in owned_wav_file::write_pcm_wave",
+      "source": "crates/fvid-media/src/owned_wav_file.rs",
+      "regression": "tests/wave_loudness_and_mix_single_open.rs",
+      "before": "write_pcm_wave invoked output.write_all(&sample) per individual 1..8-byte sample across the entire audio stream.",
+      "result": "write_pcm_wave packs samples into a 4096-byte stack chunk before calling output.write_all.",
+      "status": "accepted",
+      "validation": "batch-616-validation.json"
     }
   ],
-  "pending_count": 191
+  "pending_count": 186
 }

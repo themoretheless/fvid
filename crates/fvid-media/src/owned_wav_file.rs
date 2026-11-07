@@ -257,11 +257,21 @@ fn write_pcm_wave<const WIDTH: usize, F: FnMut() -> Result<()>>(
         header[4..8].copy_from_slice(&(riff_size as u32).to_le_bytes());
         file.write_all(&header).map_err(|e| e.to_string())?;
         let mut output = std::io::BufWriter::new(file);
+        let mut chunk = [0u8; 4096];
+        let mut filled = 0usize;
         for (index, sample) in samples.enumerate() {
             if index % 16384 == 0 {
                 check()?;
             }
-            output.write_all(&sample).map_err(|e| e.to_string())?;
+            if filled + WIDTH > chunk.len() {
+                output.write_all(&chunk[..filled]).map_err(|e| e.to_string())?;
+                filled = 0;
+            }
+            chunk[filled..filled + WIDTH].copy_from_slice(&sample);
+            filled += WIDTH;
+        }
+        if filled > 0 {
+            output.write_all(&chunk[..filled]).map_err(|e| e.to_string())?;
         }
         check()?;
         if padding != 0 {

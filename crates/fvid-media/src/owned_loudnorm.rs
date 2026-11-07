@@ -269,10 +269,11 @@ pub fn plan_loudnorm(
     options: &CopyOptions,
 ) -> Result<fvid_media_info::MediaPlan> {
     check_options(options)?;
-    if crate::owned_container_loudness::recognizes_with_options(source, options)? {
+    let (head, head_len) = crate::owned_audio_plan::read_source_head(source)?;
+    if crate::owned_container_loudness::recognizes_from_head(source, &head, head_len, options)? {
         return crate::owned_container_loudnorm::plan_loudnorm(source, args, dual_pass, options);
     }
-    if crate::owned_adts_export::recognizes(source)? {
+    if head_len >= 7 && crate::owned_aac::adts::header(&head[..7]).is_some() {
         return crate::owned_adts_loudnorm::plan_loudnorm(source, args, dual_pass, options);
     }
     use fvid_media_info::{MediaPlan, PlanStep, PlanStream};
@@ -447,10 +448,11 @@ pub fn apply_loudnorm(
     options: &CopyOptions,
 ) -> Result<LoudnormStats> {
     check_options(options)?;
-    if crate::owned_container_loudness::recognizes_with_options(source, options)? {
+    let (head, head_len) = crate::owned_audio_plan::read_source_head(source)?;
+    if crate::owned_container_loudness::recognizes_from_head(source, &head, head_len, options)? {
         return crate::owned_container_loudnorm::apply(source, destination, args, false, options);
     }
-    if crate::owned_adts_export::recognizes(source)? {
+    if head_len >= 7 && crate::owned_aac::adts::header(&head[..7]).is_some() {
         return crate::owned_adts_loudnorm::apply(source, destination, args, false, options);
     }
     let args = resolve_loudnorm_args(args)?;
@@ -481,10 +483,11 @@ pub fn apply_loudnorm_dual(
     options: &CopyOptions,
 ) -> Result<LoudnormStats> {
     check_options(options)?;
-    if crate::owned_container_loudness::recognizes_with_options(source, options)? {
+    let (head, head_len) = crate::owned_audio_plan::read_source_head(source)?;
+    if crate::owned_container_loudness::recognizes_from_head(source, &head, head_len, options)? {
         return crate::owned_container_loudnorm::apply(source, destination, args, true, options);
     }
-    if crate::owned_adts_export::recognizes(source)? {
+    if head_len >= 7 && crate::owned_aac::adts::header(&head[..7]).is_some() {
         return crate::owned_adts_loudnorm::apply(source, destination, args, true, options);
     }
     let base = resolve_loudnorm_args(args)?;

@@ -31,7 +31,7 @@ pub fn recognizes_standalone_audio_with_options(
     recognizes_standalone_from_head(source, &head, head_len, options)
 }
 
-fn recognizes_standalone_from_head(
+pub fn recognizes_standalone_from_head(
     source: &Path,
     head: &[u8; 12],
     head_len: usize,
@@ -52,6 +52,23 @@ fn recognizes_standalone_from_head(
     Ok(crate::owned_mpeg_audio::has_signature(&head[..head_len.min(10)]))
 }
 
+pub(crate) fn recognizes_from_head(
+    source: &Path,
+    head: &[u8; 12],
+    head_len: usize,
+    options: &CopyOptions,
+) -> Result<bool> {
+    if head_len < 4 {
+        return Ok(false);
+    }
+    if head[..4] == [0x1a, 0x45, 0xdf, 0xa3]
+        || (head_len >= 8 && crate::owned_mp4::recognizes_prefix(&head[..8]))
+    {
+        return Ok(true);
+    }
+    recognizes_standalone_from_head(source, head, head_len, options)
+}
+
 pub(crate) fn recognizes(source: &Path) -> Result<bool> {
     recognizes_with_options(source, &Default::default())
 }
@@ -70,15 +87,7 @@ pub(crate) fn recognizes_with_options(source: &Path, options: &CopyOptions) -> R
     }
     crate::owned_budget::check_rss_budget(options)?;
     let (head, head_len) = crate::owned_audio_plan::read_source_head(source)?;
-    if head_len < 4 {
-        return Ok(false);
-    }
-    if head[..4] == [0x1a, 0x45, 0xdf, 0xa3]
-        || (head_len >= 8 && crate::owned_mp4::recognizes_prefix(&head[..8]))
-    {
-        return Ok(true);
-    }
-    recognizes_standalone_from_head(source, &head, head_len, options)
+    recognizes_from_head(source, &head, head_len, options)
 }
 fn geometry_unqualified(source: &Path, options: &CopyOptions) -> Result<(u32, u16, u32, String)> {
     if options.cancel.as_ref().is_some_and(|c| c.is_cancelled()) {
