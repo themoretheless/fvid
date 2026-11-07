@@ -449,7 +449,7 @@ fn write_y4m_ffv1_policy<W: Write + Seek>(
                 if options.max_controlled_bytes.is_some_and(|limit| {
                     frame_working_bytes.saturating_add(packet.len()) > limit
                 }) {
-                    return Err("Y4M frame byte length exceeds controlled memory budget".into());
+                    return Err("encoded FFV1 packet exceeds controlled memory budget".into());
                 }
             }
             if packet.len() > max_packet_bytes {

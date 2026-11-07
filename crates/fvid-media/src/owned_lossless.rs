@@ -611,6 +611,7 @@ pub fn transcode_lossless(
             .checked_mul(n_red)
             .ok_or("interval timestamp overflow")?;
     }
+    let meta_working_bytes = options_matroska_metadata_working_bytes(options)?;
     let mut overlay_frame_len = 0usize;
     if let Some(spec) = &request.overlay {
         if crate::owned_y4m_decode::supports(&spec.path) {
@@ -626,7 +627,7 @@ pub fn transcode_lossless(
                 }
                 if options
                     .max_controlled_bytes
-                    .is_some_and(|limit| frame_len > limit)
+                    .is_some_and(|limit| frame_len.saturating_add(meta_working_bytes) > limit)
                 {
                     return Err("Y4M frame byte length exceeds controlled memory budget".into());
                 }
@@ -634,7 +635,6 @@ pub fn transcode_lossless(
         }
     }
     if crate::owned_y4m_decode::supports(source) {
-        let meta_working_bytes = options_matroska_metadata_working_bytes(options)?;
         let geometry = crate::owned_y4m_decode::has_geometry_or_pixel_transform(&request);
         let mut reader =
             std::io::BufReader::new(std::fs::File::open(source).map_err(|e| e.to_string())?);
@@ -1130,8 +1130,10 @@ pub fn plan_transcode_lossless(
                     || options.max_controlled_bytes.is_some()
                 {
                     let (sx, sy) = header.format.subsampling();
+                    let mut buf = crate::owned_frame::buffer(data.len())?;
+                    buf.copy_from_slice(data);
                     let frame = crate::owned_frame::GeometryFrame {
-                        data: data.to_vec(),
+                        data: buf,
                         width: header.width,
                         height: header.height,
                         subsampling: Some([sx, sy]),

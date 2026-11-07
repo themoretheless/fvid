@@ -329,13 +329,13 @@ pub fn overlay_video_transformed(
     if destination.extension().and_then(|s| s.to_str()) != Some("mkv") {
         return Err(invalid("owned overlay output requires .mkv"));
     }
+    if destination.symlink_metadata().is_ok() {
+        return Err(invalid("overlay destination already exists"));
+    }
     if !overlay_eligible(main)? {
         return Err(invalid(
             "owned overlay requires a supported owned lossless main input",
         ));
-    }
-    if destination.try_exists()? {
-        return Err(invalid("overlay destination already exists"));
     }
     let mut compositor = TimedOverlay::new(foreground, x, y)?;
     let mut main_reader = NativeReader::software(BufReader::new(File::open(main)?), usize::MAX)?;

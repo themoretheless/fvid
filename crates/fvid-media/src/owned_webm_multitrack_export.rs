@@ -103,8 +103,20 @@ fn check_multitrack_matroska_metadata_budget(
             .unwrap_or(1),
     };
     let mut combined_track_tags = BTreeMap::new();
+    let mut audio_desc_bytes = 0usize;
     for &index in selected {
         let track = &reader.tracks[index];
+        let mut audio_name = track.name.clone();
+        let mut audio_lang = if !track.language.is_empty() {
+            track.language.clone()
+        } else {
+            reader
+                .track_languages
+                .get(&track.number)
+                .or_else(|| reader.track_legacy_languages.get(&track.number))
+                .cloned()
+                .unwrap_or_else(|| "eng".into())
+        };
         let mut tags = reader.track_metadata.get(&0).cloned().unwrap_or_default();
         if let Some(uid) = reader.track_uids.get(&track.number) {
             if let Some(scoped) = reader.track_metadata.get(uid) {
@@ -130,10 +142,15 @@ fn check_multitrack_matroska_metadata_budget(
                 {
                     tags.insert(key.to_ascii_uppercase(), value.clone());
                 }
-            } else if !key.eq_ignore_ascii_case("title")
-                && !key.eq_ignore_ascii_case("language")
-                && !value.is_empty()
-            {
+            } else if key.eq_ignore_ascii_case("title") {
+                audio_name = value.clone();
+            } else if key.eq_ignore_ascii_case("language") {
+                audio_lang = if value.is_empty() {
+                    "und".into()
+                } else {
+                    value.clone()
+                };
+            } else if !value.is_empty() {
                 tags.insert(key.to_ascii_uppercase(), value.clone());
             }
         }
@@ -145,7 +162,19 @@ fn check_multitrack_matroska_metadata_budget(
             tags.retain(|name, _| !name.eq_ignore_ascii_case(key));
             if index == video {
                 crate::owned_ffv1_export::edit_track_description(&mut description, key, "");
+            } else if key.eq_ignore_ascii_case("title") {
+                audio_name.clear();
+            } else if key.eq_ignore_ascii_case("language") {
+                audio_lang = "und".into();
             }
+        }
+        if tags.len() > 256 {
+            return Err("Matroska text tag count exceeds limit".into());
+        }
+        if index != video {
+            audio_desc_bytes = audio_desc_bytes
+                .saturating_add(audio_name.len())
+                .saturating_add(audio_lang.len().saturating_sub(3));
         }
         for (k, v) in tags {
             combined_track_tags.insert(format!("{index}:{k}"), v);
@@ -188,12 +217,16 @@ fn check_multitrack_matroska_metadata_budget(
         file.tags.set(key, "");
         text_tags.retain(|name, _| !name.eq_ignore_ascii_case(key));
     }
+    if text_tags.len() > 256 {
+        return Err("Matroska text tag count exceeds limit".into());
+    }
     let meta_working_bytes = crate::owned_lossless::estimate_matroska_metadata_working_bytes(
         &file,
         &text_tags,
         &combined_track_tags,
         Some(&description),
-    );
+    )
+    .saturating_add(audio_desc_bytes.saturating_mul(8));
     if options
         .max_controlled_bytes
         .filter(|&limit| limit > 0)

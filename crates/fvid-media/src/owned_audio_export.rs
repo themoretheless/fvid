@@ -307,10 +307,6 @@ pub fn decode_audio_transformed(
         done: false,
     };
     check()?;
-    if let Some(hook) = &options.progress {
-        hook.emit(event);
-    }
-    check()?;
     let (input, pcm) = crate::owned_audio_mix::read_wave_with_admission(
         source,
         None,
@@ -334,6 +330,13 @@ pub fn decode_audio_transformed(
                         "controlled memory budget exceeded: need {estimated} bytes, limit {max}"
                     ));
                 }
+            }
+            if let Some(hook) = &options.progress {
+                hook.emit(fvid_control::ProgressEvent {
+                    packets: 0,
+                    payload_bytes: 0,
+                    done: false,
+                });
             }
             Ok(())
         },

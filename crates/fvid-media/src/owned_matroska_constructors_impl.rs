@@ -45,7 +45,7 @@ impl<'a, W: Write + Seek> PacketWriter<'a, W> {
         Self::new_with_text_metadata(output,tracks,options,metadata,&Default::default(),&Default::default())
     }
     /// Preserve file-wide and per-track text tags while replacing video coding.
-    pub(crate) fn new_with_text_metadata(
+    pub fn new_with_text_metadata(
         output:&'a mut W,tracks:&[TrackSpec<'_>],options:&[TrackOptions],metadata:&FileMetadata,
         text:&std::collections::BTreeMap<String,String>,
         scoped:&std::collections::BTreeMap<usize,std::collections::BTreeMap<String,String>>,

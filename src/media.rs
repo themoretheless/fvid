@@ -606,27 +606,34 @@ fn validate_mp4_packet_budget(source: &std::path::Path, options: &CopyOptions) -
             },
         )
         .map_err(|e| e.to_string())?;
+        let index_bytes = reader
+            .estimated_index_payload_bytes()
+            .map_err(|e| e.to_string())?;
         if let Some(mem_limit) = options.max_controlled_bytes
-            && reader.estimated_index_payload_bytes().map_err(|e| e.to_string())? > mem_limit
+            && index_bytes > mem_limit
         {
             return Err("controlled memory budget exceeded: MP4 index payload exceeds budget".into());
         }
         for track in reader.tracks() {
-            if (0..track.samples.len()).any(|i| {
-                track
-                    .samples
-                    .get(i)
-                    .is_some_and(|sample| usize::try_from(sample.size).unwrap_or(usize::MAX) > options.max_packet_bytes)
-            }) {
+            let max_sample_size = match &track.samples {
+                crate::container::mp4::SampleIndex::Expanded(samples) => samples
+                    .iter()
+                    .map(|sample| usize::try_from(sample.size).unwrap_or(usize::MAX))
+                    .max()
+                    .unwrap_or(0),
+                crate::container::mp4::SampleIndex::Uniform(uniform) => {
+                    if uniform.count == 0 {
+                        0
+                    } else {
+                        usize::try_from(uniform.bytes_per_frame).unwrap_or(usize::MAX)
+                    }
+                }
+            };
+            if max_sample_size > options.max_packet_bytes {
                 return Err("MP4 packet exceeds budget".into());
             }
             if let Some(mem_limit) = options.max_controlled_bytes
-                && (0..track.samples.len()).any(|i| {
-                    track
-                        .samples
-                        .get(i)
-                        .is_some_and(|sample| usize::try_from(sample.size).unwrap_or(usize::MAX) > mem_limit)
-                })
+                && index_bytes.saturating_add(max_sample_size) > mem_limit
             {
                 return Err("controlled memory budget exceeded".into());
             }

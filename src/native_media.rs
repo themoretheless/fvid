@@ -227,9 +227,13 @@ impl<'a> DecodeProgress<'a> {
         Self::new_with_limits(cancel, hook, max_rss_bytes, None)
     }
     pub(crate) fn new_with_limits(cancel: Option<&'a crate::media_control::CancelFlag>, hook: Option<&'a crate::media_control::ProgressHook>, max_rss_bytes: Option<u64>, max_packets: Option<u64>) -> Result<Self> {
-        let state = Self { cancel, hook, max_rss_bytes, max_packets, event: crate::media_control::ProgressEvent { packets: 0, payload_bytes: 0, done: false } };
-        state.check()?;
+        let state = Self::new_unemitted(cancel, hook, max_rss_bytes, max_packets)?;
         state.emit(false);
+        state.check()?;
+        Ok(state)
+    }
+    pub(crate) fn new_unemitted(cancel: Option<&'a crate::media_control::CancelFlag>, hook: Option<&'a crate::media_control::ProgressHook>, max_rss_bytes: Option<u64>, max_packets: Option<u64>) -> Result<Self> {
+        let state = Self { cancel, hook, max_rss_bytes, max_packets, event: crate::media_control::ProgressEvent { packets: 0, payload_bytes: 0, done: false } };
         state.check()?;
         Ok(state)
     }

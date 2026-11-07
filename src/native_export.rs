@@ -1599,7 +1599,6 @@ fn export_pcm_selected(    source: &Path,
     if options.is_some_and(|o| o.max_controlled_bytes == Some(0)) {
         return Err(invalid("controlled memory limit must be positive"));
     }
-    let mut control = crate::native_media::DecodeProgress::new_with_limits(cancel, progress, max_rss_bytes, max_packets)?;
     if sample_rate.is_some_and(|rate| !(8000..=384000).contains(&rate)) {
         return Err(invalid("sample rate must be within 8000..=384000"));
     }
@@ -1613,6 +1612,10 @@ fn export_pcm_selected(    source: &Path,
         Some("mka" | "mkv") => (false, true),
         _ => return Err(invalid("native PCM output requires .f32le, .wav, .mka or .mkv extension")),
     };
+    if destination.symlink_metadata().is_ok() {
+        return Err(invalid("output already exists"));
+    }
+    let mut control = crate::native_media::DecodeProgress::new_unemitted(cancel, progress, max_rss_bytes, max_packets)?;
     let mut input = BufReader::new(File::open(source)?);
     let mut prefix = [0; 8];
     input.read_exact(&mut prefix)?;
@@ -1888,19 +1891,6 @@ fn export_pcm_selected(    source: &Path,
     } else {
         None
     };
-    let directory = destination.parent().filter(|p| !p.as_os_str().is_empty()).unwrap_or(Path::new("."));
-    let (temporary, file) = (0..100).find_map(|_| {
-        let path = directory.join(format!(".fvid-pcm-{}-{}.tmp", std::process::id(), NEXT.fetch_add(1, Ordering::Relaxed)));
-        match OpenOptions::new().write(true).create_new(true).open(&path) {
-            Ok(file) => Some(Ok((Temporary(path), file))),
-            Err(e) if e.kind() == std::io::ErrorKind::AlreadyExists => None,
-            Err(e) => Some(Err(e)),
-        }
-    }).ok_or_else(|| invalid("cannot reserve PCM output"))??;
-    let mut output = BufWriter::new(file);
-    if wav { output.write_all(&[0; 80])?; }
-    let mut sink = pcm_matroska::Output::new_with_source_metadata(&mut output, matroska_output, output_rate, output_channels, matroska_base_metadata, options)?;
-    let mut resampler = crate::pcm_resample::Resampler::new(&mut sink, input_rate, output_rate, output_channels)?;
     let effective_input_mask = if let Some((_, info)) = &wave {
         if info.channel_mask != 0 {
             info.channel_mask
@@ -1936,6 +1926,19 @@ fn export_pcm_selected(    source: &Path,
             )));
         }
     }
+    let directory = destination.parent().filter(|p| !p.as_os_str().is_empty()).unwrap_or(Path::new("."));
+    let (temporary, file) = (0..100).find_map(|_| {
+        let path = directory.join(format!(".fvid-pcm-{}-{}.tmp", std::process::id(), NEXT.fetch_add(1, Ordering::Relaxed)));
+        match OpenOptions::new().write(true).create_new(true).open(&path) {
+            Ok(file) => Some(Ok((Temporary(path), file))),
+            Err(e) if e.kind() == std::io::ErrorKind::AlreadyExists => None,
+            Err(e) => Some(Err(e)),
+        }
+    }).ok_or_else(|| invalid("cannot reserve PCM output"))??;
+    let mut output = BufWriter::new(file);
+    if wav { output.write_all(&[0; 80])?; }
+    let mut sink = pcm_matroska::Output::new_with_source_metadata(&mut output, matroska_output, output_rate, output_channels, matroska_base_metadata, options)?;
+    let mut resampler = crate::pcm_resample::Resampler::new(&mut sink, input_rate, output_rate, output_channels)?;
     let mut pcm = fvid_media::owned_pcm_gain::PcmGain::with_mask(
         &mut resampler,
         volume,
@@ -1944,6 +1947,8 @@ fn export_pcm_selected(    source: &Path,
         effective_input_mask,
     )
     .map_err(|e| invalid(&e))?;
+    control.emit(false);
+    control.check()?;
     let mut stats = if let Some(reader) = mp4 {
         crate::native_media::decode_mp4_audio_reader_targeted(reader, &mut pcm, interval, selected, &mut control, mp4_target)?
     } else if let Some(reader) = matroska {

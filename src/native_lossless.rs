@@ -279,12 +279,21 @@ pub fn write_mp4_selected<W: Write + Seek>(
     let defaults: Vec<_> = (0..tracks.len())
         .map(|index| mp4_matroska::effective_track_default(&input, index))
         .collect();
+    let mut text_tags = std::collections::BTreeMap::new();
+    let encoder = input.encoder().trim();
+    if !encoder.is_empty()
+        && encoder != "FVid"
+        && encoder.len() <= 1024
+        && !encoder.contains('\0')
+    {
+        text_tags.insert("ENCODER".into(), encoder.to_owned());
+    }
     let mut writer = PacketWriter::new_with_track_preferences(
         output,
         &specs,
         &options,
         &FileMetadata::from_mp4(&input),
-        &Default::default(),
+        &text_tags,
         &Default::default(),
         &enabled,
         &defaults,

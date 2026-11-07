@@ -4296,3 +4296,14 @@ See `batch-588-validation.json`.
 
 See `batch-589-validation.json`.
 
+## Batch 590 — FVID-0680..0684: 256-tag Matroska cap and audio title/language budget in `owned_webm_multitrack_export::qualify`, upfront destination check in `overlay_video_transformed` and MP4 `©too` encoder preservation in `native_lossless::write_mp4_selected`, O(1) uniform sample table and `index_bytes + sample_size` budget in MP4 fast-start relocation, aligned Y4M overlay/FFV1 packet budget diagnostics in `owned_lossless`, and upfront destination check plus deferred 0-packet progress in WAVE PCM audio export
+
+- **FVID-0680** — Enforce 256-tag Matroska container and stream metadata caps and audio track title/language budgets in `owned_webm_multitrack_export::qualify` (`crates/fvid-media/src/owned_webm_multitrack_export.rs`, `tests/webm_multitrack_tags_overlay_mp4_relocate_and_pcm_preflight.rs`).
+- **FVID-0681** — Check existing overlay destination upfront before scanning main input and preserve MP4 `©too` encoder tag in `native_lossless::write_mp4_selected` (`src/native_export/overlay.rs`, `src/native_lossless.rs`, `tests/webm_multitrack_tags_overlay_mp4_relocate_and_pcm_preflight.rs`).
+- **FVID-0682** — Charge simultaneous MP4 index and sample working set in O(1) for uniform sample tables during MP4 fast-start relocation planning and remux (`src/media.rs`, `src/native_plan.rs`, `tests/webm_multitrack_tags_overlay_mp4_relocate_and_pcm_preflight.rs`).
+- **FVID-0683** — Align Y4M lossless overlay frame working-set check, guarded frame cloning, and FFV1 packet budget diagnostics between `plan_transcode_lossless` and `transcode_lossless` (`crates/fvid-media/src/owned_lossless.rs`, `crates/fvid-media/src/owned_matroska.rs`, `tests/webm_multitrack_tags_overlay_mp4_relocate_and_pcm_preflight.rs`).
+- **FVID-0684** — Reject existing outputs upfront and defer 0-packet progress until preflight succeeds in native and owned WAVE PCM audio exports (`src/native_export.rs`, `src/native_media.rs`, `crates/fvid-media/src/owned_audio_export.rs`, `tests/webm_multitrack_tags_overlay_mp4_relocate_and_pcm_preflight.rs`).
+
+See `batch-590-validation.json`.
+
+

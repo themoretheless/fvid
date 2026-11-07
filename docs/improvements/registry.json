@@ -1,8 +1,8 @@
 {
   "target": 1000,
   "counting_rule": "One independently confirmed problem or useful capability; fixture variants and baseline integration repairs are excluded. Only accepted entries count.",
-  "accepted_count": 679,
-  "next_id": "FVID-0680",
+  "accepted_count": 684,
+  "next_id": "FVID-0685",
   "entries": [
     {
       "id": "FVID-0001",
@@ -7660,6 +7660,61 @@
       "result": "Check destination.symlink_metadata().is_ok() upfront in export_y4m_pipeline_with_options, concat_y4m_with_options, and export_y4m_sources_with_options, and run all source budget and concat compatibility validations before creating the temporary file and emitting the initial 0-packet ProgressEvent.",
       "status": "accepted",
       "validation": "batch-589-validation.json"
+    },
+    {
+      "id": "FVID-0680",
+      "batch": 590,
+      "title": "Enforce 256-tag Matroska container and stream metadata caps and audio track title/language budgets in owned_webm_multitrack_export::qualify",
+      "source": "crates/fvid-media/src/owned_webm_multitrack_export.rs",
+      "regression": "tests/webm_multitrack_tags_overlay_mp4_relocate_and_pcm_preflight.rs",
+      "before": "check_multitrack_matroska_metadata_budget did not check whether merged source + user container tags or per-stream tags exceeded Matroska's 256-tag cap, and silently dropped stream_metadata_set title/language overrides on non-video tracks instead of charging their working set.",
+      "result": "Enforce tags.len() <= 256 and text_tags.len() <= 256 in check_multitrack_matroska_metadata_budget and charge non-video track name and language overrides against meta_working_bytes.",
+      "status": "accepted",
+      "validation": "batch-590-validation.json"
+    },
+    {
+      "id": "FVID-0681",
+      "batch": 590,
+      "title": "Check existing overlay destination upfront before scanning main input and preserve MP4 encoder tag in native_lossless::write_mp4_selected",
+      "source": "src/native_export/overlay.rs",
+      "regression": "tests/webm_multitrack_tags_overlay_mp4_relocate_and_pcm_preflight.rs",
+      "before": "overlay_video_transformed called overlay_eligible(main) before checking whether destination already existed and used destination.try_exists() instead of symlink_metadata(), and native_lossless::write_mp4_selected passed an empty text_tags map to PacketWriter::new_with_track_preferences, dropping the source MP4 ©too encoder tag.",
+      "result": "Reject destination.symlink_metadata().is_ok() at the start of overlay_video_transformed before opening main, and populate text_tags with ENCODER from input.encoder() in native_lossless::write_mp4_selected.",
+      "status": "accepted",
+      "validation": "batch-590-validation.json"
+    },
+    {
+      "id": "FVID-0682",
+      "batch": 590,
+      "title": "Charge simultaneous MP4 index and sample working set in O(1) for uniform sample tables during MP4 fast-start relocation planning and remux",
+      "source": "src/media.rs",
+      "regression": "tests/webm_multitrack_tags_overlay_mp4_relocate_and_pcm_preflight.rs",
+      "before": "validate_mp4_packet_budget and native_plan::remux_with_options iterated 0..track.samples.len() even on compact SampleIndex::Uniform tables and checked sample.size > mem_limit without adding index_bytes, allowing plan_remux and remux to admit MP4 inputs whose index_bytes + max_sample_size exceeded max_controlled_bytes.",
+      "result": "Inspect SampleIndex::Uniform in O(1) vs SampleIndex::Expanded in validate_mp4_packet_budget and native_plan::remux_with_options, and enforce index_bytes.saturating_add(max_sample_size) <= mem_limit.",
+      "status": "accepted",
+      "validation": "batch-590-validation.json"
+    },
+    {
+      "id": "FVID-0683",
+      "batch": 590,
+      "title": "Align Y4M lossless overlay frame working-set check, guarded frame cloning, and FFV1 packet budget diagnostics between plan_transcode_lossless and transcode_lossless",
+      "source": "crates/fvid-media/src/owned_lossless.rs",
+      "regression": "tests/webm_multitrack_tags_overlay_mp4_relocate_and_pcm_preflight.rs",
+      "before": "transcode_lossless checked overlay Y4M frame_len > limit without adding meta_working_bytes (whereas plan_transcode_lossless charged frame_len + meta_working_bytes), plan_transcode_lossless cloned the first frame with unguarded data.to_vec(), and write_y4m_ffv1_policy reported 'Y4M FFV1 working set exceeds controlled memory budget' instead of 'encoded FFV1 packet exceeds controlled memory budget'.",
+      "result": "Charge frame_len.saturating_add(meta_working_bytes) for Y4M overlays in transcode_lossless, allocate the first-frame clone via owned_frame::buffer in plan_transcode_lossless, and align the post-encode FFV1 packet budget error message in write_y4m_ffv1_policy.",
+      "status": "accepted",
+      "validation": "batch-590-validation.json"
+    },
+    {
+      "id": "FVID-0684",
+      "batch": 590,
+      "title": "Reject existing outputs upfront and defer 0-packet progress until preflight succeeds in native and owned WAVE PCM audio exports",
+      "source": "src/native_export.rs",
+      "regression": "tests/webm_multitrack_tags_overlay_mp4_relocate_and_pcm_preflight.rs",
+      "before": "export_pcm_selected opened and decoded the audio source before checking if destination already existed and emitted a 0-packet ProgressEvent before validating sample rate, channels, metadata, or controlled memory budgets; owned_audio_export::decode_audio_transformed similarly emitted a 0-packet ProgressEvent before WAVE max_controlled_bytes admission.",
+      "result": "Check destination.symlink_metadata().is_ok() upfront in export_pcm_selected and defer the initial 0-packet ProgressEvent in both export_pcm_selected and owned_audio_export::decode_audio_transformed until all preflight and controlled memory budget checks succeed.",
+      "status": "accepted",
+      "validation": "batch-590-validation.json"
     }
   ]
 }
