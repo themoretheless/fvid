@@ -1,0 +1,15 @@
+{
+  "batch": 606,
+  "ids": [
+    "FVID-0760",
+    "FVID-0761",
+    "FVID-0762",
+    "FVID-0763",
+    "FVID-0764"
+  ],
+  "commands": [
+    "cargo test --test export_pcm_and_y4m_single_open",
+    "cargo test --test normalize_wave_info_and_plan_single_open"
+  ],
+  "status": "accepted"
+}

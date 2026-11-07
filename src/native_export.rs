@@ -518,17 +518,17 @@ pub(crate) fn validate_video_packet_budget_with_geometry_filters_interval_and_li
     relative_interval: bool,
     max_packets: Option<u64>,
 ) -> Result<()> {
-    use std::io::Read;
+    use std::io::{Read, Seek, SeekFrom};
     if options.max_packet_bytes == 0 {
         return Err(invalid("packet byte limit must be positive"));
     }
-    let mut file = File::open(source)?;
+    let mut input = BufReader::new(File::open(source)?);
     let mut prefix = [0u8; 9];
-    let read = file.read(&mut prefix)?;
+    let read = input.read(&mut prefix)?;
+    input.seek(SeekFrom::Start(0))?;
     if read == 9 && &prefix == b"YUV4MPEG2" {
         let mut frame_len = 0usize;
         let mut rgb_len = 0usize;
-        let mut input = BufReader::new(File::open(source)?);
         let mut line = Vec::new();
         if crate::line(&mut input, &mut line)? {
             let header = crate::Header::parse(&line)?;
@@ -597,7 +597,7 @@ pub(crate) fn validate_video_packet_budget_with_geometry_filters_interval_and_li
             .max_packet_bytes
             .min(options.max_controlled_bytes.unwrap_or(usize::MAX));
         let reader = crate::container::mp4::Mp4Reader::open(
-            BufReader::new(File::open(source)?),
+            input,
             crate::container::mp4::Limits {
                 metadata_bytes: crate::container::mp4::Limits::default()
                     .metadata_bytes
@@ -720,7 +720,7 @@ pub(crate) fn validate_video_packet_budget_with_geometry_filters_interval_and_li
             }
         };
         let mut reader =
-            crate::container::webm::WebmReader::open(BufReader::new(File::open(source)?), limits)
+            crate::container::webm::WebmReader::open(input, limits)
                 .map_err(map_packet_limit)?;
         reader.scan_all().map_err(map_packet_limit)?;
         let index_bytes = reader.estimated_index_payload_bytes()?;
@@ -825,13 +825,13 @@ pub(crate) fn y4m_segment_frame_upper_bound_with_options(
     selected: Option<usize>,
     options: &fvid_media::CopyOptions,
 ) -> Result<Option<u64>> {
-    use std::io::Read;
-    let mut file = File::open(source)?;
+    use std::io::{Read, Seek, SeekFrom};
+    let mut input = BufReader::new(File::open(source)?);
     let mut prefix = [0u8; 9];
-    let read = file.read(&mut prefix)?;
+    let read = input.read(&mut prefix)?;
+    input.seek(SeekFrom::Start(0))?;
     if read == 9 && &prefix == b"YUV4MPEG2" {
-        let metadata = file.metadata()?;
-        let mut input = BufReader::new(File::open(source)?);
+        let metadata = input.get_ref().metadata()?;
         let mut line = Vec::new();
         if !crate::line(&mut input, &mut line)? {
             return Ok(Some(0));
@@ -846,7 +846,7 @@ pub(crate) fn y4m_segment_frame_upper_bound_with_options(
     }
     if read >= 8 && crate::container::mp4::recognizes_prefix(&prefix[..8]) {
         let reader = crate::container::mp4::Mp4Reader::open(
-            BufReader::new(File::open(source)?),
+            input,
             crate::container::mp4::Limits {
                 metadata_bytes: crate::container::mp4::Limits::default()
                     .metadata_bytes
@@ -891,7 +891,7 @@ pub(crate) fn y4m_segment_frame_upper_bound_with_options(
             }
         };
         let mut reader = crate::container::webm::WebmReader::open(
-            BufReader::new(File::open(source)?),
+            input,
             limits,
         )
         .map_err(map_packet_limit)?;
@@ -1006,20 +1006,22 @@ fn export_y4m_sources_with_options(
     let mut layout = None;
     let mut count = 0;
     let mut payload_bytes=0u64;
-    'sources: for source in sources {
+    'sources: for (source_idx, source) in sources.iter().enumerate() {
     control.check()?;
     let remaining_packets = control
         .packet_limit()
         .map(|limit| limit.saturating_sub(count));
-    validate_video_packet_budget_with_geometry_filters_interval_and_limit(
-        source,
-        geometry,
-        filters,
-        options,
-        interval,
-        relative_interval,
-        remaining_packets,
-    )?;
+    if source_idx > 0 && remaining_packets != max_packets {
+        validate_video_packet_budget_with_geometry_filters_interval_and_limit(
+            source,
+            geometry,
+            filters,
+            options,
+            interval,
+            relative_interval,
+            remaining_packets,
+        )?;
+    }
     if control.packet_limit_reached() {
         break;
     }
@@ -1620,7 +1622,7 @@ fn export_pcm_selected(    source: &Path,
     let mut prefix = [0; 8];
     input.read_exact(&mut prefix)?;
     input.seek(SeekFrom::Start(0))?;
-    let (mut mp4, mut matroska, adts, wave) = if allow_wave && matches!(&prefix[..4],b"RIFF"|b"RF64"|b"RIFX") {
+    let (mut mp4, mut matroska, adts, mut wave) = if allow_wave && matches!(&prefix[..4],b"RIFF"|b"RF64"|b"RIFX") {
         if selected.is_some_and(|n|n!=0) {return Err(invalid("WAVE has only stream 0"));}
         let info=crate::native_pcm::inspect(&mut input,cancel)?;
         info.validate_decode()?;
@@ -1745,14 +1747,14 @@ fn export_pcm_selected(    source: &Path,
             .unwrap_or(default_pcm_mask(output_channels)?),
     };
     let info_chunks = if wav {
-        let source_info = if wave.is_some() {
-            let mut file = File::open(source)?;
-            let inspected = fvid_media::owned_wave_inspect::inspect(&mut file, cancel)?;
+        let source_info = if let Some((reader, info)) = &mut wave {
+            let inspected = info.to_media_wave_info();
+            let mut empty = false;
             if let Some(opts) = options
                 && let Some(max) = opts.max_controlled_bytes
             {
                 let info_bytes =
-                    fvid_media::owned_wave_inspect::info_chunks_bytes(&mut file, &inspected, cancel)?;
+                    fvid_media::owned_wave_inspect::info_chunks_bytes(reader, &inspected, cancel)?;
                 let needed =
                     fvid_media::owned_wave_metadata::wave_metadata_working_bytes(info_bytes, opts)
                         .map_err(|e| invalid(&e))?
@@ -1762,8 +1764,13 @@ fn export_pcm_selected(    source: &Path,
                         "controlled memory budget exceeded: need {needed} bytes, limit {max}"
                     )));
                 }
+                empty = info_bytes == 0;
             }
-            fvid_media::owned_wave_inspect::info_chunks(&mut file, &inspected, cancel)?
+            if empty {
+                Vec::new()
+            } else {
+                fvid_media::owned_wave_inspect::info_chunks(reader, &inspected, cancel)?
+            }
         } else if let Some(reader) = &mp4 {
             let index = if allow_wave {
                 crate::native_media::mp4_audio_index(reader, selected)?

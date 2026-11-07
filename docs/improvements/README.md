@@ -4456,6 +4456,17 @@ See `batch-604-validation.json`.
 
 See `batch-605-validation.json`.
 
+## Batch 606 — FVID-0760..0764: Single-open WAVE/Y4M/MP4/Matroska reader reuse and single-pass packet budget validation in `native_export`, and blockwise `float_buf` / zero-conversion f32 fast path in `native_pcm::decode_reader`
+
+- **FVID-0760** — Reuse the already-opened WAVE reader and `WaveInfo` and skip a redundant `info_chunks` scan when `info_bytes == 0` in `native_export::export_pcm_selected` (`src/native_export.rs`, `src/native_pcm.rs`, `tests/export_pcm_and_y4m_single_open.rs`).
+- **FVID-0761** — Open `source` once in `native_export::validate_video_packet_budget_with_geometry_filters_interval_and_limit` (`src/native_export.rs`, `tests/export_pcm_and_y4m_single_open.rs`).
+- **FVID-0762** — Open `source` once in `native_export::y4m_segment_frame_upper_bound_with_options` (`src/native_export.rs`, `tests/export_pcm_and_y4m_single_open.rs`).
+- **FVID-0763** — Skip the redundant second `validate_video_packet_budget_with_geometry_filters_interval_and_limit` call for the first source in `export_y4m_sources_with_options` (`src/native_export.rs`, `tests/export_pcm_and_y4m_single_open.rs`).
+- **FVID-0764** — Batch-write converted float32 blocks and add a zero-conversion 32-bit float fast path in `native_pcm::decode_reader` (`src/native_pcm.rs`, `tests/export_pcm_and_y4m_single_open.rs`).
+
+See `batch-606-validation.json`.
+
+
 
 
 

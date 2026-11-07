@@ -1,8 +1,8 @@
 {
   "target": 1000,
   "counting_rule": "One independently confirmed problem or useful capability; fixture variants and baseline integration repairs are excluded. Only accepted entries count.",
-  "accepted_count": 759,
-  "next_id": "FVID-0760",
+  "accepted_count": 764,
+  "next_id": "FVID-0765",
   "entries": [
     {
       "id": "FVID-0001",
@@ -8540,6 +8540,61 @@
       "result": "Open File::open(source) once and reuse it across super::is_wave_reader(&mut file) and super::inspect(&mut file, ...).",
       "status": "accepted",
       "validation": "batch-605-validation.json"
+    },
+    {
+      "id": "FVID-0760",
+      "batch": 606,
+      "title": "Reuse the already-opened WAVE reader and WaveInfo and skip redundant info_chunks scan when info_bytes == 0 in native_export::export_pcm_selected",
+      "source": "src/native_export.rs",
+      "regression": "tests/export_pcm_and_y4m_single_open.rs",
+      "before": "native_export::export_pcm_selected opened source a second time and called owned_wave_inspect::inspect a second time when extracting WAVE INFO chunks, and ran info_chunks even when info_chunks_bytes returned 0.",
+      "result": "Convert the already-inspected WaveInfo via to_media_wave_info(), reuse the open WAVE BufReader<File>, and return Vec::new() without a second RIFF scan when info_bytes == 0.",
+      "status": "accepted",
+      "validation": "batch-606-validation.json"
+    },
+    {
+      "id": "FVID-0761",
+      "batch": 606,
+      "title": "Open source once in native_export::validate_video_packet_budget_with_geometry_filters_interval_and_limit",
+      "source": "src/native_export.rs",
+      "regression": "tests/export_pcm_and_y4m_single_open.rs",
+      "before": "validate_video_packet_budget_with_geometry_filters_interval_and_limit opened source once for the 9-byte prefix read and then opened source a second time for Y4M header parsing, Mp4Reader::open, or WebmReader::open.",
+      "result": "Open BufReader::new(File::open(source)?) once, seek back to 0 after prefix inspection, and pass input directly into Y4M, MP4, or Matroska budget inspection.",
+      "status": "accepted",
+      "validation": "batch-606-validation.json"
+    },
+    {
+      "id": "FVID-0762",
+      "batch": 606,
+      "title": "Open source once in native_export::y4m_segment_frame_upper_bound_with_options",
+      "source": "src/native_export.rs",
+      "regression": "tests/export_pcm_and_y4m_single_open.rs",
+      "before": "y4m_segment_frame_upper_bound_with_options opened source once for the 9-byte prefix read and then opened source a second time for Y4M header parsing, Mp4Reader::open, or WebmReader::open.",
+      "result": "Open BufReader::new(File::open(source)?) once, seek back to 0 after prefix inspection, and reuse input across Y4M, MP4, and Matroska upper-bound checks.",
+      "status": "accepted",
+      "validation": "batch-606-validation.json"
+    },
+    {
+      "id": "FVID-0763",
+      "batch": 606,
+      "title": "Skip redundant second validate_video_packet_budget_with_geometry_filters_interval_and_limit for the first source in export_y4m_sources_with_options",
+      "source": "src/native_export.rs",
+      "regression": "tests/export_pcm_and_y4m_single_open.rs",
+      "before": "export_y4m_sources_with_options ran validate_video_packet_budget_with_geometry_filters_interval_and_limit on every source with max_packets before creating the temporary file, and then immediately ran it a second time on source 0 with the exact same remaining_packets == max_packets.",
+      "result": "Only re-run validate_video_packet_budget_with_geometry_filters_interval_and_limit inside the segment loop when source_idx > 0 and remaining_packets != max_packets.",
+      "status": "accepted",
+      "validation": "batch-606-validation.json"
+    },
+    {
+      "id": "FVID-0764",
+      "batch": 606,
+      "title": "Batch-write converted float32 blocks and add a zero-conversion 32-bit float fast path in native_pcm::decode_reader",
+      "source": "src/native_pcm.rs",
+      "regression": "tests/export_pcm_and_y4m_single_open.rs",
+      "before": "native_pcm::decode_reader called output.write_all(&value.to_le_bytes()) once per individual sample (up to 65,536 virtual Write calls per 64 KiB block) and re-serialized 32-bit float PCM sample-by-sample.",
+      "result": "Validate finite samples and write &buffer[..n] directly when info.float && sample_bytes == 4, and batch converted f32 samples into float_buf for one output.write_all(&float_buf) per block otherwise.",
+      "status": "accepted",
+      "validation": "batch-606-validation.json"
     }
   ],
   "pending_count": 0

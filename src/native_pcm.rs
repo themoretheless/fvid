@@ -43,6 +43,22 @@ impl WaveInfo {
             format!("pcm_s{}le", self.bits_per_sample)
         }
     }
+    pub(crate) fn to_media_wave_info(self) -> fvid_media::owned_wave_inspect::WaveInfo {
+        fvid_media::owned_wave_inspect::WaveInfo {
+            sample_rate: self.sample_rate,
+            channels: self.channels,
+            bits_per_sample: self.bits_per_sample,
+            float: self.float,
+            valid_bits: self.valid_bits,
+            channel_mask: self.channel_mask,
+            channel_mask_explicit: false,
+            data_offset: self.data_offset,
+            sample_frames: self.sample_frames,
+            block: self.block,
+            data_bytes: self.data_bytes,
+            end: self.end,
+        }
+    }
     pub fn frame_bytes(&self) -> u16 {
         self.block
     }
@@ -418,41 +434,60 @@ pub(crate) fn decode_reader<R: Read + Seek, W: Write>(
     let mut remaining = (last - first) * u64::from(info.block);
     let sample_bytes = usize::from(info.bits_per_sample / 8);
     let mut blocks = 0;
-    while remaining != 0 && !control.packet_limit_reached() {
-        control.check()?;
-        let n = remaining.min(capacity as u64) as usize;
-        input.read_exact(&mut buffer[..n])?;
-        for bytes in buffer[..n].chunks_exact(sample_bytes) {
-            let value = if info.float {
-                if sample_bytes == 4 {
-                    f32::from_le_bytes(bytes.try_into().unwrap())
-                } else {
-                    f64::from_le_bytes(bytes.try_into().unwrap()) as f32
+    if info.float && sample_bytes == 4 {
+        while remaining != 0 && !control.packet_limit_reached() {
+            control.check()?;
+            let n = remaining.min(capacity as u64) as usize;
+            input.read_exact(&mut buffer[..n])?;
+            for bytes in buffer[..n].chunks_exact(4) {
+                if !f32::from_le_bytes(bytes.try_into().unwrap()).is_finite() {
+                    return Err(invalid("non-finite PCM sample"));
                 }
-            } else {
-                let mut packed = [0u8; 4];
-                packed[..sample_bytes].copy_from_slice(bytes);
-                let raw = u32::from_le_bytes(packed);
-                let padding = info.bits_per_sample - info.valid_bits;
-                if padding != 0 && raw & ((1u32 << padding) - 1) != 0 {
-                    return Err(invalid("nonzero PCM padding bits"));
-                }
-                if sample_bytes == 1 {
-                    (f32::from(bytes[0]) - 128.0) / 128.0
-                } else {
-                    let shift = 32 - u32::from(info.bits_per_sample);
-                    let signed = ((raw << shift) as i32) >> shift;
-                    (f64::from(signed) / (1u64 << (info.bits_per_sample - 1)) as f64) as f32
-                }
-            };
-            if !value.is_finite() {
-                return Err(invalid("non-finite PCM sample"));
             }
-            output.write_all(&value.to_le_bytes())?;
+            output.write_all(&buffer[..n])?;
+            remaining -= n as u64;
+            blocks += 1;
+            control.packet(n)?;
         }
-        remaining -= n as u64;
-        blocks += 1;
-        control.packet(n)?;
+    } else {
+        let mut float_buf = Vec::new();
+        float_buf
+            .try_reserve_exact((capacity / sample_bytes) * 4)
+            .map_err(|_| invalid("cannot allocate PCM conversion buffer"))?;
+        while remaining != 0 && !control.packet_limit_reached() {
+            control.check()?;
+            let n = remaining.min(capacity as u64) as usize;
+            input.read_exact(&mut buffer[..n])?;
+            float_buf.clear();
+            for bytes in buffer[..n].chunks_exact(sample_bytes) {
+                let value = if info.float {
+                    f64::from_le_bytes(bytes.try_into().unwrap()) as f32
+                } else {
+                    let mut packed = [0u8; 4];
+                    packed[..sample_bytes].copy_from_slice(bytes);
+                    let raw = u32::from_le_bytes(packed);
+                    let padding = info.bits_per_sample - info.valid_bits;
+                    if padding != 0 && raw & ((1u32 << padding) - 1) != 0 {
+                        return Err(invalid("nonzero PCM padding bits"));
+                    }
+                    if sample_bytes == 1 {
+                        (f32::from(bytes[0]) - 128.0) / 128.0
+                    } else {
+                        let shift = 32 - u32::from(info.bits_per_sample);
+                        let signed = ((raw << shift) as i32) >> shift;
+                        (f64::from(signed) / (1u64 << (info.bits_per_sample - 1)) as f64) as f32
+                    }
+                };
+                if !value.is_finite() {
+                    return Err(invalid("non-finite PCM sample"));
+                }
+                float_buf.extend_from_slice(&value.to_le_bytes());
+            }
+            output.write_all(&float_buf)?;
+            remaining -= n as u64;
+            blocks += 1;
+            control.packet(n)?;
+        }
     }
     Ok(crate::native_media::AudioDecodeStats {
         sample_frames: last - first - remaining / u64::from(info.block),
