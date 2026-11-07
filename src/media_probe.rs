@@ -228,6 +228,7 @@ fn matroska_with_limits(
                 "A_FLAC" => "flac",
                 "A_AC3" | "A_AC3/BSID9" | "A_AC3/BSID10" => "ac3",
                 "A_EAC3" => "eac3",
+                "A_WAVPACK4" => "wavpack",
                 "A_MPEG/L3" => "mp3",
                 "A_MPEG/L2" => "mp2",
                 "A_MPEG/L1" => "mp1",

@@ -1,8 +1,8 @@
 {
   "target": 1000,
   "counting_rule": "One independently confirmed problem or useful capability; fixture variants and baseline integration repairs are excluded. Only accepted entries count.",
-  "accepted_count": 599,
-  "next_id": "FVID-0600",
+  "accepted_count": 604,
+  "next_id": "FVID-0605",
   "entries": [
     {
       "id": "FVID-0001",
@@ -6780,6 +6780,61 @@
       "result": "Map non-AVS Matroska track kinds to 'data' in owned_webm_probe to match src/media_probe.rs.",
       "status": "accepted",
       "validation": "batch-573-validation.json"
+    },
+    {
+      "id": "FVID-0600",
+      "batch": 574,
+      "title": "Normalize Matroska A_WAVPACK4 codec ID to 'wavpack' in media_probe and owned_webm_probe",
+      "source": "src/media_probe.rs",
+      "regression": "tests/mkv_wavpack_wave_ilng_and_aac_mp3_seek.rs",
+      "before": "src/media_probe.rs and crates/fvid-media/src/owned_webm_probe.rs left Matroska WavPack tracks with raw codec ID 'A_WAVPACK4' instead of normalizing to 'wavpack'.",
+      "result": "Map 'A_WAVPACK4' to 'wavpack' in both Matroska probe implementations.",
+      "status": "accepted",
+      "validation": "batch-574-validation.json"
+    },
+    {
+      "id": "FVID-0601",
+      "batch": 574,
+      "title": "Register canonical audio and bitmap subtitle codecs in owned_codec_metadata::descriptor",
+      "source": "crates/fvid-media/src/owned_codec_metadata.rs",
+      "regression": "tests/mkv_wavpack_wave_ilng_and_aac_mp3_seek.rs",
+      "before": "fvid_media::owned_codec_metadata::descriptor returned None for canonical codecs emitted by FVid probes ('wavpack', 'adpcm_ima_qt', 'adpcm_ima_wav', 'adpcm_ms', 'mace3', 'mace6', 'dvd_subtitle', and 'hdmv_pgs_subtitle').",
+      "result": "Add CodecDescriptor entries for 'wavpack', 'adpcm_ima_qt', 'adpcm_ima_wav', 'adpcm_ms', 'mace3', 'mace6', 'dvd_subtitle', and 'hdmv_pgs_subtitle' in owned_codec_metadata::descriptor.",
+      "status": "accepted",
+      "validation": "batch-574-validation.json"
+    },
+    {
+      "id": "FVID-0602",
+      "batch": 574,
+      "title": "Map RIFF INFO ILNG tag to and from semantic 'language' metadata key in WAVE probe and metadata editor",
+      "source": "crates/fvid-media/src/owned_wave_metadata.rs",
+      "regression": "tests/mkv_wavpack_wave_ilng_and_aac_mp3_seek.rs",
+      "before": "info_for_file_tags wrote track language as RIFF INFO 'ILNG', but owned_wave_metadata::tag_for_key rejected 'language' and owned_probe::probe_wave_with_options exposed 'ILNG' verbatim instead of 'language'.",
+      "result": "Map 'language' -> *b\"ILNG\" in tag_for_key and b\"ILNG\" -> \"language\" in probe_wave_with_options.",
+      "status": "accepted",
+      "validation": "batch-574-validation.json"
+    },
+    {
+      "id": "FVID-0603",
+      "batch": 574,
+      "title": "Implement sub-sample div_ceil seek_time(Duration) in AacAudioReader",
+      "source": "src/playback/audio/aac.rs",
+      "regression": "tests/mkv_wavpack_wave_ilng_and_aac_mp3_seek.rs",
+      "before": "AacAudioReader relied on the default AudioStream::seek_time implementation which floored (target.as_nanos() * timescale) / 1_000_000_000, landing at sample 0 (0 ns) for seek_time(Duration::from_nanos(1)) instead of ceiling to sample 1.",
+      "result": "Override seek_time(Duration) in AacAudioReader using div_ceil(1_000_000_000) clamped to end in output sample units.",
+      "status": "accepted",
+      "validation": "batch-574-validation.json"
+    },
+    {
+      "id": "FVID-0604",
+      "batch": 574,
+      "title": "Implement sub-sample div_ceil seek_time(Duration) and sample_duration in Mp3AudioReader",
+      "source": "src/playback/audio/mp3.rs",
+      "regression": "tests/mkv_wavpack_wave_ilng_and_aac_mp3_seek.rs",
+      "before": "Mp3AudioReader relied on the default AudioStream::seek_time floor division, landing at sample 0 (0 ns) for seek_time(Duration::from_nanos(1)) instead of ceiling to sample 1, and computed duration() via manual 64-bit remainder multiplication instead of sample_duration.",
+      "result": "Override seek_time(Duration) in Mp3AudioReader with div_ceil(1_000_000_000) clamped to presentation_samples() / samples() and compute duration() via crate::audio::sample_duration.",
+      "status": "accepted",
+      "validation": "batch-574-validation.json"
     }
   ]
 }

@@ -13,6 +13,7 @@ pub fn tag_for_key(key: &str) -> Result<[u8; 4]> {
         "copyright" => *b"ICOP",
         "encoder" => *b"ISFT",
         "track" => *b"ITRK",
+        "language" => *b"ILNG",
         _ if key.len() == 4 && key.bytes().all(|byte| (32..=126).contains(&byte)) => {
             let bytes: [u8; 4] = key.as_bytes().try_into().unwrap();
             bytes.map(|byte| byte.to_ascii_uppercase())

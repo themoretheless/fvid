@@ -394,6 +394,7 @@ pub fn probe_wave_with_options(
                     b"ICOP" => "copyright",
                     b"ISFT" => "encoder",
                     b"ITRK" => "track",
+                    b"ILNG" => "language",
                     _ => std::str::from_utf8(&header[..4])
                         .map_err(|_| invalid("invalid WAVE INFO tag"))?,
                 };

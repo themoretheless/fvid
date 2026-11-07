@@ -216,6 +216,14 @@ impl AudioStream for AacAudioReader {
         target as i64
     }
 
+    fn seek_time(&mut self, target: Duration) -> i64 {
+        let end = self.aac.samples().saturating_mul(self.clock_ratio());
+        let wanted = (target.as_nanos() * u128::from(self.output_rate))
+            .div_ceil(1_000_000_000)
+            .min(u128::from(end)) as i64;
+        self.seek_to(wanted)
+    }
+
 }
 
 #[cfg(test)]

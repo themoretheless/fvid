@@ -1,0 +1,29 @@
+{
+  "status": "accepted",
+  "accepted_ids": [
+    "FVID-0600",
+    "FVID-0601",
+    "FVID-0602",
+    "FVID-0603",
+    "FVID-0604"
+  ],
+  "count_delta": 5,
+  "accepted_count": 604,
+  "next_id": "FVID-0605",
+  "qualification": [
+    {
+      "name": "mkv-wavpack-wave-ilng-and-aac-mp3-seek",
+      "command": [
+        "cargo",
+        "test",
+        "--features",
+        "player",
+        "--test",
+        "mkv_wavpack_wave_ilng_and_aac_mp3_seek"
+      ],
+      "exit_code": 0,
+      "passed": 5,
+      "ignored": 0
+    }
+  ]
+}

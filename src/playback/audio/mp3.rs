@@ -103,9 +103,10 @@ impl AudioStream for Mp3AudioReader {
     }
 
     fn duration(&self) -> Option<Duration> {
-        let samples = self.mp3.presentation_samples();
-        let rate = u64::from(self.mp3.sample_rate);
-        Some(Duration::new(samples / rate, ((samples % rate) * 1_000_000_000 / rate) as u32))
+        Some(crate::audio::sample_duration(
+            self.mp3.presentation_samples(),
+            self.mp3.sample_rate,
+        ))
     }
 
     /// A frame describes itself: this container stores no setup block.
@@ -161,6 +162,18 @@ impl AudioStream for Mp3AudioReader {
             .saturating_sub(1);
         self.packet = index;
         self.mp3.frames[index].pts as i64
+    }
+
+    fn seek_time(&mut self, target: Duration) -> i64 {
+        let end = if matches!(self.mp3.tag, LAYER_I | LAYER_II | LAYER_III) {
+            self.mp3.presentation_samples()
+        } else {
+            self.mp3.samples()
+        };
+        let wanted = (target.as_nanos() * u128::from(self.mp3.sample_rate))
+            .div_ceil(1_000_000_000)
+            .min(u128::from(end)) as i64;
+        self.seek_to(wanted)
     }
 }
 

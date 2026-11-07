@@ -194,6 +194,7 @@ fn try_probe_webm_with_limits(
             "A_FLAC" => "flac",
             "A_AC3" | "A_AC3/BSID9" | "A_AC3/BSID10" => "ac3",
             "A_EAC3" => "eac3",
+            "A_WAVPACK4" => "wavpack",
             "S_TEXT/UTF8" | "S_TEXT/ASCII" | "S_UTF8" => "subrip",
             "S_TEXT/ASS" | "S_ASS" => "ass",
             "S_TEXT/SSA" | "S_SSA" => "ssa",

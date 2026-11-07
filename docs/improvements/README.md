@@ -4136,6 +4136,13 @@ See `batch-572-validation.json`.
 
 See `batch-573-validation.json`.
 
+## Batch 574 — FVID-0600..0604: Matroska `A_WAVPACK4` probe normalization, `owned_codec_metadata` audio/subtitle descriptors, WAVE `ILNG` <-> `language` mapping, and `AacAudioReader` / `Mp3AudioReader` sub-sample `seek_time`
 
+- **FVID-0600** — Normalize Matroska `A_WAVPACK4` codec ID to `"wavpack"` in `media_probe` and `owned_webm_probe` (`src/media_probe.rs`, `crates/fvid-media/src/owned_webm_probe.rs`, `tests/mkv_wavpack_wave_ilng_and_aac_mp3_seek.rs`).
+- **FVID-0601** — Register canonical audio (`wavpack`, `adpcm_ima_qt`, `adpcm_ima_wav`, `adpcm_ms`, `mace3`, `mace6`) and bitmap subtitle (`dvd_subtitle`, `hdmv_pgs_subtitle`) codecs in `owned_codec_metadata::descriptor` (`crates/fvid-media/src/owned_codec_metadata.rs`, `tests/mkv_wavpack_wave_ilng_and_aac_mp3_seek.rs`).
+- **FVID-0602** — Map RIFF INFO `ILNG` tag to and from semantic `"language"` metadata key in WAVE probe and metadata editor (`crates/fvid-media/src/owned_wave_metadata.rs`, `crates/fvid-media/src/owned_probe.rs`, `tests/mkv_wavpack_wave_ilng_and_aac_mp3_seek.rs`).
+- **FVID-0603** — Implement sub-sample `div_ceil` `seek_time(Duration)` in `AacAudioReader` (`src/playback/audio/aac.rs`, `tests/mkv_wavpack_wave_ilng_and_aac_mp3_seek.rs`).
+- **FVID-0604** — Implement sub-sample `div_ceil` `seek_time(Duration)` and `sample_duration` in `Mp3AudioReader` (`src/playback/audio/mp3.rs`, `tests/mkv_wavpack_wave_ilng_and_aac_mp3_seek.rs`).
 
+See `batch-574-validation.json`.
 
