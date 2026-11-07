@@ -371,7 +371,7 @@ pub fn measure_loudness(source: &Path, options: &CopyOptions) -> Result<Loudness
     pcm_options.max_packets = None;
     pcm_options.max_packet_bytes = CopyOptions::default().max_packet_bytes;
     pcm_options.progress = None;
-    let mut stats = crate::owned_wave_loudness::measure_loudness(&spool.wave, &pcm_options)?;
+    let mut stats = crate::owned_wave_loudness::measure_wave_loudness(&spool.wave, &pcm_options)?;
     if options.cancel.as_ref().is_some_and(|c| c.is_cancelled()) {
         return Err("media operation cancelled".into());
     }

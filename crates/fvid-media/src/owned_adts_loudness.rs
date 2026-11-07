@@ -118,11 +118,37 @@ pub(crate) fn validate_configuration_and_channels(
     source: &Path,
     options: &CopyOptions,
 ) -> Result<(u32, u16)> {
-    let (header_rate, header_channels, _, reader) =
+    validate_configuration_channels_and_reader(source, options)
+        .map(|(rate, channels, _)| (rate, channels))
+}
+pub(crate) fn validate_configuration_channels_and_reader(
+    source: &Path,
+    options: &CopyOptions,
+) -> Result<(
+    u32,
+    u16,
+    Option<(
+        u32,
+        u16,
+        u32,
+        crate::owned_aac::adts::StreamReader<BufReader<File>>,
+    )>,
+)> {
+    let (header_rate, header_channels, header_mask, reader) =
         validate_header_configuration_channels_and_reader(source, options)?;
     if crate::owned_wave_loudness::qualified_rate(header_rate) {
+        let packet_limit = options
+            .max_packet_bytes
+            .min(options.max_controlled_bytes.unwrap_or(usize::MAX));
+        if packet_limit >= CopyOptions::default().max_packet_bytes {
+            return Ok((
+                header_rate,
+                header_channels,
+                Some((header_rate, header_channels, header_mask, reader)),
+            ));
+        }
         validate_packet_budget(source, Some(reader), options)?;
-        return Ok((header_rate, header_channels));
+        return Ok((header_rate, header_channels, None));
     }
     validate_packet_budget(source, None, options)?;
     let (rate, channels, mask, _) =
@@ -141,7 +167,7 @@ pub(crate) fn validate_configuration_and_channels(
             "owned AAC true-peak measurement requires a qualified standard PCM rate".into(),
         );
     }
-    Ok((rate, channels))
+    Ok((rate, channels, None))
 }
 pub(crate) fn validate_configuration(source: &Path, options: &CopyOptions) -> Result<u32> {
     validate_configuration_and_channels(source, options).map(|(rate, _)| rate)
@@ -225,7 +251,7 @@ pub fn measure_loudness(source: &Path, options: &CopyOptions) -> Result<Loudness
     pcm_options.max_packets = None;
     pcm_options.max_packet_bytes = CopyOptions::default().max_packet_bytes;
     pcm_options.progress = None;
-    let mut stats = crate::owned_wave_loudness::measure_loudness(&spool.wave, &pcm_options)?;
+    let mut stats = crate::owned_wave_loudness::measure_wave_loudness(&spool.wave, &pcm_options)?;
     if options.cancel.as_ref().is_some_and(|c| c.is_cancelled()) {
         return Err("media operation cancelled".into());
     }

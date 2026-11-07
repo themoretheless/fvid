@@ -2,16 +2,13 @@
 use super::{Parameters, Print, Result};
 use crate::owned_wave_loudness::NormalizationMeasurement;
 use fvid_control::{CopyOptions, ProgressHook};
-use std::{
-    path::Path,
-    sync::{
-        Arc,
-        atomic::{AtomicU64, Ordering},
-    },
+use std::sync::{
+    Arc,
+    atomic::{AtomicU64, Ordering},
 };
 
-pub(super) fn measure_phase(
-    source: &Path,
+pub(super) fn measure_phase_from_input(
+    input: crate::owned_wave_loudness::Input,
     dual_mono: bool,
     options: &CopyOptions,
 ) -> Result<(NormalizationMeasurement, CopyOptions)> {
@@ -29,8 +26,11 @@ pub(super) fn measure_phase(
             hook.emit(event);
         }));
     }
-    let measurement =
-        crate::owned_wave_loudness::measure_for_normalization(source, dual_mono, &measure_options)?;
+    let measurement = crate::owned_wave_loudness::measure_input_for_normalization(
+        input,
+        dual_mono,
+        &measure_options,
+    )?;
     let mut export_options = options.clone();
     if let Some(hook) = &options.progress {
         let hook = hook.clone();

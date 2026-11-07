@@ -5,7 +5,7 @@ use fvid_media_info::{LoudnormStats, resolve_loudnorm_args};
 use std::path::Path;
 type Result<T> = std::result::Result<T, String>;
 mod report;
-use report::{measure_phase, output_report, print_report, report_memory};
+use report::{measure_phase_from_input, output_report, print_report, report_memory};
 
 /// Return a gain only when the requested parameters select linear processing.
 /// Offset is a dynamic-mode parameter: linear gain is target I minus measured I.
@@ -286,7 +286,6 @@ pub fn plan_wave_loudnorm(
     options: &CopyOptions,
 ) -> Result<fvid_media_info::MediaPlan> {
     check_options(options)?;
-    use fvid_media_info::{MediaPlan, PlanStep, PlanStream};
     let resolved = validate_request(args)?;
     let params = parse(&resolved)?;
     let mut wave_file = std::fs::File::open(source).map_err(|e| e.to_string())?;
@@ -303,16 +302,39 @@ pub fn plan_wave_loudnorm(
     )
 }
 
-fn plan_wave_loudnorm_from_info(
+fn preflight_wave_loudnorm(
     source: &Path,
-    wave_file: &mut std::fs::File,
-    wave_info: &crate::owned_wave_inspect::WaveInfo,
-    resolved: &str,
     params: &Parameters,
     dual_pass: bool,
     options: &CopyOptions,
-) -> Result<fvid_media_info::MediaPlan> {
-    use fvid_media_info::{MediaPlan, PlanStep, PlanStream};
+) -> Result<crate::owned_wave_loudness::Input> {
+    let mut wave_file = std::fs::File::open(source).map_err(|e| e.to_string())?;
+    let wave_info = crate::owned_wave_inspect::inspect(&mut wave_file, options.cancel.as_ref())
+        .map_err(|e| e.to_string())?;
+    let preflight = validate_wave_loudnorm_admission(
+        &mut wave_file,
+        &wave_info,
+        params,
+        dual_pass,
+        options,
+    )?;
+    let (weights, capacity, size) = preflight.ok_or("missing WAVE loudness preflight")?;
+    Ok(crate::owned_wave_loudness::Input {
+        file: wave_file,
+        info: wave_info,
+        weights,
+        capacity,
+        size,
+    })
+}
+
+fn validate_wave_loudnorm_admission(
+    wave_file: &mut std::fs::File,
+    wave_info: &crate::owned_wave_inspect::WaveInfo,
+    params: &Parameters,
+    dual_pass: bool,
+    options: &CopyOptions,
+) -> Result<Option<(Vec<f64>, usize, usize)>> {
     if !((params.gain.is_some() || dynamic_input(wave_info))
         && (params.print == Print::None
             || (crate::owned_wave_loudness::qualified_rate(wave_info.sample_rate)
@@ -345,10 +367,12 @@ fn plan_wave_loudnorm_from_info(
         return Err("packet limit leaves no decoded audio samples".into());
     }
     let report = params.print != Print::None;
-    if dual_pass || report {
+    let preflight = if dual_pass || report {
         let decode_options = crate::owned_adts_export::pcm_decode_options(options);
-        crate::owned_wave_loudness::check_preflight(wave_info, &decode_options)?;
-    }
+        Some(crate::owned_wave_loudness::check_preflight(wave_info, &decode_options)?)
+    } else {
+        None
+    };
     if let Some(limit) = options.max_controlled_bytes {
         let metadata_bytes = crate::owned_wave_inspect::info_chunks_bytes(
             wave_file,
@@ -410,6 +434,21 @@ fn plan_wave_loudnorm_from_info(
             ));
         }
     }
+    Ok(preflight)
+}
+
+fn plan_wave_loudnorm_from_info(
+    source: &Path,
+    wave_file: &mut std::fs::File,
+    wave_info: &crate::owned_wave_inspect::WaveInfo,
+    resolved: &str,
+    params: &Parameters,
+    dual_pass: bool,
+    options: &CopyOptions,
+) -> Result<fvid_media_info::MediaPlan> {
+    use fvid_media_info::{MediaPlan, PlanStep, PlanStream};
+    validate_wave_loudnorm_admission(wave_file, wave_info, params, dual_pass, options)?;
+    let report = params.print != Print::None;
     let codec_name = wave_info.codec();
     let mut steps = vec![PlanStep {
         action: "decode".into(),
@@ -486,14 +525,25 @@ pub fn apply_loudnorm(
     if head_len >= 7 && crate::owned_aac::adts::header(&head[..7]).is_some() {
         return crate::owned_adts_loudnorm::apply(source, destination, args, false, options);
     }
+    apply_wave_loudnorm(source, destination, args, options)
+}
+
+pub(crate) fn apply_wave_loudnorm(
+    source: &Path,
+    destination: &Path,
+    args: Option<&str>,
+    options: &CopyOptions,
+) -> Result<LoudnormStats> {
+    check_options(options)?;
     let args = resolve_loudnorm_args(args)?;
     let params = parse(&args)?;
     if params.print != Print::None {
         if destination.symlink_metadata().is_ok() {
             return Err("output already exists".into());
         }
-        plan_wave_loudnorm(source, Some(&args), false, options)?;
-        let (measurement, export_options) = measure_phase(source, params.dual_mono, options)?;
+        let wave_input = preflight_wave_loudnorm(source, &params, false, options)?;
+        let (measurement, export_options) =
+            measure_phase_from_input(wave_input, params.dual_mono, options)?;
         return apply_resolved(
             source,
             destination,
@@ -521,13 +571,24 @@ pub fn apply_loudnorm_dual(
     if head_len >= 7 && crate::owned_aac::adts::header(&head[..7]).is_some() {
         return crate::owned_adts_loudnorm::apply(source, destination, args, true, options);
     }
+    apply_wave_loudnorm_dual(source, destination, args, options)
+}
+
+pub(crate) fn apply_wave_loudnorm_dual(
+    source: &Path,
+    destination: &Path,
+    args: Option<&str>,
+    options: &CopyOptions,
+) -> Result<LoudnormStats> {
+    check_options(options)?;
     let base = resolve_loudnorm_args(args)?;
     let original = parse(&base)?;
     if destination.symlink_metadata().is_ok() {
         return Err("output already exists".into());
     }
-    plan_wave_loudnorm(source, Some(&base), true, options)?;
-    let (measurement, export_options) = measure_phase(source, original.dual_mono, options)?;
+    let wave_input = preflight_wave_loudnorm(source, &original, true, options)?;
+    let (measurement, export_options) =
+        measure_phase_from_input(wave_input, original.dual_mono, options)?;
     let clean = base
         .split(':')
         .filter(|item| !item.starts_with("print_format="))

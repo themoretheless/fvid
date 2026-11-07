@@ -1,8 +1,8 @@
 {
   "target": 1000,
   "counting_rule": "One independently confirmed problem or useful capability; fixture variants and baseline integration repairs are excluded. Only accepted entries count.",
-  "accepted_count": 934,
-  "next_id": "FVID-0935",
+  "accepted_count": 939,
+  "next_id": "FVID-0940",
   "entries": [
     {
       "id": "FVID-0001",
@@ -10465,6 +10465,61 @@
       "result": "Added owned_adts_export::decode_reader_to_wave and forwarded the validated StreamReader, sample rate, channels, and channel mask from measure_loudness.",
       "status": "accepted",
       "validation": "batch-640-validation.json"
+    },
+    {
+      "id": "FVID-0935",
+      "batch": 641,
+      "title": "Extract owned_wave_loudness::measure_wave_loudness and call it directly on decoded WAVE spools in container and ADTS loudness",
+      "source": "crates/fvid-media/src/owned_wave_loudness.rs",
+      "regression": "tests/spool_loudness_and_wave_loudnorm_handle_reuse.rs",
+      "before": "owned_container_loudness::measure_loudness and owned_adts_loudness::measure_loudness called owned_wave_loudness::measure_loudness on the private decoded WAVE spool, triggering a redundant 12-byte head read and container/ADTS recognition checks.",
+      "result": "Extracted owned_wave_loudness::measure_wave_loudness and called it directly on decoded WAVE spools in container and ADTS loudness.",
+      "status": "accepted",
+      "validation": "batch-641-validation.json"
+    },
+    {
+      "id": "FVID-0936",
+      "batch": 641,
+      "title": "Extract apply_wave_loudnorm and apply_wave_loudnorm_dual in owned_loudnorm and call them directly on decoded WAVE spools in container and ADTS loudnorm",
+      "source": "crates/fvid-media/src/owned_container_loudnorm.rs",
+      "regression": "tests/spool_loudness_and_wave_loudnorm_handle_reuse.rs",
+      "before": "owned_container_loudnorm::apply and owned_adts_loudnorm::apply called apply_loudnorm / apply_loudnorm_dual on the private decoded WAVE spool, triggering a redundant 12-byte head read and container/ADTS recognition checks.",
+      "result": "Extracted apply_wave_loudnorm and apply_wave_loudnorm_dual in owned_loudnorm and routed container and ADTS decoded WAVE spools directly to them.",
+      "status": "accepted",
+      "validation": "batch-641-validation.json"
+    },
+    {
+      "id": "FVID-0937",
+      "batch": 641,
+      "title": "Reuse the preflighted Input across preflight_wave_loudnorm and measure_phase_from_input in owned_loudnorm",
+      "source": "crates/fvid-media/src/owned_loudnorm.rs",
+      "regression": "tests/spool_loudness_and_wave_loudnorm_handle_reuse.rs",
+      "before": "apply_wave_loudnorm (with report) and apply_wave_loudnorm_dual called plan_wave_loudnorm (opening and inspecting the WAVE file) and then measure_phase (which reopened and re-inspected the WAVE file).",
+      "result": "Added preflight_wave_loudnorm and validate_wave_loudnorm_admission in owned_loudnorm to return the preflighted Input directly to measure_phase_from_input.",
+      "status": "accepted",
+      "validation": "batch-641-validation.json"
+    },
+    {
+      "id": "FVID-0938",
+      "batch": 641,
+      "title": "Expose owned_wave_loudness::measure_input_for_normalization so pass-1 WAVE loudnorm measurement reuses the already-opened Input",
+      "source": "crates/fvid-media/src/owned_loudnorm/report.rs",
+      "regression": "tests/spool_loudness_and_wave_loudnorm_handle_reuse.rs",
+      "before": "measure_phase in owned_loudnorm/report.rs called measure_for_normalization(source), which opened the WAVE file and ranowned_wave_inspect::inspect and check_preflight a second time.",
+      "result": "Added measure_input_for_normalization in owned_wave_loudness and measure_phase_from_input in owned_loudnorm/report.rs to reuse the preflighted Input.",
+      "status": "accepted",
+      "validation": "batch-641-validation.json"
+    },
+    {
+      "id": "FVID-0939",
+      "batch": 641,
+      "title": "Reuse the validated ADTS StreamReader and channel mask in owned_adts_loudnorm::apply when packet byte limits are unbounded",
+      "source": "crates/fvid-media/src/owned_adts_loudnorm.rs",
+      "regression": "tests/spool_loudness_and_wave_loudnorm_handle_reuse.rs",
+      "before": "owned_adts_loudnorm::apply called validate_configuration_and_channels (opening the ADTS file and constructing NativeAacDecoder) and then decode_to_wave (reopening the ADTS file and constructing another NativeAacDecoder).",
+      "result": "Returned the validated StreamReader, rate, channels, and mask from validate_configuration_channels_and_reader when packet byte limits are unbounded and forwarded them to decode_reader_to_wave.",
+      "status": "accepted",
+      "validation": "batch-641-validation.json"
     }
   ],
   "pending_count": 126

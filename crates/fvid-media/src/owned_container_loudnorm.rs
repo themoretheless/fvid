@@ -208,14 +208,14 @@ pub fn apply(
         })
     });
     let stats = if dual_pass {
-        crate::owned_loudnorm::apply_loudnorm_dual(
+        crate::owned_loudnorm::apply_wave_loudnorm_dual(
             &spool.wave,
             destination,
             Some(&resolved),
             &pcm_options,
         )?
     } else {
-        crate::owned_loudnorm::apply_loudnorm(
+        crate::owned_loudnorm::apply_wave_loudnorm(
             &spool.wave,
             destination,
             Some(&resolved),

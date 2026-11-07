@@ -4782,6 +4782,15 @@ See `batch-628-validation.json`.
 - **FVID-0933**: Reuse the validated ADTS `StreamReader` across packet-budget and SBR prefix negotiation in `owned_adts_loudness::validate_configuration_and_channels` (`crates/fvid-media/src/owned_adts_loudness.rs`).
 - **FVID-0934**: Reuse the validated ADTS `StreamReader` and channel mask via `owned_adts_export::decode_reader_to_wave` in `owned_adts_loudness::measure_loudness` (`crates/fvid-media/src/owned_adts_export.rs`).
 
+## Batch 641 (FVID-0935..0939)
+
+- **FVID-0935**: Extract `owned_wave_loudness::measure_wave_loudness` and call it directly on decoded WAVE spools in container and ADTS loudness (`crates/fvid-media/src/owned_wave_loudness.rs`).
+- **FVID-0936**: Extract `apply_wave_loudnorm` and `apply_wave_loudnorm_dual` in `owned_loudnorm` and call them directly on decoded WAVE spools in container and ADTS loudnorm (`crates/fvid-media/src/owned_container_loudnorm.rs`).
+- **FVID-0937**: Reuse the preflighted `Input` (`File`, `WaveInfo`, `weights`, `capacity`, `size`) across `preflight_wave_loudnorm` and `measure_phase_from_input` in `owned_loudnorm` (`crates/fvid-media/src/owned_loudnorm.rs`).
+- **FVID-0938**: Expose `owned_wave_loudness::measure_input_for_normalization` so pass-1 WAVE loudnorm measurement reuses the already-opened and inspected `Input` (`crates/fvid-media/src/owned_loudnorm/report.rs`).
+- **FVID-0939**: Reuse the validated ADTS `StreamReader` and channel mask in `owned_adts_loudnorm::apply` when packet byte limits are unbounded (`crates/fvid-media/src/owned_adts_loudnorm.rs`).
+
+
 
 
 

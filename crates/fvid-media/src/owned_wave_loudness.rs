@@ -84,12 +84,12 @@ pub(crate) fn supports(source: &Path, options: &CopyOptions) -> bool {
                 .is_ok_and(|info| qualified_rate(info.sample_rate) && weights(&info).is_ok())
         })
 }
-struct Input {
-    file: File,
-    info: crate::owned_wave_inspect::WaveInfo,
-    weights: Vec<f64>,
-    capacity: usize,
-    size: usize,
+pub(crate) struct Input {
+    pub(crate) file: File,
+    pub(crate) info: crate::owned_wave_inspect::WaveInfo,
+    pub(crate) weights: Vec<f64>,
+    pub(crate) capacity: usize,
+    pub(crate) size: usize,
 }
 pub(crate) fn check_preflight(
     info: &crate::owned_wave_inspect::WaveInfo,
@@ -182,6 +182,9 @@ pub fn measure_loudness(source: &Path, options: &CopyOptions) -> Result<Loudness
     if head_len >= 7 && crate::owned_aac::adts::header(&head[..7]).is_some() {
         return crate::owned_adts_loudness::measure_loudness(source, options);
     }
+    measure_wave_loudness(source, options)
+}
+pub(crate) fn measure_wave_loudness(source: &Path, options: &CopyOptions) -> Result<LoudnessStats> {
     Ok(measure_for_normalization(source, false, options)?.stats)
 }
 pub(crate) struct NormalizationMeasurement {
@@ -195,7 +198,14 @@ pub(crate) fn measure_for_normalization(
     dual_mono: bool,
     options: &CopyOptions,
 ) -> Result<NormalizationMeasurement> {
-    let mut input = preflight(source, options)?;
+    let input = preflight(source, options)?;
+    measure_input_for_normalization(input, dual_mono, options)
+}
+pub(crate) fn measure_input_for_normalization(
+    mut input: Input,
+    dual_mono: bool,
+    options: &CopyOptions,
+) -> Result<NormalizationMeasurement> {
     if dual_mono && input.info.channels == 1 {
         input.weights[0] *= 2.;
     }

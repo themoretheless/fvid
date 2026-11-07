@@ -72,8 +72,11 @@ pub fn apply(
     let decode_options = crate::owned_adts_export::pcm_decode_options(options);
     // Read-only configuration/policy preflight; actual packet failures propagate
     // once execution starts, without retry through the legacy backend.
-    let (validated_rate, validated_channels) =
-        crate::owned_adts_loudness::validate_configuration_and_channels(source, &decode_options)?;
+    let (validated_rate, validated_channels, cached_reader) =
+        crate::owned_adts_loudness::validate_configuration_channels_and_reader(
+            source,
+            &decode_options,
+        )?;
     if dual_pass || crate::owned_loudnorm::report_requested(Some(&resolved))? {
         crate::owned_adts_loudness::plan_loudness_with_validated_rate(
             source,
@@ -97,7 +100,11 @@ pub fn apply(
         0,
         options,
     )?;
-    let spool = crate::owned_adts_export::decode_to_wave(source, None, options)?;
+    let spool = if let Some((r, ch, mask, reader)) = cached_reader {
+        crate::owned_adts_export::decode_reader_to_wave(reader, r, ch, mask, None, options)?
+    } else {
+        crate::owned_adts_export::decode_to_wave(source, None, options)?
+    };
     if !crate::owned_wave_loudness::qualified_rate(spool.stats.sample_rate) {
         return Err(
             "owned AAC true-peak measurement requires a qualified standard PCM rate".into(),
@@ -115,14 +122,14 @@ pub fn apply(
         })
     });
     let stats = if dual_pass {
-        crate::owned_loudnorm::apply_loudnorm_dual(
+        crate::owned_loudnorm::apply_wave_loudnorm_dual(
             &spool.wave,
             destination,
             Some(&resolved),
             &pcm_options,
         )?
     } else {
-        crate::owned_loudnorm::apply_loudnorm(
+        crate::owned_loudnorm::apply_wave_loudnorm(
             &spool.wave,
             destination,
             Some(&resolved),
