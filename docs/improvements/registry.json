@@ -1,8 +1,8 @@
 {
   "target": 1000,
   "counting_rule": "One independently confirmed problem or useful capability; fixture variants and baseline integration repairs are excluded. Only accepted entries count.",
-  "accepted_count": 719,
-  "next_id": "FVID-0720",
+  "accepted_count": 724,
+  "next_id": "FVID-0725",
   "entries": [
     {
       "id": "FVID-0001",
@@ -7678,7 +7678,7 @@
       "title": "Check existing overlay destination upfront before scanning main input and preserve MP4 encoder tag in native_lossless::write_mp4_selected",
       "source": "src/native_export/overlay.rs",
       "regression": "tests/webm_multitrack_tags_overlay_mp4_relocate_and_pcm_preflight.rs",
-      "before": "overlay_video_transformed called overlay_eligible(main) before checking whether destination already existed and used destination.try_exists() instead of symlink_metadata(), and native_lossless::write_mp4_selected passed an empty text_tags map to PacketWriter::new_with_track_preferences, dropping the source MP4 ©too encoder tag.",
+      "before": "overlay_video_transformed called overlay_eligible(main) before checking whether destination already existed and used destination.try_exists() instead of symlink_metadata(), and native_lossless::write_mp4_selected passed an empty text_tags map to PacketWriter::new_with_track_preferences, dropping the source MP4 \u00a9too encoder tag.",
       "result": "Reject destination.symlink_metadata().is_ok() at the start of overlay_video_transformed before opening main, and populate text_tags with ENCODER from input.encoder() in native_lossless::write_mp4_selected.",
       "status": "accepted",
       "validation": "batch-590-validation.json"
@@ -8100,6 +8100,61 @@
       "result": "Extract geometry_with_mask_and_frames_for_decode in owned_matroska_flac_export to return (rate, channels, mask, estimated_frames) from a single reader and FlacDecoder pass, and use it in supports, apply, and owned_audio_plan.",
       "status": "accepted",
       "validation": "batch-597-validation.json"
+    },
+    {
+      "id": "FVID-0720",
+      "batch": 598,
+      "title": "Pre-reserve Ogg audio catalog byte buffer with fallible try_reserve_exact before read_to_end",
+      "source": "crates/fvid-media/src/owned_ogg_audio_catalog.rs",
+      "regression": "tests/ogg_catalog_and_timeline_pcm_chunking.rs",
+      "before": "owned_ogg_audio_catalog::open read the entire Ogg stream into an unreserved Vec::new() via read_to_end without fallibly reserving limits.file_bytes.",
+      "result": "Call bytes.try_reserve_exact(limits.file_bytes.min(16 * 1024 * 1024)) before read_to_end in owned_ogg_audio_catalog::open.",
+      "status": "accepted",
+      "validation": "batch-598-validation.json"
+    },
+    {
+      "id": "FVID-0721",
+      "batch": 598,
+      "title": "Use fallible try_reserve_exact for Ogg continued and uncontinued packet assembly in Ogg::parse",
+      "source": "crates/fvid-media/src/owned_ogg.rs",
+      "regression": "tests/ogg_catalog_and_timeline_pcm_chunking.rs",
+      "before": "Ogg::parse assembled continued and uncontinued packet pieces using infallible pending.extend_from_slice(piece) and piece.to_vec().",
+      "result": "Pre-reserve pending and uncontinued packet buffers with fallible try_reserve_exact(piece.len()) in Ogg::parse before copying segment bytes.",
+      "status": "accepted",
+      "validation": "batch-598-validation.json"
+    },
+    {
+      "id": "FVID-0722",
+      "batch": 598,
+      "title": "Batch-pack Matroska timeline PCM output into a reusable fallible scratch buffer and skip cloning non-selected track packets",
+      "source": "crates/fvid-media/src/owned_matroska_audio_timeline_impl.rs",
+      "regression": "tests/ogg_catalog_and_timeline_pcm_chunking.rs",
+      "before": "decode_matroska_audio_timeline wrote PCM output one sample at a time via output.write_all(&sample.to_le_bytes()) and cloned reader.packets[index] before checking packet.track != track.number.",
+      "result": "Check reader.packets[index].track != track.number before cloning the packet descriptor and batch-pack decoded PCM samples into a fallibly pre-reserved 4096-sample scratch buffer before writing.",
+      "status": "accepted",
+      "validation": "batch-598-validation.json"
+    },
+    {
+      "id": "FVID-0723",
+      "batch": 598,
+      "title": "Batch-pack MP4 timeline PCM output into a reusable fallible scratch buffer instead of writing one sample at a time",
+      "source": "crates/fvid-media/src/owned_mp4_audio_timeline_impl.rs",
+      "regression": "tests/ogg_catalog_and_timeline_pcm_chunking.rs",
+      "before": "decode_mp4_audio_timeline wrote PCM output one sample at a time via output.write_all(&value.to_le_bytes()).",
+      "result": "Batch-pack decoded MP4 PCM samples into a fallibly pre-reserved 4096-sample scratch buffer before writing chunks to output.",
+      "status": "accepted",
+      "validation": "batch-598-validation.json"
+    },
+    {
+      "id": "FVID-0724",
+      "batch": 598,
+      "title": "Reuse the opened MP4 reader across descriptor_with_frames_for_decode and owned_audio_plan::source_descriptor_for_decode",
+      "source": "crates/fvid-media/src/owned_mp4_audio_export.rs",
+      "regression": "tests/ogg_catalog_and_timeline_pcm_chunking.rs",
+      "before": "geometry_and_frames_for_decode called descriptor_for_decode (opening and indexing the MP4 file) and then opened and indexed the MP4 file a second time, and owned_audio_plan::source_descriptor_for_decode called both descriptor_for_decode and geometry_and_frames_for_decode (opening and indexing the MP4 file 3 times).",
+      "result": "Extract descriptor_and_reader_for_decode and descriptor_with_frames_for_decode in owned_mp4_audio_export so geometry_and_frames_for_decode and owned_audio_plan::source_descriptor_for_decode reuse a single opened MP4 reader.",
+      "status": "accepted",
+      "validation": "batch-598-validation.json"
     }
   ]
 }

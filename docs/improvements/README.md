@@ -4376,6 +4376,16 @@ See `batch-596-validation.json`.
 
 See `batch-597-validation.json`.
 
+## Batch 598 — FVID-0720..0724: Fallible Ogg audio catalog and packet assembly reservation, chunked Matroska/MP4 timeline PCM writes, and single-pass MP4 audio descriptor + frame estimation
+
+- **FVID-0720** — Pre-reserve Ogg audio catalog byte buffer with fallible `try_reserve_exact` before `read_to_end` (`crates/fvid-media/src/owned_ogg_audio_catalog.rs`, `tests/ogg_catalog_and_timeline_pcm_chunking.rs`).
+- **FVID-0721** — Use fallible `try_reserve_exact` for Ogg continued and uncontinued packet assembly in `Ogg::parse` (`crates/fvid-media/src/owned_ogg.rs`, `tests/ogg_catalog_and_timeline_pcm_chunking.rs`).
+- **FVID-0722** — Batch-pack Matroska timeline PCM output into a reusable fallible scratch buffer and skip cloning non-selected track packets (`crates/fvid-media/src/owned_matroska_audio_timeline_impl.rs`, `tests/ogg_catalog_and_timeline_pcm_chunking.rs`).
+- **FVID-0723** — Batch-pack MP4 timeline PCM output into a reusable fallible scratch buffer instead of writing one sample at a time (`crates/fvid-media/src/owned_mp4_audio_timeline_impl.rs`, `tests/ogg_catalog_and_timeline_pcm_chunking.rs`).
+- **FVID-0724** — Reuse the opened MP4 reader across `descriptor_with_frames_for_decode` and `owned_audio_plan::source_descriptor_for_decode` (`crates/fvid-media/src/owned_mp4_audio_export.rs`, `crates/fvid-media/src/owned_audio_plan.rs`, `tests/ogg_catalog_and_timeline_pcm_chunking.rs`).
+
+See `batch-598-validation.json`.
+
 
 
 

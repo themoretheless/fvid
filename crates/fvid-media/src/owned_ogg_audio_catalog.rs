@@ -12,6 +12,9 @@ pub struct Track {
 }
 pub fn open(mut source: impl Read, limits: Limits) -> Result<Vec<Track>> {
     let mut bytes = Vec::new();
+    bytes
+        .try_reserve_exact(limits.file_bytes.min(16 * 1024 * 1024))
+        .map_err(|_| invalid("Ogg buffer allocation failed"))?;
     source
         .by_ref()
         .take((limits.file_bytes as u64).saturating_add(1))

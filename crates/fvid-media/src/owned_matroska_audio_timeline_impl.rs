@@ -56,7 +56,11 @@ pub(crate) fn decode_matroska_audio_reader_controlled<R: std::io::Read + std::io
         sample_rate: rate,
         channels,
     };
-    let mut pending_packet: std::collections::VecDeque<_> = reader.packets.iter().take(0).cloned().enumerate().collect();
+    let mut pending_packet = std::collections::VecDeque::new();
+    let mut pcm_scratch = Vec::new();
+    pcm_scratch
+        .try_reserve_exact(4096 * MatroskaTimelineDecoder::SAMPLE_BYTES)
+        .map_err(|_| invalid("Matroska audio PCM output buffer allocation failed"))?;
     let mut index = 0;
     loop {
         control.check()?;
@@ -68,16 +72,16 @@ pub(crate) fn decode_matroska_audio_reader_controlled<R: std::io::Read + std::io
             let Some(samples) = decoder.finish()? else {
                 break;
             };
-            let packet = pending_packet
+            let (source_index, packet) = pending_packet
                 .pop_front()
                 .ok_or_else(|| invalid("delayed Matroska audio has no source packet"))?;
-            (packet.0, packet.1, samples)
+            (source_index, packet, samples)
         } else {
-            let packet = reader.packets[index].clone();
-            if packet.track != track.number {
+            if reader.packets[index].track != track.number {
                 index += 1;
                 continue;
             }
+            let packet = reader.packets[index].clone();
             let source_index=index;
             let encoded = reader.read_packet(index)?;
             let samples = decoder.decode(&encoded)?;
@@ -204,8 +208,14 @@ pub(crate) fn decode_matroska_audio_reader_controlled<R: std::io::Read + std::io
         let begin = from.saturating_sub(position).min(available);
         let end = to.saturating_sub(position).min(available).max(begin);
         let width = usize::from(channels);
-        for sample in &samples[(first + begin) as usize * width..(first + end) as usize * width] {
-            output.write_all(&sample.to_le_bytes())?;
+        for chunk in samples[(first + begin) as usize * width..(first + end) as usize * width]
+            .chunks(4096)
+        {
+            pcm_scratch.clear();
+            for sample in chunk {
+                pcm_scratch.extend_from_slice(&sample.to_le_bytes());
+            }
+            output.write_all(&pcm_scratch)?;
         }
         stats.sample_frames += end - begin;
         position = position

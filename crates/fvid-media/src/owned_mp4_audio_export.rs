@@ -94,6 +94,22 @@ pub(crate) fn descriptor_for_decode(
     transform: Option<AudioDecodeTransform>,
     options: &CopyOptions,
 ) -> Result<(usize, u32, u16, u32, String)> {
+    let (index, rate, channels, mask, codec, _) =
+        descriptor_and_reader_for_decode(source, transform, options)?;
+    Ok((index, rate, channels, mask, codec))
+}
+fn descriptor_and_reader_for_decode(
+    source: &Path,
+    transform: Option<AudioDecodeTransform>,
+    options: &CopyOptions,
+) -> Result<(
+    usize,
+    u32,
+    u16,
+    u32,
+    String,
+    crate::owned_mp4::Mp4Reader<BufReader<File>>,
+)> {
     let mut reader = open(source, options)?;
     if !reader.refused().is_empty() {
         return Err("MP4 stream selection requires every track to be represented".into());
@@ -155,35 +171,37 @@ pub(crate) fn descriptor_for_decode(
     {
         return Err("MP4 audio export requires valid clock and matching audio geometry".into());
     }
+    let codec = match &track.codec {
+        b"mp4a" => "aac",
+        b"alac" => "alac",
+        b"MAC3" => "mace3",
+        b"MAC6" => "mace6",
+        b"ima4" => "adpcm_ima_qt",
+        b"ms\x00\x11" => "adpcm_ima_wav",
+        b"ms\x00\x02" => "adpcm_ms",
+        b"alaw" => "pcm_alaw",
+        b"ulaw" => "pcm_mulaw",
+        b"raw " => "pcm_u8",
+        b"sowt" => "pcm_sle",
+        b"twos" => "pcm_sbe",
+        b"in24" | b"in32" => {
+            if track.configuration.first() == Some(&1) {
+                "pcm_sle"
+            } else {
+                "pcm_sbe"
+            }
+        }
+        b"fl32" | b"fl64" => "pcm_float",
+        _ => return Err("selected MP4 audio codec is not owned".into()),
+    }
+    .into();
     Ok((
         index,
         decoder.sample_rate(),
         decoder.channels(),
         decoder.channel_mask(),
-        match &track.codec {
-            b"mp4a" => "aac",
-            b"alac" => "alac",
-            b"MAC3" => "mace3",
-            b"MAC6" => "mace6",
-            b"ima4" => "adpcm_ima_qt",
-            b"ms\x00\x11" => "adpcm_ima_wav",
-            b"ms\x00\x02" => "adpcm_ms",
-            b"alaw" => "pcm_alaw",
-            b"ulaw" => "pcm_mulaw",
-            b"raw " => "pcm_u8",
-            b"sowt" => "pcm_sle",
-            b"twos" => "pcm_sbe",
-            b"in24" | b"in32" => {
-                if track.configuration.first() == Some(&1) {
-                    "pcm_sle"
-                } else {
-                    "pcm_sbe"
-                }
-            }
-            b"fl32" | b"fl64" => "pcm_float",
-            _ => return Err("selected MP4 audio codec is not owned".into()),
-        }
-        .into(),
+        codec,
+        reader,
     ))
 }
 pub(crate) fn geometry_for_decode(
@@ -200,9 +218,17 @@ pub(crate) fn geometry_and_frames_for_decode(
     transform: Option<AudioDecodeTransform>,
     options: &CopyOptions,
 ) -> Result<(u32, u16, u32, bool, u64)> {
-    let (_, rate, channels, mask, codec) = descriptor_for_decode(source, transform, options)?;
-    let mut reader = open(source, options)?;
-    let index = crate::owned_mp4_audio::mp4_audio_index(&reader, options.streams.first().copied()).map_err(|e|e.to_string())?;
+    let (_, rate, channels, mask, _, precise, frames) =
+        descriptor_with_frames_for_decode(source, transform, options)?;
+    Ok((rate, channels, mask, precise, frames))
+}
+pub(crate) fn descriptor_with_frames_for_decode(
+    source: &Path,
+    transform: Option<AudioDecodeTransform>,
+    options: &CopyOptions,
+) -> Result<(usize, u32, u16, u32, String, bool, u64)> {
+    let (index, rate, channels, mask, codec, mut reader) =
+        descriptor_and_reader_for_decode(source, transform, options)?;
     let track = &reader.tracks()[index];
     let interval = transform.and_then(|t| prefix(t, rate));
     let active_samples = crate::owned_mp4_audio::mp4_active_samples(track, reader.movie_timescale(), interval, options.max_packets);
@@ -295,11 +321,14 @@ pub(crate) fn geometry_and_frames_for_decode(
         )?;
         estimated_frames = stats.sample_frames;
     }
+    let precise = codec.starts_with("pcm_") && all_pcm;
     Ok((
+        index,
         rate,
         channels,
         mask,
-        codec.starts_with("pcm_") && all_pcm,
+        codec,
+        precise,
         estimated_frames,
     ))
 }

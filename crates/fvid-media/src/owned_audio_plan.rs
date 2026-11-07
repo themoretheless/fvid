@@ -259,10 +259,8 @@ fn source_descriptor_for_decode(source: &Path, options: &CopyOptions,
         stage2_meta_bytes = info_len;
         (rate, channels, mask, codec.to_owned(), "float32".to_owned())
     } else if mp4 {
-        let (index, rate, channels, mask, codec) =
-            crate::owned_mp4_audio_export::descriptor_for_decode(source, transform.copied(), options)?;
-        let (_, _, _, precise, frames) =
-            crate::owned_mp4_audio_export::geometry_and_frames_for_decode(
+        let (index, rate, channels, mask, codec, precise, frames) =
+            crate::owned_mp4_audio_export::descriptor_with_frames_for_decode(
                 source,
                 transform.copied(),
                 options,

@@ -337,16 +337,27 @@ impl Ogg {
                     }
                     PartialPacket::Available(pending) => {
                         if number == 0 && flags & CONTINUES != 0 {
+                            pending
+                                .try_reserve_exact(piece.len())
+                                .map_err(|_| invalid("Ogg packet allocation failed"))?;
                             pending.extend_from_slice(piece);
                             if unfinished {
                                 continue;
                             }
                             std::mem::take(pending)
                         } else if unfinished {
+                            pending
+                                .try_reserve_exact(piece.len())
+                                .map_err(|_| invalid("Ogg packet allocation failed"))?;
                             pending.extend_from_slice(piece);
                             continue;
                         } else {
-                            piece.to_vec()
+                            let mut packet = Vec::new();
+                            packet
+                                .try_reserve_exact(piece.len())
+                                .map_err(|_| invalid("Ogg packet allocation failed"))?;
+                            packet.extend_from_slice(piece);
+                            packet
                         }
                     }
                 };

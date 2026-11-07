@@ -226,6 +226,10 @@ pub(crate) fn decode_mp4_audio_reader_targeted<R: std::io::Read + std::io::Seek>
         channels,
     };
     let mut packet = Vec::new();
+    let mut pcm_scratch = Vec::new();
+    pcm_scratch
+        .try_reserve_exact(4096 * Mp4TimelineDecoder::SAMPLE_BYTES)
+        .map_err(|_| invalid("MP4 audio PCM output buffer allocation failed"))?;
     // One source-boundary checkpoint bounds retained state regardless of the
     // number of edits. Checkpoints also retain their active setup identity.
     let mut checkpoint: Option<(
@@ -377,10 +381,15 @@ pub(crate) fn decode_mp4_audio_reader_targeted<R: std::io::Read + std::io::Seek>
             // overlap state still consumes the complete compressed packet.
             let first = from.saturating_sub(start).min(duration) as usize;
             let last = to.saturating_sub(start).min(duration) as usize;
-            for value in
-                &samples[first * usize::from(channels)..last.max(first) * usize::from(channels)]
+            for chunk in samples
+                [first * usize::from(channels)..last.max(first) * usize::from(channels)]
+                .chunks(4096)
             {
-                output.write_all(&value.to_le_bytes())?;
+                pcm_scratch.clear();
+                for value in chunk {
+                    pcm_scratch.extend_from_slice(&value.to_le_bytes());
+                }
+                output.write_all(&pcm_scratch)?;
             }
             written += last.saturating_sub(first) as u64;
             stats.decoded_frames += 1;
