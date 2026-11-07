@@ -1406,7 +1406,8 @@ pub fn transcode_lossless(source: &std::path::Path, transform: &crate::media_inf
     if (!crate::native_lossless::supports(transform) && !crate::native_lossless::supports_framestep(transform)) {
         return Err("request is not supported by the owned lossless planner".into());
     }
-    let planar_eligible = crate::native_lossless_y4m::eligible(source).map_err(|e| e.to_string())?;
+    let planar_kind = crate::native_lossless_y4m::classify_eligible(source).map_err(|e| e.to_string())?;
+    let planar_eligible = planar_kind.is_some();
     if !planar_eligible && !crate::native_lossless::eligible(source).map_err(|e| e.to_string())? {
         return Err("request is not supported by the owned lossless planner".into());
     }
@@ -1420,7 +1421,7 @@ pub fn transcode_lossless(source: &std::path::Path, transform: &crate::media_inf
         crate::native_lossless::validate_first_mp4_frame(source, &geometry, &filters, false)
             .map_err(|e| e.to_string())?;
     }
-    let streams=if planar_eligible {
+    let streams=if planar_kind == Some(true) {
         vec![PlanStream {index:0,media_type:"video".into(),codec:"rawvideo".into(),disposition:"primary_video".into()}]
     } else {
         let info=crate::native_probe::probe(source)?;
@@ -1470,6 +1471,14 @@ pub fn loudness_with_options(
     options: &fvid_media::CopyOptions,
     weights: Option<&[f64]>,
 ) -> Result<MediaPlan> {
+    Ok(loudness_plan_and_channels_with_options(source, options, weights)?.0)
+}
+
+fn loudness_plan_and_channels_with_options(
+    source: &std::path::Path,
+    options: &fvid_media::CopyOptions,
+    weights: Option<&[f64]>,
+) -> Result<(MediaPlan, u16)> {
     if options.cancel.as_ref().is_some_and(|c| c.is_cancelled()) {
         return Err("media operation cancelled".into());
     }
@@ -1515,11 +1524,6 @@ pub fn loudness_with_options(
         decode_audio_with_options(source, &Default::default(), options)?
     } else {
         fvid_media::plan_decode_audio(source, &Default::default(), options)?
-    };
-    let defaults;
-    let weights=match weights {
-        Some(weights)=>weights,
-        None=>{defaults=crate::native_pcm::loudness_channel_weights_with_options(source,options).map_err(|e|e.to_string())?;&defaults},
     };
     let (rate,channels)=if let Some(info) = wave_info {
         let frame = usize::from(info.frame_bytes());
@@ -1584,6 +1588,22 @@ pub fn loudness_with_options(
         }
         (rate, channels)
     };
+    let defaults;
+    let weights = match weights {
+        Some(weights) => weights,
+        None => {
+            defaults = match channels {
+                1 | 2 => vec![1.0; usize::from(channels)],
+                _ => {
+                    return Err(
+                        "multichannel loudness requires explicit channel weights in stream order"
+                            .into(),
+                    );
+                }
+            };
+            &defaults
+        }
+    };
     if weights.len()!=usize::from(channels) {return Err("channel weights must match selected audio stream".into());}
     crate::native_pcm::LoudnessMeter::new(rate,weights)?;
     plan.command="loudness".into();
@@ -1607,7 +1627,7 @@ pub fn loudness_with_options(
             options.max_rss_bytes
         ));
     }
-    Ok(plan)
+    Ok((plan, channels))
 }
 
 /// Metadata-only two-pass constant-gain normalization plan.
@@ -1658,10 +1678,8 @@ pub fn normalize_loudness_with_options(
     loudness_options.metadata_delete.clear();
     loudness_options.stream_metadata_set.clear();
     loudness_options.stream_metadata_delete.clear();
-    let mut plan=loudness_with_options(source,&loudness_options,weights)?;
+    let (mut plan, channels) = loudness_plan_and_channels_with_options(source, &loudness_options, weights)?;
     if options.max_controlled_bytes.is_some() {
-        let (_, channels) =
-            fvid_media::owned_audio_plan::source_geometry(source, &loudness_options)?;
         crate::native_export::pcm_matroska::check_output_memory_budget(
             source,
             channels,

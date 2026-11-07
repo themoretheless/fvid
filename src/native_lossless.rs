@@ -26,26 +26,33 @@ fn check(cancel: Option<&CancelFlag>) -> Result<()> {
 }
 /// All tracks must be represented; no unsupported stream may disappear.
 pub fn eligible(source: &Path) -> Result<bool> {
+    Ok(classify_eligible(source)?.is_some())
+}
+/// Returns `Some(true)` for planar/Matroska lossless sources and `Some(false)` for MP4 lossless sources.
+pub(crate) fn classify_eligible(source: &Path) -> Result<Option<bool>> {
     use std::io::SeekFrom;
     let mut input = BufReader::new(File::open(source)?);
     let mut prefix = [0; 9];
     let n = input.read(&mut prefix)?;
-    if n == 9 && &prefix == b"YUV4MPEG2" {
+    if (n == 9 && &prefix == b"YUV4MPEG2")
+        || (n >= 4 && prefix[..4] == [0x1a, 0x45, 0xdf, 0xa3])
+    {
         drop(input);
-        return crate::native_lossless_y4m::eligible(source);
+        return Ok(crate::native_lossless_y4m::eligible(source)?.then_some(true));
     }
     if n < 8 || !crate::container::mp4::recognizes_prefix(&prefix[..8]) {
-        return Ok(false);
+        return Ok(None);
     }
     input.seek(SeekFrom::Start(0))?;
     let input = Mp4Reader::open(input, Default::default())?;
-    Ok(mp4_matroska::eligible(&input)
+    Ok((mp4_matroska::eligible(&input)
         && input
             .tracks()
             .iter()
             .filter(|t| t.handler == *b"vide")
             .count()
             == 1)
+        .then_some(false))
 }
 /// Caller owns atomic publication. Progress never reports done before publication.
 pub fn write_mp4<W: Write + Seek>(

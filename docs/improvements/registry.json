@@ -1,8 +1,8 @@
 {
   "target": 1000,
   "counting_rule": "One independently confirmed problem or useful capability; fixture variants and baseline integration repairs are excluded. Only accepted entries count.",
-  "accepted_count": 829,
-  "next_id": "FVID-0830",
+  "accepted_count": 834,
+  "next_id": "FVID-0835",
   "entries": [
     {
       "id": "FVID-0001",
@@ -9310,7 +9310,62 @@
       "result": "native_plan::transcode_lossless reuses planar_eligible directly to construct the rawvideo PlanStream without reopening the source.",
       "status": "accepted",
       "validation": "batch-619-validation.json"
+    },
+    {
+      "id": "FVID-0830",
+      "batch": 620,
+      "title": "Classify planar/Matroska vs MP4 lossless eligibility in a single pass for overlay_video_transformed",
+      "source": "src/native_export/overlay.rs",
+      "regression": "tests/export_overlay_and_loudness_plan_single_open.rs",
+      "before": "overlay_video_transformed called native_lossless_y4m::eligible(main) and then, when false, called native_lossless::eligible(main), reopening the file to check the 9-byte prefix again.",
+      "result": "native_lossless::classify_eligible classifies planar/Matroska vs MP4 lossless eligibility from a single 9-byte prefix read.",
+      "status": "accepted",
+      "validation": "batch-620-validation.json"
+    },
+    {
+      "id": "FVID-0831",
+      "batch": 620,
+      "title": "Close the container reader before first-frame inspection in native_export::validate_video_packet_budget_with_geometry_filters_interval_and_limit",
+      "source": "src/native_export.rs",
+      "regression": "tests/export_overlay_and_loudness_plan_single_open.rs",
+      "before": "validate_video_packet_budget_with_geometry_filters_interval_and_limit kept its Y4M BufReader, Mp4Reader, or WebmReader open while calling inspect_first_y4m_frame_with_filters_and_options.",
+      "result": "The container reader is explicitly dropped before invoking inspect_first_y4m_frame_with_filters_and_options.",
+      "status": "accepted",
+      "validation": "batch-620-validation.json"
+    },
+    {
+      "id": "FVID-0832",
+      "batch": 620,
+      "title": "Combine ADTS and WAVE prefix checks into a single 12-byte read per input in native_export::try_concat_mp4_matroska_with_options",
+      "source": "src/native_export.rs",
+      "regression": "tests/export_overlay_and_loudness_plan_single_open.rs",
+      "before": "try_concat_mp4_matroska_with_options iterated over all sources calling is_adts_source and then iterated again calling native_pcm::is_wave when destination was .wav.",
+      "result": "try_concat_mp4_matroska_with_options reads up to 12 bytes once per source to classify both ADTS and RIFF/RF64 WAVE in a single pass.",
+      "status": "accepted",
+      "validation": "batch-620-validation.json"
+    },
+    {
+      "id": "FVID-0833",
+      "batch": 620,
+      "title": "Derive default loudness weights from the already-inspected channel count in native_plan::loudness_with_options",
+      "source": "src/native_plan.rs",
+      "regression": "tests/export_overlay_and_loudness_plan_single_open.rs",
+      "before": "loudness_with_options called native_pcm::loudness_channel_weights_with_options(source, options) when weights was None, reopening and re-inspecting the source even though loudness_with_options already inspects the source's sample rate and channel count.",
+      "result": "loudness_with_options computes default mono/stereo unit weights directly from the already-inspected channel count.",
+      "status": "accepted",
+      "validation": "batch-620-validation.json"
+    },
+    {
+      "id": "FVID-0834",
+      "batch": 620,
+      "title": "Return the inspected channel count from loudness_plan_and_channels_with_options to avoid re-probing source_geometry in native_plan::normalize_loudness_with_options",
+      "source": "src/native_plan.rs",
+      "regression": "tests/export_overlay_and_loudness_plan_single_open.rs",
+      "before": "normalize_loudness_with_options called loudness_with_options and then, when max_controlled_bytes was set, called owned_audio_plan::source_geometry(source, &loudness_options) to re-probe the channel count.",
+      "result": "loudness_plan_and_channels_with_options returns both the MediaPlan and the channel count for direct reuse in check_output_memory_budget.",
+      "status": "accepted",
+      "validation": "batch-620-validation.json"
     }
   ],
-  "pending_count": 171
+  "pending_count": 166
 }

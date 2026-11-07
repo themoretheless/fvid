@@ -1,0 +1,16 @@
+{
+  "batch": 620,
+  "ids": [
+    "FVID-0830",
+    "FVID-0831",
+    "FVID-0832",
+    "FVID-0833",
+    "FVID-0834"
+  ],
+  "commands": [
+    "cargo test --test export_overlay_and_loudness_plan_single_open",
+    "cargo test --test media_dispatch_and_lossless_plan_single_open",
+    "python3 scripts/check_improvements_registry.py"
+  ],
+  "status": "accepted"
+}

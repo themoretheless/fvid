@@ -4596,3 +4596,13 @@ See `batch-618-validation.json`.
 
 See `batch-619-validation.json`.
 
+## Batch 620 — FVID-0830..0834: Single-pass lossless/concat classification and zero-reopen loudness/normalize planning
+
+- **FVID-0830** — Classify planar/Matroska vs MP4 lossless eligibility in a single pass for `overlay_video_transformed` (`src/native_export/overlay.rs`, `src/native_lossless.rs`, `tests/export_overlay_and_loudness_plan_single_open.rs`).
+- **FVID-0831** — Close the container reader before first-frame inspection in `native_export::validate_video_packet_budget_with_geometry_filters_interval_and_limit` (`src/native_export.rs`, `tests/export_overlay_and_loudness_plan_single_open.rs`).
+- **FVID-0832** — Combine ADTS and WAVE prefix checks into a single 12-byte read per input in `native_export::try_concat_mp4_matroska_with_options` (`src/native_export.rs`, `tests/export_overlay_and_loudness_plan_single_open.rs`).
+- **FVID-0833** — Derive default loudness weights from the already-inspected channel count in `native_plan::loudness_with_options` (`src/native_plan.rs`, `tests/export_overlay_and_loudness_plan_single_open.rs`).
+- **FVID-0834** — Return the inspected channel count from `loudness_plan_and_channels_with_options` to avoid re-probing `source_geometry` in `native_plan::normalize_loudness_with_options` (`src/native_plan.rs`, `tests/export_overlay_and_loudness_plan_single_open.rs`).
+
+See `batch-620-validation.json`.
+

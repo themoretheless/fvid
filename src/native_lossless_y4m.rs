@@ -25,6 +25,9 @@ pub fn is_source(source: &Path) -> Result<bool> {
 }
 /// Admission preserves the legacy path for Y4M profiles not owned yet.
 pub fn eligible(source: &Path) -> Result<bool> {
+    Ok(classify_eligible(source)?.is_some())
+}
+pub(crate) fn classify_eligible(source: &Path) -> Result<Option<bool>> {
     use std::io::SeekFrom;
     let mut input = BufReader::new(File::open(source)?);
     let mut prefix = [0u8; 9];
@@ -32,21 +35,22 @@ pub fn eligible(source: &Path) -> Result<bool> {
     input.seek(SeekFrom::Start(0))?;
     if read != 9 || &prefix != b"YUV4MPEG2" {
         if read < 4 || prefix[..4] != [0x1a, 0x45, 0xdf, 0xa3] {
-            return Ok(false);
+            return Ok(None);
         }
         let mut input = crate::container::webm::WebmReader::open(input, Default::default())?;
         input.scan_all()?;
-        return Ok(eligible_webm(&input));
+        return Ok(eligible_webm(&input).then_some(false));
     }
     let mut line = Vec::new();
     crate::line(&mut input, &mut line)?;
     let Ok(header) = crate::Header::parse(&line) else {
-        return Ok(false);
+        return Ok(None);
     };
-    Ok(!header
+    Ok((!header
         .tokens
         .iter()
         .any(|t| matches!(t.as_str(), "C420mpeg2" | "C420paldv")))
+    .then_some(true))
 }
 fn check(cancel: Option<&CancelFlag>) -> Result<()> {
     if cancel.is_some_and(CancelFlag::is_cancelled) {

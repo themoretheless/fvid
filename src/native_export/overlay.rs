@@ -321,12 +321,11 @@ pub fn overlay_video_transformed(
     if destination.symlink_metadata().is_ok() {
         return Err(invalid("overlay destination already exists"));
     }
-    let planar_eligible = crate::native_lossless_y4m::eligible(main)?;
-    if !planar_eligible && !crate::native_lossless::eligible(main)? {
+    let Some(planar_eligible) = crate::native_lossless::classify_eligible(main)? else {
         return Err(invalid(
             "owned overlay requires a supported owned lossless main input",
         ));
-    }
+    };
     let mut compositor = TimedOverlay::new(foreground, x, y)?;
     let mut main_reader = NativeReader::software(BufReader::new(File::open(main)?), usize::MAX)?;
     let first_frame = main_reader

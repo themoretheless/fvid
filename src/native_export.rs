@@ -553,6 +553,7 @@ pub(crate) fn validate_video_packet_budget_with_geometry_filters_interval_and_li
                 return Err(invalid("Y4M frame exceeds controlled memory budget"));
             }
         }
+        drop(input);
         let ((duration, scale), (_, _, _, depth, _, _), bytes) =
             inspect_first_y4m_frame_with_filters_and_options(source, geometry, filters, options)?;
         if bytes > options.max_packet_bytes {
@@ -692,6 +693,7 @@ pub(crate) fn validate_video_packet_budget_with_geometry_filters_interval_and_li
                 return Err(invalid("input has no decoded video frames"));
             }
         }
+        drop(reader);
         let (_, (_, _, _, depth, _, _), bytes) =
             inspect_first_y4m_frame_with_filters_and_options(source, geometry, filters, options)?;
         if bytes > options.max_packet_bytes {
@@ -793,6 +795,7 @@ pub(crate) fn validate_video_packet_budget_with_geometry_filters_interval_and_li
                 }
             }
         }
+        drop(reader);
         let (_, (_, _, _, depth, _, _), bytes) =
             inspect_first_y4m_frame_with_filters_and_options(source, geometry, filters, options)?;
         if bytes > options.max_packet_bytes {
@@ -2662,18 +2665,35 @@ pub fn try_concat_mp4_matroska_with_options(
         Some("wav") => false,
         _ => return Ok(None),
     };
-    // Keep ADTS on its packet-copy route instead of the decoded PCM fallback.
-    if !sources.is_empty() && sources.iter().all(|source| is_adts_source(source).unwrap_or(false)) {
-        return Ok(None);
-    }
-    if !matroska_out
-        && !sources.is_empty()
-        && sources
-            .iter()
-            .all(|source| crate::native_pcm::is_wave(source).unwrap_or(false))
-        && crate::native_pcm::concat_info_with_cancel(sources, cancel).is_ok()
-    {
-        return Ok(None);
+    if !sources.is_empty() {
+        use std::io::Read;
+        let mut all_adts = true;
+        let mut all_wave = !matroska_out;
+        for source in sources {
+            if let Ok(mut f) = File::open(source) {
+                let mut prefix = [0u8; 12];
+                let n = f.read(&mut prefix).unwrap_or(0);
+                if n < 7 || crate::container::adts::header(&prefix[..7]).is_none() {
+                    all_adts = false;
+                }
+                if all_wave && (n < 12 || !matches!(&prefix[..4], b"RIFF" | b"RF64") || &prefix[8..12] != b"WAVE") {
+                    all_wave = false;
+                }
+            } else {
+                all_adts = false;
+                all_wave = false;
+            }
+            if !all_adts && !all_wave {
+                break;
+            }
+        }
+        // Keep ADTS on its packet-copy route instead of the decoded PCM fallback.
+        if all_adts {
+            return Ok(None);
+        }
+        if all_wave && crate::native_pcm::concat_info_with_cancel(sources, cancel).is_ok() {
+            return Ok(None);
+        }
     }
     if matroska_out && destination.symlink_metadata().is_ok() {
         return Err(invalid("concat destination already exists"));
