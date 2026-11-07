@@ -30,6 +30,9 @@ pub fn concat(
         return Err("controlled memory limit must be positive".into());
     }
     crate::owned_budget::check_rss_budget(options)?;
+    if destination.symlink_metadata().is_ok() {
+        return Err("output already exists".into());
+    }
     if !supports(sources, destination, options) {
         if sources
             .first()
@@ -38,9 +41,6 @@ pub fn concat(
             return Err("request is not an owned ADTS Matroska concat".into());
         }
         return crate::owned_wave_remux::concat(sources, destination, options);
-    }
-    if destination.symlink_metadata().is_ok() {
-        return Err("output already exists".into());
     }
     let readers = open_readers(sources, options)?;
     let mut stats = crate::owned_matroska_remux::publish(destination, options, |output| {
@@ -74,7 +74,10 @@ fn open_readers(
     }) {
         return Err("controlled memory budget exceeded".into());
     }
-    let mut readers = Vec::with_capacity(sources.len());
+    let mut readers = Vec::new();
+    readers
+        .try_reserve_exact(sources.len())
+        .map_err(|_| "cannot allocate ADTS concat readers".to_string())?;
     for source in sources {
         if options.cancel.as_ref().is_some_and(|c| c.is_cancelled()) {
             return Err("media operation cancelled".into());

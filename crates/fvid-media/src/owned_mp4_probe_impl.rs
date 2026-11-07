@@ -166,6 +166,9 @@ pub(crate) fn try_mp4_with_options(
         }
     }
     let mut streams = Vec::new();
+    streams
+        .try_reserve_exact(reader.tracks().len())
+        .map_err(|_| "cannot allocate MP4 stream list".to_string())?;
     let mut duration_us = None::<i64>;
     let mut start_us = None::<i64>;
     for (index, track) in reader.tracks().iter().enumerate() {
@@ -327,29 +330,28 @@ pub(crate) fn try_mp4_with_options(
             extradata_bytes,
         });
     }
-    let chapters = reader
-        .chapters()
-        .iter()
-        .enumerate()
-        .map(|(index, chapter)| {
-            let start = i64::try_from(chapter.start_ns / 1000)
-                .map_err(|_| "MP4 chapter time exceeds API range")?;
-            let end = match reader.chapters().get(index + 1) {
-                Some(next) => i64::try_from(next.start_ns / 1000)
-                    .map_err(|_| "MP4 chapter time exceeds API range")?,
-                None => duration_us.unwrap_or(start).max(start),
-            };
-            Ok(ChapterInfo {
-                id: index as i64,
-                time_base: [1, 1_000_000],
-                start,
-                end,
-                metadata: [("title".into(), chapter.title.clone())]
-                    .into_iter()
-                    .collect(),
-            })
-        })
-        .collect::<Result<Vec<_>>>()?;
+    let mut chapters = Vec::new();
+    chapters
+        .try_reserve_exact(reader.chapters().len())
+        .map_err(|_| "cannot allocate MP4 chapter list".to_string())?;
+    for (index, chapter) in reader.chapters().iter().enumerate() {
+        let start = i64::try_from(chapter.start_ns / 1000)
+            .map_err(|_| "MP4 chapter time exceeds API range")?;
+        let end = match reader.chapters().get(index + 1) {
+            Some(next) => i64::try_from(next.start_ns / 1000)
+                .map_err(|_| "MP4 chapter time exceeds API range")?,
+            None => duration_us.unwrap_or(start).max(start),
+        };
+        chapters.push(ChapterInfo {
+            id: index as i64,
+            time_base: [1, 1_000_000],
+            start,
+            end,
+            metadata: [("title".into(), chapter.title.clone())]
+                .into_iter()
+                .collect(),
+        });
+    }
     let mut metadata = tags(reader.tags());
     if !reader.encoder().is_empty() {
         metadata

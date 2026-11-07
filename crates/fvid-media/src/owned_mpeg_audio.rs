@@ -668,6 +668,10 @@ impl Mp3 {
         max_size
     }
     /// Extract canonical container and stream 0 metadata maps from ID3v2 and ID3v1 tags.
+    pub fn file_bytes(&self) -> usize {
+        self.data.len()
+    }
+
     pub fn probe_metadata(
         &self,
     ) -> (

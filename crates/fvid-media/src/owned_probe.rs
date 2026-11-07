@@ -382,7 +382,8 @@ pub fn probe_wave_with_options(
                         ),
                     ));
                 }
-                let mut bytes = vec![0; entry_bytes];
+                let mut bytes = crate::owned_frame::buffer(entry_bytes)
+                    .map_err(|e| std::io::Error::new(std::io::ErrorKind::OutOfMemory, e))?;
                 file.read_exact(&mut bytes)?;
                 let key = match &header[..4] {
                     b"INAM" => "title",
@@ -474,7 +475,10 @@ pub fn probe_ogg_with_options(
     }
     let mut file = File::open(path).map_err(|e| e.to_string())?;
     let (limits, index_estimate) = crate::owned_ogg_opus_export::preflight(&mut file, options)?;
-    let mut bytes = Vec::with_capacity(limits.file_bytes);
+    let mut bytes = Vec::new();
+    bytes
+        .try_reserve_exact(limits.file_bytes)
+        .map_err(|_| "cannot allocate Ogg probe buffer".to_string())?;
     crate::owned_ogg_opus_export::CheckedRead {
         input: std::io::BufReader::new(file),
         options,
@@ -494,7 +498,10 @@ pub fn probe_ogg_with_options(
     if catalog.is_empty() {
         return Err("Ogg file has no supported audio streams".into());
     }
-    let mut streams = Vec::with_capacity(catalog.len());
+    let mut streams = Vec::new();
+    streams
+        .try_reserve_exact(catalog.len())
+        .map_err(|_| "cannot allocate Ogg stream list".to_string())?;
     let mut max_duration_us = 0i64;
     let mut file_metadata = BTreeMap::new();
     for (nth, entry) in catalog.into_iter().enumerate() {

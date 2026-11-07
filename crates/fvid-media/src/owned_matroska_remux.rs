@@ -66,11 +66,11 @@ pub fn remux(
         return Err("controlled memory limit must be positive".into());
     }
     check()?;
-    if !supports(source, destination, options) {
-        return Err("request is not an owned Matroska identity remux".into());
-    }
     if std::fs::symlink_metadata(destination).is_ok() {
         return Err("output already exists".into());
+    }
+    if !supports(source, destination, options) {
+        return Err("request is not an owned Matroska identity remux".into());
     }
     let mut input = File::open(source).map_err(|e| e.to_string())?;
     if !input.metadata().map_err(|e| e.to_string())?.is_file() {

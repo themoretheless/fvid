@@ -75,6 +75,11 @@ pub fn trim(
     options: &CopyOptions,
 ) -> Result<CopyStats> {
     check_options(options)?;
+    if destination.extension().and_then(|s| s.to_str()) == Some("wav")
+        && destination.symlink_metadata().is_ok()
+    {
+        return Err("output already exists".into());
+    }
     if supports(source, destination, options) {
         return copy_wave(source, destination, Some((from, to)), options).map(|(stats, _)| stats);
     }
@@ -113,6 +118,12 @@ pub fn concat(
     options: &CopyOptions,
 ) -> Result<CopyStats> {
     check_options(options)?;
+    if destination.extension().and_then(|s| s.to_str()) != Some("wav") {
+        return Err("owned WAVE remux requires .wav output".into());
+    }
+    if destination.symlink_metadata().is_ok() {
+        return Err("output already exists".into());
+    }
     if !(2..=256).contains(&sources.len()) {
         return Err("concat requires 2..=256 inputs".into());
     }
@@ -164,6 +175,12 @@ fn copy_waves(
         }
     };
     check()?;
+    if destination.is_some_and(|path| path.extension().and_then(|s| s.to_str()) != Some("wav")) {
+        return Err("owned WAVE remux requires .wav output".into());
+    }
+    if destination.is_some_and(|path| path.symlink_metadata().is_ok()) {
+        return Err("output already exists".into());
+    }
     if interval.is_some_and(|(from, to)| from < 0 || to <= from) {
         return Err("PCM interval requires 0 <= from < to".into());
     }
@@ -172,16 +189,10 @@ fn copy_waves(
             "owned WAVE remux does not implement requested stream/metadata policies".into(),
         );
     }
-    if destination.is_some_and(|path| path.extension().and_then(|s| s.to_str()) != Some("wav")) {
-        return Err("owned WAVE remux requires .wav output".into());
-    }
     if options.metadata_set.len() + options.metadata_delete.len() > 64
         || options.metadata_set.iter().any(|(_, v)| v.contains('\0'))
     {
         return Err("invalid WAVE metadata mutations".into());
-    }
-    if destination.is_some_and(|path| path.symlink_metadata().is_ok()) {
-        return Err("output already exists".into());
     }
     let mut event = ProgressEvent {
         packets: 0,
@@ -225,7 +236,10 @@ fn copy_waves(
     {
         return Err("controlled memory budget exceeded before WAVE geometry allocation".into());
     }
-    let mut segments: Vec<Segment> = Vec::with_capacity(sources.len());
+    let mut segments: Vec<Segment> = Vec::new();
+    segments
+        .try_reserve_exact(sources.len())
+        .map_err(|_| "cannot allocate WAVE segment descriptors".to_string())?;
     let mut packets_left = options.max_packets.unwrap_or(u64::MAX);
     let mut total = 0u64;
     for (index, path) in sources.iter().enumerate() {

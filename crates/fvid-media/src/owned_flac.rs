@@ -585,6 +585,11 @@ impl Flac {
         &self.data[..self.data_start]
     }
 
+    /// Total byte length of the parsed FLAC file.
+    pub fn file_bytes(&self) -> usize {
+        self.data.len()
+    }
+
     /// Samples the stream runs to, counted off the frames themselves.
     pub fn samples(&self) -> u64 {
         self.frames

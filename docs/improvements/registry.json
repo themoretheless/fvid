@@ -1,8 +1,8 @@
 {
   "target": 1000,
   "counting_rule": "One independently confirmed problem or useful capability; fixture variants and baseline integration repairs are excluded. Only accepted entries count.",
-  "accepted_count": 709,
-  "next_id": "FVID-0710",
+  "accepted_count": 714,
+  "next_id": "FVID-0715",
   "entries": [
     {
       "id": "FVID-0001",
@@ -7990,6 +7990,61 @@
       "result": "Check destination.symlink_metadata().is_ok() immediately after the .mkv extension check in transcode_lossless before transform validation, bridge staging, or container probing.",
       "status": "accepted",
       "validation": "batch-595-validation.json"
+    },
+    {
+      "id": "FVID-0710",
+      "batch": 596,
+      "title": "Use fallible buffer and try_reserve_exact allocations in WAVE and Ogg probe paths",
+      "source": "crates/fvid-media/src/owned_probe.rs",
+      "regression": "tests/probe_remux_and_raw_audio_single_pass.rs",
+      "before": "probe_wave_with_options allocated each WAVE INFO entry via infallible vec![0; entry_bytes], and probe_ogg_with_options allocated the Ogg file buffer and stream list via infallible Vec::with_capacity.",
+      "result": "Allocate WAVE INFO entry buffers via crate::owned_frame::buffer and pre-reserve Ogg probe file bytes and stream lists via fallible try_reserve_exact.",
+      "status": "accepted",
+      "validation": "batch-596-validation.json"
+    },
+    {
+      "id": "FVID-0711",
+      "batch": 596,
+      "title": "Pre-reserve stream and chapter lists with try_reserve_exact in owned_mp4_probe::try_mp4_with_options",
+      "source": "crates/fvid-media/src/owned_mp4_probe_impl.rs",
+      "regression": "tests/probe_remux_and_raw_audio_single_pass.rs",
+      "before": "try_mp4_with_options allocated streams with Vec::new() without pre-reserving reader.tracks().len() and collected chapters via infallible .collect::<Result<Vec<_>>>().",
+      "result": "Pre-reserve streams and chapters with fallible try_reserve_exact(reader.tracks().len()) and try_reserve_exact(reader.chapters().len()) in try_mp4_with_options.",
+      "status": "accepted",
+      "validation": "batch-596-validation.json"
+    },
+    {
+      "id": "FVID-0712",
+      "batch": 596,
+      "title": "Reject existing destinations upfront before supports() in owned_matroska_remux::remux and owned_concat::concat and use fallible reader reservation",
+      "source": "crates/fvid-media/src/owned_matroska_remux.rs",
+      "regression": "tests/probe_remux_and_raw_audio_single_pass.rs",
+      "before": "owned_matroska_remux::remux and owned_concat::concat called supports() (which opens source files and checks policies) before checking whether destination already existed, and open_readers in owned_concat allocated readers with infallible Vec::with_capacity.",
+      "result": "Check destination existence before supports() in owned_matroska_remux::remux and owned_concat::concat, and use try_reserve_exact(sources.len()) in open_readers.",
+      "status": "accepted",
+      "validation": "batch-596-validation.json"
+    },
+    {
+      "id": "FVID-0713",
+      "batch": 596,
+      "title": "Reject existing destinations and non-.wav extensions upfront in owned_wave_remux and pre-reserve segment descriptors with try_reserve_exact",
+      "source": "crates/fvid-media/src/owned_wave_remux.rs",
+      "regression": "tests/probe_remux_and_raw_audio_single_pass.rs",
+      "before": "owned_wave_remux::copy_waves checked interval and policies(options) before checking .wav extension and existing destination, trim and concat opened or checked sources before checking destination, and copy_waves allocated segments with infallible Vec::with_capacity.",
+      "result": "Check .wav extension and existing destination at the start of copy_waves, trim, and concat, and pre-reserve segments via try_reserve_exact(sources.len()).",
+      "status": "accepted",
+      "validation": "batch-596-validation.json"
+    },
+    {
+      "id": "FVID-0714",
+      "batch": 596,
+      "title": "Reuse already-opened and parsed Flac and Mp3 structures during spooled WAVE exports in owned_raw_flac::apply and owned_raw_mp3::apply",
+      "source": "crates/fvid-media/src/owned_raw_flac.rs",
+      "regression": "tests/probe_remux_and_raw_audio_single_pass.rs",
+      "before": "owned_raw_flac::apply and owned_raw_mp3::apply opened, read, and parsed the entire FLAC or MP3 file into memory via open_with_transform, and then called decode_raw_flac_pcm / decode_raw_mpeg_pcm inside spool_decoded, which opened, read, and parsed the entire file a second time.",
+      "result": "Extract decode_raw_parsed(&parsed, file_bytes, ...) in owned_raw_flac and owned_raw_mp3 and invoke it directly from apply using the already-parsed Flac and Mp3 instances.",
+      "status": "accepted",
+      "validation": "batch-596-validation.json"
     }
   ]
 }

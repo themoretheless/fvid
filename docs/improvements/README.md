@@ -4356,6 +4356,17 @@ See `batch-594-validation.json`.
 
 See `batch-595-validation.json`.
 
+## Batch 596 — FVID-0710..0714: Fallible buffers in WAVE, Ogg, and MP4 probes, upfront destination checks in Matroska remux, ADTS concat, and WAVE remux/trim/concat, and single-pass parsed reuse in bare FLAC and MP3 WAVE exports
+
+- **FVID-0710** — Use fallible buffer and `try_reserve_exact` allocations in WAVE and Ogg probe paths (`crates/fvid-media/src/owned_probe.rs`, `tests/probe_remux_and_raw_audio_single_pass.rs`).
+- **FVID-0711** — Pre-reserve stream and chapter lists with `try_reserve_exact` in `owned_mp4_probe::try_mp4_with_options` (`crates/fvid-media/src/owned_mp4_probe_impl.rs`, `tests/probe_remux_and_raw_audio_single_pass.rs`).
+- **FVID-0712** — Reject existing destinations upfront before `supports()` in `owned_matroska_remux::remux` and `owned_concat::concat` and use fallible reader reservation (`crates/fvid-media/src/owned_matroska_remux.rs`, `crates/fvid-media/src/owned_concat.rs`, `tests/probe_remux_and_raw_audio_single_pass.rs`).
+- **FVID-0713** — Reject existing destinations and non-`.wav` extensions upfront in `owned_wave_remux` and pre-reserve segment descriptors with `try_reserve_exact` (`crates/fvid-media/src/owned_wave_remux.rs`, `tests/probe_remux_and_raw_audio_single_pass.rs`).
+- **FVID-0714** — Reuse already-opened and parsed `Flac` and `Mp3` structures during spooled WAVE exports in `owned_raw_flac::apply` and `owned_raw_mp3::apply` (`crates/fvid-media/src/owned_raw_flac.rs`, `crates/fvid-media/src/owned_raw_mp3.rs`, `crates/fvid-media/src/owned_flac.rs`, `crates/fvid-media/src/owned_mpeg_audio.rs`, `tests/probe_remux_and_raw_audio_single_pass.rs`).
+
+See `batch-596-validation.json`.
+
+
 
 
 

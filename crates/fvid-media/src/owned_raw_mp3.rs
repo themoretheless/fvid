@@ -393,6 +393,21 @@ fn decode_raw_checked(
     if required.is_some_and(|tag| parsed.tag != tag) {
         return Err("selected bare MPEG audio stream is not Layer III".into());
     }
+    decode_raw_parsed(
+        &parsed,
+        file_bytes,
+        output,
+        interval,
+        options,
+    )
+}
+fn decode_raw_parsed(
+    parsed: &Mp3,
+    file_bytes: usize,
+    output: &mut impl Write,
+    interval: Option<(Duration, Duration)>,
+    options: &CopyOptions,
+) -> Result<AudioDecodeStats> {
     let rate = parsed.sample_rate;
     let channels = parsed.channels;
     let boundary = |at: Duration| -> Result<u64> {
@@ -542,14 +557,16 @@ pub(crate) fn apply(
         transform,
         options,
     )?;
+    let file_bytes = parsed.file_bytes();
     let spool = crate::owned_adts_export::spool_decoded(
         rate,
         channels,
         crate::owned_pcm_channels::standard_mask(channels).unwrap_or(0) as u32,
         options,
         |writer, options| {
-            decode_raw_mpeg_pcm(
-                source,
+            decode_raw_parsed(
+                &parsed,
+                file_bytes,
                 writer,
                 crate::owned_adts_export::decoded_prefix(transform, rate),
                 &crate::owned_adts_export::pcm_decode_options(options),

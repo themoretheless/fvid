@@ -322,6 +322,21 @@ fn decode_raw_checked(
         Some((AudioDecodeTransform::default(), interval)),
         options,
     )?;
+    decode_raw_parsed(
+        &parsed,
+        file_bytes,
+        output,
+        interval,
+        options,
+    )
+}
+fn decode_raw_parsed(
+    parsed: &Flac,
+    file_bytes: usize,
+    output: &mut impl Write,
+    interval: Option<(Duration, Duration)>,
+    options: &CopyOptions,
+) -> Result<AudioDecodeStats> {
     let rate = parsed.sample_rate;
     let channels = parsed.channels;
     let boundary = |at: Duration| -> Result<u64> {
@@ -493,14 +508,16 @@ pub(crate) fn apply(
         transform,
         options,
     )?;
+    let file_bytes = parsed.file_bytes();
     let spool = crate::owned_adts_export::spool_decoded(
         rate,
         channels,
         mask,
         options,
         |writer, options| {
-            decode_raw_flac_pcm(
-                source,
+            decode_raw_parsed(
+                &parsed,
+                file_bytes,
                 writer,
                 crate::owned_adts_export::decoded_prefix(transform, rate),
                 &crate::owned_adts_export::pcm_decode_options(options),
