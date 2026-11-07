@@ -48,11 +48,7 @@ pub(crate) fn supports(
     transform: AudioDecodeTransform,
     options: &CopyOptions,
 ) -> bool {
-    let (rate, channels) = match geometry_for_decode(source, Some(transform), options) {
-        Ok(value) => value,
-        Err(error) => return error.starts_with("controlled memory budget exceeded:"),
-    };
-    let mask = match channel_mask(source, options) {
+    let (rate, channels, mask) = match geometry_with_mask_for_decode(source, Some(transform), options) {
         Ok(value) => value,
         Err(error) => return error.starts_with("controlled memory budget exceeded:"),
     };
@@ -105,9 +101,8 @@ pub(crate) fn apply(
     if destination.symlink_metadata().is_ok() {
         return Err("output already exists".into());
     }
-    let (rate, channels, frames) =
-        geometry_and_frames_for_decode(source, Some(transform), options)?;
-    let mask = channel_mask(source, options)?;
+    let (rate, channels, mask, frames) =
+        geometry_with_mask_and_frames_for_decode(source, Some(transform), options)?;
     let info = crate::owned_wave_metadata::matroska_source_info_with_interval(
         source,
         prefix(transform, rate),
@@ -151,8 +146,17 @@ pub(crate) fn geometry_for_decode(
     transform: Option<AudioDecodeTransform>,
     options: &CopyOptions,
 ) -> Result<(u32, u16)> {
-    let (rate, channels, _) = geometry_and_frames_for_decode(source, transform, options)?;
+    let (rate, channels, _, _) = geometry_with_mask_and_frames_for_decode(source, transform, options)?;
     Ok((rate, channels))
+}
+
+pub(crate) fn geometry_with_mask_for_decode(
+    source: &Path,
+    transform: Option<AudioDecodeTransform>,
+    options: &CopyOptions,
+) -> Result<(u32, u16, u32)> {
+    let (rate, channels, mask, _) = geometry_with_mask_and_frames_for_decode(source, transform, options)?;
+    Ok((rate, channels, mask))
 }
 
 pub(crate) fn geometry_and_frames_for_decode(
@@ -160,6 +164,15 @@ pub(crate) fn geometry_and_frames_for_decode(
     transform: Option<AudioDecodeTransform>,
     options: &CopyOptions,
 ) -> Result<(u32, u16, u64)> {
+    let (rate, channels, _, frames) = geometry_with_mask_and_frames_for_decode(source, transform, options)?;
+    Ok((rate, channels, frames))
+}
+
+pub(crate) fn geometry_with_mask_and_frames_for_decode(
+    source: &Path,
+    transform: Option<AudioDecodeTransform>,
+    options: &CopyOptions,
+) -> Result<(u32, u16, u32, u64)> {
     let mut reader = crate::owned_matroska_audio::open_audio_reader(
         BufReader::new(File::open(source).map_err(|e| e.to_string())?),
         options,
@@ -180,9 +193,9 @@ pub(crate) fn geometry_and_frames_for_decode(
     if track.codec != "A_FLAC" {
         return Err("selected Matroska audio stream has a different codec".into());
     }
-    let decoder = crate::owned_matroska_audio::MatroskaTimelineDecoder::from_matroska(track)
+    let flac = crate::owned_flac_decoder::FlacDecoder::from_matroska(track)
         .map_err(|e| e.to_string())?;
-    let (rate, channels) = (decoder.sample_rate(), decoder.channels());
+    let (rate, channels, mask) = (flac.sample_rate(), flac.channels(), flac.channel_mask());
     let interval = transform.and_then(|t| prefix(t, rate));
     crate::owned_matroska_audio::admit_audio_reader_with_interval(&mut reader, index, interval, options)
         .map_err(|e| e.to_string())?;
@@ -211,7 +224,7 @@ pub(crate) fn geometry_and_frames_for_decode(
         )?;
         estimated_frames = stats.sample_frames;
     }
-    Ok((rate, channels, estimated_frames))
+    Ok((rate, channels, mask, estimated_frames))
 }
 
 pub(crate) fn channel_mask(source: &Path, options: &CopyOptions) -> Result<u32> {

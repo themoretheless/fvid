@@ -107,16 +107,8 @@ pub(crate) fn open_with_transform(
             .ok_or("Vorbis export reserve overflow")?,
         options,
     )?;
-    drop(ogg);
-    let program = Program::open_source_track(
-        CheckedRead {
-            input: BufReader::new(File::open(source).map_err(|e| e.to_string())?),
-            options,
-        },
-        limits,
-        selection,
-    )
-    .map_err(|e| e.to_string())?;
+    let program = Program::from_ogg_source_track(ogg, selection)
+        .map_err(|e| e.to_string())?;
     let rate = program.sample_rate();
     let until = transform
         .and_then(|t| crate::owned_adts_export::decoded_prefix(t, rate))

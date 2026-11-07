@@ -1,8 +1,8 @@
 {
   "target": 1000,
   "counting_rule": "One independently confirmed problem or useful capability; fixture variants and baseline integration repairs are excluded. Only accepted entries count.",
-  "accepted_count": 714,
-  "next_id": "FVID-0715",
+  "accepted_count": 719,
+  "next_id": "FVID-0720",
   "entries": [
     {
       "id": "FVID-0001",
@@ -8045,6 +8045,61 @@
       "result": "Extract decode_raw_parsed(&parsed, file_bytes, ...) in owned_raw_flac and owned_raw_mp3 and invoke it directly from apply using the already-parsed Flac and Mp3 instances.",
       "status": "accepted",
       "validation": "batch-596-validation.json"
+    },
+    {
+      "id": "FVID-0715",
+      "batch": 597,
+      "title": "Reuse the already-parsed Ogg container in owned_ogg_vorbis_export::open_with_transform without re-opening or re-reading source",
+      "source": "crates/fvid-media/src/owned_ogg_vorbis_export.rs",
+      "regression": "tests/ogg_g711_subtitle_burn_and_flac_mask.rs",
+      "before": "open_with_transform in owned_ogg_vorbis_export read the entire Ogg file into memory, parsed Ogg::parse(&bytes, &limits), dropped ogg, and then called Program::open_source_track, which opened source a second time and read and parsed the entire Ogg file again.",
+      "result": "Expose Program::from_ogg_source_track(ogg, selection) in owned_ogg_vorbis and call it directly from open_with_transform using the already-parsed Ogg instance.",
+      "status": "accepted",
+      "validation": "batch-597-validation.json"
+    },
+    {
+      "id": "FVID-0716",
+      "batch": 597,
+      "title": "Pre-reserve Ogg file byte buffers with fallible try_reserve_exact in owned_ogg_opus::Program::open_selected and owned_ogg_vorbis::Program::read",
+      "source": "crates/fvid-media/src/owned_ogg_opus.rs",
+      "regression": "tests/ogg_g711_subtitle_burn_and_flac_mask.rs",
+      "before": "Program::open_selected in owned_ogg_opus and Program::read in owned_ogg_vorbis read the entire Ogg stream into an unreserved Vec::new() via read_to_end without fallibly reserving limits.file_bytes.",
+      "result": "Call bytes.try_reserve_exact(limits.file_bytes.min(16 * 1024 * 1024)) before read_to_end in owned_ogg_opus::Program::open_selected and owned_ogg_vorbis::Program::read.",
+      "status": "accepted",
+      "validation": "batch-597-validation.json"
+    },
+    {
+      "id": "FVID-0717",
+      "batch": 597,
+      "title": "Record the G.711 codec name during owned_g711_wave_export::open instead of re-opening source and re-inspecting g711_law in descriptor_for_decode",
+      "source": "crates/fvid-media/src/owned_g711_wave_export.rs",
+      "regression": "tests/ogg_g711_subtitle_burn_and_flac_mask.rs",
+      "before": "descriptor_for_decode in owned_g711_wave_export called open(path, options) (which inspected g711_law) and then opened path a second time and called g711_law again just to select 'pcm_alaw' or 'pcm_mulaw'.",
+      "result": "Store codec: &'static str on Input during open and return input.codec directly from descriptor_for_decode.",
+      "status": "accepted",
+      "validation": "batch-597-validation.json"
+    },
+    {
+      "id": "FVID-0718",
+      "batch": 597,
+      "title": "Use fallible frame buffer allocation for Y4M frames in owned_subtitle_burn::plan_burn_subtitles and burn_subtitles",
+      "source": "crates/fvid-media/src/owned_subtitle_burn.rs",
+      "regression": "tests/ogg_g711_subtitle_burn_and_flac_mask.rs",
+      "before": "plan_burn_subtitles and burn_subtitles in owned_subtitle_burn cloned Y4M frame bytes via infallible bytes.to_vec() when constructing GeometryFrame, whereas the Matroska path used crate::owned_frame::buffer.",
+      "result": "Allocate GeometryFrame::data via fallible crate::owned_frame::buffer(bytes.len()) in both Y4M subtitle burn-in paths.",
+      "status": "accepted",
+      "validation": "batch-597-validation.json"
+    },
+    {
+      "id": "FVID-0719",
+      "batch": 597,
+      "title": "Unify geometry, channel_mask, and frame estimation in owned_matroska_flac_export::geometry_with_mask_and_frames_for_decode",
+      "source": "crates/fvid-media/src/owned_matroska_flac_export.rs",
+      "regression": "tests/ogg_g711_subtitle_burn_and_flac_mask.rs",
+      "before": "owned_matroska_flac_export::supports, apply, and owned_audio_plan::matroska_descriptor_for_decode called geometry_and_frames_for_decode and then separately called channel_mask(source, options), which re-opened the Matroska file and re-constructed FlacDecoder.",
+      "result": "Extract geometry_with_mask_and_frames_for_decode in owned_matroska_flac_export to return (rate, channels, mask, estimated_frames) from a single reader and FlacDecoder pass, and use it in supports, apply, and owned_audio_plan.",
+      "status": "accepted",
+      "validation": "batch-597-validation.json"
     }
   ]
 }

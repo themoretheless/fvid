@@ -43,14 +43,14 @@ pub(crate) fn matroska_descriptor_for_decode(
     drop(reader);
     let (rate, channels, mask, codec, precision, frames) = match source_codec.as_str() {
         "A_FLAC" => {
-            let (rate, channels, frames) =
-                crate::owned_matroska_flac_export::geometry_and_frames_for_decode(
+            let (rate, channels, mask, frames) =
+                crate::owned_matroska_flac_export::geometry_with_mask_and_frames_for_decode(
                     source, transform, options,
                 )?;
             (
                 rate,
                 channels,
-                crate::owned_matroska_flac_export::channel_mask(source, options)?,
+                mask,
                 "flac".into(),
                 "float32".into(),
                 frames,

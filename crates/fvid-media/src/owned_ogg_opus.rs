@@ -116,6 +116,9 @@ impl Program {
         let cap =
             u64::try_from(limits.file_bytes).map_err(|_| invalid("Ogg input limit overflow"))?;
         let mut bytes = Vec::new();
+        bytes
+            .try_reserve_exact(limits.file_bytes.min(16 * 1024 * 1024))
+            .map_err(|_| invalid("Ogg Opus input allocation failed"))?;
         source
             .by_ref()
             .take(cap.saturating_add(1))

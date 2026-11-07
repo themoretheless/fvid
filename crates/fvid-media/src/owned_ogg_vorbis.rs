@@ -311,6 +311,9 @@ impl Program {
     fn open_selected<R: Read>(reader: R, limits: Limits, selection: Selection) -> Result<Self> {
         Self::from_ogg(Self::read(reader, limits)?, selection)
     }
+    pub(crate) fn from_ogg_source_track(ogg: Ogg, index: Option<usize>) -> Result<Self> {
+        Self::from_ogg(ogg, Selection::Source(index))
+    }
     pub(crate) fn from_chain(chain: crate::owned_ogg::Chain) -> Result<Self> {
         Self::from_ogg(Ogg::from_chain(chain), Selection::Ordinal(0))
     }
@@ -486,6 +489,9 @@ impl Program {
     /// page walk that rebuilds them reads every byte.
     pub fn read<R: Read>(mut reader: R, limits: Limits) -> Result<Ogg> {
         let mut bytes = Vec::new();
+        bytes
+            .try_reserve_exact(limits.file_bytes.min(16 * 1024 * 1024))
+            .map_err(|_| invalid("Ogg Vorbis input allocation failed"))?;
         let cap = u64::try_from(limits.file_bytes).unwrap_or(u64::MAX);
         reader
             .by_ref()

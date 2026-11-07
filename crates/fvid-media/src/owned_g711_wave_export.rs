@@ -17,6 +17,7 @@ struct Input {
     shape: WaveInfo,
     decoder: PcmDecoder,
     mask: u32,
+    codec: &'static str,
 }
 pub(crate) fn recognizes(path: &Path, options: &CopyOptions) -> Result<bool> {
     check(options)?;
@@ -69,10 +70,10 @@ fn open(path: &Path, options: &CopyOptions) -> Result<(Input, Vec<u8>)> {
     {
         return Err("controlled memory budget exceeded: WAVE metadata limit".into());
     }
-    let format = if law == fvid_codecs::g711::Law::ALaw {
-        PcmFormat::ALaw
+    let (format, codec) = if law == fvid_codecs::g711::Law::ALaw {
+        (PcmFormat::ALaw, "pcm_alaw")
     } else {
-        PcmFormat::MuLaw
+        (PcmFormat::MuLaw, "pcm_mulaw")
     };
     let decoder =
         PcmDecoder::new(format, shape.sample_rate, shape.channels).map_err(|e| e.to_string())?;
@@ -85,6 +86,7 @@ fn open(path: &Path, options: &CopyOptions) -> Result<(Input, Vec<u8>)> {
             shape,
             decoder,
             mask,
+            codec,
         },
         info,
     ))
@@ -161,20 +163,11 @@ pub(crate) fn descriptor_for_decode(
             }
         }
     }
-    let mut file = File::open(path).map_err(|e| e.to_string())?;
-    let law = crate::owned_wave_inspect::g711_law(&mut file, options.cancel.as_ref())
-        .map_err(|e| e.to_string())?
-        .ok_or("WAVE does not contain G.711")?;
-    let codec = if law == fvid_codecs::g711::Law::ALaw {
-        "pcm_alaw"
-    } else {
-        "pcm_mulaw"
-    };
     Ok((
         input.shape.sample_rate,
         input.shape.channels,
         input.mask,
-        codec,
+        input.codec,
         frames_read,
         info.len(),
     ))

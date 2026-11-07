@@ -4366,6 +4366,17 @@ See `batch-595-validation.json`.
 
 See `batch-596-validation.json`.
 
+## Batch 597 — FVID-0715..0719: Single-pass Ogg Vorbis `Program::from_ogg_source_track`, fallible Ogg Opus/Vorbis input reservation, single-open G.711 WAVE codec descriptor, fallible Y4M frame buffers in subtitle burn-in, and unified Matroska FLAC geometry and channel mask extraction
+
+- **FVID-0715** — Reuse the already-parsed `Ogg` container in `owned_ogg_vorbis_export::open_with_transform` without re-opening or re-reading `source` (`crates/fvid-media/src/owned_ogg_vorbis_export.rs`, `crates/fvid-media/src/owned_ogg_vorbis.rs`, `tests/ogg_g711_subtitle_burn_and_flac_mask.rs`).
+- **FVID-0716** — Pre-reserve Ogg file byte buffers with fallible `try_reserve_exact` in `owned_ogg_opus::Program::open_selected` and `owned_ogg_vorbis::Program::read` (`crates/fvid-media/src/owned_ogg_opus.rs`, `crates/fvid-media/src/owned_ogg_vorbis.rs`, `tests/ogg_g711_subtitle_burn_and_flac_mask.rs`).
+- **FVID-0717** — Record the G.711 codec name during `owned_g711_wave_export::open` instead of re-opening `source` and re-inspecting `g711_law` in `descriptor_for_decode` (`crates/fvid-media/src/owned_g711_wave_export.rs`, `tests/ogg_g711_subtitle_burn_and_flac_mask.rs`).
+- **FVID-0718** — Use fallible frame buffer allocation for Y4M frames in `owned_subtitle_burn::plan_burn_subtitles` and `burn_subtitles` (`crates/fvid-media/src/owned_subtitle_burn.rs`, `tests/ogg_g711_subtitle_burn_and_flac_mask.rs`).
+- **FVID-0719** — Unify geometry, `channel_mask`, and frame estimation in `owned_matroska_flac_export::geometry_with_mask_and_frames_for_decode` (`crates/fvid-media/src/owned_matroska_flac_export.rs`, `crates/fvid-media/src/owned_audio_plan.rs`, `tests/ogg_g711_subtitle_burn_and_flac_mask.rs`).
+
+See `batch-597-validation.json`.
+
+
 
 
 

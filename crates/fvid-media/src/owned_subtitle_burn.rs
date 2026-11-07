@@ -293,11 +293,13 @@ pub fn plan_burn_subtitles(
             }
             if encode_packets {
                 let (sx, sy) = h.format.subsampling();
+                let mut data = crate::owned_frame::buffer(bytes.len())?;
+                data.copy_from_slice(bytes);
                 let mut frame = crate::owned_frame::GeometryFrame {
                     width: h.width,
                     height: h.height,
                     subsampling: Some([sx, sy]),
-                    data: bytes.to_vec(),
+                    data,
                 };
                 let text = cues
                     .iter()
@@ -688,11 +690,13 @@ pub fn burn_subtitles(
                         return Err("subtitle burn frame exceeds controlled memory budget".into());
                     }
                     let (sx, sy) = h.format.subsampling();
+                    let mut data = crate::owned_frame::buffer(bytes.len())?;
+                    data.copy_from_slice(bytes);
                     let mut frame = crate::owned_frame::GeometryFrame {
                         width: h.width,
                         height: h.height,
                         subsampling: Some([sx, sy]),
-                        data: bytes.to_vec(),
+                        data,
                     };
                     let text = cues
                         .iter()
