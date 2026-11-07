@@ -208,12 +208,15 @@ fn audio_plan_with_controls(
                 (wave_info.sample_rate, wave_info.channels)
             }
         } else {
-            drop(file);
-            let (_, info) = crate::owned_audio_plan::plan_decode_audio_with_descriptor(
-                source,
-                &Default::default(),
-                controls,
-            )?;
+            let (_, info) =
+                crate::owned_audio_plan::plan_decode_audio_from_file_and_head_with_descriptor(
+                    source,
+                    file,
+                    head,
+                    head_len,
+                    &Default::default(),
+                    controls,
+                )?;
             if info.precision != "float32" {
                 return Err(
                     "mix-audio requires float PCM inputs (flt); integer formats are not qualified"
@@ -294,39 +297,63 @@ pub(crate) fn decode_owned_audio_with_controls(
     use std::io::{Seek, SeekFrom};
     validate_mix_controls(controls)?;
     let (mut file, head, head_len) = crate::owned_audio_plan::open_source_head(source)?;
+    let mut head_file = Some(file);
     if head_len == 12 && &head[..4] == b"RIFF" && &head[8..12] == b"WAVE" {
-        file.seek(SeekFrom::Start(0)).map_err(|e| e.to_string())?;
-        match read_wave_from_file_with_admission(
-            file,
-            Some(32),
-            true,
-            controls.cancel.as_ref(),
-            controls.max_packet_bytes,
-            controls.max_packets,
-            |_, _, size| {
-                if let Some(limit) = controls.max_controlled_bytes {
-                    if size > limit {
-                        return Err(
-                            "controlled memory budget exceeded by WAVE PCM input".into()
-                        );
+        let mut wave_file = head_file.take().unwrap();
+        wave_file
+            .seek(SeekFrom::Start(0))
+            .map_err(|e| e.to_string())?;
+        if crate::owned_wave_inspect::g711_law(&mut wave_file, controls.cancel.as_ref())
+            .map_err(|e| e.to_string())?
+            .is_some()
+        {
+            wave_file
+                .seek(SeekFrom::Start(0))
+                .map_err(|e| e.to_string())?;
+            head_file = Some(wave_file);
+        } else {
+            wave_file
+                .seek(SeekFrom::Start(0))
+                .map_err(|e| e.to_string())?;
+            match read_wave_from_file_with_admission(
+                wave_file,
+                Some(32),
+                true,
+                controls.cancel.as_ref(),
+                controls.max_packet_bytes,
+                controls.max_packets,
+                |_, _, size| {
+                    if let Some(limit) = controls.max_controlled_bytes {
+                        if size > limit {
+                            return Err(
+                                "controlled memory budget exceeded by WAVE PCM input".into()
+                            );
+                        }
                     }
-                }
-                Ok(())
-            },
-            |_| crate::owned_budget::check_rss_budget(controls),
-        ) {
-            Ok(result) => return Ok(result),
-            Err(err)
-                if err.starts_with("mix-audio requires float PCM inputs")
-                    || err.starts_with("owned WAVE reader requires PCM or IEEE float") => {}
-            Err(err) => return Err(err),
+                    Ok(())
+                },
+                |_| crate::owned_budget::check_rss_budget(controls),
+            ) {
+                Ok(result) => return Ok(result),
+                Err(err)
+                    if err.starts_with("mix-audio requires float PCM inputs")
+                        || err.starts_with("owned WAVE reader requires PCM or IEEE float") => {}
+                Err(err) => return Err(err),
+            }
         }
-    } else {
-        drop(file);
     }
     let spool = crate::owned_adts_export::Spool::create()?;
     let wave = spool.0.join("decoded.wav");
-    crate::owned_audio_export::decode_audio(source, &wave, controls)?;
+    match head_file {
+        Some(file) => {
+            crate::owned_audio_export::decode_audio_from_file_and_head(
+                source, file, head, head_len, &wave, controls,
+            )?;
+        }
+        None => {
+            crate::owned_audio_export::decode_audio(source, &wave, controls)?;
+        }
+    }
     read_float_wave_with_admission(
         &wave,
         Some(32),

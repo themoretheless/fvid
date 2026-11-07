@@ -308,18 +308,37 @@ fn source_descriptor_for_decode(source: &Path, options: &CopyOptions,
         return Err("controlled memory limit must be positive".into());
     }
     crate::owned_budget::check_rss_budget(options)?;
-    use std::io::{Seek, SeekFrom};
-    let mut head_file = Some(File::open(source).map_err(|e| e.to_string())?);
-    let mut head = [0u8; 12];
-    let mut head_len = 0;
-    while head_len < head.len() {
-        match head_file.as_mut().unwrap().read(&mut head[head_len..]) {
-            Ok(0) => break,
-            Ok(n) => head_len += n,
-            Err(e) if e.kind() == std::io::ErrorKind::Interrupted => continue,
-            Err(e) => return Err(e.to_string()),
-        }
+    let (file, head, head_len) = open_source_head(source)?;
+    source_descriptor_from_file_and_head_for_decode(source, file, head, head_len, options, transform)
+}
+
+pub(crate) fn source_descriptor_from_file_and_head_for_decode(
+    source: &Path,
+    file: File,
+    head: [u8; 12],
+    head_len: usize,
+    options: &CopyOptions,
+    transform: Option<&AudioDecodeTransform>,
+) -> Result<AudioDescriptor> {
+    if options
+        .cancel
+        .as_ref()
+        .is_some_and(fvid_control::CancelFlag::is_cancelled)
+    {
+        return Err("media operation cancelled".into());
     }
+    if options.max_packet_bytes == 0 {
+        return Err("packet byte limit must be positive".into());
+    }
+    if options.max_packets == Some(0) {
+        return Err("packet work limit requires at least one packet".into());
+    }
+    if options.max_controlled_bytes == Some(0) {
+        return Err("controlled memory limit must be positive".into());
+    }
+    crate::owned_budget::check_rss_budget(options)?;
+    use std::io::{Seek, SeekFrom};
+    let mut head_file = Some(file);
     let head_slice = &head[..head_len];
     let adts = head_len >= 7 && crate::owned_aac::adts::header(&head[..7]).is_some();
     let raw_flac = !adts && head_slice.starts_with(b"fLaC");
@@ -647,7 +666,34 @@ pub(crate) fn plan_decode_audio_with_descriptor(
     }
     crate::owned_budget::check_rss_budget(options)?;
     crate::owned_adts_export::check_wave_metadata_budget(options)?;
-    let descriptor = source_descriptor_for_decode(source, options, Some(transform))?;
+    let (file, head, head_len) = open_source_head(source)?;
+    plan_decode_audio_from_file_and_head_with_descriptor(
+        source, file, head, head_len, transform, options,
+    )
+}
+
+pub(crate) fn plan_decode_audio_from_file_and_head_with_descriptor(
+    source: &Path,
+    file: File,
+    head: [u8; 12],
+    head_len: usize,
+    transform: &AudioDecodeTransform,
+    options: &CopyOptions,
+) -> Result<(MediaPlan, AudioDescriptor)> {
+    crate::owned_audio_export::validate_request(*transform, options)?;
+    if options.cancel.as_ref().is_some_and(|c| c.is_cancelled()) {
+        return Err("media operation cancelled".into());
+    }
+    crate::owned_budget::check_rss_budget(options)?;
+    crate::owned_adts_export::check_wave_metadata_budget(options)?;
+    let descriptor = source_descriptor_from_file_and_head_for_decode(
+        source,
+        file,
+        head,
+        head_len,
+        options,
+        Some(transform),
+    )?;
     let AudioDescriptor {
         rate, channels, mask, codec, precision, stream_index,
         adts, mp4, mp4_target, aac_fold, is_matroska, raw_encoded_audio, ogg, g711_wave,

@@ -52,7 +52,7 @@ pub fn recognizes_standalone_from_head(
     Ok(crate::owned_mpeg_audio::has_signature(&head[..head_len.min(10)]))
 }
 
-fn recognizes_standalone_from_file_and_head(
+pub fn recognizes_standalone_from_file_and_head(
     mut file: File,
     head: &[u8; 12],
     head_len: usize,

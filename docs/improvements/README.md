@@ -4846,4 +4846,13 @@ See `batch-628-validation.json`.
 - **FVID-0973**: Reuse open `File` handle across 8-byte MP4 prefix check and `Mp4Reader::open` in `owned_mp4_multitrack_export::qualify` (`crates/fvid-media/src/owned_mp4_multitrack_export.rs`).
 - **FVID-0974**: Reuse open `File` handle across 4-byte EBML signature check and `WebmReader::open` in `owned_webm_multitrack_export::qualify` (`crates/fvid-media/src/owned_webm_multitrack_export.rs`).
 
+## Batch 649 (FVID-0975..0979)
+
+- **FVID-0975**: Reuse open Y4M `BufReader<File>` and parsed `Header` across `try_plan_xfade`, `plan_xfade`, `try_xfade_video`, `xfade_video`, and `export_y4m_ffv1_counted` (`crates/fvid-media/src/owned_xfade.rs`).
+- **FVID-0976**: Reuse open `File` handle and 12-byte head across `audio_plan_with_controls` and `decode_owned_audio_with_controls` in `owned_audio_mix` (`crates/fvid-media/src/owned_audio_mix.rs`).
+- **FVID-0977**: Reuse open Y4M `BufReader<File>` in `native_export::validate_video_packet_budget_and_layout` via `inspect_first_y4m_frame_from_reader_with_filters_and_options` (`src/native_export.rs`).
+- **FVID-0978**: Reuse open `File` handle across structure scan and stream probe in `native_plan::remux_with_options` (`src/native_plan.rs`).
+- **FVID-0979**: Reuse open `File` handle across `open_source_head` and WAVE/standalone loudnorm qualification and planning in `native_loudnorm` (`src/native_loudnorm.rs`).
+
+
 

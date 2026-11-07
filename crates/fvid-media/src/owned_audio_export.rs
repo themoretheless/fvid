@@ -399,6 +399,53 @@ pub fn decode_audio_transformed(
     transform: AudioDecodeTransform,
     options: &CopyOptions,
 ) -> Result<AudioDecodeStats> {
+    let _ = validate_request(transform, options)?;
+    if destination.extension().and_then(|s| s.to_str()) != Some("wav") {
+        return Err("owned WAVE export requires .wav output".into());
+    }
+    if destination.symlink_metadata().is_ok() {
+        return Err("output already exists".into());
+    }
+    let (file, head, head_len) = crate::owned_audio_plan::open_source_head(source)?;
+    decode_audio_transformed_from_file_and_head(
+        source,
+        file,
+        head,
+        head_len,
+        destination,
+        transform,
+        options,
+    )
+}
+
+pub(crate) fn decode_audio_from_file_and_head(
+    source: &Path,
+    file: std::fs::File,
+    head: [u8; 12],
+    head_len: usize,
+    destination: &Path,
+    options: &CopyOptions,
+) -> Result<AudioDecodeStats> {
+    decode_audio_transformed_from_file_and_head(
+        source,
+        file,
+        head,
+        head_len,
+        destination,
+        Default::default(),
+        options,
+    )
+}
+
+pub(crate) fn decode_audio_transformed_from_file_and_head(
+    source: &Path,
+    file: std::fs::File,
+    head: [u8; 12],
+    head_len: usize,
+    destination: &Path,
+    transform: AudioDecodeTransform,
+    options: &CopyOptions,
+) -> Result<AudioDecodeStats> {
     let gain = validate_request(transform, options)?;
     if destination.extension().and_then(|s| s.to_str()) != Some("wav") {
         return Err("owned WAVE export requires .wav output".into());
@@ -406,18 +453,8 @@ pub fn decode_audio_transformed(
     if destination.symlink_metadata().is_ok() {
         return Err("output already exists".into());
     }
-    use std::io::{Read, Seek, SeekFrom};
-    let mut head_file = Some(std::fs::File::open(source).map_err(|e| e.to_string())?);
-    let mut head = [0u8; 12];
-    let mut head_len = 0;
-    while head_len < head.len() {
-        match head_file.as_mut().unwrap().read(&mut head[head_len..]) {
-            Ok(0) => break,
-            Ok(n) => head_len += n,
-            Err(e) if e.kind() == std::io::ErrorKind::Interrupted => continue,
-            Err(e) => return Err(e.to_string()),
-        }
-    }
+    use std::io::{Seek, SeekFrom};
+    let mut head_file = Some(file);
     let head_slice = &head[..head_len];
     if head_len == 12
         && &head[..4] == b"RIFF"

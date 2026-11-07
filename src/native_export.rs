@@ -211,8 +211,26 @@ pub(crate) fn inspect_first_y4m_frame_with_filters_and_options(
     (usize, usize, &'static str, u8, bool, (u32, u32)),
     usize,
 )> {
-    let mut reader = NativeReader::software(
+    inspect_first_y4m_frame_from_reader_with_filters_and_options(
         BufReader::new(File::open(source)?),
+        geometry,
+        filters,
+        options,
+    )
+}
+
+pub(crate) fn inspect_first_y4m_frame_from_reader_with_filters_and_options(
+    input: BufReader<File>,
+    geometry: &crate::native_geometry::VideoGeometry,
+    filters: &crate::native_pixels::PixelFilters,
+    options: &fvid_media::CopyOptions,
+) -> Result<(
+    (u128, u128),
+    (usize, usize, &'static str, u8, bool, (u32, u32)),
+    usize,
+)> {
+    let mut reader = NativeReader::software(
+        input,
         options.max_controlled_bytes.unwrap_or(usize::MAX),
     )?;
     let frame = reader
@@ -599,9 +617,11 @@ pub(crate) fn validate_video_packet_budget_and_layout(
             let payload = metadata_len.saturating_sub(line.len() as u64);
             (stride > 0 && payload % stride == 0).then_some(payload / stride)
         };
-        drop(input);
+        input.seek(SeekFrom::Start(0))?;
         let ((duration, scale), layout, bytes) =
-            inspect_first_y4m_frame_with_filters_and_options(source, geometry, filters, options)?;
+            inspect_first_y4m_frame_from_reader_with_filters_and_options(
+                input, geometry, filters, options,
+            )?;
         let depth = layout.3;
         if bytes > options.max_packet_bytes {
             return Err(invalid("Y4M frame exceeds byte limit"));

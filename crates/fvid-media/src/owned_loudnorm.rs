@@ -186,6 +186,37 @@ pub fn supports_request(
     }
 }
 
+pub fn supports_request_from_file(
+    file: &mut std::fs::File,
+    destination: &Path,
+    args: Option<&str>,
+    dual_pass: bool,
+    options: &CopyOptions,
+) -> bool {
+    let Ok(args) = resolve_loudnorm_args(args) else {
+        return false;
+    };
+    if !policies(options) || destination.extension().and_then(|s| s.to_str()) != Some("wav") {
+        return false;
+    }
+    let Ok(params) = parse(&args) else {
+        return false;
+    };
+    crate::owned_wave_inspect::inspect(file, options.cancel.as_ref()).is_ok_and(|info| {
+        if dual_pass {
+            info.sample_frames > 0
+                && crate::owned_wave_loudness::qualified_rate(info.sample_rate)
+                && crate::owned_wave_loudness::weights(&info).is_ok()
+        } else {
+            info.sample_frames > 0
+                && (params.gain.is_some() || dynamic_input(&info))
+                && (params.print == Print::None
+                    || (crate::owned_wave_loudness::qualified_rate(info.sample_rate)
+                        && crate::owned_wave_loudness::weights(&info).is_ok()))
+        }
+    })
+}
+
 /// Enforce the minimum controlled-memory working set required by the WAVE normalization
 /// stage on a decoded float32/float64 spool with `(rate, channels)` before decoding packets.
 pub(crate) fn check_spool_loudnorm_budget(
@@ -286,9 +317,20 @@ pub fn plan_wave_loudnorm(
     options: &CopyOptions,
 ) -> Result<fvid_media_info::MediaPlan> {
     check_options(options)?;
+    let wave_file = std::fs::File::open(source).map_err(|e| e.to_string())?;
+    plan_wave_loudnorm_from_file(source, wave_file, args, dual_pass, options)
+}
+
+pub fn plan_wave_loudnorm_from_file(
+    source: &Path,
+    mut wave_file: std::fs::File,
+    args: Option<&str>,
+    dual_pass: bool,
+    options: &CopyOptions,
+) -> Result<fvid_media_info::MediaPlan> {
+    check_options(options)?;
     let resolved = validate_request(args)?;
     let params = parse(&resolved)?;
-    let mut wave_file = std::fs::File::open(source).map_err(|e| e.to_string())?;
     let wave_info = crate::owned_wave_inspect::inspect(&mut wave_file, options.cancel.as_ref())
         .map_err(|e| e.to_string())?;
     plan_wave_loudnorm_from_info(

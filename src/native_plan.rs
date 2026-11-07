@@ -591,8 +591,8 @@ pub fn remux_with_options(
         }
         "FVid ADTS AAC packet copy into MP4 or Matroska; preserve encoder priming"
     };
-    drop(input);
     let streams = if adts {
+        drop(input);
         vec![PlanStream {
             index: 0,
             media_type: "audio".into(),
@@ -600,10 +600,12 @@ pub fn remux_with_options(
             disposition: "copy".into(),
         }]
     } else {
+        let mut file = input.into_inner();
+        file.seek(SeekFrom::Start(0)).map_err(|e| e.to_string())?;
         let info = if matroska {
-            crate::native_probe::matroska_with_options(source, options)?
+            crate::native_probe::matroska_from_file_with_options(source, file, options)?
         } else {
-            crate::native_probe::probe_with_options(source, options)?
+            crate::native_probe::mp4_from_file_with_options(source, file, options)?
         };
         info.streams
             .into_iter()

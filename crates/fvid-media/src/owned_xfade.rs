@@ -21,18 +21,41 @@ pub fn try_plan_xfade(
     offset_us: i64,
     options: &fvid_control::CopyOptions,
 ) -> Result<Option<fvid_media_info::MediaPlan>, String> {
-    if transition != "fade" || !default_policy(options)
-        || read_header(main).is_none() || read_header(other).is_none()
-    {
+    if transition != "fade" || !default_policy(options) {
         return Ok(None);
     }
-    plan_xfade(main, other, transition, duration_us, offset_us, options).map(Some)
+    let Some((header, primary)) = open_header(main) else {
+        return Ok(None);
+    };
+    let Some((_, secondary)) = open_header(other) else {
+        return Ok(None);
+    };
+    plan_xfade_from_readers(
+        main,
+        other,
+        primary,
+        header,
+        secondary,
+        transition,
+        duration_us,
+        offset_us,
+        options,
+    )
+    .map(Some)
 }
 
-fn read_header(path: &std::path::Path) -> Option<Header> {
+fn open_header(
+    path: &std::path::Path,
+) -> Option<(Header, std::io::BufReader<std::fs::File>)> {
+    use std::io::{Seek, SeekFrom};
     let mut input = std::io::BufReader::new(std::fs::File::open(path).ok()?);
     let mut bytes = Vec::new();
-    line(&mut input, &mut bytes).ok()?.then(|| Header::parse(&bytes).ok()).flatten()
+    let header = line(&mut input, &mut bytes)
+        .ok()?
+        .then(|| Header::parse(&bytes).ok())
+        .flatten()?;
+    input.seek(SeekFrom::Start(0)).ok()?;
+    Some((header, input))
 }
 
 pub fn plan_xfade(
@@ -43,7 +66,7 @@ pub fn plan_xfade(
     offset_us: i64,
     options: &fvid_control::CopyOptions,
 ) -> Result<fvid_media_info::MediaPlan, String> {
-    use fvid_media_info::{MediaPlan, PlanStep, PlanStream};
+    use std::io::{Seek, SeekFrom};
     if options
         .cancel
         .as_ref()
@@ -66,6 +89,52 @@ pub fn plan_xfade(
         return Err("cross-fade plan is not supported by the owned backend".into());
     }
     crate::owned_lossless::check_options_matroska_metadata_budget(options)?;
+    let _ = FadeTimeline::new(offset_us, duration_us)?;
+    let mut primary =
+        std::io::BufReader::new(std::fs::File::open(main).map_err(|e| e.to_string())?);
+    let mut bytes = Vec::new();
+    if !line(&mut primary, &mut bytes)? {
+        return Err("empty cross-fade primary source".into());
+    }
+    let header = Header::parse(&bytes)?;
+    primary
+        .seek(SeekFrom::Start(0))
+        .map_err(|e| e.to_string())?;
+    let other_reader =
+        std::io::BufReader::new(std::fs::File::open(other).map_err(|e| e.to_string())?);
+    plan_xfade_from_readers(
+        main,
+        other,
+        primary,
+        header,
+        other_reader,
+        transition,
+        duration_us,
+        offset_us,
+        options,
+    )
+}
+
+fn plan_xfade_from_readers(
+    main: &std::path::Path,
+    other: &std::path::Path,
+    primary: std::io::BufReader<std::fs::File>,
+    header: Header,
+    other_reader: std::io::BufReader<std::fs::File>,
+    transition: &str,
+    duration_us: i64,
+    offset_us: i64,
+    options: &fvid_control::CopyOptions,
+) -> Result<fvid_media_info::MediaPlan, String> {
+    use fvid_media_info::{MediaPlan, PlanStep, PlanStream};
+    use std::io::{Seek, SeekFrom};
+    if options
+        .cancel
+        .as_ref()
+        .is_some_and(fvid_control::CancelFlag::is_cancelled)
+    {
+        return Err("media operation cancelled".into());
+    }
     if options.max_packet_bytes == 0 {
         return Err("packet byte limit must be positive".into());
     }
@@ -75,18 +144,14 @@ pub fn plan_xfade(
     if options.max_controlled_bytes == Some(0) {
         return Err("controlled memory limit must be positive".into());
     }
-    let timeline = FadeTimeline::new(offset_us, duration_us)?;
-    let mut primary =
-        std::io::BufReader::new(std::fs::File::open(main).map_err(|e| e.to_string())?);
-    let mut bytes = Vec::new();
-    if !line(&mut primary, &mut bytes)? {
-        return Err("empty cross-fade primary source".into());
+    crate::owned_budget::check_rss_budget(options)?;
+    crate::owned_lossless::metadata(options)?;
+    if transition != "fade" || !default_policy(options) {
+        return Err("cross-fade plan is not supported by the owned backend".into());
     }
-    let header = Header::parse(&bytes)?;
-    let secondary = SecondaryReader::new(
-        std::io::BufReader::new(std::fs::File::open(other).map_err(|e| e.to_string())?),
-        &header,
-    )?;
+    crate::owned_lossless::check_options_matroska_metadata_budget(options)?;
+    let timeline = FadeTimeline::new(offset_us, duration_us)?;
+    let secondary = SecondaryReader::new(other_reader, &header)?;
     if header.frame_rate()? != secondary.header.frame_rate()? {
         return Err("cross-fade inputs require matching frame rates".into());
     }
@@ -168,10 +233,11 @@ pub fn plan_xfade(
     let encode_packets =
         options.max_packet_bytes != fvid_control::CopyOptions::default().max_packet_bytes
             || options.max_controlled_bytes.is_some();
-    let main_reader =
-        std::io::BufReader::new(std::fs::File::open(main).map_err(|e| e.to_string())?);
-    let other_reader =
-        std::io::BufReader::new(std::fs::File::open(other).map_err(|e| e.to_string())?);
+    let main_reader = primary;
+    let mut other_reader = secondary.input;
+    other_reader
+        .seek(SeekFrom::Start(0))
+        .map_err(|e| e.to_string())?;
     visit_y4m_counted(
         main_reader,
         other_reader,
@@ -280,14 +346,21 @@ pub fn try_xfade_video(
     if transition != "fade" || !default_policy(options) {
         return Ok(None);
     }
-    let Some(header) = read_header(source) else {
+    let Some((header, primary)) = open_header(source) else {
         return Ok(None);
     };
-    if read_header(other).is_none() {
+    let Some((_, secondary)) = open_header(other) else {
         return Ok(None);
-    }
-    let (count, decoded_frames) =
-        export_y4m_ffv1_counted(source, other, destination, offset_us, duration_us, options)?;
+    };
+    let (count, decoded_frames) = export_y4m_ffv1_counted_from_readers(
+        primary,
+        header.clone(),
+        secondary,
+        destination,
+        offset_us,
+        duration_us,
+        options,
+    )?;
     Ok(Some(fvid_media_info::LosslessStats {
         backend: "owned Y4M cross-fade FFV1 export",
         video_frames: count,
@@ -312,6 +385,7 @@ pub fn xfade_video(
     offset_us: i64,
     options: &fvid_control::CopyOptions,
 ) -> Result<fvid_media_info::LosslessStats, String> {
+    use std::io::{Seek, SeekFrom};
     if options
         .cancel
         .as_ref()
@@ -359,16 +433,36 @@ pub fn xfade_video(
     if header.frame_rate()? != secondary.header.frame_rate()? {
         return Err("cross-fade inputs require matching frame rates".into());
     }
-    try_xfade_video(
-        source,
-        other,
+    primary
+        .seek(SeekFrom::Start(0))
+        .map_err(|e| e.to_string())?;
+    let mut other_reader = secondary.input;
+    other_reader
+        .seek(SeekFrom::Start(0))
+        .map_err(|e| e.to_string())?;
+    let (count, decoded_frames) = export_y4m_ffv1_counted_from_readers(
+        primary,
+        header.clone(),
+        other_reader,
         destination,
-        transition,
-        duration_us,
         offset_us,
+        duration_us,
         options,
-    )?
-    .ok_or_else(|| "cross-fade request is not supported by the owned backend".into())
+    )?;
+    Ok(fvid_media_info::LosslessStats {
+        backend: "owned Y4M cross-fade FFV1 export",
+        video_frames: count,
+        decoded_frames,
+        seek_used: false,
+        video_packets: count,
+        copied_packets: 0,
+        trimmed_audio_sample_frames: 0,
+        pixel_format: format!("{:?}/{}", header.format, header.depth()),
+        encoder: "ffv1".into(),
+        fvid_crop_payload_copies: 0,
+        vertical_flip: false,
+        horizontal_flip: false,
+    })
 }
 
 /// Forward-only secondary video reader. Retains one frame and selects the most
@@ -784,7 +878,53 @@ fn export_y4m_ffv1_counted(
     duration_us: i64,
     options: &fvid_control::CopyOptions,
 ) -> Result<(u64, u64), String> {
-    use std::{fs::File, io::BufReader};
+    use std::{
+        fs::File,
+        io::{BufReader, Seek, SeekFrom},
+    };
+    if options.max_packet_bytes == 0 {
+        return Err("packet byte limit must be positive".into());
+    }
+    if options.max_packets == Some(0) {
+        return Err("packet work limit requires at least one packet".into());
+    }
+    if options.max_controlled_bytes == Some(0) {
+        return Err("controlled memory limit must be positive".into());
+    }
+    if destination.symlink_metadata().is_ok() {
+        return Err("output already exists".into());
+    }
+    let _ = FadeTimeline::new(offset_us, duration_us)?;
+    let mut input = BufReader::new(File::open(main).map_err(|e| e.to_string())?);
+    let mut bytes = Vec::new();
+    if !line(&mut input, &mut bytes)? {
+        return Err("empty cross-fade primary source".into());
+    }
+    let header = Header::parse(&bytes)?;
+    input
+        .seek(SeekFrom::Start(0))
+        .map_err(|e| e.to_string())?;
+    let other_reader = BufReader::new(File::open(other).map_err(|e| e.to_string())?);
+    export_y4m_ffv1_counted_from_readers(
+        input,
+        header,
+        other_reader,
+        destination,
+        offset_us,
+        duration_us,
+        options,
+    )
+}
+
+fn export_y4m_ffv1_counted_from_readers(
+    input: std::io::BufReader<std::fs::File>,
+    header: Header,
+    other: std::io::BufReader<std::fs::File>,
+    destination: &std::path::Path,
+    offset_us: i64,
+    duration_us: i64,
+    options: &fvid_control::CopyOptions,
+) -> Result<(u64, u64), String> {
     if options.max_packet_bytes == 0 {
         return Err("packet byte limit must be positive".into());
     }
@@ -798,12 +938,6 @@ fn export_y4m_ffv1_counted(
         return Err("output already exists".into());
     }
     let timeline = FadeTimeline::new(offset_us, duration_us)?;
-    let mut probe = BufReader::new(File::open(main).map_err(|e| e.to_string())?);
-    let mut bytes = Vec::new();
-    if !line(&mut probe, &mut bytes)? {
-        return Err("empty cross-fade primary source".into());
-    }
-    let header = Header::parse(&bytes)?;
     crate::owned_budget::check_rss_budget(options)?;
     crate::owned_lossless::metadata(options)?;
     crate::owned_lossless::check_options_matroska_metadata_budget(options)?;
@@ -817,8 +951,6 @@ fn export_y4m_ffv1_counted(
     {
         return Err("cross-fade frame exceeds controlled memory budget".into());
     }
-    let input = BufReader::new(File::open(main).map_err(|e| e.to_string())?);
-    let other = BufReader::new(File::open(other).map_err(|e| e.to_string())?);
     let (stats, _, decoded_frames) = crate::owned_matroska::export_atomic(
         destination,
         options.cancel.as_ref(),

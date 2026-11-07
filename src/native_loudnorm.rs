@@ -156,12 +156,13 @@ pub fn try_plan(
         );
         return Ok(Some(plan));
     }
-    let (head, head_len) = fvid_media::owned_audio_plan::read_source_head(source)
+    let (mut head_file, head, head_len) = fvid_media::owned_audio_plan::open_source_head(source)
         .map_err(|e| crate::invalid(&e))?;
     if head_len >= 7
         && !head[..3].starts_with(b"ID3")
         && let Some(header) = crate::container::adts::header(&head[..7])
     {
+        drop(head_file);
         if options.streams.first().is_some_and(|&s| s != 0) {
             return Err("owned ADTS loudnorm requires stream 0 and valid WAVE INFO metadata edits".into());
         }
@@ -182,34 +183,39 @@ pub fn try_plan(
             .map_err(|e| crate::invalid(&e))?,
         ));
     }
-    if fvid_media::owned_container_loudness::recognizes_standalone_from_head(
-        source, &head, head_len, options,
-    )
-    .map_err(|e| crate::invalid(&e))?
-    {
-        return Ok(Some(
-            fvid_media::owned_container_loudnorm::plan_loudnorm(
-                source,
-                Some(&resolved),
-                dual_pass,
-                options,
-            )
-            .map_err(|e| crate::invalid(&e))?,
-        ));
-    }
     let wave = head_len == 12
         && matches!(&head[..4], b"RIFF" | b"RF64")
         && &head[8..12] == b"WAVE";
     if wave {
+        use std::io::{Seek, SeekFrom};
+        if fvid_media::owned_container_loudness::recognizes_standalone_from_file_and_head(
+            head_file.try_clone()?,
+            &head,
+            head_len,
+            options,
+        )
+        .map_err(|e| crate::invalid(&e))?
+        {
+            drop(head_file);
+            return Ok(Some(
+                fvid_media::owned_container_loudnorm::plan_loudnorm(
+                    source,
+                    Some(&resolved),
+                    dual_pass,
+                    options,
+                )
+                .map_err(|e| crate::invalid(&e))?,
+            ));
+        }
         if options.streams.len() > 1 {
             return Err("loudnorm requires one selected audio stream".into());
         }
         if options.streams.first().is_some_and(|&s| s != 0) {
             return Err("WAVE has only stream 0".into());
         }
-        let mut wave_file = std::fs::File::open(source)?;
+        head_file.seek(SeekFrom::Start(0))?;
         if let Ok(info) = crate::native_pcm::inspect(
-            &mut wave_file,
+            &mut head_file,
             options.cancel.as_ref(),
         ) {
             if info.sample_frames == 0 {
@@ -223,9 +229,9 @@ pub fn try_plan(
                 return Err("PCM packet limit cannot hold one sample frame".into());
             }
         }
-        drop(wave_file);
-        if !fvid_media::owned_loudnorm::supports_request(
-            source,
+        head_file.seek(SeekFrom::Start(0))?;
+        if !fvid_media::owned_loudnorm::supports_request_from_file(
+            &mut head_file,
             Path::new("output.wav"),
             Some(&resolved),
             dual_pass,
@@ -233,9 +239,24 @@ pub fn try_plan(
         ) {
             return Ok(None);
         }
+        head_file.seek(SeekFrom::Start(0))?;
         return Ok(Some(
-            fvid_media::owned_loudnorm::plan_wave_loudnorm(
-                source, Some(&resolved), dual_pass, options,
+            fvid_media::owned_loudnorm::plan_wave_loudnorm_from_file(
+                source, head_file, Some(&resolved), dual_pass, options,
+            )
+            .map_err(|e| crate::invalid(&e))?,
+        ));
+    } else if fvid_media::owned_container_loudness::recognizes_standalone_from_file_and_head(
+        head_file, &head, head_len, options,
+    )
+    .map_err(|e| crate::invalid(&e))?
+    {
+        return Ok(Some(
+            fvid_media::owned_container_loudnorm::plan_loudnorm(
+                source,
+                Some(&resolved),
+                dual_pass,
+                options,
             )
             .map_err(|e| crate::invalid(&e))?,
         ));
@@ -553,10 +574,56 @@ pub fn try_apply(
     }
     let mut default_opts = CopyOptions::default();
     default_opts.streams = options.streams.clone();
-    let (head, head_len) = fvid_media::owned_audio_plan::read_source_head(source)
+    let (mut head_file, head, head_len) = fvid_media::owned_audio_plan::open_source_head(source)
         .map_err(|e| crate::invalid(&e))?;
-    if fvid_media::owned_container_loudness::recognizes_standalone_from_head(
-        source, &head, head_len, options,
+    let wave = head_len == 12
+        && matches!(&head[..4], b"RIFF" | b"RF64")
+        && &head[8..12] == b"WAVE";
+    if wave {
+        use std::io::{Seek, SeekFrom};
+        if fvid_media::owned_container_loudness::recognizes_standalone_from_file_and_head(
+            head_file.try_clone()?,
+            &head,
+            head_len,
+            options,
+        )
+        .map_err(|e| crate::invalid(&e))?
+        {
+            drop(head_file);
+            if destination.extension().and_then(|s| s.to_str()) == Some("wav") {
+                return Ok(Some(
+                    fvid_media::owned_container_loudnorm::apply(
+                        source,
+                        destination,
+                        args,
+                        dual_pass,
+                        options,
+                    )
+                    .map_err(|e| crate::invalid(&e))?,
+                ));
+            }
+            return Ok(None);
+        }
+        if options.streams.len() > 1 {
+            return Err("loudnorm requires one selected audio stream".into());
+        }
+        if options.streams.first().is_some_and(|&s| s != 0) {
+            return Err("WAVE has only stream 0".into());
+        }
+        head_file.seek(SeekFrom::Start(0))?;
+        if fvid_media::owned_loudnorm::supports_request_from_file(
+            &mut head_file,
+            destination,
+            args,
+            dual_pass,
+            options,
+        ) {
+            drop(head_file);
+            return Ok(Some(normalize(source, options)?));
+        }
+        return Ok(None);
+    } else if fvid_media::owned_container_loudness::recognizes_standalone_from_file_and_head(
+        head_file, &head, head_len, options,
     )
     .map_err(|e| crate::invalid(&e))?
     {
@@ -571,27 +638,6 @@ pub fn try_apply(
                 )
                 .map_err(|e| crate::invalid(&e))?,
             ));
-        }
-        return Ok(None);
-    }
-    let wave = head_len == 12
-        && matches!(&head[..4], b"RIFF" | b"RF64")
-        && &head[8..12] == b"WAVE";
-    if wave {
-        if options.streams.len() > 1 {
-            return Err("loudnorm requires one selected audio stream".into());
-        }
-        if options.streams.first().is_some_and(|&s| s != 0) {
-            return Err("WAVE has only stream 0".into());
-        }
-        if fvid_media::owned_loudnorm::supports_request(
-            source,
-            destination,
-            args,
-            dual_pass,
-            options,
-        ) {
-            return Ok(Some(normalize(source, options)?));
         }
         return Ok(None);
     }
