@@ -1,8 +1,8 @@
 {
   "target": 1000,
   "counting_rule": "One independently confirmed problem or useful capability; fixture variants and baseline integration repairs are excluded. Only accepted entries count.",
-  "accepted_count": 899,
-  "next_id": "FVID-0900",
+  "accepted_count": 904,
+  "next_id": "FVID-0905",
   "entries": [
     {
       "id": "FVID-0001",
@@ -10080,6 +10080,61 @@
       "result": "Directly checks constant_audio_source_info_selected_with_interval_and_options for single-stream selection without scanning unselected tracks first.",
       "status": "accepted",
       "validation": "batch-633-validation.json"
+    },
+    {
+      "id": "FVID-0900",
+      "batch": 634,
+      "title": "Remove redundant MP4/Matroska/ADTS packet-budget rescan in native_audio_mix::eligible_with_options",
+      "source": "src/native_audio_mix.rs",
+      "regression": "tests/audio_mix_concat_and_loudnorm_single_stream_admission.rs",
+      "before": "native_audio_mix::eligible_with_options called constant_audio_source_info_selected_with_options and then reopened MP4, Matroska, and ADTS sources to re-verify max_packet_bytes and max_packets.",
+      "result": "Relies on constant_audio_source_info_selected_with_options, which already enforces packet byte and packet count budgets across all three formats.",
+      "status": "accepted",
+      "validation": "batch-634-validation.json"
+    },
+    {
+      "id": "FVID-0901",
+      "batch": 634,
+      "title": "Skip redundant eligible_with_options re-probe for active segments in validate_concat_segments_internal",
+      "source": "src/native_audio_mix/concat.rs",
+      "regression": "tests/audio_mix_concat_and_loudnorm_single_stream_admission.rs",
+      "before": "validate_concat_segments_internal validated active segments via validate_and_inspect_source_with_options and then called eligible_with_options on those same segments in the second pass.",
+      "result": "Skips eligible_with_options when active_geometries already holds the validated geometry for the segment.",
+      "status": "accepted",
+      "validation": "batch-634-validation.json"
+    },
+    {
+      "id": "FVID-0902",
+      "batch": 634,
+      "title": "Avoid redundant is_aac_source_with_metadata_limit container scan in is_owned_audio_trim_source_with_interval_and_options",
+      "source": "src/native_media.rs",
+      "regression": "tests/audio_mix_concat_and_loudnorm_single_stream_admission.rs",
+      "before": "For MP4 and Matroska containers, is_owned_audio_trim_source_with_interval_and_options called is_owned_audio_source_with_interval_and_options, which scanned the container via is_aac_source_with_metadata_limit before constant_audio_source_info_selected_with_interval_and_options.",
+      "result": "Calls constant_audio_source_info_selected_with_interval_and_options directly for MP4 and Matroska containers before falling back to multi-stream probing.",
+      "status": "accepted",
+      "validation": "batch-634-validation.json"
+    },
+    {
+      "id": "FVID-0903",
+      "batch": 634,
+      "title": "Direct single-stream audio source inspection in native_loudnorm::try_plan",
+      "source": "src/native_loudnorm.rs",
+      "regression": "tests/audio_mix_concat_and_loudnorm_single_stream_admission.rs",
+      "before": "When options.streams contained a single explicit stream index, native_loudnorm::try_plan still called is_owned_audio_trim_source_with_options across the whole container before inspecting the selected stream.",
+      "result": "Directly inspects options.streams[0] with constant_audio_source_info_selected_with_options when a single stream is explicitly selected.",
+      "status": "accepted",
+      "validation": "batch-634-validation.json"
+    },
+    {
+      "id": "FVID-0904",
+      "batch": 634,
+      "title": "Direct single-stream audio source inspection in native_loudnorm::try_apply",
+      "source": "src/native_loudnorm.rs",
+      "regression": "tests/audio_mix_concat_and_loudnorm_single_stream_admission.rs",
+      "before": "When options.streams contained a single explicit stream index, native_loudnorm::try_apply called is_owned_audio_trim_source_with_options across all tracks before inspecting options.streams[0].",
+      "result": "Directly inspects options.streams[0] with constant_audio_source_info_selected_with_options when a single stream is explicitly selected.",
+      "status": "accepted",
+      "validation": "batch-634-validation.json"
     }
   ],
   "pending_count": 126

@@ -268,7 +268,9 @@ fn validate_concat_segments_internal(
         }
         let mut eligible_probe = geom_probe.clone();
         eligible_probe.max_controlled_bytes = None;
-        if !super::eligible_with_options(std::slice::from_ref(source), &eligible_probe)? {
+        if active_geometries.get(idx).is_none()
+            && !super::eligible_with_options(std::slice::from_ref(source), &eligible_probe)?
+        {
             return Err(invalid(
                 "PCM concat requires 2..=256 single audio inputs with matching sample rate and channels",
             ));

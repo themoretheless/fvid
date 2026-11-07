@@ -282,7 +282,12 @@ pub fn try_plan(
         default_opts.streams = options.streams.clone();
         default_opts.max_rss_bytes = options.max_rss_bytes;
         default_opts.cancel = options.cancel.clone();
-        let native_stream = if crate::native_media::is_owned_audio_trim_source_with_options(source, &default_opts)? {
+        let native_stream = if options.streams.len() == 1 {
+            let idx = options.streams[0];
+            crate::native_media::constant_audio_source_info_selected_with_options(source, Some(idx), &default_opts)
+                .ok()
+                .map(|info| (idx, info))
+        } else if crate::native_media::is_owned_audio_trim_source_with_options(source, &default_opts)? {
             let idx = selected_audio(source, options)?;
             crate::native_media::constant_audio_source_info_selected_with_options(source, Some(idx), &default_opts)
                 .ok()
@@ -621,9 +626,9 @@ pub fn try_apply(
     let native_info = if options.max_controlled_bytes.is_none()
         && options.metadata_set.is_empty()
         && options.metadata_delete.is_empty()
-        && crate::native_media::is_owned_audio_trim_source_with_options(source, &default_opts)?
     {
-        selected_audio(source, options).ok().and_then(|idx| {
+        if options.streams.len() == 1 {
+            let idx = options.streams[0];
             crate::native_media::constant_audio_source_info_selected_with_options(
                 source,
                 Some(idx),
@@ -631,7 +636,19 @@ pub fn try_apply(
             )
             .ok()
             .map(|info| (idx, info))
-        })
+        } else if crate::native_media::is_owned_audio_trim_source_with_options(source, &default_opts)? {
+            selected_audio(source, options).ok().and_then(|idx| {
+                crate::native_media::constant_audio_source_info_selected_with_options(
+                    source,
+                    Some(idx),
+                    &default_opts,
+                )
+                .ok()
+                .map(|info| (idx, info))
+            })
+        } else {
+            None
+        }
     } else {
         None
     };

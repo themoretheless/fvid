@@ -1109,7 +1109,7 @@ pub fn is_owned_audio_trim_source_with_interval_and_options(
     if !is_container {
         return is_owned_audio_source_with_interval_and_options(path, interval, options);
     }
-    if is_owned_audio_source_with_interval_and_options(path, interval, options)? {
+    if constant_audio_source_info_selected_with_interval_and_options(path, None, interval, options).is_ok() {
         return Ok(true);
     }
     let info = crate::native_probe::try_probe_metadata_with_options(path, options)

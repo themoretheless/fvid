@@ -4726,3 +4726,12 @@ See `batch-628-validation.json`.
 - **FVID-0898**: Eliminate duplicate `decode_audio_with_options` call in `native_loudnorm::try_apply` (`src/native_loudnorm.rs`).
 - **FVID-0899**: Skip redundant whole-container audio trim eligibility check when a single stream is selected (`src/media.rs`).
 
+## Batch 634 (FVID-0900..0904)
+
+- **FVID-0900**: Remove redundant MP4/Matroska/ADTS packet-budget rescan in `native_audio_mix::eligible_with_options` (`src/native_audio_mix.rs`).
+- **FVID-0901**: Skip redundant `eligible_with_options` re-probe for active segments in `validate_concat_segments_internal` (`src/native_audio_mix/concat.rs`).
+- **FVID-0902**: Avoid redundant `is_aac_source_with_metadata_limit` container scan in `is_owned_audio_trim_source_with_interval_and_options` (`src/native_media.rs`).
+- **FVID-0903**: Direct single-stream audio source inspection in `native_loudnorm::try_plan` (`src/native_loudnorm.rs`).
+- **FVID-0904**: Direct single-stream audio source inspection in `native_loudnorm::try_apply` (`src/native_loudnorm.rs`).
+
+

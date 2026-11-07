@@ -325,7 +325,7 @@ pub fn eligible_with_options(
             drop(wave_file);
             crate::native_media::is_owned_audio_source_with_options(source, &clean_opts)?
         } {
-            let Ok(info) = crate::native_media::constant_audio_source_info_selected_with_options(source, None, &clean_opts) else {
+            let Ok(_) = crate::native_media::constant_audio_source_info_selected_with_options(source, None, &clean_opts) else {
                 return Ok(false);
             };
             if crate::native_probe::try_probe_metadata_with_options(source, &clean_opts)
@@ -336,101 +336,6 @@ pub fn eligible_with_options(
                 })
             {
                 return Ok(false);
-            }
-            if options.max_controlled_bytes.is_none()
-                && options.max_packet_bytes != fvid_media::CopyOptions::default().max_packet_bytes
-            {
-                use std::io::{Seek, SeekFrom};
-                let mut input = BufReader::new(File::open(source)?);
-                let mut prefix = [0u8; 8];
-                if input.read_exact(&mut prefix).is_err() || input.seek(SeekFrom::Start(0)).is_err()
-                {
-                    return Ok(false);
-                }
-                if crate::container::mp4::recognizes_prefix(&prefix) {
-                    let Ok(reader) = crate::container::mp4::Mp4Reader::open(
-                        input,
-                        crate::container::mp4::Limits::default(),
-                    ) else {
-                        return Ok(false);
-                    };
-                    if let Some(track) = reader.tracks().get(info.stream_index) {
-                        let max_samples = crate::native_media::mp4_active_samples(
-                            track,
-                            reader.movie_timescale(), None,
-                            options.max_packets,
-                        );
-                        let exceeds = match &track.samples {
-                            crate::container::mp4::SampleIndex::Expanded(samples) => samples
-                                .iter()
-                                .take(max_samples)
-                                .any(|s| (s.size as usize) > options.max_packet_bytes),
-                            crate::container::mp4::SampleIndex::Uniform(uniform) => {
-                                uniform.count > 0
-                                    && max_samples > 0
-                                    && (uniform.bytes_per_frame as usize) > options.max_packet_bytes
-                            }
-                        };
-                        if exceeds {
-                            return Ok(false);
-                        }
-                    }
-                } else if prefix.starts_with(&[0x1a, 0x45, 0xdf, 0xa3]) {
-                    let Ok(mut reader) = crate::container::webm::WebmReader::open(
-                        input,
-                        crate::container::webm::Limits::default(),
-                    ) else {
-                        return Ok(false);
-                    };
-                    if reader.scan_all().is_err() {
-                        return Ok(false);
-                    }
-                    if let Some(track) = reader.tracks.get(info.stream_index) {
-                        let track_number = track.number;
-                        let mut track_packets = 0u64;
-                        for (packet_index, packet) in reader.packets.iter().enumerate() {
-                            if options.cancel.as_ref().is_some_and(|c| c.is_cancelled())
-                                || fvid_media::owned_budget::check_rss_budget(options).is_err()
-                            {
-                                return Ok(false);
-                            }
-                            if packet.track == track_number {
-                                if options.max_packets.is_some_and(|max| track_packets >= max) {
-                                    break;
-                                }
-                                track_packets += 1;
-                                let Ok(size) = reader.packet_payload_size(packet_index) else {
-                                    return Ok(false);
-                                };
-                                if size > options.max_packet_bytes {
-                                    return Ok(false);
-                                }
-                            }
-                        }
-                    }
-                } else if crate::container::adts::header(&prefix).is_some() {
-                    let Ok(mut reader) =
-                        crate::container::adts::StreamReader::open_with_packet_limit(
-                            input,
-                            options.max_packet_bytes,
-                        )
-                    else {
-                        return Ok(false);
-                    };
-                    let mut packets = 0u64;
-                    while options.max_packets.is_none_or(|max| packets < max) {
-                        if options.cancel.as_ref().is_some_and(|c| c.is_cancelled())
-                            || fvid_media::owned_budget::check_rss_budget(options).is_err()
-                        {
-                            return Ok(false);
-                        }
-                        match reader.next_packet() {
-                            Ok(Some(_)) => packets += 1,
-                            Ok(None) => break,
-                            Err(_) => return Ok(false),
-                        }
-                    }
-                }
             }
             let probe_opts = clean_opts.clone();
             if options.max_controlled_bytes.is_some()
