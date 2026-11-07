@@ -1,0 +1,15 @@
+{
+  "batch": 637,
+  "ids": [
+    "FVID-0915",
+    "FVID-0916",
+    "FVID-0917",
+    "FVID-0918",
+    "FVID-0919"
+  ],
+  "commands": [
+    "cargo test --test loudnorm_trim_and_mix_spool_reuse --test audio_mix_concat_and_loudnorm_single_stream_admission",
+    "python3 scripts/check_improvements_registry.py"
+  ],
+  "status": "accepted"
+}

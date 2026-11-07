@@ -1022,25 +1022,38 @@ pub fn trim(
         && options.stream_metadata_set.is_empty()
         && options.stream_metadata_delete.is_empty()
         && matches!(destination.extension().and_then(|s|s.to_str()),Some("wav" | "f32le" | "mka" | "mkv"))
-        && if options.streams.len() == 1 {
-            crate::native_media::constant_audio_source_info_selected_with_interval_and_options(
+    {
+        if options.streams.len() == 1
+            && let Ok(info) = crate::native_media::constant_audio_source_info_selected_with_interval_and_options(
                 source,
                 Some(options.streams[0]),
                 trim_interval,
                 options,
             )
-            .is_ok()
-        } else {
-            crate::native_media::is_owned_audio_trim_source_with_interval_and_options(
+        {
+            validate_owned_audio_options(options)?;
+            let stats = crate::native_export::trim_audio_pcm_with_controls_and_cached_info(
+                source,
+                destination,
+                from,
+                to,
+                options,
+                Some(&info),
+            )
+            .map_err(|e| e.to_string())?;
+            return Ok(CopyStats {packets:stats.decoded_frames,payload_bytes:stats.sample_frames*u64::from(stats.channels)*4,segments:1,backend:"fvid",fvid_payload_copies:0});
+        } else if options.streams.len() != 1
+            && crate::native_media::is_owned_audio_trim_source_with_interval_and_options(
                 source,
                 trim_interval,
                 options,
             )
             .map_err(|e| e.to_string())?
-        } {
-        validate_owned_audio_options(options)?;
-        let stats=crate::native_export::trim_audio_pcm_with_controls(source,destination,from,to,options).map_err(|e|e.to_string())?;
-        return Ok(CopyStats {packets:stats.decoded_frames,payload_bytes:stats.sample_frames*u64::from(stats.channels)*4,segments:1,backend:"fvid",fvid_payload_copies:0});
+        {
+            validate_owned_audio_options(options)?;
+            let stats=crate::native_export::trim_audio_pcm_with_controls(source,destination,from,to,options).map_err(|e|e.to_string())?;
+            return Ok(CopyStats {packets:stats.decoded_frames,payload_bytes:stats.sample_frames*u64::from(stats.channels)*4,segments:1,backend:"fvid",fvid_payload_copies:0});
+        }
     }
     if !crate::native_pcm::is_wave(source).map_err(|e| e.to_string())? {
         if matches!(destination.extension().and_then(|s| s.to_str()), Some("wav" | "f32le" | "mka" | "mkv")) {

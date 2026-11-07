@@ -4750,6 +4750,11 @@ See `batch-628-validation.json`.
 - **FVID-0913**: Inspect constant-audio sources before `is_owned_audio_source_with_options` in `decode_source_to_f32le_with_options` (`src/native_audio_mix.rs`).
 - **FVID-0914**: Build ADTS `PlanStream` directly without full-file `probe_with_options` rescan in `native_plan::remux_with_options` (`src/native_plan.rs`).
 
+## Batch 637 (FVID-0915..0919)
 
-
+- **FVID-0915**: Reuse `default_info` in `native_loudnorm::try_plan` when packet limits match default controls (`src/native_loudnorm.rs`).
+- **FVID-0916**: Inspect constant-audio sources directly when `options.streams` is empty in `native_loudnorm::try_plan` (`src/native_loudnorm.rs`).
+- **FVID-0917**: Inspect constant-audio sources directly when `options.streams` is empty in `native_loudnorm::try_apply` (`src/native_loudnorm.rs`).
+- **FVID-0918**: Reuse single-stream `AudioSourceInfo` across `media::trim` and `trim_audio_pcm_with_controls_and_cached_info` (`src/media.rs`, `src/native_export.rs`).
+- **FVID-0919**: Propagate pre-resolved `info.stream_index` into `export_audio_pcm_transformed_with_controls` during `decode_source_to_f32le_with_options` (`src/native_audio_mix.rs`).
 

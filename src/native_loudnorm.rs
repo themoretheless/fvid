@@ -287,6 +287,14 @@ pub fn try_plan(
             crate::native_media::constant_audio_source_info_selected_with_options(source, Some(idx), &default_opts)
                 .ok()
                 .map(|info| (idx, info))
+        } else if options.streams.is_empty()
+            && let Ok(info) = crate::native_media::constant_audio_source_info_selected_with_options(
+                source,
+                None,
+                &default_opts,
+            )
+        {
+            Some((info.stream_index, info))
         } else if crate::native_media::is_owned_audio_trim_source_with_options(source, &default_opts)? {
             let idx = selected_audio(source, options)?;
             crate::native_media::constant_audio_source_info_selected_with_options(source, Some(idx), &default_opts)
@@ -295,13 +303,19 @@ pub fn try_plan(
         } else {
             None
         };
-        if let Some((idx, _)) = native_stream {
-            let info = crate::native_media::constant_audio_source_info_selected_with_options(
-                source,
-                Some(idx),
-                options,
-            )
-            .map_err(|e| crate::invalid(&e.to_string()))?;
+        if let Some((idx, default_info)) = native_stream {
+            let info = if options.max_packet_bytes == CopyOptions::default().max_packet_bytes
+                && options.max_packets.is_none()
+            {
+                default_info
+            } else {
+                crate::native_media::constant_audio_source_info_selected_with_options(
+                    source,
+                    Some(idx),
+                    options,
+                )
+                .map_err(|e| crate::invalid(&e.to_string()))?
+            };
             if !fvid_media::owned_wave_loudness::qualified_rate(info.sample_rate) {
                 return Ok(None);
             }
@@ -636,6 +650,14 @@ pub fn try_apply(
             )
             .ok()
             .map(|info| (idx, info))
+        } else if options.streams.is_empty()
+            && let Ok(info) = crate::native_media::constant_audio_source_info_selected_with_options(
+                source,
+                None,
+                &default_opts,
+            )
+        {
+            Some((info.stream_index, info))
         } else if crate::native_media::is_owned_audio_trim_source_with_options(source, &default_opts)? {
             selected_audio(source, options).ok().and_then(|idx| {
                 crate::native_media::constant_audio_source_info_selected_with_options(

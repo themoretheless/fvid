@@ -2540,6 +2540,17 @@ pub fn trim_audio_pcm_with_controls(
     to: i64,
     options: &fvid_media::CopyOptions,
 ) -> Result<crate::native_media::AudioDecodeStats> {
+    trim_audio_pcm_with_controls_and_cached_info(source, destination, from, to, options, None)
+}
+
+pub(crate) fn trim_audio_pcm_with_controls_and_cached_info(
+    source: &Path,
+    destination: &Path,
+    from: i64,
+    to: i64,
+    options: &fvid_media::CopyOptions,
+    cached_info: Option<&crate::native_media::AudioSourceInfo>,
+) -> Result<crate::native_media::AudioDecodeStats> {
     crate::media::validate_owned_audio_options_for_destination(options, Some(destination))
         .map_err(|e| invalid(&e))?;
     if from < 0 || to <= from {
@@ -2550,15 +2561,20 @@ pub fn trim_audio_pcm_with_controls(
         std::time::Duration::from_micros(from as u64),
         std::time::Duration::from_micros(to as u64),
     );
-    let index = crate::native_plan::audio_stream_index_from_metadata(source, selected, options)
-        .map_err(|e| invalid(&e))?;
-    let info = crate::native_media::constant_audio_source_info_selected_with_interval_and_options(
-        source,
-        Some(index),
-        Some(interval),
-        options,
-    )?;
-    let allow_wave = info.codec != "aac";
+    let (index, allow_wave) = if let Some(info) = cached_info {
+        (info.stream_index, info.codec != "aac")
+    } else {
+        let index = crate::native_plan::audio_stream_index_from_metadata(source, selected, options)
+            .map_err(|e| invalid(&e))?;
+        let info =
+            crate::native_media::constant_audio_source_info_selected_with_interval_and_options(
+                source,
+                Some(index),
+                Some(interval),
+                options,
+            )?;
+        (index, info.codec != "aac")
+    };
     export_pcm_selected(
         source,
         destination,
