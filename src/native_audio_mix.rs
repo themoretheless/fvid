@@ -119,11 +119,14 @@ fn is_single_stream_fvid_media_audio_with_options(
     if !single_audio {
         return Ok(false);
     }
-    if fvid_media::plan_decode_audio(source, &Default::default(), &probe_opts).is_err() {
+    let Ok((_, (_, ch, _))) = fvid_media::owned_audio_plan::plan_decode_audio_with_geometry(
+        source,
+        &Default::default(),
+        &probe_opts,
+    ) else {
         return Ok(false);
-    }
-    Ok(fvid_media::owned_audio_plan::source_geometry_with_mask(source, &probe_opts)
-        .is_ok_and(|(_, ch, _)| (1..=64).contains(&ch)))
+    };
+    Ok((1..=64).contains(&ch))
 }
 
 fn validate_and_inspect_source_with_options(
@@ -254,8 +257,12 @@ fn validate_and_inspect_source_with_options(
         Ok((info.sample_rate, info.channels, mask))
     } else {
         let probe_opts = strip_output_controls(options);
-        fvid_media::plan_decode_audio(source, &Default::default(), &probe_opts)
-            .map_err(|e| invalid(&e))?;
+        let (_, geom) = fvid_media::owned_audio_plan::plan_decode_audio_with_geometry(
+            source,
+            &Default::default(),
+            &probe_opts,
+        )
+        .map_err(|e| invalid(&e))?;
         let mut default_probe = fvid_media::CopyOptions::default();
         default_probe.cancel = options.cancel.clone();
         default_probe.max_rss_bytes = options.max_rss_bytes;
@@ -273,8 +280,6 @@ fn validate_and_inspect_source_with_options(
         if !single_audio {
             return Err(invalid("source is not a single-stream owned audio input"));
         }
-        let geom = fvid_media::owned_audio_plan::source_geometry_with_mask(source, &probe_opts)
-            .map_err(|e| invalid(&e))?;
         if !(1..=64).contains(&geom.1) {
             return Err(invalid("source is not a single-stream owned audio input"));
         }
@@ -304,37 +309,39 @@ pub(crate) fn decode_source_to_f32le_with_options(
     }
     fvid_media::owned_budget::check_rss_budget(options).map_err(|e| invalid(&e))?;
     let clean_opts = strip_output_controls(options);
-    if options.max_controlled_bytes.is_none()
-        && (crate::native_pcm::is_wave(source)? || crate::native_media::is_owned_audio_source_with_options(source, &clean_opts)?)
-    {
-        let mut export_opts = clean_opts;
-        export_opts.progress = None;
-        crate::native_export::export_audio_pcm_transformed_with_controls(
-            source,
-            destination,
-            None,
-            1.0,
-            None,
-            None,
-            &export_opts,
-        )
-    } else {
-        let temp_wav = scratch_dir.join(format!("decoded-{index}.wav"));
-        let mut decode_opts = clean_opts;
-        decode_opts.progress = None;
-        let decoded =
-            fvid_media::decode_audio(source, &temp_wav, &decode_opts).map_err(|e| invalid(&e))?;
-        let mut spool_opts = fvid_media::CopyOptions::default();
-        spool_opts.cancel = cancel.cloned();
-        spool_opts.max_rss_bytes = options.max_rss_bytes;
-        spool_opts.max_controlled_bytes = options.max_controlled_bytes;
-        let mut stats = crate::native_export::export_audio_pcm_selected_with_controls(
-            &temp_wav, destination, None, &spool_opts,
-        )?;
-        let _ = std::fs::remove_file(&temp_wav);
-        stats.decoded_frames = decoded.decoded_frames;
-        Ok(stats)
+    if options.max_controlled_bytes.is_none() {
+        let mut wave_file = File::open(source)?;
+        let is_wave = crate::native_pcm::is_wave_reader(&mut wave_file)?;
+        drop(wave_file);
+        if is_wave || crate::native_media::is_owned_audio_source_with_options(source, &clean_opts)? {
+            let mut export_opts = clean_opts;
+            export_opts.progress = None;
+            return crate::native_export::export_audio_pcm_transformed_with_controls(
+                source,
+                destination,
+                None,
+                1.0,
+                None,
+                None,
+                &export_opts,
+            );
+        }
     }
+    let temp_wav = scratch_dir.join(format!("decoded-{index}.wav"));
+    let mut decode_opts = clean_opts;
+    decode_opts.progress = None;
+    let decoded =
+        fvid_media::decode_audio(source, &temp_wav, &decode_opts).map_err(|e| invalid(&e))?;
+    let mut spool_opts = fvid_media::CopyOptions::default();
+    spool_opts.cancel = cancel.cloned();
+    spool_opts.max_rss_bytes = options.max_rss_bytes;
+    spool_opts.max_controlled_bytes = options.max_controlled_bytes;
+    let mut stats = crate::native_export::export_audio_pcm_selected_with_controls(
+        &temp_wav, destination, None, &spool_opts,
+    )?;
+    let _ = std::fs::remove_file(&temp_wav);
+    stats.decoded_frames = decoded.decoded_frames;
+    Ok(stats)
 }
 
 #[allow(dead_code)]
@@ -376,8 +383,6 @@ pub fn eligible_with_options(
         }
         let mut wave_file = File::open(source)?;
         if crate::native_pcm::is_wave_reader(&mut wave_file)? {
-            use std::io::{Seek, SeekFrom};
-            wave_file.seek(SeekFrom::Start(0))?;
             let Ok(info) = crate::native_pcm::inspect(&mut wave_file, options.cancel.as_ref()) else {
                 return Ok(false);
             };

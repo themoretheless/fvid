@@ -1,0 +1,16 @@
+{
+  "batch": 626,
+  "ids": [
+    "FVID-0860",
+    "FVID-0861",
+    "FVID-0862",
+    "FVID-0863",
+    "FVID-0864"
+  ],
+  "commands": [
+    "cargo test --test native_audio_mix_and_concat_validation_single_open",
+    "cargo test --test ogg_packet_work_mix_plan_and_loudness_info_reuse",
+    "python3 scripts/check_improvements_registry.py"
+  ],
+  "status": "accepted"
+}

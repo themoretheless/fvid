@@ -218,6 +218,8 @@ fn validate_concat_segments_internal(
     super::validate_output_controls(options, None)?;
     let mut remaining_packets = options.max_packets;
     let mut masks = Vec::new();
+    let mut active_geometries = Vec::new();
+    let mut packet_counts = Vec::new();
     for source in sources {
         if options.cancel.as_ref().is_some_and(|c| c.is_cancelled()) {
             return Err(invalid("media operation cancelled"));
@@ -228,10 +230,13 @@ fn validate_concat_segments_internal(
         }
         let mut segment_opts = super::strip_output_controls(options);
         segment_opts.max_packets = remaining_packets;
-        let (_, _, mask) = super::validate_and_inspect_source_with_options(source, &segment_opts)?;
+        let (rate, channels, mask) =
+            super::validate_and_inspect_source_with_options(source, &segment_opts)?;
         masks.push(mask);
+        active_geometries.push((rate, channels));
         if let Some(rem) = &mut remaining_packets {
             let count = segment_packet_count(source, &segment_opts)?;
+            packet_counts.push(count);
             *rem = rem.saturating_sub(count);
         }
     }
@@ -242,7 +247,7 @@ fn validate_concat_segments_internal(
     default_probe.max_packet_bytes = options.max_packet_bytes;
     let mut expected_geometry = None;
     let mut rem_geom = options.max_packets;
-    for source in sources {
+    for (idx, source) in sources.iter().enumerate() {
         if options.cancel.as_ref().is_some_and(|c| c.is_cancelled()) {
             return Err(invalid("media operation cancelled"));
         }
@@ -263,7 +268,11 @@ fn validate_concat_segments_internal(
         }
         crate::native_plan::audio_stream_index_from_metadata(source, None, &geom_probe)
             .map_err(|e| invalid(&e))?;
-        let current = geometry_with_options(source, &geom_probe)?;
+        let current = if let Some(&geom) = active_geometries.get(idx) {
+            geom
+        } else {
+            geometry_with_options(source, &geom_probe)?
+        };
         if rem_geom != Some(0) {
             if expected_geometry.is_some_and(|g| g != current) {
                 return Err(invalid(
@@ -275,7 +284,9 @@ fn validate_concat_segments_internal(
         if let Some(rem) = &mut rem_geom
             && *rem > 0
         {
-            if let Ok(count) = segment_packet_count(source, &geom_probe) {
+            if let Some(&count) = packet_counts.get(idx) {
+                *rem = rem.saturating_sub(count);
+            } else if let Ok(count) = segment_packet_count(source, &geom_probe) {
                 *rem = rem.saturating_sub(count);
             }
         }

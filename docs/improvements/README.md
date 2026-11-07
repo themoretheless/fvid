@@ -4656,6 +4656,17 @@ See `batch-624-validation.json`.
 
 See `batch-625-validation.json`.
 
+## Batch 626 — FVID-0860..0864: Single-pass geometry in `native_audio_mix` and active segment reuse in `native_audio_mix::concat`
+
+- **FVID-0860** — Single-pass `plan_decode_audio_with_geometry` in `native_audio_mix::is_single_stream_fvid_media_audio_with_options` (`src/native_audio_mix.rs`, `tests/native_audio_mix_and_concat_validation_single_open.rs`).
+- **FVID-0861** — Single-pass `plan_decode_audio_with_geometry` in `native_audio_mix::validate_and_inspect_source_with_options` (`src/native_audio_mix.rs`, `tests/native_audio_mix_and_concat_validation_single_open.rs`).
+- **FVID-0862** — Remove redundant `SeekFrom::Start(0)` after `is_wave_reader` in `native_audio_mix::eligible_with_options` (`src/native_audio_mix.rs`, `tests/native_audio_mix_and_concat_validation_single_open.rs`).
+- **FVID-0863** — Close WAVE probe handle before delegating in `native_audio_mix::decode_source_to_f32le_with_options` (`src/native_audio_mix.rs`, `tests/native_audio_mix_and_concat_validation_single_open.rs`).
+- **FVID-0864** — Reuse active segment geometries and packet counts in `native_audio_mix::concat::validate_concat_segments_internal` (`src/native_audio_mix/concat.rs`, `tests/native_audio_mix_and_concat_validation_single_open.rs`).
+
+See `batch-626-validation.json`.
+
+
 
 
 

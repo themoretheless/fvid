@@ -559,6 +559,16 @@ pub fn plan_decode_audio(
     Ok(plan_decode_audio_with_descriptor(source, transform, options)?.0)
 }
 
+/// Read-only operation plan and `(rate, channels, mask)` geometry for native audio mixing/concat.
+pub fn plan_decode_audio_with_geometry(
+    source: &Path,
+    transform: &AudioDecodeTransform,
+    options: &CopyOptions,
+) -> Result<(MediaPlan, (u32, u16, u32))> {
+    let (plan, desc) = plan_decode_audio_with_descriptor(source, transform, options)?;
+    Ok((plan, (desc.rate, desc.channels, desc.mask)))
+}
+
 pub(crate) fn plan_decode_audio_with_descriptor(
     source: &Path,
     transform: &AudioDecodeTransform,

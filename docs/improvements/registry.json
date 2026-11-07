@@ -1,8 +1,8 @@
 {
   "target": 1000,
   "counting_rule": "One independently confirmed problem or useful capability; fixture variants and baseline integration repairs are excluded. Only accepted entries count.",
-  "accepted_count": 859,
-  "next_id": "FVID-0860",
+  "accepted_count": 864,
+  "next_id": "FVID-0865",
   "entries": [
     {
       "id": "FVID-0001",
@@ -9640,7 +9640,62 @@
       "result": "AudioDescriptor retains stage2_info for MP4 and Matroska sources, and owned_container_loudnorm::apply forwards it to decode_to_wave_from_geometry_with_info.",
       "status": "accepted",
       "validation": "batch-625-validation.json"
+    },
+    {
+      "id": "FVID-0860",
+      "batch": 626,
+      "title": "Single-pass plan_decode_audio_with_geometry in native_audio_mix::is_single_stream_fvid_media_audio_with_options",
+      "source": "src/native_audio_mix.rs",
+      "regression": "tests/native_audio_mix_and_concat_validation_single_open.rs",
+      "before": "is_single_stream_fvid_media_audio_with_options called plan_decode_audio(source, ..., &probe_opts) and then called source_geometry_with_mask(source, &probe_opts), parsing and indexing the audio source twice.",
+      "result": "plan_decode_audio_with_geometry returns both the plan and (rate, channels, mask) in a single pass, which is_single_stream_fvid_media_audio_with_options uses directly.",
+      "status": "accepted",
+      "validation": "batch-626-validation.json"
+    },
+    {
+      "id": "FVID-0861",
+      "batch": 626,
+      "title": "Single-pass plan_decode_audio_with_geometry in native_audio_mix::validate_and_inspect_source_with_options",
+      "source": "src/native_audio_mix.rs",
+      "regression": "tests/native_audio_mix_and_concat_validation_single_open.rs",
+      "before": "In the fvid-media fallback branch of validate_and_inspect_source_with_options, plan_decode_audio(source, ..., &probe_opts) and source_geometry_with_mask(source, &probe_opts) were both called on the same source.",
+      "result": "validate_and_inspect_source_with_options calls plan_decode_audio_with_geometry once and reuses the returned (rate, channels, mask).",
+      "status": "accepted",
+      "validation": "batch-626-validation.json"
+    },
+    {
+      "id": "FVID-0862",
+      "batch": 626,
+      "title": "Remove redundant SeekFrom::Start(0) after is_wave_reader in native_audio_mix::eligible_with_options",
+      "source": "src/native_audio_mix.rs",
+      "regression": "tests/native_audio_mix_and_concat_validation_single_open.rs",
+      "before": "eligible_with_options called is_wave_reader(&mut wave_file) (which already rewinds to 0) and then called wave_file.seek(SeekFrom::Start(0)) again before inspect(&mut wave_file) (which also rewinds to 0).",
+      "result": "eligible_with_options calls inspect(&mut wave_file) directly after is_wave_reader without the extra seek.",
+      "status": "accepted",
+      "validation": "batch-626-validation.json"
+    },
+    {
+      "id": "FVID-0863",
+      "batch": 626,
+      "title": "Close WAVE probe handle before delegating in native_audio_mix::decode_source_to_f32le_with_options",
+      "source": "src/native_audio_mix.rs",
+      "regression": "tests/native_audio_mix_and_concat_validation_single_open.rs",
+      "before": "decode_source_to_f32le_with_options called is_wave(source) without explicitly scoping and dropping the probe File before delegating to is_owned_audio_source_with_options or export_audio_pcm_transformed_with_controls.",
+      "result": "decode_source_to_f32le_with_options checks is_wave_reader(&mut wave_file) and drops wave_file immediately before delegating.",
+      "status": "accepted",
+      "validation": "batch-626-validation.json"
+    },
+    {
+      "id": "FVID-0864",
+      "batch": 626,
+      "title": "Reuse active segment geometries and packet counts in native_audio_mix::concat::validate_concat_segments_internal",
+      "source": "src/native_audio_mix/concat.rs",
+      "regression": "tests/native_audio_mix_and_concat_validation_single_open.rs",
+      "before": "validate_concat_segments_internal ran two loops over sources, computing validate_and_inspect_source_with_options and segment_packet_count in the first loop and then recomputing geometry_with_options and segment_packet_count for those same active segments in the second loop.",
+      "result": "validate_concat_segments_internal caches (rate, channels) and packet_counts from the first loop and reuses them for all reached segments in the second loop.",
+      "status": "accepted",
+      "validation": "batch-626-validation.json"
     }
   ],
-  "pending_count": 141
+  "pending_count": 136
 }
