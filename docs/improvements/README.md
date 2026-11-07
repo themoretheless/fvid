@@ -4426,5 +4426,16 @@ See `batch-601-validation.json`.
 
 See `batch-602-validation.json`.
 
+## Batch 603 — FVID-0745..0749: Single-pass WAVE `plan_trim`, single-open G.711 `recognizes` and empty INFO skip, single-open bare FLAC/MP3 `decode_to_wave`, and single-descriptor container loudnorm preflight
+
+- **FVID-0745** — Remove the redundant `supports(source, options)` WAVE header inspection before `plan` in `owned_wave_plan::plan_trim` (`crates/fvid-media/src/owned_wave_plan.rs`, `tests/wave_plan_g711_flac_mp3_loudnorm_single_pass.rs`).
+- **FVID-0746** — Open `path` once in `owned_g711_wave_export::recognizes` and skip a redundant `info_chunks` RIFF scan in `open` when `metadata == 0` (`crates/fvid-media/src/owned_g711_wave_export.rs`, `tests/wave_plan_g711_flac_mp3_loudnorm_single_pass.rs`).
+- **FVID-0747** — Reuse `parsed.file_bytes()` in `owned_raw_flac::decode_raw_checked` and expose `owned_raw_flac::decode_to_wave` so `owned_container_loudness` opens and parses bare FLAC once instead of twice (`crates/fvid-media/src/owned_raw_flac.rs`, `crates/fvid-media/src/owned_container_loudness.rs`, `tests/wave_plan_g711_flac_mp3_loudnorm_single_pass.rs`).
+- **FVID-0748** — Reuse `parsed.file_bytes()` in `owned_raw_mp3::decode_raw_checked` and expose `owned_raw_mp3::decode_to_wave` so `owned_container_loudness` opens and parses bare MPEG audio once instead of twice (`crates/fvid-media/src/owned_raw_mp3.rs`, `crates/fvid-media/src/owned_container_loudness.rs`, `tests/wave_plan_g711_flac_mp3_loudnorm_single_pass.rs`).
+- **FVID-0749** — Derive loudness rate, channel count, speaker mask, and codec directly from `source_descriptor` in `owned_container_loudnorm::apply` and `plan_loudnorm` instead of calling both `owned_container_loudness::geometry` and `source_descriptor` (`crates/fvid-media/src/owned_container_loudnorm.rs`, `crates/fvid-media/src/owned_audio_plan.rs`, `tests/wave_plan_g711_flac_mp3_loudnorm_single_pass.rs`).
+
+See `batch-603-validation.json`.
+
+
 
 

@@ -67,9 +67,6 @@ pub fn plan_trim(source: &Path, from: i64, to: i64, options: &CopyOptions) -> Re
         return Err("controlled memory limit must be positive".into());
     }
     crate::owned_budget::check_rss_budget(options)?;
-    if supports(source, options) {
-        return plan(&[source], "trim", Some((from, to)), options);
-    }
     let transform = fvid_media_info::AudioDecodeTransform {
         interval: Some((from, to)),
         ..Default::default()

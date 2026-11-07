@@ -76,9 +76,23 @@ pub fn apply(
     let decode_options = crate::owned_adts_export::pcm_decode_options(options);
     // Read-only configuration/policy preflight; actual packet failures propagate
     // once execution starts, without retry through the legacy backend.
-    let (rate, channels, mask, codec) =
-        crate::owned_container_loudness::geometry(source, &decode_options)?;
     let desc = crate::owned_audio_plan::source_descriptor(source, &decode_options)?;
+    let (rate, channels, mask, codec) = (
+        desc.rate,
+        desc.channels,
+        if desc.mask == 0 && desc.channels <= 2 {
+            crate::owned_pcm_channels::standard_mask(desc.channels).unwrap_or(0) as u32
+        } else {
+            desc.mask
+        },
+        desc.codec,
+    );
+    if mask == 0 || mask & !0x7ff != 0 || mask.count_ones() != u32::from(channels) {
+        return Err("owned loudness speaker positions are not yet qualified".into());
+    }
+    if !crate::owned_wave_loudness::qualified_rate(rate) {
+        return Err("owned true-peak measurement requires a qualified standard PCM rate".into());
+    }
     let (spool_rate, spool_channels, spool_frames, spool_meta_bytes) = (
         desc.rate,
         desc.channels,
@@ -158,9 +172,23 @@ pub fn plan_loudnorm(
     let resolved = crate::owned_loudnorm::validate_request(args)?;
     crate::owned_adts_export::check_wave_metadata_budget(options)?;
     let decode_options = crate::owned_adts_export::pcm_decode_options(options);
-    let (rate, channels, _, codec) =
-        crate::owned_container_loudness::geometry(source, &decode_options)?;
     let desc = crate::owned_audio_plan::source_descriptor(source, &decode_options)?;
+    let (rate, channels, mask, codec) = (
+        desc.rate,
+        desc.channels,
+        if desc.mask == 0 && desc.channels <= 2 {
+            crate::owned_pcm_channels::standard_mask(desc.channels).unwrap_or(0) as u32
+        } else {
+            desc.mask
+        },
+        desc.codec,
+    );
+    if mask == 0 || mask & !0x7ff != 0 || mask.count_ones() != u32::from(channels) {
+        return Err("owned loudness speaker positions are not yet qualified".into());
+    }
+    if !crate::owned_wave_loudness::qualified_rate(rate) {
+        return Err("owned true-peak measurement requires a qualified standard PCM rate".into());
+    }
     if dual_pass || crate::owned_loudnorm::report_requested(Some(&resolved))? {
         crate::owned_container_loudness::check_meter_budget(
             rate,

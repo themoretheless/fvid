@@ -1,8 +1,8 @@
 {
   "target": 1000,
   "counting_rule": "One independently confirmed problem or useful capability; fixture variants and baseline integration repairs are excluded. Only accepted entries count.",
-  "accepted_count": 744,
-  "next_id": "FVID-0745",
+  "accepted_count": 749,
+  "next_id": "FVID-0750",
   "entries": [
     {
       "id": "FVID-0001",
@@ -8375,6 +8375,61 @@
       "result": "Read up to 12 signature bytes from a single File::open(path) and dispatch WAVE, Y4M, MP4, WebM/Matroska, FLAC, Ogg, MPEG audio, and ADTS from that single prefix.",
       "status": "accepted",
       "validation": "batch-602-validation.json"
+    },
+    {
+      "id": "FVID-0745",
+      "batch": 603,
+      "title": "Remove the redundant supports(source, options) WAVE header inspection before plan in owned_wave_plan::plan_trim",
+      "source": "crates/fvid-media/src/owned_wave_plan.rs",
+      "regression": "tests/wave_plan_g711_flac_mp3_loudnorm_single_pass.rs",
+      "before": "owned_wave_plan::plan_trim called supports(source, options) (which opened and inspected the WAVE header) and then immediately called plan(&[source], ...) which opened and inspected the WAVE header a second time via inspect_copy.",
+      "result": "Check !is_wave(source) || owned_g711_wave_export::recognizes(source, options) for non-PCM delegation and call plan(&[source], \"trim\", Some((from, to)), options) once for PCM WAVE inputs.",
+      "status": "accepted",
+      "validation": "batch-603-validation.json"
+    },
+    {
+      "id": "FVID-0746",
+      "batch": 603,
+      "title": "Open path once in owned_g711_wave_export::recognizes and skip a redundant info_chunks RIFF scan in open when metadata == 0",
+      "source": "crates/fvid-media/src/owned_g711_wave_export.rs",
+      "regression": "tests/wave_plan_g711_flac_mp3_loudnorm_single_pass.rs",
+      "before": "owned_g711_wave_export::recognizes opened the file twice (once in is_wave and once for g711_law), and open scanned all RIFF chunks a second time via info_chunks even when info_chunks_bytes returned 0.",
+      "result": "Call g711_law directly on a single File::open(path) in recognizes, and return Vec::new() without a second RIFF scan when metadata == 0 in open.",
+      "status": "accepted",
+      "validation": "batch-603-validation.json"
+    },
+    {
+      "id": "FVID-0747",
+      "batch": 603,
+      "title": "Reuse parsed.file_bytes() in owned_raw_flac::decode_raw_checked and expose owned_raw_flac::decode_to_wave for single-open loudness spooling",
+      "source": "crates/fvid-media/src/owned_raw_flac.rs",
+      "regression": "tests/wave_plan_g711_flac_mp3_loudnorm_single_pass.rs",
+      "before": "owned_raw_flac::decode_raw_checked queried std::fs::metadata(source) before open_with_interval (which queried file.metadata() again), and owned_container_loudness::decode_to_wave_from_geometry opened and parsed the FLAC file twice (once in source_info and once in decode_raw_flac_pcm).",
+      "result": "Reuse parsed.file_bytes() in decode_raw_checked and expose owned_raw_flac::decode_to_wave so container loudness extracts RIFF INFO metadata and decodes PCM from a single parsed Flac instance.",
+      "status": "accepted",
+      "validation": "batch-603-validation.json"
+    },
+    {
+      "id": "FVID-0748",
+      "batch": 603,
+      "title": "Reuse parsed.file_bytes() in owned_raw_mp3::decode_raw_checked and expose owned_raw_mp3::decode_to_wave for single-open loudness spooling",
+      "source": "crates/fvid-media/src/owned_raw_mp3.rs",
+      "regression": "tests/wave_plan_g711_flac_mp3_loudnorm_single_pass.rs",
+      "before": "owned_raw_mp3::decode_raw_checked queried std::fs::metadata(source) before open_with_interval (which queried file.metadata() again), and owned_container_loudness::decode_to_wave_from_geometry opened and parsed the MPEG file twice (once in source_info and once in decode_raw_mpeg_pcm).",
+      "result": "Reuse parsed.file_bytes() in decode_raw_checked and expose owned_raw_mp3::decode_to_wave so container loudness extracts RIFF INFO metadata and decodes PCM from a single parsed Mp3 instance.",
+      "status": "accepted",
+      "validation": "batch-603-validation.json"
+    },
+    {
+      "id": "FVID-0749",
+      "batch": 603,
+      "title": "Derive loudness rate, channel count, speaker mask, and codec directly from source_descriptor in owned_container_loudnorm::apply and plan_loudnorm",
+      "source": "crates/fvid-media/src/owned_container_loudnorm.rs",
+      "regression": "tests/wave_plan_g711_flac_mp3_loudnorm_single_pass.rs",
+      "before": "owned_container_loudnorm::apply and plan_loudnorm called both owned_container_loudness::geometry(source, &decode_options) and owned_audio_plan::source_descriptor(source, &decode_options), opening and indexing the container twice on &decode_options.",
+      "result": "Expose mask and codec on AudioDescriptor and validate loudness speaker mask and sample rate directly from source_descriptor(source, &decode_options) in apply and plan_loudnorm.",
+      "status": "accepted",
+      "validation": "batch-603-validation.json"
     }
   ],
   "pending_count": 0

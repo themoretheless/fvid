@@ -216,28 +216,10 @@ pub(crate) fn decode_to_wave_from_geometry(
         };
     }
     if crate::owned_raw_flac::recognizes(source)? {
-        let info = crate::owned_raw_flac::source_info(source, options)?;
-        let spool = crate::owned_adts_export::spool_decoded(
-            rate,
-            channels,
-            mask,
-            options,
-            |writer, options| crate::owned_raw_flac::decode_raw_flac_pcm(source, writer, None, options),
-        )?;
-        crate::owned_ogg_opus_export::append_info(&spool.wave, &info)?;
-        return Ok(spool);
+        return crate::owned_raw_flac::decode_to_wave(source, rate, channels, mask, options);
     }
     if crate::owned_raw_mp3::recognizes(source)? {
-        let info = crate::owned_raw_mp3::source_info(source, options)?;
-        let spool = crate::owned_adts_export::spool_decoded(
-            rate,
-            channels,
-            mask,
-            options,
-            |writer, options| crate::owned_raw_mp3::decode_raw_mpeg_pcm(source, writer, None, options),
-        )?;
-        crate::owned_ogg_opus_export::append_info(&spool.wave, &info)?;
-        return Ok(spool);
+        return crate::owned_raw_mp3::decode_to_wave(source, rate, channels, mask, options);
     }
     let mp4 = crate::owned_mp4_audio_export::recognizes(source, options)?;
     let info = if mp4 {

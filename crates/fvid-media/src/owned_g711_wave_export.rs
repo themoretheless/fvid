@@ -21,15 +21,10 @@ struct Input {
 }
 pub(crate) fn recognizes(path: &Path, options: &CopyOptions) -> Result<bool> {
     check(options)?;
-    if !crate::owned_wave_inspect::is_wave(path).map_err(|e| e.to_string())? {
-        return Ok(false);
-    }
-    crate::owned_wave_inspect::g711_law(
-        &mut File::open(path).map_err(|e| e.to_string())?,
-        options.cancel.as_ref(),
-    )
-    .map(|law| law.is_some())
-    .map_err(|e| e.to_string())
+    let mut file = File::open(path).map_err(|e| e.to_string())?;
+    crate::owned_wave_inspect::g711_law(&mut file, options.cancel.as_ref())
+        .map(|law| law.is_some())
+        .map_err(|e| e.to_string())
 }
 fn open(path: &Path, options: &CopyOptions) -> Result<(Input, Vec<u8>)> {
     check(options)?;
@@ -62,8 +57,12 @@ fn open(path: &Path, options: &CopyOptions) -> Result<(Input, Vec<u8>)> {
             .ok_or("G.711 decode reserve overflow")?,
         options,
     )?;
-    let info = crate::owned_wave_inspect::info_chunks(&mut file, &shape, options.cancel.as_ref())
-        .map_err(|e| e.to_string())?;
+    let info = if metadata == 0 {
+        Vec::new()
+    } else {
+        crate::owned_wave_inspect::info_chunks(&mut file, &shape, options.cancel.as_ref())
+            .map_err(|e| e.to_string())?
+    };
     if options
         .max_controlled_bytes
         .is_some_and(|max| info.len() > max)

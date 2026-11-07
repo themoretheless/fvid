@@ -155,8 +155,8 @@ pub(crate) fn supports(
 pub(crate) struct AudioDescriptor {
     pub(crate) rate: u32,
     pub(crate) channels: u16,
-    mask: u32,
-    codec: String,
+    pub(crate) mask: u32,
+    pub(crate) codec: String,
     pub(crate) precision: String,
     stream_index: usize,
     adts: bool,

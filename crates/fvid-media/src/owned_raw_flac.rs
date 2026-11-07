@@ -315,13 +315,12 @@ fn decode_raw_checked(
     if interval.is_some_and(|(a, b)| a >= b) {
         return Err("audio interval requires from < to".into());
     }
-    let file_bytes = usize::try_from(std::fs::metadata(source).map_err(|e| e.to_string())?.len())
-        .map_err(|_| "FLAC input size overflow")?;
     let parsed = open_with_interval(
         source,
         Some((AudioDecodeTransform::default(), interval)),
         options,
     )?;
+    let file_bytes = parsed.file_bytes();
     decode_raw_parsed(
         &parsed,
         file_bytes,
@@ -329,6 +328,38 @@ fn decode_raw_checked(
         interval,
         options,
     )
+}
+pub(crate) fn decode_to_wave(
+    source: &Path,
+    rate: u32,
+    channels: u16,
+    mask: u32,
+    options: &CopyOptions,
+) -> Result<crate::owned_adts_export::DecodedSpool> {
+    check(options)?;
+    if !options.metadata_set.is_empty()
+        || !options.metadata_delete.is_empty()
+        || !options.stream_metadata_set.is_empty()
+        || !options.stream_metadata_delete.is_empty()
+    {
+        return Err("raw PCM stream cannot apply metadata mutations".into());
+    }
+    let parsed = open_with_interval(
+        source,
+        Some((AudioDecodeTransform::default(), None)),
+        options,
+    )?;
+    let info = source_info_from_parsed(&parsed, options)?;
+    let file_bytes = parsed.file_bytes();
+    let spool = crate::owned_adts_export::spool_decoded(
+        rate,
+        channels,
+        mask,
+        options,
+        |writer, options| decode_raw_parsed(&parsed, file_bytes, writer, None, options),
+    )?;
+    crate::owned_ogg_opus_export::append_info(&spool.wave, &info)?;
+    Ok(spool)
 }
 fn decode_raw_parsed(
     parsed: &Flac,
