@@ -145,8 +145,32 @@ pub(crate) fn extract_source_pcm_metadata_with_interval_packet_and_memory_limit(
     max_controlled_bytes: Option<usize>,
     cancel: Option<&crate::media_control::CancelFlag>,
 ) -> Result<MatroskaPcmMetadata> {
-    use std::io::{BufReader, Read, Seek, SeekFrom};
-    let mut input = BufReader::new(std::fs::File::open(source)?);
+    extract_source_pcm_metadata_from_reader_with_interval_packet_and_memory_limit(
+        source,
+        std::io::BufReader::new(std::fs::File::open(source)?),
+        selected,
+        allow_wave,
+        interval,
+        max_packet_bytes,
+        max_packets,
+        max_controlled_bytes,
+        cancel,
+    )
+}
+
+fn extract_source_pcm_metadata_from_reader_with_interval_packet_and_memory_limit(
+    source: &std::path::Path,
+    mut input: std::io::BufReader<std::fs::File>,
+    selected: Option<usize>,
+    allow_wave: bool,
+    interval: Option<(std::time::Duration, std::time::Duration)>,
+    max_packet_bytes: Option<usize>,
+    max_packets: Option<u64>,
+    max_controlled_bytes: Option<usize>,
+    cancel: Option<&crate::media_control::CancelFlag>,
+) -> Result<MatroskaPcmMetadata> {
+    use std::io::{Read, Seek, SeekFrom};
+    input.seek(SeekFrom::Start(0))?;
     let mut prefix = [0u8; 8];
     if input.read_exact(&mut prefix).is_err() {
         return Ok(default_matroska_pcm_metadata());
@@ -450,7 +474,7 @@ pub(crate) fn extract_source_pcm_metadata_with_interval_packet_and_memory_limit(
         }
         return Ok(default_matroska_pcm_metadata());
     }
-    drop(input);
+    let file = input.into_inner();
     let mut base = default_matroska_pcm_metadata();
     let mut probe_opts = fvid_media::CopyOptions::default();
     probe_opts.max_controlled_bytes = max_controlled_bytes;
@@ -459,8 +483,12 @@ pub(crate) fn extract_source_pcm_metadata_with_interval_packet_and_memory_limit(
         probe_opts.max_packet_bytes = maximum;
     }
     probe_opts.max_packets = max_packets;
-    if let Some(info) = crate::native_probe::try_probe_metadata_with_options(source, &probe_opts)
-        .map_err(|e| invalid(&e))?
+    if let Some(info) = crate::native_probe::try_probe_metadata_from_file_with_options(
+        source,
+        file,
+        &probe_opts,
+    )
+    .map_err(|e| invalid(&e))?
     {
         for (key, value) in info.metadata {
             if value.is_empty() || value.contains('\0') || value.len() > 1024 {
@@ -548,40 +576,39 @@ fn extract_source_wave_info_and_base(
     if cancel.is_some_and(|c| c.is_cancelled()) {
         return Err(invalid("media operation cancelled"));
     }
-    {
-        let mut input = BufReader::new(std::fs::File::open(source)?);
-        let mut prefix = [0u8; 8];
-        if input.read_exact(&mut prefix).is_err() {
-            return Ok((Vec::new(), None));
-        }
-        if matches!(&prefix[..4], b"RIFF" | b"RF64" | b"RIFX") {
-            input.seek(SeekFrom::Start(0))?;
-            if let Ok(info) = fvid_media::owned_wave_inspect::inspect(&mut input, cancel) {
-                if let Some(mem_limit) = options.max_controlled_bytes {
-                    let info_bytes =
-                        fvid_media::owned_wave_inspect::info_chunks_bytes(&mut input, &info, cancel)
-                            .map_err(|e| invalid(&e.to_string()))?;
-                    let needed =
-                        fvid_media::owned_wave_metadata::wave_metadata_working_bytes(info_bytes, options)
-                            .map_err(|e| invalid(&e))?
-                            .saturating_add(16 * 1024);
-                    if needed > mem_limit {
-                        return Err(invalid(&format!(
-                            "controlled memory budget exceeded: need {needed} bytes, limit {mem_limit}"
-                        )));
-                    }
-                    if info_bytes == 0 {
-                        return Ok((Vec::new(), None));
-                    }
+    let mut input = BufReader::new(std::fs::File::open(source)?);
+    let mut prefix = [0u8; 8];
+    if input.read_exact(&mut prefix).is_err() {
+        return Ok((Vec::new(), None));
+    }
+    if matches!(&prefix[..4], b"RIFF" | b"RF64" | b"RIFX") {
+        input.seek(SeekFrom::Start(0))?;
+        if let Ok(info) = fvid_media::owned_wave_inspect::inspect(&mut input, cancel) {
+            if let Some(mem_limit) = options.max_controlled_bytes {
+                let info_bytes =
+                    fvid_media::owned_wave_inspect::info_chunks_bytes(&mut input, &info, cancel)
+                        .map_err(|e| invalid(&e.to_string()))?;
+                let needed =
+                    fvid_media::owned_wave_metadata::wave_metadata_working_bytes(info_bytes, options)
+                        .map_err(|e| invalid(&e))?
+                        .saturating_add(16 * 1024);
+                if needed > mem_limit {
+                    return Err(invalid(&format!(
+                        "controlled memory budget exceeded: need {needed} bytes, limit {mem_limit}"
+                    )));
                 }
-                let chunks = fvid_media::owned_wave_inspect::info_chunks(&mut input, &info, cancel)
-                    .map_err(|e| invalid(&e.to_string()))?;
-                return Ok((chunks, None));
+                if info_bytes == 0 {
+                    return Ok((Vec::new(), None));
+                }
             }
+            let chunks = fvid_media::owned_wave_inspect::info_chunks(&mut input, &info, cancel)
+                .map_err(|e| invalid(&e.to_string()))?;
+            return Ok((chunks, None));
         }
     }
-    let base = extract_source_pcm_metadata_with_interval_packet_and_memory_limit(
+    let base = extract_source_pcm_metadata_from_reader_with_interval_packet_and_memory_limit(
         source,
+        input,
         options.streams.first().copied(),
         true,
         None,

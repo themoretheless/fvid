@@ -1185,8 +1185,8 @@ pub(crate) fn audio_stream_index_from_metadata(
         if reader.tracks.len()==1 {return Ok(0);}
         return Err("audio-to-WAVE trim requires an explicit audio stream when other tracks exist".into());
     }
-    drop(input);
-    let info = crate::native_probe::try_probe_metadata_with_options(source, options)?
+    let file = input.into_inner();
+    let info = crate::native_probe::try_probe_metadata_from_file_with_options(source, file, options)?
         .ok_or_else(|| "native probe does not yet support this container".to_owned())?;
     if info.streams.len()==1 {Ok(info.streams[0].index)}else{Err("audio-to-WAVE trim requires an explicit audio stream when other tracks exist".into())}
 }
@@ -1309,23 +1309,44 @@ pub fn trim_aac_with_options(
     let selected = options.streams.first().copied();
     let interval=(from>=0 && to>from).then(||(std::time::Duration::from_micros(from as u64),std::time::Duration::from_micros(to as u64)));
     let index = audio_stream_index_from_metadata(source, selected, options)?;
-    if let Ok(info) = crate::native_media::constant_audio_source_info_selected_with_interval_and_options(
-        source,
-        Some(index),
-        interval,
-        options,
-    ) {
-        if info.codec == "aac" {
+    let file = std::fs::File::open(source).map_err(|e| e.to_string())?;
+    if let Ok(dup) = file.try_clone() {
+        if let Ok(info) = crate::native_media::constant_audio_source_info_selected_from_file_with_interval_and_options(
+            dup,
+            Some(index),
+            interval,
+            options,
+        )
+            && info.codec == "aac"
+        {
             return finish_trim_aac_plan(source, from, to, index, Some(&info), options);
         }
+        crate::native_media::aac_source_info_selected_from_file_with_options(
+            file,
+            Some(index),
+            interval,
+            options,
+        )
+        .map_err(|e| e.to_string())?;
+    } else {
+        if let Ok(info) = crate::native_media::constant_audio_source_info_selected_from_file_with_interval_and_options(
+            file,
+            Some(index),
+            interval,
+            options,
+        )
+            && info.codec == "aac"
+        {
+            return finish_trim_aac_plan(source, from, to, index, Some(&info), options);
+        }
+        crate::native_media::aac_source_info_selected_with_options(
+            source,
+            Some(index),
+            interval,
+            options,
+        )
+        .map_err(|e| e.to_string())?;
     }
-    crate::native_media::aac_source_info_selected_with_options(
-        source,
-        Some(index),
-        interval,
-        options,
-    )
-    .map_err(|e| e.to_string())?;
     finish_trim_aac_plan(source, from, to, index, None, options)
 }
 

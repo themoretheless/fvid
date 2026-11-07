@@ -479,6 +479,18 @@ pub(crate) fn try_probe_metadata_with_options(
     try_probe_as_with_options(source, None, &metadata)
 }
 
+pub(crate) fn try_probe_metadata_from_file_with_options(
+    source: &Path,
+    file: File,
+    options: &fvid_media::CopyOptions,
+) -> Result<Option<MediaInfo>> {
+    validate_probe_options(options)?;
+    let mut metadata = options.clone();
+    metadata.max_packet_bytes = fvid_media::CopyOptions::default().max_packet_bytes;
+    metadata.max_packets = None;
+    try_probe_from_file_with_options(source, file, None, &metadata)
+}
+
 pub(crate) fn try_probe_as_with_options(
     source: &Path,
     format: Option<&str>,

@@ -594,6 +594,20 @@ pub fn aac_source_info_selected_with_options(
     interval: Option<(Duration, Duration)>,
     options: &fvid_media::CopyOptions,
 ) -> Result<AacSourceInfo> {
+    aac_source_info_selected_from_file_with_options(
+        std::fs::File::open(source)?,
+        selected,
+        interval,
+        options,
+    )
+}
+
+pub(crate) fn aac_source_info_selected_from_file_with_options(
+    file: std::fs::File,
+    selected: Option<usize>,
+    interval: Option<(Duration, Duration)>,
+    options: &fvid_media::CopyOptions,
+) -> Result<AacSourceInfo> {
     use std::io::BufReader;
     if options
         .cancel
@@ -618,7 +632,7 @@ pub fn aac_source_info_selected_with_options(
         options.max_packets,
     )?;
     control.check()?;
-    let input = BufReader::new(std::fs::File::open(source)?);
+    let input = BufReader::new(file);
     aac_source_info_selected_from_reader_with_options(input, selected, interval, options, &mut control)
 }
 
@@ -1218,9 +1232,12 @@ pub(crate) fn is_owned_audio_trim_source_from_file_with_interval_and_options(
     } else {
         file = File::open(path)?;
     }
-    let info = crate::native_probe::try_probe_metadata_with_options(path, options)
-        .map_err(|e| invalid(&e))?
-        .ok_or_else(|| invalid("native probe does not yet support this container"))?;
+    let info = match file.try_clone() {
+        Ok(dup) => crate::native_probe::try_probe_metadata_from_file_with_options(path, dup, options),
+        Err(_) => crate::native_probe::try_probe_metadata_with_options(path, options),
+    }
+    .map_err(|e| invalid(&e))?
+    .ok_or_else(|| invalid("native probe does not yet support this container"))?;
     Ok(info.streams.iter().any(|stream| {
         stream.media_type == "audio"
             && file

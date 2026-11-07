@@ -465,12 +465,9 @@ pub(crate) fn validate_video_selection_with_options(
     options: &fvid_media::CopyOptions,
 ) -> Result<()> {
     use std::io::Read;
-    let prefix = {
-        let mut file = File::open(source)?;
-        let mut buf = [0; 9];
-        file.read_exact(&mut buf)?;
-        buf
-    };
+    let mut file = File::open(source)?;
+    let mut prefix = [0; 9];
+    file.read_exact(&mut prefix)?;
     if &prefix == b"YUV4MPEG2" {
         if selected.is_some_and(|i| i != 0) {
             return Err(invalid("Y4M has only stream 0"));
@@ -480,7 +477,8 @@ pub(crate) fn validate_video_selection_with_options(
     let mut probe_opts = options.clone();
     probe_opts.max_packet_bytes = fvid_media::CopyOptions::default().max_packet_bytes;
     probe_opts.max_packets = None;
-    let info=crate::native_probe::probe_with_options(source, &probe_opts).map_err(|e|invalid(&e))?;
+    let info = crate::native_probe::probe_from_file_with_options(source, file, &probe_opts)
+        .map_err(|e| invalid(&e))?;
     let videos:Vec<_>=info.streams.iter().filter(|s|s.media_type=="video").collect();
     if videos.len()!=1 {return Err(invalid("native video export requires exactly one video track per input"));}
     if selected.is_some_and(|i|i!=videos[0].index) || (selected.is_none() && info.streams.len()!=1) {

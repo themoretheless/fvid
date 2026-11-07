@@ -1,8 +1,8 @@
 {
   "target": 1000,
   "counting_rule": "One independently confirmed problem or useful capability; fixture variants and baseline integration repairs are excluded. Only accepted entries count.",
-  "accepted_count": 994,
-  "next_id": "FVID-0995",
+  "accepted_count": 1000,
+  "next_id": "FVID-1001",
   "entries": [
     {
       "id": "FVID-0001",
@@ -11125,7 +11125,73 @@
       "result": "Checked info.max_packet_and_index_bytes.is_none() when cached_info is Some(info) to distinguish ADTS from MP4/Matroska without reopening the file.",
       "status": "accepted",
       "validation": "batch-652-validation.json"
+    },
+    {
+      "id": "FVID-0995",
+      "batch": 653,
+      "title": "Skip redundant audio_stream_index_from_metadata re-probe for active segments in native_audio_mix::concat::validate_concat_segments_internal",
+      "source": "src/native_audio_mix/concat.rs",
+      "regression": "tests/final_concat_metadata_video_selection_and_trim_handle_reuse.rs",
+      "before": "validate_concat_segments_internal unconditionally called audio_stream_index_from_metadata(source, None, &geom_probe) in its second loop even for active segments that had already been validated by validate_and_inspect_source_with_options.",
+      "result": "Only invoke audio_stream_index_from_metadata for unreached segments where active_geometries.get(idx).is_none(), avoiding a redundant container probe per active segment.",
+      "status": "accepted",
+      "validation": "batch-653-validation.json"
+    },
+    {
+      "id": "FVID-0996",
+      "batch": 653,
+      "title": "Reuse open BufReader<File> across extract_source_wave_info_and_base, extract_source_pcm_metadata_with_interval_packet_and_memory_limit, and try_probe_metadata_from_file_with_options",
+      "source": "src/native_export/pcm_matroska.rs",
+      "regression": "tests/final_concat_metadata_video_selection_and_trim_handle_reuse.rs",
+      "before": "extract_source_wave_info_and_base opened source to check for a WAVE prefix and dropped the reader before calling extract_source_pcm_metadata_with_interval_packet_and_memory_limit, which reopened source and also dropped the reader before calling try_probe_metadata_with_options.",
+      "result": "Added try_probe_metadata_from_file_with_options and extract_source_pcm_metadata_from_reader_with_interval_packet_and_memory_limit to reuse the open file handle across WAVE inspection and container metadata probing.",
+      "status": "accepted",
+      "validation": "batch-653-validation.json"
+    },
+    {
+      "id": "FVID-0997",
+      "batch": 653,
+      "title": "Reuse open File handle across 9-byte Y4M prefix check and probe_from_file_with_options in native_export::validate_video_selection_with_options",
+      "source": "src/native_export.rs",
+      "regression": "tests/final_concat_metadata_video_selection_and_trim_handle_reuse.rs",
+      "before": "validate_video_selection_with_options opened source to read a 9-byte YUV4MPEG2 prefix, dropped the File handle on non-Y4M inputs, and immediately reopened source in native_probe::probe_with_options.",
+      "result": "Passed the open File handle directly to native_probe::probe_from_file_with_options when the prefix is not YUV4MPEG2.",
+      "status": "accepted",
+      "validation": "batch-653-validation.json"
+    },
+    {
+      "id": "FVID-0998",
+      "batch": 653,
+      "title": "Reuse open File handle across 8-byte prefix check and try_probe_metadata_from_file_with_options in native_plan::audio_stream_index_from_metadata",
+      "source": "src/native_plan.rs",
+      "regression": "tests/final_concat_metadata_video_selection_and_trim_handle_reuse.rs",
+      "before": "audio_stream_index_from_metadata opened source to check for ADTS/WAVE/MP4/Matroska prefixes, dropped input on standalone containers, and reopened source in try_probe_metadata_with_options.",
+      "result": "Recovered the underlying File via input.into_inner() and passed it to try_probe_metadata_from_file_with_options.",
+      "status": "accepted",
+      "validation": "batch-653-validation.json"
+    },
+    {
+      "id": "FVID-0999",
+      "batch": 653,
+      "title": "Reuse open File handle across container prefix check and try_probe_metadata_from_file_with_options in native_media::is_owned_audio_trim_source_from_file_with_interval_and_options",
+      "source": "src/native_media.rs",
+      "regression": "tests/final_concat_metadata_video_selection_and_trim_handle_reuse.rs",
+      "before": "is_owned_audio_trim_source_from_file_with_interval_and_options held an open File handle for multi-track containers but still called try_probe_metadata_with_options(path, options), reopening the file.",
+      "result": "Cloned the open File handle and passed it to try_probe_metadata_from_file_with_options before per-stream constant-audio qualification.",
+      "status": "accepted",
+      "validation": "batch-653-validation.json"
+    },
+    {
+      "id": "FVID-1000",
+      "batch": 653,
+      "title": "Reuse open File handle across constant_audio_source_info_selected_from_file_with_interval_and_options and aac_source_info_selected_from_file_with_options in native_plan::trim_aac_with_options",
+      "source": "src/native_plan.rs",
+      "regression": "tests/final_concat_metadata_video_selection_and_trim_handle_reuse.rs",
+      "before": "trim_aac_with_options called constant_audio_source_info_selected_with_interval_and_options(source, ...) and, on dynamic MP4 AAC tracks, reopened source in aac_source_info_selected_with_options(source, ...).",
+      "result": "Added aac_source_info_selected_from_file_with_options and reused a single opened File handle (via try_clone) across constant-audio and AAC source inspection in trim_aac_with_options.",
+      "status": "accepted",
+      "validation": "batch-653-validation.json"
     }
   ],
-  "pending_count": 116
+  "pending_count": 0
 }

@@ -4878,4 +4878,14 @@ See `batch-628-validation.json`.
 - **FVID-0993**: Reuse open `File` handle across `is_wave_reader` and `constant_audio_source_info_selected_from_file_with_interval_and_options` in `native_plan::loudness_plan_and_channels_with_options` (`src/native_plan.rs`).
 - **FVID-0994**: Derive ADTS container status from `cached_info` instead of reopening the file in `native_plan::finish_trim_aac_plan` (`src/native_plan.rs`).
 
+## Batch 653 (FVID-0995..1000)
+
+- **FVID-0995**: Skip redundant `audio_stream_index_from_metadata` re-probe for active segments in `native_audio_mix::concat::validate_concat_segments_internal` (`src/native_audio_mix/concat.rs`).
+- **FVID-0996**: Reuse open `BufReader<File>` across `extract_source_wave_info_and_base`, `extract_source_pcm_metadata_with_interval_packet_and_memory_limit`, and `try_probe_metadata_from_file_with_options` (`src/native_export/pcm_matroska.rs`).
+- **FVID-0997**: Reuse open `File` handle across 9-byte Y4M prefix check and `probe_from_file_with_options` in `native_export::validate_video_selection_with_options` (`src/native_export.rs`).
+- **FVID-0998**: Reuse open `File` handle across 8-byte prefix check and `try_probe_metadata_from_file_with_options` in `native_plan::audio_stream_index_from_metadata` (`src/native_plan.rs`).
+- **FVID-0999**: Reuse open `File` handle across container prefix check, `constant_audio_source_info_selected_from_file_with_interval_and_options`, and `try_probe_metadata_from_file_with_options` in `native_media::is_owned_audio_trim_source_from_file_with_interval_and_options` (`src/native_media.rs`).
+- **FVID-1000**: Reuse open `File` handle across `constant_audio_source_info_selected_from_file_with_interval_and_options` and `aac_source_info_selected_from_file_with_options` in `native_plan::trim_aac_with_options` (`src/native_plan.rs`).
+
+
 

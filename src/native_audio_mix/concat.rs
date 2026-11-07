@@ -273,15 +273,15 @@ fn validate_concat_segments_internal(
         }
         let mut eligible_probe = geom_probe.clone();
         eligible_probe.max_controlled_bytes = None;
-        if active_geometries.get(idx).is_none()
-            && !super::eligible_with_options(std::slice::from_ref(source), &eligible_probe)?
-        {
-            return Err(invalid(
-                "PCM concat requires 2..=256 single audio inputs with matching sample rate and channels",
-            ));
+        if active_geometries.get(idx).is_none() {
+            if !super::eligible_with_options(std::slice::from_ref(source), &eligible_probe)? {
+                return Err(invalid(
+                    "PCM concat requires 2..=256 single audio inputs with matching sample rate and channels",
+                ));
+            }
+            crate::native_plan::audio_stream_index_from_metadata(source, None, &geom_probe)
+                .map_err(|e| invalid(&e))?;
         }
-        crate::native_plan::audio_stream_index_from_metadata(source, None, &geom_probe)
-            .map_err(|e| invalid(&e))?;
         let current = if let Some(&geom) = active_geometries.get(idx) {
             geom
         } else {
