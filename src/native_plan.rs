@@ -1165,13 +1165,19 @@ pub fn trim_audio_with_options(
     )
     .map_err(|e| e.to_string())?;
     if info.codec == "aac" {
-        return finish_trim_aac_plan(source, from, to, index, options);
+        return finish_trim_aac_plan(source, from, to, index, Some(&info), options);
     }
     let mut scoped = options.clone();
     scoped.streams = vec![index];
-    let mut plan = decode_audio_with_options(source, &AudioDecodeTransform {
-        interval: Some((from, to)), ..Default::default()
-    }, &scoped)?;
+    let mut plan = decode_audio_from_source_info(
+        source,
+        &info,
+        &AudioDecodeTransform {
+            interval: Some((from, to)),
+            ..Default::default()
+        },
+        &scoped,
+    )?;
     plan.command = "trim".into();
     plan.steps.last_mut().ok_or("missing write step")?.detail = "publish selected audio as float32 PCM .wav without overwriting".into();
     Ok(plan)
@@ -1194,7 +1200,7 @@ pub fn trim_aac_with_options(
     let selected = options.streams.first().copied();
     let interval=(from>=0 && to>from).then(||(std::time::Duration::from_micros(from as u64),std::time::Duration::from_micros(to as u64)));
     let index = aac_trim_selection_with_interval_and_options(source, selected, interval, options)?;
-    finish_trim_aac_plan(source, from, to, index, options)
+    finish_trim_aac_plan(source, from, to, index, None, options)
 }
 
 fn finish_trim_aac_plan(
@@ -1202,6 +1208,7 @@ fn finish_trim_aac_plan(
     from: i64,
     to: i64,
     index: usize,
+    cached_info: Option<&crate::native_media::AudioSourceInfo>,
     options: &fvid_media::CopyOptions,
 ) -> Result<MediaPlan> {
     if crate::native_export::is_adts_source(source).map_err(|e|e.to_string())? {
@@ -1209,11 +1216,108 @@ fn finish_trim_aac_plan(
     }
     let mut scoped = options.clone();
     scoped.streams = vec![index];
-    let mut plan=decode_audio_with_options(source,&AudioDecodeTransform {interval:Some((from,to)),..Default::default()},&scoped)?;
+    let transform = AudioDecodeTransform {
+        interval: Some((from, to)),
+        ..Default::default()
+    };
+    let mut plan = match cached_info {
+        Some(info) => decode_audio_from_source_info(source, info, &transform, &scoped)?,
+        None => decode_audio_with_options(source, &transform, &scoped)?,
+    };
     plan.command="trim".into();
     plan.steps.last_mut().ok_or("missing write step")?.detail="publish selected audio as float32 PCM .wav without overwriting".into();
     plan.notes.push("only explicitly selected audio is exported; source presentation edits and decoder pre-roll apply".into());
     Ok(plan)
+}
+
+fn decode_audio_from_source_info(
+    source: &std::path::Path,
+    info: &crate::native_media::AudioSourceInfo,
+    transform: &AudioDecodeTransform,
+    options: &fvid_media::CopyOptions,
+) -> Result<MediaPlan> {
+    if transform
+        .interval
+        .is_some_and(|(from, to)| from < 0 || to <= from)
+    {
+        return Err("decode-audio interval requires 0 <= from < to".into());
+    }
+    if transform
+        .sample_rate
+        .is_some_and(|rate| !(8000..=384000).contains(&rate))
+    {
+        return Err("sample rate must be within 8000..=384000".into());
+    }
+    if transform
+        .volume
+        .is_some_and(|gain| !gain.is_finite() || !(0.0..=64.0).contains(&gain))
+    {
+        return Err("volume must be a finite linear gain within 0..=64".into());
+    }
+    if let Some(mem_limit) = options.max_controlled_bytes
+        && let Some(needed) = info.max_packet_and_index_bytes
+        && needed > mem_limit
+    {
+        return Err("controlled memory budget exceeded".into());
+    }
+    let decode_detail = format!(
+        "FVid owned {} decoder to interleaved float PCM",
+        match info.codec {
+            "aac" => "AAC-LC",
+            "alac" => "ALAC",
+            _ => "PCM",
+        }
+    );
+    let mut steps = vec![PlanStep {
+        action: "decode".into(),
+        detail: decode_detail,
+    }];
+    if let Some((from, to)) = transform.interval {
+        steps.push(PlanStep {
+            action: "trim".into(),
+            detail: format!(
+                "presentation window [{from}, {to}) µs; round up to source sample grid; pre-roll only for predictive codecs"
+            ),
+        });
+    }
+    steps.push(PlanStep {
+        action: "write".into(),
+        detail:
+            "atomic float32 PCM export to .f32le, .wav, .mka or .mkv; never overwrite an existing destination"
+                .into(),
+    });
+    let mut notes = vec![
+        "backend: fvid; no external codec or resampler".into(),
+        "MP4 edits and Matroska trim metadata apply; ADTS retains encoder priming".into(),
+        "metadata-only plan: packet contents and timeline consistency are verified during execution".into(),
+    ];
+    if options.max_packet_bytes != fvid_media::CopyOptions::default().max_packet_bytes
+        || options.max_packets.is_some()
+        || options.max_controlled_bytes.is_some()
+        || options.max_rss_bytes.is_some()
+    {
+        notes.push(format!(
+            "encoded packet limit: {} bytes; packet work limit: {} packets; controlled memory limit: {} bytes; RSS limit: {} bytes",
+            options.max_packet_bytes,
+            options.max_packets.map_or_else(|| "unbounded".to_owned(), |n| n.to_string()),
+            options.max_controlled_bytes.map_or_else(|| "unbounded".to_owned(), |n| n.to_string()),
+            options.max_rss_bytes.map_or_else(|| "unbounded".to_owned(), |n| n.to_string()),
+        ));
+    }
+    Ok(MediaPlan {
+        command: "decode-audio".into(),
+        input: source.to_path_buf(),
+        inputs: vec![source.to_path_buf()],
+        streams: vec![PlanStream {
+            index: info.stream_index,
+            media_type: "audio".into(),
+            codec: info.codec.into(),
+            disposition: "decode".into(),
+        }],
+        steps,
+        graph: None,
+        notes,
+    })
 }
 
 /// Metadata-only plan for decoded, constant-rate video concatenation to Y4M.

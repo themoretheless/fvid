@@ -19,8 +19,18 @@ pub use crate::native_export::{export_y4m, export_y4m_interval, export_y4m_trans
 
 pub fn plan_overlay(source:&std::path::Path,overlay:&std::path::Path,x:i32,y:i32,options:&CopyOptions)->Result<MediaPlan> {
     validate_concat_matroska_options(options)?;
-    if validate_native_copy_options(options,false).is_ok() && crate::native_export::overlay_eligible(source).map_err(|e|e.to_string())? {
-        return crate::native_plan::overlay(source,overlay,i64::from(x),i64::from(y));
+    if validate_native_copy_options(options,false).is_ok()
+        && let Some(lossless_source) = crate::native_lossless::open_eligible_source(source).map_err(|e|e.to_string())?
+    {
+        return crate::native_plan::overlay_with_geometry_and_filters_with_source(
+            source,
+            lossless_source,
+            overlay,
+            i64::from(x),
+            i64::from(y),
+            &Default::default(),
+            &Default::default(),
+        );
     }
     fvid_media::plan_overlay(source,overlay,x,y,options)
 }
@@ -28,8 +38,22 @@ pub fn plan_overlay(source:&std::path::Path,overlay:&std::path::Path,x:i32,y:i32
 /// Owned opaque overlay for compatible main inputs; retains supported main audio.
 pub fn overlay_video(source:&std::path::Path,overlay:&std::path::Path,destination:&std::path::Path,x:i32,y:i32,options:&CopyOptions)->Result<LosslessStats> {
     validate_concat_matroska_options(options)?;
-    if validate_native_copy_options(options,false).is_ok() && crate::native_export::overlay_eligible(source).map_err(|e|e.to_string())? {
-        return crate::native_export::overlay_video(source,overlay,destination,i64::from(x),i64::from(y),options.cancel.as_ref(),options.progress.as_ref()).map_err(|e|e.to_string());
+    if validate_native_copy_options(options,false).is_ok()
+        && let Some(lossless_source) = crate::native_lossless::open_eligible_source(source).map_err(|e|e.to_string())?
+    {
+        return crate::native_export::overlay_video_transformed_with_source(
+            source,
+            lossless_source,
+            overlay,
+            destination,
+            i64::from(x),
+            i64::from(y),
+            options.cancel.as_ref(),
+            options.progress.as_ref(),
+            &Default::default(),
+            &Default::default(),
+        )
+        .map_err(|e|e.to_string());
     }
     fvid_media::overlay_video(source,overlay,destination,x,y,options)
 }
@@ -292,6 +316,7 @@ pub(crate) fn decode_fvid_media_audio_to_destination(
         transform,
         options,
         None,
+        None,
     )
 }
 
@@ -301,6 +326,7 @@ pub(crate) fn decode_fvid_media_audio_to_destination_with_prechecked_channels(
     transform: AudioDecodeTransform,
     options: &CopyOptions,
     mut prechecked_channels: Option<u16>,
+    mut cached_matroska_metadata: Option<crate::native_export::pcm_matroska::MatroskaPcmMetadata>,
 ) -> Result<AudioDecodeStats> {
     if options
         .cancel
@@ -345,14 +371,15 @@ pub(crate) fn decode_fvid_media_audio_to_destination_with_prechecked_channels(
                 .channels
                 .and_then(|c| u16::try_from(c).ok())
                 .unwrap_or(src_channels);
-            crate::native_export::pcm_matroska::check_output_memory_budget(
-                source,
-                out_channels,
-                65536,
-                options,
-                Some(true),
-            )
-            .map_err(|e| e.to_string())?;
+            cached_matroska_metadata =
+                crate::native_export::pcm_matroska::check_output_memory_budget_with_metadata(
+                    source,
+                    out_channels,
+                    65536,
+                    options,
+                    Some(true),
+                )
+                .map_err(|e| e.to_string())?;
             prechecked_channels = Some(out_channels);
         }
     } else if let Some(limit) = options.max_controlled_bytes {
@@ -390,14 +417,15 @@ pub(crate) fn decode_fvid_media_audio_to_destination_with_prechecked_channels(
     if matroska_out && options.max_controlled_bytes.is_some() {
         let decoded_channels = u16::try_from(decoded.channels).unwrap_or(2);
         if prechecked_channels != Some(decoded_channels) {
-            crate::native_export::pcm_matroska::check_output_memory_budget(
-                source,
-                decoded_channels,
-                65536,
-                options,
-                Some(true),
-            )
-            .map_err(|e| e.to_string())?;
+            cached_matroska_metadata =
+                crate::native_export::pcm_matroska::check_output_memory_budget_with_metadata(
+                    source,
+                    decoded_channels,
+                    65536,
+                    options,
+                    Some(true),
+                )
+                .map_err(|e| e.to_string())?;
         }
     }
     let mut publish_options = CopyOptions::default();
@@ -421,19 +449,25 @@ pub(crate) fn decode_fvid_media_audio_to_destination_with_prechecked_channels(
                     std::time::Duration::from_micros(to as u64),
                 )
             });
-        Some(
-            crate::native_export::pcm_matroska::extract_source_pcm_metadata_with_interval_packet_and_memory_limit(
-                source,
-                options.streams.first().copied(),
-                true,
-                interval,
-                Some(options.max_packet_bytes),
-                options.max_packets,
-                options.max_controlled_bytes,
-                options.cancel.as_ref(),
+        if interval.is_none()
+            && let Some(meta) = cached_matroska_metadata
+        {
+            Some(meta)
+        } else {
+            Some(
+                crate::native_export::pcm_matroska::extract_source_pcm_metadata_with_interval_packet_and_memory_limit(
+                    source,
+                    options.streams.first().copied(),
+                    true,
+                    interval,
+                    Some(options.max_packet_bytes),
+                    options.max_packets,
+                    options.max_controlled_bytes,
+                    options.cancel.as_ref(),
+                )
+                .map_err(|e| e.to_string())?,
             )
-            .map_err(|e| e.to_string())?,
-        )
+        }
     } else {
         None
     };

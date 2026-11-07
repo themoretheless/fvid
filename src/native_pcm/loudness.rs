@@ -166,8 +166,8 @@ pub(super) fn measure_file_with_options_and_kind(
                     }))
     } {
         drop(input.take());
-        let (rate, channels) =
-            fvid_media::owned_audio_plan::source_geometry(source, options)
+        let (rate, channels, mask, codec, _, precomputed_info) =
+            fvid_media::owned_container_loudness::geometry_with_frames_unqualified(source, options)
                 .map_err(|e| invalid(&e))?;
         if weights.len() != usize::from(channels) {
             return Err(invalid("channel weights must match selected audio stream"));
@@ -188,10 +188,17 @@ pub(super) fn measure_file_with_options_and_kind(
                 )));
             }
         }
-        let spool = fvid_media::owned_container_loudness::decode_to_wave_unqualified(
-            source, options,
-        )
-        .map_err(|e| invalid(&e))?;
+        let spool =
+            fvid_media::owned_container_loudness::decode_to_wave_from_geometry_with_info(
+                source,
+                rate,
+                channels,
+                mask,
+                &codec,
+                precomputed_info,
+                options,
+            )
+            .map_err(|e| invalid(&e))?;
         let mut pcm_options = fvid_media::CopyOptions::default();
         pcm_options.cancel = options.cancel.clone();
         pcm_options.max_controlled_bytes = options.max_controlled_bytes;
@@ -467,74 +474,6 @@ pub fn default_weights_with_options(
         options.max_controlled_bytes.is_none()
     } && let Ok(info) = crate::native_media::constant_audio_source_info_selected_with_options(source, selected, options)
     {
-        if options.max_packet_bytes != fvid_media::CopyOptions::default().max_packet_bytes {
-            use std::io::{BufReader, Read, Seek, SeekFrom};
-            let mut input = BufReader::new(std::fs::File::open(source)?);
-            let mut prefix = [0u8; 8];
-            input.read_exact(&mut prefix)?;
-            input.seek(SeekFrom::Start(0))?;
-            if crate::container::mp4::recognizes_prefix(&prefix) {
-                let reader = crate::container::mp4::Mp4Reader::open(
-                    input,
-                    crate::container::mp4::Limits::default(),
-                )?;
-                if let Some(track) = reader.tracks().get(info.stream_index) {
-                    let max_samples = crate::native_media::mp4_active_samples(
-                        track,
-                        reader.movie_timescale(), None,
-                        options.max_packets,
-                    );
-                    let exceeds = match &track.samples {
-                        crate::container::mp4::SampleIndex::Expanded(samples) => samples
-                            .iter()
-                            .take(max_samples)
-                            .any(|s| (s.size as usize) > options.max_packet_bytes),
-                        crate::container::mp4::SampleIndex::Uniform(uniform) => {
-                            uniform.count > 0
-                                && max_samples > 0
-                                && (uniform.bytes_per_frame as usize) > options.max_packet_bytes
-                        }
-                    };
-                    if exceeds {
-                        return Err(crate::invalid("MP4 packet exceeds budget"));
-                    }
-                }
-            } else if prefix.starts_with(&[0x1a, 0x45, 0xdf, 0xa3]) {
-                let mut reader = crate::container::webm::WebmReader::open(
-                    input,
-                    crate::container::webm::Limits::default(),
-                )?;
-                reader.scan_all()?;
-                let Some(track) = reader.tracks.get(info.stream_index) else {
-                    return Err(crate::invalid("selected audio stream is absent"));
-                };
-                let track_number = track.number;
-                let mut packets = 0u64;
-                for (packet_index, packet) in reader.packets.iter().enumerate() {
-                    if packet.track == track_number {
-                        if options.max_packets.is_some_and(|limit| packets >= limit) {
-                            break;
-                        }
-                        packets += 1;
-                        if reader.packet_payload_size(packet_index)? > options.max_packet_bytes {
-                            return Err(crate::invalid("WebM packet exceeds budget"));
-                        }
-                    }
-                }
-            } else if crate::container::adts::header(&prefix).is_some() {
-                let mut reader = crate::container::adts::StreamReader::open_with_packet_limit(
-                    input,
-                    options.max_packet_bytes,
-                )?;
-                let mut packets = 0u64;
-                while options.max_packets.is_none_or(|limit| packets < limit) {
-                    let Some(_) = reader.next_packet()? else {
-                        break;
-                    };
-                    packets += 1;
-                }
-            }
-        }
         info.channels
     } else {
         let mut geom_options = options.clone();

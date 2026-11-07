@@ -103,6 +103,7 @@ pub(crate) fn normalize_file_with_options_and_prechecked_channels(
     measure_options.stream_metadata_set.clear();
     measure_options.stream_metadata_delete.clear();
     let mut prechecked_channels = known_channels;
+    let mut cached_matroska_metadata = None;
     if options.max_controlled_bytes.is_some() {
         let channels = match prechecked_channels {
             Some(ch) => ch,
@@ -113,13 +114,14 @@ pub(crate) fn normalize_file_with_options_and_prechecked_channels(
                 ch
             }
         };
-        crate::native_export::pcm_matroska::check_output_memory_budget(
-            source,
-            channels,
-            65536,
-            options,
-            Some(matroska_out),
-        )?;
+        cached_matroska_metadata =
+            crate::native_export::pcm_matroska::check_output_memory_budget_with_metadata(
+                source,
+                channels,
+                65536,
+                options,
+                Some(matroska_out),
+            )?;
     }
     measure_options.progress = measure_hook;
     let (measured, native_measured) =
@@ -163,6 +165,7 @@ pub(crate) fn normalize_file_with_options_and_prechecked_channels(
             transform,
             &export_options,
             prechecked_channels,
+            cached_matroska_metadata,
         )
         .map_err(|e| invalid(&e))?
         .sample_frames

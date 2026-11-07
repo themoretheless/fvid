@@ -1,8 +1,8 @@
 {
   "target": 1000,
   "counting_rule": "One independently confirmed problem or useful capability; fixture variants and baseline integration repairs are excluded. Only accepted entries count.",
-  "accepted_count": 889,
-  "next_id": "FVID-0890",
+  "accepted_count": 894,
+  "next_id": "FVID-0895",
   "entries": [
     {
       "id": "FVID-0001",
@@ -9970,6 +9970,61 @@
       "result": "media::plan_transcode_lossless calls open_eligible_source(source) once and passes the opened LosslessSource into native_plan::transcode_lossless_with_source.",
       "status": "accepted",
       "validation": "batch-631-validation.json"
+    },
+    {
+      "id": "FVID-0890",
+      "batch": 632,
+      "title": "Single-open LosslessSource dispatch in media::plan_overlay and media::overlay_video",
+      "source": "src/media.rs",
+      "regression": "tests/overlay_and_audio_loudness_trim_reuse.rs",
+      "before": "media::plan_overlay and media::overlay_video called native_export::overlay_eligible(source) and then native_plan::overlay or native_export::overlay_video, opening and indexing the main container twice.",
+      "result": "media::plan_overlay and media::overlay_video call open_eligible_source(source) once and forward the opened LosslessSource to overlay_with_geometry_and_filters_with_source and overlay_video_transformed_with_source.",
+      "status": "accepted",
+      "validation": "batch-632-validation.json"
+    },
+    {
+      "id": "FVID-0891",
+      "batch": 632,
+      "title": "Reuse extracted MatroskaPcmMetadata across budget precheck and publication in normalize and fvid_media audio decode",
+      "source": "src/native_pcm/normalize.rs",
+      "regression": "tests/overlay_and_audio_loudness_trim_reuse.rs",
+      "before": "When max_controlled_bytes was set for Matroska output, normalize_file_with_options_and_prechecked_channels and decode_fvid_media_audio_to_destination_with_prechecked_channels extracted MatroskaPcmMetadata during check_output_memory_budget and then extracted it a second time before publication.",
+      "result": "normalize_file_with_options_and_prechecked_channels and decode_fvid_media_audio_to_destination_with_prechecked_channels capture the Option<MatroskaPcmMetadata> returned by check_output_memory_budget_with_metadata and reuse it during publication.",
+      "status": "accepted",
+      "validation": "batch-632-validation.json"
+    },
+    {
+      "id": "FVID-0892",
+      "batch": 632,
+      "title": "Single-pass geometry and INFO extraction for owned container loudness fallback in measure_file_with_options_and_kind",
+      "source": "src/native_pcm/loudness.rs",
+      "regression": "tests/overlay_and_audio_loudness_trim_reuse.rs",
+      "before": "When measure_file_with_options_and_kind delegated to owned_container_loudness, it first called owned_audio_plan::source_geometry(source, options) and then called decode_to_wave_unqualified(source, options) which re-opened and re-scanned the container via geometry_with_frames_unqualified.",
+      "result": "measure_file_with_options_and_kind calls geometry_with_frames_unqualified once, validates channel weights and memory budget, and passes the precomputed geometry and RIFF INFO bytes directly to decode_to_wave_from_geometry_with_info.",
+      "status": "accepted",
+      "validation": "batch-632-validation.json"
+    },
+    {
+      "id": "FVID-0893",
+      "batch": 632,
+      "title": "Remove redundant second container packet-budget scan in loudness::default_weights_with_options",
+      "source": "src/native_pcm/loudness.rs",
+      "regression": "tests/overlay_and_audio_loudness_trim_reuse.rs",
+      "before": "After constant_audio_source_info_selected_with_options had already verified custom max_packet_bytes and max_packets limits on MP4, Matroska, or ADTS sources, default_weights_with_options reopened the file and repeated the exact same packet-budget scan.",
+      "result": "default_weights_with_options uses the channel count from constant_audio_source_info_selected_with_options directly without reopening the container.",
+      "status": "accepted",
+      "validation": "batch-632-validation.json"
+    },
+    {
+      "id": "FVID-0894",
+      "batch": 632,
+      "title": "Build MediaPlan directly from inspected AudioSourceInfo in native_plan::trim_audio_with_options",
+      "source": "src/native_plan.rs",
+      "regression": "tests/overlay_and_audio_loudness_trim_reuse.rs",
+      "before": "native_plan::trim_audio_with_options called constant_audio_source_info_selected_with_interval_and_options and then called decode_audio_with_options, which reopened and re-inspected the container a second time.",
+      "result": "native_plan::trim_audio_with_options and finish_trim_aac_plan build the trim MediaPlan directly from the already-inspected AudioSourceInfo via decode_audio_from_source_info.",
+      "status": "accepted",
+      "validation": "batch-632-validation.json"
     }
   ],
   "pending_count": 126

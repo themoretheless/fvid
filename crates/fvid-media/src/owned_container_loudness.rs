@@ -93,7 +93,7 @@ fn geometry_unqualified(source: &Path, options: &CopyOptions) -> Result<(u32, u1
     let (rate, channels, mask, codec, _, _) = geometry_with_frames_unqualified(source, options)?;
     Ok((rate, channels, mask, codec))
 }
-fn geometry_with_frames_unqualified(
+pub fn geometry_with_frames_unqualified(
     source: &Path,
     options: &CopyOptions,
 ) -> Result<(u32, u16, u32, String, u64, Option<Vec<u8>>)> {
@@ -244,7 +244,7 @@ pub(crate) fn decode_to_wave_from_geometry(
 ) -> Result<crate::owned_adts_export::DecodedSpool> {
     decode_to_wave_from_geometry_with_info(source, rate, channels, mask, codec, None, options)
 }
-pub(crate) fn decode_to_wave_from_geometry_with_info(
+pub fn decode_to_wave_from_geometry_with_info(
     source: &Path,
     rate: u32,
     channels: u16,

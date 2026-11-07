@@ -4709,3 +4709,11 @@ See `batch-628-validation.json`.
 - **FVID-0887**: Eliminate recursive `transcode_lossless` invocation for overlay transforms in `native_plan::transcode_lossless` (`src/native_plan.rs`).
 - **FVID-0888**: Single-open `LosslessSource` dispatch in `media::transcode_lossless` and `media::transcode` (`src/media.rs`, `src/native_export.rs`, `src/native_export/overlay.rs`).
 - **FVID-0889**: Single-open `LosslessSource` dispatch in `media::plan_transcode_lossless` (`src/media.rs`, `src/native_plan.rs`).
+
+## Batch 632 (FVID-0890..0894)
+
+- **FVID-0890**: Single-open `LosslessSource` dispatch in `media::plan_overlay` and `media::overlay_video` (`src/media.rs`).
+- **FVID-0891**: Reuse extracted `MatroskaPcmMetadata` across budget precheck and publication in `normalize_file_with_options_and_prechecked_channels` and `decode_fvid_media_audio_to_destination_with_prechecked_channels` (`src/native_pcm/normalize.rs`, `src/media.rs`).
+- **FVID-0892**: Single-pass geometry and RIFF `INFO` extraction for owned container loudness fallback in `measure_file_with_options_and_kind` (`src/native_pcm/loudness.rs`, `crates/fvid-media/src/owned_container_loudness.rs`).
+- **FVID-0893**: Remove redundant second container packet-budget scan in `loudness::default_weights_with_options` (`src/native_pcm/loudness.rs`).
+- **FVID-0894**: Build `MediaPlan` directly from inspected `AudioSourceInfo` in `native_plan::trim_audio_with_options` (`src/native_plan.rs`).
