@@ -1230,7 +1230,7 @@ fn finish_trim_aac_plan(
     Ok(plan)
 }
 
-fn decode_audio_from_source_info(
+pub(crate) fn decode_audio_from_source_info(
     source: &std::path::Path,
     info: &crate::native_media::AudioSourceInfo,
     transform: &AudioDecodeTransform,
@@ -1772,9 +1772,64 @@ fn loudness_plan_and_channels_with_options(
     };
     let mut fvid_media_geometry = None;
     let mut plan = if options.max_controlled_bytes.is_none()
-        && (wave || cached_native_info.is_some())
+        && let Some(ref info) = wave_info
     {
-        decode_audio_with_options(source, &Default::default(), options)?
+        if selected.is_some_and(|n| n != 0) {
+            return Err("WAVE has only stream 0".into());
+        }
+        info.validate_decode().map_err(|e| e.to_string())?;
+        let frame_bytes = usize::from(info.frame_bytes());
+        if frame_bytes == 0
+            || (65536usize.min(options.max_packet_bytes) / frame_bytes * frame_bytes) == 0
+        {
+            return Err("packet byte limit is smaller than one PCM sample frame".into());
+        }
+        info.decode_interval(None).map_err(|e| e.to_string())?;
+        let mut notes = vec![
+            "backend: fvid; no external codec or resampler".into(),
+            "WAVE sample starts are selected directly; no decoder pre-roll; invalid float samples or padding bits fail during execution".into(),
+            "metadata-only plan: packet contents and timeline consistency are verified during execution".into(),
+        ];
+        if options.max_packet_bytes != fvid_media::CopyOptions::default().max_packet_bytes
+            || options.max_packets.is_some()
+            || options.max_controlled_bytes.is_some()
+            || options.max_rss_bytes.is_some()
+        {
+            notes.push(format!(
+                "encoded packet limit: {} bytes; packet work limit: {} packets; controlled memory limit: {} bytes; RSS limit: {} bytes",
+                options.max_packet_bytes,
+                options.max_packets.map_or_else(|| "unbounded".to_owned(), |n| n.to_string()),
+                options.max_controlled_bytes.map_or_else(|| "unbounded".to_owned(), |n| n.to_string()),
+                options.max_rss_bytes.map_or_else(|| "unbounded".to_owned(), |n| n.to_string()),
+            ));
+        }
+        MediaPlan {
+            command: "decode-audio".into(),
+            input: source.to_path_buf(),
+            inputs: vec![source.to_path_buf()],
+            streams: vec![PlanStream {
+                index: 0,
+                media_type: "audio".into(),
+                codec: info.codec(),
+                disposition: "decode".into(),
+            }],
+            steps: vec![
+                PlanStep {
+                    action: "decode".into(),
+                    detail: "FVid packed WAVE PCM conversion to interleaved float32".into(),
+                },
+                PlanStep {
+                    action: "write".into(),
+                    detail: "atomic float32 PCM export to .f32le, .wav, .mka or .mkv; never overwrite an existing destination".into(),
+                },
+            ],
+            graph: None,
+            notes,
+        }
+    } else if options.max_controlled_bytes.is_none()
+        && let Some(ref info) = cached_native_info
+    {
+        decode_audio_from_source_info(source, info, &Default::default(), options)?
     } else if wave || cached_native_info.is_some() {
         fvid_media::plan_decode_audio(source, &Default::default(), options)?
     } else {

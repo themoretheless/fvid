@@ -170,9 +170,8 @@ fn validate_and_inspect_source_with_options(
             && crate::native_media::is_owned_audio_source_with_options(source, options)?
     } {
         let probe_opts = strip_output_controls(options);
-        crate::native_plan::decode_audio_with_options(source, &Default::default(), &probe_opts)
-            .map_err(|e| invalid(&e))?;
-        let info = crate::native_media::constant_audio_source_info_selected_with_options(source, None, &probe_opts)?;
+        let info = crate::native_media::constant_audio_source_info_selected_with_options(source, None, &probe_opts)
+            .map_err(|e| invalid(&e.to_string()))?;
         let mask = info
             .channel_mask
             .unwrap_or(crate::native_export::default_pcm_mask(info.channels)?);

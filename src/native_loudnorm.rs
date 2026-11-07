@@ -240,6 +240,7 @@ pub fn try_plan(
             .map_err(|e| crate::invalid(&e))?,
         ));
     }
+    let mut cached_native_info = None;
     let index = if wave {
         selected_audio(source, options)?
     } else if options.max_controlled_bytes.is_some()
@@ -289,72 +290,17 @@ pub fn try_plan(
         } else {
             None
         };
-        if let Some((idx, info)) = native_stream {
+        if let Some((idx, _)) = native_stream {
+            let info = crate::native_media::constant_audio_source_info_selected_with_options(
+                source,
+                Some(idx),
+                options,
+            )
+            .map_err(|e| crate::invalid(&e.to_string()))?;
             if !fvid_media::owned_wave_loudness::qualified_rate(info.sample_rate) {
                 return Ok(None);
             }
-            if options.max_packet_bytes != CopyOptions::default().max_packet_bytes {
-                use std::io::{Read, Seek, SeekFrom};
-                let mut input = std::io::BufReader::new(std::fs::File::open(source)?);
-                let mut prefix = [0u8; 8];
-                input.read_exact(&mut prefix)?;
-                input.seek(SeekFrom::Start(0))?;
-                if crate::container::mp4::recognizes_prefix(&prefix) {
-                    let reader = crate::container::mp4::Mp4Reader::open(
-                        input,
-                        crate::container::mp4::Limits::default(),
-                    )?;
-                    if let Some(track) = reader.tracks().get(idx) {
-                        let max_samples = crate::native_media::mp4_active_samples(
-                            track,
-                            reader.movie_timescale(), None,
-                            options.max_packets,
-                        );
-                        let exceeds = match &track.samples {
-                            crate::container::mp4::SampleIndex::Expanded(samples) => samples
-                                .iter()
-                                .take(max_samples)
-                                .any(|s| (s.size as usize) > options.max_packet_bytes),
-                            crate::container::mp4::SampleIndex::Uniform(uniform) => {
-                                uniform.count > 0
-                                    && max_samples > 0
-                                    && (uniform.bytes_per_frame as usize) > options.max_packet_bytes
-                            }
-                        };
-                        if exceeds {
-                            return Err("MP4 packet exceeds budget".into());
-                        }
-                    }
-                } else if prefix.starts_with(&[0x1a, 0x45, 0xdf, 0xa3]) {
-                    let mut reader = crate::container::webm::WebmReader::open(
-                        input,
-                        crate::container::webm::Limits::default(),
-                    )?;
-                    reader.scan_all()?;
-                    if let Some(track) = reader.tracks.get(idx) {
-                        let track_number = track.number;
-                        let mut track_packets = 0u64;
-                        for (packet_index, packet) in reader.packets.iter().enumerate() {
-                            if options.cancel.as_ref().is_some_and(|c| c.is_cancelled()) {
-                                return Err("media operation cancelled".into());
-                            }
-                            fvid_media::owned_budget::check_rss_budget(options)
-                                .map_err(|e| crate::invalid(&e))?;
-                            if packet.track == track_number {
-                                if options.max_packets.is_some_and(|limit| track_packets >= limit) {
-                                    break;
-                                }
-                                if reader.packet_payload_size(packet_index)?
-                                    > options.max_packet_bytes
-                                {
-                                    return Err("WebM packet exceeds budget".into());
-                                }
-                                track_packets += 1;
-                            }
-                        }
-                    }
-                }
-            }
+            cached_native_info = Some(info);
             idx
         } else {
             let mut default_opts = CopyOptions::default();
@@ -392,9 +338,21 @@ pub fn try_plan(
     };
     let mut plan_options = options.clone();
     plan_options.streams = vec![index];
-    let mut plan =
-        crate::native_plan::decode_audio_with_options(source, &Default::default(), &plan_options)
-            .map_err(|e| crate::invalid(&e))?;
+    let mut plan = match cached_native_info {
+        Some(ref info) => crate::native_plan::decode_audio_from_source_info(
+            source,
+            info,
+            &Default::default(),
+            &plan_options,
+        )
+        .map_err(|e| crate::invalid(&e))?,
+        None => crate::native_plan::decode_audio_with_options(
+            source,
+            &Default::default(),
+            &plan_options,
+        )
+        .map_err(|e| crate::invalid(&e))?,
+    };
     plan.command = "loudnorm".into();
     plan.steps.truncate(1);
     if wave {
@@ -720,15 +678,11 @@ pub fn try_apply(
     // Preserve the established loudnorm default: first audio, rather than
     // choosing the first container stream when video precedes audio.
     let (selected, cached_info) = native_info.unwrap();
-    let mut plan_options = options.clone();
-    plan_options.streams = vec![selected];
     let info = if options.max_packet_bytes == CopyOptions::default().max_packet_bytes
         && options.max_packets.is_none()
     {
         cached_info
     } else {
-        crate::native_plan::decode_audio_with_options(source, &Default::default(), &plan_options)
-            .map_err(|e| crate::invalid(&e))?;
         crate::native_media::constant_audio_source_info_selected_with_options(
             source,
             Some(selected),

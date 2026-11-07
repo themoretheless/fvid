@@ -1016,11 +1016,23 @@ pub fn trim(
         && options.metadata_delete.is_empty()
         && options.stream_metadata_set.is_empty()
         && options.stream_metadata_delete.is_empty()
-        && crate::native_media::is_owned_audio_trim_source_with_interval_and_options(source, trim_interval, options).map_err(|e|e.to_string())?
         && matches!(destination.extension().and_then(|s|s.to_str()),Some("wav" | "f32le" | "mka" | "mkv"))
-        && (options.streams.len() != 1
-            || crate::native_media::constant_audio_source_info_selected_with_interval_and_options(source, Some(options.streams[0]), trim_interval, options)
-                .is_ok()) {
+        && if options.streams.len() == 1 {
+            crate::native_media::constant_audio_source_info_selected_with_interval_and_options(
+                source,
+                Some(options.streams[0]),
+                trim_interval,
+                options,
+            )
+            .is_ok()
+        } else {
+            crate::native_media::is_owned_audio_trim_source_with_interval_and_options(
+                source,
+                trim_interval,
+                options,
+            )
+            .map_err(|e| e.to_string())?
+        } {
         validate_owned_audio_options(options)?;
         let stats=crate::native_export::trim_audio_pcm_with_controls(source,destination,from,to,options).map_err(|e|e.to_string())?;
         return Ok(CopyStats {packets:stats.decoded_frames,payload_bytes:stats.sample_frames*u64::from(stats.channels)*4,segments:1,backend:"fvid",fvid_payload_copies:0});
@@ -1091,10 +1103,22 @@ pub fn plan_trim(
         && options.metadata_delete.is_empty()
         && options.stream_metadata_set.is_empty()
         && options.stream_metadata_delete.is_empty()
-        && crate::native_media::is_owned_audio_trim_source_with_interval_and_options(source, trim_interval, options).map_err(|e|e.to_string())?
-        && (options.streams.len() != 1
-            || crate::native_media::constant_audio_source_info_selected_with_interval_and_options(source, Some(options.streams[0]), trim_interval, options)
-                .is_ok()) {
+        && if options.streams.len() == 1 {
+            crate::native_media::constant_audio_source_info_selected_with_interval_and_options(
+                source,
+                Some(options.streams[0]),
+                trim_interval,
+                options,
+            )
+            .is_ok()
+        } else {
+            crate::native_media::is_owned_audio_trim_source_with_interval_and_options(
+                source,
+                trim_interval,
+                options,
+            )
+            .map_err(|e| e.to_string())?
+        } {
         validate_owned_audio_options(options)?;
         return crate::native_plan::trim_audio_with_options(source,from,to,options);
     }

@@ -4717,3 +4717,12 @@ See `batch-628-validation.json`.
 - **FVID-0892**: Single-pass geometry and RIFF `INFO` extraction for owned container loudness fallback in `measure_file_with_options_and_kind` (`src/native_pcm/loudness.rs`, `crates/fvid-media/src/owned_container_loudness.rs`).
 - **FVID-0893**: Remove redundant second container packet-budget scan in `loudness::default_weights_with_options` (`src/native_pcm/loudness.rs`).
 - **FVID-0894**: Build `MediaPlan` directly from inspected `AudioSourceInfo` in `native_plan::trim_audio_with_options` (`src/native_plan.rs`).
+
+## Batch 633 (FVID-0895..0899)
+
+- **FVID-0895**: Build native loudness plans directly from inspected WAVE or container audio metadata (`src/native_plan.rs`).
+- **FVID-0896**: Avoid redundant `decode_audio_with_options` probe during native audio mix source inspection (`src/native_audio_mix.rs`).
+- **FVID-0897**: Reuse selected `AudioSourceInfo` and packet-budget check in `native_loudnorm::try_plan` (`src/native_loudnorm.rs`).
+- **FVID-0898**: Eliminate duplicate `decode_audio_with_options` call in `native_loudnorm::try_apply` (`src/native_loudnorm.rs`).
+- **FVID-0899**: Skip redundant whole-container audio trim eligibility check when a single stream is selected (`src/media.rs`).
+
