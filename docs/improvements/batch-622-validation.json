@@ -1,0 +1,16 @@
+{
+  "batch": 622,
+  "ids": [
+    "FVID-0840",
+    "FVID-0841",
+    "FVID-0842",
+    "FVID-0843",
+    "FVID-0844"
+  ],
+  "commands": [
+    "cargo test --test lossless_reader_and_mix_loudnorm_single_open",
+    "cargo test --test native_plan_trim_and_pcm_matroska_budget_single_open",
+    "python3 scripts/check_improvements_registry.py"
+  ],
+  "status": "accepted"
+}

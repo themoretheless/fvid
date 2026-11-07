@@ -4616,3 +4616,13 @@ See `batch-620-validation.json`.
 
 See `batch-621-validation.json`.
 
+## Batch 622 — FVID-0840..0844: Single-open reader reuse in `native_lossless_y4m`, `native_media`, `native_audio_mix`, and `native_loudnorm`
+
+- **FVID-0840** — Reuse the open `BufReader<File>` across `native_lossless::classify_eligible` and `native_lossless_y4m::classify_eligible_reader` (`src/native_lossless_y4m.rs`, `tests/lossless_reader_and_mix_loudnorm_single_open.rs`).
+- **FVID-0841** — Short-circuit non-MP4/Matroska inputs after `is_aac_source_with_metadata_limit` in `native_media::is_owned_audio_source_with_interval_and_options` (`src/native_media.rs`, `tests/lossless_reader_and_mix_loudnorm_single_open.rs`).
+- **FVID-0842** — Eliminate duplicate `plan_decode_audio` and `source_geometry_with_mask` calls in `native_audio_mix::validate_and_inspect_source_with_options` (`src/native_audio_mix.rs`, `tests/lossless_reader_and_mix_loudnorm_single_open.rs`).
+- **FVID-0843** — Remove redundant `SeekFrom::Start(0)` after `is_wave_reader` in `native_audio_mix::concat::geometry_with_options` (`src/native_audio_mix/concat.rs`, `tests/lossless_reader_and_mix_loudnorm_single_open.rs`).
+- **FVID-0844** — Close `wave_file` before delegating to `owned_loudnorm` or container loudnorm in `native_loudnorm::try_plan` (`src/native_loudnorm.rs`, `tests/lossless_reader_and_mix_loudnorm_single_open.rs`).
+
+See `batch-622-validation.json`.
+

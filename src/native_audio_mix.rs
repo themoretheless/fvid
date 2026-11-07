@@ -261,11 +261,24 @@ fn validate_and_inspect_source_with_options(
         default_probe.max_rss_bytes = options.max_rss_bytes;
         default_probe.max_controlled_bytes = options.max_controlled_bytes;
         default_probe.max_packets = options.max_packets;
-        if !is_single_stream_fvid_media_audio_with_options(source, &default_probe)? {
+        let single_audio = match crate::native_probe::try_probe_metadata_with_options(source, &default_probe) {
+            Ok(Some(info)) => info.streams.iter().filter(|s| s.media_type == "audio").count() == 1,
+            Ok(None) => fvid_media::owned_container_loudness::recognizes_standalone_audio_with_options(
+                source,
+                &default_probe,
+            )
+            .map_err(|e| invalid(&e))?,
+            Err(e) => return Err(invalid(&e)),
+        };
+        if !single_audio {
             return Err(invalid("source is not a single-stream owned audio input"));
         }
-        fvid_media::owned_audio_plan::source_geometry_with_mask(source, &probe_opts)
-            .map_err(|e| invalid(&e))
+        let geom = fvid_media::owned_audio_plan::source_geometry_with_mask(source, &probe_opts)
+            .map_err(|e| invalid(&e))?;
+        if !(1..=64).contains(&geom.1) {
+            return Err(invalid("source is not a single-stream owned audio input"));
+        }
+        Ok(geom)
     }
 }
 

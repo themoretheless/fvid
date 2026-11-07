@@ -1,8 +1,8 @@
 {
   "target": 1000,
   "counting_rule": "One independently confirmed problem or useful capability; fixture variants and baseline integration repairs are excluded. Only accepted entries count.",
-  "accepted_count": 839,
-  "next_id": "FVID-0840",
+  "accepted_count": 844,
+  "next_id": "FVID-0845",
   "entries": [
     {
       "id": "FVID-0001",
@@ -9420,7 +9420,62 @@
       "result": "media::normalize_loudness_controlled passes the channel count inferred from weights directly to normalize_file_with_options_and_prechecked_channels so source_geometry is not re-probed.",
       "status": "accepted",
       "validation": "batch-621-validation.json"
+    },
+    {
+      "id": "FVID-0840",
+      "batch": 622,
+      "title": "Reuse the open BufReader<File> across native_lossless::classify_eligible and native_lossless_y4m::classify_eligible_reader",
+      "source": "src/native_lossless_y4m.rs",
+      "regression": "tests/lossless_reader_and_mix_loudnorm_single_open.rs",
+      "before": "native_lossless::classify_eligible opened a BufReader<File> to read the 9-byte prefix and then dropped it and called native_lossless_y4m::eligible(source), reopening the file and re-reading the same 9-byte prefix.",
+      "result": "native_lossless::classify_eligible seeks the already-open BufReader<File> to 0 and passes it directly to classify_eligible_reader.",
+      "status": "accepted",
+      "validation": "batch-622-validation.json"
+    },
+    {
+      "id": "FVID-0841",
+      "batch": 622,
+      "title": "Short-circuit non-MP4/Matroska inputs after is_aac_source_with_metadata_limit in native_media::is_owned_audio_source_with_interval_and_options",
+      "source": "src/native_media.rs",
+      "regression": "tests/lossless_reader_and_mix_loudnorm_single_open.rs",
+      "before": "When is_aac_source_with_metadata_limit returned false on a non-container file (such as standalone FLAC, Ogg, or MP3), is_owned_audio_source_with_interval_and_options still invoked constant_audio_source_info_selected_with_interval_and_options, which reopened the file and attempted ADTS StreamReader parsing.",
+      "result": "is_owned_audio_source_with_interval_and_options checks the 8-byte prefix and immediately returns Ok(false) unless the file is an MP4 or Matroska container.",
+      "status": "accepted",
+      "validation": "batch-622-validation.json"
+    },
+    {
+      "id": "FVID-0842",
+      "batch": 622,
+      "title": "Eliminate duplicate plan_decode_audio and source_geometry_with_mask calls in native_audio_mix::validate_and_inspect_source_with_options",
+      "source": "src/native_audio_mix.rs",
+      "regression": "tests/lossless_reader_and_mix_loudnorm_single_open.rs",
+      "before": "The fvid_media fallback branch of validate_and_inspect_source_with_options called plan_decode_audio, then called is_single_stream_fvid_media_audio_with_options (which called plan_decode_audio and source_geometry_with_mask again), and then called source_geometry_with_mask a second time.",
+      "result": "validate_and_inspect_source_with_options checks single-stream metadata directly after plan_decode_audio and calls source_geometry_with_mask once.",
+      "status": "accepted",
+      "validation": "batch-622-validation.json"
+    },
+    {
+      "id": "FVID-0843",
+      "batch": 622,
+      "title": "Remove redundant SeekFrom::Start(0) after is_wave_reader in native_audio_mix::concat::geometry_with_options",
+      "source": "src/native_audio_mix/concat.rs",
+      "regression": "tests/lossless_reader_and_mix_loudnorm_single_open.rs",
+      "before": "geometry_with_options called is_wave_reader(&mut wave_file) (which already rewinds the reader to 0) and then issued a second wave_file.seek(SeekFrom::Start(0)) before inspect.",
+      "result": "geometry_with_options passes wave_file directly to native_pcm::inspect after is_wave_reader.",
+      "status": "accepted",
+      "validation": "batch-622-validation.json"
+    },
+    {
+      "id": "FVID-0844",
+      "batch": 622,
+      "title": "Close wave_file before delegating to owned_loudnorm or container loudnorm in native_loudnorm::try_plan",
+      "source": "src/native_loudnorm.rs",
+      "regression": "tests/lossless_reader_and_mix_loudnorm_single_open.rs",
+      "before": "native_loudnorm::try_plan kept wave_file open across owned_loudnorm::supports_request, owned_loudnorm::plan_loudnorm, and the non-WAVE container loudnorm branches.",
+      "result": "native_loudnorm::try_plan explicitly drops wave_file as soon as WAVE header/info inspection finishes.",
+      "status": "accepted",
+      "validation": "batch-622-validation.json"
     }
   ],
-  "pending_count": 161
+  "pending_count": 156
 }

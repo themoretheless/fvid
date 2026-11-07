@@ -223,6 +223,7 @@ pub fn try_plan(
                 return Err("PCM packet limit cannot hold one sample frame".into());
             }
         }
+        drop(wave_file);
         if !fvid_media::owned_loudnorm::supports_request(
             source,
             Path::new("output.wav"),
@@ -239,6 +240,7 @@ pub fn try_plan(
             .map_err(|e| crate::invalid(&e))?,
         ));
     }
+    drop(wave_file);
     let index = if wave {
         selected_audio(source, options)?
     } else if options.max_controlled_bytes.is_some()

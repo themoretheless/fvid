@@ -37,8 +37,8 @@ pub(crate) fn classify_eligible(source: &Path) -> Result<Option<bool>> {
     if (n == 9 && &prefix == b"YUV4MPEG2")
         || (n >= 4 && prefix[..4] == [0x1a, 0x45, 0xdf, 0xa3])
     {
-        drop(input);
-        return Ok(crate::native_lossless_y4m::eligible(source)?.then_some(true));
+        input.seek(SeekFrom::Start(0))?;
+        return Ok(crate::native_lossless_y4m::classify_eligible_reader(input, &prefix, n)?.is_some().then_some(true));
     }
     if n < 8 || !crate::container::mp4::recognizes_prefix(&prefix[..8]) {
         return Ok(None);

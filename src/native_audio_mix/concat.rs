@@ -29,7 +29,6 @@ fn geometry_with_options(source: &Path, options: &fvid_media::CopyOptions) -> Re
     if options.max_controlled_bytes.is_none() {
         let mut wave_file = File::open(source)?;
         if crate::native_pcm::is_wave_reader(&mut wave_file)? {
-            wave_file.seek(SeekFrom::Start(0))?;
             let info = crate::native_pcm::inspect(&mut wave_file, options.cancel.as_ref())?;
             return Ok((info.sample_rate, info.channels));
         }

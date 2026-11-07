@@ -1053,6 +1053,13 @@ pub fn is_owned_audio_source_with_interval_and_options(
     if is_aac_source_with_metadata_limit(path, options.max_controlled_bytes)? {
         return Ok(true);
     }
+    let mut prefix = [0u8; 8];
+    let n = std::io::Read::read(&mut File::open(path)?, &mut prefix).unwrap_or(0);
+    if !((n == 8 && crate::container::mp4::recognizes_prefix(&prefix))
+        || (n >= 4 && prefix[..4] == [0x1a, 0x45, 0xdf, 0xa3]))
+    {
+        return Ok(false);
+    }
     Ok(constant_audio_source_info_selected_with_interval_and_options(path, None, interval, options).is_ok())
 }
 

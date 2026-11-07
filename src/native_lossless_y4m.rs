@@ -33,7 +33,14 @@ pub(crate) fn classify_eligible(source: &Path) -> Result<Option<bool>> {
     let mut prefix = [0u8; 9];
     let read = input.read(&mut prefix)?;
     input.seek(SeekFrom::Start(0))?;
-    if read != 9 || &prefix != b"YUV4MPEG2" {
+    classify_eligible_reader(input, &prefix, read)
+}
+pub(crate) fn classify_eligible_reader(
+    mut input: BufReader<File>,
+    prefix: &[u8; 9],
+    read: usize,
+) -> Result<Option<bool>> {
+    if read != 9 || prefix != b"YUV4MPEG2" {
         if read < 4 || prefix[..4] != [0x1a, 0x45, 0xdf, 0xa3] {
             return Ok(None);
         }
