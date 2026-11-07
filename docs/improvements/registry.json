@@ -1,8 +1,8 @@
 {
   "target": 1000,
   "counting_rule": "One independently confirmed problem or useful capability; fixture variants and baseline integration repairs are excluded. Only accepted entries count.",
-  "accepted_count": 919,
-  "next_id": "FVID-0920",
+  "accepted_count": 924,
+  "next_id": "FVID-0925",
   "entries": [
     {
       "id": "FVID-0001",
@@ -10300,6 +10300,61 @@
       "result": "decode_source_to_f32le_with_options populates export_opts.streams with info.stream_index before delegating to export_audio_pcm_transformed_with_controls",
       "status": "accepted",
       "validation": "batch-637-validation.json"
+    },
+    {
+      "id": "FVID-0920",
+      "batch": 638,
+      "title": "Reuse single-stream AudioSourceInfo across media::plan_trim and trim_audio_with_options_and_cached_info",
+      "source": "src/native_plan.rs",
+      "regression": "tests/trim_plan_wave_and_concat_plan_reuse.rs",
+      "before": "media::plan_trim inspected constant_audio_source_info_selected_with_interval_and_options when options.streams.len() == 1 and then trim_audio_with_options reopened the container to inspect the same stream again",
+      "result": "media::plan_trim forwards the inspected AudioSourceInfo into trim_audio_with_options_and_cached_info",
+      "status": "accepted",
+      "validation": "batch-638-validation.json"
+    },
+    {
+      "id": "FVID-0921",
+      "batch": 638,
+      "title": "Build PlanStream directly from constant_audio_source_info_selected_with_options in native_plan::concat_mp4_matroska_with_options",
+      "source": "src/native_plan.rs",
+      "regression": "tests/trim_plan_wave_and_concat_plan_reuse.rs",
+      "before": "native_plan::concat_mp4_matroska_with_options called media::plan_decode_audio on sources[0], reopening the container twice via uses_native_audio_route and decode_audio_with_options",
+      "result": "native_plan::concat_mp4_matroska_with_options constructs the PlanStream descriptor directly when constant_audio_source_info_selected_with_options succeeds",
+      "status": "accepted",
+      "validation": "batch-638-validation.json"
+    },
+    {
+      "id": "FVID-0922",
+      "batch": 638,
+      "title": "Skip duplicate concat_eligible_with_options pass in native_export::try_concat_mp4_matroska_with_options when controls match defaults",
+      "source": "src/native_export.rs",
+      "regression": "tests/trim_plan_wave_and_concat_plan_reuse.rs",
+      "before": "try_concat_mp4_matroska_with_options ran concat_eligible_with_options over all segments and then immediately ran validate_concat_segments_internal again inside concat_audio_with_options even when options matched default controls",
+      "result": "try_concat_mp4_matroska_with_options skips the redundant concat_eligible_with_options pre-check when options match default controls",
+      "status": "accepted",
+      "validation": "batch-638-validation.json"
+    },
+    {
+      "id": "FVID-0923",
+      "batch": 638,
+      "title": "Inspect constant-audio sources in a single pass before fallback in native_export::trim_audio_wave",
+      "source": "src/native_export.rs",
+      "regression": "tests/trim_plan_wave_and_concat_plan_reuse.rs",
+      "before": "trim_audio_wave called is_aac_trim_source and then audio_trim_selection or aac_trim_selection, opening the container up to three times before export",
+      "result": "trim_audio_wave resolves audio_stream_index_from_metadata and constant_audio_source_info_selected_with_interval_and_options first and dispatches directly by info.codec",
+      "status": "accepted",
+      "validation": "batch-638-validation.json"
+    },
+    {
+      "id": "FVID-0924",
+      "batch": 638,
+      "title": "Reject G.711 WAVE in media::uses_native_audio_route via is_wave_reader and verify single-stream MP4 audio handler before container inspection",
+      "source": "src/media.rs",
+      "regression": "tests/trim_plan_wave_and_concat_plan_reuse.rs",
+      "before": "uses_native_audio_route returned true on any RIFF/RF64 WAVE prefix without checking for G.711 format tags and kept Mp4Reader open while re-opening the file for single-stream constant-audio inspection",
+      "result": "uses_native_audio_route delegates RIFF/RF64/RIFX WAVE prefix checks to is_wave_reader, verifies single-stream MP4 soun handler early, and drops Mp4Reader before subsequent inspection",
+      "status": "accepted",
+      "validation": "batch-638-validation.json"
     }
   ],
   "pending_count": 126

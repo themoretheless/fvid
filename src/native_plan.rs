@@ -1170,6 +1170,16 @@ pub fn trim_audio_with_options(
     to: i64,
     options: &fvid_media::CopyOptions,
 ) -> Result<MediaPlan> {
+    trim_audio_with_options_and_cached_info(source, from, to, options, None)
+}
+
+pub(crate) fn trim_audio_with_options_and_cached_info(
+    source: &std::path::Path,
+    from: i64,
+    to: i64,
+    options: &fvid_media::CopyOptions,
+    cached_info: Option<&crate::native_media::AudioSourceInfo>,
+) -> Result<MediaPlan> {
     let selected = options.streams.first().copied();
     let interval = (from >= 0 && to > from).then(|| {
         (
@@ -1177,22 +1187,28 @@ pub fn trim_audio_with_options(
             std::time::Duration::from_micros(to as u64),
         )
     });
-    let index = audio_stream_index_from_metadata(source, selected, options)?;
-    let info = crate::native_media::constant_audio_source_info_selected_with_interval_and_options(
-        source,
-        Some(index),
-        interval,
-        options,
-    )
-    .map_err(|e| e.to_string())?;
+    let owned_info;
+    let (index, info) = if let Some(info) = cached_info {
+        (info.stream_index, info)
+    } else {
+        let index = audio_stream_index_from_metadata(source, selected, options)?;
+        owned_info = crate::native_media::constant_audio_source_info_selected_with_interval_and_options(
+            source,
+            Some(index),
+            interval,
+            options,
+        )
+        .map_err(|e| e.to_string())?;
+        (index, &owned_info)
+    };
     if info.codec == "aac" {
-        return finish_trim_aac_plan(source, from, to, index, Some(&info), options);
+        return finish_trim_aac_plan(source, from, to, index, Some(info), options);
     }
     let mut scoped = options.clone();
     scoped.streams = vec![index];
     let mut plan = decode_audio_from_source_info(
         source,
-        &info,
+        info,
         &AudioDecodeTransform {
             interval: Some((from, to)),
             ..Default::default()
@@ -2210,8 +2226,29 @@ pub fn concat_mp4_matroska_with_options(
         let mut inspect = options.clone();
         inspect.metadata_set.clear();inspect.metadata_delete.clear();
         inspect.stream_metadata_set.clear();inspect.stream_metadata_delete.clear();
-        let streams = crate::media::plan_decode_audio(&sources[0], &Default::default(), &inspect)?.streams
-            .into_iter().map(|mut stream| {stream.disposition="decode_to_pcm".into();stream}).collect();
+        let streams = if inspect.max_controlled_bytes.is_none()
+            && let Ok(info) = crate::native_media::constant_audio_source_info_selected_with_options(
+                &sources[0],
+                None,
+                &inspect,
+            )
+        {
+            vec![PlanStream {
+                index: info.stream_index,
+                media_type: "audio".into(),
+                codec: info.codec.into(),
+                disposition: "decode_to_pcm".into(),
+            }]
+        } else {
+            crate::media::plan_decode_audio(&sources[0], &Default::default(), &inspect)?
+                .streams
+                .into_iter()
+                .map(|mut stream| {
+                    stream.disposition = "decode_to_pcm".into();
+                    stream
+                })
+                .collect()
+        };
         return Ok(Some(MediaPlan {command:"concat".into(),input:sources[0].clone(),inputs:sources.to_vec(),
             streams,graph:None,
             steps,

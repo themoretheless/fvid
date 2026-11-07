@@ -4758,3 +4758,12 @@ See `batch-628-validation.json`.
 - **FVID-0918**: Reuse single-stream `AudioSourceInfo` across `media::trim` and `trim_audio_pcm_with_controls_and_cached_info` (`src/media.rs`, `src/native_export.rs`).
 - **FVID-0919**: Propagate pre-resolved `info.stream_index` into `export_audio_pcm_transformed_with_controls` during `decode_source_to_f32le_with_options` (`src/native_audio_mix.rs`).
 
+## Batch 638 (FVID-0920..0924)
+
+- **FVID-0920**: Reuse single-stream `AudioSourceInfo` across `media::plan_trim` and `trim_audio_with_options_and_cached_info` (`src/media.rs`, `src/native_plan.rs`).
+- **FVID-0921**: Build `PlanStream` directly from `constant_audio_source_info_selected_with_options` in `native_plan::concat_mp4_matroska_with_options` (`src/native_plan.rs`).
+- **FVID-0922**: Skip duplicate `concat_eligible_with_options` pass in `native_export::try_concat_mp4_matroska_with_options` when controls match defaults (`src/native_export.rs`).
+- **FVID-0923**: Inspect constant-audio sources in a single pass before fallback in `native_export::trim_audio_wave` (`src/native_export.rs`).
+- **FVID-0924**: Reject G.711 WAVE in `media::uses_native_audio_route` via `is_wave_reader` and verify single-stream MP4 audio handler before container inspection (`src/media.rs`).
+
+

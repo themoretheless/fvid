@@ -205,8 +205,8 @@ fn uses_native_audio_route(source: &std::path::Path, options: &CopyOptions, tran
         let mut input = std::fs::File::open(source).map_err(|e| e.to_string())?;
         let mut prefix = [0u8; 12];
         match input.read_exact(&mut prefix) {
-            Ok(()) if matches!(&prefix[..4], b"RIFF" | b"RF64") && &prefix[8..12] == b"WAVE" => {
-                return Ok(true);
+            Ok(()) if matches!(&prefix[..4], b"RIFF" | b"RF64" | b"RIFX") && &prefix[8..12] == b"WAVE" => {
+                return crate::native_pcm::is_wave_reader(&mut input).map_err(|e| e.to_string());
             }
             Ok(()) if crate::container::mp4::recognizes_prefix(&prefix[..8]) => {
                 if options.cancel.as_ref().is_some_and(|c| c.is_cancelled()) {
@@ -226,6 +226,19 @@ fn uses_native_audio_route(source: &std::path::Path, options: &CopyOptions, tran
                 }
                 if transform.channels.is_some_and(|c|reader.tracks().iter().enumerate().any(|(i,t)|t.handler==*b"soun"&&(options.streams.is_empty()||options.streams.contains(&i))&&t.description_for_sample(0).is_some_and(|d|d.channels>2&&c!=i32::from(d.channels)))) {
                     return Ok(false);
+                }
+                if options.streams.len() == 1 {
+                    let selected_idx = options.streams[0];
+                    if reader
+                        .tracks()
+                        .get(selected_idx)
+                        .is_none_or(|t| t.handler != *b"soun")
+                    {
+                        return Ok(false);
+                    }
+                    drop(reader);
+                } else {
+                    drop(reader);
                 }
             }
             Ok(()) => {}
@@ -1121,24 +1134,34 @@ pub fn plan_trim(
         && options.metadata_delete.is_empty()
         && options.stream_metadata_set.is_empty()
         && options.stream_metadata_delete.is_empty()
-        && if options.streams.len() == 1 {
-            crate::native_media::constant_audio_source_info_selected_with_interval_and_options(
+    {
+        if options.streams.len() == 1
+            && let Ok(info) = crate::native_media::constant_audio_source_info_selected_with_interval_and_options(
                 source,
                 Some(options.streams[0]),
                 trim_interval,
                 options,
             )
-            .is_ok()
-        } else {
-            crate::native_media::is_owned_audio_trim_source_with_interval_and_options(
+        {
+            validate_owned_audio_options(options)?;
+            return crate::native_plan::trim_audio_with_options_and_cached_info(
+                source,
+                from,
+                to,
+                options,
+                Some(&info),
+            );
+        } else if options.streams.len() != 1
+            && crate::native_media::is_owned_audio_trim_source_with_interval_and_options(
                 source,
                 trim_interval,
                 options,
             )
             .map_err(|e| e.to_string())?
-        } {
-        validate_owned_audio_options(options)?;
-        return crate::native_plan::trim_audio_with_options(source,from,to,options);
+        {
+            validate_owned_audio_options(options)?;
+            return crate::native_plan::trim_audio_with_options(source,from,to,options);
+        }
     }
     if has_metadata_mutations(options) && !has_only_wave_info_metadata(options) {
         let mut planned = plan_decode_audio(

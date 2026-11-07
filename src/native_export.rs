@@ -2603,15 +2603,31 @@ pub(crate) fn trim_audio_pcm_with_controls_and_cached_info(
 pub fn trim_audio_wave(source: &Path, destination: &Path, from: i64, to: i64, selected: Option<usize>,
     cancel: Option<&crate::media_control::CancelFlag>, progress: Option<&crate::media_control::ProgressHook>,
 ) -> Result<crate::native_media::AudioDecodeStats> {
-    if crate::native_media::is_aac_trim_source(source, selected)? {
-        return trim_aac_wave(source, destination, from, to, selected, cancel, progress);
-    }
     if from < 0 || to <= from { return Err(invalid("trim requires 0 <= from < to")); }
     if destination.extension().and_then(|s|s.to_str()) != Some("wav") { return Err(invalid("native audio trim output requires .wav")); }
     if cancel.is_some_and(|c|c.is_cancelled()) { return Err(invalid("media operation cancelled")); }
+    let interval = (std::time::Duration::from_micros(from as u64), std::time::Duration::from_micros(to as u64));
+    let mut options = fvid_media::CopyOptions::default();
+    options.cancel = cancel.cloned();
+    if let Ok(index) = crate::native_plan::audio_stream_index_from_metadata(source, selected, &options)
+        && let Ok(info) = crate::native_media::constant_audio_source_info_selected_with_interval_and_options(
+            source,
+            Some(index),
+            Some(interval),
+            &options,
+        )
+    {
+        if info.codec == "aac" {
+            return export_aac_pcm_selected(source, destination, Some(interval), 1.0, None, None, Some(index), cancel, progress);
+        }
+        return export_audio_pcm_selected(source, destination, Some(interval), 1.0, None, None, Some(index), cancel, progress);
+    }
+    if crate::native_media::is_aac_trim_source(source, selected)? {
+        return trim_aac_wave(source, destination, from, to, selected, cancel, progress);
+    }
     let index = crate::native_plan::audio_trim_selection(source, selected).map_err(|e|invalid(&e))?;
     export_audio_pcm_selected(source, destination,
-        Some((std::time::Duration::from_micros(from as u64), std::time::Duration::from_micros(to as u64))),
+        Some(interval),
         1.0, None, None, Some(index), cancel, progress)
 }
 
@@ -3005,11 +3021,36 @@ pub fn try_concat_mp4_matroska_with_options(
         let mut default_opts = fvid_media::CopyOptions::default();
         default_opts.cancel = options.cancel.clone();
         default_opts.max_rss_bytes = options.max_rss_bytes;
-        if !crate::native_audio_mix::concat_eligible_with_options(sources, &default_opts)? {
+        let same_as_default = options.streams.is_empty()
+            && options.max_packet_bytes == default_opts.max_packet_bytes
+            && options.max_packets.is_none()
+            && options.max_controlled_bytes.is_none()
+            && options.metadata_set.is_empty()
+            && options.metadata_delete.is_empty()
+            && options.stream_metadata_set.is_empty()
+            && options.stream_metadata_delete.is_empty();
+        if !same_as_default
+            && !crate::native_audio_mix::concat_eligible_with_options(sources, &default_opts)?
+        {
             return Ok(None);
         }
-        let stats =
-            crate::native_audio_mix::concat_audio_with_options(sources, destination, options)?;
+        let stats = match crate::native_audio_mix::concat_audio_with_options(
+            sources,
+            destination,
+            options,
+        ) {
+            Ok(stats) => stats,
+            Err(e) if same_as_default && e.to_string() != "concat destination already exists" => {
+                if options.cancel.as_ref().is_some_and(|c| c.is_cancelled()) {
+                    return Err(invalid("media operation cancelled"));
+                }
+                if fvid_media::owned_budget::check_rss_budget(options).is_err() {
+                    return Err(e);
+                }
+                return Ok(None);
+            }
+            Err(e) => return Err(e),
+        };
         return Ok(Some(crate::media_control::ProgressEvent {
             packets: stats.decoded_frames,
             payload_bytes: stats.sample_frames * u64::from(stats.channels) * 4,
