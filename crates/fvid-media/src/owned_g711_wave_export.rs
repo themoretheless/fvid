@@ -283,11 +283,15 @@ pub(crate) fn apply(
     let end = until.map_or(input.shape.sample_frames, |n| {
         n.min(input.shape.sample_frames)
     });
+    let window = packet_window(usize::from(channels), options)?;
+    let frames_read = options.max_packets.map_or(end, |pkts| {
+        end.min(pkts.saturating_mul(window as u64))
+    });
     crate::owned_adts_export::check_spool_wave_export_budget(
         rate,
         channels,
         32,
-        end.max(1024),
+        frames_read.max(1024),
         info.len(),
         false,
         transform,

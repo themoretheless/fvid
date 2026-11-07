@@ -4226,6 +4226,17 @@ See `batch-581-validation.json`.
 
 See `batch-582-validation.json`.
 
+## Batch 583 — FVID-0645..0649: `max_packets`-bounded interval prefix checks for Ogg Opus, Ogg Vorbis, and linked Ogg Joint programs, `max_packets`-bounded G.711 WAVE spool budget in `apply`, and actual G.711 frame count in `plan_decode_audio` Stage-2 budget check
+
+- **FVID-0645** — Bound Ogg Opus interval prefix check by `options.max_packets` in `open_with_transform` (`crates/fvid-media/src/owned_ogg_opus.rs`, `crates/fvid-media/src/owned_ogg_opus_export.rs`, `tests/ogg_packet_limit_interval_and_g711_budget.rs`).
+- **FVID-0646** — Bound Ogg Vorbis interval prefix check by `options.max_packets` in `open_with_transform` (`crates/fvid-media/src/owned_ogg_vorbis.rs`, `crates/fvid-media/src/owned_ogg_vorbis_export.rs`, `tests/ogg_packet_limit_interval_and_g711_budget.rs`).
+- **FVID-0647** — Bound linked Ogg Joint interval prefix check by `options.max_packets` in `open_with_transform` (`crates/fvid-media/src/owned_ogg_audio_program.rs`, `crates/fvid-media/src/owned_ogg_joint_export.rs`, `tests/ogg_packet_limit_interval_and_g711_budget.rs`).
+- **FVID-0648** — Bound G.711 WAVE spool export budget by `options.max_packets` in `apply` (`crates/fvid-media/src/owned_g711_wave_export.rs`, `tests/ogg_packet_limit_interval_and_g711_budget.rs`).
+- **FVID-0649** — Use actual G.711 frame count in `plan_decode_audio` Stage-2 spool budget check (`crates/fvid-media/src/owned_audio_plan.rs`, `tests/ogg_packet_limit_interval_and_g711_budget.rs`).
+
+See `batch-583-validation.json`.
+
+
 
 
 

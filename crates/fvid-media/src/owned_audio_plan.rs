@@ -114,6 +114,7 @@ pub(crate) struct AudioDescriptor {
     raw_encoded_audio: bool,
     ogg: bool,
     g711_wave: bool,
+    g711_frames: u64,
 }
 
 /// Read-only audio source geometry (`rate`, `channels`) for native loudness and planning.
@@ -189,13 +190,15 @@ fn source_descriptor_for_decode(source: &Path, options: &CopyOptions,
     let ogg = crate::owned_ogg_opus_export::recognizes(source)?;
     let g711_wave = crate::owned_g711_wave_export::recognizes(source, options)?;
     let mut stream_index = 0;
+    let mut g711_frames = 1024;
     let (rate, channels, mask, codec, precision) = if g711_wave {
-        let (rate, channels, mask, codec, _) =
+        let (rate, channels, mask, codec, frames) =
             crate::owned_g711_wave_export::descriptor_with_transform(
                 source,
                 transform.copied(),
                 options,
             )?;
+        g711_frames = frames;
         (rate, channels, mask, codec.to_owned(), "float32".to_owned())
     } else if ogg {
         let (index, rate, channels, mask, codec) =
@@ -368,7 +371,7 @@ fn source_descriptor_for_decode(source: &Path, options: &CopyOptions,
     };
     Ok(AudioDescriptor {
         rate, channels, mask, codec, precision, stream_index,
-        adts, mp4, is_matroska, raw_encoded_audio, ogg, g711_wave,
+        adts, mp4, is_matroska, raw_encoded_audio, ogg, g711_wave, g711_frames,
     })
 }
 
@@ -385,7 +388,7 @@ pub fn plan_decode_audio(
     crate::owned_adts_export::check_wave_metadata_budget(options)?;
     let AudioDescriptor {
         rate, channels, mask, codec, precision, stream_index,
-        adts, mp4, is_matroska, raw_encoded_audio, ogg, g711_wave,
+        adts, mp4, is_matroska, raw_encoded_audio, ogg, g711_wave, g711_frames,
     } = source_descriptor_for_decode(source, options, Some(transform))?;
     let mp4_target=if mp4 {crate::owned_mp4_audio_export::normalization_target(source,*transform,options,rate,channels,mask)?}else{None};
     let output_channels = transform.channels.unwrap_or(i32::from(channels));
@@ -405,11 +408,12 @@ pub fn plan_decode_audio(
     if adts || mp4 || is_matroska || raw_encoded_audio || ogg || g711_wave {
         let (stage2_rate, stage2_channels, _) = mp4_target.unwrap_or((rate, channels, mask));
         let stage2_bits = if precision == "float64" { 64 } else { 32 };
+        let stage2_frames = if g711_wave { g711_frames.max(1024) } else { 1024 };
         crate::owned_adts_export::check_spool_wave_export_budget(
             stage2_rate,
             stage2_channels,
             stage2_bits,
-            1024,
+            stage2_frames,
             0,
             aac_fold,
             *transform,

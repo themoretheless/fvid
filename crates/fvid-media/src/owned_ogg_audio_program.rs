@@ -284,6 +284,52 @@ impl Program {
         }
         maximum
     }
+    pub(crate) fn prefix_end_samples(&self, until: Option<u64>, max_packets: Option<u64>) -> u64 {
+        let total = u64::try_from(self.end_samples().max(0)).unwrap_or(0);
+        let Some(mut remaining) = max_packets else {
+            return until.map_or(total, |end| end.min(total));
+        };
+        let mut last = 0u64;
+        for link in &self.links {
+            if remaining == 0 {
+                break;
+            }
+            let start = link.origin.whole;
+            if until.is_some_and(|end| start >= 0 && start as u64 >= end) {
+                break;
+            }
+            let local_until = (link.source.rate() == self.rate && link.origin.phase.0 == 0)
+                .then(|| until.map(|end| end.saturating_sub(start.max(0) as u64)))
+                .flatten();
+            let (local_end, count) = match &link.source {
+                Source::Vorbis(p) => (
+                    p.prefix_end_samples(local_until, Some(remaining)),
+                    p.packet_times().len() as u64,
+                ),
+                Source::Opus(p) => (
+                    p.prefix_end_samples(local_until, Some(remaining)),
+                    p.packet_count() as u64,
+                ),
+            };
+            if local_end > 0 {
+                let mut clock = link.origin;
+                if clock
+                    .advance(
+                        i64::try_from(local_end).unwrap_or(i64::MAX),
+                        link.source.rate(),
+                    )
+                    .is_ok()
+                {
+                    if let Ok(global_end) = clock.ceil() {
+                        let global_end = global_end.min(link.end).max(0) as u64;
+                        last = last.max(until.map_or(global_end, |end| global_end.min(end)));
+                    }
+                }
+            }
+            remaining = remaining.saturating_sub(count);
+        }
+        last.min(total)
+    }
     pub fn seek_to(&mut self, target: i64) -> i64 {
         self.target = target.clamp(0, self.end);
         self.cursor = self

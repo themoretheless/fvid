@@ -191,8 +191,7 @@ pub(crate) fn open_with_transform(
     if program.max_packet_size_in_prefix(until, options.max_packets) > options.max_packet_bytes {
         return Err("Opus compressed packet exceeds byte limit".into());
     }
-    let total_samples = u64::try_from(program.end_samples().max(0)).unwrap_or(0);
-    let prefix_samples = until.map_or(total_samples, |end| end.min(total_samples));
+    let prefix_samples = program.prefix_end_samples(until, options.max_packets);
     check_nonempty_interval_prefix(transform, 48000, prefix_samples)?;
     check(options)?;
     Ok(program)

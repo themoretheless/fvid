@@ -397,6 +397,27 @@ impl Program {
         }
         maximum
     }
+    pub(crate) fn prefix_end_samples(&self, until: Option<u64>, max_packets: Option<u64>) -> u64 {
+        let total = u64::try_from(self.end_samples().max(0)).unwrap_or(0);
+        let Some(limit) = max_packets else {
+            return until.map_or(total, |end| end.min(total));
+        };
+        let mut last = 0u64;
+        for (packets, stamp) in self.stamps.iter().enumerate() {
+            if packets as u64 >= limit {
+                break;
+            }
+            if until.is_some_and(|end| {
+                let start = stamp.pts.max(stamp.start);
+                start >= 0 && start as u64 >= end
+            }) {
+                break;
+            }
+            let packet_end = (stamp.pts + stamp.samples).min(stamp.end).max(0) as u64;
+            last = last.max(until.map_or(packet_end, |end| packet_end.min(end)));
+        }
+        last.min(total)
+    }
     pub(crate) fn packet_count(&self) -> usize {
         self.stamps.len()
     }

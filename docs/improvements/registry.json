@@ -1,8 +1,8 @@
 {
   "target": 1000,
   "counting_rule": "One independently confirmed problem or useful capability; fixture variants and baseline integration repairs are excluded. Only accepted entries count.",
-  "accepted_count": 644,
-  "next_id": "FVID-0645",
+  "accepted_count": 649,
+  "next_id": "FVID-0650",
   "entries": [
     {
       "id": "FVID-0001",
@@ -7275,6 +7275,61 @@
       "result": "Resolve reader.track_languages.get(&track.number).unwrap_or(&track.language) in matroska_source_info_with_interval before calling info_for_file_tags.",
       "status": "accepted",
       "validation": "batch-582-validation.json"
+    },
+    {
+      "id": "FVID-0645",
+      "batch": 583,
+      "title": "Bound Ogg Opus interval prefix check by options.max_packets in open_with_transform",
+      "source": "crates/fvid-media/src/owned_ogg_opus.rs",
+      "regression": "tests/ogg_packet_limit_interval_and_g711_budget.rs",
+      "before": "owned_ogg_opus_export::open_with_transform passed the full stream sample count to check_nonempty_interval_prefix without bounding by options.max_packets, allowing plan_decode_audio and supports to accept intervals that fall entirely after the max_packets prefix.",
+      "result": "Add Program::prefix_end_samples(until, max_packets) in owned_ogg_opus and pass it to check_nonempty_interval_prefix in owned_ogg_opus_export::open_with_transform.",
+      "status": "accepted",
+      "validation": "batch-583-validation.json"
+    },
+    {
+      "id": "FVID-0646",
+      "batch": 583,
+      "title": "Bound Ogg Vorbis interval prefix check by options.max_packets in open_with_transform",
+      "source": "crates/fvid-media/src/owned_ogg_vorbis.rs",
+      "regression": "tests/ogg_packet_limit_interval_and_g711_budget.rs",
+      "before": "owned_ogg_vorbis_export::open_with_transform passed the full stream sample count to check_nonempty_interval_prefix without bounding by options.max_packets, allowing plan_decode_audio and supports to accept intervals that fall after the max_packets prefix.",
+      "result": "Add Program::prefix_end_samples(until, max_packets) in owned_ogg_vorbis and pass it to check_nonempty_interval_prefix in owned_ogg_vorbis_export::open_with_transform.",
+      "status": "accepted",
+      "validation": "batch-583-validation.json"
+    },
+    {
+      "id": "FVID-0647",
+      "batch": 583,
+      "title": "Bound linked Ogg Joint interval prefix check by options.max_packets in open_with_transform",
+      "source": "crates/fvid-media/src/owned_ogg_audio_program.rs",
+      "regression": "tests/ogg_packet_limit_interval_and_g711_budget.rs",
+      "before": "owned_ogg_joint_export::open_with_transform passed the full linked program sample count to check_nonempty_interval_prefix without bounding by options.max_packets across links, allowing plan_decode_audio and supports to accept intervals in later links beyond the max_packets limit.",
+      "result": "Add Program::prefix_end_samples(until, max_packets) in owned_ogg_audio_program and pass it to check_nonempty_interval_prefix in owned_ogg_joint_export::open_with_transform.",
+      "status": "accepted",
+      "validation": "batch-583-validation.json"
+    },
+    {
+      "id": "FVID-0648",
+      "batch": 583,
+      "title": "Bound G.711 WAVE spool export budget by options.max_packets in apply",
+      "source": "crates/fvid-media/src/owned_g711_wave_export.rs",
+      "regression": "tests/ogg_packet_limit_interval_and_g711_budget.rs",
+      "before": "owned_g711_wave_export::apply passed end.max(1024) to check_spool_wave_export_budget without bounding by options.max_packets * packet_window, overestimating Stage-2 PCM export memory when max_packets limited decoding.",
+      "result": "Bound frames_read by options.max_packets.map_or(end, |pkts| end.min(pkts.saturating_mul(window as u64))) before calling check_spool_wave_export_budget in owned_g711_wave_export::apply.",
+      "status": "accepted",
+      "validation": "batch-583-validation.json"
+    },
+    {
+      "id": "FVID-0649",
+      "batch": 583,
+      "title": "Use actual G.711 frame count in plan_decode_audio Stage-2 spool budget check",
+      "source": "crates/fvid-media/src/owned_audio_plan.rs",
+      "regression": "tests/ogg_packet_limit_interval_and_g711_budget.rs",
+      "before": "source_descriptor_for_decode discarded the frames_read count returned by owned_g711_wave_export::descriptor_with_transform and plan_decode_audio passed a hardcoded 1024 frames to check_spool_wave_export_budget for G.711 WAVE inputs, underestimating Stage-2 export memory relative to apply.",
+      "result": "Preserve g711_frames in AudioDescriptor and pass g711_frames.max(1024) to check_spool_wave_export_budget in plan_decode_audio.",
+      "status": "accepted",
+      "validation": "batch-583-validation.json"
     }
   ]
 }
