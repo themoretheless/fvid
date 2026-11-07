@@ -138,7 +138,15 @@ pub(crate) fn try_descriptor_for_decode(
     options: &CopyOptions,
 ) -> Result<Option<(u32, u16, u32, &'static str, u64, usize)>> {
     check(options)?;
-    let mut file = File::open(path).map_err(|e| e.to_string())?;
+    let file = File::open(path).map_err(|e| e.to_string())?;
+    try_descriptor_from_file_for_decode(file, transform, options)
+}
+pub(crate) fn try_descriptor_from_file_for_decode(
+    mut file: File,
+    transform: Option<AudioDecodeTransform>,
+    options: &CopyOptions,
+) -> Result<Option<(u32, u16, u32, &'static str, u64, usize)>> {
+    check(options)?;
     let Some(law) = crate::owned_wave_inspect::g711_law(&mut file, options.cancel.as_ref())
         .map_err(|e| e.to_string())?
     else {

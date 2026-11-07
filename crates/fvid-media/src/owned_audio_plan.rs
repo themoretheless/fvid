@@ -31,7 +31,7 @@ pub(crate) fn matroska_descriptor_for_decode(
     matroska_descriptor_from_file_for_decode(source, file, transform, options).map(Some)
 }
 
-fn matroska_descriptor_from_file_for_decode(
+pub(crate) fn matroska_descriptor_from_file_for_decode(
     source: &Path,
     file: File,
     transform: Option<AudioDecodeTransform>,
@@ -302,9 +302,11 @@ fn source_descriptor_for_decode(source: &Path, options: &CopyOptions,
     let raw_encoded_audio =
         raw_flac || (!adts && crate::owned_mpeg_audio::has_signature(&head[..head_len.min(10)]));
     let mp4_desc = if head_len >= 8 && crate::owned_mp4::recognizes_prefix(&head[..8]) {
-        drop(head_file.take());
-        crate::owned_mp4_audio_export::try_descriptor_with_frames_for_decode(
+        let mut file = head_file.take().unwrap();
+        file.seek(SeekFrom::Start(0)).map_err(|e| e.to_string())?;
+        crate::owned_mp4_audio_export::try_descriptor_with_frames_from_file_for_decode(
             source,
+            file,
             transform.copied(),
             options,
         )?
@@ -330,12 +332,25 @@ fn source_descriptor_for_decode(source: &Path, options: &CopyOptions,
         && &head[..4] == b"RIFF"
         && &head[8..12] == b"WAVE"
     {
-        drop(head_file.take());
-        crate::owned_g711_wave_export::try_descriptor_for_decode(
-            source,
-            transform.copied(),
-            options,
-        )?
+        let mut file = head_file.take().unwrap();
+        file.seek(SeekFrom::Start(0)).map_err(|e| e.to_string())?;
+        if let Some(law) =
+            crate::owned_wave_inspect::g711_law(&mut file, options.cancel.as_ref())
+                .map_err(|e| e.to_string())?
+        {
+            Some(
+                crate::owned_g711_wave_export::descriptor_from_file_and_law_for_decode(
+                    file,
+                    law,
+                    transform.copied(),
+                    options,
+                )?,
+            )
+        } else {
+            file.seek(SeekFrom::Start(0)).map_err(|e| e.to_string())?;
+            head_file = Some(file);
+            None
+        }
     } else {
         None
     };

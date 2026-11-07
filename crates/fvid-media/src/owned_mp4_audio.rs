@@ -506,6 +506,40 @@ pub(crate) fn decode_mp4_audio_pcm_targeted<R: Read + Seek>(
     admit_audio_reader_with_interval(&reader, index, interval, options, target)?;
     decode_mp4_audio_reader_targeted(reader, output, interval, selected, &mut control,target)
 }
+pub(crate) fn decode_mp4_audio_reader_pcm_targeted<R: Read + Seek>(
+    reader: Mp4TimelineReader<R>,
+    output: &mut impl Write,
+    interval: Option<(Duration, Duration)>,
+    options: &CopyOptions,
+    target: Option<(u32, u16, u32)>,
+) -> Result<AudioDecodeStats> {
+    let mut control = DecodeProgress {
+        options,
+        event: fvid_control::ProgressEvent {
+            packets: 0,
+            payload_bytes: 0,
+            done: false,
+        },
+    };
+    control.check()?;
+    if !options.metadata_set.is_empty()
+        || !options.metadata_delete.is_empty()
+        || !options.stream_metadata_set.is_empty()
+        || !options.stream_metadata_delete.is_empty()
+    {
+        return Err(invalid("raw PCM stream cannot apply metadata mutations"));
+    }
+    let selected = match options.streams.as_slice() {
+        [] => None,
+        [index] => Some(*index),
+        _ => return Err(invalid("select exactly one audio stream")),
+    };
+    if let Some(hook) = &options.progress {
+        hook.emit(control.event);
+    }
+    control.check()?;
+    decode_mp4_audio_reader_targeted(reader, output, interval, selected, &mut control, target)
+}
 use crate::owned_mp4_audio_normalization::coefficients as mp4_normalization_coefficients;
 type Mp4NormalizationTrack = crate::owned_mp4::Track;
 type Mp4NormalizationSampleIndex = crate::owned_mp4::SampleIndex;
@@ -575,6 +609,15 @@ pub fn decode_mp4_pcm_f64<R: Read + Seek>(
 }
 pub(crate) fn decode_mp4_pcm_f64_targeted<R:Read+Seek>(source:R,output:&mut impl Write,interval:Option<(Duration,Duration)>,options:&CopyOptions,target:Option<(u32,u16,u32)>)->Result<AudioDecodeStats> {
     precise::decode(source,output,interval,options,target)
+}
+pub(crate) fn decode_mp4_pcm_f64_reader_targeted<R: Read + Seek>(
+    reader: Mp4TimelineReader<R>,
+    output: &mut impl Write,
+    interval: Option<(Duration, Duration)>,
+    options: &CopyOptions,
+    target: Option<(u32, u16, u32)>,
+) -> Result<AudioDecodeStats> {
+    precise::decode_reader(reader, output, interval, options, target)
 }
 
 mod precise {
@@ -674,6 +717,40 @@ mod precise {
         let index = mp4_audio_index(&reader, selected)?;
         admit_audio_reader_with_interval(&reader, index, interval, options, target)?;
         decode_mp4_audio_reader_targeted(reader, output, interval, selected, &mut control,target)
+    }
+    pub(super) fn decode_reader<R: Read + Seek>(
+        reader: Mp4TimelineReader<R>,
+        output: &mut impl Write,
+        interval: Option<(Duration, Duration)>,
+        options: &CopyOptions,
+        target: Option<(u32, u16, u32)>,
+    ) -> Result<AudioDecodeStats> {
+        let mut control = DecodeProgress {
+            options,
+            event: fvid_control::ProgressEvent {
+                packets: 0,
+                payload_bytes: 0,
+                done: false,
+            },
+        };
+        control.check()?;
+        if !options.metadata_set.is_empty()
+            || !options.metadata_delete.is_empty()
+            || !options.stream_metadata_set.is_empty()
+            || !options.stream_metadata_delete.is_empty()
+        {
+            return Err(invalid("raw PCM stream cannot apply metadata mutations"));
+        }
+        let selected = match options.streams.as_slice() {
+            [] => None,
+            [index] => Some(*index),
+            _ => return Err(invalid("select exactly one audio stream")),
+        };
+        if let Some(hook) = &options.progress {
+            hook.emit(control.event);
+        }
+        control.check()?;
+        decode_mp4_audio_reader_targeted(reader, output, interval, selected, &mut control, target)
     }
     type Mp4PcmScalar = f64;
     type Mp4OutputResampler = crate::owned_resample_f64::Resampler<Vec<u8>>;

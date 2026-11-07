@@ -27,6 +27,14 @@ pub fn decode_matroska_pcm_f64<R: Read + Seek>(
 ) -> std::result::Result<AudioDecodeStats, Error> {
     precise::decode(source, output, interval, options)
 }
+pub(crate) fn decode_matroska_pcm_f64_reader<R: Read + Seek>(
+    reader: crate::owned_webm::WebmReader<R>,
+    output: &mut impl Write,
+    interval: Option<(Duration, Duration)>,
+    options: &CopyOptions,
+) -> std::result::Result<AudioDecodeStats, Error> {
+    precise::decode_reader(reader, output, interval, options)
+}
 mod precise {
     use super::*;
     use crate::owned_matroska_sample_clock::quantized_sample_matches as aac_quantized_sample_matches;
@@ -109,6 +117,39 @@ mod precise {
             ));
         }
         crate::owned_matroska_audio::admit_audio_reader_with_interval(&mut reader, index, interval, options)?;
+        decode_matroska_audio_reader_controlled(reader, output, interval, selected, &mut control)
+    }
+    pub(super) fn decode_reader<R: Read + Seek>(
+        reader: MatroskaTimelineReader<R>,
+        output: &mut impl Write,
+        interval: Option<(Duration, Duration)>,
+        options: &CopyOptions,
+    ) -> Result<AudioDecodeStats> {
+        let mut control = DecodeProgress {
+            options,
+            event: fvid_control::ProgressEvent {
+                packets: 0,
+                payload_bytes: 0,
+                done: false,
+            },
+        };
+        control.check()?;
+        if !options.metadata_set.is_empty()
+            || !options.metadata_delete.is_empty()
+            || !options.stream_metadata_set.is_empty()
+            || !options.stream_metadata_delete.is_empty()
+        {
+            return Err(invalid("raw PCM stream cannot apply metadata mutations"));
+        }
+        let selected = match options.streams.as_slice() {
+            [] => None,
+            [i] => Some(*i),
+            _ => return Err(invalid("select exactly one audio stream")),
+        };
+        if let Some(hook) = &options.progress {
+            hook.emit(control.event);
+        }
+        control.check()?;
         decode_matroska_audio_reader_controlled(reader, output, interval, selected, &mut control)
     }
     include!("owned_matroska_audio_timeline_impl.rs");

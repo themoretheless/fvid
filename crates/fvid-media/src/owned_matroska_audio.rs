@@ -649,6 +649,39 @@ pub(crate) fn decode_matroska_audio_pcm<R: Read + Seek>(
     }
     decode_matroska_audio_reader_controlled(reader, output, interval, selected, &mut control)
 }
+pub(crate) fn decode_matroska_audio_reader_pcm<R: Read + Seek>(
+    reader: MatroskaTimelineReader<R>,
+    output: &mut impl Write,
+    interval: Option<(Duration, Duration)>,
+    options: &CopyOptions,
+) -> Result<AudioDecodeStats> {
+    let mut control = DecodeProgress {
+        options,
+        event: ProgressEvent {
+            packets: 0,
+            payload_bytes: 0,
+            done: false,
+        },
+    };
+    control.check()?;
+    if !options.metadata_set.is_empty()
+        || !options.metadata_delete.is_empty()
+        || !options.stream_metadata_set.is_empty()
+        || !options.stream_metadata_delete.is_empty()
+    {
+        return Err(invalid("raw PCM stream cannot apply metadata mutations"));
+    }
+    let selected = match options.streams.as_slice() {
+        [] => None,
+        [index] => Some(*index),
+        _ => return Err(invalid("select exactly one audio stream")),
+    };
+    if let Some(hook) = &options.progress {
+        hook.emit(control.event);
+    }
+    control.check()?;
+    decode_matroska_audio_reader_controlled(reader, output, interval, selected, &mut control)
+}
 include!("owned_matroska_audio_timeline_impl.rs");
 
 impl From<crate::owned_webm::Error> for Error {

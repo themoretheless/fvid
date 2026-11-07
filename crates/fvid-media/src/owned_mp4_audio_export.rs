@@ -11,6 +11,13 @@ fn open(
     source: &Path,
     options: &CopyOptions,
 ) -> Result<crate::owned_mp4::Mp4Reader<BufReader<File>>> {
+    let file = File::open(source).map_err(|e| e.to_string())?;
+    open_from_file(file, options)
+}
+pub(crate) fn open_from_file(
+    file: File,
+    options: &CopyOptions,
+) -> Result<crate::owned_mp4::Mp4Reader<BufReader<File>>> {
     if options.cancel.as_ref().is_some_and(|c| c.is_cancelled()) {
         return Err("media operation cancelled".into());
     }
@@ -28,7 +35,7 @@ fn open(
         .metadata_bytes
         .min(options.max_controlled_bytes.unwrap_or(usize::MAX));
     let mut reader = crate::owned_mp4::Mp4Reader::open_indexed(
-        BufReader::new(File::open(source).map_err(|e| e.to_string())?),
+        BufReader::new(file),
         crate::owned_mp4::Limits {
             metadata_bytes,
             ..Default::default()
@@ -52,13 +59,14 @@ fn open(
     Ok(reader)
 }
 pub(crate) fn recognizes(source: &Path, options: &CopyOptions) -> Result<bool> {
+    use std::io::{Seek, SeekFrom};
     let mut prefix = [0; 8];
     let mut file = File::open(source).map_err(|e| e.to_string())?;
     if file.read_exact(&mut prefix).is_err() || !crate::owned_mp4::recognizes_prefix(&prefix) {
         return Ok(false);
     }
-    drop(file);
-    let reader = open(source, options)?;
+    file.seek(SeekFrom::Start(0)).map_err(|e| e.to_string())?;
+    let reader = open_from_file(file, options)?;
     Ok(recognizes_reader(&reader, options))
 }
 pub(crate) fn recognizes_reader(
@@ -95,7 +103,16 @@ pub(crate) fn try_descriptor_with_frames_for_decode(
     transform: Option<AudioDecodeTransform>,
     options: &CopyOptions,
 ) -> Result<Option<(usize, u32, u16, u32, String, bool, u64, Vec<u8>)>> {
-    let reader = open(source, options)?;
+    let file = File::open(source).map_err(|e| e.to_string())?;
+    try_descriptor_with_frames_from_file_for_decode(source, file, transform, options)
+}
+pub(crate) fn try_descriptor_with_frames_from_file_for_decode(
+    source: &Path,
+    file: File,
+    transform: Option<AudioDecodeTransform>,
+    options: &CopyOptions,
+) -> Result<Option<(usize, u32, u16, u32, String, bool, u64, Vec<u8>)>> {
+    let reader = open_from_file(file, options)?;
     if !recognizes_reader(&reader, options) {
         return Ok(None);
     }
@@ -278,7 +295,38 @@ fn descriptor_with_frames_from_reader_for_decode(
     transform: Option<AudioDecodeTransform>,
     options: &CopyOptions,
 ) -> Result<(usize, u32, u16, u32, String, bool, u64, Vec<u8>)> {
-    let (index, rate, channels, mask, codec, info, mut reader) =
+    let (index, rate, channels, mask, codec, precise, estimated_frames, info, _) =
+        descriptor_with_frames_and_reader_from_reader_for_decode(
+            source, reader, transform, options,
+        )?;
+    Ok((
+        index,
+        rate,
+        channels,
+        mask,
+        codec,
+        precise,
+        estimated_frames,
+        info,
+    ))
+}
+fn descriptor_with_frames_and_reader_from_reader_for_decode(
+    source: &Path,
+    reader: crate::owned_mp4::Mp4Reader<BufReader<File>>,
+    transform: Option<AudioDecodeTransform>,
+    options: &CopyOptions,
+) -> Result<(
+    usize,
+    u32,
+    u16,
+    u32,
+    String,
+    bool,
+    u64,
+    Vec<u8>,
+    crate::owned_mp4::Mp4Reader<BufReader<File>>,
+)> {
+    let (index, rate, channels, mask, codec, info, reader) =
         descriptor_and_reader_from_reader_for_decode(reader, transform, options)?;
     let track = &reader.tracks()[index];
     let interval = transform.and_then(|t| prefix(t, rate));
@@ -324,16 +372,7 @@ fn descriptor_with_frames_from_reader_for_decode(
         probe.metadata_delete.clear();
         probe.stream_metadata_set.clear();
         probe.stream_metadata_delete.clear();
-        let selected = options.streams.first().copied();
         let stats = if codec.starts_with("pcm_") && all_pcm {
-            let mut control = crate::owned_matroska_audio::DecodeProgress {
-                options: &probe,
-                event: fvid_control::ProgressEvent {
-                    packets: 0,
-                    payload_bytes: 0,
-                    done: false,
-                },
-            };
             crate::owned_mp4_audio::decode_mp4_pcm_f64_targeted(
                 std::io::BufReader::new(File::open(source).map_err(|e| e.to_string())?),
                 &mut std::io::sink(),
@@ -341,26 +380,13 @@ fn descriptor_with_frames_from_reader_for_decode(
                 &probe,
                 None,
             )
-            .map_err(|e| {
-                let _ = &mut control;
-                e.to_string()
-            })?
+            .map_err(|e| e.to_string())?
         } else {
-            let mut control = crate::owned_matroska_audio::DecodeProgress {
-                options: &probe,
-                event: fvid_control::ProgressEvent {
-                    packets: 0,
-                    payload_bytes: 0,
-                    done: false,
-                },
-            };
-            let _ = &mut reader;
-            crate::owned_mp4_audio::decode_mp4_audio_reader_targeted(
-                reader,
+            crate::owned_mp4_audio::decode_mp4_audio_pcm_targeted(
+                std::io::BufReader::new(File::open(source).map_err(|e| e.to_string())?),
                 &mut std::io::sink(),
                 interval,
-                selected,
-                &mut control,
+                &probe,
                 None,
             )
             .map_err(|e| e.to_string())?
@@ -382,6 +408,7 @@ fn descriptor_with_frames_from_reader_for_decode(
         precise,
         estimated_frames,
         info,
+        reader,
     ))
 }
 pub(crate) fn normalization_target(source:&Path,transform:AudioDecodeTransform,options:&CopyOptions,rate:u32,channels:u16,mask:u32)->Result<Option<(u32,u16,u32)>> {
@@ -389,6 +416,21 @@ pub(crate) fn normalization_target(source:&Path,transform:AudioDecodeTransform,o
     if !requested&&mask!=0 {return Ok(None);}
     let mut reader=open(source,options)?;
     let index=crate::owned_mp4_audio::mp4_audio_index(&reader,options.streams.first().copied()).map_err(|e|e.to_string())?;
+    normalization_target_from_reader(&mut reader,index,transform,options,rate,channels,mask)
+}
+fn normalization_target_from_reader(
+    reader: &mut crate::owned_mp4::Mp4Reader<BufReader<File>>,
+    index: usize,
+    transform: AudioDecodeTransform,
+    options: &CopyOptions,
+    rate: u32,
+    channels: u16,
+    mask: u32,
+) -> Result<Option<(u32, u16, u32)>> {
+    let requested = transform.channels.is_some() || transform.sample_rate.is_some();
+    if !requested && mask != 0 {
+        return Ok(None);
+    }
     let interval = prefix(transform, rate);
     let active_samples = crate::owned_mp4_audio::mp4_active_samples(&reader.tracks()[index], reader.movie_timescale(), interval, options.max_packets);
     let changing = reader.tracks()[index].description_changes_before(active_samples);
@@ -402,7 +444,7 @@ pub(crate) fn normalization_target(source:&Path,transform:AudioDecodeTransform,o
             }
             crate::owned_budget::check_rss_budget(options).map_err(|e| crate::owned_matroska_audio::invalid(&e))
         };
-        if crate::owned_mp4_audio::mp4_normalized_geometry_controlled_with_interval(&mut reader,index,interval,options.max_packets,&mut check).map_err(|e|e.to_string())?.is_some() {
+        if crate::owned_mp4_audio::mp4_normalized_geometry_controlled_with_interval(reader,index,interval,options.max_packets,&mut check).map_err(|e|e.to_string())?.is_some() {
             return Err("MP4 normalization requires an explicit destination speaker layout".into());
         }
         return Ok(None);
@@ -411,7 +453,7 @@ pub(crate) fn normalization_target(source:&Path,transform:AudioDecodeTransform,o
     let rate=transform.sample_rate.map(u32::try_from).transpose().map_err(|_|"invalid output rate")?.unwrap_or(rate);
     let output=transform.channels.map(u16::try_from).transpose().map_err(|_|"invalid output channels")?.unwrap_or(channels);
     let mask=if transform.channels.is_some() {crate::owned_pcm_channels::standard_mask(output).ok_or("unsupported output speaker layout")? as u32}else{mask};
-    crate::owned_mp4_audio::admit_audio_reader_with_interval(&reader, index, interval, options, Some((rate, output, mask))).map_err(|e| e.to_string())?;
+    crate::owned_mp4_audio::admit_audio_reader_with_interval(reader, index, interval, options, Some((rate, output, mask))).map_err(|e| e.to_string())?;
     Ok(Some((rate,output,mask)))
 }
 use crate::owned_adts_export::decoded_prefix as prefix;
@@ -514,10 +556,18 @@ pub(crate) fn apply(
     if destination.symlink_metadata().is_ok() {
         return Err("output already exists".into());
     }
-    let (_, source_rate, channels, mask, _, precise, source_frames, info) =
-        descriptor_with_frames_for_decode(source, Some(transform), options)?;
-    apply_from_descriptor(
+    let reader = open(source, options)?;
+    let (index, source_rate, channels, mask, _, precise, source_frames, info, reader) =
+        descriptor_with_frames_and_reader_from_reader_for_decode(
+            source,
+            reader,
+            Some(transform),
+            options,
+        )?;
+    apply_from_descriptor_and_reader(
         source,
+        reader,
+        index,
         destination,
         transform,
         options,
@@ -548,16 +598,24 @@ pub(crate) fn try_apply(
         return Err("controlled memory limit must be positive".into());
     }
     crate::owned_budget::check_rss_budget(options)?;
-    let Some((_, source_rate, channels, mask, _, precise, source_frames, info)) =
-        try_descriptor_with_frames_for_decode(source, Some(transform), options)?
-    else {
+    let reader = open(source, options)?;
+    if !recognizes_reader(&reader, options) {
         return Ok(None);
-    };
+    }
+    let (index, source_rate, channels, mask, _, precise, source_frames, info, reader) =
+        descriptor_with_frames_and_reader_from_reader_for_decode(
+            source,
+            reader,
+            Some(transform),
+            options,
+        )?;
     if destination.symlink_metadata().is_ok() {
         return Err("output already exists".into());
     }
-    apply_from_descriptor(
+    apply_from_descriptor_and_reader(
         source,
+        reader,
+        index,
         destination,
         transform,
         options,
@@ -570,8 +628,10 @@ pub(crate) fn try_apply(
     )
     .map(Some)
 }
-fn apply_from_descriptor(
+fn apply_from_descriptor_and_reader(
     source: &Path,
+    mut reader: crate::owned_mp4::Mp4Reader<BufReader<File>>,
+    index: usize,
     destination: &Path,
     transform: AudioDecodeTransform,
     options: &CopyOptions,
@@ -582,8 +642,16 @@ fn apply_from_descriptor(
     source_frames: u64,
     info: Vec<u8>,
 ) -> Result<AudioDecodeStats> {
-    let target=normalization_target(source,transform,options,source_rate,channels,mask)?;
-    let (rate,channels,mask)=target.unwrap_or((source_rate,channels,mask));
+    let target = normalization_target_from_reader(
+        &mut reader,
+        index,
+        transform,
+        options,
+        source_rate,
+        channels,
+        mask,
+    )?;
+    let (rate, channels, mask) = target.unwrap_or((source_rate, channels, mask));
     let stage2_frames = if rate != source_rate && source_rate > 0 {
         (u128::from(source_frames) * u128::from(rate)).div_ceil(u128::from(source_rate)) as u64
     } else {
@@ -618,19 +686,18 @@ fn apply_from_descriptor(
         mask,
         if precise { 64 } else { 32 },
         options,
-        |writer, options| {
-            let file = BufReader::new(File::open(source).map_err(|e| e.to_string())?);
+        move |writer, options| {
             let result = if precise {
-                crate::owned_mp4_audio::decode_mp4_pcm_f64_targeted(
-                    file,
+                crate::owned_mp4_audio::decode_mp4_pcm_f64_reader_targeted(
+                    reader,
                     writer,
                     prefix(transform, rate),
                     options,
                     target,
                 )
             } else {
-                crate::owned_mp4_audio::decode_mp4_audio_pcm_targeted(
-                    file,
+                crate::owned_mp4_audio::decode_mp4_audio_reader_pcm_targeted(
+                    reader,
                     writer,
                     prefix(transform, rate),
                     options,

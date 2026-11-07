@@ -141,8 +141,8 @@ pub(crate) fn apply_from_reader<R: Read + std::io::Seek>(
     if destination.symlink_metadata().is_ok() {
         return Err("output already exists".into());
     }
-    let (rate, channels, mask, frames, info) =
-        geometry_from_reader_for_decode(source, reader, index, Some(transform), options)?;
+    let (rate, channels, mask, frames, info, reader) =
+        geometry_and_reader_for_decode(source, reader, index, Some(transform), options)?;
     crate::owned_adts_export::check_spool_wave_export_budget(
         rate,
         channels,
@@ -158,9 +158,9 @@ pub(crate) fn apply_from_reader<R: Read + std::io::Seek>(
         channels,
         mask,
         options,
-        |writer, options| {
-            crate::owned_matroska_flac::decode_matroska_flac_pcm(
-                BufReader::new(File::open(source).map_err(|e| e.to_string())?),
+        move |writer, options| {
+            crate::owned_matroska_audio::decode_matroska_audio_reader_pcm(
+                reader,
                 writer,
                 prefix(transform, rate),
                 &decode_options(options),
@@ -236,11 +236,23 @@ pub(crate) fn geometry_with_mask_frames_and_info_for_decode(
 
 pub(crate) fn geometry_from_reader_for_decode<R: Read + std::io::Seek>(
     source: &Path,
-    mut reader: crate::owned_webm::WebmReader<R>,
+    reader: crate::owned_webm::WebmReader<R>,
     index: usize,
     transform: Option<AudioDecodeTransform>,
     options: &CopyOptions,
 ) -> Result<(u32, u16, u32, u64, Vec<u8>)> {
+    let (rate, channels, mask, estimated_frames, info, _) =
+        geometry_and_reader_for_decode(source, reader, index, transform, options)?;
+    Ok((rate, channels, mask, estimated_frames, info))
+}
+
+fn geometry_and_reader_for_decode<R: Read + std::io::Seek>(
+    source: &Path,
+    mut reader: crate::owned_webm::WebmReader<R>,
+    index: usize,
+    transform: Option<AudioDecodeTransform>,
+    options: &CopyOptions,
+) -> Result<(u32, u16, u32, u64, Vec<u8>, crate::owned_webm::WebmReader<R>)> {
     let track = reader
         .tracks
         .get(index)
@@ -264,7 +276,6 @@ pub(crate) fn geometry_from_reader_for_decode<R: Read + std::io::Seek>(
     let info = crate::owned_wave_metadata::matroska_source_info_from_reader(
         &mut reader, index, interval, options,
     )?;
-    drop(reader);
     if transform.is_some_and(|t| t.interval.is_some()) {
         let mut probe = decode_options(options);
         probe.progress = None;
@@ -282,7 +293,7 @@ pub(crate) fn geometry_from_reader_for_decode<R: Read + std::io::Seek>(
         )?;
         estimated_frames = stats.sample_frames;
     }
-    Ok((rate, channels, mask, estimated_frames, info))
+    Ok((rate, channels, mask, estimated_frames, info, reader))
 }
 
 pub(crate) fn channel_mask(source: &Path, options: &CopyOptions) -> Result<u32> {

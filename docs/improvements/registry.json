@@ -1,8 +1,8 @@
 {
   "target": 1000,
   "counting_rule": "One independently confirmed problem or useful capability; fixture variants and baseline integration repairs are excluded. Only accepted entries count.",
-  "accepted_count": 939,
-  "next_id": "FVID-0940",
+  "accepted_count": 944,
+  "next_id": "FVID-0945",
   "entries": [
     {
       "id": "FVID-0001",
@@ -10520,6 +10520,61 @@
       "result": "Returned the validated StreamReader, rate, channels, and mask from validate_configuration_channels_and_reader when packet byte limits are unbounded and forwarded them to decode_reader_to_wave.",
       "status": "accepted",
       "validation": "batch-641-validation.json"
+    },
+    {
+      "id": "FVID-0940",
+      "batch": 642,
+      "title": "Reuse the scanned WebmReader across geometry_and_reader_for_decode and apply_from_reader in Matroska audio exports",
+      "source": "crates/fvid-media/src/owned_matroska_audio.rs",
+      "regression": "tests/matroska_mp4_g711_descriptor_and_reader_reuse.rs",
+      "before": "apply_from_reader across Matroska AAC, Opus, FLAC, ALAC, MP3, and PCM export modules scanned and admitted the WebmReader in geometry_from_reader_for_decode, dropped it, and reopened and re-indexed the Matroska file in decode_matroska_audio_pcm / decode_matroska_pcm_f64.",
+      "result": "Added decode_matroska_audio_reader_pcm and decode_matroska_pcm_f64_reader and returned the scanned WebmReader from geometry_and_reader_for_decode so apply_from_reader decodes directly from the indexed reader.",
+      "status": "accepted",
+      "validation": "batch-642-validation.json"
+    },
+    {
+      "id": "FVID-0941",
+      "batch": 642,
+      "title": "Reuse the indexed Mp4Reader across descriptor_with_frames_and_reader_from_reader_for_decode and apply_from_descriptor_and_reader in owned_mp4_audio_export",
+      "source": "crates/fvid-media/src/owned_mp4_audio_export.rs",
+      "regression": "tests/matroska_mp4_g711_descriptor_and_reader_reuse.rs",
+      "before": "owned_mp4_audio_export::try_apply opened an indexed Mp4Reader and validated audio track descriptors, dropped the Mp4Reader, and reopened and re-indexed the MP4 container inside decode_mp4_audio_pcm / decode_mp4_pcm_f64.",
+      "result": "Added decode_mp4_audio_reader_pcm_targeted and decode_mp4_pcm_f64_reader_targeted in owned_mp4_audio and forwarded the indexed Mp4Reader from descriptor_with_frames_and_reader_from_reader_for_decode into apply_from_descriptor_and_reader.",
+      "status": "accepted",
+      "validation": "batch-642-validation.json"
+    },
+    {
+      "id": "FVID-0942",
+      "batch": 642,
+      "title": "Reuse the open File handle when probing MP4 audio descriptors in owned_audio_plan and owned_container_loudness",
+      "source": "crates/fvid-media/src/owned_audio_plan.rs",
+      "regression": "tests/matroska_mp4_g711_descriptor_and_reader_reuse.rs",
+      "before": "owned_audio_plan::source_descriptor_for_decode and owned_container_loudness::geometry_with_frames_unqualified read the 12-byte MP4 header from an open File handle and then reopened the path in try_descriptor_with_frames_for_decode.",
+      "result": "Added open_from_file and try_descriptor_with_frames_from_file_for_decode in owned_mp4_audio_export and reused the rewound File handle in owned_audio_plan and owned_container_loudness.",
+      "status": "accepted",
+      "validation": "batch-642-validation.json"
+    },
+    {
+      "id": "FVID-0943",
+      "batch": 642,
+      "title": "Reuse the open File handle when inspecting G.711 WAVE descriptors in owned_audio_plan and owned_container_loudness",
+      "source": "crates/fvid-media/src/owned_g711_wave_export.rs",
+      "regression": "tests/matroska_mp4_g711_descriptor_and_reader_reuse.rs",
+      "before": "owned_audio_plan::source_descriptor_for_decode and owned_container_loudness::geometry_with_frames_unqualified read the 12-byte RIFF/WAVE header from an open File handle and then reopened the file in owned_g711_wave_export::try_descriptor_for_decode.",
+      "result": "Added try_descriptor_from_file_for_decode in owned_g711_wave_export and reused the open File handle across G.711 law detection and non-G.711 WAVE fallback in owned_audio_plan and owned_container_loudness.",
+      "status": "accepted",
+      "validation": "batch-642-validation.json"
+    },
+    {
+      "id": "FVID-0944",
+      "batch": 642,
+      "title": "Reuse the open File handle when opening Matroska audio readers in owned_audio_plan and owned_container_loudness",
+      "source": "crates/fvid-media/src/owned_container_loudness.rs",
+      "regression": "tests/matroska_mp4_g711_descriptor_and_reader_reuse.rs",
+      "before": "owned_audio_plan::source_descriptor_for_decode and owned_container_loudness::geometry_with_frames_unqualified read the 4-byte EBML signature from an open File handle and then reopened the file to construct the Matroska WebmReader.",
+      "result": "Rewound the open File handle to offset 0 and passed it directly into owned_matroska_audio::open_audio_reader in owned_audio_plan and owned_container_loudness.",
+      "status": "accepted",
+      "validation": "batch-642-validation.json"
     }
   ],
   "pending_count": 126

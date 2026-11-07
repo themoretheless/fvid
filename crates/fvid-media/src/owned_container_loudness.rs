@@ -120,28 +120,48 @@ pub fn geometry_with_frames_unqualified(
             "owned container loudness requires one audio stream and no metadata edits".into(),
         );
     }
-    let (head, head_len) = crate::owned_audio_plan::read_source_head(source)?;
+    use std::io::{Seek, SeekFrom};
+    let mut head_file = File::open(source).map_err(|e| e.to_string())?;
+    let mut head = [0u8; 12];
+    let mut head_len = 0;
+    while head_len < head.len() {
+        match head_file.read(&mut head[head_len..]) {
+            Ok(0) => break,
+            Ok(n) => head_len += n,
+            Err(e) if e.kind() == std::io::ErrorKind::Interrupted => continue,
+            Err(e) => return Err(e.to_string()),
+        }
+    }
     if head_len < 4 {
         return Err("source is not an owned audio container".into());
     }
     let head_slice = &head[..head_len];
     let (_, rate, channels, mask, codec, frames, info) =
         if head_len >= 8 && crate::owned_mp4::recognizes_prefix(&head[..8]) {
+            head_file
+                .seek(SeekFrom::Start(0))
+                .map_err(|e| e.to_string())?;
             let (index, rate, channels, mask, codec, _, frames, info) =
-                crate::owned_mp4_audio_export::try_descriptor_with_frames_for_decode(
-                    source, None, options,
+                crate::owned_mp4_audio_export::try_descriptor_with_frames_from_file_for_decode(
+                    source, head_file, None, options,
                 )?
                 .ok_or("source is not a supported Matroska audio container")?;
             (index, rate, channels, mask, codec, frames, Some(info))
         } else if matches!(&head[..4], b"RIFF" | b"RIFX" | b"RF64") {
+            head_file
+                .seek(SeekFrom::Start(0))
+                .map_err(|e| e.to_string())?;
             let (rate, channels, mask, codec, frames, _) =
-                crate::owned_g711_wave_export::try_descriptor_for_decode(source, None, options)?
-                    .ok_or("source is not an owned audio container")?;
+                crate::owned_g711_wave_export::try_descriptor_from_file_for_decode(
+                    head_file, None, options,
+                )?
+                .ok_or("source is not an owned audio container")?;
             if frames == 0 {
                 return Err("loudness requires at least one audio frame".into());
             }
             (0, rate, channels, mask, codec.into(), frames, None)
         } else if head_slice.starts_with(b"OggS") {
+            drop(head_file);
             let (index, rate, channels, mask, codec, frames, _) =
                 crate::owned_ogg_audio_export::descriptor_for_decode(source, None, options)?;
             let effective_mask = if mask == 0 && channels <= 2 {
@@ -151,6 +171,7 @@ pub fn geometry_with_frames_unqualified(
             };
             (index, rate, channels, effective_mask, codec.into(), frames, None)
         } else if head_slice.starts_with(b"fLaC") {
+            drop(head_file);
             let (rate, channels, mask, frames, _) =
                 crate::owned_raw_flac::descriptor_for_decode(source, None, options)?;
             let effective_mask = if mask == 0 && channels <= 2 {
@@ -162,14 +183,19 @@ pub fn geometry_with_frames_unqualified(
         } else if !(head_len >= 7 && crate::owned_aac::adts::header(&head[..7]).is_some())
             && crate::owned_mpeg_audio::has_signature(&head[..head_len.min(10)])
         {
+            drop(head_file);
             let (rate, channels, codec, frames, _) =
                 crate::owned_raw_mp3::descriptor_for_decode(source, None, options)?;
             let mask = crate::owned_pcm_channels::standard_mask(channels).unwrap_or(0) as u32;
             (0, rate, channels, mask, codec.into(), frames, None)
         } else if head[..4] == [0x1a, 0x45, 0xdf, 0xa3] {
+            head_file
+                .seek(SeekFrom::Start(0))
+                .map_err(|e| e.to_string())?;
             let (index, rate, channels, mask, codec, _, frames, info) =
-                crate::owned_audio_plan::matroska_descriptor_for_decode(source, None, options)?
-                    .ok_or("source is not a supported Matroska audio container")?;
+                crate::owned_audio_plan::matroska_descriptor_from_file_for_decode(
+                    source, head_file, None, options,
+                )?;
             (index, rate, channels, mask, codec, frames, Some(info))
         } else {
             return Err("source is not an owned audio container".into());

@@ -4790,7 +4790,11 @@ See `batch-628-validation.json`.
 - **FVID-0938**: Expose `owned_wave_loudness::measure_input_for_normalization` so pass-1 WAVE loudnorm measurement reuses the already-opened and inspected `Input` (`crates/fvid-media/src/owned_loudnorm/report.rs`).
 - **FVID-0939**: Reuse the validated ADTS `StreamReader` and channel mask in `owned_adts_loudnorm::apply` when packet byte limits are unbounded (`crates/fvid-media/src/owned_adts_loudnorm.rs`).
 
+## Batch 642 (FVID-0940..0944)
 
-
-
+- **FVID-0940**: Reuse the scanned `WebmReader` across `geometry_and_reader_for_decode` and `apply_from_reader` in Matroska audio exports (`crates/fvid-media/src/owned_matroska_audio.rs`).
+- **FVID-0941**: Reuse the indexed `Mp4Reader` across `descriptor_with_frames_and_reader_from_reader_for_decode` and `apply_from_descriptor_and_reader` in `owned_mp4_audio_export` (`crates/fvid-media/src/owned_mp4_audio_export.rs`).
+- **FVID-0942**: Reuse the open `File` handle when probing MP4 audio descriptors in `owned_audio_plan` and `owned_container_loudness` (`crates/fvid-media/src/owned_audio_plan.rs`).
+- **FVID-0943**: Reuse the open `File` handle when inspecting G.711 WAVE descriptors in `owned_audio_plan` and `owned_container_loudness` (`crates/fvid-media/src/owned_g711_wave_export.rs`).
+- **FVID-0944**: Reuse the open `File` handle when opening Matroska audio readers in `owned_audio_plan` and `owned_container_loudness` (`crates/fvid-media/src/owned_container_loudness.rs`).
 
