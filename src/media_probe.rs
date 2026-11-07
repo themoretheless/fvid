@@ -238,6 +238,7 @@ fn matroska_with_limits(
                 "S_TEXT/WEBVTT" => "webvtt",
                 "S_VOBSUB" => "dvd_subtitle",
                 "S_HDMV/PGS" => "hdmv_pgs_subtitle",
+                "S_DVBSUB" => "dvb_subtitle",
                 other => other,
             }
             .to_owned(),

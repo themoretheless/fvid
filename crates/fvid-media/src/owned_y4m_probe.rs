@@ -68,6 +68,11 @@ pub fn try_y4m_with_options(
         if token.starts_with('I') && !matches!(token, "Ip" | "I?") {
             return Ok(None);
         }
+        if let Some(value) = token.strip_prefix("XCOLORRANGE=")
+            && !matches!(value, "FULL" | "LIMITED")
+        {
+            return Err("invalid Y4M colour range".into());
+        }
     }
     probe_y4m_with_options(source, options).map(Some)
 }
@@ -101,6 +106,8 @@ pub fn probe_y4m_with_options(
         return Err("empty Y4M input".into());
     }
     let header = crate::owned_y4m::Header::parse(&line).map_err(|e| e.to_string())?;
+    header.pixel_aspect().map_err(|e| e.to_string())?;
+    header.full_range().map_err(|e| e.to_string())?;
     let frame_len = header.frame_len().map_err(|e| e.to_string())?;
     if frame_len > options.max_packet_bytes {
         return Err("Y4M frame byte length exceeds packet byte limit".into());

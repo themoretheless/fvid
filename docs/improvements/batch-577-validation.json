@@ -1,0 +1,29 @@
+{
+  "status": "accepted",
+  "accepted_ids": [
+    "FVID-0615",
+    "FVID-0616",
+    "FVID-0617",
+    "FVID-0618",
+    "FVID-0619"
+  ],
+  "count_delta": 5,
+  "accepted_count": 619,
+  "next_id": "FVID-0620",
+  "qualification": [
+    {
+      "name": "subtitles-case-entities-dvbsub-and-y4m-probe",
+      "command": [
+        "cargo",
+        "test",
+        "--features",
+        "player",
+        "--test",
+        "subtitles_case_entities_dvbsub_and_y4m_probe"
+      ],
+      "exit_code": 0,
+      "passed": 5,
+      "ignored": 0
+    }
+  ]
+}

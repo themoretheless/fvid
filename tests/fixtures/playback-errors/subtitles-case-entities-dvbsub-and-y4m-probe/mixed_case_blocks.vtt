@@ -1,0 +1,14 @@
+webvtt
+
+note ignored comment block
+00:00:00.100 --> 00:00:00.500
+should not appear
+
+style
+::cue { color: yellow; }
+
+region
+id:r1
+
+00:00:01.000 --> 00:00:02.500
+Tom &amp; Jerry: &quot;Hi&#x21;&quot;&nbsp;forever

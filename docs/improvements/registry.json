@@ -1,8 +1,8 @@
 {
   "target": 1000,
   "counting_rule": "One independently confirmed problem or useful capability; fixture variants and baseline integration repairs are excluded. Only accepted entries count.",
-  "accepted_count": 614,
-  "next_id": "FVID-0615",
+  "accepted_count": 619,
+  "next_id": "FVID-0620",
   "entries": [
     {
       "id": "FVID-0001",
@@ -6945,6 +6945,61 @@
       "result": "Override seek_time(Duration) in XmAudioReader with div_ceil(1_000_000_000) in millisecond units.",
       "status": "accepted",
       "validation": "batch-576-validation.json"
+    },
+    {
+      "id": "FVID-0615",
+      "batch": 577,
+      "title": "Case-insensitive [Events] and WEBVTT header sniffing in subtitles::parse",
+      "source": "src/subtitles.rs",
+      "regression": "tests/subtitles_case_entities_dvbsub_and_y4m_probe.rs",
+      "before": "subtitles::parse checked text.contains(\"[Events]\") and text.trim_start().starts_with(\"WEBVTT\") case-sensitively, routing ASS/SSA scripts with [events] or [EVENTS] headers and WebVTT files with lowercase webvtt headers to parse_srt (returning zero cues).",
+      "result": "Sniff WEBVTT and [Events] headers case-insensitively in subtitles::parse.",
+      "status": "accepted",
+      "validation": "batch-577-validation.json"
+    },
+    {
+      "id": "FVID-0616",
+      "batch": 577,
+      "title": "Decode named and numeric HTML character entities in subtitles::plain after stripping tags",
+      "source": "src/subtitles.rs",
+      "regression": "tests/subtitles_case_entities_dvbsub_and_y4m_probe.rs",
+      "before": "subtitles::plain stripped <...> tags and {...} override blocks without decoding HTML character entities (&amp;, &lt;, &gt;, &quot;, &apos;, &nbsp;, &#39;, &#x21;), leaving raw entity markup visible in rendered SRT, WebVTT, ASS/SSA, MP4 tx3g, and Matroska text subtitles.",
+      "result": "Decode standard named (&amp;, &lt;, &gt;, &quot;, &apos;, &nbsp;) and decimal/hexadecimal numeric HTML character entities in subtitles::plain after tag stripping.",
+      "status": "accepted",
+      "validation": "batch-577-validation.json"
+    },
+    {
+      "id": "FVID-0617",
+      "batch": 577,
+      "title": "Case-insensitive WebVTT header and NOTE/STYLE/REGION block skipping in parse_webvtt and owned_subtitle::try_convert_srt_inner",
+      "source": "crates/fvid-media/src/owned_subtitle_impl.rs",
+      "regression": "tests/subtitles_case_entities_dvbsub_and_y4m_probe.rs",
+      "before": "parse_webvtt and owned_subtitle::try_convert_srt_inner matched WEBVTT, NOTE, STYLE, and REGION block headers with case-sensitive comparisons, failing or misparsing WebVTT files that used lowercase or mixed-case block keywords.",
+      "result": "Match WEBVTT, NOTE, STYLE, and REGION block headers case-insensitively in both subtitles::parse_webvtt and owned_subtitle::try_convert_srt_inner.",
+      "status": "accepted",
+      "validation": "batch-577-validation.json"
+    },
+    {
+      "id": "FVID-0618",
+      "batch": 577,
+      "title": "Normalize Matroska S_DVBSUB codec ID to 'dvb_subtitle' and register in owned_codec_metadata",
+      "source": "crates/fvid-media/src/owned_webm_probe.rs",
+      "regression": "tests/subtitles_case_entities_dvbsub_and_y4m_probe.rs",
+      "before": "media_probe and owned_webm_probe returned the raw Matroska CodecID 'S_DVBSUB' instead of 'dvb_subtitle', and owned_codec_metadata::descriptor(\"dvb_subtitle\") returned None.",
+      "result": "Map 'S_DVBSUB' to 'dvb_subtitle' in media_probe and owned_webm_probe and register 'dvb_subtitle' in owned_codec_metadata::descriptor.",
+      "status": "accepted",
+      "validation": "batch-577-validation.json"
+    },
+    {
+      "id": "FVID-0619",
+      "batch": 577,
+      "title": "Validate Y4M pixel_aspect() and full_range() tokens during owned_y4m_probe inspection",
+      "source": "crates/fvid-media/src/owned_y4m_probe.rs",
+      "regression": "tests/subtitles_case_entities_dvbsub_and_y4m_probe.rs",
+      "before": "owned_y4m_probe::probe_y4m_with_options validated Y4M dimensions, chroma format, and frame_rate() but omitted header.pixel_aspect() and header.full_range(), allowing malformed A1:0 or XCOLORRANGE=BOGUS Y4M headers to pass probe inspection.",
+      "result": "Validate header.pixel_aspect() and header.full_range() in owned_y4m_probe::try_y4m_with_options and probe_y4m_with_options.",
+      "status": "accepted",
+      "validation": "batch-577-validation.json"
     }
   ]
 }

@@ -142,6 +142,7 @@ pub fn descriptor(name: &str) -> Option<CodecDescriptor> {
         "webvtt" => ("webvtt", &[]),
         "dvd_subtitle" => ("dvd_subtitle", &[]),
         "hdmv_pgs_subtitle" => ("hdmv_pgs_subtitle", &[]),
+        "dvb_subtitle" => ("dvb_subtitle", &[]),
         "bin_data" => ("bin_data", &[]),
         _ => return None,
     };

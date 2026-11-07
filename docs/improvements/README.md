@@ -4166,5 +4166,16 @@ See `batch-575-validation.json`.
 
 See `batch-576-validation.json`.
 
+## Batch 577 — FVID-0615..0619: Case-insensitive `[Events]` and `WEBVTT` subtitle sniffing, HTML entity decoding in `subtitles::plain`, case-insensitive WebVTT `NOTE`/`STYLE`/`REGION` conversion, Matroska `S_DVBSUB` -> `dvb_subtitle` probe normalization, and Y4M `pixel_aspect`/`full_range` probe validation
+
+- **FVID-0615** — Case-insensitive `[Events]` and `WEBVTT` header sniffing in `subtitles::parse` (`src/subtitles.rs`, `tests/subtitles_case_entities_dvbsub_and_y4m_probe.rs`).
+- **FVID-0616** — Decode named and numeric HTML character entities in `subtitles::plain` after stripping tags (`src/subtitles.rs`, `tests/subtitles_case_entities_dvbsub_and_y4m_probe.rs`).
+- **FVID-0617** — Case-insensitive `WEBVTT` header and `NOTE`/`STYLE`/`REGION` block skipping in `parse_webvtt` and `owned_subtitle::try_convert_srt_inner` (`src/subtitles.rs`, `crates/fvid-media/src/owned_subtitle_impl.rs`, `tests/subtitles_case_entities_dvbsub_and_y4m_probe.rs`).
+- **FVID-0618** — Normalize Matroska `S_DVBSUB` codec ID to `"dvb_subtitle"` and register in `owned_codec_metadata` (`src/media_probe.rs`, `crates/fvid-media/src/owned_webm_probe.rs`, `crates/fvid-media/src/owned_codec_metadata.rs`, `tests/subtitles_case_entities_dvbsub_and_y4m_probe.rs`).
+- **FVID-0619** — Validate Y4M `pixel_aspect()` and `full_range()` tokens during `owned_y4m_probe` inspection (`crates/fvid-media/src/owned_y4m_probe.rs`, `tests/subtitles_case_entities_dvbsub_and_y4m_probe.rs`).
+
+See `batch-577-validation.json`.
+
+
 
 

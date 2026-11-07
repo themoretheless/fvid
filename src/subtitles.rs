@@ -26,9 +26,16 @@ pub const DELAY_STEP: Duration = Duration::from_millis(50);
 /// Read cues from whatever subtitle text is handed over, sniffing the format.
 pub fn parse(text: &str) -> Vec<Cue> {
     let text = text.strip_prefix('\u{feff}').unwrap_or(text);
-    if text.trim_start().starts_with("WEBVTT") {
+    if text
+        .trim_start()
+        .get(..6)
+        .is_some_and(|head| head.eq_ignore_ascii_case("WEBVTT"))
+    {
         parse_webvtt(text)
-    } else if text.contains("[Events]") {
+    } else if text
+        .lines()
+        .any(|line| line.trim().eq_ignore_ascii_case("[events]"))
+    {
         parse_ass(text)
     } else if is_sami(text) {
         parse_sami(text)
@@ -88,6 +95,58 @@ fn range(line: &str) -> Option<(Duration, Duration)> {
     (start < end).then_some((start, end))
 }
 
+fn decode_entities(text: &str) -> String {
+    let mut out = String::with_capacity(text.len());
+    let mut rest = text;
+    while let Some(amp) = rest.find('&') {
+        out.push_str(&rest[..amp]);
+        rest = &rest[amp..];
+        let Some(end) = rest.find(';').filter(|&end| (2..=12).contains(&end)) else {
+            out.push('&');
+            rest = &rest[1..];
+            continue;
+        };
+        let entity = &rest[1..end];
+        let decoded = if entity.eq_ignore_ascii_case("amp") {
+            Some('&')
+        } else if entity.eq_ignore_ascii_case("lt") {
+            Some('<')
+        } else if entity.eq_ignore_ascii_case("gt") {
+            Some('>')
+        } else if entity.eq_ignore_ascii_case("quot") {
+            Some('"')
+        } else if entity.eq_ignore_ascii_case("apos") {
+            Some('\'')
+        } else if entity.eq_ignore_ascii_case("nbsp") {
+            Some('\u{a0}')
+        } else if let Some(hex) = entity
+            .strip_prefix("#x")
+            .or_else(|| entity.strip_prefix("#X"))
+        {
+            u32::from_str_radix(hex, 16)
+                .ok()
+                .filter(|&code| code != 0)
+                .and_then(char::from_u32)
+        } else if let Some(dec) = entity.strip_prefix('#') {
+            dec.parse::<u32>()
+                .ok()
+                .filter(|&code| code != 0)
+                .and_then(char::from_u32)
+        } else {
+            None
+        };
+        if let Some(ch) = decoded {
+            out.push(ch);
+            rest = &rest[end + 1..];
+        } else {
+            out.push('&');
+            rest = &rest[1..];
+        }
+    }
+    out.push_str(rest);
+    out
+}
+
 /// Drop `<i>`-style tags and ASS `{…}` override blocks, and turn `\N` into a
 /// real line break.
 pub(crate) fn plain(text: &str) -> String {
@@ -112,7 +171,8 @@ pub(crate) fn plain(text: &str) -> String {
             }
         }
     }
-    out.replace("\\N", "\n")
+    decode_entities(&out)
+        .replace("\\N", "\n")
         .replace("\\n", "\n")
         .replace("\\h", "\u{a0}")
         .split('\n')
@@ -147,15 +207,18 @@ pub fn parse_webvtt(text: &str) -> Vec<Cue> {
     while index < lines.len() {
         let line = lines[index].trim();
         index += 1;
-        if line == "NOTE"
-            || line.starts_with("NOTE ")
-            || line.starts_with("NOTE\t")
-            || line == "STYLE"
-            || line.starts_with("STYLE ")
-            || line.starts_with("STYLE\t")
-            || line == "REGION"
-            || line.starts_with("REGION ")
-            || line.starts_with("REGION\t")
+        if line.eq_ignore_ascii_case("NOTE")
+            || line
+                .get(..5)
+                .is_some_and(|head| head.eq_ignore_ascii_case("NOTE ") || head.eq_ignore_ascii_case("NOTE\t"))
+            || line.eq_ignore_ascii_case("STYLE")
+            || line
+                .get(..6)
+                .is_some_and(|head| head.eq_ignore_ascii_case("STYLE ") || head.eq_ignore_ascii_case("STYLE\t"))
+            || line.eq_ignore_ascii_case("REGION")
+            || line
+                .get(..7)
+                .is_some_and(|head| head.eq_ignore_ascii_case("REGION ") || head.eq_ignore_ascii_case("REGION\t"))
         {
             while index < lines.len() && !lines[index].trim().is_empty() {
                 index += 1;

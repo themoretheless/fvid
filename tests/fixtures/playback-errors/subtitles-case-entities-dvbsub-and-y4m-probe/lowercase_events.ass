@@ -1,0 +1,6 @@
+[Script Info]
+ScriptType: v4.00+
+
+[events]
+Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
+Dialogue: 0,0:00:01.00,0:00:03.00,Default,,0,0,0,,Rock &amp; Roll&#39;s &lt;best&gt;

@@ -1394,9 +1394,10 @@ fn try_convert_srt_inner(
         let first_trimmed = first.trim();
         if is_vtt && !saw_vtt_header {
             saw_vtt_header = true;
-            if first_trimmed == "WEBVTT"
-                || first_trimmed.starts_with("WEBVTT ")
-                || first_trimmed.starts_with("WEBVTT\t")
+            if first_trimmed.eq_ignore_ascii_case("WEBVTT")
+                || first_trimmed
+                    .get(..7)
+                    .is_some_and(|head| head.eq_ignore_ascii_case("WEBVTT ") || head.eq_ignore_ascii_case("WEBVTT\t"))
             {
                 let rest: Vec<_> = lines.collect();
                 let Some(arrow_pos) = rest.iter().position(|line| line.contains("-->")) else {
@@ -1433,15 +1434,18 @@ fn try_convert_srt_inner(
             }
         }
         if is_vtt
-            && (first_trimmed == "NOTE"
-                || first_trimmed.starts_with("NOTE ")
-                || first_trimmed.starts_with("NOTE\t")
-                || first_trimmed == "STYLE"
-                || first_trimmed.starts_with("STYLE ")
-                || first_trimmed.starts_with("STYLE\t")
-                || first_trimmed == "REGION"
-                || first_trimmed.starts_with("REGION ")
-                || first_trimmed.starts_with("REGION\t"))
+            && (first_trimmed.eq_ignore_ascii_case("NOTE")
+                || first_trimmed
+                    .get(..5)
+                    .is_some_and(|head| head.eq_ignore_ascii_case("NOTE ") || head.eq_ignore_ascii_case("NOTE\t"))
+                || first_trimmed.eq_ignore_ascii_case("STYLE")
+                || first_trimmed
+                    .get(..6)
+                    .is_some_and(|head| head.eq_ignore_ascii_case("STYLE ") || head.eq_ignore_ascii_case("STYLE\t"))
+                || first_trimmed.eq_ignore_ascii_case("REGION")
+                || first_trimmed
+                    .get(..7)
+                    .is_some_and(|head| head.eq_ignore_ascii_case("REGION ") || head.eq_ignore_ascii_case("REGION\t")))
         {
             continue;
         }
