@@ -1,0 +1,29 @@
+{
+  "status": "accepted",
+  "accepted_ids": [
+    "FVID-0610",
+    "FVID-0611",
+    "FVID-0612",
+    "FVID-0613",
+    "FVID-0614"
+  ],
+  "count_delta": 5,
+  "accepted_count": 614,
+  "next_id": "FVID-0615",
+  "qualification": [
+    {
+      "name": "mp4-g711-probe-id3-vorbis-and-smf-xm-seek",
+      "command": [
+        "cargo",
+        "test",
+        "--features",
+        "player",
+        "--test",
+        "mp4_g711_probe_id3_vorbis_and_smf_xm_seek"
+      ],
+      "exit_code": 0,
+      "passed": 4,
+      "ignored": 0
+    }
+  ]
+}

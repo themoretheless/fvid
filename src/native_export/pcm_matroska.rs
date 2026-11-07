@@ -167,7 +167,7 @@ pub(crate) fn extract_source_pcm_metadata_with_interval_packet_and_memory_limit(
             if value.is_empty() || value.contains('\0') || value.len() > 1024 {
                 continue;
             }
-            if key.eq_ignore_ascii_case("ILNG") {
+            if key.eq_ignore_ascii_case("ILNG") || key.eq_ignore_ascii_case("language") {
                 if value.len() <= 128 {
                     base.1 = value.clone();
                 }

@@ -174,7 +174,7 @@ fn bare_flac_wave_exports_and_loudnorm_preserve_and_edit_source_vorbis_comments(
         info.metadata.get("track").map(String::as_str),
         Some("3/12")
     );
-    assert_eq!(info.metadata.get("ILNG").map(String::as_str), Some("eng"));
+    assert_eq!(info.metadata.get("language").map(String::as_str), Some("eng"));
 
     // 2. trim input.flac output.wav preserves source Vorbis comments and applies metadata edits.
     let trimmed_wav = temp_out("trim");
@@ -193,7 +193,7 @@ fn bare_flac_wave_exports_and_loudnorm_preserve_and_edit_source_vorbis_comments(
     );
     assert!(!trimmed_info.metadata.contains_key("comment"));
     assert_eq!(
-        trimmed_info.metadata.get("ILNG").map(String::as_str),
+        trimmed_info.metadata.get("language").map(String::as_str),
         Some("eng")
     );
 
@@ -228,7 +228,7 @@ fn bare_flac_wave_exports_and_loudnorm_preserve_and_edit_source_vorbis_comments(
             Some("3/12")
         );
         assert_eq!(
-            norm_info.metadata.get("ILNG").map(String::as_str),
+            norm_info.metadata.get("language").map(String::as_str),
             Some("eng")
         );
     }

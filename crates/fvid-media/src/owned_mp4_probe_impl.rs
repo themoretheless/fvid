@@ -224,6 +224,8 @@ pub(crate) fn try_mp4_with_options(
             b"av01" => "av1".into(),
             b"text" => "bin_data".into(),
             b"raw " => "pcm_u8".into(),
+            b"alaw" => "pcm_alaw".into(),
+            b"ulaw" => "pcm_mulaw".into(),
             b"alac" => "alac".into(),
             b"sowt" | b"twos" | b"in24" | b"in32" => {
                 let little = track.codec == *b"sowt"

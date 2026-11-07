@@ -202,7 +202,7 @@ fn bare_mp3_wave_exports_and_loudnorm_preserve_and_edit_source_id3_tags() {
         info.metadata.get("track").map(String::as_str),
         Some("4/10")
     );
-    assert_eq!(info.metadata.get("ILNG").map(String::as_str), Some("eng"));
+    assert_eq!(info.metadata.get("language").map(String::as_str), Some("eng"));
 
     // 2. trim input.mp3 output.wav preserves source ID3 tags and applies metadata edits.
     let trimmed_wav = temp_out("trim");
@@ -221,7 +221,7 @@ fn bare_mp3_wave_exports_and_loudnorm_preserve_and_edit_source_id3_tags() {
     );
     assert!(!trimmed_info.metadata.contains_key("comment"));
     assert_eq!(
-        trimmed_info.metadata.get("ILNG").map(String::as_str),
+        trimmed_info.metadata.get("language").map(String::as_str),
         Some("eng")
     );
 
@@ -256,7 +256,7 @@ fn bare_mp3_wave_exports_and_loudnorm_preserve_and_edit_source_id3_tags() {
             Some("4/10")
         );
         assert_eq!(
-            norm_info.metadata.get("ILNG").map(String::as_str),
+            norm_info.metadata.get("language").map(String::as_str),
             Some("eng")
         );
     }

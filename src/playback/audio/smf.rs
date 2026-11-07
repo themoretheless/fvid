@@ -162,6 +162,14 @@ impl AudioStream for SmfAudioReader {
         self.presentation_floor = 0;
     }
 
+    fn seek_time(&mut self, target: Duration) -> i64 {
+        let end = (self.packet_count() as u64).saturating_mul(WINDOW_MILLISECONDS);
+        let millis = (target.as_nanos() * u128::from(WINDOW_TIMESCALE))
+            .div_ceil(1_000_000_000)
+            .min(u128::from(end)) as i64;
+        self.seek_to(millis)
+    }
+
     fn seek_to(&mut self, pts: i64) -> i64 {
         self.window = self.window_of(pts);
         self.presentation_floor = self.window as i64 * WINDOW_MILLISECONDS as i64;

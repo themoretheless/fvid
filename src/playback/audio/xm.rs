@@ -190,6 +190,14 @@ impl AudioStream for XmAudioReader {
         self.presentation_floor = 0;
     }
 
+    fn seek_time(&mut self, target: Duration) -> i64 {
+        let end = self.end_pts();
+        let millis = (target.as_nanos() * u128::from(xm::PACKET_TIMESCALE))
+            .div_ceil(1_000_000_000)
+            .min(u128::from(end.max(0) as u64)) as i64;
+        self.seek_to(millis)
+    }
+
     fn seek_to(&mut self, pts: i64) -> i64 {
         let end = self.end_pts();
         if pts.max(0) >= end {

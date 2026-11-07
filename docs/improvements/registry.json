@@ -1,8 +1,8 @@
 {
   "target": 1000,
   "counting_rule": "One independently confirmed problem or useful capability; fixture variants and baseline integration repairs are excluded. Only accepted entries count.",
-  "accepted_count": 609,
-  "next_id": "FVID-0610",
+  "accepted_count": 614,
+  "next_id": "FVID-0615",
   "entries": [
     {
       "id": "FVID-0001",
@@ -6890,6 +6890,61 @@
       "result": "Resolve parenthesized or bare numeric ID3v1 genre indices in ID3v2 TCON frames via id3v1_genre_name.",
       "status": "accepted",
       "validation": "batch-575-validation.json"
+    },
+    {
+      "id": "FVID-0610",
+      "batch": 576,
+      "title": "Normalize MP4 'alaw' and 'ulaw' audio sample entry FourCCs to 'pcm_alaw' and 'pcm_mulaw' in owned_mp4_probe_impl",
+      "source": "crates/fvid-media/src/owned_mp4_probe_impl.rs",
+      "regression": "tests/mp4_g711_probe_id3_vorbis_and_smf_xm_seek.rs",
+      "before": "owned_mp4_probe_impl::audio_codec lacked 'alaw' and 'ulaw' match arms, returning raw 'alaw' and 'ulaw' codec strings instead of 'pcm_alaw' and 'pcm_mulaw' even though Mp4AudioReader and owned_mp4_audio_export support G.711 A-law and mu-law tracks.",
+      "result": "Map b\"alaw\" to \"pcm_alaw\" and b\"ulaw\" to \"pcm_mulaw\" in owned_mp4_probe_impl::audio_codec.",
+      "status": "accepted",
+      "validation": "batch-576-validation.json"
+    },
+    {
+      "id": "FVID-0611",
+      "batch": 576,
+      "title": "Expand id3v1_genre_name to full standard 80-entry ID3v1 genre table (0..=79)",
+      "source": "crates/fvid-media/src/owned_mpeg_audio.rs",
+      "regression": "tests/mp4_g711_probe_id3_vorbis_and_smf_xm_seek.rs",
+      "before": "id3v1_genre_name only included 22 partial entries, dropping standard ID3v1 genre bytes and numeric ID3v2 TCON references such as 19 ('Industrial'), 20 ('Alternative'), 43 ('Punk'), and 79 ('Hard Rock').",
+      "result": "Populate all 80 standard ID3v1 genre codes (0..=79) in id3v1_genre_name.",
+      "status": "accepted",
+      "validation": "batch-576-validation.json"
+    },
+    {
+      "id": "FVID-0612",
+      "batch": 576,
+      "title": "Normalize YEAR, ORGANIZATION, and ENCODED-BY / ENCODED_BY metadata aliases across Vorbis comments, ID3v2 TXXX, and FileTags",
+      "source": "crates/fvid-media/src/owned_flac_layout.rs",
+      "regression": "tests/mp4_g711_probe_id3_vorbis_and_smf_xm_seek.rs",
+      "before": "Vorbis comment probing and WAVE INFO export, ID3v2 TXXX frames, and FileTags::field did not map common aliases YEAR -> 'date', ORGANIZATION -> 'publisher', or ENCODED-BY / ENCODED_BY -> 'encoder'.",
+      "result": "Normalize YEAR to 'date', ORGANIZATION to 'publisher', and ENCODED-BY / ENCODED_BY to 'encoder' in owned_flac_layout, owned_ogg_opus_export, owned_mpeg_audio, and owned_file_tags.",
+      "status": "accepted",
+      "validation": "batch-576-validation.json"
+    },
+    {
+      "id": "FVID-0613",
+      "batch": 576,
+      "title": "Implement sub-millisecond div_ceil seek_time(Duration) in SmfAudioReader",
+      "source": "src/playback/audio/smf.rs",
+      "regression": "tests/mp4_g711_probe_id3_vorbis_and_smf_xm_seek.rs",
+      "before": "SmfAudioReader relied on the default AudioStream::seek_time floor division at timescale 1_000, flooring sub-millisecond targets such as 99_000_001 ns to 99 ms (window 0) instead of ceiling to 100 ms (window 1).",
+      "result": "Override seek_time(Duration) in SmfAudioReader with div_ceil(1_000_000_000) in millisecond units.",
+      "status": "accepted",
+      "validation": "batch-576-validation.json"
+    },
+    {
+      "id": "FVID-0614",
+      "batch": 576,
+      "title": "Implement sub-millisecond div_ceil seek_time(Duration) in XmAudioReader",
+      "source": "src/playback/audio/xm.rs",
+      "regression": "tests/mp4_g711_probe_id3_vorbis_and_smf_xm_seek.rs",
+      "before": "XmAudioReader relied on the default AudioStream::seek_time floor division at timescale 1_000, flooring sub-millisecond targets such as 119_000_001 ns to 119 ms (row 0) instead of ceiling to 120 ms (row 1).",
+      "result": "Override seek_time(Duration) in XmAudioReader with div_ceil(1_000_000_000) in millisecond units.",
+      "status": "accepted",
+      "validation": "batch-576-validation.json"
     }
   ]
 }

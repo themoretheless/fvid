@@ -105,6 +105,9 @@ pub fn probe_metadata_from_entries<'a>(
             "tracknumber" | "part_number" => "track",
             "albumartist" => "album_artist",
             "discnumber" => "disc",
+            "year" => "date",
+            "organization" => "publisher",
+            "encoded-by" | "encoded_by" => "encoder",
             other => other,
         };
         container
@@ -127,7 +130,7 @@ pub fn wave_info_from_extra(extra: &[u8]) -> std::result::Result<Vec<u8>, String
             continue;
         }
         if key.len() == 4
-            && !matches!(key.to_ascii_uppercase().as_str(), "DATE")
+            && !matches!(key.to_ascii_uppercase().as_str(), "DATE" | "YEAR")
             && crate::owned_wave_metadata::tag_for_key(key).is_ok()
         {
             entries.push((key.clone(), value.clone()));
@@ -138,13 +141,21 @@ pub fn wave_info_from_extra(extra: &[u8]) -> std::result::Result<Vec<u8>, String
         ("ARTIST", "artist"),
         ("COMMENT", "comment"),
         ("DATE", "date"),
+        ("YEAR", "date"),
         ("ALBUM", "album"),
         ("GENRE", "genre"),
         ("COPYRIGHT", "copyright"),
         ("ENCODER", "encoder"),
+        ("ENCODED-BY", "encoder"),
+        ("ENCODED_BY", "encoder"),
         ("TRACKNUMBER", "track"),
+        ("PART_NUMBER", "track"),
+        ("TRACK", "track"),
         ("LANGUAGE", "ILNG"),
     ] {
+        if entries.iter().any(|(k, _)| k.eq_ignore_ascii_case(target)) {
+            continue;
+        }
         if let Some((_, value)) = comments
             .iter()
             .find(|(k, _)| k.eq_ignore_ascii_case(source))
@@ -153,6 +164,9 @@ pub fn wave_info_from_extra(extra: &[u8]) -> std::result::Result<Vec<u8>, String
                 entries.push((target.to_string(), value.clone()));
             }
         }
+    }
+    if entries.len() > 64 {
+        entries.truncate(64);
     }
     crate::owned_wave_metadata::edit_info_chunks(&[], &[], &entries)
 }

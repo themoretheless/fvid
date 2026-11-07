@@ -84,7 +84,7 @@ fn mix_and_merge_audio_preserve_and_edit_first_input_metadata_across_wave_and_ma
         Some("2/8")
     );
     assert_eq!(
-        info_mix_wave_wav.metadata.get("ILNG").map(String::as_str),
+        info_mix_wave_wav.metadata.get("language").map(String::as_str),
         Some("jpn")
     );
     assert_eq!(
@@ -203,7 +203,7 @@ fn mix_and_merge_audio_preserve_and_edit_first_input_metadata_across_wave_and_ma
         Some("5/9")
     );
     assert_eq!(
-        info_merge_mp4_wav.metadata.get("ILNG").map(String::as_str),
+        info_merge_mp4_wav.metadata.get("language").map(String::as_str),
         Some("fra")
     );
 
@@ -284,7 +284,7 @@ fn mix_and_merge_audio_preserve_and_edit_first_input_metadata_across_wave_and_ma
         Some("FVidMixMergeMkaSynth")
     );
     assert_eq!(
-        info_mix_mka_wav.metadata.get("ILNG").map(String::as_str),
+        info_mix_mka_wav.metadata.get("language").map(String::as_str),
         Some("deu")
     );
     assert_eq!(

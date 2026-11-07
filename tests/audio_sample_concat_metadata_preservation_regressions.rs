@@ -78,7 +78,7 @@ fn sample_domain_audio_concat_preserves_and_edits_first_segment_metadata_across_
         Some("1/4")
     );
     assert_eq!(
-        info_wave_wav.metadata.get("ILNG").map(String::as_str),
+        info_wave_wav.metadata.get("language").map(String::as_str),
         Some("jpn")
     );
     assert_eq!(
@@ -175,7 +175,7 @@ fn sample_domain_audio_concat_preserves_and_edits_first_segment_metadata_across_
         Some("3/7")
     );
     assert_eq!(
-        info_mp4_wav.metadata.get("ILNG").map(String::as_str),
+        info_mp4_wav.metadata.get("language").map(String::as_str),
         Some("fra")
     );
     assert!(!info_mp4_wav.metadata.contains_key("comment"));
@@ -258,7 +258,7 @@ fn sample_domain_audio_concat_preserves_and_edits_first_segment_metadata_across_
         Some("FVidConcatMkaSynth")
     );
     assert_eq!(
-        info_mka_wav.metadata.get("ILNG").map(String::as_str),
+        info_mka_wav.metadata.get("language").map(String::as_str),
         Some("deu")
     );
     assert_eq!(

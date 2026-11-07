@@ -106,7 +106,7 @@ fn wave_mp4_and_matroska_audio_exports_preserve_and_edit_source_wave_info_tags_a
         Some("Wave Native Copyright")
     );
     assert_eq!(
-        probed_wav_decode.metadata.get("ILNG").map(String::as_str),
+        probed_wav_decode.metadata.get("language").map(String::as_str),
         Some("eng")
     );
     assert_eq!(
@@ -176,7 +176,7 @@ fn wave_mp4_and_matroska_audio_exports_preserve_and_edit_source_wave_info_tags_a
         Some("5/12")
     );
     assert_eq!(
-        probed_mp4_decode.metadata.get("ILNG").map(String::as_str),
+        probed_mp4_decode.metadata.get("language").map(String::as_str),
         Some("fra")
     );
 
@@ -209,7 +209,7 @@ fn wave_mp4_and_matroska_audio_exports_preserve_and_edit_source_wave_info_tags_a
         Some("MP4 Source Album")
     );
     assert_eq!(
-        probed_mp4_edited.metadata.get("ILNG").map(String::as_str),
+        probed_mp4_edited.metadata.get("language").map(String::as_str),
         Some("fra")
     );
     assert!(!probed_mp4_edited.metadata.contains_key("comment"));
@@ -313,7 +313,7 @@ fn wave_mp4_and_matroska_audio_exports_preserve_and_edit_source_wave_info_tags_a
         Some("3/9")
     );
     assert_eq!(
-        probed_mka_decode.metadata.get("ILNG").map(String::as_str),
+        probed_mka_decode.metadata.get("language").map(String::as_str),
         Some("deu")
     );
     assert_eq!(

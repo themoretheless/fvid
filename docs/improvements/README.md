@@ -4156,4 +4156,15 @@ See `batch-574-validation.json`.
 
 See `batch-575-validation.json`.
 
+## Batch 576 — FVID-0610..0614: MP4 `alaw`/`ulaw` G.711 probe normalization, full 80-entry ID3v1/ID3v2 genre table, Vorbis/ID3 `YEAR`/`ORGANIZATION`/`ENCODED-BY` metadata aliases, and `SmfAudioReader` / `XmAudioReader` sub-millisecond `seek_time`
+
+- **FVID-0610** — Normalize MP4 `alaw` and `ulaw` audio sample entry FourCCs to `"pcm_alaw"` and `"pcm_mulaw"` in `owned_mp4_probe_impl` (`crates/fvid-media/src/owned_mp4_probe_impl.rs`, `tests/mp4_g711_probe_id3_vorbis_and_smf_xm_seek.rs`).
+- **FVID-0611** — Expand `id3v1_genre_name` to the full standard 80-entry ID3v1 genre table (`0..=79`) (`crates/fvid-media/src/owned_mpeg_audio.rs`, `tests/mp4_g711_probe_id3_vorbis_and_smf_xm_seek.rs`).
+- **FVID-0612** — Normalize `YEAR` -> `"date"`, `ORGANIZATION` -> `"publisher"`, and `ENCODED-BY` / `ENCODED_BY` -> `"encoder"` across Vorbis comments, ID3v2 `TXXX`, and `FileTags::field` (`crates/fvid-media/src/owned_flac_layout.rs`, `crates/fvid-media/src/owned_ogg_opus_export.rs`, `crates/fvid-media/src/owned_mpeg_audio.rs`, `crates/fvid-media/src/owned_file_tags.rs`, `tests/mp4_g711_probe_id3_vorbis_and_smf_xm_seek.rs`).
+- **FVID-0613** — Implement sub-millisecond `div_ceil` `seek_time(Duration)` in `SmfAudioReader` (`src/playback/audio/smf.rs`, `tests/mp4_g711_probe_id3_vorbis_and_smf_xm_seek.rs`).
+- **FVID-0614** — Implement sub-millisecond `div_ceil` `seek_time(Duration)` in `XmAudioReader` (`src/playback/audio/xm.rs`, `tests/mp4_g711_probe_id3_vorbis_and_smf_xm_seek.rs`).
+
+See `batch-576-validation.json`.
+
+
 
