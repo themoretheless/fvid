@@ -1,8 +1,8 @@
 {
   "target": 1000,
   "counting_rule": "One independently confirmed problem or useful capability; fixture variants and baseline integration repairs are excluded. Only accepted entries count.",
-  "accepted_count": 624,
-  "next_id": "FVID-0625",
+  "accepted_count": 629,
+  "next_id": "FVID-0630",
   "entries": [
     {
       "id": "FVID-0001",
@@ -7055,6 +7055,61 @@
       "result": "Require !v.is_empty() && !v.contains('\\0') when searching Vorbis comments in owned_flac_layout::wave_info_from_extra.",
       "status": "accepted",
       "validation": "batch-578-validation.json"
+    },
+    {
+      "id": "FVID-0625",
+      "batch": 579,
+      "title": "Skip empty Ogg comment values in info_for_tags, owned_ogg_opus::Program, and owned_ogg_audio_catalog",
+      "source": "crates/fvid-media/src/owned_ogg_opus_export.rs",
+      "regression": "tests/ogg_mp3_wave_metadata.rs",
+      "before": "owned_ogg_opus_export::info_for_tags, owned_ogg_opus::Program::from_ogg, and owned_ogg_audio_catalog::from_ogg used OpusTags::get(key), which returned the first matching comment even when empty, writing empty RIFF INFO tags, hiding subsequent non-empty TITLE/LANGUAGE values, and blocking fallback aliases such as YEAR -> date.",
+      "result": "Use OpusTags::get_all(key).find(|v| !v.is_empty() && !v.contains('\\0')) so empty Ogg comments are skipped in favor of the first non-empty value.",
+      "status": "accepted",
+      "validation": "batch-579-validation.json"
+    },
+    {
+      "id": "FVID-0626",
+      "batch": 579,
+      "title": "Populate AudioTrack name and language from Vorbis comment header in owned_ogg_vorbis::Program",
+      "source": "crates/fvid-media/src/owned_ogg_vorbis.rs",
+      "regression": "tests/ogg_mp3_wave_metadata.rs",
+      "before": "owned_ogg_vorbis::Program::from_ogg hardcoded AudioTrack { name: String::new(), language: String::new() } instead of parsing the Vorbis comment packet, losing track TITLE and LANGUAGE when opening Ogg Vorbis streams directly.",
+      "result": "Parse the Vorbis comment packet in owned_ogg_vorbis::Program::from_ogg and populate AudioTrack.name and AudioTrack.language from the first non-empty TITLE and LANGUAGE comments.",
+      "status": "accepted",
+      "validation": "batch-579-validation.json"
+    },
+    {
+      "id": "FVID-0627",
+      "batch": 579,
+      "title": "Cap RIFF INFO entries at 64 while preserving canonical tags in Mp3::wave_info and info_for_file_tags",
+      "source": "crates/fvid-media/src/owned_mpeg_audio.rs",
+      "regression": "tests/ogg_mp3_wave_metadata.rs",
+      "before": "Mp3::wave_info and owned_wave_metadata::info_for_file_tags passed all 4-character custom tags plus canonical tags to edit_info_chunks without capping at 64 entries, causing WAVE export to fail with 'at most 64 container metadata mutations' when a file carried more than 64 tags.",
+      "result": "Drain excess custom entries from the front of entries when entries.len() > 64 in Mp3::wave_info and owned_wave_metadata::info_for_file_tags so canonical tags at the tail are preserved within the 64-entry RIFF INFO limit.",
+      "status": "accepted",
+      "validation": "batch-579-validation.json"
+    },
+    {
+      "id": "FVID-0628",
+      "batch": 579,
+      "title": "Skip empty RIFF INFO entries in probe_wave_with_options",
+      "source": "crates/fvid-media/src/owned_probe.rs",
+      "regression": "tests/ogg_mp3_wave_metadata.rs",
+      "before": "probe_wave_with_options inserted RIFF INFO entries into MediaInfo.metadata even when the NUL-trimmed text was empty, unlike MP4, Matroska, FLAC, Ogg, and MPEG probes.",
+      "result": "Skip empty NUL-trimmed RIFF INFO strings (!text.is_empty()) in probe_wave_with_options.",
+      "status": "accepted",
+      "validation": "batch-579-validation.json"
+    },
+    {
+      "id": "FVID-0629",
+      "batch": 579,
+      "title": "Skip empty ID3v2 text, TXXX, and COMM frames in owned_mpeg_audio::parse_id3v2_into",
+      "source": "crates/fvid-media/src/owned_mpeg_audio.rs",
+      "regression": "tests/ogg_mp3_wave_metadata.rs",
+      "before": "parse_id3v2_into inserted empty decoded strings via container.entry(...).or_insert(val), causing an empty ID3v2 frame (such as an empty TIT2 or TYER) to block a subsequent non-empty frame or ID3v1 fallback for the same canonical key.",
+      "result": "Filter out empty decoded ID3v2 strings (.filter(|v| !v.is_empty())) across TXXX, COMM, and standard text frames in parse_id3v2_into.",
+      "status": "accepted",
+      "validation": "batch-579-validation.json"
     }
   ]
 }

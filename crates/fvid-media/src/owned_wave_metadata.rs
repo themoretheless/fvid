@@ -165,6 +165,10 @@ pub fn info_for_file_tags(
     {
         entries.push(("ILNG".into(), track_language.to_owned()));
     }
+    if entries.len() > 64 {
+        let excess = entries.len() - 64;
+        entries.drain(0..excess);
+    }
     edit_info_chunks(&[], &[], &entries)
 }
 

@@ -351,13 +351,31 @@ impl Program {
         let mut tracks: Vec<AudioTrack> = choices
             .into_iter()
             .map(|i| {
-                let data = &ogg.chains()[i].packets[0].data;
+                let chain = &ogg.chains()[i];
+                let data = &chain.packets[0].data;
                 let shape = geometry(data).ok();
+                let tags = chain
+                    .packets
+                    .get(1)
+                    .and_then(|p| p.data.strip_prefix(COMMENT))
+                    .and_then(|bytes| {
+                        let mut raw = b"OpusTags".to_vec();
+                        raw.extend_from_slice(bytes);
+                        fvid_opus::OpusTags::parse(&raw).ok()
+                    });
                 AudioTrack {
                     sample_rate: shape.map_or(0, |s| s.sample_rate),
                     channels: shape.map_or(0, |s| s.channels),
-                    name: String::new(),
-                    language: String::new(),
+                    name: tags
+                        .as_ref()
+                        .and_then(|t| t.get_all("TITLE").find(|v| !v.is_empty()))
+                        .unwrap_or("")
+                        .into(),
+                    language: tags
+                        .as_ref()
+                        .and_then(|t| t.get_all("LANGUAGE").find(|v| !v.is_empty()))
+                        .unwrap_or("")
+                        .into(),
                 }
             })
             .collect();

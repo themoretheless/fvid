@@ -722,6 +722,10 @@ impl Mp3 {
                 }
             }
         }
+        if entries.len() > 64 {
+            let excess = entries.len() - 64;
+            entries.drain(0..excess);
+        }
         crate::owned_wave_metadata::edit_info_chunks(&[], &[], &entries)
     }
 }
@@ -898,7 +902,7 @@ fn parse_id3v2_into(
                             if let Some((desc_raw, val_raw)) = split_id3_terminated(enc, rest) {
                                 if let (Some(desc), Some(val)) = (
                                     decode_id3_text(enc, desc_raw),
-                                    decode_id3_text(enc, val_raw),
+                                    decode_id3_text(enc, val_raw).filter(|v| !v.is_empty()),
                                 ) {
                                     let lower = desc.to_ascii_lowercase();
                                     let canonical = match lower.as_str() {
@@ -923,7 +927,7 @@ fn parse_id3v2_into(
                             let val_raw = split_id3_terminated(enc, rest)
                                 .map(|(_, v)| v)
                                 .unwrap_or(rest);
-                            if let Some(val) = decode_id3_text(enc, val_raw) {
+                            if let Some(val) = decode_id3_text(enc, val_raw).filter(|v| !v.is_empty()) {
                                 container.entry("comment".into()).or_insert(val);
                             }
                         }
@@ -944,7 +948,7 @@ fn parse_id3v2_into(
                         _ => None,
                     } {
                         if let Some((&enc, rest)) = body.split_first() {
-                            if let Some(mut val) = decode_id3_text(enc, rest) {
+                            if let Some(mut val) = decode_id3_text(enc, rest).filter(|v| !v.is_empty()) {
                                 if key == "genre" {
                                     let inner = val
                                         .strip_prefix('(')

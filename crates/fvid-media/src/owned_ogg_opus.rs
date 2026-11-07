@@ -165,8 +165,16 @@ impl Program {
                 tracks.push(AudioTrack {
                     sample_rate: 48000,
                     channels: u16::from(head.channel_count),
-                    name: tags.get("TITLE").unwrap_or("").into(),
-                    language: tags.get("LANGUAGE").unwrap_or("").into(),
+                    name: tags
+                        .get_all("TITLE")
+                        .find(|v| !v.is_empty())
+                        .unwrap_or("")
+                        .into(),
+                    language: tags
+                        .get_all("LANGUAGE")
+                        .find(|v| !v.is_empty())
+                        .unwrap_or("")
+                        .into(),
                 });
             }
         }

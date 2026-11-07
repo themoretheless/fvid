@@ -4186,6 +4186,17 @@ See `batch-577-validation.json`.
 
 See `batch-578-validation.json`.
 
+## Batch 579 — FVID-0625..0629: Non-empty Ogg comment selection, Vorbis `AudioTrack` title/language population, 64-entry RIFF `INFO` cap in MP3 and `FileTags` WAVE export, empty RIFF `INFO` filtering in `probe_wave`, and empty ID3v2 frame filtering in `owned_mpeg_audio`
+
+- **FVID-0625** — Skip empty Ogg comment values in `info_for_tags`, `owned_ogg_opus::Program`, and `owned_ogg_audio_catalog` (`crates/fvid-media/src/owned_ogg_opus_export.rs`, `crates/fvid-media/src/owned_ogg_opus.rs`, `crates/fvid-media/src/owned_ogg_audio_catalog.rs`, `tests/ogg_mp3_wave_metadata.rs`).
+- **FVID-0626** — Populate `AudioTrack` `name` and `language` from the Vorbis comment header in `owned_ogg_vorbis::Program` (`crates/fvid-media/src/owned_ogg_vorbis.rs`, `tests/ogg_mp3_wave_metadata.rs`).
+- **FVID-0627** — Cap RIFF `INFO` entries at 64 while preserving canonical tags in `Mp3::wave_info` and `info_for_file_tags` (`crates/fvid-media/src/owned_mpeg_audio.rs`, `crates/fvid-media/src/owned_wave_metadata.rs`, `tests/ogg_mp3_wave_metadata.rs`).
+- **FVID-0628** — Skip empty RIFF `INFO` entries in `probe_wave_with_options` (`crates/fvid-media/src/owned_probe.rs`, `tests/ogg_mp3_wave_metadata.rs`).
+- **FVID-0629** — Skip empty ID3v2 text, `TXXX`, and `COMM` frames in `owned_mpeg_audio::parse_id3v2_into` (`crates/fvid-media/src/owned_mpeg_audio.rs`, `tests/ogg_mp3_wave_metadata.rs`).
+
+See `batch-579-validation.json`.
+
+
 
 
 

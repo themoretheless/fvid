@@ -363,10 +363,11 @@ pub(crate) fn info_for_tags(tags: &fvid_opus::OpusTags) -> Result<Vec<u8>> {
         if entries.iter().any(|(k, _)| k.eq_ignore_ascii_case(target)) {
             continue;
         }
-        if let Some(value) = tags.get(source) {
-            if !value.contains('\0') {
-                entries.push((target.to_string(), value.to_string()));
-            }
+        if let Some(value) = tags
+            .get_all(source)
+            .find(|v| !v.is_empty() && !v.contains('\0'))
+        {
+            entries.push((target.to_string(), value.to_string()));
         }
     }
     if entries.len() > 64 {

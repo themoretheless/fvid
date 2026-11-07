@@ -79,12 +79,12 @@ pub fn from_ogg(ogg: &Ogg) -> Result<Vec<Track>> {
                 channels,
                 name: tags
                     .as_ref()
-                    .and_then(|t| t.get("TITLE"))
+                    .and_then(|t| t.get_all("TITLE").find(|v| !v.is_empty()))
                     .unwrap_or("")
                     .into(),
                 language: tags
                     .as_ref()
-                    .and_then(|t| t.get("LANGUAGE"))
+                    .and_then(|t| t.get_all("LANGUAGE").find(|v| !v.is_empty()))
                     .unwrap_or("")
                     .into(),
             },

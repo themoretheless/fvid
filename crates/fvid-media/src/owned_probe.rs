@@ -401,7 +401,9 @@ pub fn probe_wave_with_options(
                 let text = String::from_utf8_lossy(&bytes)
                     .trim_end_matches('\0')
                     .to_owned();
-                metadata.insert(key.to_owned(), text);
+                if !text.is_empty() {
+                    metadata.insert(key.to_owned(), text);
+                }
                 cursor = next;
             }
         }

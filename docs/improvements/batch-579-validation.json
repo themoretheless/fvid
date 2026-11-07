@@ -1,0 +1,27 @@
+{
+  "status": "accepted",
+  "accepted_ids": [
+    "FVID-0625",
+    "FVID-0626",
+    "FVID-0627",
+    "FVID-0628",
+    "FVID-0629"
+  ],
+  "count_delta": 5,
+  "accepted_count": 629,
+  "next_id": "FVID-0630",
+  "qualification": [
+    {
+      "name": "ogg-mp3-wave-metadata",
+      "command": [
+        "cargo",
+        "test",
+        "--test",
+        "ogg_mp3_wave_metadata"
+      ],
+      "exit_code": 0,
+      "passed": 5,
+      "ignored": 0
+    }
+  ]
+}
