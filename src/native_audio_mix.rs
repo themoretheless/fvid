@@ -148,12 +148,12 @@ fn validate_and_inspect_source_with_options(
     if options.max_controlled_bytes.is_none()
         && crate::native_pcm::is_wave_reader(&mut wave_file)?
     {
-        use std::io::{Seek, SeekFrom};
-        let probe_opts = strip_output_controls(options);
-        crate::native_plan::decode_audio_with_options(source, &Default::default(), &probe_opts)
-            .map_err(|e| invalid(&e))?;
-        wave_file.seek(SeekFrom::Start(0))?;
+        if options.streams.iter().any(|&s| s != 0) {
+            return Err(invalid("WAVE has only stream 0"));
+        }
         let info = crate::native_pcm::inspect(&mut wave_file, options.cancel.as_ref())?;
+        drop(wave_file);
+        info.validate_decode()?;
         let frame = usize::from(info.frame_bytes());
         if frame == 0 || (65536usize.min(options.max_packet_bytes) / frame * frame) == 0 {
             return Err(invalid(
@@ -161,8 +161,11 @@ fn validate_and_inspect_source_with_options(
             ));
         }
         Ok((info.sample_rate, info.channels, info.channel_mask))
-    } else if options.max_controlled_bytes.is_none() && crate::native_media::is_owned_audio_source_with_options(source, options)? {
+    } else if {
         drop(wave_file);
+        options.max_controlled_bytes.is_none()
+            && crate::native_media::is_owned_audio_source_with_options(source, options)?
+    } {
         let probe_opts = strip_output_controls(options);
         crate::native_plan::decode_audio_with_options(source, &Default::default(), &probe_opts)
             .map_err(|e| invalid(&e))?;

@@ -1,8 +1,8 @@
 {
   "target": 1000,
   "counting_rule": "One independently confirmed problem or useful capability; fixture variants and baseline integration repairs are excluded. Only accepted entries count.",
-  "accepted_count": 819,
-  "next_id": "FVID-0820",
+  "accepted_count": 824,
+  "next_id": "FVID-0825",
   "entries": [
     {
       "id": "FVID-0001",
@@ -9200,7 +9200,62 @@
       "result": "is_owned_audio_trim_source_with_interval_and_options reads the 8-byte prefix once up front, short-circuiting empty/short files and skipping the container fallback reopen for non-MP4/Matroska inputs.",
       "status": "accepted",
       "validation": "batch-617-validation.json"
+    },
+    {
+      "id": "FVID-0820",
+      "batch": 618,
+      "title": "Inspect WAVE once in native_audio_mix::validate_and_inspect_source_with_options instead of calling decode_audio_with_options",
+      "source": "src/native_audio_mix.rs",
+      "regression": "tests/native_mix_export_and_lossless_single_open.rs",
+      "before": "native_audio_mix::validate_and_inspect_source_with_options opened the WAVE source, called native_plan::decode_audio_with_options (reopening and inspecting the same WAVE file), and then inspected it a second time.",
+      "result": "validate_and_inspect_source_with_options validates stream selection and decode admission directly on the WaveInfo inspected from the already-open file handle.",
+      "status": "accepted",
+      "validation": "batch-618-validation.json"
+    },
+    {
+      "id": "FVID-0821",
+      "batch": 618,
+      "title": "Select the MP4 audio track directly from the open Mp4Reader in native_audio_mix::concat::segment_packet_count",
+      "source": "src/native_audio_mix/concat.rs",
+      "regression": "tests/native_mix_export_and_lossless_single_open.rs",
+      "before": "segment_packet_count opened an Mp4Reader and then called constant_audio_source_info_selected_with_options(source, ...), which reopened and re-indexed the MP4 file just to obtain the audio stream index.",
+      "result": "segment_packet_count opens Mp4Reader::open_indexed once and resolves mp4_audio_index and ensure_constant_description directly on the open reader.",
+      "status": "accepted",
+      "validation": "batch-618-validation.json"
+    },
+    {
+      "id": "FVID-0822",
+      "batch": 618,
+      "title": "Close the 9-byte Y4M prefix probe handle before delegating to native_probe in native_export::validate_video_selection_with_options",
+      "source": "src/native_export.rs",
+      "regression": "tests/native_mix_export_and_lossless_single_open.rs",
+      "before": "validate_video_selection_with_options kept its File handle open across native_probe::probe_with_options for non-Y4M inputs.",
+      "result": "validate_video_selection_with_options scopes the 9-byte prefix read so the handle is closed before invoking native_probe.",
+      "status": "accepted",
+      "validation": "batch-618-validation.json"
+    },
+    {
+      "id": "FVID-0823",
+      "batch": 618,
+      "title": "Eliminate redundant aac_source_info_selected_with_options call in native_export::trim_audio_pcm_with_controls",
+      "source": "src/native_export.rs",
+      "regression": "tests/native_mix_export_and_lossless_single_open.rs",
+      "before": "trim_audio_pcm_with_controls called constant_audio_source_info_selected_with_interval_and_options and then, when info.codec == \"aac\", immediately called aac_source_info_selected_with_options to re-run the same AAC inspection.",
+      "result": "trim_audio_pcm_with_controls relies on the single constant_audio_source_info_selected_with_interval_and_options pass before export_pcm_selected.",
+      "status": "accepted",
+      "validation": "batch-618-validation.json"
+    },
+    {
+      "id": "FVID-0824",
+      "batch": 618,
+      "title": "Gate Y4M and MP4 lossless eligibility on a single 9-byte prefix read in native_lossless::eligible",
+      "source": "src/native_lossless.rs",
+      "regression": "tests/native_mix_export_and_lossless_single_open.rs",
+      "before": "native_lossless::eligible opened the file via native_lossless_y4m::eligible and then reopened it to check the 8-byte MP4 prefix.",
+      "result": "native_lossless::eligible reads up to 9 bytes once, delegating to native_lossless_y4m::eligible only when the YUV4MPEG2 signature matches and otherwise reusing the same BufReader for MP4 inspection.",
+      "status": "accepted",
+      "validation": "batch-618-validation.json"
     }
   ],
-  "pending_count": 181
+  "pending_count": 176
 }

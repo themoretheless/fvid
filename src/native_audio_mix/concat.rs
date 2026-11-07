@@ -58,7 +58,6 @@ fn segment_packet_count(source: &Path, options: &fvid_media::CopyOptions) -> Res
     fvid_media::owned_budget::check_rss_budget(options).map_err(|e| invalid(&e))?;
     let mut raw_file = File::open(source)?;
     if crate::native_pcm::is_wave_reader(&mut raw_file)? {
-        raw_file.seek(SeekFrom::Start(0))?;
         let info = crate::native_pcm::inspect(&mut raw_file, options.cancel.as_ref())?;
         let frame = usize::from(info.frame_bytes());
         if frame == 0 {
@@ -75,13 +74,12 @@ fn segment_packet_count(source: &Path, options: &fvid_media::CopyOptions) -> Res
         }
         return Ok(info.sample_frames.div_ceil(chunk_frames));
     }
-    raw_file.seek(SeekFrom::Start(0))?;
     let mut input = std::io::BufReader::new(raw_file);
     let mut prefix = [0u8; 8];
     input.read_exact(&mut prefix)?;
     input.seek(SeekFrom::Start(0))?;
-        if crate::container::mp4::recognizes_prefix(&prefix) {
-        let reader = crate::container::mp4::Mp4Reader::open(
+    if crate::container::mp4::recognizes_prefix(&prefix) {
+        let reader = crate::container::mp4::Mp4Reader::open_indexed(
             input,
             crate::container::mp4::Limits {
                 metadata_bytes: crate::container::mp4::Limits::default()
@@ -98,8 +96,9 @@ fn segment_packet_count(source: &Path, options: &fvid_media::CopyOptions) -> Res
         {
             return Err(invalid("controlled memory budget exceeded"));
         }
-        let info = crate::native_media::constant_audio_source_info_selected_with_options(source, None, options)?;
-        if let Some(track) = reader.tracks().get(info.stream_index) {
+        let stream_index = crate::native_media::mp4_audio_index(&reader, None)?;
+        if let Some(track) = reader.tracks().get(stream_index) {
+            track.ensure_constant_description()?;
             if track.edits.is_empty() {
                 return Ok(track.samples.len() as u64);
             }

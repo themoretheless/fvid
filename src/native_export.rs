@@ -431,10 +431,16 @@ pub(crate) fn validate_video_selection_with_options(
     options: &fvid_media::CopyOptions,
 ) -> Result<()> {
     use std::io::Read;
-    let mut file=File::open(source)?;
-    let mut prefix=[0;9];file.read_exact(&mut prefix)?;
-    if &prefix==b"YUV4MPEG2" {
-        if selected.is_some_and(|i|i!=0) {return Err(invalid("Y4M has only stream 0"));}
+    let prefix = {
+        let mut file = File::open(source)?;
+        let mut buf = [0; 9];
+        file.read_exact(&mut buf)?;
+        buf
+    };
+    if &prefix == b"YUV4MPEG2" {
+        if selected.is_some_and(|i| i != 0) {
+            return Err(invalid("Y4M has only stream 0"));
+        }
         return Ok(());
     }
     let mut probe_opts = options.clone();
@@ -2325,14 +2331,6 @@ pub fn trim_audio_pcm_with_controls(
         options,
     )?;
     let allow_wave = info.codec != "aac";
-    if !allow_wave {
-        crate::native_media::aac_source_info_selected_with_options(
-            source,
-            Some(index),
-            Some(interval),
-            options,
-        )?;
-    }
     export_pcm_selected(
         source,
         destination,

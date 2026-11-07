@@ -1,0 +1,15 @@
+{
+  "batch": 618,
+  "ids": [
+    "FVID-0820",
+    "FVID-0821",
+    "FVID-0822",
+    "FVID-0823",
+    "FVID-0824"
+  ],
+  "commands": [
+    "cargo test --test native_mix_export_and_lossless_single_open",
+    "cargo test --test native_plan_and_loudnorm_single_open"
+  ],
+  "status": "accepted"
+}

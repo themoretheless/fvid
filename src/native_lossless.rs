@@ -27,12 +27,14 @@ fn check(cancel: Option<&CancelFlag>) -> Result<()> {
 /// All tracks must be represented; no unsupported stream may disappear.
 pub fn eligible(source: &Path) -> Result<bool> {
     use std::io::SeekFrom;
-    if crate::native_lossless_y4m::eligible(source)? {
-        return Ok(true);
-    }
     let mut input = BufReader::new(File::open(source)?);
-    let mut prefix = [0; 8];
-    if input.read(&mut prefix)? != 8 || !crate::container::mp4::recognizes_prefix(&prefix) {
+    let mut prefix = [0; 9];
+    let n = input.read(&mut prefix)?;
+    if n == 9 && &prefix == b"YUV4MPEG2" {
+        drop(input);
+        return crate::native_lossless_y4m::eligible(source);
+    }
+    if n < 8 || !crate::container::mp4::recognizes_prefix(&prefix[..8]) {
         return Ok(false);
     }
     input.seek(SeekFrom::Start(0))?;
