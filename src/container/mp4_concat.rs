@@ -285,6 +285,13 @@ pub fn open_with_options(
                 }
             }
         }
+        for &index in &selected {
+            let track = &segments[0].reader.tracks()[index];
+            raw_meta_bytes = raw_meta_bytes
+                .saturating_add(track.name.len())
+                .saturating_add(track.language.len())
+                .saturating_add(32);
+        }
         let mut plan_bytes = segments
             .len()
             .saturating_mul(8192)
@@ -329,6 +336,20 @@ pub fn open_with_options(
     } else {
         16384usize
     };
+    let mut total_chapters = 0usize;
+    for segment in &segments {
+        for chapter in segment.reader.chapters() {
+            if chapter.start_ns < segment.duration {
+                if segment.offset.checked_add(chapter.start_ns).is_none() {
+                    return Err(invalid("concat chapter overflow"));
+                }
+                total_chapters = total_chapters.saturating_add(1);
+                if total_chapters > 1024 {
+                    return Err(invalid("Matroska chapter count exceeds limit"));
+                }
+            }
+        }
+    }
     let mut packets = 0u64;
     'segments: for segment in &segments {
         let mut queue = BinaryHeap::new();
@@ -552,6 +573,14 @@ pub fn write_with_options<R: Read + Seek, W: Write + Seek>(
     for option in &mut track_options {
         option.default_duration_ns = 0;
     }
+    let enabled: Vec<_> = selected
+        .iter()
+        .map(|&i| mp4_matroska::effective_track_enabled(&first.reader, i))
+        .collect();
+    let defaults: Vec<_> = selected
+        .iter()
+        .map(|&i| mp4_matroska::effective_track_default(&first.reader, i))
+        .collect();
     metadata.chapters.clear();
     for segment in segments.iter() {
         for chapter in segment.reader.chapters() {
@@ -567,13 +596,15 @@ pub fn write_with_options<R: Read + Seek, W: Write + Seek>(
             }
         }
     }
-    let mut writer = PacketWriter::new_with_text_metadata(
+    let mut writer = PacketWriter::new_with_track_preferences(
         output,
         &specs,
         &track_options,
         &metadata,
         &text,
         &scoped,
+        &enabled,
+        &defaults,
     )?;
     if let Some(hook) = progress {
         hook.emit(writer.event());

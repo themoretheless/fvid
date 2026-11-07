@@ -1,8 +1,8 @@
 {
   "target": 1000,
   "counting_rule": "One independently confirmed problem or useful capability; fixture variants and baseline integration repairs are excluded. Only accepted entries count.",
-  "accepted_count": 684,
-  "next_id": "FVID-0685",
+  "accepted_count": 689,
+  "next_id": "FVID-0690",
   "entries": [
     {
       "id": "FVID-0001",
@@ -7715,6 +7715,61 @@
       "result": "Check destination.symlink_metadata().is_ok() upfront in export_pcm_selected and defer the initial 0-packet ProgressEvent in both export_pcm_selected and owned_audio_export::decode_audio_transformed until all preflight and controlled memory budget checks succeed.",
       "status": "accepted",
       "validation": "batch-590-validation.json"
+    },
+    {
+      "id": "FVID-0685",
+      "batch": 591,
+      "title": "Enforce concatenated chapter limit, preserve MP4 track preferences, and check destination upfront in MP4-to-Matroska concat",
+      "source": "src/container/mp4_concat.rs",
+      "regression": "tests/mp4_concat_chapters_remux_preflight_and_pcm_tags.rs",
+      "before": "mp4_concat::open_with_options did not check whether total chapters across concatenated MP4 segments exceeded Matroska's 1024-chapter cap or charge source track name/language bytes in raw_meta_bytes, mp4_concat::write_with_options dropped MP4 track enabled/default flags by calling PacketWriter::new_with_text_metadata instead of PacketWriter::new_with_track_preferences, and try_concat_mp4_matroska_with_options scanned all source MP4 segments before checking if destination already existed.",
+      "result": "Enforce total_chapters <= 1024 and charge selected source track name/language bytes in mp4_concat::open_with_options, preserve MP4 track enabled/default preferences via PacketWriter::new_with_track_preferences in mp4_concat::write_with_options, and reject existing Matroska concat destinations upfront in try_concat_mp4_matroska_with_options.",
+      "status": "accepted",
+      "validation": "batch-591-validation.json"
+    },
+    {
+      "id": "FVID-0686",
+      "batch": 591,
+      "title": "Reject existing destinations upfront before opening or scanning inputs in owned and native Matroska remux and FFV1 export",
+      "source": "crates/fvid-media/src/owned_mp4_remux.rs",
+      "regression": "tests/mp4_concat_chapters_remux_preflight_and_pcm_tags.rs",
+      "before": "owned_mp4_remux::remux scanned the source MP4 twice (in supports and open/validate_selected_prefix_packet_budget) before owned_matroska_remux::publish checked destination.symlink_metadata(), and remux_mp4_matroska_inner, transcode_ffv1_selected, remux_matroska_with_packet_and_memory_limits, and remux_mp4_stats_with_memory_limit opened/transcoded inputs and reserved temporary files before failing at std::fs::hard_link when destination already existed.",
+      "result": "Check destination.symlink_metadata().is_ok() upfront before opening or scanning inputs in owned_mp4_remux::remux, remux_mp4_matroska_inner, transcode_ffv1_selected, remux_matroska_with_packet_and_memory_limits, and remux_mp4_stats_with_memory_limit.",
+      "status": "accepted",
+      "validation": "batch-591-validation.json"
+    },
+    {
+      "id": "FVID-0687",
+      "batch": 591,
+      "title": "Check destination and broken symlinks upfront before scanning inputs and use fallible buffers in mix, merge, and concat audio",
+      "source": "src/native_audio_mix.rs",
+      "regression": "tests/mp4_concat_chapters_remux_preflight_and_pcm_tags.rs",
+      "before": "mix_audio_with_controls, merge_audio_with_controls, and concat_audio_with_options used destination.try_exists() instead of destination.symlink_metadata().is_ok() (missing broken symlinks at destination until std::fs::hard_link after decoding all inputs), merge_audio_with_controls and concat_audio_with_options scanned all inputs before checking destination extension or existence, and mix/merge allocated sample block buffers with infallible vec![0; ...].",
+      "result": "Validate destination extension and destination.symlink_metadata().is_ok() before scanning inputs in mix_audio_with_controls, merge_audio_with_controls, and concat_audio_with_options, and allocate mix/merge sample block buffers with fallible crate::buffer / try_reserve_exact.",
+      "status": "accepted",
+      "validation": "batch-591-validation.json"
+    },
+    {
+      "id": "FVID-0688",
+      "batch": 591,
+      "title": "Enforce 256-tag Matroska container and stream metadata caps and fallback probe metadata memory budget in pcm_matroska",
+      "source": "src/native_export/pcm_matroska.rs",
+      "regression": "tests/mp4_concat_chapters_remux_preflight_and_pcm_tags.rs",
+      "before": "parse_matroska_pcm_metadata did not check text.len() <= 256 or scoped.values().all(|m| m.len() <= 256), allowing plan_loudnorm, plan_mix, plan_merge, and plan_concat to accept >256 combined source and user tags that later failed in PacketWriter::new_with_text_metadata; additionally, the fallback probe branch in extract_source_pcm_metadata_with_interval_packet_and_memory_limit did not check max_controlled_bytes on extracted tags.",
+      "result": "Enforce text.len() <= 256 and per-stream scoped tag count <= 256 in parse_matroska_pcm_metadata and enforce max_controlled_bytes on fallback container metadata in extract_source_pcm_metadata_with_interval_packet_and_memory_limit.",
+      "status": "accepted",
+      "validation": "batch-591-validation.json"
+    },
+    {
+      "id": "FVID-0689",
+      "batch": 591,
+      "title": "Charge simultaneous index and packet working set in validate_encoded_audio_packet_budget for MP4 and Matroska audio planning",
+      "source": "src/native_plan.rs",
+      "regression": "tests/mp4_concat_chapters_remux_preflight_and_pcm_tags.rs",
+      "before": "validate_encoded_audio_packet_budget checked index_bytes > mem_limit and packet_size > max_packet_bytes independently for MP4 and Matroska sources, allowing plan_decode_audio to admit inputs whose simultaneous index_bytes + sample_size (MP4) or index_bytes + packet_payload_size + packet_read_overhead (Matroska) exceeded max_controlled_bytes.",
+      "result": "Charge index_bytes.saturating_add(max_sample_bytes) for MP4 and index_bytes.saturating_add(pkt_bytes).saturating_add(overhead) for Matroska against max_controlled_bytes in validate_encoded_audio_packet_budget.",
+      "status": "accepted",
+      "validation": "batch-591-validation.json"
     }
   ]
 }

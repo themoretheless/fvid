@@ -328,11 +328,11 @@ pub fn concat_audio_with_options(
         Some("mka" | "mkv") => true,
         _ => return Err(invalid("owned PCM concat requires .wav, .mka or .mkv output")),
     };
-    super::validate_output_controls(options, Some(matroska))?;
-    validate_concat_segments_with_options(sources, options)?;
-    if destination.try_exists()? {
+    if destination.symlink_metadata().is_ok() {
         return Err(invalid("concat destination already exists"));
     }
+    super::validate_output_controls(options, Some(matroska))?;
+    validate_concat_segments_with_options(sources, options)?;
     let info_chunks = if matroska {
         Vec::new()
     } else {

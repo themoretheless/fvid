@@ -336,6 +336,9 @@ pub fn remux(
         return Err("controlled memory limit must be positive".into());
     }
     crate::owned_budget::check_rss_budget(options)?;
+    if destination.symlink_metadata().is_ok() {
+        return Err("Matroska remux destination already exists".into());
+    }
     if !supports(source, destination, options) {
         return Err("request is not an owned MP4 Matroska remux".into());
     }

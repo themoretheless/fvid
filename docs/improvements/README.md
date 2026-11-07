@@ -4306,4 +4306,15 @@ See `batch-589-validation.json`.
 
 See `batch-590-validation.json`.
 
+## Batch 591 — FVID-0685..0689: Concatenated chapter cap, track preferences, and upfront destination check in MP4-to-Matroska concat, upfront destination checks across owned/native Matroska remux and FFV1 export, upfront destination/symlink checks and fallible buffers in mix/merge/concat audio, 256-tag Matroska cap in `pcm_matroska`, and simultaneous index + packet working set in `validate_encoded_audio_packet_budget`
+
+- **FVID-0685** — Enforce concatenated chapter limit, preserve MP4 track preferences, and check destination upfront in MP4-to-Matroska concat (`src/container/mp4_concat.rs`, `src/native_export.rs`, `tests/mp4_concat_chapters_remux_preflight_and_pcm_tags.rs`).
+- **FVID-0686** — Reject existing destinations upfront before opening or scanning inputs in owned and native Matroska remux and FFV1 export (`crates/fvid-media/src/owned_mp4_remux.rs`, `src/native_export.rs`, `tests/mp4_concat_chapters_remux_preflight_and_pcm_tags.rs`).
+- **FVID-0687** — Check destination and broken symlinks upfront before scanning inputs and use fallible buffers in mix, merge, and concat audio (`src/native_audio_mix.rs`, `src/native_audio_mix/concat.rs`, `tests/mp4_concat_chapters_remux_preflight_and_pcm_tags.rs`).
+- **FVID-0688** — Enforce 256-tag Matroska container and stream metadata caps and fallback probe metadata memory budget in `pcm_matroska` (`src/native_export/pcm_matroska.rs`, `tests/mp4_concat_chapters_remux_preflight_and_pcm_tags.rs`).
+- **FVID-0689** — Charge simultaneous index and packet working set in `validate_encoded_audio_packet_budget` for MP4 and Matroska audio planning (`src/native_plan.rs`, `tests/mp4_concat_chapters_remux_preflight_and_pcm_tags.rs`).
+
+See `batch-591-validation.json`.
+
+
 

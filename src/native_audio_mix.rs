@@ -656,7 +656,7 @@ pub fn mix_audio_with_controls(
         Some("mka" | "mkv") => true,
         _ => return Err(invalid("mix-audio requires .wav, .mka or .mkv output")),
     };
-    if destination.try_exists()? {
+    if destination.symlink_metadata().is_ok() {
         return Err(invalid("mix-audio destination already exists"));
     }
     validate_output_controls(controls, Some(matroska))?;
@@ -760,8 +760,12 @@ pub fn mix_audio_with_controls(
         .map(|&w| if options.normalize { w / total } else { w })
         .collect();
     let block_samples = 4096 * usize::from(channels);
-    let mut encoded = vec![0u8; block_samples * 4];
-    let mut mixed = vec![0f32; block_samples];
+    let mut encoded = crate::buffer(block_samples * 4)?;
+    let mut mixed = Vec::new();
+    mixed
+        .try_reserve_exact(block_samples)
+        .map_err(|_| invalid("mix-audio sample buffer allocation failed"))?;
+    mixed.resize(block_samples, 0.0f32);
     let mut remaining = frames;
     let mut event = crate::media_control::ProgressEvent {
         packets: 0,
@@ -1005,16 +1009,16 @@ pub fn merge_audio_with_controls(
     destination: &Path,
     controls: &fvid_media::CopyOptions,
 ) -> Result<crate::media_info::MergeAudioStats> {
-    let (rate, channels) = merge_geometry_with_options(sources, controls)?;
     let matroska = match destination.extension().and_then(|s| s.to_str()) {
         Some("wav") => false,
         Some("mka" | "mkv") => true,
         _ => return Err(invalid("merge-audio requires .wav, .mka or .mkv output")),
     };
-    if destination.try_exists()? {
+    if destination.symlink_metadata().is_ok() {
         return Err(invalid("merge-audio destination already exists"));
     }
     validate_output_controls(controls, Some(matroska))?;
+    let (rate, channels) = merge_geometry_with_options(sources, controls)?;
     let info_chunks = if matroska {
         Vec::new()
     } else {
@@ -1096,8 +1100,8 @@ pub fn merge_audio_with_controls(
     )?;
     let mut buffers = descriptions
         .iter()
-        .map(|s| vec![0u8; 4096 * usize::from(s.channels) * 4])
-        .collect::<Vec<_>>();
+        .map(|s| crate::buffer(4096 * usize::from(s.channels) * 4))
+        .collect::<Result<Vec<_>>>()?;
     let strides = descriptions
         .iter()
         .map(|s| usize::from(s.channels) * 4)

@@ -504,6 +504,28 @@ pub(crate) fn extract_source_pcm_metadata_with_interval_packet_and_memory_limit(
                 base.4.insert(0, track_tags);
             }
         }
+        if let Some(mem_limit) = max_controlled_bytes {
+            let mut tag_bytes = base.0.len().saturating_add(base.1.len()).saturating_add(64);
+            for (_, val) in base.2.tags.entries() {
+                if !val.is_empty() {
+                    tag_bytes = tag_bytes.saturating_add(val.len().saturating_add(32));
+                }
+            }
+            for (k, v) in &base.3 {
+                tag_bytes = tag_bytes.saturating_add(k.len()).saturating_add(v.len()).saturating_add(32);
+            }
+            for entries in base.4.values() {
+                for (k, v) in entries {
+                    tag_bytes = tag_bytes.saturating_add(k.len()).saturating_add(v.len()).saturating_add(32);
+                }
+            }
+            let needed = 8usize
+                .saturating_mul(tag_bytes.saturating_add(12))
+                .saturating_add(16 * 1024);
+            if needed > mem_limit {
+                return Err(invalid("controlled memory budget exceeded"));
+            }
+        }
     }
     Ok(base)
 }
@@ -762,6 +784,12 @@ fn parse_matroska_pcm_metadata(
                 entries.retain(|k, _| !k.eq_ignore_ascii_case(key));
             }
         }
+    }
+    if text.len() > 256 {
+        return Err(invalid("Matroska metadata tag count exceeds limit"));
+    }
+    if scoped.values().any(|entries| entries.len() > 256) {
+        return Err(invalid("Matroska track metadata tag count exceeds limit"));
     }
     Ok((name, language, metadata, text, scoped))
 }

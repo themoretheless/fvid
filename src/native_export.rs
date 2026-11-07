@@ -2233,6 +2233,9 @@ pub fn remux_mp4_stats_with_memory_limit(
     if max_controlled_bytes == Some(0) {
         return Err(invalid("controlled memory limit must be positive"));
     }
+    if destination.symlink_metadata().is_ok() {
+        return Err(invalid("MP4 relocate destination already exists"));
+    }
     let mut input=BufReader::new(File::open(source)?);
     let directory=destination.parent().filter(|p|!p.as_os_str().is_empty()).unwrap_or(Path::new("."));
     let (temporary,file)=(0..100).find_map(|_| {
@@ -2441,6 +2444,9 @@ fn remux_mp4_matroska_inner(source: &Path, destination: &Path,
     if !matches!(destination.extension().and_then(|s| s.to_str()), Some("mka" | "mkv")) {
         return Err(invalid("Matroska remux output requires .mka or .mkv"));
     }
+    if destination.symlink_metadata().is_ok() {
+        return Err(invalid("Matroska remux destination already exists"));
+    }
     let mut input = crate::container::mp4::Mp4Reader::open(BufReader::new(File::open(source)?), Default::default())?;
     let directory = destination.parent().filter(|p| !p.as_os_str().is_empty()).unwrap_or(Path::new("."));
     let (temporary, file) = (0..100).find_map(|_| {
@@ -2488,6 +2494,9 @@ pub fn transcode_ffv1_selected(source:&Path,destination:&Path,
 )->Result<crate::media_info::LosslessStats> {
     if destination.extension().and_then(|s|s.to_str())!=Some("mkv"){return Err(invalid("lossless export requires FFV1 in .mkv"));}
     if cancel.is_some_and(|c|c.is_cancelled()){return Err(invalid("media operation cancelled"));}
+    if destination.symlink_metadata().is_ok() {
+        return Err(invalid("lossless export destination already exists"));
+    }
     let directory=destination.parent().filter(|p|!p.as_os_str().is_empty()).unwrap_or(Path::new("."));
     let (temporary,file)=(0..100).find_map(|_|{
         let path=directory.join(format!(".fvid-ffv1-{}-{}.tmp",std::process::id(),NEXT.fetch_add(1,Ordering::Relaxed)));
@@ -2561,6 +2570,9 @@ pub fn remux_matroska_with_packet_and_memory_limits(
     }
     if max_controlled_bytes == Some(0) {
         return Err(invalid("controlled memory limit must be positive"));
+    }
+    if destination.symlink_metadata().is_ok() {
+        return Err(invalid("Matroska copy destination already exists"));
     }
     let mut input=BufReader::new(File::open(source)?);
     let directory=destination.parent().filter(|p|!p.as_os_str().is_empty()).unwrap_or(Path::new("."));
@@ -2636,6 +2648,9 @@ pub fn try_concat_mp4_matroska_with_options(
         && crate::native_pcm::concat_info_with_cancel(sources, cancel).is_ok()
     {
         return Ok(None);
+    }
+    if matroska_out && destination.symlink_metadata().is_ok() {
+        return Err(invalid("concat destination already exists"));
     }
     let segments = if matroska_out {
         crate::container::mp4_concat::open_with_options(sources, options)?

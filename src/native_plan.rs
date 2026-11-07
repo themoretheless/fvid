@@ -245,29 +245,47 @@ fn validate_encoded_audio_packet_budget(
             },
         )
         .map_err(|e| e.to_string())?;
+        let index_bytes = reader
+            .estimated_index_payload_bytes()
+            .map_err(|e| e.to_string())?;
         if let Some(mem_limit) = options.max_controlled_bytes
-            && reader
-                .estimated_index_payload_bytes()
-                .map_err(|e| e.to_string())?
-                > mem_limit
+            && index_bytes > mem_limit
         {
             return Err("controlled memory budget exceeded".into());
         }
         if let Some(track) = reader.tracks().get(stream_index) {
             let max_samples = crate::native_media::mp4_active_samples(track, reader.movie_timescale(), interval, options.max_packets);
+            let mut max_sample_bytes = 0usize;
             let exceeds = match &track.samples {
-                crate::container::mp4::SampleIndex::Expanded(samples) => samples
-                    .iter()
-                    .take(max_samples)
-                    .any(|s| (s.size as usize) > options.max_packet_bytes),
+                crate::container::mp4::SampleIndex::Expanded(samples) => {
+                    let mut over = false;
+                    for s in samples.iter().take(max_samples) {
+                        let sz = s.size as usize;
+                        if sz > options.max_packet_bytes {
+                            over = true;
+                            break;
+                        }
+                        max_sample_bytes = max_sample_bytes.max(sz);
+                    }
+                    over
+                }
                 crate::container::mp4::SampleIndex::Uniform(uniform) => {
-                    uniform.count > 0
-                        && max_samples > 0
-                        && (uniform.bytes_per_frame as usize) > options.max_packet_bytes
+                    if uniform.count > 0 && max_samples > 0 {
+                        let sz = uniform.bytes_per_frame as usize;
+                        max_sample_bytes = sz;
+                        sz > options.max_packet_bytes
+                    } else {
+                        false
+                    }
                 }
             };
             if exceeds {
                 return Err("MP4 packet exceeds budget".into());
+            }
+            if let Some(mem_limit) = options.max_controlled_bytes
+                && index_bytes.saturating_add(max_sample_bytes) > mem_limit
+            {
+                return Err("controlled memory budget exceeded".into());
             }
         }
         return Ok(());
@@ -295,11 +313,11 @@ fn validate_encoded_audio_packet_budget(
         let mut reader = crate::container::webm::WebmReader::open(input, limits)
             .map_err(map_packet_limit)?;
         reader.scan_all().map_err(map_packet_limit)?;
+        let index_bytes = reader
+            .estimated_index_payload_bytes()
+            .map_err(|e| e.to_string())?;
         if let Some(mem_limit) = options.max_controlled_bytes
-            && reader
-                .estimated_index_payload_bytes()
-                .map_err(|e| e.to_string())?
-                > mem_limit
+            && index_bytes > mem_limit
         {
             return Err("controlled memory budget exceeded".into());
         }
@@ -319,12 +337,22 @@ fn validate_encoded_audio_packet_budget(
                 if track_packets >= active_limit {
                     break;
                 }
-                if reader
+                let pkt_bytes = reader
                     .packet_payload_size(packet_index)
-                    .map_err(|e| e.to_string())?
-                    > options.max_packet_bytes
-                {
+                    .map_err(|e| e.to_string())?;
+                if pkt_bytes > options.max_packet_bytes {
                     return Err("WebM packet exceeds budget".into());
+                }
+                let overhead = reader
+                    .packet_read_overhead(packet_index)
+                    .map_err(|e| e.to_string())?;
+                if let Some(mem_limit) = options.max_controlled_bytes
+                    && index_bytes
+                        .saturating_add(pkt_bytes)
+                        .saturating_add(overhead)
+                        > mem_limit
+                {
+                    return Err("controlled memory budget exceeded".into());
                 }
                 track_packets += 1;
             }
