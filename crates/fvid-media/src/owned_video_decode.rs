@@ -61,8 +61,131 @@ pub(crate) fn decode_ffv1(
     decode_webm(source,transform,visit,options)
 }
 pub(crate) fn decode_webm(
-    source:&Path,transform:&DecodeTransform,mut visit:Option<&mut Visitor<'_>>,options:Option<&fvid_control::CopyOptions>,
-)->Result<Option<(DecodeStats,u64)>> {
+    source: &Path,
+    transform: &DecodeTransform,
+    visit: Option<&mut Visitor<'_>>,
+    options: Option<&fvid_control::CopyOptions>,
+) -> Result<Option<(DecodeStats, u64)>> {
+    if let Some(options) = options {
+        if options
+            .cancel
+            .as_ref()
+            .is_some_and(fvid_control::CancelFlag::is_cancelled)
+        {
+            return Err("media operation cancelled".into());
+        }
+        if options.max_packet_bytes == 0 {
+            return Err("packet byte limit must be positive".into());
+        }
+        if options.max_packets == Some(0) {
+            return Err("packet work limit requires at least one packet".into());
+        }
+        if options.max_controlled_bytes == Some(0) {
+            return Err("controlled memory limit must be positive".into());
+        }
+        crate::owned_budget::check_rss_budget(options)?;
+    }
+    let mut frame_transform = transform.clone();
+    frame_transform.input_format = None;
+    frame_transform.interval = None;
+    frame_transform.framestep = None;
+    frame_transform.reverse = None;
+    frame_transform.shuffleframes = None;
+    frame_transform.overlay = None;
+    if transform
+        .reverse
+        .as_deref()
+        .is_some_and(|args| !args.is_empty())
+    {
+        return Ok(None);
+    }
+    if transform
+        .shuffleframes
+        .as_deref()
+        .map(crate::owned_shuffleframes::ShuffleFrames::parse)
+        .transpose()
+        .is_err()
+    {
+        return Ok(None);
+    }
+    if !crate::owned_y4m_decode::supported_request(&frame_transform)
+        || !transform
+            .input_format
+            .as_deref()
+            .is_none_or(|f| matches!(f, "matroska" | "webm"))
+    {
+        return Ok(None);
+    }
+    let _ = transform
+        .lutyuv
+        .as_deref()
+        .map(crate::owned_lutyuv::LutYuv::parse)
+        .transpose()?;
+    let _ = crate::owned_pixel_context::PixelContext::parse(transform)?;
+    let _ = transform
+        .fade
+        .as_deref()
+        .map(crate::owned_fade::FadeClock::parse)
+        .transpose()?;
+    if crate::owned_framestep::FrameStep::parse(transform.framestep.as_deref().unwrap_or(""))
+        .is_err()
+    {
+        return Ok(None);
+    }
+    if transform
+        .interval
+        .is_some_and(|(from, to)| from < 0 || to <= from)
+    {
+        return Err("decode interval requires 0 <= from < to".into());
+    }
+    let mut file = File::open(source).map_err(|e| e.to_string())?;
+    let mut signature = [0; 4];
+    if file.read(&mut signature).map_err(|e| e.to_string())? != 4
+        || signature != [0x1a, 0x45, 0xdf, 0xa3]
+    {
+        return Ok(None);
+    }
+    std::io::Seek::seek(&mut file, std::io::SeekFrom::Start(0)).map_err(|e| e.to_string())?;
+    let mut reader_limits = crate::owned_webm::Limits::default();
+    let memory_packets = options.and_then(|o| {
+        o.max_controlled_bytes
+            .map(|bytes| bytes / std::mem::size_of::<crate::owned_webm::Packet>())
+    });
+    if let Some(maximum) = memory_packets {
+        reader_limits.packets = reader_limits.packets.min(maximum);
+    }
+    let map_packet_limit = |error: crate::owned_webm::Error| {
+        if memory_packets.is_some_and(|max| max < crate::owned_webm::Limits::default().packets)
+            && error
+                .to_string()
+                .contains("WebM packet count exceeds limit")
+        {
+            "controlled memory budget exceeded: Matroska packet index limit".to_owned()
+        } else {
+            error.to_string()
+        }
+    };
+    let mut reader = crate::owned_webm::WebmReader::open(BufReader::new(file), reader_limits)
+        .map_err(map_packet_limit)?;
+    if let Some(options) = options {
+        if options
+            .cancel
+            .as_ref()
+            .is_some_and(fvid_control::CancelFlag::is_cancelled)
+        {
+            return Err("media operation cancelled".into());
+        }
+    }
+    reader.scan_all().map_err(map_packet_limit)?;
+    decode_webm_from_scanned_reader(reader, transform, visit, options)
+}
+
+pub(crate) fn decode_webm_from_scanned_reader<R: std::io::Read + std::io::Seek>(
+    mut reader: crate::owned_webm::WebmReader<R>,
+    transform: &DecodeTransform,
+    mut visit: Option<&mut Visitor<'_>>,
+    options: Option<&fvid_control::CopyOptions>,
+) -> Result<Option<(DecodeStats, u64)>> {
     if let Some(options) = options {
         if options
             .cancel
@@ -113,13 +236,17 @@ pub(crate) fn decode_webm(
     {
         return Ok(None);
     }
-    let lut = transform.lutyuv.as_deref().map(crate::owned_lutyuv::LutYuv::parse)
+    let lut = transform
+        .lutyuv
+        .as_deref()
+        .map(crate::owned_lutyuv::LutYuv::parse)
         .transpose()?;
     let history = crate::owned_pixel_context::PixelContext::parse(transform)?;
     let fade = transform
         .fade
         .as_deref()
-        .map(crate::owned_fade::FadeClock::parse).transpose()?;
+        .map(crate::owned_fade::FadeClock::parse)
+        .transpose()?;
     let step = match crate::owned_framestep::FrameStep::parse(
         transform.framestep.as_deref().unwrap_or(""),
     ) {
@@ -132,49 +259,7 @@ pub(crate) fn decode_webm(
     {
         return Err("decode interval requires 0 <= from < to".into());
     }
-    let mut file = File::open(source).map_err(|e| e.to_string())?;
-    let mut signature = [0; 4];
-    if file.read(&mut signature).map_err(|e| e.to_string())? != 4
-        || signature != [0x1a, 0x45, 0xdf, 0xa3]
-    {
-        return Ok(None);
-    }
-    std::io::Seek::seek(&mut file, std::io::SeekFrom::Start(0)).map_err(|e| e.to_string())?;
-    let mut reader_limits = crate::owned_webm::Limits::default();
-    let memory_packets = options.and_then(|o| {
-        o.max_controlled_bytes
-            .map(|bytes| bytes / std::mem::size_of::<crate::owned_webm::Packet>())
-    });
-    if let Some(maximum) = memory_packets {
-        reader_limits.packets = reader_limits.packets.min(maximum);
-    }
-    let map_packet_limit = |error: crate::owned_webm::Error| {
-        if memory_packets.is_some_and(|max| max < crate::owned_webm::Limits::default().packets)
-            && error
-                .to_string()
-                .contains("WebM packet count exceeds limit")
-        {
-            "controlled memory budget exceeded: Matroska packet index limit".to_owned()
-        } else {
-            error.to_string()
-        }
-    };
-    let mut reader = crate::owned_webm::WebmReader::open(
-        BufReader::new(file),
-        reader_limits,
-    )
-    .map_err(map_packet_limit)?;
     let mut overlay_frame_len = 0usize;
-    if let Some(options) = options {
-        if options
-            .cancel
-            .as_ref()
-            .is_some_and(fvid_control::CancelFlag::is_cancelled)
-        {
-            return Err("media operation cancelled".into());
-        }
-    }
-    reader.scan_all().map_err(map_packet_limit)?;
     let index_bytes = reader
         .estimated_index_payload_bytes()
         .map_err(|e| e.to_string())?;

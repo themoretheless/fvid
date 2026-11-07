@@ -4838,3 +4838,12 @@ See `batch-628-validation.json`.
 - **FVID-0968**: Reuse open `File` handle across 4-byte EBML signature check and `WebmReader::open` in `owned_video_decode::decode_webm` (`crates/fvid-media/src/owned_video_decode.rs`).
 - **FVID-0969**: Reuse open Y4M `BufReader<File>` and remove redundant `recognizes`/`supports` opens in `owned_subtitle_burn` (`crates/fvid-media/src/owned_subtitle_burn.rs`).
 
+## Batch 648 (FVID-0970..0974)
+
+- **FVID-0970**: Reuse scanned `WebmReader` across `supports_with_options` and `export_processed` in `owned_ffv1_export` via `decode_webm_from_scanned_reader` (`crates/fvid-media/src/owned_ffv1_export.rs`).
+- **FVID-0971**: Reuse open `File` and parsed Y4M `Header` across `check_source_matroska_metadata_budget`, `transcode_lossless`, and `plan_transcode_lossless` (`crates/fvid-media/src/owned_lossless.rs`).
+- **FVID-0972**: Reuse open `File` handle across 8-byte container magic dispatch and MP4/WebM decoders in `owned_compressed_video::try_decode` (`crates/fvid-media/src/owned_compressed_video.rs`).
+- **FVID-0973**: Reuse open `File` handle across 8-byte MP4 prefix check and `Mp4Reader::open` in `owned_mp4_multitrack_export::qualify` (`crates/fvid-media/src/owned_mp4_multitrack_export.rs`).
+- **FVID-0974**: Reuse open `File` handle across 4-byte EBML signature check and `WebmReader::open` in `owned_webm_multitrack_export::qualify` (`crates/fvid-media/src/owned_webm_multitrack_export.rs`).
+
+

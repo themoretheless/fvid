@@ -111,7 +111,7 @@ pub(crate) fn supports_with_options(
     // Qualify all keyframes before selecting this backend, preserving legacy tools.
     // Corruption remains owned and is reported by execution, without publication.
     !matches!(
-        decode::decode_webm(source, transform, None, options),
+        decode::decode_webm_from_scanned_reader(input, transform, None, options),
         Ok(None)
     )
 }
@@ -378,6 +378,9 @@ pub(crate) fn export_processed(
             return Err("Matroska metadata working set exceeds controlled memory budget".into());
         }
     }
+    let input_chapters = input.chapters.clone();
+    let track_owned = track.clone();
+    let mut input_opt = Some(input);
     mkv::export_atomic(
         destination,
         options.cancel.as_ref(),
@@ -478,36 +481,36 @@ pub(crate) fn export_processed(
                     return Err("encoded FFV1 packet exceeds controlled memory budget".into());
                 }
                 if writer.is_none() {
-                    metadata.chapters=export_chapters(&input.chapters,view.origin_ns,transform.interval)?;
+                    metadata.chapters = export_chapters(&input_chapters, view.origin_ns, transform.interval)?;
                     let video = mkv::VideoMetadata {
-                        pixel_aspect: aspect(track, transform, view.width, view.height)?,
-                        colour: Some(if track.codec == "V_FFV1" {
-                            track.colour
+                        pixel_aspect: aspect(&track_owned, transform, view.width, view.height)?,
+                        colour: Some(if track_owned.codec == "V_FFV1" {
+                            track_owned.colour
                         } else {
                             crate::owned_matroska::ColourDescription {
                                 full_range: view.full_range,
                                 matrix: if matches!(view.matrix, 0 | 2) {
-                                    if track.colour.matrix == 0 {
+                                    if track_owned.colour.matrix == 0 {
                                         view.matrix
                                     } else {
-                                        track.colour.matrix
+                                        track_owned.colour.matrix
                                     }
                                 } else {
                                     view.matrix
                                 },
                                 primaries: if matches!(view.primaries, 0 | 2) {
-                                    track.colour.primaries
+                                    track_owned.colour.primaries
                                 } else {
                                     view.primaries
                                 },
                                 transfer: if matches!(view.transfer, 0 | 2) {
-                                    track.colour.transfer
+                                    track_owned.colour.transfer
                                 } else {
                                     view.transfer
                                 },
                             }
                         }),
-                        hdr: if track.codec=="V_FFV1" {track.hdr}else{view.hdr},
+                        hdr: if track_owned.codec == "V_FFV1" { track_owned.hdr } else { view.hdr },
                         ..Default::default()
                     };
                     writer = Some(
@@ -548,8 +551,13 @@ pub(crate) fn export_processed(
                 }
                 Ok(())
             };
-            let result = decode::decode_webm(source, transform, Some(&mut visitor), Some(options))
-                .map_err(mkv::Error)?;
+            let result = decode::decode_webm_from_scanned_reader(
+                input_opt.take().unwrap(),
+                transform,
+                Some(&mut visitor),
+                Some(options),
+            )
+            .map_err(mkv::Error)?;
             drop(visitor);
             let (stats, consumed) = result
                 .ok_or_else(|| mkv::Error("unsupported owned FFV1 export capability".into()))?;

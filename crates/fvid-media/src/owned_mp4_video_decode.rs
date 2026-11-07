@@ -15,6 +15,28 @@ pub(crate) fn try_decode(
     decode_presented(source, transform, None, None)
 }
 
+pub(crate) fn try_decode_from_file(
+    file: File,
+    transform: &DecodeTransform,
+) -> Result<Option<DecodeStats>> {
+    if transform
+        .input_format
+        .as_deref()
+        .is_some_and(|v| !matches!(v, "mp4" | "mov"))
+    {
+        return Ok(None);
+    }
+    let reader = match crate::owned_mp4::Mp4Reader::open(
+        BufReader::new(file),
+        crate::owned_mp4::Limits::default(),
+    ) {
+        Ok(value) => value,
+        Err(error) if error.is_unsupported() => return Ok(None),
+        Err(error) => return Err(error.to_string()),
+    };
+    decode_presented_from_reader(reader, transform, None, None)
+}
+
 pub(crate) type Visitor<'a> = dyn FnMut(&FrameMetadata, &[u8], u64, u64) -> Result<()> + 'a;
 pub(crate) fn decode_presented(
     source: &Path,

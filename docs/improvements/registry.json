@@ -1,8 +1,8 @@
 {
   "target": 1000,
   "counting_rule": "One independently confirmed problem or useful capability; fixture variants and baseline integration repairs are excluded. Only accepted entries count.",
-  "accepted_count": 969,
-  "next_id": "FVID-0970",
+  "accepted_count": 974,
+  "next_id": "FVID-0975",
   "entries": [
     {
       "id": "FVID-0001",
@@ -10850,6 +10850,61 @@
       "result": "Returned the rewound Y4M BufReader<File> from owned_subtitle_burn::prepare and removed redundant supports() and recognizes() pre-opens in prepare, plan_burn_subtitles, and burn_subtitles.",
       "status": "accepted",
       "validation": "batch-647-validation.json"
+    },
+    {
+      "id": "FVID-0970",
+      "batch": 648,
+      "title": "Reuse scanned WebmReader across supports_with_options and export_processed in owned_ffv1_export via decode_webm_from_scanned_reader",
+      "source": "crates/fvid-media/src/owned_ffv1_export.rs",
+      "regression": "tests/lossless_ffv1_and_multitrack_handle_reuse.rs",
+      "before": "owned_ffv1_export::supports_with_options and export_processed opened and scanned WebmReader via input_limited and then called decode_webm(source, ...), which reopened source and scanned all Matroska packets a second time.",
+      "result": "Added owned_video_decode::decode_webm_from_scanned_reader and passed the already-scanned WebmReader directly from supports_with_options and export_processed.",
+      "status": "accepted",
+      "validation": "batch-648-validation.json"
+    },
+    {
+      "id": "FVID-0971",
+      "batch": 648,
+      "title": "Reuse open File and parsed Y4M Header across check_source_matroska_metadata_budget, transcode_lossless, and plan_transcode_lossless",
+      "source": "crates/fvid-media/src/owned_lossless.rs",
+      "regression": "tests/lossless_ffv1_and_multitrack_handle_reuse.rs",
+      "before": "owned_lossless::check_source_matroska_metadata_budget opened source twice for Matroska budget checks, and transcode_lossless and plan_transcode_lossless opened Y4M sources up to 5 times across supports(), interval checks, header budget checks, and frame visits.",
+      "result": "Rewound the open File handle in check_source_matroska_metadata_budget and reused the open Y4M BufReader<File> and parsed Header across transcode_lossless and plan_transcode_lossless.",
+      "status": "accepted",
+      "validation": "batch-648-validation.json"
+    },
+    {
+      "id": "FVID-0972",
+      "batch": 648,
+      "title": "Reuse open File handle across 8-byte container magic dispatch and MP4/WebM decoders in owned_compressed_video::try_decode",
+      "source": "crates/fvid-media/src/owned_compressed_video.rs",
+      "regression": "tests/lossless_ffv1_and_multitrack_handle_reuse.rs",
+      "before": "owned_compressed_video::try_decode opened source to read the 8-byte magic header and then reopened source in owned_mp4_video_decode::try_decode or WebmReader::open.",
+      "result": "Added owned_mp4_video_decode::try_decode_from_file and rewound the open File handle in owned_compressed_video::try_decode before passing it to try_decode_from_file or WebmReader::open.",
+      "status": "accepted",
+      "validation": "batch-648-validation.json"
+    },
+    {
+      "id": "FVID-0973",
+      "batch": 648,
+      "title": "Reuse open File handle across 8-byte MP4 prefix check and Mp4Reader::open in owned_mp4_multitrack_export::qualify",
+      "source": "crates/fvid-media/src/owned_mp4_multitrack_export.rs",
+      "regression": "tests/lossless_ffv1_and_multitrack_handle_reuse.rs",
+      "before": "owned_mp4_multitrack_export::qualify called owned_mp4_video_bridge::recognizes(source) (opening source once) and then reopened source for Mp4Reader::open.",
+      "result": "Checked the 8-byte MP4 prefix on the open File handle in qualify, rewound it to offset 0, and passed it directly into Mp4Reader::open.",
+      "status": "accepted",
+      "validation": "batch-648-validation.json"
+    },
+    {
+      "id": "FVID-0974",
+      "batch": 648,
+      "title": "Reuse open File handle across 4-byte EBML signature check and WebmReader::open in owned_webm_multitrack_export::qualify",
+      "source": "crates/fvid-media/src/owned_webm_multitrack_export.rs",
+      "regression": "tests/lossless_ffv1_and_multitrack_handle_reuse.rs",
+      "before": "owned_webm_multitrack_export::qualify opened path to verify the 4-byte EBML signature, dropped the File handle, and reopened path in open().",
+      "result": "Added open_from_file in owned_webm_multitrack_export and rewound the open File handle in qualify after verifying the 4-byte EBML signature.",
+      "status": "accepted",
+      "validation": "batch-648-validation.json"
     }
   ],
   "pending_count": 126

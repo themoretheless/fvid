@@ -23,7 +23,7 @@ struct Input {
     video_origin: i64,
     index_and_meta_bytes: usize,
 }
-fn open(path: &Path, options: &CopyOptions) -> Result<Reader> {
+fn open_from_file(file: File, options: &CopyOptions) -> Result<Reader> {
     let mut limits = webm::Limits::default();
     let memory_packets = options
         .max_controlled_bytes
@@ -44,7 +44,7 @@ fn open(path: &Path, options: &CopyOptions) -> Result<Reader> {
         }
     };
     let mut reader = webm::WebmReader::open(
-        BufReader::new(File::open(path).map_err(|e| e.to_string())?),
+        BufReader::new(file),
         limits,
     )
     .map_err(map_packet_limit)?;
@@ -57,6 +57,10 @@ fn open(path: &Path, options: &CopyOptions) -> Result<Reader> {
         });
     reader.restrict_packet_bytes(effective_packet_limit);
     Ok(reader)
+}
+fn open(path: &Path, options: &CopyOptions) -> Result<Reader> {
+    let file = File::open(path).map_err(|e| e.to_string())?;
+    open_from_file(file, options)
 }
 fn check(o: &CopyOptions) -> Result<()> {
     if o.cancel
@@ -237,17 +241,20 @@ fn check_multitrack_matroska_metadata_budget(
     Ok(meta_working_bytes)
 }
 fn qualify(path: &Path, t: &LosslessTransform, o: &CopyOptions) -> Result<Option<Input>> {
+    use std::io::{Seek, SeekFrom};
     check(o)?;
-    let mut prefix = [0; 4];
-    if !File::open(path)
-        .is_ok_and(|mut f| f.read_exact(&mut prefix).is_ok() && prefix == [0x1a, 0x45, 0xdf, 0xa3])
-    {
-        return Ok(None);
-    }
     if crate::owned_lossless::request(t).is_none() {
         return Ok(None);
     }
-    let mut reader = open(path, o)?;
+    let Ok(mut file) = File::open(path) else {
+        return Ok(None);
+    };
+    let mut prefix = [0; 4];
+    if file.read_exact(&mut prefix).is_err() || prefix != [0x1a, 0x45, 0xdf, 0xa3] {
+        return Ok(None);
+    }
+    file.seek(SeekFrom::Start(0)).map_err(|e| e.to_string())?;
+    let mut reader = open_from_file(file, o)?;
     if !(2..=126).contains(&reader.tracks.len()) || !reader.metadata_complete {
         return Ok(None);
     }

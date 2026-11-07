@@ -18,15 +18,19 @@ fn qualify(
     transform: &LosslessTransform,
     options: &CopyOptions,
 ) -> Result<Option<Input>> {
+    use std::io::{Read, Seek, SeekFrom};
     check(options)?;
-    if !crate::owned_mp4_video_bridge::recognizes(source) {
-        return Ok(None);
-    }
     if crate::owned_lossless::request(transform).is_none() {
         return Ok(None);
     }
+    let mut file = File::open(source).map_err(|e| e.to_string())?;
+    let mut prefix = [0u8; 8];
+    if file.read_exact(&mut prefix).is_err() || !crate::owned_mp4::recognizes_prefix(&prefix) {
+        return Ok(None);
+    }
+    file.seek(SeekFrom::Start(0)).map_err(|e| e.to_string())?;
     let reader = match Mp4Reader::open(
-        BufReader::new(File::open(source).map_err(|e| e.to_string())?),
+        BufReader::new(file),
         crate::owned_mp4::Limits {
             metadata_bytes: crate::owned_mp4::Limits::default().metadata_bytes.min(
                 options

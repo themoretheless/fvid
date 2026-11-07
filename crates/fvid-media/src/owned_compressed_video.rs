@@ -5,7 +5,7 @@ use fvid_codecs::codec::{av1_decoder, vp9, vp9_decoder};
 use fvid_media_info::{DecodeStats, DecodeTransform};
 use std::{
     fs::File,
-    io::{BufReader, Read},
+    io::{BufReader, Read, Seek, SeekFrom},
     path::Path,
 };
 type Result<T> = std::result::Result<T, String>;
@@ -27,8 +27,10 @@ pub(crate) fn try_decode(
     let count = file.read(&mut magic).map_err(|e| e.to_string())?;
     if count == 8 && crate::owned_mp4::recognizes_prefix(&magic) {
         if request == DecodeTransform::default() {
-            return crate::owned_mp4_video_decode::try_decode(source, transform);
+            file.seek(SeekFrom::Start(0)).map_err(|e| e.to_string())?;
+            return crate::owned_mp4_video_decode::try_decode_from_file(file, transform);
         }
+        drop(file);
         if transform
             .input_format
             .as_deref()
@@ -48,6 +50,7 @@ pub(crate) fn try_decode(
         return Ok(result);
     }
     if request != DecodeTransform::default() {
+        drop(file);
         return crate::owned_video_decode::try_webm(source, transform);
     }
     if count < 4 || magic[..4] != [0x1a, 0x45, 0xdf, 0xa3] {
@@ -60,8 +63,9 @@ pub(crate) fn try_decode(
     {
         return Ok(None);
     }
+    file.seek(SeekFrom::Start(0)).map_err(|e| e.to_string())?;
     let mut reader = crate::owned_webm::WebmReader::open(
-        BufReader::new(File::open(source).map_err(|e| e.to_string())?),
+        BufReader::new(file),
         Default::default(),
     )
     .map_err(|e| e.to_string())?;

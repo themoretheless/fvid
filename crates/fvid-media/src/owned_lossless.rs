@@ -254,11 +254,14 @@ pub(crate) fn check_source_matroska_metadata_budget(
         return Ok(options_meta_bytes);
     };
     let mut prefix = [0u8; 4];
-    if !std::fs::File::open(source)
-        .is_ok_and(|mut f| std::io::Read::read_exact(&mut f, &mut prefix).is_ok() && prefix == [0x1a, 0x45, 0xdf, 0xa3])
+    let Ok(mut file) = std::fs::File::open(source) else {
+        return Ok(options_meta_bytes);
+    };
+    if std::io::Read::read_exact(&mut file, &mut prefix).is_err() || prefix != [0x1a, 0x45, 0xdf, 0xa3]
     {
         return Ok(options_meta_bytes);
     }
+    std::io::Seek::seek(&mut file, std::io::SeekFrom::Start(0)).map_err(|e| e.to_string())?;
     let mut limits = crate::owned_webm::Limits::default();
     let memory_packets = limit / std::mem::size_of::<crate::owned_webm::Packet>();
     limits.packets = limits.packets.min(memory_packets);
@@ -274,7 +277,7 @@ pub(crate) fn check_source_matroska_metadata_budget(
         }
     };
     let mut reader = crate::owned_webm::WebmReader::open(
-        std::io::BufReader::new(std::fs::File::open(source).map_err(|e| e.to_string())?),
+        std::io::BufReader::new(file),
         limits,
     )
     .map_err(map_packet_limit)?;
@@ -588,15 +591,25 @@ pub fn transcode_lossless(
     if count >= 4 && prefix[..4] == [0x1a, 0x45, 0xdf, 0xa3] {
         return Err("owned Matroska lossless export does not yet support this codec, format or transform".into());
     }
+    std::io::Seek::seek(&mut probe, std::io::SeekFrom::Start(0)).map_err(|e| e.to_string())?;
+    let mut y4m_reader = std::io::BufReader::new(probe);
+    let mut y4m_line = Vec::new();
+    let parsed_y4m_header = if crate::owned_y4m::line(&mut y4m_reader, &mut y4m_line)
+        .is_ok_and(|present| present)
+    {
+        crate::owned_y4m::Header::parse(&y4m_line).ok()
+    } else {
+        None
+    };
+    drop(y4m_reader);
     if let Some((from, to)) = request.interval {
         if from < 0 || to <= from {
             return Err("lossless interval requires 0 <= from < to".into());
         }
-        let mut reader =
-            std::io::BufReader::new(std::fs::File::open(source).map_err(|e| e.to_string())?);
-        let mut line = Vec::new();
-        crate::owned_y4m::line(&mut reader, &mut line)?;
-        let header = crate::owned_y4m::Header::parse(&line)?;
+        let header = match parsed_y4m_header.as_ref() {
+            Some(h) => h.clone(),
+            None => crate::owned_y4m::Header::parse(&y4m_line)?,
+        };
         let [n, d] = header.frame_rate()?;
         let mut a = n as u64;
         let mut b = d as u64 * 1_000_000;
@@ -617,12 +630,12 @@ pub fn transcode_lossless(
     let meta_working_bytes = options_matroska_metadata_working_bytes(options)?;
     let mut overlay_frame_len = 0usize;
     if let Some(spec) = &request.overlay {
-        if crate::owned_y4m_decode::supports(&spec.path) {
-            let mut reader =
-                std::io::BufReader::new(std::fs::File::open(&spec.path).map_err(|e| e.to_string())?);
+        if let Ok(ov_file) = std::fs::File::open(&spec.path) {
+            let mut reader = std::io::BufReader::new(ov_file);
             let mut line = Vec::new();
-            if crate::owned_y4m::line(&mut reader, &mut line)? {
-                let header = crate::owned_y4m::Header::parse(&line)?;
+            if crate::owned_y4m::line(&mut reader, &mut line).is_ok_and(|present| present)
+                && let Ok(header) = crate::owned_y4m::Header::parse(&line)
+            {
                 let frame_len = header.frame_len()?;
                 overlay_frame_len = frame_len;
                 if frame_len > options.max_packet_bytes {
@@ -637,45 +650,39 @@ pub fn transcode_lossless(
             }
         }
     }
-    if crate::owned_y4m_decode::supports(source) {
+    if let Some(ref header) = parsed_y4m_header {
         let geometry = crate::owned_y4m_decode::has_geometry_or_pixel_transform(&request);
-        let mut reader =
-            std::io::BufReader::new(std::fs::File::open(source).map_err(|e| e.to_string())?);
-        let mut line = Vec::new();
-        if crate::owned_y4m::line(&mut reader, &mut line)? {
-            let header = crate::owned_y4m::Header::parse(&line)?;
-            let frame_len = header.frame_len()?;
-            if frame_len > options.max_packet_bytes {
-                return Err("Y4M frame byte length exceeds packet byte limit".into());
-            }
-            if options
-                .max_controlled_bytes
-                .is_some_and(|limit| frame_len.saturating_add(meta_working_bytes) > limit)
+        let frame_len = header.frame_len()?;
+        if frame_len > options.max_packet_bytes {
+            return Err("Y4M frame byte length exceeds packet byte limit".into());
+        }
+        if options
+            .max_controlled_bytes
+            .is_some_and(|limit| frame_len.saturating_add(meta_working_bytes) > limit)
+        {
+            return Err("Y4M frame byte length exceeds controlled memory budget".into());
+        }
+        if let Some(limit) = options.max_controlled_bytes {
+            let presented =
+                crate::owned_y4m_decode::presented_header_after_geometry(header, &request)?;
+            let out_len = presented.frame_len()?;
+            let working = estimate_transform_working_bytes(
+                &request,
+                out_len,
+                presented.depth(),
+                overlay_frame_len,
+            )?;
+            let extra_buffers = if geometry {
+                frame_len.saturating_add(out_len)
+            } else {
+                out_len
+            };
+            if working
+                .saturating_add(extra_buffers)
+                .saturating_add(meta_working_bytes)
+                > limit
             {
                 return Err("Y4M frame byte length exceeds controlled memory budget".into());
-            }
-            if let Some(limit) = options.max_controlled_bytes {
-                let presented =
-                    crate::owned_y4m_decode::presented_header_after_geometry(&header, &request)?;
-                let out_len = presented.frame_len()?;
-                let working = estimate_transform_working_bytes(
-                    &request,
-                    out_len,
-                    presented.depth(),
-                    overlay_frame_len,
-                )?;
-                let extra_buffers = if geometry {
-                    frame_len.saturating_add(out_len)
-                } else {
-                    out_len
-                };
-                if working
-                    .saturating_add(extra_buffers)
-                    .saturating_add(meta_working_bytes)
-                    > limit
-                {
-                    return Err("Y4M frame byte length exceeds controlled memory budget".into());
-                }
             }
         }
     }
@@ -1008,16 +1015,26 @@ pub fn plan_transcode_lossless(
         action: "decode".into(),
         detail: "read source video frames with the owned container parser and decoder".into(),
     }];
+    let mut plan_y4m_header = None;
+    let mut plan_y4m_reader = None;
+    if multitrack.is_none()
+        && let Ok(file) = std::fs::File::open(source)
+    {
+        let mut reader = std::io::BufReader::new(file);
+        let mut line = Vec::new();
+        if crate::owned_y4m::line(&mut reader, &mut line).is_ok_and(|present| present)
+            && let Ok(header) = crate::owned_y4m::Header::parse(&line)
+        {
+            let _ = std::io::Seek::seek(&mut reader, std::io::SeekFrom::Start(0));
+            plan_y4m_header = Some(header);
+            plan_y4m_reader = Some(reader);
+        }
+    }
     if let Some((from, to)) = transform.interval {
         if from < 0 || to <= from {
             return Err("lossless interval requires 0 <= from < to".into());
         }
-        if multitrack.is_none() && crate::owned_y4m_decode::supports(source) {
-            let mut input =
-                std::io::BufReader::new(std::fs::File::open(source).map_err(|e| e.to_string())?);
-            let mut bytes = Vec::new();
-            crate::owned_y4m::line(&mut input, &mut bytes)?;
-            let header = crate::owned_y4m::Header::parse(&bytes)?;
+        if let Some(ref header) = plan_y4m_header {
             let [n, d] = header.frame_rate()?;
             if [from, to]
                 .into_iter()
@@ -1031,7 +1048,7 @@ pub fn plan_transcode_lossless(
             detail: format!("presentation window [{from},{to}) µs"),
         });
     }
-    if multitrack.is_none() && crate::owned_y4m_decode::supports(source) {
+    if let (Some(header), Some(mut reader)) = (plan_y4m_header, plan_y4m_reader) {
         if options.max_packets.is_some()
             || options.max_packet_bytes != CopyOptions::default().max_packet_bytes
             || options.max_controlled_bytes.is_some()
@@ -1043,71 +1060,61 @@ pub fn plan_transcode_lossless(
             let meta_working_bytes = options_matroska_metadata_working_bytes(options)?;
             let geometry = crate::owned_y4m_decode::has_geometry_or_pixel_transform(&request);
             let mut overlay_frame_len = 0usize;
-            if let Some(spec) = &request.overlay {
-                if crate::owned_y4m_decode::supports(&spec.path) {
-                    let mut ov_reader = std::io::BufReader::new(
-                        std::fs::File::open(&spec.path).map_err(|e| e.to_string())?,
-                    );
-                    let mut ov_line = Vec::new();
-                    if crate::owned_y4m::line(&mut ov_reader, &mut ov_line)? {
-                        let ov_header = crate::owned_y4m::Header::parse(&ov_line)?;
-                        let ov_len = ov_header.frame_len()?;
-                        overlay_frame_len = ov_len;
-                        if ov_len > options.max_packet_bytes {
-                            return Err("Y4M frame byte length exceeds packet byte limit".into());
-                        }
-                        if options
-                            .max_controlled_bytes
-                            .is_some_and(|limit| ov_len.saturating_add(meta_working_bytes) > limit)
-                        {
-                            return Err(
-                                "Y4M frame byte length exceeds controlled memory budget".into(),
-                            );
-                        }
+            if let Some(spec) = &request.overlay
+                && let Ok(ov_file) = std::fs::File::open(&spec.path)
+            {
+                let mut ov_reader = std::io::BufReader::new(ov_file);
+                let mut ov_line = Vec::new();
+                if crate::owned_y4m::line(&mut ov_reader, &mut ov_line).is_ok_and(|present| present)
+                    && let Ok(ov_header) = crate::owned_y4m::Header::parse(&ov_line)
+                {
+                    let ov_len = ov_header.frame_len()?;
+                    overlay_frame_len = ov_len;
+                    if ov_len > options.max_packet_bytes {
+                        return Err("Y4M frame byte length exceeds packet byte limit".into());
+                    }
+                    if options
+                        .max_controlled_bytes
+                        .is_some_and(|limit| ov_len.saturating_add(meta_working_bytes) > limit)
+                    {
+                        return Err(
+                            "Y4M frame byte length exceeds controlled memory budget".into(),
+                        );
                     }
                 }
             }
-            let mut reader =
-                std::io::BufReader::new(std::fs::File::open(source).map_err(|e| e.to_string())?);
-            let mut line = Vec::new();
-            let mut y4m_encode_working_bytes = 0usize;
-            if crate::owned_y4m::line(&mut reader, &mut line)? {
-                let header = crate::owned_y4m::Header::parse(&line)?;
-                let frame_len = header.frame_len()?;
-                if frame_len > options.max_packet_bytes {
-                    return Err("Y4M frame byte length exceeds packet byte limit".into());
-                }
-                if options
-                    .max_controlled_bytes
-                    .is_some_and(|limit| frame_len.saturating_add(meta_working_bytes) > limit)
-                {
-                    return Err("Y4M frame byte length exceeds controlled memory budget".into());
-                }
-                let presented =
-                    crate::owned_y4m_decode::presented_header_after_geometry(&header, &request)?;
-                let out_len = presented.frame_len()?;
-                let working = estimate_transform_working_bytes(
-                    &request,
-                    out_len,
-                    presented.depth(),
-                    overlay_frame_len,
-                )?;
-                let extra_buffers = if geometry {
-                    frame_len.saturating_add(out_len)
-                } else {
-                    out_len
-                };
-                y4m_encode_working_bytes = working
-                    .saturating_add(extra_buffers)
-                    .saturating_add(meta_working_bytes);
-                if let Some(limit) = options.max_controlled_bytes
-                    && y4m_encode_working_bytes > limit
-                {
-                    return Err("Y4M frame byte length exceeds controlled memory budget".into());
-                }
+            let frame_len = header.frame_len()?;
+            if frame_len > options.max_packet_bytes {
+                return Err("Y4M frame byte length exceeds packet byte limit".into());
             }
-            let mut reader =
-                std::io::BufReader::new(std::fs::File::open(source).map_err(|e| e.to_string())?);
+            if options
+                .max_controlled_bytes
+                .is_some_and(|limit| frame_len.saturating_add(meta_working_bytes) > limit)
+            {
+                return Err("Y4M frame byte length exceeds controlled memory budget".into());
+            }
+            let presented =
+                crate::owned_y4m_decode::presented_header_after_geometry(&header, &request)?;
+            let out_len = presented.frame_len()?;
+            let working = estimate_transform_working_bytes(
+                &request,
+                out_len,
+                presented.depth(),
+                overlay_frame_len,
+            )?;
+            let extra_buffers = if geometry {
+                frame_len.saturating_add(out_len)
+            } else {
+                out_len
+            };
+            let y4m_encode_working_bytes = working
+                .saturating_add(extra_buffers)
+                .saturating_add(meta_working_bytes);
+            if let Some(limit) = options.max_controlled_bytes
+                && y4m_encode_working_bytes > limit
+            {
+                return Err("Y4M frame byte length exceeds controlled memory budget".into());
+            }
             let mut visit = |header: &crate::owned_y4m::Header, data: &[u8], _: u64, _: u64| {
                 if options
                     .cancel
@@ -1172,16 +1179,14 @@ pub fn plan_transcode_lossless(
                 );
             }
         } else {
-            let mut reader =
-                std::io::BufReader::new(std::fs::File::open(source).map_err(|e| e.to_string())?);
             let mut line = Vec::new();
             if !crate::owned_y4m::line(&mut reader, &mut line)?
                 || !crate::owned_y4m::line(&mut reader, &mut line)?
             {
                 return Err("Matroska has no selected frames".into());
             }
-            let mut reader =
-                std::io::BufReader::new(std::fs::File::open(source).map_err(|e| e.to_string())?);
+            std::io::Seek::seek(&mut reader, std::io::SeekFrom::Start(0))
+                .map_err(|e| e.to_string())?;
             let mut first = false;
             let mut visit = |_: &crate::owned_y4m::Header, _: &[u8], _: u64, _: u64| {
                 first = true;
