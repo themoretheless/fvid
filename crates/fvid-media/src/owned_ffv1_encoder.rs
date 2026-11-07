@@ -38,8 +38,10 @@ pub(crate) fn encode_y4m_counted(
         max_packets,
         &mut |header, data, pts, duration| {
             let (sx, sy) = header.format.subsampling();
+            let mut buf = crate::owned_frame::buffer(data.len())?;
+            buf.copy_from_slice(data);
             let frame = GeometryFrame {
-                data: data.to_vec(),
+                data: buf,
                 width: header.width,
                 height: header.height,
                 subsampling: Some([sx, sy]),

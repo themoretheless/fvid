@@ -4346,6 +4346,17 @@ See `batch-593-validation.json`.
 
 See `batch-594-validation.json`.
 
+## Batch 595 — FVID-0705..0709: Fallible stream and chapter reservation in WebM probe, single-open header qualification in Y4M `supports_transformed`, single-open header reuse in `try_y4m_with_options`, fallible frame buffer in `encode_y4m_counted`, and upfront destination check in `transcode_lossless`
+
+- **FVID-0705** — Pre-reserve stream and chapter lists with `try_reserve_exact` in `owned_webm_probe::try_probe_webm_with_limits` (`crates/fvid-media/src/owned_webm_probe.rs`, `tests/y4m_probe_and_lossless_preflight.rs`).
+- **FVID-0706** — Read and parse the primary Y4M header once per call in `owned_y4m_decode::supports_transformed` (`crates/fvid-media/src/owned_y4m_decode.rs`, `tests/y4m_probe_and_lossless_preflight.rs`).
+- **FVID-0707** — Reuse the already-opened reader and header buffer in `owned_y4m_probe::try_y4m_with_options` (`crates/fvid-media/src/owned_y4m_probe.rs`, `tests/y4m_probe_and_lossless_preflight.rs`).
+- **FVID-0708** — Use fallible frame buffer allocation in `owned_ffv1_encoder::encode_y4m_counted` (`crates/fvid-media/src/owned_ffv1_encoder.rs`, `tests/y4m_probe_and_lossless_preflight.rs`).
+- **FVID-0709** — Reject existing destination upfront in `owned_lossless::transcode_lossless` before transform and container validation (`crates/fvid-media/src/owned_lossless.rs`, `tests/y4m_probe_and_lossless_preflight.rs`).
+
+See `batch-595-validation.json`.
+
+
 
 
 

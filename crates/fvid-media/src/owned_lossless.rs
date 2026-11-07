@@ -538,6 +538,9 @@ pub fn transcode_lossless(
     {
         return Err("owned FFV1 export requires .mkv".into());
     }
+    if destination.symlink_metadata().is_ok() {
+        return Err("output already exists".into());
+    }
     let request = request(&transform)
         .ok_or("owned Y4M lossless export does not yet implement requested transforms")?;
     if let Some(stats)=crate::owned_mp4_multitrack_export::try_export(source,destination,&transform,options)? {return Ok(stats);}

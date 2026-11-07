@@ -1,8 +1,8 @@
 {
   "target": 1000,
   "counting_rule": "One independently confirmed problem or useful capability; fixture variants and baseline integration repairs are excluded. Only accepted entries count.",
-  "accepted_count": 704,
-  "next_id": "FVID-0705",
+  "accepted_count": 709,
+  "next_id": "FVID-0710",
   "entries": [
     {
       "id": "FVID-0001",
@@ -7935,6 +7935,61 @@
       "result": "Precompute plan_bytes, video_index_bytes, and schedule_base_bytes once before the packet loop in try_export, and report 'controlled memory budget exceeded: MP4 index and metadata' when effective_packet_limit is clamped below max_packet_bytes by max_controlled_bytes.",
       "status": "accepted",
       "validation": "batch-594-validation.json"
+    },
+    {
+      "id": "FVID-0705",
+      "batch": 595,
+      "title": "Pre-reserve stream and chapter lists with try_reserve_exact in owned_webm_probe::try_probe_webm_with_limits",
+      "source": "crates/fvid-media/src/owned_webm_probe.rs",
+      "regression": "tests/y4m_probe_and_lossless_preflight.rs",
+      "before": "try_probe_webm_with_limits allocated streams and chapters with Vec::new() and pushed reader.tracks.len() and reader.chapters.len() entries via infallible growth.",
+      "result": "Pre-reserve streams and chapters with fallible try_reserve_exact(reader.tracks.len()) and try_reserve_exact(reader.chapters.len()) in try_probe_webm_with_limits.",
+      "status": "accepted",
+      "validation": "batch-595-validation.json"
+    },
+    {
+      "id": "FVID-0706",
+      "batch": 595,
+      "title": "Read and parse the primary Y4M header once per call in owned_y4m_decode::supports_transformed",
+      "source": "crates/fvid-media/src/owned_y4m_decode.rs",
+      "regression": "tests/y4m_probe_and_lossless_preflight.rs",
+      "before": "supports_transformed opened source and parsed the Y4M header up to 5 separate times across header_format, overlay_supported, supports, framestep_clock_supported, and transpose header_format.",
+      "result": "Read and parse Header once via read_header(source) in supports_transformed and pass &header to overlay_supported_with_header and framestep_clock_supported_with_header.",
+      "status": "accepted",
+      "validation": "batch-595-validation.json"
+    },
+    {
+      "id": "FVID-0707",
+      "batch": 595,
+      "title": "Reuse the already-opened reader and header buffer in owned_y4m_probe::try_y4m_with_options",
+      "source": "crates/fvid-media/src/owned_y4m_probe.rs",
+      "regression": "tests/y4m_probe_and_lossless_preflight.rs",
+      "before": "try_y4m_with_options opened source, verified the YUV4MPEG2 signature, read and validated the header line, and then called probe_y4m_with_options(source, options), which re-opened source, re-validated options, and re-read the header line.",
+      "result": "Extract probe_y4m_after_header(source, input, line, options) and call it directly from try_y4m_with_options and probe_y4m_with_options without re-opening source or re-reading the header line.",
+      "status": "accepted",
+      "validation": "batch-595-validation.json"
+    },
+    {
+      "id": "FVID-0708",
+      "batch": 595,
+      "title": "Use fallible frame buffer allocation in owned_ffv1_encoder::encode_y4m_counted",
+      "source": "crates/fvid-media/src/owned_ffv1_encoder.rs",
+      "regression": "tests/y4m_probe_and_lossless_preflight.rs",
+      "before": "encode_y4m_counted cloned each decoded Y4M frame into GeometryFrame using infallible data.to_vec() before encoding FFV1.",
+      "result": "Allocate GeometryFrame::data via fallible crate::owned_frame::buffer(data.len()) in encode_y4m_counted.",
+      "status": "accepted",
+      "validation": "batch-595-validation.json"
+    },
+    {
+      "id": "FVID-0709",
+      "batch": 595,
+      "title": "Reject existing destination upfront in owned_lossless::transcode_lossless before transform and container validation",
+      "source": "crates/fvid-media/src/owned_lossless.rs",
+      "regression": "tests/y4m_probe_and_lossless_preflight.rs",
+      "before": "transcode_lossless checked the .mkv extension upfront, but deferred destination.symlink_metadata().is_ok() until individual export backends or after transform, metadata, MP4 bridge staging, and Y4M header/frame-size budget checks.",
+      "result": "Check destination.symlink_metadata().is_ok() immediately after the .mkv extension check in transcode_lossless before transform validation, bridge staging, or container probing.",
+      "status": "accepted",
+      "validation": "batch-595-validation.json"
     }
   ]
 }

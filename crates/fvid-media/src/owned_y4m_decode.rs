@@ -187,46 +187,45 @@ pub(crate) fn supported_request(transform: &DecodeTransform) -> bool {
             }
 }
 pub(crate) fn supports_transformed(source: &Path, transform: &DecodeTransform) -> bool {
-    supported_request(transform)
-        && (!crate::owned_deband::Deband::needs_equal_planes(transform.deband.as_deref()) || header_format(source)==Some(PixelFormat::Yuv444))
-        && overlay_supported(source, transform)
-        && supports(source)
-        && framestep_clock_supported(source, transform)
-        && (transform.transpose.is_none() || header_format(source) != Some(PixelFormat::Yuv411))
+    if !supported_request(transform) {
+        return false;
+    }
+    let Some(header) = read_header(source) else {
+        return false;
+    };
+    (!crate::owned_deband::Deband::needs_equal_planes(transform.deband.as_deref())
+        || header.format == PixelFormat::Yuv444)
+        && overlay_supported_with_header(&header, transform)
+        && framestep_clock_supported_with_header(&header, transform)
+        && (transform.transpose.is_none() || header.format != PixelFormat::Yuv411)
 }
-fn framestep_clock_supported(source: &Path, transform: &DecodeTransform) -> bool {
+fn read_header(source: &Path) -> Option<Header> {
+    let mut reader = BufReader::new(File::open(source).ok()?);
+    let mut bytes = Vec::new();
+    if !line(&mut reader, &mut bytes).ok()? {
+        return None;
+    }
+    Header::parse(&bytes).ok()
+}
+fn framestep_clock_supported_with_header(header: &Header, transform: &DecodeTransform) -> bool {
     let Some(args) = transform.framestep.as_deref() else {
         return true;
     };
-    let qualify = || -> Result<()> {
-        let mut input = BufReader::new(File::open(source).map_err(|e| e.to_string())?);
-        let mut bytes = Vec::new();
-        line(&mut input, &mut bytes)?;
-        let rate = Header::parse(&bytes)?.frame_rate()?;
-        crate::owned_framestep::FrameStep::parse(args)?.frame_rate(rate)?;
-        Ok(())
+    let Ok(rate) = header.frame_rate() else {
+        return false;
     };
-    qualify().is_ok()
+    crate::owned_framestep::FrameStep::parse(args)
+        .and_then(|step| step.frame_rate(rate))
+        .is_ok()
 }
-fn overlay_supported(source: &Path, transform: &DecodeTransform) -> bool {
+fn overlay_supported_with_header(header: &Header, transform: &DecodeTransform) -> bool {
     let Some(spec) = &transform.overlay else {
         return true;
     };
     if transform.shuffleplanes.is_some() {
         return false;
     }
-    let Ok(file) = File::open(source) else {
-        return false;
-    };
-    let mut reader = BufReader::new(file);
-    let mut bytes = Vec::new();
-    if !line(&mut reader, &mut bytes).is_ok_and(|present| present) {
-        return false;
-    }
-    let Ok(header) = Header::parse(&bytes) else {
-        return false;
-    };
-    let Ok(presented) = presented_header_after_geometry(&header, transform) else {
+    let Ok(presented) = presented_header_after_geometry(header, transform) else {
         return false;
     };
     crate::owned_y4m_overlay::OverlayReader::open(&presented, spec).is_ok()
@@ -303,12 +302,6 @@ pub(crate) fn presented_header_after_geometry(
         .tokens
         .push(format!("A{}:{}", aspect.0, aspect.1));
     Ok(presented_header)
-}
-fn header_format(source: &Path) -> Option<PixelFormat> {
-    let mut r = BufReader::new(File::open(source).ok()?);
-    let mut b = Vec::new();
-    line(&mut r, &mut b).ok()?;
-    Some(Header::parse(&b).ok()?.format)
 }
 pub fn decode_video_transformed(source: &Path, transform: DecodeTransform) -> Result<DecodeStats> {
     decode_reader_transformed(

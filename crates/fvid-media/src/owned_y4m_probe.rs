@@ -74,7 +74,7 @@ pub fn try_y4m_with_options(
             return Err("invalid Y4M colour range".into());
         }
     }
-    probe_y4m_with_options(source, options).map(Some)
+    probe_y4m_after_header(source, input, header, options).map(Some)
 }
 
 pub fn probe_y4m(source: &Path) -> Result<MediaInfo> {
@@ -85,7 +85,6 @@ pub fn probe_y4m_with_options(
     source: &Path,
     options: &fvid_control::CopyOptions,
 ) -> Result<MediaInfo> {
-    use std::io::{Seek, SeekFrom};
     if options.cancel.as_ref().is_some_and(|c| c.is_cancelled()) {
         return Err("media operation cancelled".into());
     }
@@ -100,11 +99,20 @@ pub fn probe_y4m_with_options(
     }
     crate::owned_budget::check_rss_budget(options)?;
     let mut input = BufReader::new(File::open(source).map_err(|e| e.to_string())?);
-    let length = input.get_ref().metadata().map_err(|e| e.to_string())?.len();
     let mut line = Vec::new();
     if !crate::owned_y4m::line(&mut input, &mut line).map_err(|e| e.to_string())? {
         return Err("empty Y4M input".into());
     }
+    probe_y4m_after_header(source, input, line, options)
+}
+
+fn probe_y4m_after_header(
+    source: &Path,
+    mut input: BufReader<File>,
+    mut line: Vec<u8>,
+    options: &fvid_control::CopyOptions,
+) -> Result<MediaInfo> {
+    let length = input.get_ref().metadata().map_err(|e| e.to_string())?.len();
     let header = crate::owned_y4m::Header::parse(&line).map_err(|e| e.to_string())?;
     header.pixel_aspect().map_err(|e| e.to_string())?;
     header.full_range().map_err(|e| e.to_string())?;

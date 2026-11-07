@@ -167,6 +167,9 @@ fn try_probe_webm_with_limits(
         }
     }
     let mut streams = Vec::new();
+    streams
+        .try_reserve_exact(reader.tracks.len())
+        .map_err(|_| "cannot allocate Matroska stream list".to_string())?;
     for (index, track) in reader.tracks.iter().enumerate() {
         let start = reader
             .packets
@@ -273,6 +276,9 @@ fn try_probe_webm_with_limits(
         });
     }
     let mut chapters = Vec::new();
+    chapters
+        .try_reserve_exact(reader.chapters.len())
+        .map_err(|_| "cannot allocate Matroska chapter list".to_string())?;
     for (index, chapter) in reader.chapters.iter().enumerate() {
         let start = checked(chapter.start_ns)?;
         let end = if let Some(end) = chapter.end_ns {

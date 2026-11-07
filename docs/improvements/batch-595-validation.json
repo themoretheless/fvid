@@ -1,0 +1,17 @@
+{
+  "batch": 595,
+  "ids": [
+    "FVID-0705",
+    "FVID-0706",
+    "FVID-0707",
+    "FVID-0708",
+    "FVID-0709"
+  ],
+  "commands": [
+    "cargo test --test y4m_probe_and_lossless_preflight",
+    "cargo test -p fvid-media owned_y4m",
+    "cargo test -p fvid-media owned_webm_probe",
+    "cargo test -p fvid-media owned_lossless"
+  ],
+  "status": "accepted"
+}
