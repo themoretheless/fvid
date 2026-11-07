@@ -50,6 +50,70 @@ pub fn supports_plan(source: &Path, args: Option<&str>, options: &CopyOptions) -
             &crate::owned_adts_export::pcm_decode_options(options),
         )
 }
+pub fn try_apply(
+    source: &Path,
+    destination: &Path,
+    args: Option<&str>,
+    dual_pass: bool,
+    options: &CopyOptions,
+) -> Result<Option<LoudnormStats>> {
+    if destination.extension().and_then(|s| s.to_str()) != Some("wav")
+        || !policies(options)
+        || crate::owned_loudnorm::validate_request(args).is_err()
+    {
+        return Ok(None);
+    }
+    let decode_options = crate::owned_adts_export::pcm_decode_options(options);
+    if !crate::owned_container_loudness::recognizes_with_options(source, &decode_options)
+        .unwrap_or(false)
+    {
+        return Ok(None);
+    }
+    match apply(source, destination, args, dual_pass, options) {
+        Ok(stats) => Ok(Some(stats)),
+        Err(error)
+            if error.starts_with("controlled memory budget exceeded:")
+                || matches!(
+                    error.as_str(),
+                    "MP4 packet exceeds budget"
+                        | "WebM packet exceeds budget"
+                        | "output already exists"
+                ) =>
+        {
+            Err(error)
+        }
+        Err(_) => Ok(None),
+    }
+}
+pub fn try_plan_loudnorm(
+    source: &Path,
+    args: Option<&str>,
+    dual_pass: bool,
+    options: &CopyOptions,
+) -> Result<Option<MediaPlan>> {
+    if !policies(options) || crate::owned_loudnorm::validate_request(args).is_err() {
+        return Ok(None);
+    }
+    let decode_options = crate::owned_adts_export::pcm_decode_options(options);
+    if !crate::owned_container_loudness::recognizes_with_options(source, &decode_options)
+        .unwrap_or(false)
+    {
+        return Ok(None);
+    }
+    match plan_loudnorm(source, args, dual_pass, options) {
+        Ok(plan) => Ok(Some(plan)),
+        Err(error)
+            if error.starts_with("controlled memory budget exceeded:")
+                || matches!(
+                    error.as_str(),
+                    "MP4 packet exceeds budget" | "WebM packet exceeds budget"
+                ) =>
+        {
+            Err(error)
+        }
+        Err(_) => Ok(None),
+    }
+}
 pub fn apply(
     source: &Path,
     destination: &Path,

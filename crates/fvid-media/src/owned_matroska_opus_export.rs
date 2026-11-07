@@ -89,8 +89,48 @@ pub(crate) fn apply(
     if destination.symlink_metadata().is_ok() {
         return Err("output already exists".into());
     }
+    let reader = crate::owned_matroska_audio::open_audio_reader(
+        BufReader::new(File::open(source).map_err(|e| e.to_string())?),
+        options,
+        options.max_packet_bytes,
+    )
+    .map_err(|e| e.to_string())?;
+    let selected = match options.streams.as_slice() {
+        [] => None,
+        [index] => Some(*index),
+        _ => return Err("select exactly one audio stream".into()),
+    };
+    let index = crate::owned_matroska_audio::matroska_audio_index(&reader, selected)
+        .map_err(|e| e.to_string())?;
+    apply_from_reader(source, reader, index, destination, transform, options)
+}
+
+pub(crate) fn apply_from_reader<R: Read + std::io::Seek>(
+    source: &Path,
+    reader: crate::owned_webm::WebmReader<R>,
+    index: usize,
+    destination: &Path,
+    transform: AudioDecodeTransform,
+    options: &CopyOptions,
+) -> Result<AudioDecodeStats> {
+    if options.cancel.as_ref().is_some_and(|c| c.is_cancelled()) {
+        return Err("media operation cancelled".into());
+    }
+    if options.max_packet_bytes == 0 {
+        return Err("packet byte limit must be positive".into());
+    }
+    if options.max_packets == Some(0) {
+        return Err("packet work limit requires at least one packet".into());
+    }
+    if options.max_controlled_bytes == Some(0) {
+        return Err("controlled memory limit must be positive".into());
+    }
+    crate::owned_budget::check_rss_budget(options)?;
+    if destination.symlink_metadata().is_ok() {
+        return Err("output already exists".into());
+    }
     let (rate, channels, mask, frames, info) =
-        geometry_with_mask_frames_and_info_for_decode(source, Some(transform), options)?;
+        geometry_from_reader_for_decode(source, reader, index, Some(transform), options)?;
     crate::owned_adts_export::check_spool_wave_export_budget(
         rate,
         channels,

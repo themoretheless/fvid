@@ -123,12 +123,23 @@ fn audio_plan_with_controls(
     let mut total_out_channels = 0u32;
     for source in sources {
         validate_mix_controls(controls)?;
-        let (head, head_len) = crate::owned_audio_plan::read_source_head(source)?;
+        use std::io::{Read, Seek, SeekFrom};
+        let mut file = std::fs::File::open(source).map_err(|e| e.to_string())?;
+        let mut head = [0u8; 12];
+        let mut head_len = 0;
+        while head_len < head.len() {
+            match file.read(&mut head[head_len..]) {
+                Ok(0) => break,
+                Ok(n) => head_len += n,
+                Err(e) if e.kind() == std::io::ErrorKind::Interrupted => continue,
+                Err(e) => return Err(e.to_string()),
+            }
+        }
         let is_wave_header = matches!(&head[..head_len.min(4)], b"RIFF" | b"RIFX" | b"RF64")
             && head_len == 12
             && &head[8..12] == b"WAVE";
         let (rate, channels) = if is_wave_header {
-            let mut file = std::fs::File::open(source).map_err(|e| e.to_string())?;
+            file.seek(SeekFrom::Start(0)).map_err(|e| e.to_string())?;
             if let Some(law) =
                 crate::owned_wave_inspect::g711_law(&mut file, controls.cancel.as_ref())
                     .map_err(|e| e.to_string())?
@@ -154,7 +165,6 @@ fn audio_plan_with_controls(
                 min_frames = Some(min_frames.map_or(g711_frames, |m| m.min(g711_frames)));
                 (rate, channels)
             } else {
-                use std::io::{Seek, SeekFrom};
                 file.seek(SeekFrom::Start(0)).map_err(|e| e.to_string())?;
                 let wave_info =
                     crate::owned_wave_inspect::inspect(&mut file, controls.cancel.as_ref())
@@ -198,6 +208,7 @@ fn audio_plan_with_controls(
                 (wave_info.sample_rate, wave_info.channels)
             }
         } else {
+            drop(file);
             let (_, info) = crate::owned_audio_plan::plan_decode_audio_with_descriptor(
                 source,
                 &Default::default(),

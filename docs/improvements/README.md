@@ -4766,4 +4766,13 @@ See `batch-628-validation.json`.
 - **FVID-0923**: Inspect constant-audio sources in a single pass before fallback in `native_export::trim_audio_wave` (`src/native_export.rs`).
 - **FVID-0924**: Reject G.711 WAVE in `media::uses_native_audio_route` via `is_wave_reader` and verify single-stream MP4 audio handler before container inspection (`src/media.rs`).
 
+## Batch 639 (FVID-0925..0929)
+
+- **FVID-0925**: Combine container loudnorm support preflight and planning via `owned_container_loudnorm::try_plan_loudnorm` in `native_loudnorm::try_plan` (`crates/fvid-media/src/owned_container_loudnorm.rs`).
+- **FVID-0926**: Combine container loudnorm support preflight and execution via `owned_container_loudnorm::try_apply` in `native_loudnorm::try_apply` (`src/native_loudnorm.rs`).
+- **FVID-0927**: Reuse the open WAVE file handle across header read, G.711 law check, and WAVE inspection in `owned_audio_mix::audio_plan_with_controls` (`crates/fvid-media/src/owned_audio_mix.rs`).
+- **FVID-0928**: Forward the already-opened `WebmReader` and audio track index from `decode_audio_transformed` into Matroska codec export modules (`crates/fvid-media/src/owned_audio_export.rs`).
+- **FVID-0929**: Derive default mono/stereo channel weights inline during `measure_file_default_weights_with_options` in `media::measure_loudness` (`src/native_pcm/loudness.rs`).
+
+
 

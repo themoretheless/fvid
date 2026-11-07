@@ -1,8 +1,8 @@
 {
   "target": 1000,
   "counting_rule": "One independently confirmed problem or useful capability; fixture variants and baseline integration repairs are excluded. Only accepted entries count.",
-  "accepted_count": 924,
-  "next_id": "FVID-0925",
+  "accepted_count": 929,
+  "next_id": "FVID-0930",
   "entries": [
     {
       "id": "FVID-0001",
@@ -10355,6 +10355,61 @@
       "result": "uses_native_audio_route delegates RIFF/RF64/RIFX WAVE prefix checks to is_wave_reader, verifies single-stream MP4 soun handler early, and drops Mp4Reader before subsequent inspection",
       "status": "accepted",
       "validation": "batch-638-validation.json"
+    },
+    {
+      "id": "FVID-0925",
+      "batch": 639,
+      "title": "Combine container loudnorm support preflight and planning via owned_container_loudnorm::try_plan_loudnorm in native_loudnorm::try_plan",
+      "source": "crates/fvid-media/src/owned_container_loudnorm.rs",
+      "regression": "tests/container_loudnorm_matroska_export_and_loudness_reuse.rs",
+      "before": "native_loudnorm::try_plan called owned_container_loudnorm::supports_plan (which ran owned_container_loudness::geometry) and then immediately called owned_container_loudnorm::plan_loudnorm (which re-opened the container via plan_decode_audio_with_descriptor)",
+      "result": "owned_container_loudnorm::try_plan_loudnorm checks light signature and policy admission before invoking plan_loudnorm once, propagating budget errors",
+      "status": "accepted",
+      "validation": "batch-639-validation.json"
+    },
+    {
+      "id": "FVID-0926",
+      "batch": 639,
+      "title": "Combine container loudnorm support preflight and execution via owned_container_loudnorm::try_apply in native_loudnorm::try_apply",
+      "source": "src/native_loudnorm.rs",
+      "regression": "tests/container_loudnorm_matroska_export_and_loudness_reuse.rs",
+      "before": "native_loudnorm::try_apply called owned_container_loudnorm::supports_plan and then immediately called owned_container_loudnorm::apply, opening and parsing the container twice before decoding",
+      "result": "native_loudnorm::try_apply delegates directly to owned_container_loudnorm::try_apply, avoiding the redundant supports_plan container scan",
+      "status": "accepted",
+      "validation": "batch-639-validation.json"
+    },
+    {
+      "id": "FVID-0927",
+      "batch": 639,
+      "title": "Reuse the open WAVE file handle across header read, G.711 law check, and WAVE inspection in owned_audio_mix::audio_plan_with_controls",
+      "source": "crates/fvid-media/src/owned_audio_mix.rs",
+      "regression": "tests/container_loudnorm_matroska_export_and_loudness_reuse.rs",
+      "before": "audio_plan_with_controls called read_source_head (opening each source to read 12 bytes) and then opened the same WAVE source a second time for g711_law and inspect",
+      "result": "audio_plan_with_controls opens the source file once, reads the 12-byte header, and rewinds the same handle for WAVE G.711 and float32 inspection",
+      "status": "accepted",
+      "validation": "batch-639-validation.json"
+    },
+    {
+      "id": "FVID-0928",
+      "batch": 639,
+      "title": "Forward the already-opened WebmReader and audio track index from decode_audio_transformed into Matroska codec export modules",
+      "source": "crates/fvid-media/src/owned_audio_export.rs",
+      "regression": "tests/container_loudnorm_matroska_export_and_loudness_reuse.rs",
+      "before": "decode_audio_transformed called matroska_selected_codec (which opened the Matroska file and built the full packet index via open_audio_reader), dropped the reader, and then called owned_matroska_*_export::apply which opened and indexed the Matroska file again",
+      "result": "matroska_selected_reader_and_codec returns the open WebmReader and resolved track index to apply_from_reader across PCM, AAC, Opus, FLAC, MP3, and ALAC Matroska exporters",
+      "status": "accepted",
+      "validation": "batch-639-validation.json"
+    },
+    {
+      "id": "FVID-0929",
+      "batch": 639,
+      "title": "Derive default mono/stereo channel weights inline during measure_file_default_weights_with_options in media::measure_loudness",
+      "source": "src/native_pcm/loudness.rs",
+      "regression": "tests/container_loudnorm_matroska_export_and_loudness_reuse.rs",
+      "before": "media::measure_loudness called loudness_channel_weights_with_options (which opened and inspected the WAVE/MP4/Matroska/container source to read channels) and then called measure_file_with_options which opened and inspected the source a second time",
+      "result": "measure_file_with_optional_weights_and_kind derives default unit weights once the input stream channels are known, eliminating the duplicate preflight container open",
+      "status": "accepted",
+      "validation": "batch-639-validation.json"
     }
   ],
   "pending_count": 126

@@ -33,12 +33,49 @@ pub fn measure_file_with_options(
     weights: &[f64],
     options: &fvid_media::CopyOptions,
 ) -> crate::Result<IntegratedLoudness> {
-    Ok(measure_file_with_options_and_kind(source, weights, options)?.0)
+    Ok(measure_file_with_optional_weights_and_kind(source, Some(weights), options)?.0)
+}
+
+pub(crate) fn measure_file_default_weights_with_options(
+    source: &std::path::Path,
+    options: &fvid_media::CopyOptions,
+) -> crate::Result<IntegratedLoudness> {
+    Ok(measure_file_with_optional_weights_and_kind(source, None, options)?.0)
 }
 
 pub(super) fn measure_file_with_options_and_kind(
     source: &std::path::Path,
     weights: &[f64],
+    options: &fvid_media::CopyOptions,
+) -> crate::Result<(IntegratedLoudness, bool)> {
+    measure_file_with_optional_weights_and_kind(source, Some(weights), options)
+}
+
+fn resolve_weights_for_channels(
+    weights: Option<&[f64]>,
+    channels: u16,
+) -> crate::Result<Vec<f64>> {
+    match weights {
+        Some(w) => {
+            if w.len() != usize::from(channels) {
+                return Err(crate::invalid(
+                    "channel weights must match selected audio stream",
+                ));
+            }
+            Ok(w.to_vec())
+        }
+        None => match channels {
+            1 | 2 => Ok(vec![1.0; usize::from(channels)]),
+            _ => Err(crate::invalid(
+                "multichannel loudness requires explicit channel weights in stream order",
+            )),
+        },
+    }
+}
+
+pub(super) fn measure_file_with_optional_weights_and_kind(
+    source: &std::path::Path,
+    weights: Option<&[f64]>,
     options: &fvid_media::CopyOptions,
 ) -> crate::Result<(IntegratedLoudness, bool)> {
     use crate::{invalid, native_media};
@@ -169,10 +206,8 @@ pub(super) fn measure_file_with_options_and_kind(
         let (rate, channels, mask, codec, _, precomputed_info) =
             fvid_media::owned_container_loudness::geometry_with_frames_unqualified(source, options)
                 .map_err(|e| invalid(&e))?;
-        if weights.len() != usize::from(channels) {
-            return Err(invalid("channel weights must match selected audio stream"));
-        }
-        LoudnessMeter::new(rate, weights).map_err(|e| invalid(&e))?;
+        let resolved_weights = resolve_weights_for_channels(weights, channels)?;
+        LoudnessMeter::new(rate, &resolved_weights).map_err(|e| invalid(&e))?;
         if let Some(max) = options.max_controlled_bytes {
             let frame = usize::from(channels.max(1)) * 4;
             let capacity = 65536 / frame * frame;
@@ -203,7 +238,7 @@ pub(super) fn measure_file_with_options_and_kind(
         pcm_options.cancel = options.cancel.clone();
         pcm_options.max_controlled_bytes = options.max_controlled_bytes;
         pcm_options.max_rss_bytes = options.max_rss_bytes;
-        let report = measure_file_with_options(&spool.wave, weights, &pcm_options)?;
+        let report = measure_file_with_options(&spool.wave, &resolved_weights, &pcm_options)?;
         control.check()?;
         if let Some(hook) = progress {
             hook.emit(crate::media_control::ProgressEvent {
@@ -267,10 +302,8 @@ pub(super) fn measure_file_with_options_and_kind(
             let (rate, channels) =
                 fvid_media::owned_audio_plan::source_geometry(source, options)
                     .map_err(|e| invalid(&e))?;
-            if weights.len() != usize::from(channels) {
-                return Err(invalid("channel weights must match selected audio stream"));
-            }
-            LoudnessMeter::new(rate, weights).map_err(|e| invalid(&e))?;
+            let resolved_weights = resolve_weights_for_channels(weights, channels)?;
+            LoudnessMeter::new(rate, &resolved_weights).map_err(|e| invalid(&e))?;
             let frame = usize::from(channels.max(1)) * 4;
             let capacity = 65536 / frame * frame;
             let rate_sz = rate as usize;
@@ -287,15 +320,14 @@ pub(super) fn measure_file_with_options_and_kind(
             let spool =
                 fvid_media::owned_container_loudness::decode_adts_to_wave(source, options)
                     .map_err(|e| invalid(&e))?;
-            if weights.len() != usize::from(spool.stats.channels) {
-                return Err(invalid("channel weights must match selected audio stream"));
-            }
-            LoudnessMeter::new(spool.stats.sample_rate, weights).map_err(|e| invalid(&e))?;
+            let resolved_weights = resolve_weights_for_channels(weights, spool.stats.channels)?;
+            LoudnessMeter::new(spool.stats.sample_rate, &resolved_weights)
+                .map_err(|e| invalid(&e))?;
             let mut pcm_options = fvid_media::CopyOptions::default();
             pcm_options.cancel = options.cancel.clone();
             pcm_options.max_controlled_bytes = options.max_controlled_bytes;
             pcm_options.max_rss_bytes = options.max_rss_bytes;
-            let report = measure_file_with_options(&spool.wave, weights, &pcm_options)?;
+            let report = measure_file_with_options(&spool.wave, &resolved_weights, &pcm_options)?;
             control.check()?;
             if let Some(hook) = progress {
                 hook.emit(crate::media_control::ProgressEvent {
@@ -313,9 +345,7 @@ pub(super) fn measure_file_with_options_and_kind(
         let (rate, channels) = (negotiated.sample_rate(), negotiated.channels());
         (Input::Adts(Box::new(negotiated)), rate, channels)
     };
-    if weights.len() != usize::from(channels) {
-        return Err(invalid("channel weights must match selected audio stream"));
-    }
+    let resolved_weights = resolve_weights_for_channels(weights, channels)?;
     struct Sink {
         meter: LoudnessMeter,
         bytes: [u8; 4],
@@ -365,12 +395,12 @@ pub(super) fn measure_file_with_options_and_kind(
         }
     }
     let mut sink = Sink {
-        meter: LoudnessMeter::new(rate, weights).map_err(|e| invalid(&e))?,
+        meter: LoudnessMeter::new(rate, &resolved_weights).map_err(|e| invalid(&e))?,
         bytes: [0; 4],
         byte_count: 0,
         frame: [0.0; 64],
         channel: 0,
-        channels: weights.len(),
+        channels: resolved_weights.len(),
     };
     let stats = match input {
         Input::Wave(reader, info) => super::decode_reader(

@@ -1632,9 +1632,8 @@ pub fn measure_loudness(source: &std::path::Path, options: &CopyOptions) -> Resu
     {
         return Err("owned loudness requires at most one audio stream and no metadata edits".into());
     }
-    let weights = crate::native_pcm::loudness_channel_weights_with_options(source, options)
-        .map_err(|e| e.to_string())?;
-    measure_loudness_with_weights(source, options, &weights)
+    crate::native_pcm::loudness::measure_file_default_weights_with_options(source, options)
+        .map_err(|e| e.to_string())
 }
 /// Explicit energy weights for multichannel layouts; no implicit channel remapping.
 pub fn measure_loudness_with_weights(source: &std::path::Path, options: &CopyOptions, weights: &[f64]) -> Result<crate::native_pcm::IntegratedLoudness> {

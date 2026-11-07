@@ -173,6 +173,18 @@ pub(crate) fn simple_options(options: &CopyOptions) -> bool {
     (options.streams.is_empty() || options.streams == [0]) && single_audio_options(options)
 }
 fn matroska_selected_codec(source: &Path, options: &CopyOptions) -> Result<Option<&'static str>> {
+    Ok(matroska_selected_reader_and_codec(source, options)?.map(|(codec, _, _)| codec))
+}
+fn matroska_selected_reader_and_codec(
+    source: &Path,
+    options: &CopyOptions,
+) -> Result<
+    Option<(
+        &'static str,
+        crate::owned_webm::WebmReader<std::io::BufReader<std::fs::File>>,
+        usize,
+    )>,
+> {
     let reader = crate::owned_matroska_audio::open_audio_reader(
         std::io::BufReader::new(std::fs::File::open(source).map_err(|e| e.to_string())?),
         options,
@@ -205,7 +217,14 @@ fn matroska_selected_codec(source: &Path, options: &CopyOptions) -> Result<Optio
                 && t.kind == 2
                 && t.codec == codec
         }) {
-            return Ok(Some(codec));
+            let selected = match options.streams.as_slice() {
+                [] => None,
+                [index] => Some(*index),
+                _ => return Err("select exactly one audio stream".into()),
+            };
+            let index = crate::owned_matroska_audio::matroska_audio_index(&reader, selected)
+                .map_err(|e| e.to_string())?;
+            return Ok(Some((codec, reader, index)));
         }
     }
     Ok(None)
@@ -355,50 +374,62 @@ pub fn decode_audio_transformed(
         }
     }
     if head_slice.starts_with(&[0x1a, 0x45, 0xdf, 0xa3]) {
-        match matroska_selected_codec(source, options)? {
-            Some("A_PCM/INT/LIT" | "A_PCM/INT/BIG" | "A_PCM/FLOAT/IEEE") => {
-                return crate::owned_matroska_pcm_export::apply(
+        match matroska_selected_reader_and_codec(source, options)? {
+            Some(("A_PCM/INT/LIT" | "A_PCM/INT/BIG" | "A_PCM/FLOAT/IEEE", reader, index)) => {
+                return crate::owned_matroska_pcm_export::apply_from_reader(
                     source,
+                    reader,
+                    index,
                     destination,
                     transform,
                     options,
                 );
             }
-            Some("A_AAC") => {
-                return crate::owned_matroska_aac_export::apply(
+            Some(("A_AAC", reader, index)) => {
+                return crate::owned_matroska_aac_export::apply_from_reader(
                     source,
+                    reader,
+                    index,
                     destination,
                     transform,
                     options,
                 );
             }
-            Some("A_OPUS") => {
-                return crate::owned_matroska_opus_export::apply(
+            Some(("A_OPUS", reader, index)) => {
+                return crate::owned_matroska_opus_export::apply_from_reader(
                     source,
+                    reader,
+                    index,
                     destination,
                     transform,
                     options,
                 );
             }
-            Some("A_FLAC") => {
-                return crate::owned_matroska_flac_export::apply(
+            Some(("A_FLAC", reader, index)) => {
+                return crate::owned_matroska_flac_export::apply_from_reader(
                     source,
+                    reader,
+                    index,
                     destination,
                     transform,
                     options,
                 );
             }
-            Some("A_MPEG/L1" | "A_MPEG/L2" | "A_MPEG/L3") => {
-                return crate::owned_matroska_mp3_export::apply(
+            Some(("A_MPEG/L1" | "A_MPEG/L2" | "A_MPEG/L3", reader, index)) => {
+                return crate::owned_matroska_mp3_export::apply_from_reader(
                     source,
+                    reader,
+                    index,
                     destination,
                     transform,
                     options,
                 );
             }
-            Some("A_ALAC") => {
-                return crate::owned_matroska_alac_export::apply(
+            Some(("A_ALAC", reader, index)) => {
+                return crate::owned_matroska_alac_export::apply_from_reader(
                     source,
+                    reader,
+                    index,
                     destination,
                     transform,
                     options,

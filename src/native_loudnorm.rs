@@ -247,34 +247,27 @@ pub fn try_plan(
         || !options.metadata_set.is_empty()
         || !options.metadata_delete.is_empty()
     {
-        let mut default_opts = CopyOptions::default();
-        default_opts.streams = options.streams.clone();
-        default_opts.max_controlled_bytes = options.max_controlled_bytes;
-        default_opts.max_packet_bytes = options.max_packet_bytes;
-        default_opts.max_packets = options.max_packets;
-        default_opts.max_rss_bytes = options.max_rss_bytes;
-        default_opts.cancel = options.cancel.clone();
-        if default_opts.streams.is_empty() {
+        let mut selected_options = options.clone();
+        if selected_options.streams.is_empty() {
+            let mut default_opts = CopyOptions::default();
+            default_opts.max_controlled_bytes = options.max_controlled_bytes;
+            default_opts.max_packet_bytes = options.max_packet_bytes;
+            default_opts.max_packets = options.max_packets;
+            default_opts.max_rss_bytes = options.max_rss_bytes;
+            default_opts.cancel = options.cancel.clone();
             if let Ok(index) = selected_audio(source, &default_opts) {
-                default_opts.streams.push(index);
+                selected_options.streams.push(index);
             }
         }
-        if fvid_media::owned_container_loudnorm::supports_plan(
+        if let Some(plan) = fvid_media::owned_container_loudnorm::try_plan_loudnorm(
             source,
             Some(&resolved),
-            &default_opts,
-        ) {
-            let mut selected_options = options.clone();
-            selected_options.streams = default_opts.streams.clone();
-            return Ok(Some(
-                fvid_media::owned_container_loudnorm::plan_loudnorm(
-                    source,
-                    Some(&resolved),
-                    dual_pass,
-                    &selected_options,
-                )
-                .map_err(|e| crate::invalid(&e))?,
-            ));
+            dual_pass,
+            &selected_options,
+        )
+        .map_err(|e| crate::invalid(&e))?
+        {
+            return Ok(Some(plan));
         }
         return Ok(None);
     } else {
@@ -322,34 +315,27 @@ pub fn try_plan(
             cached_native_info = Some(info);
             idx
         } else {
-            let mut default_opts = CopyOptions::default();
-            default_opts.streams = options.streams.clone();
-            default_opts.max_controlled_bytes = options.max_controlled_bytes;
-            default_opts.max_packet_bytes = options.max_packet_bytes;
-            default_opts.max_packets = options.max_packets;
-            default_opts.max_rss_bytes = options.max_rss_bytes;
-            default_opts.cancel = options.cancel.clone();
-            if default_opts.streams.is_empty() {
+            let mut selected_options = options.clone();
+            if selected_options.streams.is_empty() {
+                let mut default_opts = CopyOptions::default();
+                default_opts.max_controlled_bytes = options.max_controlled_bytes;
+                default_opts.max_packet_bytes = options.max_packet_bytes;
+                default_opts.max_packets = options.max_packets;
+                default_opts.max_rss_bytes = options.max_rss_bytes;
+                default_opts.cancel = options.cancel.clone();
                 if let Ok(index) = selected_audio(source, &default_opts) {
-                    default_opts.streams.push(index);
+                    selected_options.streams.push(index);
                 }
             }
-            if fvid_media::owned_container_loudnorm::supports_plan(
+            if let Some(plan) = fvid_media::owned_container_loudnorm::try_plan_loudnorm(
                 source,
                 Some(&resolved),
-                &default_opts,
-            ) {
-                let mut selected_options = options.clone();
-                selected_options.streams = default_opts.streams.clone();
-                return Ok(Some(
-                    fvid_media::owned_container_loudnorm::plan_loudnorm(
-                        source,
-                        Some(&resolved),
-                        dual_pass,
-                        &selected_options,
-                    )
-                    .map_err(|e| crate::invalid(&e))?,
-                ));
+                dual_pass,
+                &selected_options,
+            )
+            .map_err(|e| crate::invalid(&e))?
+            {
+                return Ok(Some(plan));
             } else {
                 return Ok(None);
             }
@@ -683,27 +669,14 @@ pub fn try_apply(
                 selected_options.streams.push(index);
             }
         }
-        let mut plan_opts = default_opts;
-        plan_opts.streams = selected_options.streams.clone();
-        plan_opts.max_controlled_bytes = options.max_controlled_bytes;
-        plan_opts.max_packet_bytes = options.max_packet_bytes;
-        plan_opts.max_packets = options.max_packets;
-        plan_opts.max_rss_bytes = options.max_rss_bytes;
-        if destination.extension().and_then(|s| s.to_str()) == Some("wav")
-            && fvid_media::owned_container_loudnorm::supports_plan(source, args, &plan_opts)
-        {
-            return Ok(Some(
-                fvid_media::owned_container_loudnorm::apply(
-                    source,
-                    destination,
-                    args,
-                    dual_pass,
-                    &selected_options,
-                )
-                .map_err(|e| crate::invalid(&e))?,
-            ));
-        }
-        return Ok(None);
+        return Ok(fvid_media::owned_container_loudnorm::try_apply(
+            source,
+            destination,
+            args,
+            dual_pass,
+            &selected_options,
+        )
+        .map_err(|e| crate::invalid(&e))?);
     }
     if options.streams.len() > 1 {
         return Err("loudnorm requires one selected audio stream".into());
