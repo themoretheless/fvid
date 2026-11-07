@@ -106,8 +106,126 @@ fn qualify(
     selected_options
         .stream_metadata_delete
         .retain(|(i, _)| selected.contains(i));
-    let meta_working_bytes =
-        crate::owned_lossless::options_matroska_metadata_working_bytes(&selected_options)?;
+    let mut file_metadata = mkv::FileMetadata::from_mp4(&reader);
+    let mut text_tags = BTreeMap::new();
+    let encoder = reader.encoder();
+    if !encoder.is_empty()
+        && encoder != "FVid"
+        && !encoder.contains('\0')
+        && encoder.len() <= 1024
+    {
+        text_tags.insert("ENCODER".into(), encoder.to_owned());
+    }
+    for (key, value) in &selected_options.metadata_set {
+        text_tags.retain(|name: &String, _| !name.eq_ignore_ascii_case(key));
+        if !file_metadata.tags.set(key, value) && !value.is_empty() {
+            text_tags.insert(key.to_ascii_uppercase(), value.clone());
+        }
+    }
+    for key in &selected_options.metadata_delete {
+        file_metadata.tags.set(key, "");
+        text_tags.retain(|name: &String, _| !name.eq_ignore_ascii_case(key));
+    }
+    let mut video_description = mkv::VideoTrackDescription {
+        name: tracks[video].name.clone(),
+        language: if tracks[video].language.is_empty() {
+            "und".into()
+        } else {
+            tracks[video].language.clone()
+        },
+        legacy_language: if tracks[video].language.is_empty() {
+            "und".into()
+        } else {
+            tracks[video].language.clone()
+        },
+        disposition: i32::from(crate::owned_mp4_matroska::effective_track_default(&reader, video)),
+    };
+    let mut video_track_tags = BTreeMap::new();
+    let mut other_scoped_tags: BTreeMap<usize, BTreeMap<String, String>> = BTreeMap::new();
+    let mut audio_track_names: BTreeMap<usize, String> = BTreeMap::new();
+    let mut audio_track_languages: BTreeMap<usize, String> = BTreeMap::new();
+    for &i in &selected {
+        if i != video {
+            audio_track_names.insert(i, tracks[i].name.clone());
+            audio_track_languages.insert(
+                i,
+                if tracks[i].language.is_empty() {
+                    "und".into()
+                } else {
+                    tracks[i].language.clone()
+                },
+            );
+        }
+    }
+    for (index, key, value) in &selected_options.stream_metadata_set {
+        if *index == video {
+            video_track_tags.retain(|name: &String, _| !name.eq_ignore_ascii_case(key));
+            if !crate::owned_ffv1_export::edit_track_description(&mut video_description, key, value)
+                && !value.is_empty()
+            {
+                video_track_tags.insert(key.to_ascii_uppercase(), value.clone());
+            }
+        } else if key.eq_ignore_ascii_case("title") {
+            audio_track_names.insert(*index, value.clone());
+        } else if key.eq_ignore_ascii_case("language") {
+            audio_track_languages.insert(
+                *index,
+                if value.is_empty() {
+                    "und".into()
+                } else {
+                    value.clone()
+                },
+            );
+        } else {
+            let scoped = other_scoped_tags.entry(*index).or_default();
+            scoped.retain(|name, _| !name.eq_ignore_ascii_case(key));
+            if !value.is_empty() {
+                scoped.insert(key.to_ascii_uppercase(), value.clone());
+            }
+        }
+    }
+    for (index, key) in &selected_options.stream_metadata_delete {
+        if *index == video {
+            video_track_tags.retain(|name: &String, _| !name.eq_ignore_ascii_case(key));
+            crate::owned_ffv1_export::edit_track_description(&mut video_description, key, "");
+        } else if key.eq_ignore_ascii_case("title") {
+            audio_track_names.insert(*index, String::new());
+        } else if key.eq_ignore_ascii_case("language") {
+            audio_track_languages.insert(*index, "und".into());
+        } else if let Some(scoped) = other_scoped_tags.get_mut(index) {
+            scoped.retain(|name, _| !name.eq_ignore_ascii_case(key));
+        }
+    }
+    if video_track_tags.len() > 256
+        || other_scoped_tags.values().any(|scoped| scoped.len() > 256)
+    {
+        return Err("Matroska stream metadata exceeds 256-tag limit".into());
+    }
+    let mut meta_working_bytes = crate::owned_lossless::estimate_matroska_metadata_working_bytes(
+        &file_metadata,
+        &text_tags,
+        &video_track_tags,
+        Some(&video_description),
+    );
+    for name in audio_track_names.values() {
+        meta_working_bytes = meta_working_bytes.saturating_add(name.len());
+    }
+    for lang in audio_track_languages.values() {
+        meta_working_bytes = meta_working_bytes.saturating_add(lang.len());
+    }
+    for scoped in other_scoped_tags.values() {
+        if !scoped.is_empty() {
+            meta_working_bytes = meta_working_bytes.saturating_add(4096);
+            for (k, v) in scoped {
+                meta_working_bytes = meta_working_bytes
+                    .saturating_add(4096)
+                    .saturating_add(k.len())
+                    .saturating_add(v.len());
+            }
+        }
+    }
+    meta_working_bytes = meta_working_bytes
+        .max(crate::owned_lossless::options_matroska_metadata_working_bytes(&selected_options)?);
     let index_bytes = reader
         .estimated_index_payload_bytes()
         .map_err(|e| e.to_string())?;

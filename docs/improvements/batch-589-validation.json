@@ -1,0 +1,27 @@
+{
+  "status": "accepted",
+  "accepted_ids": [
+    "FVID-0675",
+    "FVID-0676",
+    "FVID-0677",
+    "FVID-0678",
+    "FVID-0679"
+  ],
+  "count_delta": 5,
+  "accepted_count": 679,
+  "next_id": "FVID-0680",
+  "qualification": [
+    {
+      "name": "matroska-zlib-copy-xfade-wave-and-y4m-preflight",
+      "command": [
+        "cargo",
+        "test",
+        "--test",
+        "matroska_zlib_copy_xfade_wave_and_y4m_preflight"
+      ],
+      "exit_code": 0,
+      "passed": 5,
+      "ignored": 0
+    }
+  ]
+}

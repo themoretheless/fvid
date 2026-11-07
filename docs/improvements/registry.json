@@ -1,8 +1,8 @@
 {
   "target": 1000,
   "counting_rule": "One independently confirmed problem or useful capability; fixture variants and baseline integration repairs are excluded. Only accepted entries count.",
-  "accepted_count": 674,
-  "next_id": "FVID-0675",
+  "accepted_count": 679,
+  "next_id": "FVID-0680",
   "entries": [
     {
       "id": "FVID-0001",
@@ -7605,6 +7605,61 @@
       "result": "Reject >256 stream tags in extract_adts_matroska_metadata and emit the initial 0-packet ProgressEvent in write_aac_packets only after the first packet passes max_controlled_bytes admission (or when the stream is empty).",
       "status": "accepted",
       "validation": "batch-588-validation.json"
+    },
+    {
+      "id": "FVID-0675",
+      "batch": 589,
+      "title": "Charge decompressed zlib packet payload and read overhead in Matroska identity copy and defer 0-packet progress until preflight succeeds",
+      "source": "crates/fvid-media/src/owned_matroska_copy_impl.rs",
+      "regression": "tests/matroska_zlib_copy_xfade_wave_and_y4m_preflight.rs",
+      "before": "inspect_with_packet_and_memory_limits checked index_bytes.saturating_add(packet.size) using only the compressed on-disk packet size instead of packet_payload_size + packet_read_overhead, and copy_with_packet_and_memory_limits emitted a 0-packet ProgressEvent before inspection and source-length verification.",
+      "result": "Charge packet_payload_size(index) + packet_read_overhead(index) against max_controlled_bytes in inspect_with_packet_and_memory_limits and emit the initial 0-packet ProgressEvent in copy_with_packet_and_memory_limits only after inspection, length validation, and copy buffer allocation succeed.",
+      "status": "accepted",
+      "validation": "batch-589-validation.json"
+    },
+    {
+      "id": "FVID-0676",
+      "batch": 589,
+      "title": "Validate Y4M colour range, pixel aspect, and Matroska PacketWriter metadata in plan_xfade and check existing outputs upfront in xfade_video",
+      "source": "crates/fvid-media/src/owned_xfade.rs",
+      "regression": "tests/matroska_zlib_copy_xfade_wave_and_y4m_preflight.rs",
+      "before": "plan_xfade skipped header.pixel_aspect(), header.full_range(), and PacketWriter::new_ffv1_with_track_description dry-run validation, visit_y4m_counted cloned frame buffers without owned_frame::buffer, and xfade_video opened input sources before checking if destination already existed.",
+      "result": "Validate pixel_aspect, full_range, and PacketWriter::new_ffv1_with_track_description on an in-memory Cursor in plan_xfade, allocate working frames via owned_frame::buffer in visit_y4m_counted, and reject existing destination paths upfront in xfade_video and export_y4m_ffv1_counted.",
+      "status": "accepted",
+      "validation": "batch-589-validation.json"
+    },
+    {
+      "id": "FVID-0677",
+      "batch": 589,
+      "title": "Defer initial 0-packet WAVE remux and concat progress until preflight and temporary reservation succeed",
+      "source": "crates/fvid-media/src/owned_wave_remux.rs",
+      "regression": "tests/matroska_zlib_copy_xfade_wave_and_y4m_preflight.rs",
+      "before": "copy_waves emitted a 0-packet ProgressEvent before inspecting WAVE inputs, validating packet capacity, trim boundaries, concat format compatibility, or controlled memory budgets, and allocated the copy buffer with unguarded vec![0; capacity].",
+      "result": "Allocate the copy buffer via owned_frame::buffer(capacity) and emit the initial 0-packet ProgressEvent only after all WAVE inspection, trim, concat, budget, and temporary output reservation checks succeed.",
+      "status": "accepted",
+      "validation": "batch-589-validation.json"
+    },
+    {
+      "id": "FVID-0678",
+      "batch": 589,
+      "title": "Include source MP4 metadata and per-track scoped stream tags in multitrack MP4 lossless qualification budget",
+      "source": "crates/fvid-media/src/owned_mp4_multitrack_export.rs",
+      "regression": "tests/matroska_zlib_copy_xfade_wave_and_y4m_preflight.rs",
+      "before": "owned_mp4_multitrack_export::qualify computed meta_working_bytes using only options_matroska_metadata_working_bytes(&selected_options), omitting source MP4 tags, chapters, encoder, and track names/languages and collapsing identical stream_metadata_set keys across distinct tracks into a single map.",
+      "result": "Compute meta_working_bytes in qualify from source MP4 FileMetadata, encoder, per-track names/languages, and per-track scoped stream tag maps, and enforce the 256-tag per-stream Matroska metadata cap.",
+      "status": "accepted",
+      "validation": "batch-589-validation.json"
+    },
+    {
+      "id": "FVID-0679",
+      "batch": 589,
+      "title": "Reject existing outputs upfront and defer 0-packet progress until preflight in native Y4M export and concat",
+      "source": "src/native_export.rs",
+      "regression": "tests/matroska_zlib_copy_xfade_wave_and_y4m_preflight.rs",
+      "before": "export_y4m_pipeline_with_options, concat_y4m_with_options, and export_y4m_sources_with_options did not check destination.symlink_metadata().is_ok() before probing/decoding inputs, and DecodeProgress::new_with_limits emitted a 0-packet ProgressEvent before source packet/memory budget validation and concat compatibility checks.",
+      "result": "Check destination.symlink_metadata().is_ok() upfront in export_y4m_pipeline_with_options, concat_y4m_with_options, and export_y4m_sources_with_options, and run all source budget and concat compatibility validations before creating the temporary file and emitting the initial 0-packet ProgressEvent.",
+      "status": "accepted",
+      "validation": "batch-589-validation.json"
     }
   ]
 }

@@ -91,19 +91,80 @@ pub fn plan_xfade(
         return Err("cross-fade inputs require matching frame rates".into());
     }
     crate::owned_budget::check_rss_budget(options)?;
-    crate::owned_lossless::metadata(options)?;
-    let meta_working_bytes = crate::owned_lossless::options_matroska_metadata_working_bytes(options)?;
+    let width = u32::try_from(header.width).map_err(|_| "cross-fade width overflow")?;
+    let height = u32::try_from(header.height).map_err(|_| "cross-fade height overflow")?;
+    let metadata = crate::owned_matroska::VideoMetadata {
+        pixel_aspect: header.pixel_aspect()?,
+        colour: Some(crate::owned_matroska::ColourDescription {
+            matrix: 6,
+            full_range: header.full_range()?,
+            ..Default::default()
+        }),
+        ..Default::default()
+    };
+    let file_metadata = crate::owned_lossless::metadata(options)?;
+    let mut text_tags = std::collections::BTreeMap::new();
+    for (key, value) in &options.metadata_set {
+        text_tags.retain(|name: &String, _| !name.eq_ignore_ascii_case(key));
+        if !crate::owned_file_tags::FileTags::supports_key(key) && !value.is_empty() {
+            text_tags.insert(key.to_ascii_uppercase(), value.clone());
+        }
+    }
+    for key in &options.metadata_delete {
+        text_tags.retain(|name: &String, _| !name.eq_ignore_ascii_case(key));
+    }
+    let mut description = crate::owned_matroska::VideoTrackDescription {
+        name: String::new(),
+        language: "und".into(),
+        legacy_language: "und".into(),
+        disposition: 1,
+    };
+    let mut track_tags = std::collections::BTreeMap::new();
+    for (_, key, value) in &options.stream_metadata_set {
+        track_tags.retain(|name: &String, _| !name.eq_ignore_ascii_case(key));
+        if !crate::owned_ffv1_export::edit_track_description(&mut description, key, value)
+            && !value.is_empty()
+        {
+            track_tags.insert(key.to_ascii_uppercase(), value.clone());
+        }
+    }
+    for (_, key) in &options.stream_metadata_delete {
+        track_tags.retain(|name: &String, _| !name.eq_ignore_ascii_case(key));
+        crate::owned_ffv1_export::edit_track_description(&mut description, key, "");
+    }
+    let meta_working_bytes = crate::owned_lossless::estimate_matroska_metadata_working_bytes(
+        &file_metadata,
+        &text_tags,
+        &track_tags,
+        Some(&description),
+    );
     let frame_len = header.frame_len()?;
     if frame_len > options.max_packet_bytes {
         return Err("Y4M frame byte length exceeds packet byte limit".into());
     }
     let frame_working_bytes = frame_len.saturating_mul(3).saturating_add(meta_working_bytes);
-    if options
-        .max_controlled_bytes
-        .is_some_and(|limit| frame_working_bytes > limit)
-    {
-        return Err("cross-fade frame exceeds controlled memory budget".into());
+    if let Some(limit) = options.max_controlled_bytes {
+        if meta_working_bytes > limit {
+            return Err("Matroska metadata working set exceeds controlled memory budget".into());
+        }
+        if frame_working_bytes > limit {
+            return Err("cross-fade frame exceeds controlled memory budget".into());
+        }
     }
+    let mut dry_output = std::io::Cursor::new(Vec::new());
+    crate::owned_matroska::PacketWriter::new_ffv1_with_track_description(
+        &mut dry_output,
+        width,
+        height,
+        Some(&metadata),
+        0,
+        0,
+        &file_metadata,
+        &text_tags,
+        &track_tags,
+        &description,
+    )
+    .map_err(|e| e.to_string())?;
     let encode_packets =
         options.max_packet_bytes != fvid_control::CopyOptions::default().max_packet_bytes
             || options.max_controlled_bytes.is_some();
@@ -274,6 +335,9 @@ pub fn xfade_video(
         .is_none_or(|e| !e.eq_ignore_ascii_case("mkv"))
     {
         return Err("owned FFV1 export requires .mkv".into());
+    }
+    if destination.symlink_metadata().is_ok() {
+        return Err("output already exists".into());
     }
     crate::owned_lossless::metadata(options)?;
     if transition != "fade" || !default_policy(options) {
@@ -496,11 +560,13 @@ fn visit_y4m_counted(
         let current = primary
             .frame_at(sample_pts)?
             .ok_or("cross-fade primary source has no frames")?;
+        let mut data = crate::owned_frame::buffer(current.data.len())?;
+        data.copy_from_slice(&current.data);
         let mut output = GeometryFrame {
             width: current.width,
             height: current.height,
             subsampling: current.subsampling,
-            data: current.data.clone(),
+            data,
         };
         if matches!(phase, Phase::Primary) && primary.eof {
             return Err("cross-fade offset is beyond the primary source".into());
@@ -727,6 +793,9 @@ fn export_y4m_ffv1_counted(
     }
     if options.max_controlled_bytes == Some(0) {
         return Err("controlled memory limit must be positive".into());
+    }
+    if destination.symlink_metadata().is_ok() {
+        return Err("output already exists".into());
     }
     let timeline = FadeTimeline::new(offset_us, duration_us)?;
     let mut probe = BufReader::new(File::open(main).map_err(|e| e.to_string())?);

@@ -93,11 +93,16 @@ pub(crate) fn inspect_with_packet_and_memory_limits<R: Read + Seek>(
     let mut ends = Vec::new();
     ends.try_reserve_exact(reader.packets.len())
         .map_err(|_| invalid("cannot allocate Matroska copy index"))?;
-    for packet in reader.packets {
+    for (index, packet) in reader.packets.iter().enumerate() {
         check(cancel)?;
-        if max_controlled_bytes
-            .is_some_and(|limit| index_bytes.saturating_add(packet.size) > limit)
-        {
+        let payload_bytes = reader.packet_payload_size(index)?;
+        let read_overhead = reader.packet_read_overhead(index)?;
+        if max_controlled_bytes.is_some_and(|limit| {
+            index_bytes
+                .saturating_add(payload_bytes)
+                .saturating_add(read_overhead)
+                > limit
+        }) {
             return Err(invalid("controlled memory budget exceeded"));
         }
         let end = packet
@@ -143,14 +148,6 @@ pub fn copy_with_packet_and_memory_limits<R: Read + Seek, W: Write>(
     max_controlled_bytes: Option<usize>,
 ) -> Result<ProgressEvent> {
     check(cancel)?;
-    let mut event = ProgressEvent {
-        packets: 0,
-        payload_bytes: 0,
-        done: false,
-    };
-    if let Some(hook) = progress {
-        hook.emit(event);
-    }
     let packets = inspect_with_packet_and_memory_limits(
         input,
         audio_only,
@@ -164,6 +161,14 @@ pub fn copy_with_packet_and_memory_limits<R: Read + Seek, W: Write>(
     }
     input.seek(SeekFrom::Start(0))?;
     let mut buffer = buffer(64 << 10)?;
+    let mut event = ProgressEvent {
+        packets: 0,
+        payload_bytes: 0,
+        done: false,
+    };
+    if let Some(hook) = progress {
+        hook.emit(event);
+    }
     let mut copied = 0u64;
     let mut next = 0usize;
     while copied < length {

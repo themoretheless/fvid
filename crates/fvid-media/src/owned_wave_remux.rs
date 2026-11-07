@@ -188,7 +188,6 @@ fn copy_waves(
         payload_bytes: 0,
         done: false,
     };
-    emit(event);
     check()?;
     let source = sources[0];
     let mut input = std::fs::File::open(source).map_err(|e| e.to_string())?;
@@ -398,7 +397,8 @@ fn copy_waves(
             .write_all(b"data")
             .and_then(|_| output.write_all(&size.to_le_bytes()))
             .map_err(|e| e.to_string())?;
-        let mut buffer = vec![0; capacity];
+        let mut buffer = crate::owned_frame::buffer(capacity)?;
+        emit(event);
         for (index, (path, info, first, bytes)) in segments.iter().enumerate() {
             check()?;
             if *bytes == 0 {

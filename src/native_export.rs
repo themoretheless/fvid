@@ -92,6 +92,9 @@ pub fn export_y4m_pipeline_with_options(
     if destination.extension().and_then(|s| s.to_str()) != Some("y4m") {
         return Err(invalid("native video export output requires .y4m"));
     }
+    if destination.symlink_metadata().is_ok() {
+        return Err(invalid("output already exists"));
+    }
     validate_video_selection_with_options(source, options.streams.first().copied(), options)?;
     export_y4m_sources_with_options(
         &[source.to_owned()],
@@ -123,6 +126,9 @@ pub fn concat_y4m_with_options(
     validate_y4m_options(options)?;
     if !(2..=256).contains(&sources.len()) {return Err(invalid("concat requires 2..=256 inputs"));}
     if destination.extension().and_then(|s|s.to_str())!=Some("y4m") {return Err(invalid("native video concat output requires .y4m"));}
+    if destination.symlink_metadata().is_ok() {
+        return Err(invalid("output already exists"));
+    }
     let selected = options.streams.first().copied();
     for source in sources {
         if options.cancel.as_ref().is_some_and(|c|c.is_cancelled()) {return Err(invalid("media operation cancelled"));}
@@ -945,14 +951,31 @@ fn export_y4m_sources_with_options(
     if options.max_controlled_bytes == Some(0) {
         return Err(invalid("controlled memory limit must be positive"));
     }
-    let mut control=crate::native_media::DecodeProgress::new_with_limits(
-        options.cancel.as_ref(),
-        options.progress.as_ref(),
-        options.max_rss_bytes,
-        options.max_packets,
-    )?;
     if interval.is_some_and(|(from, to)| from >= to) {
         return Err(invalid("export interval requires from < to"));
+    }
+    if destination.symlink_metadata().is_ok() {
+        return Err(invalid("output already exists"));
+    }
+    fvid_media::owned_budget::check_rss_budget(options).map_err(|e| invalid(&e))?;
+    let max_packets = options.max_packets;
+    for source in sources {
+        if options.cancel.as_ref().is_some_and(|c| c.is_cancelled()) {
+            return Err(invalid("media operation cancelled"));
+        }
+        fvid_media::owned_budget::check_rss_budget(options).map_err(|e| invalid(&e))?;
+        validate_video_packet_budget_with_geometry_filters_interval_and_limit(
+            source,
+            geometry,
+            filters,
+            options,
+            interval,
+            relative_interval,
+            max_packets,
+        )?;
+    }
+    if sources.len() > 1 {
+        validate_y4m_concat_compatibility_with_options(sources, options)?;
     }
     let directory = destination
         .parent()
@@ -972,6 +995,12 @@ fn export_y4m_sources_with_options(
             }
         })
         .ok_or_else(|| invalid("cannot reserve Y4M output"))??;
+    let mut control=crate::native_media::DecodeProgress::new_with_limits(
+        options.cancel.as_ref(),
+        options.progress.as_ref(),
+        options.max_rss_bytes,
+        options.max_packets,
+    )?;
     let mut output = BufWriter::new(file);
     let mut output_rate: Option<(u128,u128)> = None;
     let mut layout = None;

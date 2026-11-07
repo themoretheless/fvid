@@ -4286,7 +4286,13 @@ See `batch-587-validation.json`.
 
 See `batch-588-validation.json`.
 
+## Batch 589 — FVID-0675..0679: Decompressed zlib payload budget and deferred 0-packet progress in `owned_matroska_copy`, `plan_xfade` colour-range/metadata dry-run validation and upfront existing-output check in `owned_xfade`, deferred 0-packet progress in `owned_wave_remux`, source MP4 and per-track scoped metadata working set in `owned_mp4_multitrack_export::qualify`, and upfront existing-output and preflight validation in `native_export` Y4M export/concat
 
+- **FVID-0675** — Charge decompressed zlib packet payload and read overhead in Matroska identity copy and defer 0-packet progress until preflight succeeds (`crates/fvid-media/src/owned_matroska_copy_impl.rs`, `tests/matroska_zlib_copy_xfade_wave_and_y4m_preflight.rs`).
+- **FVID-0676** — Validate Y4M colour range, pixel aspect, and Matroska `PacketWriter` metadata in `plan_xfade` and check existing outputs upfront in `xfade_video` (`crates/fvid-media/src/owned_xfade.rs`, `tests/matroska_zlib_copy_xfade_wave_and_y4m_preflight.rs`).
+- **FVID-0677** — Defer initial 0-packet WAVE remux and concat progress until preflight and temporary reservation succeed (`crates/fvid-media/src/owned_wave_remux.rs`, `tests/matroska_zlib_copy_xfade_wave_and_y4m_preflight.rs`).
+- **FVID-0678** — Include source MP4 metadata and per-track scoped stream tags in multitrack MP4 lossless qualification budget (`crates/fvid-media/src/owned_mp4_multitrack_export.rs`, `tests/matroska_zlib_copy_xfade_wave_and_y4m_preflight.rs`).
+- **FVID-0679** — Reject existing outputs upfront and defer 0-packet progress until preflight in native Y4M export and concat (`src/native_export.rs`, `tests/matroska_zlib_copy_xfade_wave_and_y4m_preflight.rs`).
 
-
+See `batch-589-validation.json`.
 
