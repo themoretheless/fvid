@@ -1884,8 +1884,19 @@ pub fn concat_mp4_matroska_with_options(
         }
         crate::native_audio_mix::validate_output_controls(options, None)
             .map_err(|e| e.to_string())?;
-        crate::native_audio_mix::validate_concat_segments_with_options(sources, options)
-            .map_err(|e| e.to_string())?;
+        if options.max_packet_bytes != fvid_media::CopyOptions::default().max_packet_bytes
+            || options.max_packets.is_some()
+            || options.max_controlled_bytes.is_some()
+            || options.max_rss_bytes.is_some()
+            || !options.streams.is_empty()
+            || !options.metadata_set.is_empty()
+            || !options.metadata_delete.is_empty()
+            || !options.stream_metadata_set.is_empty()
+            || !options.stream_metadata_delete.is_empty()
+        {
+            crate::native_audio_mix::validate_concat_segments_with_options(sources, options)
+                .map_err(|e| e.to_string())?;
+        }
         let mut notes = vec![
             "backend: fvid; matching sample rates and channel counts required".into(),
             "decoded PCM output; tags, chapters and compressed packets are not retained; one segment of temporary disk space required".into(),

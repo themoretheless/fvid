@@ -4686,4 +4686,10 @@ See `batch-627-validation.json`.
 
 See `batch-628-validation.json`.
 
+## Batch 629 (FVID-0875..0879)
 
+- **FVID-0875**: Reuse WAV RIFF `INFO` and `MatroskaPcmMetadata` from `check_output_memory_budget_with_wave_and_metadata` in `concat_audio_with_options` (`src/native_export/pcm_matroska.rs`, `src/native_audio_mix/concat.rs`).
+- **FVID-0876**: Reuse cached RIFF `INFO` and `MatroskaPcmMetadata` from `validate_mix_sources_with_controls` in `mix_audio_with_controls` (`src/native_audio_mix.rs`).
+- **FVID-0877**: Reuse cached RIFF `INFO` and `MatroskaPcmMetadata` from `merge_geometry_with_options` in `merge_audio_with_controls` (`src/native_audio_mix.rs`).
+- **FVID-0878**: Remove redundant fourth container packet-budget scan in `validate_and_inspect_source_with_options` (`src/native_audio_mix.rs`).
+- **FVID-0879**: Skip duplicate `validate_concat_segments_with_options` pass in `native_plan::concat_mp4_matroska_with_options` when default controls were already validated (`src/native_plan.rs`).

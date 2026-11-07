@@ -173,84 +173,6 @@ fn validate_and_inspect_source_with_options(
         crate::native_plan::decode_audio_with_options(source, &Default::default(), &probe_opts)
             .map_err(|e| invalid(&e))?;
         let info = crate::native_media::constant_audio_source_info_selected_with_options(source, None, &probe_opts)?;
-        if options.max_packet_bytes != fvid_media::CopyOptions::default().max_packet_bytes {
-            use std::io::{Seek, SeekFrom};
-            let mut input = BufReader::new(File::open(source)?);
-            let mut prefix = [0u8; 8];
-            input.read_exact(&mut prefix)?;
-            input.seek(SeekFrom::Start(0))?;
-            if crate::container::mp4::recognizes_prefix(&prefix) {
-                let reader = crate::container::mp4::Mp4Reader::open(
-                    input,
-                    crate::container::mp4::Limits::default(),
-                )?;
-                if let Some(track) = reader.tracks().get(info.stream_index) {
-                    let max_samples = crate::native_media::mp4_active_samples(
-                        track,
-                        reader.movie_timescale(), None,
-                        options.max_packets,
-                    );
-                    let exceeds = match &track.samples {
-                        crate::container::mp4::SampleIndex::Expanded(samples) => samples
-                            .iter()
-                            .take(max_samples)
-                            .any(|s| (s.size as usize) > options.max_packet_bytes),
-                        crate::container::mp4::SampleIndex::Uniform(uniform) => {
-                            uniform.count > 0
-                                && max_samples > 0
-                                && (uniform.bytes_per_frame as usize) > options.max_packet_bytes
-                        }
-                    };
-                    if exceeds {
-                        return Err(invalid("MP4 packet exceeds budget"));
-                    }
-                }
-            } else if prefix.starts_with(&[0x1a, 0x45, 0xdf, 0xa3]) {
-                let mut reader = crate::container::webm::WebmReader::open(
-                    input,
-                    crate::container::webm::Limits::default(),
-                )?;
-                reader.scan_all()?;
-                if let Some(track) = reader.tracks.get(info.stream_index) {
-                    let track_number = track.number;
-                    let mut track_packets = 0u64;
-                    for (packet_index, packet) in reader.packets.iter().enumerate() {
-                        if options.cancel.as_ref().is_some_and(|c| c.is_cancelled()) {
-                            return Err(invalid("media operation cancelled"));
-                        }
-                        fvid_media::owned_budget::check_rss_budget(options)
-                            .map_err(|e| invalid(&e))?;
-                        if packet.track == track_number {
-                            if options.max_packets.is_some_and(|max| track_packets >= max) {
-                                break;
-                            }
-                            track_packets += 1;
-                            if reader.packet_payload_size(packet_index)? > options.max_packet_bytes
-                            {
-                                return Err(invalid("WebM packet exceeds budget"));
-                            }
-                        }
-                    }
-                }
-            } else if crate::container::adts::header(&prefix).is_some() {
-                let mut reader = crate::container::adts::StreamReader::open_with_packet_limit(
-                    input,
-                    options.max_packet_bytes,
-                )?;
-                let mut packets = 0u64;
-                while options.max_packets.is_none_or(|max| packets < max) {
-                    if options.cancel.as_ref().is_some_and(|c| c.is_cancelled()) {
-                        return Err(invalid("media operation cancelled"));
-                    }
-                    fvid_media::owned_budget::check_rss_budget(options)
-                        .map_err(|e| invalid(&e))?;
-                    if reader.next_packet()?.is_none() {
-                        break;
-                    }
-                    packets += 1;
-                }
-            }
-        }
         let mask = info
             .channel_mask
             .unwrap_or(crate::native_export::default_pcm_mask(info.channels)?);
@@ -559,7 +481,12 @@ fn validate_mix_sources_with_controls(
     sources: &[PathBuf],
     options: &MixAudioOptions,
     controls: &fvid_media::CopyOptions,
-) -> Result<Vec<(u32, u16, u32)>> {
+    matroska: Option<bool>,
+) -> Result<(
+    Vec<(u32, u16, u32)>,
+    Option<Vec<u8>>,
+    Option<crate::native_export::pcm_matroska::MatroskaPcmMetadata>,
+)> {
     if controls.cancel.as_ref().is_some_and(|c| c.is_cancelled()) {
         return Err(invalid("media operation cancelled"));
     }
@@ -591,14 +518,15 @@ fn validate_mix_sources_with_controls(
     let mix_stage_bytes = 32768usize
         .saturating_mul(usize::from(channels))
         .saturating_add(sources.len().saturating_mul(8 * 1024));
-    crate::native_export::pcm_matroska::check_output_memory_budget(
-        &sources[0],
-        channels,
-        mix_stage_bytes,
-        controls,
-        None,
-    )?;
-    Ok(inspected)
+    let (cached_wave_info, cached_matroska_meta) =
+        crate::native_export::pcm_matroska::check_output_memory_budget_with_wave_and_metadata(
+            &sources[0],
+            channels,
+            mix_stage_bytes,
+            controls,
+            matroska,
+        )?;
+    Ok((inspected, cached_wave_info, cached_matroska_meta))
 }
 
 pub fn plan_with_controls(
@@ -606,7 +534,7 @@ pub fn plan_with_controls(
     options: &MixAudioOptions,
     controls: &fvid_media::CopyOptions,
 ) -> Result<crate::media_info::MediaPlan> {
-    validate_mix_sources_with_controls(sources, options, controls)?;
+    validate_mix_sources_with_controls(sources, options, controls, None)?;
     let mut notes = vec!["PCM spools bound mixing memory independently of input duration; temporary disk space is required".into()];
     if controls.max_packet_bytes != fvid_media::CopyOptions::default().max_packet_bytes
         || controls.max_packets.is_some()
@@ -703,12 +631,15 @@ pub fn mix_audio_with_controls(
         return Err(invalid("mix-audio destination already exists"));
     }
     validate_output_controls(controls, Some(matroska))?;
-    let inspected_sources = validate_mix_sources_with_controls(sources, options, controls)?;
+    let (inspected_sources, cached_wave_info, cached_matroska_meta) =
+        validate_mix_sources_with_controls(sources, options, controls, Some(matroska))?;
     let info_chunks = if matroska {
         Vec::new()
     } else {
-        let source_info =
-            crate::native_export::pcm_matroska::extract_source_wave_info(&sources[0], controls)?;
+        let source_info = match cached_wave_info {
+            Some(info) => info,
+            None => crate::native_export::pcm_matroska::extract_source_wave_info(&sources[0], controls)?,
+        };
         let edited = fvid_media::owned_wave_metadata::edit_info_chunks(
             &source_info,
             &controls.metadata_delete,
@@ -726,18 +657,21 @@ pub fn mix_audio_with_controls(
         edited
     };
     let source_matroska_metadata = if matroska {
-        Some(
-            crate::native_export::pcm_matroska::extract_source_pcm_metadata_with_interval_packet_and_memory_limit(
-                &sources[0],
-                controls.streams.first().copied(),
-                true,
-                None,
-                Some(controls.max_packet_bytes),
-                controls.max_packets,
-                controls.max_controlled_bytes,
-                controls.cancel.as_ref(),
-            )?,
-        )
+        match cached_matroska_meta {
+            Some(meta) => Some(meta),
+            None => Some(
+                crate::native_export::pcm_matroska::extract_source_pcm_metadata_with_interval_packet_and_memory_limit(
+                    &sources[0],
+                    controls.streams.first().copied(),
+                    true,
+                    None,
+                    Some(controls.max_packet_bytes),
+                    controls.max_packets,
+                    controls.max_controlled_bytes,
+                    controls.cancel.as_ref(),
+                )?,
+            ),
+        }
     } else {
         None
     };
@@ -920,7 +854,13 @@ fn decode_sources_with_options(
 fn merge_geometry_with_options(
     sources: &[PathBuf],
     options: &fvid_media::CopyOptions,
-) -> Result<(u32, u16)> {
+    matroska: Option<bool>,
+) -> Result<(
+    u32,
+    u16,
+    Option<Vec<u8>>,
+    Option<crate::native_export::pcm_matroska::MatroskaPcmMetadata>,
+)> {
     if options.cancel.as_ref().is_some_and(|c| c.is_cancelled()) {
         return Err(invalid("media operation cancelled"));
     }
@@ -955,14 +895,15 @@ fn merge_geometry_with_options(
     let merge_stage_bytes = 16384usize
         .saturating_mul(usize::from(channels))
         .saturating_add(sources.len().saturating_mul(8 * 1024));
-    crate::native_export::pcm_matroska::check_output_memory_budget(
-        &sources[0],
-        channels,
-        merge_stage_bytes,
-        options,
-        None,
-    )?;
-    Ok((rate.unwrap(), channels))
+    let (cached_wave_info, cached_matroska_meta) =
+        crate::native_export::pcm_matroska::check_output_memory_budget_with_wave_and_metadata(
+            &sources[0],
+            channels,
+            merge_stage_bytes,
+            options,
+            matroska,
+        )?;
+    Ok((rate.unwrap(), channels, cached_wave_info, cached_matroska_meta))
 }
 
 pub fn plan_merge(sources: &[PathBuf]) -> Result<crate::media_info::MediaPlan> {
@@ -973,7 +914,7 @@ pub fn plan_merge_with_controls(
     sources: &[PathBuf],
     controls: &fvid_media::CopyOptions,
 ) -> Result<crate::media_info::MediaPlan> {
-    let (rate, channels) = merge_geometry_with_options(sources, controls)?;
+    let (rate, channels, _, _) = merge_geometry_with_options(sources, controls, None)?;
     let mut notes = vec![
         "Channel order is first input then second input, preserving the existing merge-audio API contract".into(),
         "PCM spools require temporary disk space; mixing memory is bounded independently of duration".into(),
@@ -1058,12 +999,15 @@ pub fn merge_audio_with_controls(
         return Err(invalid("merge-audio destination already exists"));
     }
     validate_output_controls(controls, Some(matroska))?;
-    let (rate, channels) = merge_geometry_with_options(sources, controls)?;
+    let (rate, channels, cached_wave_info, cached_matroska_meta) =
+        merge_geometry_with_options(sources, controls, Some(matroska))?;
     let info_chunks = if matroska {
         Vec::new()
     } else {
-        let source_info =
-            crate::native_export::pcm_matroska::extract_source_wave_info(&sources[0], controls)?;
+        let source_info = match cached_wave_info {
+            Some(info) => info,
+            None => crate::native_export::pcm_matroska::extract_source_wave_info(&sources[0], controls)?,
+        };
         let edited = fvid_media::owned_wave_metadata::edit_info_chunks(
             &source_info,
             &controls.metadata_delete,
@@ -1081,18 +1025,21 @@ pub fn merge_audio_with_controls(
         edited
     };
     let source_matroska_metadata = if matroska {
-        Some(
-            crate::native_export::pcm_matroska::extract_source_pcm_metadata_with_interval_packet_and_memory_limit(
-                &sources[0],
-                controls.streams.first().copied(),
-                true,
-                None,
-                Some(controls.max_packet_bytes),
-                controls.max_packets,
-                controls.max_controlled_bytes,
-                controls.cancel.as_ref(),
-            )?,
-        )
+        match cached_matroska_meta {
+            Some(meta) => Some(meta),
+            None => Some(
+                crate::native_export::pcm_matroska::extract_source_pcm_metadata_with_interval_packet_and_memory_limit(
+                    &sources[0],
+                    controls.streams.first().copied(),
+                    true,
+                    None,
+                    Some(controls.max_packet_bytes),
+                    controls.max_packets,
+                    controls.max_controlled_bytes,
+                    controls.cancel.as_ref(),
+                )?,
+            ),
+        }
     } else {
         None
     };

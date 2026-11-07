@@ -190,13 +190,20 @@ pub fn validate_concat_segments_with_options(
     sources: &[PathBuf],
     options: &fvid_media::CopyOptions,
 ) -> Result<()> {
-    validate_concat_segments_internal(sources, options).map(|_| ())
+    validate_concat_segments_internal(sources, options, None).map(|_| ())
 }
 
 fn validate_concat_segments_internal(
     sources: &[PathBuf],
     options: &fvid_media::CopyOptions,
-) -> Result<(u32, u16, u32)> {
+    matroska: Option<bool>,
+) -> Result<(
+    u32,
+    u16,
+    u32,
+    Option<Vec<u8>>,
+    Option<crate::native_export::pcm_matroska::MatroskaPcmMetadata>,
+)> {
     if options.cancel.as_ref().is_some_and(|c| c.is_cancelled()) {
         return Err(invalid("media operation cancelled"));
     }
@@ -295,19 +302,20 @@ fn validate_concat_segments_internal(
         Some(geom) => geom,
         None => geometry_with_options(&sources[0], options)?,
     };
-    crate::native_export::pcm_matroska::check_output_memory_budget(
-        &sources[0],
-        channels,
-        81920,
-        options,
-        None,
-    )?;
+    let (cached_wave_info, cached_matroska_meta) =
+        crate::native_export::pcm_matroska::check_output_memory_budget_with_wave_and_metadata(
+            &sources[0],
+            channels,
+            81920,
+            options,
+            matroska,
+        )?;
     let mask = if !masks.is_empty() && masks.iter().all(|m| *m == masks[0]) {
         masks[0]
     } else {
         0
     };
-    Ok((rate, channels, mask))
+    Ok((rate, channels, mask, cached_wave_info, cached_matroska_meta))
 }
 
 pub fn eligible(sources: &[PathBuf]) -> Result<bool> {
@@ -364,12 +372,15 @@ pub fn concat_audio_with_options(
         return Err(invalid("concat destination already exists"));
     }
     super::validate_output_controls(options, Some(matroska))?;
-    let (rate, channels, validated_mask) = validate_concat_segments_internal(sources, options)?;
+    let (rate, channels, validated_mask, cached_wave_info, cached_matroska_meta) =
+        validate_concat_segments_internal(sources, options, Some(matroska))?;
     let info_chunks = if matroska {
         Vec::new()
     } else {
-        let source_info =
-            crate::native_export::pcm_matroska::extract_source_wave_info(&sources[0], options)?;
+        let source_info = match cached_wave_info {
+            Some(info) => info,
+            None => crate::native_export::pcm_matroska::extract_source_wave_info(&sources[0], options)?,
+        };
         let edited = fvid_media::owned_wave_metadata::edit_info_chunks(
             &source_info,
             &options.metadata_delete,
@@ -387,18 +398,21 @@ pub fn concat_audio_with_options(
         edited
     };
     let source_matroska_metadata = if matroska {
-        Some(
-            crate::native_export::pcm_matroska::extract_source_pcm_metadata_with_interval_packet_and_memory_limit(
-                &sources[0],
-                options.streams.first().copied(),
-                true,
-                None,
-                Some(options.max_packet_bytes),
-                options.max_packets,
-                options.max_controlled_bytes,
-                cancel,
-            )?,
-        )
+        match cached_matroska_meta {
+            Some(meta) => Some(meta),
+            None => Some(
+                crate::native_export::pcm_matroska::extract_source_pcm_metadata_with_interval_packet_and_memory_limit(
+                    &sources[0],
+                    options.streams.first().copied(),
+                    true,
+                    None,
+                    Some(options.max_packet_bytes),
+                    options.max_packets,
+                    options.max_controlled_bytes,
+                    cancel,
+                )?,
+            ),
+        }
     } else {
         None
     };

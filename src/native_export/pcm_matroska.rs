@@ -651,8 +651,27 @@ pub(crate) fn check_output_memory_budget_with_metadata(
     options: &fvid_media::CopyOptions,
     matroska: Option<bool>,
 ) -> Result<Option<MatroskaPcmMetadata>> {
+    Ok(
+        check_output_memory_budget_with_wave_and_metadata(
+            source,
+            channels,
+            stage_working_bytes,
+            options,
+            matroska,
+        )?
+        .1,
+    )
+}
+
+pub(crate) fn check_output_memory_budget_with_wave_and_metadata(
+    source: &std::path::Path,
+    channels: u16,
+    stage_working_bytes: usize,
+    options: &fvid_media::CopyOptions,
+    matroska: Option<bool>,
+) -> Result<(Option<Vec<u8>>, Option<MatroskaPcmMetadata>)> {
     let Some(limit) = options.max_controlled_bytes else {
-        return Ok(None);
+        return Ok((None, None));
     };
     if limit == 0 {
         return Err(invalid("controlled memory budget exceeded: limit is 0"));
@@ -662,12 +681,15 @@ pub(crate) fn check_output_memory_budget_with_metadata(
         && options.stream_metadata_delete.is_empty();
     let check_matroska = matroska != Some(false);
     let mut needed = stage_working_bytes.saturating_add(16 * 1024);
+    let mut cached_wave_info: Option<Vec<u8>> = None;
     let mut cached_base: Option<MatroskaPcmMetadata> = None;
     if check_wave {
         let source_info_len = match extract_source_wave_info_and_base(source, options) {
             Ok((b, base)) => {
+                let len = b.len();
+                cached_wave_info = Some(b);
                 cached_base = base;
-                b.len()
+                len
             }
             Err(e) if e.to_string().contains("budget") || e.to_string().contains("cancelled") => {
                 return Err(e);
@@ -738,7 +760,7 @@ pub(crate) fn check_output_memory_budget_with_metadata(
             "controlled memory budget exceeded: need {needed} bytes, limit {limit}"
         )));
     }
-    Ok(extracted_base)
+    Ok((cached_wave_info, extracted_base))
 }
 
 fn parse_matroska_pcm_metadata(

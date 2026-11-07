@@ -1,0 +1,15 @@
+{
+  "batch": 629,
+  "ids": [
+    "FVID-0875",
+    "FVID-0876",
+    "FVID-0877",
+    "FVID-0878",
+    "FVID-0879"
+  ],
+  "commands": [
+    "cargo test --test audio_mix_concat_metadata_and_budget_reuse",
+    "python3 scripts/check_improvements_registry.py"
+  ],
+  "status": "accepted"
+}
