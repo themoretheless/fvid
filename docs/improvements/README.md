@@ -4336,6 +4336,17 @@ See `batch-592-validation.json`.
 
 See `batch-593-validation.json`.
 
+## Batch 594 — FVID-0700..0704: Fallible single-pass PCM f32/f64 decode, fallible MACE planar and output reservation, fallible WebM audio window position reservation, upfront destination check in WebM multitrack export, and O(1) per-packet schedule budget check and memory-budget error attribution in MP4 multitrack export
+
+- **FVID-0700** — Use fallible `try_reserve_exact` and single-pass inline finiteness validation in `PcmDecoder::decode_pcm` and `PcmDecoder::decode_pcm_f64` (`crates/fvid-media/src/owned_pcm_decoder_impl.rs`, `tests/pcm_mace_and_multitrack_export_preflight.rs`).
+- **FVID-0701** — Use checked arithmetic and fallible `try_reserve_exact` for planar and interleaved output buffers in owned and playback MACE decoders (`crates/fvid-media/src/owned_mace_impl.rs`, `src/codec/mace_decoder.rs`, `tests/pcm_mace_and_multitrack_export_preflight.rs`).
+- **FVID-0702** — Pre-reserve packet position table with `try_reserve_exact` in `owned_webm_audio_window::apply` (`crates/fvid-media/src/owned_webm_audio_window.rs`, `tests/pcm_mace_and_multitrack_export_preflight.rs`).
+- **FVID-0703** — Check `.mkv` extension and existing destination upfront before opening or decoding input video in `owned_webm_multitrack_export::try_export` (`crates/fvid-media/src/owned_webm_multitrack_export.rs`, `tests/pcm_mace_and_multitrack_export_preflight.rs`).
+- **FVID-0704** — Precompute `schedule_base_bytes` once outside the packet loop and attribute memory-budget-clamped packet rejections in `owned_mp4_multitrack_export` (`crates/fvid-media/src/owned_mp4_multitrack_export.rs`, `tests/multitrack_lossless_budget_parity_regressions.rs`).
+
+See `batch-594-validation.json`.
+
+
 
 
 

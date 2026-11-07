@@ -587,6 +587,12 @@ pub(crate) fn try_export(
     t: &LosslessTransform,
     o: &CopyOptions,
 ) -> Result<Option<LosslessStats>> {
+    if destination.extension().and_then(|s| s.to_str()) != Some("mkv") {
+        return Err("lossless export requires FFV1 in .mkv".into());
+    }
+    if destination.symlink_metadata().is_ok() {
+        return Err("output already exists".into());
+    }
     let Some(mut input) = qualify(source, t, o)? else {
         return Ok(None);
     };
@@ -596,12 +602,6 @@ pub(crate) fn try_export(
         Ok(None)
     ) {
         return Ok(None);
-    }
-    if destination.extension().and_then(|s| s.to_str()) != Some("mkv") {
-        return Err("lossless export requires FFV1 in .mkv".into());
-    }
-    if destination.symlink_metadata().is_ok() {
-        return Err("output already exists".into());
     }
     let mut private = crate::owned_video_temporary::Directory::new()?;
     let video_path = private.0.join("video.mkv");

@@ -69,7 +69,10 @@ pub(super) fn apply<R: Read + Seek>(
         return Err("controlled memory budget exceeded: Matroska audio window limit".into());
     }
     let mut total = 0u64;
-    let mut positions = Vec::with_capacity(indices.len());
+    let mut positions = Vec::new();
+    positions
+        .try_reserve_exact(indices.len())
+        .map_err(|_| "audio window allocation failed")?;
     let tolerance =
         (u128::from(reader.timestamp_scale_ns()) * u128::from(rate) / 1_000_000_000) as u64;
     for (ordinal, &i) in indices.iter().enumerate() {

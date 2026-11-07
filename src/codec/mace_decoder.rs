@@ -81,7 +81,13 @@ impl AudioDecode for MaceDecoder {
     ) -> crate::Result<Option<AudioPacket>> {
         let planar = self.decode_planar(data)?;
         let frames = planar[0].len();
-        let mut out = Vec::with_capacity(frames * usize::from(self.channels) * 4);
+        let byte_len = frames
+            .checked_mul(usize::from(self.channels))
+            .and_then(|n| n.checked_mul(4))
+            .ok_or_else(|| invalid("MACE packet size overflow"))?;
+        let mut out = Vec::new();
+        out.try_reserve_exact(byte_len)
+            .map_err(|_| invalid("MACE output buffer allocation failed"))?;
         for frame in 0..frames {
             for channel in 0..usize::from(self.channels) {
                 let sample = f32::from(planar[channel][frame]) / 32_768.0;

@@ -301,11 +301,14 @@ impl MaceDecoder {
         }
         let blocks = data.len() / block;
         let per_channel = self.coding.bytes_per_channel();
-        let mut planar = [
-            Vec::with_capacity(blocks * SAMPLES_PER_BLOCK),
-            Vec::with_capacity(blocks * SAMPLES_PER_BLOCK),
-        ];
+        let frames = blocks
+            .checked_mul(SAMPLES_PER_BLOCK)
+            .ok_or_else(|| invalid("MACE sample count overflow"))?;
+        let mut planar = [Vec::new(), Vec::new()];
         for channel in 0..usize::from(self.channels) {
+            planar[channel]
+                .try_reserve_exact(frames)
+                .map_err(|_| invalid("MACE planar buffer allocation failed"))?;
             let state = &mut self.state[channel];
             // One channel's run at a time: the reference reads a channel's whole buffer
             // before the next one's, and a block's bytes for this channel start at
@@ -333,7 +336,13 @@ impl MaceDecoder {
     pub fn decode_pcm(&mut self, data: &[u8]) -> Result<Vec<f32>> {
         let planar = self.decode_planar(data)?;
         let frames = planar[0].len();
-        let mut output = Vec::with_capacity(frames * usize::from(self.channels));
+        let total = frames
+            .checked_mul(usize::from(self.channels))
+            .ok_or_else(|| invalid("MACE sample count overflow"))?;
+        let mut output = Vec::new();
+        output
+            .try_reserve_exact(total)
+            .map_err(|_| invalid("MACE output buffer allocation failed"))?;
         for frame in 0..frames {
             for channel in 0..usize::from(self.channels) {
                 output.push(f32::from(planar[channel][frame]) / 32768.0);

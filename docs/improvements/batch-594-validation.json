@@ -1,0 +1,41 @@
+{
+  "status": "accepted",
+  "accepted_ids": [
+    "FVID-0700",
+    "FVID-0701",
+    "FVID-0702",
+    "FVID-0703",
+    "FVID-0704"
+  ],
+  "count_delta": 5,
+  "accepted_count": 704,
+  "next_id": "FVID-0705",
+  "qualification": [
+    {
+      "name": "pcm-mace-and-multitrack-export-preflight",
+      "command": [
+        "cargo",
+        "test",
+        "--test",
+        "pcm_mace_and_multitrack_export_preflight"
+      ],
+      "exit_code": 0,
+      "passed": 3,
+      "ignored": 0
+    },
+    {
+      "name": "multitrack-lossless-budget-parity-regressions",
+      "command": [
+        "cargo",
+        "test",
+        "--test",
+        "multitrack_lossless_budget_parity_regressions",
+        "--",
+        "--test-threads=1"
+      ],
+      "exit_code": 0,
+      "passed": 4,
+      "ignored": 0
+    }
+  ]
+}

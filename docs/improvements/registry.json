@@ -1,8 +1,8 @@
 {
   "target": 1000,
   "counting_rule": "One independently confirmed problem or useful capability; fixture variants and baseline integration repairs are excluded. Only accepted entries count.",
-  "accepted_count": 699,
-  "next_id": "FVID-0700",
+  "accepted_count": 704,
+  "next_id": "FVID-0705",
   "entries": [
     {
       "id": "FVID-0001",
@@ -7880,6 +7880,61 @@
       "result": "Introduce ResamplerOutput with fallible try_reserve for Vec<u8> outputs and use write_sample_bytes in both float32 and float64 Resampler implementations.",
       "status": "accepted",
       "validation": "batch-593-validation.json"
+    },
+    {
+      "id": "FVID-0700",
+      "batch": 594,
+      "title": "Use fallible try_reserve_exact and single-pass inline finiteness validation in PcmDecoder::decode_pcm and decode_pcm_f64",
+      "source": "crates/fvid-media/src/owned_pcm_decoder_impl.rs",
+      "regression": "tests/pcm_mace_and_multitrack_export_preflight.rs",
+      "before": "PcmDecoder::decode_pcm and PcmDecoder::decode_pcm_f64 allocated Vec<f32> and Vec<f64> via infallible .collect() and then iterated over the entire decoded sample slice a second time to check !s.is_finite().",
+      "result": "Pre-reserve exact sample capacity via try_reserve_exact and validate !sample.is_finite() inline in a single loop in both decode_pcm and decode_pcm_f64.",
+      "status": "accepted",
+      "validation": "batch-594-validation.json"
+    },
+    {
+      "id": "FVID-0701",
+      "batch": 594,
+      "title": "Use checked arithmetic and fallible try_reserve_exact for planar and interleaved output buffers in owned and playback MACE decoders",
+      "source": "crates/fvid-media/src/owned_mace_impl.rs",
+      "regression": "tests/pcm_mace_and_multitrack_export_preflight.rs",
+      "before": "MaceDecoder::decode_planar always allocated two Vec::with_capacity(blocks * SAMPLES_PER_BLOCK) buffers even for mono streams, and MaceDecoder::decode_pcm and AudioDecode::decode_encoded used infallible Vec::with_capacity with unchecked multiplication.",
+      "result": "Use checked_mul and fallible try_reserve_exact only for active channels in decode_planar and for interleaved output buffers in decode_pcm and decode_encoded.",
+      "status": "accepted",
+      "validation": "batch-594-validation.json"
+    },
+    {
+      "id": "FVID-0702",
+      "batch": 594,
+      "title": "Pre-reserve packet position table with try_reserve_exact in owned_webm_audio_window::apply",
+      "source": "crates/fvid-media/src/owned_webm_audio_window.rs",
+      "regression": "tests/pcm_mace_and_multitrack_export_preflight.rs",
+      "before": "owned_webm_audio_window::apply checked the controlled memory budget for positions_bytes, but allocated positions with infallible Vec::with_capacity(indices.len()).",
+      "result": "Allocate positions with fallible try_reserve_exact(indices.len()) in owned_webm_audio_window::apply.",
+      "status": "accepted",
+      "validation": "batch-594-validation.json"
+    },
+    {
+      "id": "FVID-0703",
+      "batch": 594,
+      "title": "Check .mkv extension and existing destination upfront before opening or decoding input video in owned_webm_multitrack_export::try_export",
+      "source": "crates/fvid-media/src/owned_webm_multitrack_export.rs",
+      "regression": "tests/pcm_mace_and_multitrack_export_preflight.rs",
+      "before": "owned_webm_multitrack_export::try_export ran qualify(source, t, o) and decoded the entire input video via decode_webm(source, &request, None, Some(o)) before checking that destination had a .mkv extension and did not already exist.",
+      "result": "Validate destination .mkv extension and destination.symlink_metadata().is_ok() at the very start of owned_webm_multitrack_export::try_export before opening or decoding source.",
+      "status": "accepted",
+      "validation": "batch-594-validation.json"
+    },
+    {
+      "id": "FVID-0704",
+      "batch": 594,
+      "title": "Precompute schedule_base_bytes once outside the packet loop and attribute memory-budget-clamped packet rejections in owned_mp4_multitrack_export",
+      "source": "crates/fvid-media/src/owned_mp4_multitrack_export.rs",
+      "regression": "tests/multitrack_lossless_budget_parity_regressions.rs",
+      "before": "owned_mp4_multitrack_export::try_export recomputed plan_bytes across all audio plans and called video.estimated_index_payload_bytes() inside the inner loop on every output packet, and qualify reported 'MP4 packet exceeds budget' instead of 'controlled memory budget exceeded: MP4 index and metadata' when a packet fit max_packet_bytes but exceeded max_controlled_bytes - index_and_meta_bytes.",
+      "result": "Precompute plan_bytes, video_index_bytes, and schedule_base_bytes once before the packet loop in try_export, and report 'controlled memory budget exceeded: MP4 index and metadata' when effective_packet_limit is clamped below max_packet_bytes by max_controlled_bytes.",
+      "status": "accepted",
+      "validation": "batch-594-validation.json"
     }
   ]
 }

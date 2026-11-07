@@ -158,26 +158,38 @@ impl PcmDecoder {
 
     /// Strict packet conversion for container export: reject incomplete frames.
     pub fn decode_pcm(&self, data: &[u8]) -> Result<Vec<f32>> {
-        let frame = self.format.sample_bytes() * usize::from(self.channels);
+        let sample_bytes = self.format.sample_bytes();
+        let frame = sample_bytes * usize::from(self.channels);
         if !data.len().is_multiple_of(frame) {
             return Err(invalid("PCM packet ends in an incomplete channel frame"));
         }
-        let samples: Vec<f32> = data.chunks_exact(self.format.sample_bytes())
-            .map(|s| self.sample(s)).collect();
-        if samples.iter().any(|s| !s.is_finite()) {
-            return Err(invalid("PCM packet contains non-finite samples"));
+        let mut samples = Vec::new();
+        samples
+            .try_reserve_exact(data.len() / sample_bytes)
+            .map_err(|_| invalid("PCM output allocation failed"))?;
+        for s in data.chunks_exact(sample_bytes) {
+            let sample = self.sample(s);
+            if !sample.is_finite() {
+                return Err(invalid("PCM packet contains non-finite samples"));
+            }
+            samples.push(sample);
         }
         Ok(samples)
     }
 
     /// Preserve all stored integer bits and IEEE float64 precision in normalized f64.
     pub fn decode_pcm_f64(&self, data: &[u8]) -> Result<Vec<f64>> {
-        let frame = self.format.sample_bytes() * usize::from(self.channels);
+        let sample_bytes = self.format.sample_bytes();
+        let frame = sample_bytes * usize::from(self.channels);
         if !data.len().is_multiple_of(frame) {
             return Err(invalid("PCM packet ends in an incomplete channel frame"));
         }
-        let samples: Vec<f64> = data.chunks_exact(self.format.sample_bytes()).map(|bytes| {
-            match self.format {
+        let mut samples = Vec::new();
+        samples
+            .try_reserve_exact(data.len() / sample_bytes)
+            .map_err(|_| invalid("PCM output allocation failed"))?;
+        for bytes in data.chunks_exact(sample_bytes) {
+            let sample = match self.format {
                 PcmFormat::ALaw => f64::from(fvid_codecs::g711::Law::ALaw.decode(bytes[0]))/32768.,
                 PcmFormat::MuLaw => f64::from(fvid_codecs::g711::Law::MuLaw.decode(bytes[0]))/32768.,
                 PcmFormat::Unsigned8 => (f64::from(bytes[0]) - 128.0) / 128.0,
@@ -185,10 +197,11 @@ impl PcmDecoder {
                 PcmFormat::Float { bits: 32 } => f64::from(if self.float_big_endian { f32::from_be_bytes(bytes.try_into().unwrap()) } else { f32::from_le_bytes(bytes.try_into().unwrap()) }),
                 PcmFormat::Float { bits: 64 } => if self.float_big_endian { f64::from_be_bytes(bytes.try_into().unwrap()) } else { f64::from_le_bytes(bytes.try_into().unwrap()) },
                 PcmFormat::Float { .. } => unreachable!(),
+            };
+            if !sample.is_finite() {
+                return Err(invalid("PCM packet contains non-finite samples"));
             }
-        }).collect();
-        if samples.iter().any(|s| !s.is_finite()) {
-            return Err(invalid("PCM packet contains non-finite samples"));
+            samples.push(sample);
         }
         Ok(samples)
     }
