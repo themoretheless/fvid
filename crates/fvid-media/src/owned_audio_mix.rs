@@ -127,70 +127,88 @@ fn audio_plan_with_controls(
         let is_wave_header = matches!(&head[..head_len.min(4)], b"RIFF" | b"RIFX" | b"RF64")
             && head_len == 12
             && &head[8..12] == b"WAVE";
-        let (rate, channels) = if is_wave_header
-            && crate::owned_g711_wave_export::recognizes(source, controls)?
-        {
-            let info = crate::owned_audio_plan::source_descriptor(source, controls)?;
-            crate::owned_audio_plan::plan_decode_audio(source, &Default::default(), controls)?;
-            let g711_frames = info.stage2_frames;
-            if g711_frames == 0 {
-                return Err("audio mix/merge requires nonempty owned audio inputs".into());
-            }
-            let decoded_bytes = u128::from(g711_frames)
-                .saturating_mul(u128::from(info.channels))
-                .saturating_mul(4);
-            total_input_pcm_bytes = total_input_pcm_bytes.saturating_add(decoded_bytes);
-            min_frames = Some(min_frames.map_or(g711_frames, |m| m.min(g711_frames)));
-            (info.rate, info.channels)
-        } else if is_wave_header {
+        let (rate, channels) = if is_wave_header {
             let mut file = std::fs::File::open(source).map_err(|e| e.to_string())?;
-            let wave_info = crate::owned_wave_inspect::inspect(&mut file, controls.cancel.as_ref())
-                .map_err(|e| e.to_string())?;
-            if !wave_info.float || wave_info.bits_per_sample != 32 {
-                return Err(
-                    "mix-audio requires float PCM inputs (flt); integer formats are not qualified"
-                        .into(),
-                );
-            }
-            if wave_info.sample_frames == 0 || !(1..=255).contains(&wave_info.channels) {
-                return Err("audio mix/merge requires nonempty owned audio inputs".into());
-            }
-            let frame_bytes = usize::from(wave_info.block);
-            let capacity = (4096 * frame_bytes).min(controls.max_packet_bytes / frame_bytes * frame_bytes);
-            if capacity == 0 {
-                return Err("PCM packet limit cannot hold one sample frame".into());
-            }
-            let full_size = usize::try_from(wave_info.data_bytes)
-                .map_err(|_| "WAVE PCM payload exceeds address space")?;
-            let limit = controls
-                .max_packets
-                .map(|packets| u128::from(packets) * capacity as u128)
-                .unwrap_or(full_size as u128);
-            let size = (full_size as u128).min(limit) as usize;
-            if size == 0 {
-                return Err("packet limit leaves no decoded audio samples".into());
-            }
-            if let Some(max_bytes) = controls.max_controlled_bytes {
-                if size > max_bytes {
-                    return Err("controlled memory budget exceeded by WAVE PCM input".into());
+            if let Some(law) =
+                crate::owned_wave_inspect::g711_law(&mut file, controls.cancel.as_ref())
+                    .map_err(|e| e.to_string())?
+            {
+                let (rate, channels, _, _, g711_frames, info_len) =
+                    crate::owned_g711_wave_export::descriptor_from_file_and_law_for_decode(
+                        file, law, None, controls,
+                    )?;
+                crate::owned_adts_export::check_spool_wave_export_budget(
+                    rate,
+                    channels,
+                    32,
+                    g711_frames.max(1024),
+                    info_len,
+                    false,
+                    Default::default(),
+                    controls,
+                )?;
+                let decoded_bytes = u128::from(g711_frames)
+                    .saturating_mul(u128::from(channels))
+                    .saturating_mul(4);
+                total_input_pcm_bytes = total_input_pcm_bytes.saturating_add(decoded_bytes);
+                min_frames = Some(min_frames.map_or(g711_frames, |m| m.min(g711_frames)));
+                (rate, channels)
+            } else {
+                use std::io::{Seek, SeekFrom};
+                file.seek(SeekFrom::Start(0)).map_err(|e| e.to_string())?;
+                let wave_info =
+                    crate::owned_wave_inspect::inspect(&mut file, controls.cancel.as_ref())
+                        .map_err(|e| e.to_string())?;
+                if !wave_info.float || wave_info.bits_per_sample != 32 {
+                    return Err(
+                        "mix-audio requires float PCM inputs (flt); integer formats are not qualified"
+                            .into(),
+                    );
                 }
+                if wave_info.sample_frames == 0 || !(1..=255).contains(&wave_info.channels) {
+                    return Err("audio mix/merge requires nonempty owned audio inputs".into());
+                }
+                let frame_bytes = usize::from(wave_info.block);
+                let capacity = (4096 * frame_bytes)
+                    .min(controls.max_packet_bytes / frame_bytes * frame_bytes);
+                if capacity == 0 {
+                    return Err("PCM packet limit cannot hold one sample frame".into());
+                }
+                let full_size = usize::try_from(wave_info.data_bytes)
+                    .map_err(|_| "WAVE PCM payload exceeds address space")?;
+                let limit = controls
+                    .max_packets
+                    .map(|packets| u128::from(packets) * capacity as u128)
+                    .unwrap_or(full_size as u128);
+                let size = (full_size as u128).min(limit) as usize;
+                if size == 0 {
+                    return Err("packet limit leaves no decoded audio samples".into());
+                }
+                if let Some(max_bytes) = controls.max_controlled_bytes {
+                    if size > max_bytes {
+                        return Err("controlled memory budget exceeded by WAVE PCM input".into());
+                    }
+                }
+                let wave_frames = (size / frame_bytes) as u64;
+                let decoded_bytes = u128::from(wave_frames)
+                    .saturating_mul(u128::from(wave_info.channels))
+                    .saturating_mul(4);
+                total_input_pcm_bytes = total_input_pcm_bytes.saturating_add(decoded_bytes);
+                min_frames = Some(min_frames.map_or(wave_frames, |m| m.min(wave_frames)));
+                (wave_info.sample_rate, wave_info.channels)
             }
-            let wave_frames = (size / frame_bytes) as u64;
-            let decoded_bytes = u128::from(wave_frames)
-                .saturating_mul(u128::from(wave_info.channels))
-                .saturating_mul(4);
-            total_input_pcm_bytes = total_input_pcm_bytes.saturating_add(decoded_bytes);
-            min_frames = Some(min_frames.map_or(wave_frames, |m| m.min(wave_frames)));
-            (wave_info.sample_rate, wave_info.channels)
         } else {
-            let info = crate::owned_audio_plan::source_descriptor(source, controls)?;
+            let (_, info) = crate::owned_audio_plan::plan_decode_audio_with_descriptor(
+                source,
+                &Default::default(),
+                controls,
+            )?;
             if info.precision != "float32" {
                 return Err(
                     "mix-audio requires float PCM inputs (flt); integer formats are not qualified"
                         .into(),
                 );
             }
-            crate::owned_audio_plan::plan_decode_audio(source, &Default::default(), controls)?;
             let frames = info.stage2_frames;
             let decoded_bytes = u128::from(frames)
                 .saturating_mul(u128::from(info.channels))

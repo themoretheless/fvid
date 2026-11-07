@@ -122,12 +122,13 @@ pub fn apply(
         spool_meta_bytes,
         options,
     )?;
-    let spool = crate::owned_container_loudness::decode_to_wave_from_geometry(
+    let spool = crate::owned_container_loudness::decode_to_wave_from_geometry_with_info(
         source,
         rate,
         channels,
         mask,
         &codec,
+        desc.stage2_info,
         &decode_options,
     )?;
     let mut pcm_options = options.clone();

@@ -108,6 +108,16 @@ pub(crate) fn packet_work(source: &Path, options: &CopyOptions) -> Result<u64> {
     Ok(frames.div_ceil(packet_window(usize::from(channels), options)? as u64))
 }
 
+pub(crate) fn try_packet_work(source: &Path, options: &CopyOptions) -> Result<Option<u64>> {
+    let Some((_, channels, _, _, frames, _)) = try_descriptor_for_decode(source, None, options)?
+    else {
+        return Ok(None);
+    };
+    Ok(Some(
+        frames.div_ceil(packet_window(usize::from(channels), options)? as u64),
+    ))
+}
+
 pub(crate) fn descriptor(
     path: &Path,
     options: &CopyOptions,
@@ -134,8 +144,16 @@ pub(crate) fn try_descriptor_for_decode(
     else {
         return Ok(None);
     };
+    descriptor_from_file_and_law_for_decode(file, law, transform, options).map(Some)
+}
+pub(crate) fn descriptor_from_file_and_law_for_decode(
+    file: File,
+    law: fvid_codecs::g711::Law,
+    transform: Option<AudioDecodeTransform>,
+    options: &CopyOptions,
+) -> Result<(u32, u16, u32, &'static str, u64, usize)> {
     let (input, info) = open_from_file_and_law(file, law, options)?;
-    descriptor_from_input_for_decode(input, info, transform, options).map(Some)
+    descriptor_from_input_for_decode(input, info, transform, options)
 }
 fn descriptor_from_input_for_decode(
     input: Input,

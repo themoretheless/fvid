@@ -1,8 +1,8 @@
 {
   "target": 1000,
   "counting_rule": "One independently confirmed problem or useful capability; fixture variants and baseline integration repairs are excluded. Only accepted entries count.",
-  "accepted_count": 854,
-  "next_id": "FVID-0855",
+  "accepted_count": 859,
+  "next_id": "FVID-0860",
   "entries": [
     {
       "id": "FVID-0001",
@@ -9585,7 +9585,62 @@
       "result": "decode_owned_audio_with_controls calls read_float_wave_with_admission directly on RIFF/WAVE inputs and falls back to the general decode spool when the WAVE format is G.711 or integer PCM.",
       "status": "accepted",
       "validation": "batch-624-validation.json"
+    },
+    {
+      "id": "FVID-0855",
+      "batch": 625,
+      "title": "Single-open Ogg and G.711 WAVE packet work inspection in owned_audio_plan::standalone_packet_work",
+      "source": "crates/fvid-media/src/owned_audio_plan.rs",
+      "regression": "tests/ogg_packet_work_mix_plan_and_loudness_info_reuse.rs",
+      "before": "standalone_packet_work called owned_g711_wave_export::recognizes followed by packet_work for WAVE inputs, and called owned_ogg_audio_export::coding (which opened and parsed the Ogg file) followed by open (which reopened and parsed the Ogg file a second time) for Ogg inputs.",
+      "result": "standalone_packet_work calls try_packet_work for WAVE inputs and reuses the parsed Ogg from open_selected_ogg via open_from_ogg_with_transform for Ogg inputs.",
+      "status": "accepted",
+      "validation": "batch-625-validation.json"
+    },
+    {
+      "id": "FVID-0856",
+      "batch": 625,
+      "title": "Single-pass input inspection in owned_audio_mix::audio_plan_with_controls",
+      "source": "crates/fvid-media/src/owned_audio_mix.rs",
+      "regression": "tests/ogg_packet_work_mix_plan_and_loudness_info_reuse.rs",
+      "before": "audio_plan_with_controls called recognizes(source) + source_descriptor(source) + plan_decode_audio(source) on WAVE inputs and called source_descriptor(source) + plan_decode_audio(source) on non-WAVE inputs, opening each source 2 to 4 times.",
+      "result": "audio_plan_with_controls inspects WAVE inputs in one open (checking g711_law and falling back to float32 WAVE inspection on the same File) and uses plan_decode_audio_with_descriptor for non-WAVE inputs in a single pass.",
+      "status": "accepted",
+      "validation": "batch-625-validation.json"
+    },
+    {
+      "id": "FVID-0857",
+      "batch": 625,
+      "title": "Single-pass container plan_loudness via plan_decode_audio_with_descriptor",
+      "source": "crates/fvid-media/src/owned_container_loudness.rs",
+      "regression": "tests/ogg_packet_work_mix_plan_and_loudness_info_reuse.rs",
+      "before": "owned_container_loudness::plan_loudness called geometry_with_frames(source, options) and then called owned_audio_plan::plan_decode_audio(source, ..., options), parsing and indexing the container twice.",
+      "result": "plan_loudness calls plan_decode_audio_with_descriptor once and validates container loudness qualification and meter budget directly from the returned AudioDescriptor.",
+      "status": "accepted",
+      "validation": "batch-625-validation.json"
+    },
+    {
+      "id": "FVID-0858",
+      "batch": 625,
+      "title": "Reuse precomputed MP4 and Matroska RIFF INFO metadata in owned_container_loudness::measure_loudness",
+      "source": "crates/fvid-media/src/owned_container_loudness.rs",
+      "regression": "tests/ogg_packet_work_mix_plan_and_loudness_info_reuse.rs",
+      "before": "geometry_with_frames extracted and discarded the RIFF INFO metadata Vec<u8> from MP4 and Matroska descriptors, and decode_to_wave_from_geometry reopened and re-indexed the container via mp4_source_info / matroska_source_info.",
+      "result": "geometry_with_frames preserves the extracted RIFF INFO metadata and passes it to decode_to_wave_from_geometry_with_info so MP4 and Matroska loudness measurement avoids reopening the container for metadata.",
+      "status": "accepted",
+      "validation": "batch-625-validation.json"
+    },
+    {
+      "id": "FVID-0859",
+      "batch": 625,
+      "title": "Reuse AudioDescriptor.stage2_info in owned_container_loudnorm::apply",
+      "source": "crates/fvid-media/src/owned_container_loudnorm.rs",
+      "regression": "tests/ogg_packet_work_mix_plan_and_loudness_info_reuse.rs",
+      "before": "owned_container_loudnorm::apply obtained AudioDescriptor from plan_decode_audio_with_descriptor, but decode_to_wave_from_geometry still reopened MP4 and Matroska inputs to compute mp4_source_info / matroska_source_info.",
+      "result": "AudioDescriptor retains stage2_info for MP4 and Matroska sources, and owned_container_loudnorm::apply forwards it to decode_to_wave_from_geometry_with_info.",
+      "status": "accepted",
+      "validation": "batch-625-validation.json"
     }
   ],
-  "pending_count": 146
+  "pending_count": 141
 }

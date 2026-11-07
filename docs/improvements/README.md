@@ -4646,5 +4646,16 @@ See `batch-623-validation.json`.
 
 See `batch-624-validation.json`.
 
+## Batch 625 — FVID-0855..0859: Single-open Ogg/G.711 packet work, mix/merge planning, and container loudness/loudnorm RIFF INFO reuse
+
+- **FVID-0855** — Single-open Ogg and G.711 WAVE packet work inspection in `owned_audio_plan::standalone_packet_work` (`crates/fvid-media/src/owned_audio_plan.rs`, `tests/ogg_packet_work_mix_plan_and_loudness_info_reuse.rs`).
+- **FVID-0856** — Single-pass input inspection in `owned_audio_mix::audio_plan_with_controls` (`crates/fvid-media/src/owned_audio_mix.rs`, `tests/ogg_packet_work_mix_plan_and_loudness_info_reuse.rs`).
+- **FVID-0857** — Single-pass container `plan_loudness` via `plan_decode_audio_with_descriptor` (`crates/fvid-media/src/owned_container_loudness.rs`, `tests/ogg_packet_work_mix_plan_and_loudness_info_reuse.rs`).
+- **FVID-0858** — Reuse precomputed MP4 and Matroska RIFF `INFO` metadata in `owned_container_loudness::measure_loudness` (`crates/fvid-media/src/owned_container_loudness.rs`, `tests/ogg_packet_work_mix_plan_and_loudness_info_reuse.rs`).
+- **FVID-0859** — Reuse `AudioDescriptor.stage2_info` in `owned_container_loudnorm::apply` (`crates/fvid-media/src/owned_container_loudnorm.rs`, `tests/ogg_packet_work_mix_plan_and_loudness_info_reuse.rs`).
+
+See `batch-625-validation.json`.
+
+
 
 
