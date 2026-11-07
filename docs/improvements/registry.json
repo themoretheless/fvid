@@ -1,8 +1,8 @@
 {
   "target": 1000,
   "counting_rule": "One independently confirmed problem or useful capability; fixture variants and baseline integration repairs are excluded. Only accepted entries count.",
-  "accepted_count": 749,
-  "next_id": "FVID-0750",
+  "accepted_count": 754,
+  "next_id": "FVID-0755",
   "entries": [
     {
       "id": "FVID-0001",
@@ -8430,6 +8430,61 @@
       "result": "Expose mask and codec on AudioDescriptor and validate loudness speaker mask and sample rate directly from source_descriptor(source, &decode_options) in apply and plan_loudnorm.",
       "status": "accepted",
       "validation": "batch-603-validation.json"
+    },
+    {
+      "id": "FVID-0750",
+      "batch": 604,
+      "title": "Skip redundant post-decode check_output_memory_budget in decode_fvid_media_audio_to_destination when prechecked_channels matches decoded.channels",
+      "source": "src/media.rs",
+      "regression": "tests/audio_mix_concat_loudness_single_pass.rs",
+      "before": "decode_fvid_media_audio_to_destination ran check_output_memory_budget(source, out_channels, 65536, options, Some(true)) before decode_audio_transformed and then ran check_output_memory_budget a second time after decode even when decoded.channels equaled out_channels.",
+      "result": "Record prechecked_channels during preflight and skip the post-decode check_output_memory_budget call whenever prechecked_channels == Some(decoded_channels).",
+      "status": "accepted",
+      "validation": "batch-604-validation.json"
+    },
+    {
+      "id": "FVID-0751",
+      "batch": 604,
+      "title": "Skip redundant post-normalization check_output_memory_budget in native_loudnorm::try_apply when prechecked_channels matches stats.channels",
+      "source": "src/native_loudnorm.rs",
+      "regression": "tests/audio_mix_concat_loudness_single_pass.rs",
+      "before": "native_loudnorm::try_apply ran check_output_memory_budget(source, channels, 65536, options, Some(true)) before spooling normalized WAVE and then ran check_output_memory_budget a second time after try_apply even though stats.channels matched channels.",
+      "result": "Record prechecked_channels during preflight and skip the post-normalization check_output_memory_budget call whenever prechecked_channels == Some(decoded_channels).",
+      "status": "accepted",
+      "validation": "batch-604-validation.json"
+    },
+    {
+      "id": "FVID-0752",
+      "batch": 604,
+      "title": "Return inspected source (rate, channels, mask) tuples from validate_mix_sources_with_controls in native_audio_mix",
+      "source": "src/native_audio_mix.rs",
+      "regression": "tests/audio_mix_concat_loudness_single_pass.rs",
+      "before": "native_audio_mix::mix_audio_with_controls called plan_with_controls (which called validate_and_inspect_source_with_options on every input) and then called validate_and_inspect_source_with_options on every input a second time after decoding just to collect speaker masks.",
+      "result": "Extract validate_mix_sources_with_controls returning Vec<(u32, u16, u32)> and reuse the inspected speaker masks in mix_audio_with_controls without re-opening or re-scanning the inputs.",
+      "status": "accepted",
+      "validation": "batch-604-validation.json"
+    },
+    {
+      "id": "FVID-0753",
+      "batch": 604,
+      "title": "Return (rate, channels, mask) from validate_concat_segments_internal in native_audio_mix::concat::concat_audio_with_options",
+      "source": "src/native_audio_mix/concat.rs",
+      "regression": "tests/audio_mix_concat_loudness_single_pass.rs",
+      "before": "concat_audio_with_options called validate_concat_segments_with_options and then called geometry_with_options(&sources[0], options) and looped over all sources a second time calling validate_and_inspect_source_with_options and segment_packet_count to compute the output speaker mask.",
+      "result": "Return (rate, channels, mask) directly from validate_concat_segments_internal and reuse them in concat_audio_with_options.",
+      "status": "accepted",
+      "validation": "batch-604-validation.json"
+    },
+    {
+      "id": "FVID-0754",
+      "batch": 604,
+      "title": "Reuse the already-opened BufReader<File> via is_wave_reader and add a frame-aligned chunks_exact fast path to Sink::write in native_pcm::loudness",
+      "source": "src/native_pcm/loudness.rs",
+      "regression": "tests/audio_mix_concat_loudness_single_pass.rs",
+      "before": "native_pcm::loudness::measure_file_with_options opened source in BufReader<File> and then called super::is_wave(source) which opened source a second time, while Sink::write pushed PCM bytes one byte at a time.",
+      "result": "Add native_pcm::is_wave_reader(&mut input) to inspect the already-opened reader and add a frame-aligned chunks_exact(frame_bytes) fast path in Sink::write.",
+      "status": "accepted",
+      "validation": "batch-604-validation.json"
     }
   ],
   "pending_count": 0

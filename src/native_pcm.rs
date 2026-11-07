@@ -100,22 +100,33 @@ fn is_g711_riff_wave<R: Read + Seek>(input: &mut R, head: &[u8; 12]) -> bool {
     false
 }
 
-pub fn is_wave(path: &Path) -> std::io::Result<bool> {
-    let mut file = File::open(path)?;
+pub(crate) fn is_wave_reader<R: Read + Seek>(input: &mut R) -> std::io::Result<bool> {
+    input.seek(SeekFrom::Start(0))?;
     let mut prefix = [0; 12];
-    match file.read_exact(&mut prefix) {
+    match input.read_exact(&mut prefix) {
         Ok(()) => {
             if !matches!(&prefix[..4], b"RIFF" | b"RIFX" | b"RF64") || &prefix[8..] != b"WAVE" {
+                input.seek(SeekFrom::Start(0))?;
                 return Ok(false);
             }
-            if is_g711_riff_wave(&mut file, &prefix) {
+            if is_g711_riff_wave(input, &prefix) {
+                input.seek(SeekFrom::Start(0))?;
                 return Ok(false);
             }
+            input.seek(SeekFrom::Start(0))?;
             Ok(true)
         }
-        Err(e) if e.kind() == std::io::ErrorKind::UnexpectedEof => Ok(false),
+        Err(e) if e.kind() == std::io::ErrorKind::UnexpectedEof => {
+            input.seek(SeekFrom::Start(0))?;
+            Ok(false)
+        }
         Err(e) => Err(e),
     }
+}
+
+pub fn is_wave(path: &Path) -> std::io::Result<bool> {
+    let mut file = File::open(path)?;
+    is_wave_reader(&mut file)
 }
 fn check(cancel: Option<&CancelFlag>) -> Result<()> {
     if cancel.is_some_and(|c| c.is_cancelled()) {

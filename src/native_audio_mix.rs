@@ -523,11 +523,11 @@ pub fn plan(
     plan_with_controls(sources, options, &Default::default())
 }
 
-pub fn plan_with_controls(
+fn validate_mix_sources_with_controls(
     sources: &[PathBuf],
     options: &MixAudioOptions,
     controls: &fvid_media::CopyOptions,
-) -> Result<crate::media_info::MediaPlan> {
+) -> Result<Vec<(u32, u16, u32)>> {
     if controls.cancel.as_ref().is_some_and(|c| c.is_cancelled()) {
         return Err(invalid("media operation cancelled"));
     }
@@ -543,8 +543,9 @@ pub fn plan_with_controls(
     fvid_media::owned_budget::check_rss_budget(controls).map_err(|e| invalid(&e))?;
     weights(sources.len(), options)?;
     let mut geometry = None;
+    let mut inspected = Vec::with_capacity(sources.len());
     for source in sources {
-        let (rate, channels, _) = validate_and_inspect_source_with_options(source, controls)?;
+        let (rate, channels, mask) = validate_and_inspect_source_with_options(source, controls)?;
         let shape = (rate, channels);
         if geometry.is_some_and(|g| g != shape) {
             return Err(invalid(
@@ -552,6 +553,7 @@ pub fn plan_with_controls(
             ));
         }
         geometry = Some(shape);
+        inspected.push((rate, channels, mask));
     }
     let (_, channels) = geometry.unwrap();
     let mix_stage_bytes = 32768usize
@@ -564,6 +566,15 @@ pub fn plan_with_controls(
         controls,
         None,
     )?;
+    Ok(inspected)
+}
+
+pub fn plan_with_controls(
+    sources: &[PathBuf],
+    options: &MixAudioOptions,
+    controls: &fvid_media::CopyOptions,
+) -> Result<crate::media_info::MediaPlan> {
+    validate_mix_sources_with_controls(sources, options, controls)?;
     let mut notes = vec!["PCM spools bound mixing memory independently of input duration; temporary disk space is required".into()];
     if controls.max_packet_bytes != fvid_media::CopyOptions::default().max_packet_bytes
         || controls.max_packets.is_some()
@@ -660,7 +671,7 @@ pub fn mix_audio_with_controls(
         return Err(invalid("mix-audio destination already exists"));
     }
     validate_output_controls(controls, Some(matroska))?;
-    plan_with_controls(sources, options, controls)?;
+    let inspected_sources = validate_mix_sources_with_controls(sources, options, controls)?;
     let info_chunks = if matroska {
         Vec::new()
     } else {
@@ -715,12 +726,9 @@ pub fn mix_audio_with_controls(
         sample_rate: rate,
         channels,
     };
-    let masks = sources
-        .iter()
-        .map(|source| validate_and_inspect_source_with_options(source, controls).map(|(_, _, mask)| mask))
-        .collect::<Result<Vec<_>>>()?;
-    let mask = if masks.iter().all(|m| *m == masks[0]) {
-        masks[0]
+    let first_mask = inspected_sources[0].2;
+    let mask = if inspected_sources.iter().all(|(_, _, m)| *m == first_mask) {
+        first_mask
     } else {
         0
     };

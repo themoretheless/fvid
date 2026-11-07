@@ -82,7 +82,7 @@ pub fn measure_file_with_options(
         Adts(Box<crate::native_media::NegotiatedAdts<BufReader<std::fs::File>>>),
         _Marker(std::marker::PhantomData<&'a ()>),
     }
-    let (input, rate, channels) = if super::is_wave(source)? {
+    let (input, rate, channels) = if super::is_wave_reader(&mut input)? {
         if selected.is_some_and(|s| s != 0) {
             return Err(invalid("WAVE has only stream 0"));
         }
@@ -278,6 +278,23 @@ pub fn measure_file_with_options(
     }
     impl Write for Sink {
         fn write(&mut self, bytes: &[u8]) -> std::io::Result<usize> {
+            let frame_bytes = self.channels.saturating_mul(4);
+            if self.byte_count == 0
+                && self.channel == 0
+                && frame_bytes > 0
+                && bytes.len() % frame_bytes == 0
+            {
+                for raw_frame in bytes.chunks_exact(frame_bytes) {
+                    for (ch, sample_bytes) in raw_frame.chunks_exact(4).enumerate() {
+                        self.frame[ch] =
+                            f64::from(f32::from_le_bytes(sample_bytes.try_into().unwrap()));
+                    }
+                    self.meter
+                        .push(&self.frame[..self.channels])
+                        .map_err(|e| std::io::Error::new(std::io::ErrorKind::InvalidData, e))?;
+                }
+                return Ok(bytes.len());
+            }
             for byte in bytes {
                 self.bytes[self.byte_count] = *byte;
                 self.byte_count += 1;

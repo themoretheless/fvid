@@ -185,6 +185,13 @@ pub fn validate_concat_segments_with_options(
     sources: &[PathBuf],
     options: &fvid_media::CopyOptions,
 ) -> Result<()> {
+    validate_concat_segments_internal(sources, options).map(|_| ())
+}
+
+fn validate_concat_segments_internal(
+    sources: &[PathBuf],
+    options: &fvid_media::CopyOptions,
+) -> Result<(u32, u16, u32)> {
     if options.cancel.as_ref().is_some_and(|c| c.is_cancelled()) {
         return Err(invalid("media operation cancelled"));
     }
@@ -205,6 +212,7 @@ pub fn validate_concat_segments_with_options(
     }
     super::validate_output_controls(options, None)?;
     let mut remaining_packets = options.max_packets;
+    let mut masks = Vec::new();
     for source in sources {
         if options.cancel.as_ref().is_some_and(|c| c.is_cancelled()) {
             return Err(invalid("media operation cancelled"));
@@ -215,7 +223,8 @@ pub fn validate_concat_segments_with_options(
         }
         let mut segment_opts = super::strip_output_controls(options);
         segment_opts.max_packets = remaining_packets;
-        super::validate_and_inspect_source_with_options(source, &segment_opts)?;
+        let (_, _, mask) = super::validate_and_inspect_source_with_options(source, &segment_opts)?;
+        masks.push(mask);
         if let Some(rem) = &mut remaining_packets {
             let count = segment_packet_count(source, &segment_opts)?;
             *rem = rem.saturating_sub(count);
@@ -266,16 +275,23 @@ pub fn validate_concat_segments_with_options(
             }
         }
     }
-    if let Some((_, channels)) = expected_geometry {
-        crate::native_export::pcm_matroska::check_output_memory_budget(
-            &sources[0],
-            channels,
-            81920,
-            options,
-            None,
-        )?;
-    }
-    Ok(())
+    let (rate, channels) = match expected_geometry {
+        Some(geom) => geom,
+        None => geometry_with_options(&sources[0], options)?,
+    };
+    crate::native_export::pcm_matroska::check_output_memory_budget(
+        &sources[0],
+        channels,
+        81920,
+        options,
+        None,
+    )?;
+    let mask = if !masks.is_empty() && masks.iter().all(|m| *m == masks[0]) {
+        masks[0]
+    } else {
+        0
+    };
+    Ok((rate, channels, mask))
 }
 
 pub fn eligible(sources: &[PathBuf]) -> Result<bool> {
@@ -332,7 +348,7 @@ pub fn concat_audio_with_options(
         return Err(invalid("concat destination already exists"));
     }
     super::validate_output_controls(options, Some(matroska))?;
-    validate_concat_segments_with_options(sources, options)?;
+    let (rate, channels, validated_mask) = validate_concat_segments_internal(sources, options)?;
     let info_chunks = if matroska {
         Vec::new()
     } else {
@@ -370,32 +386,7 @@ pub fn concat_audio_with_options(
     } else {
         None
     };
-    let (rate, channels) = geometry_with_options(&sources[0], options)?;
-    let mask = if matroska {
-        0
-    } else {
-        let mut inspect_opts = super::strip_output_controls(options);
-        inspect_opts.max_packets = options.max_packets;
-        let mut remaining = options.max_packets;
-        let mut masks = Vec::new();
-        for source in sources {
-            if remaining == Some(0) {
-                break;
-            }
-            inspect_opts.max_packets = remaining;
-            let (_, _, mask) = super::validate_and_inspect_source_with_options(source, &inspect_opts)?;
-            masks.push(mask);
-            if let Some(rem) = &mut remaining {
-                let count = segment_packet_count(source, &inspect_opts)?;
-                *rem = rem.saturating_sub(count);
-            }
-        }
-        if masks.iter().all(|m| *m == masks[0]) {
-            masks[0]
-        } else {
-            0
-        }
-    };
+    let mask = if matroska { 0 } else { validated_mask };
     let scratch = super::reserve_scratch(destination)?;
     let temporary = scratch.0.join(if matroska { "concat.mka" } else { "concat.wav" });
     let mut output = BufWriter::new(

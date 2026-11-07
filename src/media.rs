@@ -297,6 +297,7 @@ pub(crate) fn decode_fvid_media_audio_to_destination(
         meta_options.max_controlled_bytes = None;
         validate_owned_audio_options_for_destination(&meta_options, Some(destination))?;
     }
+    let mut prechecked_channels = None;
     if matroska_out && options.max_controlled_bytes.is_some() {
         let mut clean_probe = options.clone();
         clean_probe.metadata_set.clear();
@@ -317,6 +318,7 @@ pub(crate) fn decode_fvid_media_audio_to_destination(
             Some(true),
         )
         .map_err(|e| e.to_string())?;
+        prechecked_channels = Some(out_channels);
     } else if let Some(limit) = options.max_controlled_bytes {
         let mut clean_probe = options.clone();
         clean_probe.metadata_set.clear();
@@ -350,14 +352,17 @@ pub(crate) fn decode_fvid_media_audio_to_destination(
     let original_progress = spool_options.progress.take();
     let decoded = fvid_media::decode_audio_transformed(source, &spool.0, transform, &spool_options)?;
     if matroska_out && options.max_controlled_bytes.is_some() {
-        crate::native_export::pcm_matroska::check_output_memory_budget(
-            source,
-            u16::try_from(decoded.channels).unwrap_or(2),
-            65536,
-            options,
-            Some(true),
-        )
-        .map_err(|e| e.to_string())?;
+        let decoded_channels = u16::try_from(decoded.channels).unwrap_or(2);
+        if prechecked_channels != Some(decoded_channels) {
+            crate::native_export::pcm_matroska::check_output_memory_budget(
+                source,
+                decoded_channels,
+                65536,
+                options,
+                Some(true),
+            )
+            .map_err(|e| e.to_string())?;
+        }
     }
     let mut publish_options = CopyOptions::default();
     publish_options.cancel = options.cancel.clone();

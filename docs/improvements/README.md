@@ -4436,6 +4436,17 @@ See `batch-602-validation.json`.
 
 See `batch-603-validation.json`.
 
+## Batch 604 — FVID-0750..0754: Single-pass Matroska audio output memory budget checks in `media` and `native_loudnorm`, single-pass source geometry and mask reuse in `native_audio_mix` and `concat`, and single-open `is_wave_reader` + frame-aligned `Sink::write` in `native_pcm::loudness`
+
+- **FVID-0750** — Skip redundant post-decode `check_output_memory_budget` in `decode_fvid_media_audio_to_destination` when `prechecked_channels` matches `decoded.channels` (`src/media.rs`, `tests/audio_mix_concat_loudness_single_pass.rs`).
+- **FVID-0751** — Skip redundant post-normalization `check_output_memory_budget` in `native_loudnorm::try_apply` when `prechecked_channels` matches `stats.channels` (`src/native_loudnorm.rs`, `tests/audio_mix_concat_loudness_single_pass.rs`).
+- **FVID-0752** — Return inspected source `(rate, channels, mask)` tuples from `validate_mix_sources_with_controls` in `native_audio_mix` so `mix_audio_with_controls` does not re-inspect all inputs for speaker masks (`src/native_audio_mix.rs`, `tests/audio_mix_concat_loudness_single_pass.rs`).
+- **FVID-0753** — Return `(rate, channels, mask)` from `validate_concat_segments_internal` in `native_audio_mix::concat` so `concat_audio_with_options` does not re-inspect all segments (`src/native_audio_mix/concat.rs`, `tests/audio_mix_concat_loudness_single_pass.rs`).
+- **FVID-0754** — Reuse the already-opened `BufReader<File>` via `is_wave_reader` and add a frame-aligned `chunks_exact` fast path to `Sink::write` in `native_pcm::loudness` (`src/native_pcm.rs`, `src/native_pcm/loudness.rs`, `tests/audio_mix_concat_loudness_single_pass.rs`).
+
+See `batch-604-validation.json`.
+
+
 
 
 

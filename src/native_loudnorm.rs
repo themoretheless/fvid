@@ -466,6 +466,7 @@ pub fn try_apply(
             return Err("loudnorm destination already exists".into());
         }
         let clean = strip_metadata_options(options);
+        let mut prechecked_channels = None;
         if options.max_controlled_bytes.is_some() {
             let (_, channels) = fvid_media::owned_audio_plan::source_geometry(source, &clean)
                 .map_err(|e| crate::invalid(&e))?;
@@ -476,6 +477,7 @@ pub fn try_apply(
                 options,
                 Some(true),
             )?;
+            prechecked_channels = Some(channels);
         }
         let spool = Spool::create()?;
         let spool_wav = spool.0.join("normalized.wav");
@@ -491,13 +493,16 @@ pub fn try_apply(
             return Ok(None);
         };
         if options.max_controlled_bytes.is_some() {
-            crate::native_export::pcm_matroska::check_output_memory_budget(
-                source,
-                u16::try_from(stats.channels).unwrap_or(2),
-                65536,
-                options,
-                Some(true),
-            )?;
+            let decoded_channels = u16::try_from(stats.channels).unwrap_or(2);
+            if prechecked_channels != Some(decoded_channels) {
+                crate::native_export::pcm_matroska::check_output_memory_budget(
+                    source,
+                    decoded_channels,
+                    65536,
+                    options,
+                    Some(true),
+                )?;
+            }
         }
         let mut publish_options = CopyOptions::default();
         publish_options.cancel = options.cancel.clone();
