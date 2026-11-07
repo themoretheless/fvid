@@ -467,8 +467,9 @@ fn parse_meta(
         // which must never be interpreted as a text label.
         0x03 => {
             let text: String = payload.iter().map(|byte| char::from(*byte)).collect();
+            let text = text.trim_end_matches('\0');
             if !text.is_empty() {
-                names.push((kind, text));
+                names.push((kind, text.to_owned()));
             }
         }
         _ => {}

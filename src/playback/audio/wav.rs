@@ -666,6 +666,11 @@ pub(crate) fn parse_fmt(body: &[u8], limits: &Limits) -> Result<(Pcm, Option<u32
                     return Err(invalid("extensible float precision differs from storage width"));
                 }
             }
+            ALAW | MULAW => {
+                if bits != 8 || valid_bits != 8 {
+                    return Err(invalid("extensible G.711 requires eight-bit storage and precision"));
+                }
+            }
             // The union describes samples per block for compressed formats.
             // Retain their existing admission until separately qualified.
             _ => bits = valid_bits,

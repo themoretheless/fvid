@@ -115,11 +115,12 @@ impl AudioStream for Mp3AudioReader {
     }
 
     fn audio_tracks(&self) -> Vec<AudioTrack> {
+        let (_, stream) = self.mp3.probe_metadata();
         vec![AudioTrack {
             sample_rate: self.mp3.sample_rate,
             channels: self.mp3.channels,
-            name: String::new(),
-            language: String::new(),
+            name: stream.get("title").cloned().unwrap_or_default(),
+            language: stream.get("language").cloned().unwrap_or_default(),
         }]
     }
 

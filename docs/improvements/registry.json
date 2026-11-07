@@ -1,8 +1,8 @@
 {
   "target": 1000,
   "counting_rule": "One independently confirmed problem or useful capability; fixture variants and baseline integration repairs are excluded. Only accepted entries count.",
-  "accepted_count": 629,
-  "next_id": "FVID-0630",
+  "accepted_count": 634,
+  "next_id": "FVID-0635",
   "entries": [
     {
       "id": "FVID-0001",
@@ -7110,6 +7110,61 @@
       "result": "Filter out empty decoded ID3v2 strings (.filter(|v| !v.is_empty())) across TXXX, COMM, and standard text frames in parse_id3v2_into.",
       "status": "accepted",
       "validation": "batch-579-validation.json"
+    },
+    {
+      "id": "FVID-0630",
+      "batch": 580,
+      "title": "Require 8-bit storage and precision for WAVEFORMATEXTENSIBLE G.711 in Wav::parse",
+      "source": "src/playback/audio/wav.rs",
+      "regression": "tests/wav_flac_mp3_smf_xm_playback.rs",
+      "before": "parse_fmt in src/playback/audio/wav.rs overwrote bits with valid_bits for compressed WAVEFORMATEXTENSIBLE subformats without checking that G.711 A-law/mu-law storage width wBitsPerSample was 8, accepting malformed extensible G.711 headers with 16-bit container storage.",
+      "result": "Require bits == 8 && valid_bits == 8 for ALAW | MULAW in the WAVEFORMATEXTENSIBLE match arm of parse_fmt.",
+      "status": "accepted",
+      "validation": "batch-580-validation.json"
+    },
+    {
+      "id": "FVID-0631",
+      "batch": 580,
+      "title": "Populate AudioTrack name and language from Vorbis comments in FlacAudioReader::audio_tracks",
+      "source": "src/playback/audio/flac.rs",
+      "regression": "tests/wav_flac_mp3_smf_xm_playback.rs",
+      "before": "FlacAudioReader::audio_tracks hardcoded empty name and language strings even though self.flac.metadata_blocks() retained the FLAC VORBIS_COMMENT metadata block.",
+      "result": "Extract the first non-empty TITLE and LANGUAGE Vorbis comments from self.flac.metadata_blocks() in FlacAudioReader::audio_tracks.",
+      "status": "accepted",
+      "validation": "batch-580-validation.json"
+    },
+    {
+      "id": "FVID-0632",
+      "batch": 580,
+      "title": "Populate AudioTrack name and language from ID3 metadata in Mp3AudioReader::audio_tracks",
+      "source": "src/playback/audio/mp3.rs",
+      "regression": "tests/wav_flac_mp3_smf_xm_playback.rs",
+      "before": "Mp3AudioReader::audio_tracks hardcoded empty name and language strings despite self.mp3.probe_metadata() parsing ID3v2/ID3v1 title and language.",
+      "result": "Populate AudioTrack.name and AudioTrack.language from self.mp3.probe_metadata().1 in Mp3AudioReader::audio_tracks.",
+      "status": "accepted",
+      "validation": "batch-580-validation.json"
+    },
+    {
+      "id": "FVID-0633",
+      "batch": 580,
+      "title": "Trim trailing NUL bytes from SMF FF 03 track/sequence names before emptiness check",
+      "source": "src/container/smf.rs",
+      "regression": "tests/wav_flac_mp3_smf_xm_playback.rs",
+      "before": "parse_meta in src/container/smf.rs kept trailing NUL bytes in FF 03 track/sequence names, so a NUL-only conductor track name (e.g. \"\\0\\0\") was treated as non-empty and shadowed real track names in subsequent tracks, and NUL-terminated names retained trailing '\\0'.",
+      "result": "Trim trailing '\\0' bytes from FF 03 payloads before checking !text.is_empty() in parse_meta.",
+      "status": "accepted",
+      "validation": "batch-580-validation.json"
+    },
+    {
+      "id": "FVID-0634",
+      "batch": 580,
+      "title": "Write final timeline row BPM and speed into XM release tail packet header",
+      "source": "src/container/xm.rs",
+      "regression": "tests/wav_flac_mp3_smf_xm_playback.rs",
+      "before": "Module::packet wrote the module header's initial self.bpm and self.speed into the release tail packet even when Fxx tempo/speed effects changed the active BPM and speed on the timeline, mismatched against the tail packet's duration_microseconds (which used the last timeline row).",
+      "result": "Use self.timeline.last().map_or((self.bpm, self.speed), |row| (row.bpm, row.speed)) when serializing the XM tail packet header in Module::packet.",
+      "status": "accepted",
+      "validation": "batch-580-validation.json"
     }
   ]
 }

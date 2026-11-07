@@ -515,9 +515,13 @@ impl Module {
             None => {
                 let tail = self.packet_time(index).1;
                 let length = u32::try_from(tail).unwrap_or(u32::MAX);
+                let (bpm, speed) = self
+                    .timeline
+                    .last()
+                    .map_or((self.bpm, self.speed), |row| (row.bpm, row.speed));
                 data.extend_from_slice(&length.to_le_bytes());
-                data.extend_from_slice(&self.bpm.to_le_bytes());
-                data.push(self.speed);
+                data.extend_from_slice(&bpm.to_le_bytes());
+                data.push(speed);
                 data.push(0);
                 data.resize(ROW_HEADER_BYTES + self.channels * CELL_BYTES, 0);
             }

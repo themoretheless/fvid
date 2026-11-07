@@ -4196,6 +4196,17 @@ See `batch-578-validation.json`.
 
 See `batch-579-validation.json`.
 
+## Batch 580 — FVID-0630..0634: `WAVEFORMATEXTENSIBLE` G.711 storage width validation in `Wav::parse`, FLAC and MP3 `AudioTrack` title/language population, SMF `FF 03` trailing NUL trimming, and XM tail packet tempo header consistency
+
+- **FVID-0630** — Require 8-bit storage and precision for `WAVEFORMATEXTENSIBLE` G.711 in `Wav::parse` (`src/playback/audio/wav.rs`, `tests/wav_flac_mp3_smf_xm_playback.rs`).
+- **FVID-0631** — Populate `AudioTrack` `name` and `language` from Vorbis comments in `FlacAudioReader::audio_tracks` (`src/playback/audio/flac.rs`, `tests/wav_flac_mp3_smf_xm_playback.rs`).
+- **FVID-0632** — Populate `AudioTrack` `name` and `language` from ID3 metadata in `Mp3AudioReader::audio_tracks` (`src/playback/audio/mp3.rs`, `tests/wav_flac_mp3_smf_xm_playback.rs`).
+- **FVID-0633** — Trim trailing NUL bytes from SMF `FF 03` track/sequence names before emptiness check (`src/container/smf.rs`, `tests/wav_flac_mp3_smf_xm_playback.rs`).
+- **FVID-0634** — Write final timeline row BPM and speed into XM release tail packet header (`src/container/xm.rs`, `tests/wav_flac_mp3_smf_xm_playback.rs`).
+
+See `batch-580-validation.json`.
+
+
 
 
 

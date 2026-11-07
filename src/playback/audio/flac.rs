@@ -69,11 +69,27 @@ impl AudioStream for FlacAudioReader {
     }
 
     fn audio_tracks(&self) -> Vec<AudioTrack> {
+        let mut name = String::new();
+        let mut language = String::new();
+        for (key, value) in fvid_media::owned_flac_layout::vorbis_comments(self.flac.metadata_blocks())
+            .into_iter()
+            .flatten()
+        {
+            let trimmed = value.trim_matches('\0');
+            if trimmed.is_empty() {
+                continue;
+            }
+            if key.eq_ignore_ascii_case("TITLE") && name.is_empty() {
+                name = trimmed.to_owned();
+            } else if key.eq_ignore_ascii_case("LANGUAGE") && language.is_empty() {
+                language = trimmed.to_owned();
+            }
+        }
         vec![AudioTrack {
             sample_rate: self.flac.sample_rate,
             channels: self.flac.channels,
-            name: String::new(),
-            language: String::new(),
+            name,
+            language,
         }]
     }
 

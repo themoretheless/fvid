@@ -1,0 +1,29 @@
+{
+  "status": "accepted",
+  "accepted_ids": [
+    "FVID-0630",
+    "FVID-0631",
+    "FVID-0632",
+    "FVID-0633",
+    "FVID-0634"
+  ],
+  "count_delta": 5,
+  "accepted_count": 634,
+  "next_id": "FVID-0635",
+  "qualification": [
+    {
+      "name": "wav-flac-mp3-smf-xm-playback",
+      "command": [
+        "cargo",
+        "test",
+        "--features",
+        "player",
+        "--test",
+        "wav_flac_mp3_smf_xm_playback"
+      ],
+      "exit_code": 0,
+      "passed": 5,
+      "ignored": 0
+    }
+  ]
+}
