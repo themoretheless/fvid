@@ -1,5 +1,6 @@
 use fvid_media::{
-    CopyOptions, decode_audio, decode_audio_transformed, measure_loudness, plan_decode_audio,
+    CopyOptions, apply_loudnorm, apply_loudnorm_dual, decode_audio, decode_audio_transformed,
+    measure_loudness, plan_decode_audio, plan_loudness, plan_loudnorm,
 };
 use fvid_media_info::AudioDecodeTransform;
 use std::path::Path;
@@ -129,4 +130,94 @@ fn standalone_packet_work_loudness_spool_and_float_wave_mix_reuse_open_handles()
     .unwrap();
     assert!(mix_stats.sample_frames > 0);
     std::fs::remove_dir_all(&dir).unwrap();
+}
+
+#[test]
+fn aac_routing_and_adts_container_loudnorm_reuse_readers_and_prefix_info() {
+    let root = Path::new(env!("CARGO_MANIFEST_DIR")).join("tests/fixtures");
+    let options = CopyOptions {
+        max_controlled_bytes: Some(64 * 1024 * 1024),
+        ..Default::default()
+    };
+    let fold_transform = AudioDecodeTransform {
+        channels: Some(1),
+        ..Default::default()
+    };
+
+    for rel in ["audio/aac-stereo.aac", "audio/aac-native-edit.m4a"] {
+        let source = root.join(rel);
+        let plan = plan_decode_audio(&source, &fold_transform, &options).unwrap();
+        assert_eq!(plan.command, "decode-audio");
+        let stem = source.file_stem().unwrap().to_string_lossy();
+        let out = std::env::temp_dir().join(format!(
+            "fvid-b645-fold-{stem}-{}.wav",
+            std::process::id()
+        ));
+        let _ = std::fs::remove_file(&out);
+        let stats = decode_audio_transformed(&source, &out, fold_transform, &options).unwrap();
+        assert_eq!(stats.channels, 1);
+        std::fs::remove_file(&out).unwrap();
+    }
+
+    let adts_source = root.join("audio/aac-stereo.aac");
+    let loud_plan = plan_loudness(&adts_source, &options).unwrap();
+    assert_eq!(loud_plan.command, "loudness");
+    for dual in [false, true] {
+        let norm_plan = plan_loudnorm(&adts_source, Some("I=-16"), dual, &options).unwrap();
+        assert_eq!(norm_plan.command, "loudnorm");
+        let out = std::env::temp_dir().join(format!(
+            "fvid-b645-adts-norm-{dual}-{}.wav",
+            std::process::id()
+        ));
+        let _ = std::fs::remove_file(&out);
+        let stats = if dual {
+            apply_loudnorm_dual(&adts_source, &out, Some("I=-16"), &options).unwrap()
+        } else {
+            apply_loudnorm(&adts_source, &out, Some("I=-16"), &options).unwrap()
+        };
+        assert!(stats.sample_frames > 0);
+        std::fs::remove_file(&out).unwrap();
+    }
+
+    let mp4_source = root.join("audio/aac-native-edit.m4a");
+    let container_plan = fvid_media::owned_container_loudnorm::try_plan_loudnorm(
+        &mp4_source,
+        Some("I=-16"),
+        true,
+        &options,
+    )
+    .unwrap()
+    .unwrap();
+    assert_eq!(container_plan.command, "loudnorm");
+    let out_mp4 = std::env::temp_dir().join(format!(
+        "fvid-b645-mp4-norm-{}.wav",
+        std::process::id()
+    ));
+    let _ = std::fs::remove_file(&out_mp4);
+    let container_stats = fvid_media::owned_container_loudnorm::try_apply(
+        &mp4_source,
+        &out_mp4,
+        Some("I=-16"),
+        true,
+        &options,
+    )
+    .unwrap()
+    .unwrap();
+    assert!(container_stats.sample_frames > 0);
+    std::fs::remove_file(&out_mp4).unwrap();
+
+    // Non-container inputs (ADTS and plain PCM WAVE) must still return Ok(None) from try_plan_loudnorm / try_apply
+    let pcm_wave = root.join("playback-errors/loudness-normalize-budget-parity/stereo-48k.wav");
+    for non_container in [&adts_source, &pcm_wave] {
+        assert!(
+            fvid_media::owned_container_loudnorm::try_plan_loudnorm(
+                non_container,
+                Some("I=-16"),
+                false,
+                &options
+            )
+            .unwrap()
+            .is_none()
+        );
+    }
 }

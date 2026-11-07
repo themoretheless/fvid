@@ -72,21 +72,28 @@ pub fn apply(
     let decode_options = crate::owned_adts_export::pcm_decode_options(options);
     // Read-only configuration/policy preflight; actual packet failures propagate
     // once execution starts, without retry through the legacy backend.
-    let (validated_rate, validated_channels, cached_reader) =
-        crate::owned_adts_loudness::validate_configuration_channels_and_reader(
+    let (validated_rate, validated_channels, validated_frames, cached_reader) =
+        crate::owned_adts_loudness::validate_configuration_channels_frames_and_reader(
             source,
             &decode_options,
         )?;
+    let mut known_info = validated_frames.map(|f| (validated_rate, validated_channels, f));
     if dual_pass || crate::owned_loudnorm::report_requested(Some(&resolved))? {
-        crate::owned_adts_loudness::plan_loudness_with_validated_rate(
+        let (_, metered_info) = crate::owned_adts_loudness::plan_loudness_with_validated_info(
             source,
             validated_rate,
+            known_info,
             &decode_options,
         )?;
+        known_info = metered_info;
     }
     let (rate, channels, stage2_frames) = if options.max_controlled_bytes.is_some() {
-        let desc = crate::owned_audio_plan::source_descriptor(source, &decode_options)?;
-        (desc.rate, desc.channels, desc.stage2_frames)
+        if let Some(info) = known_info {
+            info
+        } else {
+            let desc = crate::owned_audio_plan::source_descriptor(source, &decode_options)?;
+            (desc.rate, desc.channels, desc.stage2_frames)
+        }
     } else {
         (validated_rate, validated_channels, 1024)
     };
@@ -154,22 +161,33 @@ pub fn plan_loudnorm(
     // A generic decode plan also negotiates PCM by decoding the ADTS stream;
     // normalization planning must leave packet-content validity to execution.
     let decode_options = crate::owned_adts_export::pcm_decode_options(options);
-    let (validated_rate, channels) =
-        crate::owned_adts_loudness::validate_configuration_and_channels(source, &decode_options)?;
+    let (validated_rate, validated_channels, validated_frames, _) =
+        crate::owned_adts_loudness::validate_configuration_channels_frames_and_reader(
+            source,
+            &decode_options,
+        )?;
+    let mut known_info = validated_frames.map(|f| (validated_rate, validated_channels, f));
     let mut plan = if dual_pass || crate::owned_loudnorm::report_requested(Some(&resolved))? {
-        crate::owned_adts_loudness::plan_loudness_with_validated_rate(
+        let (plan, metered_info) = crate::owned_adts_loudness::plan_loudness_with_validated_info(
             source,
             validated_rate,
+            known_info,
             &decode_options,
-        )?
+        )?;
+        known_info = metered_info;
+        plan
     } else {
         crate::owned_adts_loudness::build_loudness_plan(source, &decode_options)
     };
     let (rate, channels, stage2_frames) = if options.max_controlled_bytes.is_some() {
-        let desc = crate::owned_audio_plan::source_descriptor(source, &decode_options)?;
-        (desc.rate, desc.channels, desc.stage2_frames)
+        if let Some(info) = known_info {
+            info
+        } else {
+            let desc = crate::owned_audio_plan::source_descriptor(source, &decode_options)?;
+            (desc.rate, desc.channels, desc.stage2_frames)
+        }
     } else {
-        (validated_rate, channels, 1024)
+        (validated_rate, validated_channels, 1024)
     };
     crate::owned_loudnorm::check_spool_loudnorm_budget(
         &resolved,

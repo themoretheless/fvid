@@ -118,8 +118,8 @@ pub(crate) fn validate_configuration_and_channels(
     source: &Path,
     options: &CopyOptions,
 ) -> Result<(u32, u16)> {
-    validate_configuration_channels_and_reader(source, options)
-        .map(|(rate, channels, _)| (rate, channels))
+    validate_configuration_channels_frames_and_reader(source, options)
+        .map(|(rate, channels, _, _)| (rate, channels))
 }
 pub(crate) fn validate_configuration_channels_and_reader(
     source: &Path,
@@ -127,6 +127,23 @@ pub(crate) fn validate_configuration_channels_and_reader(
 ) -> Result<(
     u32,
     u16,
+    Option<(
+        u32,
+        u16,
+        u32,
+        crate::owned_aac::adts::StreamReader<BufReader<File>>,
+    )>,
+)> {
+    validate_configuration_channels_frames_and_reader(source, options)
+        .map(|(rate, channels, _, reader)| (rate, channels, reader))
+}
+pub(crate) fn validate_configuration_channels_frames_and_reader(
+    source: &Path,
+    options: &CopyOptions,
+) -> Result<(
+    u32,
+    u16,
+    Option<u64>,
     Option<(
         u32,
         u16,
@@ -144,14 +161,15 @@ pub(crate) fn validate_configuration_channels_and_reader(
             return Ok((
                 header_rate,
                 header_channels,
+                None,
                 Some((header_rate, header_channels, header_mask, reader)),
             ));
         }
         validate_packet_budget(source, Some(reader), options)?;
-        return Ok((header_rate, header_channels, None));
+        return Ok((header_rate, header_channels, None, None));
     }
     validate_packet_budget(source, None, options)?;
-    let (rate, channels, mask, _) =
+    let (rate, channels, mask, frames) =
         crate::owned_aac::stream::adts_prefix_info_from_reader_for_transform(
             reader,
             None,
@@ -167,7 +185,7 @@ pub(crate) fn validate_configuration_channels_and_reader(
             "owned AAC true-peak measurement requires a qualified standard PCM rate".into(),
         );
     }
-    Ok((rate, channels, None))
+    Ok((rate, channels, Some(frames), None))
 }
 pub(crate) fn validate_configuration(source: &Path, options: &CopyOptions) -> Result<u32> {
     validate_configuration_and_channels(source, options).map(|(rate, _)| rate)
@@ -184,16 +202,27 @@ pub(crate) fn supports(source: &Path, options: &CopyOptions) -> bool {
         Err(error) => error.starts_with("controlled memory budget exceeded:"),
     }
 }
-fn check_meter_budget(source: &Path, rate: u32, options: &CopyOptions) -> Result<()> {
+pub(crate) fn check_meter_budget_with_known_info(
+    source: &Path,
+    rate: u32,
+    known_info: Option<(u32, u16, u64)>,
+    options: &CopyOptions,
+) -> Result<Option<(u32, u16, u64)>> {
     if let Some(limit) = options.max_controlled_bytes {
-        let (negotiated_rate, negotiated_channels, _, sample_frames) =
-            crate::owned_aac::stream::adts_prefix_info_for_transform(
-                BufReader::new(File::open(source).map_err(|e| e.to_string())?),
-                None,
-                None,
-                options,
-            )
-            .map_err(|e| e.to_string())?;
+        let (negotiated_rate, negotiated_channels, sample_frames) = match known_info {
+            Some(info) => info,
+            None => {
+                let (r, ch, _, frames) =
+                    crate::owned_aac::stream::adts_prefix_info_for_transform(
+                        BufReader::new(File::open(source).map_err(|e| e.to_string())?),
+                        None,
+                        None,
+                        options,
+                    )
+                    .map_err(|e| e.to_string())?;
+                (r, ch, frames)
+            }
+        };
         let eff_rate = if crate::owned_wave_loudness::qualified_rate(negotiated_rate) {
             negotiated_rate
         } else {
@@ -227,8 +256,12 @@ fn check_meter_budget(source: &Path, rate: u32, options: &CopyOptions) -> Result
                 "controlled memory budget exceeded: need {estimated} bytes"
             ));
         }
+        return Ok(Some((negotiated_rate, negotiated_channels, sample_frames)));
     }
-    Ok(())
+    Ok(known_info)
+}
+fn check_meter_budget(source: &Path, rate: u32, options: &CopyOptions) -> Result<()> {
+    check_meter_budget_with_known_info(source, rate, None, options).map(|_| ())
 }
 pub fn measure_loudness(source: &Path, options: &CopyOptions) -> Result<LoudnessStats> {
     let (header_rate, header_channels, mask, reader) =
@@ -330,10 +363,20 @@ pub(crate) fn plan_loudness_with_validated_rate(
     check_meter_budget(source, rate, options)?;
     Ok(build_loudness_plan(source, options))
 }
+pub(crate) fn plan_loudness_with_validated_info(
+    source: &Path,
+    rate: u32,
+    known_info: Option<(u32, u16, u64)>,
+    options: &CopyOptions,
+) -> Result<(MediaPlan, Option<(u32, u16, u64)>)> {
+    let info = check_meter_budget_with_known_info(source, rate, known_info, options)?;
+    Ok((build_loudness_plan(source, options), info))
+}
 
 pub fn plan_loudness(source: &Path, options: &CopyOptions) -> Result<MediaPlan> {
-    let rate = validate_configuration(source, options)?;
-    plan_loudness_with_validated_rate(source, rate, options)
+    let (rate, channels, frames, _) = validate_configuration_channels_frames_and_reader(source, options)?;
+    let known_info = frames.map(|f| (rate, channels, f));
+    plan_loudness_with_validated_info(source, rate, known_info, options).map(|(plan, _)| plan)
 }
 
 #[cfg(test)]

@@ -4814,3 +4814,12 @@ See `batch-628-validation.json`.
 - **FVID-0953**: Reuse the open `File` handle in `owned_container_loudness::decode_to_wave_from_geometry_with_info` and `recognizes_with_options` (`crates/fvid-media/src/owned_container_loudness.rs`).
 - **FVID-0954**: Reuse the open `File` handle in `owned_audio_plan::standalone_packet_work` and `owned_audio_mix::decode_owned_audio_with_controls` (`crates/fvid-media/src/owned_audio_plan.rs`).
 
+## Batch 645 (FVID-0955..0959)
+
+- **FVID-0955**: Reuse open MP4 and Matroska readers and `StereoRouter` across AAC spatial routing checks and export (`crates/fvid-media/src/owned_aac_export_routing.rs`).
+- **FVID-0956**: Reuse `AudioSpecificConfig` and open readers for AAC fold qualification in `owned_adts_export` and `owned_audio_plan` (`crates/fvid-media/src/owned_adts_export.rs`).
+- **FVID-0957**: Eliminate redundant `recognizes_with_options` pre-open in `owned_container_loudnorm::try_apply` and `try_plan_loudnorm` (`crates/fvid-media/src/owned_container_loudnorm.rs`).
+- **FVID-0958**: Reuse negotiated ADTS prefix geometry across `validate_configuration` and `check_meter_budget` in `owned_adts_loudness` (`crates/fvid-media/src/owned_adts_loudness.rs`).
+- **FVID-0959**: Reuse negotiated ADTS prefix geometry across meter and spool budget checks in `owned_adts_loudnorm` (`crates/fvid-media/src/owned_adts_loudnorm.rs`).
+
+

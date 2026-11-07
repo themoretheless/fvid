@@ -114,7 +114,7 @@ pub(crate) fn try_descriptor_with_frames_from_file_for_decode(
 ) -> Result<Option<(usize, u32, u16, u32, String, bool, u64, Vec<u8>)>> {
     try_descriptor_with_frames_and_target_from_file_for_decode(source, file, transform, options)
         .map(|opt| {
-            opt.map(|(index, rate, channels, mask, codec, precise, frames, info, _)| {
+            opt.map(|(index, rate, channels, mask, codec, precise, frames, info, _, _)| {
                 (index, rate, channels, mask, codec, precise, frames, info)
             })
         })
@@ -135,6 +135,7 @@ pub(crate) fn try_descriptor_with_frames_and_target_from_file_for_decode(
         u64,
         Vec<u8>,
         Option<(u32, u16, u32)>,
+        bool,
     )>,
 > {
     let reader = open_from_file(file, options)?;
@@ -151,8 +152,21 @@ pub(crate) fn try_descriptor_with_frames_and_target_from_file_for_decode(
         )?,
         None => None,
     };
+    let aac_fold = if target.is_none()
+        && codec == "aac"
+        && transform
+            .and_then(|t| t.channels)
+            .is_some_and(|output| output != i32::from(channels) && matches!(output, 1 | 2))
+    {
+        crate::owned_aac_export_routing::router_from_mp4_reader(
+            &mut reader, index, rate, channels, transform, options,
+        )?
+        .is_some()
+    } else {
+        false
+    };
     Ok(Some((
-        index, rate, channels, mask, codec, precise, frames, info, target,
+        index, rate, channels, mask, codec, precise, frames, info, target, aac_fold,
     )))
 }
 pub(crate) fn descriptor(
@@ -553,7 +567,7 @@ pub(crate) fn supports(
     )
 }
 fn supports_from_reader(
-    source: &Path,
+    _source: &Path,
     mut reader: crate::owned_mp4::Mp4Reader<BufReader<File>>,
     index: usize,
     transform: AudioDecodeTransform,
@@ -570,7 +584,24 @@ fn supports_from_reader(
         Err(e) => return e.starts_with("controlled memory budget exceeded:"),
     };
     let output = transform.channels.unwrap_or(i32::from(channels));
-    let aac_fold=if target.is_none() && output!=i32::from(channels)&&matches!(output,1|2){match crate::owned_aac_export_routing::router_for_decode(source,rate,channels,Some(transform),options){Ok(router)=>router.is_some(),Err(error)=>return error.starts_with("controlled memory budget exceeded:")}}else{false};
+    let aac_fold = if target.is_none()
+        && output != i32::from(channels)
+        && matches!(output, 1 | 2)
+    {
+        match crate::owned_aac_export_routing::router_from_mp4_reader(
+            &mut reader,
+            index,
+            rate,
+            channels,
+            Some(transform),
+            options,
+        ) {
+            Ok(router) => router.is_some(),
+            Err(error) => return error.starts_with("controlled memory budget exceeded:"),
+        }
+    } else {
+        false
+    };
     if target.is_none() && output != i32::from(channels) && !aac_fold
         && (!((channels <= 2 && (1..=8).contains(&output))
             || (channels <= 8 && matches!(output, 1 | 2)))
@@ -712,7 +743,7 @@ pub(crate) fn try_apply_from_file(
     .map(Some)
 }
 fn apply_from_descriptor_and_reader(
-    source: &Path,
+    _source: &Path,
     mut reader: crate::owned_mp4::Mp4Reader<BufReader<File>>,
     index: usize,
     destination: &Path,
@@ -740,19 +771,24 @@ fn apply_from_descriptor_and_reader(
     } else {
         source_frames
     };
-    let aac_fold = target.is_none()
+    let router = if target.is_none()
         && !precise
         && transform
             .channels
             .is_some_and(|output| output != i32::from(channels) && matches!(output, 1 | 2))
-        && crate::owned_aac_export_routing::router_for_decode(
-            source,
+    {
+        crate::owned_aac_export_routing::router_from_mp4_reader(
+            &mut reader,
+            index,
             rate,
             channels,
             Some(transform),
             options,
         )?
-        .is_some();
+    } else {
+        None
+    };
+    let aac_fold = router.is_some();
     crate::owned_adts_export::check_spool_wave_export_budget(
         rate,
         channels,
@@ -791,7 +827,13 @@ fn apply_from_descriptor_and_reader(
         },
     )?;
     crate::owned_ogg_opus_export::append_info(&spool.wave, &info)?;
-    crate::owned_aac_export_routing::export(source,spool,destination,transform,options)
+    crate::owned_aac_export_routing::export_with_router(
+        router,
+        spool,
+        destination,
+        transform,
+        options,
+    )
 }
 
 #[cfg(test)]

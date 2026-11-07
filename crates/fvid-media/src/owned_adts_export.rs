@@ -144,7 +144,7 @@ pub(crate) fn supports(
     supports_from_file(source, file, transform, options)
 }
 pub(crate) fn supports_from_file(
-    source: &Path,
+    _source: &Path,
     file: File,
     transform: AudioDecodeTransform,
     options: &CopyOptions,
@@ -174,9 +174,10 @@ pub(crate) fn supports_from_file(
             options,
         )?;
         let config = reader.configuration();
-        crate::owned_aac::stream::check_adts_decode_admission(reader.audio_specific_config(), options)
+        let asc = reader.audio_specific_config().to_vec();
+        crate::owned_aac::stream::check_adts_decode_admission(&asc, options)
             .map_err(|e| e.to_string())?;
-        let asc_mask = crate::owned_aac::NativeAacDecoder::new(reader.audio_specific_config())
+        let asc_mask = crate::owned_aac::NativeAacDecoder::new(&asc)
             .map_err(|e| e.to_string())?
             .channel_mask();
         let mut quiet = pcm_decode_options(options);
@@ -189,13 +190,32 @@ pub(crate) fn supports_from_file(
             &quiet,
         )
         .map_err(|e| e.to_string())?;
-        let output=transform.channels.unwrap_or(i32::from(stats.channels));
-        if output!=i32::from(stats.channels){
-            if matches!(output,1|2){
-                if crate::owned_aac_export_routing::router_for_decode(source,stats.sample_rate,stats.channels,Some(transform),&quiet)?.is_none(){return Err("AAC speaker routing is absent".into());}
-            }else{
-                let mask=if config.channels==1&&stats.channels==2{3}else{asc_mask};
-                if stats.channels>2||!(1..=8).contains(&output)||!crate::owned_pcm_channels::standard_mask(stats.channels).is_some_and(|m|m==u64::from(mask)){return Err("unsupported channel conversion".into());}
+        let output = transform.channels.unwrap_or(i32::from(stats.channels));
+        if output != i32::from(stats.channels) {
+            if matches!(output, 1 | 2) {
+                if crate::owned_aac_export_routing::router_from_asc(
+                    &asc,
+                    stats.sample_rate,
+                    stats.channels,
+                    &quiet,
+                )?
+                .is_none()
+                {
+                    return Err("AAC speaker routing is absent".into());
+                }
+            } else {
+                let mask = if config.channels == 1 && stats.channels == 2 {
+                    3
+                } else {
+                    asc_mask
+                };
+                if stats.channels > 2
+                    || !(1..=8).contains(&output)
+                    || !crate::owned_pcm_channels::standard_mask(stats.channels)
+                        .is_some_and(|m| m == u64::from(mask))
+                {
+                    return Err("unsupported channel conversion".into());
+                }
             }
         }
         Ok(())
@@ -347,8 +367,28 @@ pub(crate) fn apply_from_file(
             std::time::Duration::from_micros(to as u64),
         )
     });
-    let spool = decode_to_wave_from_file_with_rate(file, prefix, transform.sample_rate, options)?;
-    crate::owned_aac_export_routing::export(source,spool,destination,transform,options)
+    let (spool, asc) =
+        decode_to_wave_and_asc_from_file_with_rate(file, prefix, transform.sample_rate, options)?;
+    let router = if transform
+        .channels
+        .is_some_and(|output| output != i32::from(spool.stats.channels) && matches!(output, 1 | 2))
+    {
+        crate::owned_aac_export_routing::router_from_asc(
+            &asc,
+            spool.stats.sample_rate,
+            spool.stats.channels,
+            options,
+        )?
+    } else {
+        None
+    };
+    crate::owned_aac_export_routing::export_with_router(
+        router,
+        spool,
+        destination,
+        transform,
+        options,
+    )
 }
 
 pub(crate) fn export_spool(
@@ -421,6 +461,15 @@ fn decode_to_wave_from_file_with_rate(
     output_rate: Option<i32>,
     options: &CopyOptions,
 ) -> Result<DecodedSpool> {
+    decode_to_wave_and_asc_from_file_with_rate(file, interval, output_rate, options)
+        .map(|(spool, _)| spool)
+}
+fn decode_to_wave_and_asc_from_file_with_rate(
+    file: File,
+    interval: Option<(std::time::Duration, std::time::Duration)>,
+    output_rate: Option<i32>,
+    options: &CopyOptions,
+) -> Result<(DecodedSpool, Vec<u8>)> {
     if options.cancel.as_ref().is_some_and(|c| c.is_cancelled()) {
         return Err("media operation cancelled".into());
     }
@@ -442,7 +491,8 @@ fn decode_to_wave_from_file_with_rate(
     )
     .map_err(|e| e.to_string())?;
     let config = reader.configuration();
-    crate::owned_aac::stream::check_adts_decode_admission(reader.audio_specific_config(), options)
+    let asc = reader.audio_specific_config().to_vec();
+    crate::owned_aac::stream::check_adts_decode_admission(&asc, options)
         .map_err(|e| e.to_string())?;
     let interval = interval.map(|(from, to)| {
         (
@@ -450,17 +500,18 @@ fn decode_to_wave_from_file_with_rate(
             to + adts_resample_lookahead(config.sample_rate, output_rate),
         )
     });
-    let mask = crate::owned_aac::NativeAacDecoder::new(reader.audio_specific_config())
+    let mask = crate::owned_aac::NativeAacDecoder::new(&asc)
         .map_err(|e| e.to_string())?
         .channel_mask();
-    decode_reader_to_wave(
+    let spool = decode_reader_to_wave(
         reader,
         config.sample_rate,
         config.channels,
         mask,
         interval,
         options,
-    )
+    )?;
+    Ok((spool, asc))
 }
 
 pub(crate) fn decode_reader_to_wave(

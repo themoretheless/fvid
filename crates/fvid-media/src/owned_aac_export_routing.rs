@@ -16,6 +16,126 @@ pub(crate) fn router(
 ) -> Result<Option<StereoRouter>> {
     router_for_decode(source, rate, channels, None, options)
 }
+pub(crate) fn router_from_mp4_reader<R: Read + Seek>(
+    reader: &mut crate::owned_mp4::Mp4Reader<R>,
+    index: usize,
+    rate: u32,
+    channels: u16,
+    transform: Option<AudioDecodeTransform>,
+    options: &CopyOptions,
+) -> Result<Option<StereoRouter>> {
+    check(options)?;
+    if reader.tracks()[index]
+        .description_for_sample(0)
+        .is_none_or(|s| s.codec != *b"mp4a")
+    {
+        return Ok(None);
+    }
+    let interval = transform.and_then(|t| crate::owned_adts_export::decoded_prefix(t, rate));
+    crate::owned_mp4_audio::admit_audio_reader_with_interval(
+        reader, index, interval, options, None,
+    )
+    .map_err(|e| e.to_string())?;
+    if let Some((normalized_rate, normalized_channels, mask)) =
+        crate::owned_mp4_audio::mp4_normalized_geometry_controlled_with_interval(
+            reader,
+            index,
+            interval,
+            options.max_packets,
+            || {
+                if options.cancel.as_ref().is_some_and(|c| c.is_cancelled()) {
+                    return Err(crate::owned_matroska_audio::invalid(
+                        "media operation cancelled",
+                    ));
+                }
+                crate::owned_budget::check_rss_budget(options)
+                    .map_err(|e| crate::owned_matroska_audio::invalid(&e))
+            },
+        )
+        .map_err(|e| e.to_string())?
+    {
+        if rate != normalized_rate || channels != normalized_channels {
+            return Err("MP4 normalized spool geometry mismatch".into());
+        }
+        return StereoRouter::new(channels, mask).map(Some);
+    }
+    let track = &reader.tracks()[index];
+    let active_samples = crate::owned_mp4_audio::mp4_active_samples(
+        track,
+        reader.movie_timescale(),
+        interval,
+        options.max_packets,
+    );
+    let first = track.samples.get(0).ok_or("MP4 audio has no samples")?;
+    let setup = track
+        .decoder_setup(first.description_index)
+        .map_err(|e| e.to_string())?;
+    if setup.codec != *b"mp4a" {
+        return Ok(None);
+    }
+    let mut router: Option<StereoRouter> = None;
+    for (i, description) in track.sample_descriptions.iter().enumerate() {
+        if !(0..active_samples).any(|n| {
+            track
+                .samples
+                .get(n)
+                .is_some_and(|s| s.description_index as usize == i + 1)
+        }) {
+            continue;
+        }
+        if description.codec != *b"mp4a" {
+            return Err(
+                "mixed-codec MP4 speaker routing requires per-configuration routing".into(),
+            );
+        }
+        let asc = crate::owned_codec_config::aac_specific_config(&description.configuration)
+            .map_err(|e| e.to_string())?;
+        let parsed =
+            crate::owned_aac::config::AudioSpecificConfig::parse(asc).map_err(|e| e.to_string())?;
+        let next = crate::owned_aac::speaker_routing::stereo_router(
+            asc,
+            rate,
+            channels,
+            channels == 2 && parsed.core.channels == 1,
+        )?;
+        if router.as_ref().is_some_and(|previous| *previous != next) {
+            return Err(
+                "MP4 AAC speaker routing changes require per-configuration routing".into(),
+            );
+        }
+        router = Some(next);
+    }
+    Ok(router)
+}
+pub(crate) fn router_from_matroska_reader<R: Read + Seek>(
+    reader: &mut crate::owned_webm::WebmReader<R>,
+    index: usize,
+    rate: u32,
+    channels: u16,
+    transform: Option<AudioDecodeTransform>,
+    options: &CopyOptions,
+) -> Result<Option<StereoRouter>> {
+    check(options)?;
+    if reader.tracks[index].codec != "A_AAC" {
+        return Ok(None);
+    }
+    let interval = transform.and_then(|t| crate::owned_adts_export::decoded_prefix(t, rate));
+    crate::owned_matroska_audio::admit_audio_reader_with_interval(reader, index, interval, options)
+        .map_err(|e| e.to_string())?;
+    router_from_asc(&reader.tracks[index].codec_private, rate, channels, options)
+}
+pub(crate) fn router_from_asc(
+    asc: &[u8],
+    rate: u32,
+    channels: u16,
+    options: &CopyOptions,
+) -> Result<Option<StereoRouter>> {
+    check(options)?;
+    let parsed =
+        crate::owned_aac::config::AudioSpecificConfig::parse(asc).map_err(|e| e.to_string())?;
+    let ps = channels == 2 && parsed.core.channels == 1;
+    crate::owned_aac::speaker_routing::stereo_router(asc, rate, channels, ps).map(Some)
+}
 pub(crate) fn router_for_decode(
     source: &Path,
     rate: u32,
@@ -56,44 +176,7 @@ pub(crate) fn router_for_decode(
         reader.restrict_packet_bytes(options.max_packet_bytes);
         let index = crate::owned_mp4_audio::mp4_audio_index(&reader, selected)
             .map_err(|e| e.to_string())?;
-        if reader.tracks()[index].description_for_sample(0).is_none_or(|s|s.codec!=*b"mp4a") {return Ok(None);}
-        let interval = transform.and_then(|t| crate::owned_adts_export::decoded_prefix(t, rate));
-        crate::owned_mp4_audio::admit_audio_reader_with_interval(&reader,index,interval,options,None).map_err(|e|e.to_string())?;
-        if let Some((normalized_rate,normalized_channels,mask))=crate::owned_mp4_audio::mp4_normalized_geometry_controlled_with_interval(
-            &mut reader,
-            index,
-            interval,
-            options.max_packets,
-            || {
-                if options.cancel.as_ref().is_some_and(|c| c.is_cancelled()) {
-                    return Err(crate::owned_matroska_audio::invalid("media operation cancelled"));
-                }
-                crate::owned_budget::check_rss_budget(options)
-                    .map_err(|e| crate::owned_matroska_audio::invalid(&e))
-            },
-        )
-        .map_err(|e|e.to_string())? {
-            if rate!=normalized_rate||channels!=normalized_channels {return Err("MP4 normalized spool geometry mismatch".into());}
-            return StereoRouter::new(channels,mask).map(Some);
-        }
-        let track = &reader.tracks()[index];
-        let active_samples = crate::owned_mp4_audio::mp4_active_samples(track, reader.movie_timescale(), interval, options.max_packets);
-        let first = track.samples.get(0).ok_or("MP4 audio has no samples")?;
-        let setup = track.decoder_setup(first.description_index).map_err(|e|e.to_string())?;
-        if setup.codec != *b"mp4a" { return Ok(None); }
-        let mut router: Option<StereoRouter> = None;
-        for (i, description) in track.sample_descriptions.iter().enumerate() {
-            if !(0..active_samples).any(|n| track.samples.get(n).is_some_and(|s| s.description_index as usize == i+1)) { continue; }
-            if description.codec != *b"mp4a" { return Err("mixed-codec MP4 speaker routing requires per-configuration routing".into()); }
-            let asc = crate::owned_codec_config::aac_specific_config(&description.configuration).map_err(|e|e.to_string())?;
-            let parsed = crate::owned_aac::config::AudioSpecificConfig::parse(asc).map_err(|e|e.to_string())?;
-            let next = crate::owned_aac::speaker_routing::stereo_router(asc, rate, channels, channels == 2 && parsed.core.channels == 1)?;
-            if router.as_ref().is_some_and(|previous| *previous != next) {
-                return Err("MP4 AAC speaker routing changes require per-configuration routing".into());
-            }
-            router = Some(next);
-        }
-        return Ok(router);
+        return router_from_mp4_reader(&mut reader, index, rate, channels, transform, options);
     } else if n >= 4 && prefix[..4] == [0x1a, 0x45, 0xdf, 0xa3] {
         file.seek(SeekFrom::Start(0)).map_err(|e| e.to_string())?;
         let mut reader = crate::owned_matroska_audio::open_aac_reader(
@@ -104,13 +187,7 @@ pub(crate) fn router_for_decode(
         .map_err(|e| e.to_string())?;
         let index = crate::owned_matroska_audio::matroska_audio_index(&reader, selected)
             .map_err(|e| e.to_string())?;
-        if reader.tracks[index].codec != "A_AAC" {
-            return Ok(None);
-        }
-        let interval = transform.and_then(|t| crate::owned_adts_export::decoded_prefix(t, rate));
-        crate::owned_matroska_audio::admit_audio_reader_with_interval(&mut reader, index, interval, options)
-            .map_err(|e| e.to_string())?;
-        reader.tracks[index].codec_private.clone()
+        return router_from_matroska_reader(&mut reader, index, rate, channels, transform, options);
     } else if crate::owned_aac::adts::header(&prefix[..n]).is_some() {
         if selected.is_some_and(|i| i != 0) {
             return Err("ADTS has only stream 0".into());
@@ -132,10 +209,7 @@ pub(crate) fn router_for_decode(
     } else {
         return Ok(None);
     };
-    let parsed =
-        crate::owned_aac::config::AudioSpecificConfig::parse(&asc).map_err(|e| e.to_string())?;
-    let ps = channels == 2 && parsed.core.channels == 1;
-    crate::owned_aac::speaker_routing::stereo_router(&asc, rate, channels, ps).map(Some)
+    router_from_asc(&asc, rate, channels, options)
 }
 fn check(options: &CopyOptions) -> Result<()> {
     if options.cancel.as_ref().is_some_and(|c| c.is_cancelled()) {
@@ -154,7 +228,7 @@ fn check(options: &CopyOptions) -> Result<()> {
 }
 pub(crate) fn export(
     source: &Path,
-    mut spool: crate::owned_adts_export::DecodedSpool,
+    spool: crate::owned_adts_export::DecodedSpool,
     destination: &Path,
     transform: AudioDecodeTransform,
     options: &CopyOptions,
@@ -163,15 +237,28 @@ pub(crate) fn export(
     let fold = transform
         .channels
         .is_some_and(|output| output != i32::from(spool.stats.channels) && matches!(output, 1 | 2));
-    if fold
-        && let Some(router) = router_for_decode(
+    let router = if fold {
+        router_for_decode(
             source,
             spool.stats.sample_rate,
             spool.stats.channels,
             Some(transform),
             options,
         )?
-    {
+    } else {
+        None
+    };
+    export_with_router(router, spool, destination, transform, options)
+}
+pub(crate) fn export_with_router(
+    router: Option<StereoRouter>,
+    mut spool: crate::owned_adts_export::DecodedSpool,
+    destination: &Path,
+    transform: AudioDecodeTransform,
+    options: &CopyOptions,
+) -> Result<AudioDecodeStats> {
+    check(options)?;
+    if let Some(router) = router {
         check(options)?;
         let mut input = File::open(&spool.wave).map_err(|e| e.to_string())?;
         let info = crate::owned_wave_inspect::inspect(&mut input, options.cancel.as_ref())

@@ -63,12 +63,6 @@ pub fn try_apply(
     {
         return Ok(None);
     }
-    let decode_options = crate::owned_adts_export::pcm_decode_options(options);
-    if !crate::owned_container_loudness::recognizes_with_options(source, &decode_options)
-        .unwrap_or(false)
-    {
-        return Ok(None);
-    }
     match apply(source, destination, args, dual_pass, options) {
         Ok(stats) => Ok(Some(stats)),
         Err(error)
@@ -92,12 +86,6 @@ pub fn try_plan_loudnorm(
     options: &CopyOptions,
 ) -> Result<Option<MediaPlan>> {
     if !policies(options) || crate::owned_loudnorm::validate_request(args).is_err() {
-        return Ok(None);
-    }
-    let decode_options = crate::owned_adts_export::pcm_decode_options(options);
-    if !crate::owned_container_loudness::recognizes_with_options(source, &decode_options)
-        .unwrap_or(false)
-    {
         return Ok(None);
     }
     match plan_loudnorm(source, args, dual_pass, options) {
@@ -143,6 +131,15 @@ pub fn apply(
         &Default::default(),
         options,
     )?;
+    if desc.adts
+        || !(desc.mp4
+            || desc.is_matroska
+            || desc.raw_encoded_audio
+            || desc.ogg
+            || desc.g711_wave)
+    {
+        return Err("source is not an owned audio container".into());
+    }
     let decode_options = crate::owned_adts_export::pcm_decode_options(options);
     let (rate, channels, mask, codec) = (
         desc.rate,
@@ -245,6 +242,15 @@ pub fn plan_loudnorm(
         &Default::default(),
         options,
     )?;
+    if desc.adts
+        || !(desc.mp4
+            || desc.is_matroska
+            || desc.raw_encoded_audio
+            || desc.ogg
+            || desc.g711_wave)
+    {
+        return Err("source is not an owned audio container".into());
+    }
     let (rate, channels, mask, codec) = (
         desc.rate,
         desc.channels,

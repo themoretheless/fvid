@@ -68,7 +68,7 @@ pub(crate) fn supports_from_reader<R: Read + std::io::Seek>(
     transform: AudioDecodeTransform,
     options: &CopyOptions,
 ) -> bool {
-    let (rate, channels, mask, _, _, reader) =
+    let (rate, channels, mask, _, _, mut reader) =
         match geometry_and_reader_for_decode(source, reader, index, Some(transform), options) {
             Ok(geometry) => geometry,
             Err(error) => return error.starts_with("controlled memory budget exceeded:"),
@@ -76,8 +76,9 @@ pub(crate) fn supports_from_reader<R: Read + std::io::Seek>(
     if let Some(target) = transform.channels {
         if target != i32::from(channels) {
             let aac_fold = if matches!(target, 1 | 2) {
-                match crate::owned_aac_export_routing::router_for_decode(
-                    source,
+                match crate::owned_aac_export_routing::router_from_matroska_reader(
+                    &mut reader,
+                    index,
                     rate,
                     channels,
                     Some(transform),
@@ -173,19 +174,24 @@ pub(crate) fn apply_from_reader<R: Read + std::io::Seek>(
     if destination.symlink_metadata().is_ok() {
         return Err("output already exists".into());
     }
-    let (rate, channels, mask, frames, info, reader) =
+    let (rate, channels, mask, frames, info, mut reader) =
         geometry_and_reader_for_decode(source, reader, index, Some(transform), options)?;
-    let aac_fold = transform
+    let router = if transform
         .channels
         .is_some_and(|output| output != i32::from(channels) && matches!(output, 1 | 2))
-        && crate::owned_aac_export_routing::router_for_decode(
-            source,
+    {
+        crate::owned_aac_export_routing::router_from_matroska_reader(
+            &mut reader,
+            index,
             rate,
             channels,
             Some(transform),
             options,
         )?
-        .is_some();
+    } else {
+        None
+    };
+    let aac_fold = router.is_some();
     crate::owned_adts_export::check_spool_wave_export_budget(
         rate,
         channels,
@@ -212,7 +218,13 @@ pub(crate) fn apply_from_reader<R: Read + std::io::Seek>(
         },
     )?;
     crate::owned_ogg_opus_export::append_info(&spool.wave, &info)?;
-    crate::owned_aac_export_routing::export(source,spool,destination,transform,options)
+    crate::owned_aac_export_routing::export_with_router(
+        router,
+        spool,
+        destination,
+        transform,
+        options,
+    )
 }
 
 pub(crate) fn geometry(source: &Path, options: &CopyOptions) -> Result<(u32, u16, u32)> {
@@ -271,7 +283,7 @@ pub(crate) fn geometry_from_reader_for_decode<R: Read + std::io::Seek>(
     Ok((rate, channels, mask, estimated_frames, info))
 }
 
-fn geometry_and_reader_for_decode<R: Read + std::io::Seek>(
+pub(crate) fn geometry_and_reader_for_decode<R: Read + std::io::Seek>(
     source: &Path,
     mut reader: crate::owned_webm::WebmReader<R>,
     index: usize,

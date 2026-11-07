@@ -13,14 +13,14 @@ pub(crate) fn matroska_descriptor(
     options: &CopyOptions,
 ) -> Result<Option<(usize, u32, u16, u32, String, String)>> {
     matroska_descriptor_for_decode(source, None, options)
-        .map(|opt| opt.map(|(index, rate, channels, mask, codec, precision, _, _)| (index, rate, channels, mask, codec, precision)))
+        .map(|opt| opt.map(|(index, rate, channels, mask, codec, precision, _, _, _)| (index, rate, channels, mask, codec, precision)))
 }
 
 pub(crate) fn matroska_descriptor_for_decode(
     source: &Path,
     transform: Option<AudioDecodeTransform>,
     options: &CopyOptions,
-) -> Result<Option<(usize, u32, u16, u32, String, String, u64, Vec<u8>)>> {
+) -> Result<Option<(usize, u32, u16, u32, String, String, u64, Vec<u8>, bool)>> {
     use std::io::{Seek, SeekFrom};
     let mut file = File::open(source).map_err(|e| e.to_string())?;
     let mut prefix = [0; 4];
@@ -36,7 +36,7 @@ pub(crate) fn matroska_descriptor_from_file_for_decode(
     file: File,
     transform: Option<AudioDecodeTransform>,
     options: &CopyOptions,
-) -> Result<(usize, u32, u16, u32, String, String, u64, Vec<u8>)> {
+) -> Result<(usize, u32, u16, u32, String, String, u64, Vec<u8>, bool)> {
     let reader = crate::owned_matroska_audio::open_audio_reader(
         BufReader::new(file),
         options,
@@ -51,6 +51,7 @@ pub(crate) fn matroska_descriptor_from_file_for_decode(
     let index = crate::owned_matroska_audio::matroska_audio_index(&reader, selected)
         .map_err(|e| e.to_string())?;
     let source_codec = reader.tracks[index].codec.clone();
+    let mut aac_fold = false;
     let (rate, channels, mask, codec, precision, frames, info) = match source_codec.as_str() {
         "A_FLAC" => {
             let (rate, channels, mask, frames, info) =
@@ -68,10 +69,19 @@ pub(crate) fn matroska_descriptor_from_file_for_decode(
             )
         }
         "A_AAC" => {
-            let (rate, channels, mask, frames, info) =
-                crate::owned_matroska_aac_export::geometry_from_reader_for_decode(
+            let (rate, channels, mask, frames, info, mut reader) =
+                crate::owned_matroska_aac_export::geometry_and_reader_for_decode(
                     source, reader, index, transform, options,
                 )?;
+            if transform
+                .and_then(|t| t.channels)
+                .is_some_and(|output| output != i32::from(channels) && matches!(output, 1 | 2))
+            {
+                aac_fold = crate::owned_aac_export_routing::router_from_matroska_reader(
+                    &mut reader, index, rate, channels, transform, options,
+                )?
+                .is_some();
+            }
             (rate, channels, mask, "aac".into(), "float32".into(), frames, info)
         }
         "A_OPUS" => {
@@ -146,7 +156,7 @@ pub(crate) fn matroska_descriptor_from_file_for_decode(
         }
         _ => return Err("selected Matroska audio codec is not owned by the export path".into()),
     };
-    Ok((index, rate, channels, mask, codec, precision, frames, info))
+    Ok((index, rate, channels, mask, codec, precision, frames, info, aac_fold))
 }
 /// Admit only plans accepted by the owned metadata preflight.
 /// This does not decode packets, create a destination, or emit progress.
@@ -171,6 +181,7 @@ pub(crate) struct AudioDescriptor {
     pub(crate) adts: bool,
     pub(crate) mp4: bool,
     pub(crate) mp4_target: Option<(u32, u16, u32)>,
+    pub(crate) aac_fold: bool,
     pub(crate) is_matroska: bool,
     pub(crate) raw_encoded_audio: bool,
     pub(crate) ogg: bool,
@@ -373,6 +384,7 @@ fn source_descriptor_for_decode(source: &Path, options: &CopyOptions,
     let mut stage2_meta_bytes = 0;
     let mut stage2_info = None;
     let mut mp4_target = None;
+    let mut aac_fold = false;
     let (rate, channels, mask, codec, precision) = if let Some((rate, channels, mask, codec, frames, info_len)) = g711_desc {
         stage2_frames = frames;
         stage2_meta_bytes = info_len;
@@ -390,23 +402,25 @@ fn source_descriptor_for_decode(source: &Path, options: &CopyOptions,
         stage2_frames = frames;
         stage2_meta_bytes = info_len;
         (rate, channels, mask, codec.to_owned(), "float32".to_owned())
-    } else if let Some((index, rate, channels, mask, codec, precise, frames, info, target)) = mp4_desc {
+    } else if let Some((index, rate, channels, mask, codec, precise, frames, info, target, fold)) = mp4_desc {
         stream_index = index;
         stage2_frames = frames;
         stage2_meta_bytes = info.len();
         stage2_info = Some(info);
         mp4_target = target;
+        aac_fold = fold;
         let precision = if precise || codec.starts_with("pcm_") {
             "float64"
         } else {
             "float32"
         };
         (rate, channels, mask, codec, precision.to_owned())
-    } else if let Some((index, rate, channels, mask, codec, precision, frames, info)) = matroska {
+    } else if let Some((index, rate, channels, mask, codec, precision, frames, info, fold)) = matroska {
         stream_index = index;
         stage2_frames = frames;
         stage2_meta_bytes = info.len();
         stage2_info = Some(info);
+        aac_fold = fold;
         (rate, channels, mask, codec, precision)
     } else if raw_flac {
         let mut file = head_file.take().unwrap();
@@ -464,6 +478,7 @@ fn source_descriptor_for_decode(source: &Path, options: &CopyOptions,
             options,
         )?;
         let config = reader.configuration();
+        let asc = reader.audio_specific_config().to_vec();
         let prefix = transform.and_then(|transform|
             crate::owned_adts_export::decoded_prefix(*transform, config.sample_rate));
         let (rate, channels, mask, frames) =
@@ -474,6 +489,17 @@ fn source_descriptor_for_decode(source: &Path, options: &CopyOptions,
                 options,
             )
             .map_err(|e| e.to_string())?;
+        if transform
+            .and_then(|t| t.channels)
+            .is_some_and(|output| output != i32::from(channels) && matches!(output, 1 | 2))
+        {
+            crate::owned_aac::stream::check_adts_decode_admission(&asc, options)
+                .map_err(|e| e.to_string())?;
+            aac_fold = crate::owned_aac_export_routing::router_from_asc(
+                &asc, rate, channels, options,
+            )?
+            .is_some();
+        }
         stage2_frames = frames;
         (
             rate,
@@ -587,7 +613,7 @@ fn source_descriptor_for_decode(source: &Path, options: &CopyOptions,
     };
     Ok(AudioDescriptor {
         rate, channels, mask, codec, precision, stream_index,
-        adts, mp4, mp4_target, is_matroska, raw_encoded_audio, ogg, g711_wave,
+        adts, mp4, mp4_target, aac_fold, is_matroska, raw_encoded_audio, ogg, g711_wave,
         stage2_frames, stage2_meta_bytes, stage2_info,
     })
 }
@@ -624,11 +650,10 @@ pub(crate) fn plan_decode_audio_with_descriptor(
     let descriptor = source_descriptor_for_decode(source, options, Some(transform))?;
     let AudioDescriptor {
         rate, channels, mask, codec, precision, stream_index,
-        adts, mp4, mp4_target, is_matroska, raw_encoded_audio, ogg, g711_wave,
+        adts, mp4, mp4_target, aac_fold, is_matroska, raw_encoded_audio, ogg, g711_wave,
         stage2_frames, stage2_meta_bytes, stage2_info: _,
     } = descriptor.clone();
     let output_channels = transform.channels.unwrap_or(i32::from(channels));
-    let aac_fold=mp4_target.is_none()&&codec=="aac"&&output_channels!=i32::from(channels)&&matches!(output_channels,1|2)&&crate::owned_aac_export_routing::router_for_decode(source,rate,channels,Some(*transform),options)?.is_some();
     if mp4_target.is_none() && output_channels != i32::from(channels) && !aac_fold {
         if !((channels <= 8 && matches!(output_channels, 1 | 2))
             || (channels <= 2 && (1..=8).contains(&output_channels)))

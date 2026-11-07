@@ -1,8 +1,8 @@
 {
   "target": 1000,
   "counting_rule": "One independently confirmed problem or useful capability; fixture variants and baseline integration repairs are excluded. Only accepted entries count.",
-  "accepted_count": 954,
-  "next_id": "FVID-0955",
+  "accepted_count": 959,
+  "next_id": "FVID-0960",
   "entries": [
     {
       "id": "FVID-0001",
@@ -10685,6 +10685,61 @@
       "result": "Added open_source_head in owned_audio_plan and forwarded the rewound File handle into try_packet_work_from_file, open_selected_ogg_from_file, open_from_file, and read_wave_from_file_with_admission.",
       "status": "accepted",
       "validation": "batch-644-validation.json"
+    },
+    {
+      "id": "FVID-0955",
+      "batch": 645,
+      "title": "Reuse open MP4 and Matroska readers and StereoRouter across AAC spatial routing checks and export",
+      "source": "crates/fvid-media/src/owned_aac_export_routing.rs",
+      "regression": "tests/ogg_flac_mp3_and_export_handle_reuse.rs",
+      "before": "MP4 and Matroska AAC exports and supports() called router_for_decode(source, ...) to check spatial fold eligibility (reopening and re-indexing the container) and then called owned_aac_export_routing::export(source, ...) which reopened and re-indexed the container a second time.",
+      "result": "Added router_from_mp4_reader, router_from_matroska_reader, and export_with_router in owned_aac_export_routing so MP4 and Matroska AAC exports and supports() evaluate and reuse StereoRouter directly from the open reader.",
+      "status": "accepted",
+      "validation": "batch-645-validation.json"
+    },
+    {
+      "id": "FVID-0956",
+      "batch": 645,
+      "title": "Reuse AudioSpecificConfig and open readers for AAC fold qualification in owned_adts_export and owned_audio_plan",
+      "source": "crates/fvid-media/src/owned_adts_export.rs",
+      "regression": "tests/ogg_flac_mp3_and_export_handle_reuse.rs",
+      "before": "owned_adts_export::supports_from_file, owned_adts_export::apply_from_file, and owned_audio_plan::plan_decode_audio_with_descriptor reopened the source file via router_for_decode to check AAC speaker routing fold eligibility after already opening the ADTS/MP4/Matroska reader.",
+      "result": "Added router_from_asc in owned_aac_export_routing, returned the AudioSpecificConfig from decode_to_wave_and_asc_from_file_with_rate in owned_adts_export, and computed aac_fold during source_descriptor_for_decode in owned_audio_plan.",
+      "status": "accepted",
+      "validation": "batch-645-validation.json"
+    },
+    {
+      "id": "FVID-0957",
+      "batch": 645,
+      "title": "Eliminate redundant recognizes_with_options pre-open in owned_container_loudnorm::try_apply and try_plan_loudnorm",
+      "source": "crates/fvid-media/src/owned_container_loudnorm.rs",
+      "regression": "tests/ogg_flac_mp3_and_export_handle_reuse.rs",
+      "before": "owned_container_loudnorm::try_apply and try_plan_loudnorm opened source via recognizes_with_options before calling apply / plan_loudnorm, which immediately reopened the file in plan_decode_audio_with_descriptor.",
+      "result": "Validated container ownership directly on the AudioDescriptor returned by plan_decode_audio_with_descriptor in owned_container_loudnorm::apply and plan_loudnorm and removed the redundant pre-open in try_apply and try_plan_loudnorm.",
+      "status": "accepted",
+      "validation": "batch-645-validation.json"
+    },
+    {
+      "id": "FVID-0958",
+      "batch": 645,
+      "title": "Reuse negotiated ADTS prefix geometry across validate_configuration and check_meter_budget in owned_adts_loudness",
+      "source": "crates/fvid-media/src/owned_adts_loudness.rs",
+      "regression": "tests/ogg_flac_mp3_and_export_handle_reuse.rs",
+      "before": "owned_adts_loudness::plan_loudness decoded the ADTS prefix in validate_configuration when the header clock was unqualified and then decoded the ADTS prefix a second time in check_meter_budget when max_controlled_bytes was set.",
+      "result": "Added validate_configuration_channels_frames_and_reader and check_meter_budget_with_known_info to preserve and reuse negotiated (rate, channels, sample_frames) across ADTS loudness preflight and meter budget checks.",
+      "status": "accepted",
+      "validation": "batch-645-validation.json"
+    },
+    {
+      "id": "FVID-0959",
+      "batch": 645,
+      "title": "Reuse negotiated ADTS prefix geometry across meter and spool budget checks in owned_adts_loudnorm",
+      "source": "crates/fvid-media/src/owned_adts_loudnorm.rs",
+      "regression": "tests/ogg_flac_mp3_and_export_handle_reuse.rs",
+      "before": "owned_adts_loudnorm::apply and plan_loudnorm decoded the ADTS stream in plan_loudness_with_validated_rate and then decoded the ADTS stream a second time via owned_audio_plan::source_descriptor when max_controlled_bytes was set.",
+      "result": "Returned negotiated (rate, channels, sample_frames) from plan_loudness_with_validated_info and reused it for check_spool_loudnorm_budget in owned_adts_loudnorm::apply and plan_loudnorm without calling source_descriptor again.",
+      "status": "accepted",
+      "validation": "batch-645-validation.json"
     }
   ],
   "pending_count": 126

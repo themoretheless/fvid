@@ -240,7 +240,7 @@ pub fn geometry_with_frames_unqualified(
             head_file
                 .seek(SeekFrom::Start(0))
                 .map_err(|e| e.to_string())?;
-            let (index, rate, channels, mask, codec, _, frames, info) =
+            let (index, rate, channels, mask, codec, _, frames, info, _) =
                 crate::owned_audio_plan::matroska_descriptor_from_file_for_decode(
                     source, head_file, None, options,
                 )?;
