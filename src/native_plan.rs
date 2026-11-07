@@ -450,6 +450,31 @@ pub fn remux_with_options(
     source: &std::path::Path,
     options: &fvid_media::CopyOptions,
 ) -> Result<Option<MediaPlan>> {
+    if options.cancel.as_ref().is_some_and(|c| c.is_cancelled()) {
+        return Err("media operation cancelled".into());
+    }
+    if options.max_packet_bytes == 0 {
+        return Err("packet byte limit must be positive".into());
+    }
+    if options.max_packets == Some(0) {
+        return Err("packet work limit requires at least one packet".into());
+    }
+    if options.max_controlled_bytes == Some(0) {
+        return Err("controlled memory limit must be positive".into());
+    }
+    fvid_media::owned_budget::check_rss_budget(options)?;
+    remux_from_file_with_options(
+        source,
+        std::fs::File::open(source).map_err(|e| e.to_string())?,
+        options,
+    )
+}
+
+pub(crate) fn remux_from_file_with_options(
+    source: &std::path::Path,
+    mut file: std::fs::File,
+    options: &fvid_media::CopyOptions,
+) -> Result<Option<MediaPlan>> {
     use std::io::{Read, Seek, SeekFrom};
     if options.cancel.as_ref().is_some_and(|c| c.is_cancelled()) {
         return Err("media operation cancelled".into());
@@ -464,7 +489,8 @@ pub fn remux_with_options(
         return Err("controlled memory limit must be positive".into());
     }
     fvid_media::owned_budget::check_rss_budget(options)?;
-    let mut input = std::io::BufReader::new(std::fs::File::open(source).map_err(|e| e.to_string())?);
+    file.seek(SeekFrom::Start(0)).map_err(|e| e.to_string())?;
+    let mut input = std::io::BufReader::new(file);
     let mut signature = [0; 8];
     let mut count = 0;
     while count < signature.len() {
@@ -681,6 +707,38 @@ pub fn remux_adts_with_options(
         return Err("controlled memory budget exceeded".into());
     }
     let file = std::fs::File::open(source).map_err(|e| e.to_string())?;
+    remux_adts_from_file_with_options(source, file, options)
+}
+
+pub(crate) fn remux_adts_from_file_with_options(
+    source: &std::path::Path,
+    mut file: std::fs::File,
+    options: &fvid_media::CopyOptions,
+) -> Result<MediaPlan> {
+    use std::io::{Seek, SeekFrom};
+    if options.cancel.as_ref().is_some_and(|c| c.is_cancelled()) {
+        return Err("media operation cancelled".into());
+    }
+    if options.max_packet_bytes == 0 {
+        return Err("packet byte limit must be positive".into());
+    }
+    if options.max_packets == Some(0) {
+        return Err("packet work limit requires at least one packet".into());
+    }
+    if options.max_controlled_bytes == Some(0) {
+        return Err("controlled memory limit must be positive".into());
+    }
+    fvid_media::owned_budget::check_rss_budget(options)?;
+    let meta_bytes =
+        crate::container::matroska_write::estimate_adts_matroska_metadata_bytes(Some(options))
+            .map_err(|e| e.to_string())?;
+    if options
+        .max_controlled_bytes
+        .is_some_and(|limit| 16384usize.saturating_add(meta_bytes) > limit)
+    {
+        return Err("controlled memory budget exceeded".into());
+    }
+    file.seek(SeekFrom::Start(0)).map_err(|e| e.to_string())?;
     let mut reader = crate::container::adts::StreamReader::open_with_packet_limit(
         std::io::BufReader::new(file),
         options
@@ -2476,11 +2534,24 @@ pub fn decode_overlay_with_geometry_and_filters(
     geometry: &crate::native_geometry::VideoGeometry,
     filters: &crate::native_pixels::PixelFilters,
 ) -> Result<MediaPlan> {
-    let info = crate::native_probe::probe(source)?;
+    let source_file = std::fs::File::open(source).map_err(|e| e.to_string())?;
+    let probe_file = source_file.try_clone();
+    let info = match probe_file {
+        Ok(dup) => crate::native_probe::probe_from_file(source, dup)?,
+        Err(_) => crate::native_probe::probe(source)?,
+    };
     if !info.streams.iter().any(|s| s.media_type == "video") {
         return Err("decode overlay requires main video and exactly one foreground video track".into());
     }
-    crate::native_export::TimedOverlay::validate_pair_with_geometry_and_filters(source, foreground, x, y, geometry, filters).map_err(|e| {
+    crate::native_export::TimedOverlay::validate_pair_from_main_file_with_geometry_and_filters(
+        source_file,
+        foreground,
+        x,
+        y,
+        geometry,
+        filters,
+    )
+    .map_err(|e| {
         let msg = e.to_string();
         if msg == "foreground requires exactly one video track" {
             "decode overlay requires main video and exactly one foreground video track".into()

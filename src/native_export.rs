@@ -2328,6 +2328,55 @@ pub fn remux_adts_aac_with_options(
     )
 }
 
+pub(crate) fn remux_adts_aac_from_file_with_options(
+    mut file: File,
+    destination: &Path,
+    options: &fvid_media::CopyOptions,
+) -> Result<crate::media_control::ProgressEvent> {
+    use std::io::{Seek, SeekFrom};
+    if options
+        .cancel
+        .as_ref()
+        .is_some_and(crate::media_control::CancelFlag::is_cancelled)
+    {
+        return Err(invalid("media operation cancelled"));
+    }
+    if options.max_packet_bytes == 0 {
+        return Err(invalid("packet byte limit must be positive"));
+    }
+    if options.max_packets == Some(0) {
+        return Err(invalid("packet work limit requires at least one packet"));
+    }
+    if options.max_controlled_bytes == Some(0) {
+        return Err(invalid("controlled memory limit must be positive"));
+    }
+    fvid_media::owned_budget::check_rss_budget(options).map_err(|e| invalid(&e))?;
+    if destination.symlink_metadata().is_ok() {
+        return Err(invalid("output already exists"));
+    }
+    if options
+        .max_controlled_bytes
+        .is_some_and(|limit| limit < 16384)
+    {
+        return Err(invalid("controlled memory budget exceeded"));
+    }
+    file.seek(SeekFrom::Start(0))?;
+    let input = crate::container::adts::StreamReader::open_with_packet_limit(
+        BufReader::new(file),
+        options
+            .max_packet_bytes
+            .min(options.max_controlled_bytes.unwrap_or(usize::MAX)),
+    )?;
+    publish_adts_readers_limited(
+        vec![input],
+        destination,
+        options.cancel.as_ref(),
+        options.progress.as_ref(),
+        options.max_packets,
+        Some(options),
+    )
+}
+
 /// Content detection for the owned ADTS concat route.
 pub fn is_adts_source(source: &Path) -> Result<bool> {
     use std::io::Read;
@@ -2506,7 +2555,32 @@ pub fn remux_mp4_stats_with_memory_limit(
     if destination.symlink_metadata().is_ok() {
         return Err(invalid("MP4 relocate destination already exists"));
     }
-    let mut input=BufReader::new(File::open(source)?);
+    remux_mp4_stats_from_file_with_memory_limit(
+        File::open(source)?,
+        destination,
+        cancel,
+        progress,
+        max_controlled_bytes,
+    )
+}
+
+pub(crate) fn remux_mp4_stats_from_file_with_memory_limit(
+    mut file: File,
+    destination: &Path,
+    cancel: Option<&crate::media_control::CancelFlag>,
+    progress: Option<&crate::media_control::ProgressHook>,
+    max_controlled_bytes: Option<usize>,
+) -> Result<crate::media_control::ProgressEvent> {
+    use std::io::{Seek, SeekFrom};
+    if cancel.is_some_and(|flag| flag.is_cancelled()) { return Err(invalid("media operation cancelled")); }
+    if max_controlled_bytes == Some(0) {
+        return Err(invalid("controlled memory limit must be positive"));
+    }
+    if destination.symlink_metadata().is_ok() {
+        return Err(invalid("MP4 relocate destination already exists"));
+    }
+    file.seek(SeekFrom::Start(0))?;
+    let mut input=BufReader::new(file);
     let directory=destination.parent().filter(|p|!p.as_os_str().is_empty()).unwrap_or(Path::new("."));
     let (temporary,file)=(0..100).find_map(|_| {
         let path=directory.join(format!(".fvid-relocate-{}-{}.tmp",std::process::id(),NEXT.fetch_add(1,Ordering::Relaxed)));
@@ -2724,11 +2798,23 @@ pub fn is_native_mp4_matroska_with_memory_limit(source: &Path, max_controlled_by
     if max_controlled_bytes == Some(0) {
         return Err(invalid("controlled memory limit must be positive"));
     }
+    is_native_mp4_matroska_from_file_with_memory_limit(&mut File::open(source)?, max_controlled_bytes)
+}
+
+pub(crate) fn is_native_mp4_matroska_from_file_with_memory_limit(
+    file: &mut File,
+    max_controlled_bytes: Option<usize>,
+) -> Result<bool> {
+    use std::io::{Seek, SeekFrom};
+    if max_controlled_bytes == Some(0) {
+        return Err(invalid("controlled memory limit must be positive"));
+    }
+    file.seek(SeekFrom::Start(0))?;
     let mut limits = crate::container::mp4::Limits::default();
     if let Some(limit) = max_controlled_bytes {
         limits.metadata_bytes = limits.metadata_bytes.min(limit);
     }
-    let input = crate::container::mp4::Mp4Reader::open(BufReader::new(File::open(source)?), limits)?;
+    let input = crate::container::mp4::Mp4Reader::open(BufReader::new(file), limits)?;
     if let Some(limit) = max_controlled_bytes
         && input.estimated_index_payload_bytes()? > limit
     {
@@ -2742,6 +2828,42 @@ pub fn remux_mp4_matroska(source: &Path, destination: &Path,
     cancel: Option<&crate::media_control::CancelFlag>, progress: Option<&crate::media_control::ProgressHook>,
 ) -> Result<crate::media_control::ProgressEvent> {
     remux_mp4_matroska_inner(source, destination, cancel, progress, false)
+}
+pub(crate) fn remux_mp4_matroska_from_file(
+    mut file: File,
+    destination: &Path,
+    cancel: Option<&crate::media_control::CancelFlag>,
+    progress: Option<&crate::media_control::ProgressHook>,
+) -> Result<crate::media_control::ProgressEvent> {
+    use std::io::{Seek, SeekFrom};
+    if cancel.is_some_and(|c| c.is_cancelled()) { return Err(invalid("media operation cancelled")); }
+    if !matches!(destination.extension().and_then(|s| s.to_str()), Some("mka" | "mkv")) {
+        return Err(invalid("Matroska remux output requires .mka or .mkv"));
+    }
+    if destination.symlink_metadata().is_ok() {
+        return Err(invalid("Matroska remux destination already exists"));
+    }
+    file.seek(SeekFrom::Start(0))?;
+    let mut input = crate::container::mp4::Mp4Reader::open(BufReader::new(file), Default::default())?;
+    let directory = destination.parent().filter(|p| !p.as_os_str().is_empty()).unwrap_or(Path::new("."));
+    let (temporary, out_file) = (0..100).find_map(|_| {
+        let path = directory.join(format!(".fvid-mka-{}-{}.tmp", std::process::id(), NEXT.fetch_add(1, Ordering::Relaxed)));
+        match OpenOptions::new().write(true).create_new(true).open(&path) {
+            Ok(file) => Some(Ok((Temporary(path), file))),
+            Err(error) if error.kind() == std::io::ErrorKind::AlreadyExists => None,
+            Err(error) => Some(Err(error)),
+        }
+    }).ok_or_else(|| invalid("cannot reserve Matroska output"))??;
+    let mut output = BufWriter::new(out_file);
+    let event = crate::container::mp4_matroska::write(&mut input, &mut output, cancel, progress)?;
+    output.flush()?;
+    output.get_ref().sync_all()?;
+    drop(output);
+    if cancel.is_some_and(|c| c.is_cancelled()) { return Err(invalid("media operation cancelled")); }
+    std::fs::hard_link(&temporary.0, destination)?;
+    let event = crate::media_control::ProgressEvent { done: true, ..event };
+    if let Some(hook) = progress { hook.emit(event); }
+    Ok(event)
 }
 fn remux_mp4_matroska_inner(source: &Path, destination: &Path,
     cancel: Option<&crate::media_control::CancelFlag>, progress: Option<&crate::media_control::ProgressHook>, aac_only: bool,
@@ -2937,7 +3059,41 @@ pub fn remux_matroska_with_packet_and_memory_limits(
     if destination.symlink_metadata().is_ok() {
         return Err(invalid("Matroska copy destination already exists"));
     }
-    let mut input=BufReader::new(File::open(source)?);
+    remux_matroska_from_file_with_packet_and_memory_limits(
+        File::open(source)?,
+        destination,
+        cancel,
+        progress,
+        packet_bytes,
+        max_controlled_bytes,
+    )
+}
+
+pub(crate) fn remux_matroska_from_file_with_packet_and_memory_limits(
+    mut source_file: File,
+    destination: &Path,
+    cancel: Option<&crate::media_control::CancelFlag>,
+    progress: Option<&crate::media_control::ProgressHook>,
+    packet_bytes: usize,
+    max_controlled_bytes: Option<usize>,
+) -> Result<crate::media_control::ProgressEvent> {
+    use std::io::{Seek, SeekFrom};
+    let audio_only=match destination.extension().and_then(|s|s.to_str()) {
+        Some("mkv")=>false, Some("mka")=>true,
+        _=>return Err(invalid("native Matroska copy output requires .mkv or .mka")),
+    };
+    if cancel.is_some_and(|c|c.is_cancelled()) {return Err(invalid("media operation cancelled"));}
+    if packet_bytes == 0 {
+        return Err(invalid("packet byte limit must be positive"));
+    }
+    if max_controlled_bytes == Some(0) {
+        return Err(invalid("controlled memory limit must be positive"));
+    }
+    if destination.symlink_metadata().is_ok() {
+        return Err(invalid("Matroska copy destination already exists"));
+    }
+    source_file.seek(SeekFrom::Start(0))?;
+    let mut input=BufReader::new(source_file);
     let directory=destination.parent().filter(|p|!p.as_os_str().is_empty()).unwrap_or(Path::new("."));
     let (temporary,file)=(0..100).find_map(|_| {
         let path=directory.join(format!(".fvid-matroska-copy-{}-{}.tmp",std::process::id(),NEXT.fetch_add(1,Ordering::Relaxed)));

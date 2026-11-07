@@ -4854,5 +4854,14 @@ See `batch-628-validation.json`.
 - **FVID-0978**: Reuse open `File` handle across structure scan and stream probe in `native_plan::remux_with_options` (`src/native_plan.rs`).
 - **FVID-0979**: Reuse open `File` handle across `open_source_head` and WAVE/standalone loudnorm qualification and planning in `native_loudnorm` (`src/native_loudnorm.rs`).
 
+## Batch 650 (FVID-0980..0984)
+
+- **FVID-0980**: Reuse open `File` handle across `is_owned_audio_source_with_interval_and_options`, `is_owned_audio_trim_source_with_interval_and_options`, and `inspect_audio_source_selected` (`src/native_media.rs`).
+- **FVID-0981**: Reuse open `File` handle and remove redundant `constant_audio_source_info_selected_with_options` double scans in `native_audio_mix` (`src/native_audio_mix.rs`).
+- **FVID-0982**: Reuse open `File` handle across 12-byte prefix inspection and audio route qualification in `media::uses_native_audio_route` (`src/media.rs`).
+- **FVID-0983**: Reuse open `File` handle across 8-byte prefix inspection, MP4 budget validation, and `remux`/`plan_remux` execution (`src/media.rs`).
+- **FVID-0984**: Reuse open `File` handles across `probe` and `NativeReader::software` in `overlay::Source::open` and `native_plan::decode_overlay_with_geometry_and_filters` (`src/native_export/overlay.rs`).
+
+
 
 

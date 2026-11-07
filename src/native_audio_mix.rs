@@ -164,28 +164,15 @@ fn validate_and_inspect_source_with_options(
             ));
         }
         Ok((info.sample_rate, info.channels, info.channel_mask))
-    } else if {
-        drop(wave_file);
-        false
-    } {
-        unreachable!()
     } else if options.max_controlled_bytes.is_none()
-        && let Ok(info) = crate::native_media::constant_audio_source_info_selected_with_options(
-            source,
-            None,
-            &strip_output_controls(options),
-        )
+        && let Ok(info) =
+            crate::native_media::constant_audio_source_info_selected_from_file_with_interval_and_options(
+                wave_file,
+                None,
+                None,
+                &strip_output_controls(options),
+            )
     {
-        let mask = info
-            .channel_mask
-            .unwrap_or(crate::native_export::default_pcm_mask(info.channels)?);
-        Ok((info.sample_rate, info.channels, mask))
-    } else if options.max_controlled_bytes.is_none()
-        && crate::native_media::is_owned_audio_source_with_options(source, options)?
-    {
-        let probe_opts = strip_output_controls(options);
-        let info = crate::native_media::constant_audio_source_info_selected_with_options(source, None, &probe_opts)
-            .map_err(|e| invalid(&e.to_string()))?;
         let mask = info
             .channel_mask
             .unwrap_or(crate::native_export::default_pcm_mask(info.channels)?);
@@ -247,8 +234,8 @@ pub(crate) fn decode_source_to_f32le_with_options(
     if options.max_controlled_bytes.is_none() {
         let mut wave_file = File::open(source)?;
         let is_wave = crate::native_pcm::is_wave_reader(&mut wave_file)?;
-        drop(wave_file);
         if is_wave {
+            drop(wave_file);
             let mut export_opts = clean_opts;
             export_opts.progress = None;
             return crate::native_export::export_audio_pcm_transformed_with_controls(
@@ -261,11 +248,14 @@ pub(crate) fn decode_source_to_f32le_with_options(
                 &export_opts,
             );
         }
-        if let Ok(info) = crate::native_media::constant_audio_source_info_selected_with_options(
-            source,
-            None,
-            &clean_opts,
-        ) {
+        if let Ok(info) =
+            crate::native_media::constant_audio_source_info_selected_from_file_with_interval_and_options(
+                wave_file,
+                None,
+                None,
+                &clean_opts,
+            )
+        {
             let mut export_opts = clean_opts;
             export_opts.progress = None;
             if export_opts.streams.is_empty() {
@@ -368,14 +358,17 @@ pub fn eligible_with_options(
             {
                 return Ok(false);
             }
-        } else if {
+        } else if options.max_controlled_bytes.is_none()
+            && let Ok(dup) = wave_file.try_clone()
+            && crate::native_media::constant_audio_source_info_selected_from_file_with_interval_and_options(
+                dup,
+                None,
+                None,
+                &clean_opts,
+            )
+            .is_ok()
+        {
             drop(wave_file);
-            options.max_controlled_bytes.is_none()
-        } && let Ok(_) = crate::native_media::constant_audio_source_info_selected_with_options(
-            source,
-            None,
-            &clean_opts,
-        ) {
             if crate::native_probe::try_probe_metadata_with_options(source, &clean_opts)
                 .is_ok_and(|probe| {
                     probe.is_some_and(|p| {
@@ -385,7 +378,14 @@ pub fn eligible_with_options(
             {
                 return Ok(false);
             }
-        } else if crate::native_media::is_owned_audio_source_with_options(source, &clean_opts)? {
+        } else if crate::native_media::is_owned_audio_source_from_file_with_interval_and_options(
+            wave_file,
+            None,
+            &clean_opts,
+        )? {
+            if options.max_controlled_bytes.is_none() {
+                return Ok(false);
+            }
             let Ok(_) = crate::native_media::constant_audio_source_info_selected_with_options(source, None, &clean_opts) else {
                 return Ok(false);
             };

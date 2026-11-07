@@ -1,8 +1,8 @@
 {
   "target": 1000,
   "counting_rule": "One independently confirmed problem or useful capability; fixture variants and baseline integration repairs are excluded. Only accepted entries count.",
-  "accepted_count": 979,
-  "next_id": "FVID-0980",
+  "accepted_count": 984,
+  "next_id": "FVID-0985",
   "entries": [
     {
       "id": "FVID-0001",
@@ -10960,7 +10960,62 @@
       "result": "Used open_source_head and reused the open File handle across recognizes_standalone_from_file_and_head, native_pcm::inspect, supports_request_from_file, and plan_wave_loudnorm_from_file.",
       "status": "accepted",
       "validation": "batch-649-validation.json"
+    },
+    {
+      "id": "FVID-0980",
+      "batch": 650,
+      "title": "Reuse open File handle across is_owned_audio_source_with_interval_and_options, is_owned_audio_trim_source_with_interval_and_options, and inspect_audio_source_selected",
+      "source": "src/native_media.rs",
+      "regression": "tests/audio_route_remux_and_overlay_handle_reuse.rs",
+      "before": "is_owned_audio_source_with_interval_and_options, is_owned_audio_trim_source_with_interval_and_options, and inspect_audio_source_selected opened the source to read an 8-byte prefix, dropped the File handle, and reopened the source 1 to 2 times in constant_audio_source_info_selected_with_interval_and_options, is_aac_source_with_metadata_limit, or aac_source_info_selected_with_options.",
+      "result": "Added is_aac_source_from_file_with_metadata_limit, aac_source_info_selected_from_reader_with_options, constant_audio_source_info_selected_from_file_with_interval_and_options, is_owned_audio_source_from_file_with_interval_and_options, and is_owned_audio_trim_source_from_file_with_interval_and_options to reuse the open File handle across prefix checks and format inspection.",
+      "status": "accepted",
+      "validation": "batch-650-validation.json"
+    },
+    {
+      "id": "FVID-0981",
+      "batch": 650,
+      "title": "Reuse open File handle and remove redundant constant_audio_source_info_selected_with_options double scans in native_audio_mix",
+      "source": "src/native_audio_mix.rs",
+      "regression": "tests/audio_route_remux_and_overlay_handle_reuse.rs",
+      "before": "validate_and_inspect_source_with_options, decode_source_to_f32le_with_options, and eligible_with_options opened each source for is_wave_reader, dropped the File handle, and on non-WAVE inputs called constant_audio_source_info_selected_with_options and then is_owned_audio_source_with_options followed by constant_audio_source_info_selected_with_options a second time.",
+      "result": "Reused the open File handle across is_wave_reader and constant_audio_source_info_selected_from_file_with_interval_and_options and eliminated the redundant second constant_audio_source_info_selected_with_options scan when max_controlled_bytes is None.",
+      "status": "accepted",
+      "validation": "batch-650-validation.json"
+    },
+    {
+      "id": "FVID-0982",
+      "batch": 650,
+      "title": "Reuse open File handle across 12-byte prefix inspection and audio route qualification in media::uses_native_audio_route",
+      "source": "src/media.rs",
+      "regression": "tests/audio_route_remux_and_overlay_handle_reuse.rs",
+      "before": "uses_native_audio_route opened source to read the 12-byte prefix and inspect MP4 track headers, dropped the File handle, and immediately reopened source in constant_audio_source_info_selected_with_interval_and_options or is_owned_audio_trim_source_with_interval_and_options.",
+      "result": "Passed the open File handle from uses_native_audio_route directly to constant_audio_source_info_selected_from_file_with_interval_and_options or is_owned_audio_trim_source_from_file_with_interval_and_options.",
+      "status": "accepted",
+      "validation": "batch-650-validation.json"
+    },
+    {
+      "id": "FVID-0983",
+      "batch": 650,
+      "title": "Reuse open File handle across 8-byte prefix inspection, MP4 budget validation, and remux/plan_remux execution in media.rs, native_plan.rs, and native_export.rs",
+      "source": "src/media.rs",
+      "regression": "tests/audio_route_remux_and_overlay_handle_reuse.rs",
+      "before": "media::remux and media::plan_remux opened source to read the 8-byte prefix, dropped the File handle, and reopened source 1 to 2 more times across is_native_mp4_matroska_with_memory_limit, validate_mp4_packet_budget, remux exporters, or native_plan::remux_with_options.",
+      "result": "Added from_file helpers across native_export and native_plan and reused the open File handle across prefix inspection, MP4 budget checks, and remux/plan_remux execution.",
+      "status": "accepted",
+      "validation": "batch-650-validation.json"
+    },
+    {
+      "id": "FVID-0984",
+      "batch": 650,
+      "title": "Reuse open File handles across probe and NativeReader::software in overlay::Source::open and native_plan::decode_overlay_with_geometry_and_filters",
+      "source": "src/native_export/overlay.rs",
+      "regression": "tests/audio_route_remux_and_overlay_handle_reuse.rs",
+      "before": "overlay::Source::open and native_plan::decode_overlay_with_geometry_and_filters called native_probe::probe(path) and then reopened the same main and foreground files for NativeReader::software.",
+      "result": "Added probe_from_file and validate_pair_from_main_file_with_geometry_and_filters and reused the open main and foreground File handles across probing and NativeReader::software.",
+      "status": "accepted",
+      "validation": "batch-650-validation.json"
     }
   ],
-  "pending_count": 121
+  "pending_count": 116
 }

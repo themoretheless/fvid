@@ -416,6 +416,10 @@ fn try_y4m_from_file_with_options(
 pub fn probe(source: &Path) -> Result<MediaInfo> {
     probe_as(source, None)
 }
+pub(crate) fn probe_from_file(source: &Path, file: File) -> Result<MediaInfo> {
+    try_probe_from_file_with_options(source, file, None, &fvid_media::CopyOptions::default())?
+        .ok_or_else(|| "native probe does not yet support this container".into())
+}
 pub(crate) fn probe_with_options(
     source: &Path,
     options: &fvid_media::CopyOptions,
@@ -497,7 +501,19 @@ pub(crate) fn try_probe_as_with_options(
         Some("aac") | None => {}
         Some(_) => return Ok(None),
     }
-    let mut file = File::open(source).map_err(|e| e.to_string())?;
+    let file = File::open(source).map_err(|e| e.to_string())?;
+    try_probe_from_file_with_options(source, file, format, options)
+}
+
+pub(crate) fn try_probe_from_file_with_options(
+    source: &Path,
+    mut file: File,
+    format: Option<&str>,
+    options: &fvid_media::CopyOptions,
+) -> Result<Option<MediaInfo>> {
+    use std::io::{Read, Seek, SeekFrom};
+    validate_probe_options(options)?;
+    file.seek(SeekFrom::Start(0)).map_err(|e| e.to_string())?;
     let mut signature = [0; 12];
     // Read up to twelve bytes, retaining a valid seven-byte ADTS header at EOF.
     let mut count = 0;

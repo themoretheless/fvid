@@ -57,7 +57,13 @@ fn picture(reader: &mut NativeReader<BufReader<File>>) -> Result<Option<Picture>
 }
 impl Source {
     fn open(path: &Path) -> Result<Self> {
-        let info = crate::native_probe::probe(path).map_err(|e| invalid(&e))?;
+        use std::io::{Seek, SeekFrom};
+        let file = File::open(path)?;
+        let probe_file = file.try_clone();
+        let info = match probe_file {
+            Ok(dup) => crate::native_probe::probe_from_file(path, dup).map_err(|e| invalid(&e))?,
+            Err(_) => crate::native_probe::probe(path).map_err(|e| invalid(&e))?,
+        };
         if info
             .streams
             .iter()
@@ -67,7 +73,9 @@ impl Source {
         {
             return Err(invalid("foreground requires exactly one video track"));
         }
-        let mut reader = NativeReader::software(BufReader::new(File::open(path)?), usize::MAX)?;
+        let mut file = file;
+        file.seek(SeekFrom::Start(0))?;
+        let mut reader = NativeReader::software(BufReader::new(file), usize::MAX)?;
         let current =
             picture(&mut reader)?.ok_or_else(|| invalid("foreground has no video frames"))?;
         let origin = current.pts;
@@ -197,8 +205,23 @@ impl TimedOverlay {
         geometry: &VideoGeometry,
         filters: &crate::native_pixels::PixelFilters,
     ) -> Result<()> {
+        let main_file = File::open(main)?;
+        Self::validate_pair_from_main_file_with_geometry_and_filters(
+            main_file, foreground, x, y, geometry, filters,
+        )
+    }
+    pub(crate) fn validate_pair_from_main_file_with_geometry_and_filters(
+        mut main_file: File,
+        foreground: &Path,
+        x: i64,
+        y: i64,
+        geometry: &VideoGeometry,
+        filters: &crate::native_pixels::PixelFilters,
+    ) -> Result<()> {
+        use std::io::{Seek, SeekFrom};
         let mut compositor = Self::new(foreground, x, y)?;
-        let mut main_reader = NativeReader::software(BufReader::new(File::open(main)?), usize::MAX)?;
+        main_file.seek(SeekFrom::Start(0))?;
+        let mut main_reader = NativeReader::software(BufReader::new(main_file), usize::MAX)?;
         let first_frame = main_reader
             .read_frame_raw()?
             .ok_or_else(|| invalid("main input has no frames"))?;

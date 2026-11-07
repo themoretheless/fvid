@@ -465,14 +465,27 @@ pub fn is_aac_source(path: &std::path::Path) -> std::io::Result<bool> {
 
 /// Bound MP4 metadata while inspecting an audio route with copy controls.
 pub fn is_aac_source_with_metadata_limit(path: &std::path::Path, max_controlled_bytes: Option<usize>) -> std::io::Result<bool> {
-    use std::io::Read;
     if max_controlled_bytes == Some(0) {
         return Err(std::io::Error::new(
             std::io::ErrorKind::InvalidInput,
             "controlled memory limit must be positive",
         ));
     }
-    let mut file = std::fs::File::open(path)?;
+    is_aac_source_from_file_with_metadata_limit(std::fs::File::open(path)?, max_controlled_bytes)
+}
+
+pub(crate) fn is_aac_source_from_file_with_metadata_limit(
+    mut file: std::fs::File,
+    max_controlled_bytes: Option<usize>,
+) -> std::io::Result<bool> {
+    use std::io::{Read, Seek, SeekFrom};
+    if max_controlled_bytes == Some(0) {
+        return Err(std::io::Error::new(
+            std::io::ErrorKind::InvalidInput,
+            "controlled memory limit must be positive",
+        ));
+    }
+    file.seek(SeekFrom::Start(0))?;
     let mut prefix = [0; 8];
     match file.read_exact(&mut prefix) {
         Ok(()) if prefix.starts_with(&[0x1a, 0x45, 0xdf, 0xa3]) => {
@@ -581,7 +594,7 @@ pub fn aac_source_info_selected_with_options(
     interval: Option<(Duration, Duration)>,
     options: &fvid_media::CopyOptions,
 ) -> Result<AacSourceInfo> {
-    use std::io::{BufReader, Read, Seek, SeekFrom};
+    use std::io::BufReader;
     if options
         .cancel
         .as_ref()
@@ -605,7 +618,19 @@ pub fn aac_source_info_selected_with_options(
         options.max_packets,
     )?;
     control.check()?;
-    let mut input = BufReader::new(std::fs::File::open(source)?);
+    let input = BufReader::new(std::fs::File::open(source)?);
+    aac_source_info_selected_from_reader_with_options(input, selected, interval, options, &mut control)
+}
+
+fn aac_source_info_selected_from_reader_with_options(
+    mut input: std::io::BufReader<std::fs::File>,
+    selected: Option<usize>,
+    interval: Option<(Duration, Duration)>,
+    options: &fvid_media::CopyOptions,
+    control: &mut DecodeProgress<'_>,
+) -> Result<AacSourceInfo> {
+    use std::io::{Read, Seek, SeekFrom};
+    input.seek(SeekFrom::Start(0))?;
     let mut prefix = [0; 8];
     input.read_exact(&mut prefix)?;
     input.seek(SeekFrom::Start(0))?;
@@ -707,7 +732,7 @@ pub fn aac_source_info_selected_with_options(
                 .max_packet_bytes
                 .min(options.max_controlled_bytes.unwrap_or(usize::MAX)),
         )?;
-        let negotiated = negotiate_adts_aac_reader(reader, interval, &mut control)?;
+        let negotiated = negotiate_adts_aac_reader(reader, interval, control)?;
         return Ok(AacSourceInfo { stream_index: 0, sample_rate: negotiated.sample_rate(),
             channels: negotiated.channels(), channel_mask: negotiated.channel_mask() });
     };
@@ -1050,17 +1075,56 @@ pub fn is_owned_audio_source_with_interval_and_options(
         return Err(invalid("controlled memory limit must be positive"));
     }
     fvid_media::owned_budget::check_rss_budget(options).map_err(|e| invalid(&e))?;
+    is_owned_audio_source_from_file_with_interval_and_options(File::open(path)?, interval, options)
+}
+
+pub(crate) fn is_owned_audio_source_from_file_with_interval_and_options(
+    mut file: File,
+    interval: Option<(Duration, Duration)>,
+    options: &fvid_media::CopyOptions,
+) -> Result<bool> {
+    use std::io::{Read, Seek, SeekFrom};
+    if options.cancel.as_ref().is_some_and(|c| c.is_cancelled()) {
+        return Err(invalid("media operation cancelled"));
+    }
+    if options.max_packet_bytes == 0 {
+        return Err(invalid("packet byte limit must be positive"));
+    }
+    if options.max_packets == Some(0) {
+        return Err(invalid("packet work limit requires at least one packet"));
+    }
+    if options.max_controlled_bytes == Some(0) {
+        return Err(invalid("controlled memory limit must be positive"));
+    }
+    fvid_media::owned_budget::check_rss_budget(options).map_err(|e| invalid(&e))?;
+    file.seek(SeekFrom::Start(0))?;
     let mut prefix = [0u8; 8];
-    let n = std::io::Read::read(&mut File::open(path)?, &mut prefix).unwrap_or(0);
+    let n = file.read(&mut prefix).unwrap_or(0);
     if (n == 8 && crate::container::mp4::recognizes_prefix(&prefix))
         || (n >= 4 && prefix[..4] == [0x1a, 0x45, 0xdf, 0xa3])
     {
-        if constant_audio_source_info_selected_with_interval_and_options(path, None, interval, options).is_ok() {
-            return Ok(true);
+        if let Ok(dup) = file.try_clone() {
+            if constant_audio_source_info_selected_from_file_with_interval_and_options(
+                dup, None, interval, options,
+            )
+            .is_ok()
+            {
+                return Ok(true);
+            }
+            return Ok(is_aac_source_from_file_with_metadata_limit(
+                file,
+                options.max_controlled_bytes,
+            )?);
         }
-        return Ok(is_aac_source_with_metadata_limit(path, options.max_controlled_bytes)?);
+        return Ok(constant_audio_source_info_selected_from_file_with_interval_and_options(
+            file, None, interval, options,
+        )
+        .is_ok());
     }
-    Ok(is_aac_source_with_metadata_limit(path, options.max_controlled_bytes)?)
+    Ok(is_aac_source_from_file_with_metadata_limit(
+        file,
+        options.max_controlled_bytes,
+    )?)
 }
 
 /// Trim can select one supported audio track even when default decoding is
@@ -1081,7 +1145,6 @@ pub fn is_owned_audio_trim_source_with_interval_and_options(
     interval: Option<(Duration, Duration)>,
     options: &fvid_media::CopyOptions,
 ) -> Result<bool> {
-    use std::io::Read;
     if options.cancel.as_ref().is_some_and(|c| c.is_cancelled()) {
         return Err(invalid("media operation cancelled"));
     }
@@ -1095,8 +1158,37 @@ pub fn is_owned_audio_trim_source_with_interval_and_options(
         return Err(invalid("controlled memory limit must be positive"));
     }
     fvid_media::owned_budget::check_rss_budget(options).map_err(|e| invalid(&e))?;
+    is_owned_audio_trim_source_from_file_with_interval_and_options(
+        path,
+        File::open(path)?,
+        interval,
+        options,
+    )
+}
+
+pub(crate) fn is_owned_audio_trim_source_from_file_with_interval_and_options(
+    path: &Path,
+    mut file: File,
+    interval: Option<(Duration, Duration)>,
+    options: &fvid_media::CopyOptions,
+) -> Result<bool> {
+    use std::io::{Read, Seek, SeekFrom};
+    if options.cancel.as_ref().is_some_and(|c| c.is_cancelled()) {
+        return Err(invalid("media operation cancelled"));
+    }
+    if options.max_packet_bytes == 0 {
+        return Err(invalid("packet byte limit must be positive"));
+    }
+    if options.max_packets == Some(0) {
+        return Err(invalid("packet work limit requires at least one packet"));
+    }
+    if options.max_controlled_bytes == Some(0) {
+        return Err(invalid("controlled memory limit must be positive"));
+    }
+    fvid_media::owned_budget::check_rss_budget(options).map_err(|e| invalid(&e))?;
+    file.seek(SeekFrom::Start(0))?;
     let mut prefix = [0u8; 8];
-    let has_prefix = match File::open(path)?.read_exact(&mut prefix) {
+    let has_prefix = match file.read_exact(&mut prefix) {
         Ok(()) => true,
         Err(e) if e.kind() == std::io::ErrorKind::UnexpectedEof => false,
         Err(e) => return Err(e.into()),
@@ -1107,17 +1199,51 @@ pub fn is_owned_audio_trim_source_with_interval_and_options(
     let is_container = crate::container::mp4::recognizes_prefix(&prefix)
         || prefix.starts_with(&[0x1a, 0x45, 0xdf, 0xa3]);
     if !is_container {
-        return is_owned_audio_source_with_interval_and_options(path, interval, options);
+        return is_owned_audio_source_from_file_with_interval_and_options(file, interval, options);
     }
-    if constant_audio_source_info_selected_with_interval_and_options(path, None, interval, options).is_ok() {
+    if let Ok(dup) = file.try_clone() {
+        if constant_audio_source_info_selected_from_file_with_interval_and_options(
+            dup, None, interval, options,
+        )
+        .is_ok()
+        {
+            return Ok(true);
+        }
+    } else if constant_audio_source_info_selected_from_file_with_interval_and_options(
+        file, None, interval, options,
+    )
+    .is_ok()
+    {
         return Ok(true);
+    } else {
+        file = File::open(path)?;
     }
     let info = crate::native_probe::try_probe_metadata_with_options(path, options)
         .map_err(|e| invalid(&e))?
         .ok_or_else(|| invalid("native probe does not yet support this container"))?;
     Ok(info.streams.iter().any(|stream| {
         stream.media_type == "audio"
-            && constant_audio_source_info_selected_with_interval_and_options(path, Some(stream.index), interval, options).is_ok()
+            && file
+                .try_clone()
+                .ok()
+                .map(|dup| {
+                    constant_audio_source_info_selected_from_file_with_interval_and_options(
+                        dup,
+                        Some(stream.index),
+                        interval,
+                        options,
+                    )
+                    .is_ok()
+                })
+                .unwrap_or_else(|| {
+                    constant_audio_source_info_selected_with_interval_and_options(
+                        path,
+                        Some(stream.index),
+                        interval,
+                        options,
+                    )
+                    .is_ok()
+                })
     }))
 }
 
@@ -1250,6 +1376,15 @@ pub fn constant_audio_source_info_selected_with_interval_and_options(
     inspect_audio_source_selected(source, selected, interval, options, true)
 }
 
+pub(crate) fn constant_audio_source_info_selected_from_file_with_interval_and_options(
+    file: File,
+    selected: Option<usize>,
+    interval: Option<(Duration, Duration)>,
+    options: &fvid_media::CopyOptions,
+) -> Result<AudioSourceInfo> {
+    inspect_audio_source_selected_from_file(file, selected, interval, options, true)
+}
+
 fn inspect_audio_source_selected(
     source: &Path,
     selected: Option<usize>,
@@ -1280,8 +1415,48 @@ fn inspect_audio_source_selected(
         options.max_packets,
     )?;
     control.check()?;
+    inspect_audio_source_selected_from_file(
+        File::open(source)?,
+        selected,
+        interval,
+        options,
+        require_constant_description,
+    )
+}
+
+pub(crate) fn inspect_audio_source_selected_from_file(
+    mut file: File,
+    selected: Option<usize>,
+    interval: Option<(Duration, Duration)>,
+    options: &fvid_media::CopyOptions,
+    require_constant_description: bool,
+) -> Result<AudioSourceInfo> {
+    if options
+        .cancel
+        .as_ref()
+        .is_some_and(crate::media_control::CancelFlag::is_cancelled)
+    {
+        return Err(invalid("media operation cancelled"));
+    }
+    if options.max_packet_bytes == 0 {
+        return Err(invalid("packet byte limit must be positive"));
+    }
+    if options.max_packets == Some(0) {
+        return Err(invalid("packet work limit requires at least one packet"));
+    }
+    if options.max_controlled_bytes == Some(0) {
+        return Err(invalid("controlled memory limit must be positive"));
+    }
+    let mut control = DecodeProgress::new_with_limits(
+        options.cancel.as_ref(),
+        None,
+        options.max_rss_bytes,
+        options.max_packets,
+    )?;
+    control.check()?;
     use std::io::{Read, Seek, SeekFrom};
-    let mut input = BufReader::new(File::open(source)?);
+    file.seek(SeekFrom::Start(0))?;
+    let mut input = BufReader::new(file);
     let mut prefix = [0u8; 8];
     let read = input.read(&mut prefix)?;
     input.seek(SeekFrom::Start(0))?;
@@ -1479,7 +1654,13 @@ fn inspect_audio_source_selected(
             max_packet_and_index_bytes,
         })
     } else {
-        let info = aac_source_info_selected_with_options(source, selected, interval, options)?;
+        let info = aac_source_info_selected_from_reader_with_options(
+            input,
+            selected,
+            interval,
+            options,
+            &mut control,
+        )?;
         Ok(AudioSourceInfo {
             channel_mask: Some(info.channel_mask),
             stream_index: info.stream_index,
