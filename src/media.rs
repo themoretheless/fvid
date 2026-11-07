@@ -263,14 +263,19 @@ fn uses_native_audio_route(source: &std::path::Path, options: &CopyOptions, tran
             )
         })
     });
-    if !crate::native_media::is_owned_audio_trim_source_with_interval_and_options(source, interval, options).map_err(|e| e.to_string())? {
-        return Ok(false);
-    }
     if options.streams.len() == 1 {
         return Ok(
-            crate::native_media::constant_audio_source_info_selected_with_interval_and_options(source, Some(options.streams[0]), interval, options)
-                .is_ok(),
+            crate::native_media::constant_audio_source_info_selected_with_interval_and_options(
+                source,
+                Some(options.streams[0]),
+                interval,
+                options,
+            )
+            .is_ok(),
         );
+    }
+    if !crate::native_media::is_owned_audio_trim_source_with_interval_and_options(source, interval, options).map_err(|e| e.to_string())? {
+        return Ok(false);
     }
     Ok(true)
 }

@@ -166,9 +166,23 @@ fn validate_and_inspect_source_with_options(
         Ok((info.sample_rate, info.channels, info.channel_mask))
     } else if {
         drop(wave_file);
-        options.max_controlled_bytes.is_none()
-            && crate::native_media::is_owned_audio_source_with_options(source, options)?
+        false
     } {
+        unreachable!()
+    } else if options.max_controlled_bytes.is_none()
+        && let Ok(info) = crate::native_media::constant_audio_source_info_selected_with_options(
+            source,
+            None,
+            &strip_output_controls(options),
+        )
+    {
+        let mask = info
+            .channel_mask
+            .unwrap_or(crate::native_export::default_pcm_mask(info.channels)?);
+        Ok((info.sample_rate, info.channels, mask))
+    } else if options.max_controlled_bytes.is_none()
+        && crate::native_media::is_owned_audio_source_with_options(source, options)?
+    {
         let probe_opts = strip_output_controls(options);
         let info = crate::native_media::constant_audio_source_info_selected_with_options(source, None, &probe_opts)
             .map_err(|e| invalid(&e.to_string()))?;

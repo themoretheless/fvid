@@ -1867,26 +1867,6 @@ fn export_pcm_selected(    source: &Path,
             )
             .map_err(|e| invalid(&e))?
         } else if let Some(reader) = &mut matroska {
-            let memory_packets = options
-                .and_then(|o| o.max_controlled_bytes)
-                .map(|bytes| bytes / std::mem::size_of::<crate::container::webm::Packet>());
-            reader.scan_all().map_err(|error| {
-                if memory_packets
-                    .is_some_and(|max| max < crate::container::webm::Limits::default().packets)
-                    && error
-                        .to_string()
-                        .contains("WebM packet count exceeds limit")
-                {
-                    invalid("controlled memory budget exceeded: Matroska packet index limit")
-                } else {
-                    error
-                }
-            })?;
-            if let Some(mem_limit) = options.and_then(|o| o.max_controlled_bytes)
-                && reader.estimated_index_payload_bytes()? > mem_limit
-            {
-                return Err(invalid("controlled memory budget exceeded"));
-            }
             let index = if allow_wave {
                 crate::native_media::matroska_audio_index(reader, selected)?
             } else {
@@ -2028,26 +2008,6 @@ fn export_pcm_selected(    source: &Path,
             }
             Some(base)
         } else if let Some(reader) = &mut matroska {
-            let memory_packets = options
-                .and_then(|o| o.max_controlled_bytes)
-                .map(|bytes| bytes / std::mem::size_of::<crate::container::webm::Packet>());
-            reader.scan_all().map_err(|error| {
-                if memory_packets
-                    .is_some_and(|max| max < crate::container::webm::Limits::default().packets)
-                    && error
-                        .to_string()
-                        .contains("WebM packet count exceeds limit")
-                {
-                    invalid("controlled memory budget exceeded: Matroska packet index limit")
-                } else {
-                    error
-                }
-            })?;
-            if let Some(mem_limit) = options.and_then(|o| o.max_controlled_bytes)
-                && reader.estimated_index_payload_bytes()? > mem_limit
-            {
-                return Err(invalid("controlled memory budget exceeded"));
-            }
             let index = if allow_wave {
                 crate::native_media::matroska_audio_index(reader, selected)?
             } else {

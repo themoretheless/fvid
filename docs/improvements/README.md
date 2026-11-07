@@ -4734,4 +4734,13 @@ See `batch-628-validation.json`.
 - **FVID-0903**: Direct single-stream audio source inspection in `native_loudnorm::try_plan` (`src/native_loudnorm.rs`).
 - **FVID-0904**: Direct single-stream audio source inspection in `native_loudnorm::try_apply` (`src/native_loudnorm.rs`).
 
+## Batch 635 (FVID-0905..0909)
+
+- **FVID-0905**: Direct single-stream constant-audio source check in `media::uses_native_audio_route` (`src/media.rs`).
+- **FVID-0906**: Remove redundant second `WebmReader::scan_all` in `export_pcm_selected` WAV metadata extraction (`src/native_export.rs`).
+- **FVID-0907**: Remove redundant second `WebmReader::scan_all` in `export_pcm_selected` Matroska base metadata extraction (`src/native_export.rs`).
+- **FVID-0908**: Inspect constant-audio MP4 and Matroska sources before AAC fallback in `is_owned_audio_source_with_interval_and_options` (`src/native_media.rs`).
+- **FVID-0909**: Inspect constant-audio sources before whole-container eligibility check in `native_audio_mix::validate_and_inspect_source_with_options` (`src/native_audio_mix.rs`).
+
+
 

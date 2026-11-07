@@ -1,8 +1,8 @@
 {
   "target": 1000,
   "counting_rule": "One independently confirmed problem or useful capability; fixture variants and baseline integration repairs are excluded. Only accepted entries count.",
-  "accepted_count": 904,
-  "next_id": "FVID-0905",
+  "accepted_count": 909,
+  "next_id": "FVID-0910",
   "entries": [
     {
       "id": "FVID-0001",
@@ -10135,6 +10135,61 @@
       "result": "Directly inspects options.streams[0] with constant_audio_source_info_selected_with_options when a single stream is explicitly selected.",
       "status": "accepted",
       "validation": "batch-634-validation.json"
+    },
+    {
+      "id": "FVID-0905",
+      "batch": 635,
+      "title": "Direct single-stream constant-audio source check in media::uses_native_audio_route",
+      "source": "src/media.rs",
+      "regression": "tests/decode_audio_matroska_export_and_mix_scans.rs",
+      "before": "media::uses_native_audio_route ran is_owned_audio_trim_source_with_interval_and_options across all container tracks before checking options.streams[0] when a single stream was selected.",
+      "result": "Directly checks constant_audio_source_info_selected_with_interval_and_options for options.streams[0] when options.streams.len() == 1.",
+      "status": "accepted",
+      "validation": "batch-635-validation.json"
+    },
+    {
+      "id": "FVID-0906",
+      "batch": 635,
+      "title": "Remove redundant second WebmReader::scan_all in export_pcm_selected WAV metadata extraction",
+      "source": "src/native_export.rs",
+      "regression": "tests/decode_audio_matroska_export_and_mix_scans.rs",
+      "before": "export_pcm_selected called reader.scan_all() and re-validated estimated_index_payload_bytes() when extracting WAV INFO metadata from Matroska inputs after probe_matroska_audio_geometry had already scanned the reader.",
+      "result": "Uses the already-scanned WebmReader directly to build WAV INFO chunks without scanning the container a second time.",
+      "status": "accepted",
+      "validation": "batch-635-validation.json"
+    },
+    {
+      "id": "FVID-0907",
+      "batch": 635,
+      "title": "Remove redundant second WebmReader::scan_all in export_pcm_selected Matroska base metadata extraction",
+      "source": "src/native_export.rs",
+      "regression": "tests/decode_audio_matroska_export_and_mix_scans.rs",
+      "before": "export_pcm_selected called reader.scan_all() and re-validated estimated_index_payload_bytes() a second time when constructing matroska_base_metadata from Matroska inputs.",
+      "result": "Builds MatroskaPcmMetadata directly from the already-scanned WebmReader without rescanning the container.",
+      "status": "accepted",
+      "validation": "batch-635-validation.json"
+    },
+    {
+      "id": "FVID-0908",
+      "batch": 635,
+      "title": "Inspect constant-audio MP4 and Matroska sources before AAC fallback in is_owned_audio_source_with_interval_and_options",
+      "source": "src/native_media.rs",
+      "regression": "tests/decode_audio_matroska_export_and_mix_scans.rs",
+      "before": "is_owned_audio_source_with_interval_and_options called is_aac_source_with_metadata_limit before constant_audio_source_info_selected_with_interval_and_options on MP4 and Matroska containers, opening non-AAC containers twice.",
+      "result": "Checks constant_audio_source_info_selected_with_interval_and_options first for MP4 and Matroska containers and falls back to is_aac_source_with_metadata_limit only when needed.",
+      "status": "accepted",
+      "validation": "batch-635-validation.json"
+    },
+    {
+      "id": "FVID-0909",
+      "batch": 635,
+      "title": "Inspect constant-audio sources before whole-container eligibility check in native_audio_mix::validate_and_inspect_source_with_options",
+      "source": "src/native_audio_mix.rs",
+      "regression": "tests/decode_audio_matroska_export_and_mix_scans.rs",
+      "before": "When options.max_controlled_bytes was None, validate_and_inspect_source_with_options called is_owned_audio_source_with_options before constant_audio_source_info_selected_with_options, scanning every constant-audio container twice.",
+      "result": "Tries constant_audio_source_info_selected_with_options directly first when options.max_controlled_bytes is None and falls back to is_owned_audio_source_with_options only on failure.",
+      "status": "accepted",
+      "validation": "batch-635-validation.json"
     }
   ],
   "pending_count": 126
