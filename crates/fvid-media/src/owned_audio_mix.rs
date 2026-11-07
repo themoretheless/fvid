@@ -125,6 +125,7 @@ fn audio_plan_with_controls(
         validate_mix_controls(controls)?;
         let (rate, channels) = if crate::owned_g711_wave_export::recognizes(source, controls)? {
             let info = crate::owned_audio_plan::source_descriptor(source, controls)?;
+            crate::owned_audio_plan::plan_decode_audio(source, &Default::default(), controls)?;
             let g711_frames = crate::owned_g711_wave_export::descriptor(source, controls)?.4;
             if g711_frames == 0 {
                 return Err("audio mix/merge requires nonempty owned audio inputs".into());
@@ -177,6 +178,12 @@ fn audio_plan_with_controls(
             (wave_info.sample_rate, wave_info.channels)
         } else {
             let info = crate::owned_audio_plan::source_descriptor(source, controls)?;
+            if info.precision != "float32" {
+                return Err(
+                    "mix-audio requires float PCM inputs (flt); integer formats are not qualified"
+                        .into(),
+                );
+            }
             crate::owned_audio_plan::plan_decode_audio(source, &Default::default(), controls)?;
             let est_frames: Option<u64> = if crate::owned_ogg_opus_export::recognizes(source)? {
                 match crate::owned_ogg_audio_export::coding(source, controls)? {
@@ -231,7 +238,10 @@ fn audio_plan_with_controls(
                     parsed.presentation_samples()
                 };
                 Some(samples)
-            } else if crate::owned_adts_export::recognizes(source)? {
+            } else if crate::owned_adts_export::recognizes(source)?
+                || crate::owned_mp4_audio_export::recognizes(source, controls)?
+                || crate::owned_audio_plan::matroska_descriptor(source, controls)?.is_some()
+            {
                 Some(info.stage2_frames)
             } else {
                 None

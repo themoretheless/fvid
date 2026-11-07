@@ -191,6 +191,15 @@ pub(crate) fn geometry_for_decode(
     transform: Option<AudioDecodeTransform>,
     options: &CopyOptions,
 ) -> Result<(u32, u16, u32, bool)> {
+    let (rate, channels, mask, precise, _) =
+        geometry_and_frames_for_decode(source, transform, options)?;
+    Ok((rate, channels, mask, precise))
+}
+pub(crate) fn geometry_and_frames_for_decode(
+    source: &Path,
+    transform: Option<AudioDecodeTransform>,
+    options: &CopyOptions,
+) -> Result<(u32, u16, u32, bool, u64)> {
     let (_, rate, channels, mask, codec) = descriptor_for_decode(source, transform, options)?;
     let mut reader = open(source, options)?;
     let index = crate::owned_mp4_audio::mp4_audio_index(&reader, options.streams.first().copied()).map_err(|e|e.to_string())?;
@@ -198,6 +207,39 @@ pub(crate) fn geometry_for_decode(
     let interval = transform.and_then(|t| prefix(t, rate));
     let active_samples = crate::owned_mp4_audio::mp4_active_samples(track, reader.movie_timescale(), interval, options.max_packets);
     let all_pcm = (0..active_samples).all(|n| track.description_for_sample(n).is_some_and(|d| matches!(&d.codec,b"alaw"|b"ulaw"|b"raw "|b"sowt"|b"twos"|b"in24"|b"in32"|b"fl32"|b"fl64")));
+    let mut estimated_frames = {
+        let mut active_ticks = 0u64;
+        for sample_index in 0..active_samples {
+            if let Some(sample) = track.samples.get(sample_index) {
+                active_ticks = active_ticks.saturating_add(u64::from(sample.duration));
+            }
+        }
+        let media_ticks = if options.max_packets.is_some() {
+            active_ticks
+        } else {
+            active_ticks.max(track.duration)
+        };
+        let mut frames = (u128::from(media_ticks) * u128::from(rate))
+            .div_ceil(u128::from(track.timescale.max(1))) as u64;
+        if options.max_packets.is_none() && !track.edits.is_empty() {
+            if let Ok(edit_clock) = track.resolved_edit_clock(reader.movie_timescale()) {
+                let edit_ticks: u64 = edit_clock
+                    .edits()
+                    .iter()
+                    .map(|e| e.duration)
+                    .fold(0u64, u64::saturating_add);
+                if edit_ticks > 0 {
+                    frames = (u128::from(edit_ticks) * u128::from(rate))
+                        .div_ceil(u128::from(edit_clock.timescale.max(1))) as u64;
+                }
+            }
+        }
+        if let Some((_, to)) = interval {
+            let limit = (to.as_nanos() * u128::from(rate)).div_ceil(1_000_000_000) as u64;
+            frames = frames.min(limit);
+        }
+        frames
+    };
     if transform.is_some_and(|t| t.interval.is_some()) {
         let mut probe = options.clone();
         probe.progress = None;
@@ -251,8 +293,15 @@ pub(crate) fn geometry_for_decode(
             stats.sample_rate,
             stats.sample_frames,
         )?;
+        estimated_frames = stats.sample_frames;
     }
-    Ok((rate, channels, mask, codec.starts_with("pcm_") && all_pcm))
+    Ok((
+        rate,
+        channels,
+        mask,
+        codec.starts_with("pcm_") && all_pcm,
+        estimated_frames,
+    ))
 }
 pub(crate) fn normalization_target(source:&Path,transform:AudioDecodeTransform,options:&CopyOptions,rate:u32,channels:u16,mask:u32)->Result<Option<(u32,u16,u32)>> {
     let requested=transform.channels.is_some()||transform.sample_rate.is_some();
@@ -358,9 +407,15 @@ pub(crate) fn apply(
     if destination.symlink_metadata().is_ok() {
         return Err("output already exists".into());
     }
-    let (rate, channels, mask, precise) = geometry_for_decode(source, Some(transform), options)?;
-    let target=normalization_target(source,transform,options,rate,channels,mask)?;
-    let (rate,channels,mask)=target.unwrap_or((rate,channels,mask));
+    let (source_rate, channels, mask, precise, source_frames) =
+        geometry_and_frames_for_decode(source, Some(transform), options)?;
+    let target=normalization_target(source,transform,options,source_rate,channels,mask)?;
+    let (rate,channels,mask)=target.unwrap_or((source_rate,channels,mask));
+    let stage2_frames = if rate != source_rate && source_rate > 0 {
+        (u128::from(source_frames) * u128::from(rate)).div_ceil(u128::from(source_rate)) as u64
+    } else {
+        source_frames
+    };
     let info = crate::owned_wave_metadata::mp4_source_info(source, options)?;
     let aac_fold = target.is_none()
         && !precise
@@ -379,7 +434,7 @@ pub(crate) fn apply(
         rate,
         channels,
         if precise { 64 } else { 32 },
-        1024,
+        stage2_frames.max(1024),
         info.len(),
         aac_fold,
         transform,

@@ -4266,5 +4266,16 @@ See `batch-585-validation.json`.
 
 See `batch-586-validation.json`.
 
+## Batch 587 — FVID-0665..0669: MP4 and Matroska actual prefix sample frames in Stage-2 WAVE spool / loudness / loudnorm / mix / merge budgets, identity ADTS Stage-2 WAVE spool budget enforcement, and G.711 WAVE Stage-2 decode spool enforcement in `audio_plan_with_controls`
+
+- **FVID-0665** — Enforce actual prefix sample frames in MP4 audio Stage-2 WAVE spool, loudness, and loudnorm budgets (`crates/fvid-media/src/owned_mp4_audio_export.rs`, `crates/fvid-media/src/owned_audio_plan.rs`, `crates/fvid-media/src/owned_container_loudnorm.rs`, `tests/container_stage2_frames_and_spool_budget.rs`).
+- **FVID-0666** — Enforce actual prefix sample frames in Matroska audio Stage-2 WAVE spool, loudness, and loudnorm budgets (`crates/fvid-media/src/owned_matroska_audio_timeline_impl.rs`, `crates/fvid-media/src/owned_matroska_pcm_export.rs`, `crates/fvid-media/src/owned_matroska_aac_export.rs`, `crates/fvid-media/src/owned_matroska_flac_export.rs`, `crates/fvid-media/src/owned_matroska_opus_export.rs`, `crates/fvid-media/src/owned_matroska_alac_export.rs`, `crates/fvid-media/src/owned_matroska_mp3_export.rs`, `crates/fvid-media/src/owned_audio_plan.rs`, `crates/fvid-media/src/owned_container_loudnorm.rs`, `tests/container_stage2_frames_and_spool_budget.rs`).
+- **FVID-0667** — Enforce MP4 and Matroska Stage-2 frame estimates and float32 precision in `audio_plan_with_controls` (`crates/fvid-media/src/owned_audio_mix.rs`, `tests/container_stage2_frames_and_spool_budget.rs`).
+- **FVID-0668** — Enforce Stage-2 WAVE spool budget on identity-transform metadata-free ADTS AAC inputs (`crates/fvid-media/src/owned_adts_export.rs`, `tests/container_stage2_frames_and_spool_budget.rs`).
+- **FVID-0669** — Enforce Stage-2 WAVE decode spool budget for G.711 WAVE inputs in `audio_plan_with_controls` (`crates/fvid-media/src/owned_audio_mix.rs`, `tests/container_stage2_frames_and_spool_budget.rs`).
+
+See `batch-587-validation.json`.
+
+
 
 

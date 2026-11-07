@@ -1,8 +1,8 @@
 {
   "target": 1000,
   "counting_rule": "One independently confirmed problem or useful capability; fixture variants and baseline integration repairs are excluded. Only accepted entries count.",
-  "accepted_count": 664,
-  "next_id": "FVID-0665",
+  "accepted_count": 669,
+  "next_id": "FVID-0670",
   "entries": [
     {
       "id": "FVID-0001",
@@ -7495,6 +7495,61 @@
       "result": "Use Some(info.stage2_frames) as est_frames for ADTS inputs in audio_plan_with_controls.",
       "status": "accepted",
       "validation": "batch-586-validation.json"
+    },
+    {
+      "id": "FVID-0665",
+      "batch": 587,
+      "title": "Enforce actual prefix sample frames in MP4 audio Stage-2 WAVE spool, loudness, and loudnorm budgets",
+      "source": "crates/fvid-media/src/owned_mp4_audio_export.rs",
+      "regression": "tests/container_stage2_frames_and_spool_budget.rs",
+      "before": "MP4 audio export, decode planning, loudness, and loudnorm passed the 1000-frame minimum floor to check_spool_wave_export_budget, check_meter_budget, and check_spool_loudnorm_budget regardless of actual audio track duration.",
+      "result": "Compute the MP4 audio track's presentation frame count bounded by max_packets, edit clock, and transform.interval in geometry_and_frames_for_decode and enforce it across Stage-2 WAVE spool, loudness, and loudnorm budgets.",
+      "status": "accepted",
+      "validation": "batch-587-validation.json"
+    },
+    {
+      "id": "FVID-0666",
+      "batch": 587,
+      "title": "Enforce actual prefix sample frames in Matroska audio Stage-2 WAVE spool, loudness, and loudnorm budgets",
+      "source": "crates/fvid-media/src/owned_matroska_audio_timeline_impl.rs",
+      "regression": "tests/container_stage2_frames_and_spool_budget.rs",
+      "before": "Matroska audio export modules (PCM, AAC, FLAC, Opus, ALAC, MP3), decode planning, loudness, and loudnorm passed the 1000-frame minimum floor to check_spool_wave_export_budget, check_meter_budget, and check_spool_loudnorm_budget regardless of actual track timeline duration.",
+      "result": "Compute the Matroska audio track's presentation frame count bounded by max_packets and transform.interval in matroska_estimated_frames and enforce it across all Matroska audio export, decode planning, loudness, and loudnorm budgets.",
+      "status": "accepted",
+      "validation": "batch-587-validation.json"
+    },
+    {
+      "id": "FVID-0667",
+      "batch": 587,
+      "title": "Enforce MP4 and Matroska Stage-2 frame estimates and float32 precision in audio_plan_with_controls",
+      "source": "crates/fvid-media/src/owned_audio_mix.rs",
+      "regression": "tests/container_stage2_frames_and_spool_budget.rs",
+      "before": "audio_plan_with_controls passed est_frames = None for MP4 and Matroska audio inputs (skipping total_input_pcm_bytes + out_bytes admission in plan_mix_audio_with_controls and plan_merge_audio_with_controls) and admitted float64-spooled MP4/Matroska PCM inputs that decode_owned_audio_with_controls rejects at execution time.",
+      "result": "Reject non-float32-spooled container inputs in audio_plan_with_controls and pass Some(info.stage2_frames) as est_frames for float32-spooled MP4 and Matroska inputs.",
+      "status": "accepted",
+      "validation": "batch-587-validation.json"
+    },
+    {
+      "id": "FVID-0668",
+      "batch": 587,
+      "title": "Enforce Stage-2 WAVE spool budget on identity-transform metadata-free ADTS AAC inputs",
+      "source": "crates/fvid-media/src/owned_adts_export.rs",
+      "regression": "tests/container_stage2_frames_and_spool_budget.rs",
+      "before": "owned_adts_export::check_spool_wave_export_budget returned Ok(()) immediately when transform was identity and metadata_bytes == 0, allowing plan_decode_audio and decode_audio to bypass max_working_bytes on Stage-2 WAVE spool allocation for metadata-free ADTS inputs.",
+      "result": "Always enforce estimate_float_wave_export_bytes in owned_adts_export::check_spool_wave_export_budget regardless of transform identity or metadata presence.",
+      "status": "accepted",
+      "validation": "batch-587-validation.json"
+    },
+    {
+      "id": "FVID-0669",
+      "batch": 587,
+      "title": "Enforce Stage-2 WAVE decode spool budget for G.711 WAVE inputs in audio_plan_with_controls",
+      "source": "crates/fvid-media/src/owned_audio_mix.rs",
+      "regression": "tests/container_stage2_frames_and_spool_budget.rs",
+      "before": "audio_plan_with_controls skipped plan_decode_audio in the G.711 WAVE branch while decode_owned_audio_with_controls called decode_audio to spool G.711 WAVE to float32 WAVE, allowing plan_mix_audio_with_controls and plan_merge_audio_with_controls to admit G.711 WAVE inputs whose Stage-2 decode spool exceeded max_working_bytes.",
+      "result": "Call plan_decode_audio(source, &Default::default(), controls) in the G.711 WAVE branch of audio_plan_with_controls.",
+      "status": "accepted",
+      "validation": "batch-587-validation.json"
     }
   ]
 }

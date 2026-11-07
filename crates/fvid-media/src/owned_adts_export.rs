@@ -62,19 +62,6 @@ pub(crate) fn check_spool_wave_export_budget(
             return Err("controlled memory budget exceeded: AAC spatial routing".into());
         }
     }
-    if !aac_fold
-        && transform.interval.is_none()
-        && transform.sample_rate.is_none()
-        && transform.channels.is_none()
-        && transform.volume.is_none()
-        && metadata_bytes == 0
-        && options.metadata_set.is_empty()
-        && options.metadata_delete.is_empty()
-        && options.stream_metadata_set.is_empty()
-        && options.stream_metadata_delete.is_empty()
-    {
-        return Ok(());
-    }
     let stage2_channels = if aac_fold { 2 } else { channels };
     let width = usize::from(bits / 8).max(1);
     let block = u16::try_from(usize::from(stage2_channels).saturating_mul(width))

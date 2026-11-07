@@ -1,0 +1,27 @@
+{
+  "status": "accepted",
+  "accepted_ids": [
+    "FVID-0665",
+    "FVID-0666",
+    "FVID-0667",
+    "FVID-0668",
+    "FVID-0669"
+  ],
+  "count_delta": 5,
+  "accepted_count": 669,
+  "next_id": "FVID-0670",
+  "qualification": [
+    {
+      "name": "container-stage2-frames-and-spool-budget",
+      "command": [
+        "cargo",
+        "test",
+        "--test",
+        "container_stage2_frames_and_spool_budget"
+      ],
+      "exit_code": 0,
+      "passed": 3,
+      "ignored": 0
+    }
+  ]
+}

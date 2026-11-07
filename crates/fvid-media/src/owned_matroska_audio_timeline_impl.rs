@@ -290,6 +290,88 @@ pub(crate) fn matroska_active_track_packets<R: std::io::Read + std::io::Seek>(
         .min(limit)
 }
 
+pub(crate) fn matroska_estimated_frames<R: std::io::Read + std::io::Seek>(
+    reader: &mut MatroskaTimelineReader<R>,
+    index: usize,
+    rate: u32,
+    interval: Option<(Duration, Duration)>,
+    max_packets: Option<u64>,
+) -> u64 {
+    let _ = reader.scan_all();
+    let Some(track) = reader.tracks.get(index) else {
+        return 0;
+    };
+    let track_number = track.number;
+    let active_limit = matroska_active_track_packets(reader, index, interval, max_packets);
+    if active_limit == 0 {
+        return 0;
+    }
+    let codec = track.codec.as_str();
+    let channels = (track.channels as usize).max(1);
+    let bit_depth_bytes = ((track.bit_depth as usize).max(8) / 8).max(1);
+    let pcm_block = channels.saturating_mul(bit_depth_bytes).max(1);
+    let is_pcm = matches!(
+        codec,
+        "A_PCM/INT/LIT" | "A_PCM/INT/BIG" | "A_PCM/FLOAT/IEEE"
+    );
+    let default_pkt_frames = if track.default_duration_ns > 0 {
+        (u128::from(track.default_duration_ns) * u128::from(rate)).div_ceil(1_000_000_000) as u64
+    } else {
+        match codec {
+            "A_AAC" => 1024,
+            "A_MPEG/L1" => 384,
+            "A_MPEG/L2" | "A_MPEG/L3" => 1152,
+            "A_OPUS" => (u64::from(rate) / 50).max(1),
+            "A_FLAC" | "A_ALAC" => 4096,
+            _ => 1024,
+        }
+    };
+    let mut first_pts: Option<i64> = None;
+    let mut last_pts: i64 = 0;
+    let mut last_pkt_frames: u64 = default_pkt_frames;
+    let mut sum_frames: u64 = 0;
+    let mut count = 0usize;
+    for packet in reader.packets.iter().filter(|p| p.track == track_number) {
+        if count >= active_limit {
+            break;
+        }
+        if first_pts.is_none() {
+            first_pts = Some(packet.pts_ns);
+        }
+        last_pts = packet.pts_ns;
+        let pkt_frames = if is_pcm {
+            (packet.size / pcm_block) as u64
+        } else if let Some(dur_ns) = packet.duration_ns.filter(|&d| d > 0) {
+            (u128::from(dur_ns) * u128::from(rate)).div_ceil(1_000_000_000) as u64
+        } else {
+            default_pkt_frames
+        };
+        last_pkt_frames = pkt_frames;
+        sum_frames = sum_frames.saturating_add(pkt_frames);
+        count += 1;
+    }
+    let span_ns = first_pts
+        .map(|first| i128::from(last_pts).saturating_sub(i128::from(first)).max(0) as u128)
+        .unwrap_or(0);
+    let span_frames = (span_ns * u128::from(rate)).div_ceil(1_000_000_000) as u64;
+    let delay_frames =
+        (u128::from(track.codec_delay_ns) * u128::from(rate)) / 1_000_000_000;
+    let mut frames = if is_pcm {
+        sum_frames.max(span_frames.saturating_add(last_pkt_frames))
+    } else if count > 1 && span_frames > 0 {
+        let step = (span_frames / (count as u64 - 1)).max(last_pkt_frames);
+        span_frames.saturating_add(step)
+    } else {
+        sum_frames
+    };
+    frames = frames.saturating_sub(delay_frames as u64);
+    if let Some((_, to)) = interval {
+        let limit = (to.as_nanos() * u128::from(rate)).div_ceil(1_000_000_000) as u64;
+        frames = frames.min(limit);
+    }
+    frames.max(1)
+}
+
 pub(crate) fn negotiate_matroska_ps<R: std::io::Read + std::io::Seek>(
     reader: &mut MatroskaTimelineReader<R>, index: usize, max_packets: Option<u64>, check: impl FnMut() -> Result<()>,
 ) -> Result<bool> {

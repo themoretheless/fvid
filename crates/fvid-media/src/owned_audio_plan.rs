@@ -13,13 +13,14 @@ pub(crate) fn matroska_descriptor(
     options: &CopyOptions,
 ) -> Result<Option<(usize, u32, u16, u32, String, String)>> {
     matroska_descriptor_for_decode(source, None, options)
+        .map(|opt| opt.map(|(index, rate, channels, mask, codec, precision, _)| (index, rate, channels, mask, codec, precision)))
 }
 
 pub(crate) fn matroska_descriptor_for_decode(
     source: &Path,
     transform: Option<AudioDecodeTransform>,
     options: &CopyOptions,
-) -> Result<Option<(usize, u32, u16, u32, String, String)>> {
+) -> Result<Option<(usize, u32, u16, u32, String, String, u64)>> {
     let mut file = File::open(source).map_err(|e| e.to_string())?;
     let mut prefix = [0; 4];
     if file.read_exact(&mut prefix).is_err() || prefix != [0x1a, 0x45, 0xdf, 0xa3] {
@@ -40,38 +41,80 @@ pub(crate) fn matroska_descriptor_for_decode(
         .map_err(|e| e.to_string())?;
     let source_codec = reader.tracks[index].codec.clone();
     drop(reader);
-    let (rate, channels, mask, codec, precision) = match source_codec.as_str() {
+    let (rate, channels, mask, codec, precision, frames) = match source_codec.as_str() {
         "A_FLAC" => {
-            let (rate,channels)=crate::owned_matroska_flac_export::geometry_for_decode(source,transform,options)?;
-            (rate,channels,crate::owned_matroska_flac_export::channel_mask(source,options)?,"flac".into(),"float32".into())
+            let (rate, channels, frames) =
+                crate::owned_matroska_flac_export::geometry_and_frames_for_decode(
+                    source, transform, options,
+                )?;
+            (
+                rate,
+                channels,
+                crate::owned_matroska_flac_export::channel_mask(source, options)?,
+                "flac".into(),
+                "float32".into(),
+                frames,
+            )
         }
         "A_AAC" => {
-            let (rate, channels, mask) =
-                crate::owned_matroska_aac_export::geometry_for_decode(source, transform, options)?;
-            (rate, channels, mask, "aac".into(), "float32".into())
+            let (rate, channels, mask, frames) =
+                crate::owned_matroska_aac_export::geometry_and_frames_for_decode(
+                    source, transform, options,
+                )?;
+            (rate, channels, mask, "aac".into(), "float32".into(), frames)
         }
         "A_OPUS" => {
-            let (rate, channels, mask) =
-                crate::owned_matroska_opus_export::geometry_with_mask_for_decode(source, transform, options)?;
-            (rate, channels, mask, "opus".into(), "float32".into())
+            let (rate, channels, mask, frames) =
+                crate::owned_matroska_opus_export::geometry_with_mask_and_frames_for_decode(
+                    source, transform, options,
+                )?;
+            (
+                rate,
+                channels,
+                mask,
+                "opus".into(),
+                "float32".into(),
+                frames,
+            )
         }
         "A_MPEG/L1" | "A_MPEG/L2" | "A_MPEG/L3" => {
-            let (rate, channels) = crate::owned_matroska_mp3_export::geometry_for_decode(source, transform, options)?;
-            (rate, channels, crate::owned_pcm_channels::standard_mask(channels).unwrap_or(0) as u32,
-             match source_codec.as_str() { "A_MPEG/L1" => "mp1", "A_MPEG/L2" => "mp2", _=>"mp3" }.into(), "float32".into())
+            let (rate, channels, frames) =
+                crate::owned_matroska_mp3_export::geometry_and_frames_for_decode(
+                    source, transform, options,
+                )?;
+            (
+                rate,
+                channels,
+                crate::owned_pcm_channels::standard_mask(channels).unwrap_or(0) as u32,
+                match source_codec.as_str() {
+                    "A_MPEG/L1" => "mp1",
+                    "A_MPEG/L2" => "mp2",
+                    _ => "mp3",
+                }
+                .into(),
+                "float32".into(),
+                frames,
+            )
         }
         "A_ALAC" => {
-            let (rate, channels,mask) = crate::owned_matroska_alac_export::geometry_with_mask_for_decode(source, transform, options)?;
+            let (rate, channels, mask, frames) =
+                crate::owned_matroska_alac_export::geometry_with_mask_and_frames_for_decode(
+                    source, transform, options,
+                )?;
             (
                 rate,
                 channels,
                 mask,
                 "alac".into(),
                 "float32".into(),
+                frames,
             )
         }
         "A_PCM/INT/LIT" | "A_PCM/INT/BIG" | "A_PCM/FLOAT/IEEE" => {
-            let (rate, channels) = crate::owned_matroska_pcm_export::geometry_for_decode(source, transform, options)?;
+            let (rate, channels, frames) =
+                crate::owned_matroska_pcm_export::geometry_and_frames_for_decode(
+                    source, transform, options,
+                )?;
             let mask = if channels <= 2 {
                 crate::owned_pcm_channels::standard_mask(channels).unwrap_or(0) as u32
             } else {
@@ -83,11 +126,12 @@ pub(crate) fn matroska_descriptor_for_decode(
                 mask,
                 source_codec.clone(),
                 "float64".into(),
+                frames,
             )
         }
         _ => return Err("selected Matroska audio codec is not owned by the export path".into()),
     };
-    Ok(Some((index, rate, channels, mask, codec, precision)))
+    Ok(Some((index, rate, channels, mask, codec, precision, frames)))
 }
 /// Admit only plans accepted by the owned metadata preflight.
 /// This does not decode packets, create a destination, or emit progress.
@@ -106,7 +150,7 @@ pub(crate) struct AudioDescriptor {
     pub(crate) channels: u16,
     mask: u32,
     codec: String,
-    precision: String,
+    pub(crate) precision: String,
     stream_index: usize,
     adts: bool,
     mp4: bool,
@@ -217,23 +261,24 @@ fn source_descriptor_for_decode(source: &Path, options: &CopyOptions,
     } else if mp4 {
         let (index, rate, channels, mask, codec) =
             crate::owned_mp4_audio_export::descriptor_for_decode(source, transform.copied(), options)?;
-        if transform.is_some_and(|t| t.interval.is_some()) {
-            let _ = crate::owned_mp4_audio_export::geometry_for_decode(
+        let (_, _, _, precise, frames) =
+            crate::owned_mp4_audio_export::geometry_and_frames_for_decode(
                 source,
                 transform.copied(),
                 options,
             )?;
-        }
         stream_index = index;
+        stage2_frames = frames;
         stage2_meta_bytes = crate::owned_wave_metadata::mp4_source_info(source, options)?.len();
-        let precision = if codec.starts_with("pcm_") {
+        let precision = if precise || codec.starts_with("pcm_") {
             "float64"
         } else {
             "float32"
         };
         (rate, channels, mask, codec, precision.to_owned())
-    } else if let Some((index, rate, channels, mask, codec, precision)) = matroska {
+    } else if let Some((index, rate, channels, mask, codec, precision, frames)) = matroska {
         stream_index = index;
+        stage2_frames = frames;
         let interval = transform.and_then(|t| crate::owned_adts_export::decoded_prefix(*t, rate));
         stage2_meta_bytes =
             crate::owned_wave_metadata::matroska_source_info_with_interval(source, interval, options)?
@@ -425,11 +470,12 @@ pub fn plan_decode_audio(
     if adts || mp4 || is_matroska || raw_encoded_audio || ogg || g711_wave {
         let (stage2_rate, stage2_channels, _) = mp4_target.unwrap_or((rate, channels, mask));
         let stage2_bits = if precision == "float64" { 64 } else { 32 };
-        let stage2_frames = if g711_wave || ogg || adts || raw_encoded_audio {
-            stage2_frames.max(1024)
+        let stage2_frames = if stage2_rate != rate && rate > 0 {
+            (u128::from(stage2_frames) * u128::from(stage2_rate)).div_ceil(u128::from(rate)) as u64
         } else {
-            1024
-        };
+            stage2_frames
+        }
+        .max(1024);
         crate::owned_adts_export::check_spool_wave_export_budget(
             stage2_rate,
             stage2_channels,

@@ -92,7 +92,7 @@ pub(crate) fn apply(
     if destination.symlink_metadata().is_ok() {
         return Err("output already exists".into());
     }
-    let (rate, channels) = geometry_for_decode(source, Some(transform), options)?;
+    let (rate, channels, frames) = geometry_and_frames_for_decode(source, Some(transform), options)?;
     let mask = if channels <= 2 {
         crate::owned_pcm_channels::standard_mask(channels).unwrap_or(0) as u32
     } else {
@@ -107,7 +107,7 @@ pub(crate) fn apply(
         rate,
         channels,
         64,
-        1024,
+        frames.max(1024),
         info.len(),
         false,
         transform,
@@ -142,6 +142,15 @@ pub(crate) fn geometry_for_decode(
     transform: Option<AudioDecodeTransform>,
     options: &CopyOptions,
 ) -> Result<(u32, u16)> {
+    let (rate, channels, _) = geometry_and_frames_for_decode(source, transform, options)?;
+    Ok((rate, channels))
+}
+
+pub(crate) fn geometry_and_frames_for_decode(
+    source: &Path,
+    transform: Option<AudioDecodeTransform>,
+    options: &CopyOptions,
+) -> Result<(u32, u16, u64)> {
     let mut reader = crate::owned_matroska_audio::open_audio_reader(
         BufReader::new(File::open(source).map_err(|e| e.to_string())?),
         options,
@@ -165,6 +174,13 @@ pub(crate) fn geometry_for_decode(
     let interval = transform.and_then(|t| prefix(t, rate));
     crate::owned_matroska_audio::admit_audio_reader_with_interval(&mut reader, index, interval, options)
         .map_err(|e| e.to_string())?;
+    let mut estimated_frames = crate::owned_matroska_audio::matroska_estimated_frames(
+        &mut reader,
+        index,
+        rate,
+        interval,
+        options.max_packets,
+    );
     let _ = crate::owned_wave_metadata::matroska_source_info_with_interval(source, interval, options)?;
     if transform.is_some_and(|t| t.interval.is_some()) {
         let mut probe = decode_options(options);
@@ -181,8 +197,9 @@ pub(crate) fn geometry_for_decode(
             stats.sample_rate,
             stats.sample_frames,
         )?;
+        estimated_frames = stats.sample_frames;
     }
-    Ok((rate, channels))
+    Ok((rate, channels, estimated_frames))
 }
 
 #[cfg(test)]
