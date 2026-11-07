@@ -536,6 +536,13 @@ pub(crate) fn extract_source_wave_info(
     source: &std::path::Path,
     options: &fvid_media::CopyOptions,
 ) -> Result<Vec<u8>> {
+    Ok(extract_source_wave_info_and_base(source, options)?.0)
+}
+
+fn extract_source_wave_info_and_base(
+    source: &std::path::Path,
+    options: &fvid_media::CopyOptions,
+) -> Result<(Vec<u8>, Option<MatroskaPcmMetadata>)> {
     use std::io::{BufReader, Read, Seek, SeekFrom};
     let cancel = options.cancel.as_ref();
     if cancel.is_some_and(|c| c.is_cancelled()) {
@@ -545,7 +552,7 @@ pub(crate) fn extract_source_wave_info(
         let mut input = BufReader::new(std::fs::File::open(source)?);
         let mut prefix = [0u8; 8];
         if input.read_exact(&mut prefix).is_err() {
-            return Ok(Vec::new());
+            return Ok((Vec::new(), None));
         }
         if matches!(&prefix[..4], b"RIFF" | b"RF64" | b"RIFX") {
             input.seek(SeekFrom::Start(0))?;
@@ -564,11 +571,12 @@ pub(crate) fn extract_source_wave_info(
                         )));
                     }
                     if info_bytes == 0 {
-                        return Ok(Vec::new());
+                        return Ok((Vec::new(), None));
                     }
                 }
-                return fvid_media::owned_wave_inspect::info_chunks(&mut input, &info, cancel)
-                    .map_err(|e| invalid(&e.to_string()));
+                let chunks = fvid_media::owned_wave_inspect::info_chunks(&mut input, &info, cancel)
+                    .map_err(|e| invalid(&e.to_string()))?;
+                return Ok((chunks, None));
             }
         }
     }
@@ -588,7 +596,7 @@ pub(crate) fn extract_source_wave_info(
     }
     let encoder = extra.get("ENCODER").map(String::as_str);
     let lang = if base.1 == "und" { "" } else { base.1.as_str() };
-    fvid_media::owned_wave_metadata::info_for_file_tags(
+    let chunks = fvid_media::owned_wave_metadata::info_for_file_tags(
         &fvid_media::owned_file_tags::FileTags {
             title: base.2.tags.title.clone(),
             artist: base.2.tags.artist.clone(),
@@ -609,7 +617,8 @@ pub(crate) fn extract_source_wave_info(
         encoder,
         &extra,
     )
-    .map_err(|e| invalid(&e))
+    .map_err(|e| invalid(&e))?;
+    Ok((chunks, Some(base)))
 }
 
 pub(crate) fn validate_matroska_pcm_metadata(
@@ -636,9 +645,13 @@ pub(crate) fn check_output_memory_budget(
         && options.stream_metadata_delete.is_empty();
     let check_matroska = matroska != Some(false);
     let mut needed = stage_working_bytes.saturating_add(16 * 1024);
+    let mut cached_base: Option<MatroskaPcmMetadata> = None;
     if check_wave {
-        let source_info_len = match extract_source_wave_info(source, options) {
-            Ok(b) => b.len(),
+        let source_info_len = match extract_source_wave_info_and_base(source, options) {
+            Ok((b, base)) => {
+                cached_base = base;
+                b.len()
+            }
             Err(e) if e.to_string().contains("budget") || e.to_string().contains("cancelled") => {
                 return Err(e);
             }
@@ -656,21 +669,25 @@ pub(crate) fn check_output_memory_budget(
         );
     }
     if check_matroska {
-        let base = match extract_source_pcm_metadata_with_interval_packet_and_memory_limit(
-            source,
-            options.streams.first().copied(),
-            true,
-            None,
-            Some(options.max_packet_bytes),
-            options.max_packets,
-            options.max_controlled_bytes,
-            options.cancel.as_ref(),
-        ) {
-            Ok(b) => Some(b),
-            Err(e) if e.to_string().contains("budget") || e.to_string().contains("cancelled") => {
-                return Err(e);
+        let base = if let Some(base) = cached_base {
+            Some(base)
+        } else {
+            match extract_source_pcm_metadata_with_interval_packet_and_memory_limit(
+                source,
+                options.streams.first().copied(),
+                true,
+                None,
+                Some(options.max_packet_bytes),
+                options.max_packets,
+                options.max_controlled_bytes,
+                options.cancel.as_ref(),
+            ) {
+                Ok(b) => Some(b),
+                Err(e) if e.to_string().contains("budget") || e.to_string().contains("cancelled") => {
+                    return Err(e);
+                }
+                Err(_) => None,
             }
-            Err(_) => None,
         };
         let (name, language, metadata, text, scoped) =
             parse_matroska_pcm_metadata(base, Some(options))?;

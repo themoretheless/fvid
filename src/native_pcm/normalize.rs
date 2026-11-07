@@ -41,6 +41,26 @@ pub fn normalize_file_with_options(
     options: &fvid_media::CopyOptions,
     progress: Option<&NormalizationProgressHook>,
 ) -> Result<NormalizeReport> {
+    normalize_file_with_options_and_prechecked_channels(
+        source,
+        destination,
+        weights,
+        target,
+        options,
+        progress,
+        None,
+    )
+}
+
+pub(crate) fn normalize_file_with_options_and_prechecked_channels(
+    source: &Path,
+    destination: &Path,
+    weights: &[f64],
+    target: NormalizeTarget,
+    options: &fvid_media::CopyOptions,
+    progress: Option<&NormalizationProgressHook>,
+    known_channels: Option<u16>,
+) -> Result<NormalizeReport> {
     if options.cancel.as_ref().is_some_and(|c| c.is_cancelled()) {
         return Err(invalid("media operation cancelled"));
     }
@@ -84,10 +104,17 @@ pub fn normalize_file_with_options(
     measure_options.stream_metadata_set.clear();
     measure_options.stream_metadata_delete.clear();
     let selected = options.streams.first().copied();
-    let mut prechecked_channels = None;
+    let mut prechecked_channels = known_channels;
     if options.max_controlled_bytes.is_some() {
-        let (_, channels) = fvid_media::owned_audio_plan::source_geometry(source, &measure_options)
-            .map_err(|e| invalid(&e))?;
+        let channels = match prechecked_channels {
+            Some(ch) => ch,
+            None => {
+                let (_, ch) = fvid_media::owned_audio_plan::source_geometry(source, &measure_options)
+                    .map_err(|e| invalid(&e))?;
+                prechecked_channels = Some(ch);
+                ch
+            }
+        };
         crate::native_export::pcm_matroska::check_output_memory_budget(
             source,
             channels,
@@ -95,7 +122,6 @@ pub fn normalize_file_with_options(
             options,
             Some(matroska_out),
         )?;
-        prechecked_channels = Some(channels);
     }
     measure_options.progress = measure_hook;
     let measured = measure_loudness_file_with_options(source, weights, &measure_options)?;

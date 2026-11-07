@@ -1,0 +1,16 @@
+{
+  "batch": 621,
+  "ids": [
+    "FVID-0835",
+    "FVID-0836",
+    "FVID-0837",
+    "FVID-0838",
+    "FVID-0839"
+  ],
+  "commands": [
+    "cargo test --test native_plan_trim_and_pcm_matroska_budget_single_open",
+    "cargo test --test export_overlay_and_loudness_plan_single_open",
+    "python3 scripts/check_improvements_registry.py"
+  ],
+  "status": "accepted"
+}

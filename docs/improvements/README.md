@@ -4606,3 +4606,13 @@ See `batch-619-validation.json`.
 
 See `batch-620-validation.json`.
 
+## Batch 621 — FVID-0835..0839: Single-pass ADTS/AAC trim planning, metadata reuse in `pcm_matroska`, and prechecked channel forwarding in `normalize_loudness_controlled`
+
+- **FVID-0835** — Build the ADTS trim plan directly from the inspected `AdtsInfo` in `native_plan::trim_adts_with_options` (`src/native_plan.rs`, `tests/native_plan_trim_and_pcm_matroska_budget_single_open.rs`).
+- **FVID-0836** — Reuse the selected stream index and `AudioSourceInfo` in `finish_trim_aac_plan` across `trim_audio_with_options` and `trim_aac_with_options` (`src/native_plan.rs`, `tests/native_plan_trim_and_pcm_matroska_budget_single_open.rs`).
+- **FVID-0837** — Close the 8-byte prefix `BufReader` before delegating to `try_probe_metadata_with_options` in `native_plan::audio_stream_index_from_metadata` (`src/native_plan.rs`, `tests/native_plan_trim_and_pcm_matroska_budget_single_open.rs`).
+- **FVID-0838** — Reuse extracted `MatroskaPcmMetadata` across WAVE and Matroska budget checks in `pcm_matroska::check_output_memory_budget` (`src/native_export/pcm_matroska.rs`, `tests/native_plan_trim_and_pcm_matroska_budget_single_open.rs`).
+- **FVID-0839** — Forward the channel count from `loudness_channel_weights_with_options` into `normalize_file_with_options_and_prechecked_channels` (`src/native_pcm/normalize.rs`, `tests/native_plan_trim_and_pcm_matroska_budget_single_open.rs`).
+
+See `batch-621-validation.json`.
+

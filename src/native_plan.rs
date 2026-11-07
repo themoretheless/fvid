@@ -948,16 +948,60 @@ pub fn trim_adts_with_options(
         std::time::Duration::from_micros(from as u64),
         std::time::Duration::from_micros(to as u64),
     );
+    if options.streams.iter().any(|&n| n != 0) {
+        return Err("ADTS has only stream 0".into());
+    }
     let input=std::io::BufReader::new(std::fs::File::open(source).map_err(|e|e.to_string())?);
     let info=crate::native_media::inspect_adts_with_interval_and_options(input, Some(interval), options).map_err(|e|e.to_string())?;
     let boundary=|us:i64| (us as u128 * u128::from(info.sample_rate)).div_ceil(1_000_000).min(u128::from(info.sample_frames)) as u64;
     let frames=boundary(to)-boundary(from);
     if frames==0 {return Err("audio interval contains no samples".into());}
-    let mut plan=decode_audio_with_options(source,&AudioDecodeTransform {interval:Some((from,to)),..Default::default()},options)?;
-    plan.command="trim".into();
-    plan.steps.last_mut().ok_or("missing write step")?.detail=format!("publish {frames} float32 PCM sample frames to .wav without overwriting");
-    plan.notes.push("decode AAC pre-roll from the beginning; ADTS encoder priming remains part of its timeline".into());
-    Ok(plan)
+    let mut notes = vec![
+        "backend: fvid; no external codec or resampler".into(),
+        "MP4 edits and Matroska trim metadata apply; ADTS retains encoder priming".into(),
+        "metadata-only plan: packet contents and timeline consistency are verified during execution".into(),
+    ];
+    if options.max_packet_bytes != fvid_media::CopyOptions::default().max_packet_bytes
+        || options.max_packets.is_some()
+        || options.max_controlled_bytes.is_some()
+        || options.max_rss_bytes.is_some()
+    {
+        notes.push(format!(
+            "encoded packet limit: {} bytes; packet work limit: {} packets; controlled memory limit: {} bytes; RSS limit: {} bytes",
+            options.max_packet_bytes,
+            options.max_packets.map_or_else(|| "unbounded".to_owned(), |n| n.to_string()),
+            options.max_controlled_bytes.map_or_else(|| "unbounded".to_owned(), |n| n.to_string()),
+            options.max_rss_bytes.map_or_else(|| "unbounded".to_owned(), |n| n.to_string()),
+        ));
+    }
+    notes.push("decode AAC pre-roll from the beginning; ADTS encoder priming remains part of its timeline".into());
+    Ok(MediaPlan {
+        command: "trim".into(),
+        input: source.to_path_buf(),
+        inputs: vec![source.to_path_buf()],
+        streams: vec![PlanStream {
+            index: 0,
+            media_type: "audio".into(),
+            codec: "aac".into(),
+            disposition: "decode".into(),
+        }],
+        steps: vec![
+            PlanStep {
+                action: "decode".into(),
+                detail: "FVid owned AAC-LC decoder to interleaved float PCM".into(),
+            },
+            PlanStep {
+                action: "trim".into(),
+                detail: format!("presentation window [{from}, {to}) µs; round up to source sample grid; pre-roll only for predictive codecs"),
+            },
+            PlanStep {
+                action: "write".into(),
+                detail: format!("publish {frames} float32 PCM sample frames to .wav without overwriting"),
+            },
+        ],
+        graph: None,
+        notes,
+    })
 }
 
 /// Require either a single AAC stream or an explicit AAC stream selection.
@@ -1057,6 +1101,7 @@ pub(crate) fn audio_stream_index_from_metadata(
         if reader.tracks.len()==1 {return Ok(0);}
         return Err("audio-to-WAVE trim requires an explicit audio stream when other tracks exist".into());
     }
+    drop(input);
     let info = crate::native_probe::try_probe_metadata_with_options(source, options)?
         .ok_or_else(|| "native probe does not yet support this container".to_owned())?;
     if info.streams.len()==1 {Ok(info.streams[0].index)}else{Err("audio-to-WAVE trim requires an explicit audio stream when other tracks exist".into())}
@@ -1116,7 +1161,7 @@ pub fn trim_audio_with_options(
     )
     .map_err(|e| e.to_string())?;
     if info.codec == "aac" {
-        return trim_aac_with_options(source, from, to, options);
+        return finish_trim_aac_plan(source, from, to, index, options);
     }
     let mut scoped = options.clone();
     scoped.streams = vec![index];
@@ -1144,7 +1189,17 @@ pub fn trim_aac_with_options(
 ) -> Result<MediaPlan> {
     let selected = options.streams.first().copied();
     let interval=(from>=0 && to>from).then(||(std::time::Duration::from_micros(from as u64),std::time::Duration::from_micros(to as u64)));
-    let index=aac_trim_selection_with_interval_and_options(source,selected,interval,options)?;
+    let index = aac_trim_selection_with_interval_and_options(source, selected, interval, options)?;
+    finish_trim_aac_plan(source, from, to, index, options)
+}
+
+fn finish_trim_aac_plan(
+    source: &std::path::Path,
+    from: i64,
+    to: i64,
+    index: usize,
+    options: &fvid_media::CopyOptions,
+) -> Result<MediaPlan> {
     if crate::native_export::is_adts_source(source).map_err(|e|e.to_string())? {
         return trim_adts_with_options(source,from,to,options);
     }

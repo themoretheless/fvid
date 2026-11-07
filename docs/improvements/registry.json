@@ -1,8 +1,8 @@
 {
   "target": 1000,
   "counting_rule": "One independently confirmed problem or useful capability; fixture variants and baseline integration repairs are excluded. Only accepted entries count.",
-  "accepted_count": 834,
-  "next_id": "FVID-0835",
+  "accepted_count": 839,
+  "next_id": "FVID-0840",
   "entries": [
     {
       "id": "FVID-0001",
@@ -9365,7 +9365,62 @@
       "result": "loudness_plan_and_channels_with_options returns both the MediaPlan and the channel count for direct reuse in check_output_memory_budget.",
       "status": "accepted",
       "validation": "batch-620-validation.json"
+    },
+    {
+      "id": "FVID-0835",
+      "batch": 621,
+      "title": "Build the ADTS trim plan directly from the inspected AdtsInfo in native_plan::trim_adts_with_options",
+      "source": "src/native_plan.rs",
+      "regression": "tests/native_plan_trim_and_pcm_matroska_budget_single_open.rs",
+      "before": "trim_adts_with_options ran inspect_adts_with_interval_and_options and then called decode_audio_with_options(source, ...), which reopened and re-scanned the ADTS file a second time.",
+      "result": "trim_adts_with_options constructs the MediaPlan directly via build_adts_trim_plan from the already-inspected AdtsInfo.",
+      "status": "accepted",
+      "validation": "batch-621-validation.json"
+    },
+    {
+      "id": "FVID-0836",
+      "batch": 621,
+      "title": "Reuse the selected stream index and AudioSourceInfo in finish_trim_aac_plan across trim_audio_with_options and trim_aac_with_options",
+      "source": "src/native_plan.rs",
+      "regression": "tests/native_plan_trim_and_pcm_matroska_budget_single_open.rs",
+      "before": "trim_audio_with_options called constant_audio_source_info_selected_with_interval_and_options and then delegated to trim_aac_with_options, which re-ran aac_trim_selection_with_interval_and_options from scratch.",
+      "result": "trim_audio_with_options passes its already-selected stream index and AudioSourceInfo directly to finish_trim_aac_plan without re-running selection.",
+      "status": "accepted",
+      "validation": "batch-621-validation.json"
+    },
+    {
+      "id": "FVID-0837",
+      "batch": 621,
+      "title": "Close the 8-byte prefix BufReader before delegating to try_probe_metadata_with_options in native_plan::audio_stream_index_from_metadata",
+      "source": "src/native_plan.rs",
+      "regression": "tests/native_plan_trim_and_pcm_matroska_budget_single_open.rs",
+      "before": "audio_stream_index_from_metadata kept its BufReader<File> open when falling through to native_probe::try_probe_metadata_with_options.",
+      "result": "audio_stream_index_from_metadata explicitly drops input before invoking try_probe_metadata_with_options.",
+      "status": "accepted",
+      "validation": "batch-621-validation.json"
+    },
+    {
+      "id": "FVID-0838",
+      "batch": 621,
+      "title": "Reuse extracted MatroskaPcmMetadata across WAVE and Matroska budget checks in pcm_matroska::check_output_memory_budget",
+      "source": "src/native_export/pcm_matroska.rs",
+      "regression": "tests/native_plan_trim_and_pcm_matroska_budget_single_open.rs",
+      "before": "When matroska was None, check_output_memory_budget called extract_source_wave_info (which extracted MatroskaPcmMetadata for non-WAVE inputs) and then immediately called extract_source_pcm_metadata_with_interval_packet_and_memory_limit a second time.",
+      "result": "extract_source_wave_info_and_base returns any extracted MatroskaPcmMetadata so check_output_memory_budget reuses it directly for the Matroska budget check.",
+      "status": "accepted",
+      "validation": "batch-621-validation.json"
+    },
+    {
+      "id": "FVID-0839",
+      "batch": 621,
+      "title": "Forward the channel count from loudness_channel_weights_with_options into normalize_file_with_options_and_prechecked_channels",
+      "source": "src/native_pcm/normalize.rs",
+      "regression": "tests/native_plan_trim_and_pcm_matroska_budget_single_open.rs",
+      "before": "media::normalize_loudness_controlled resolved default channel weights via loudness_channel_weights_with_options and then normalize_loudness_file_controlled re-probed source_geometry to obtain the channel count when max_controlled_bytes was set.",
+      "result": "media::normalize_loudness_controlled passes the channel count inferred from weights directly to normalize_file_with_options_and_prechecked_channels so source_geometry is not re-probed.",
+      "status": "accepted",
+      "validation": "batch-621-validation.json"
     }
   ],
-  "pending_count": 166
+  "pending_count": 161
 }

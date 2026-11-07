@@ -1571,6 +1571,7 @@ pub fn normalize_loudness_controlled(source: &std::path::Path, destination: &std
     fvid_media::owned_budget::check_rss_budget(options)?;
     target.validate()?;
     if options.progress.is_some() {return Err("two-pass normalization requires phase-aware progress, not a single-pass hook".into());}
+    let mut prechecked_channels = None;
     let defaults;
     let weights=match weights {
         Some(weights)=>weights,
@@ -1581,10 +1582,11 @@ pub fn normalize_loudness_controlled(source: &std::path::Path, destination: &std
             weight_options.stream_metadata_set.clear();
             weight_options.stream_metadata_delete.clear();
             defaults=crate::native_pcm::loudness_channel_weights_with_options(source,&weight_options).map_err(|e|e.to_string())?;
+            prechecked_channels = u16::try_from(defaults.len()).ok();
             &defaults
         },
     };
-    crate::native_pcm::normalize_loudness_file_with_options(source,destination,weights,target,options,progress).map_err(|e|e.to_string())
+    crate::native_pcm::normalize::normalize_file_with_options_and_prechecked_channels(source,destination,weights,target,options,progress,prechecked_channels).map_err(|e|e.to_string())
 }
 
 /// Owned component inventory; consult operation plans for profile/workflow support.
