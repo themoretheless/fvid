@@ -128,6 +128,9 @@ impl Program {
     pub(crate) fn from_chain(chain: crate::owned_ogg::Chain) -> Result<Self> {
         Self::from_ogg(Ogg::from_chain(chain), Selection::Ordinal(0))
     }
+    pub(crate) fn from_ogg_source_track(ogg: Ogg, index: Option<usize>) -> Result<Self> {
+        Self::from_ogg(ogg, Selection::Source(index))
+    }
     fn from_ogg(ogg: Ogg, selection: Selection) -> Result<Self> {
         let chains: Vec<_> = ogg
             .chains()

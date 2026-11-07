@@ -236,6 +236,14 @@ pub(crate) fn mp4_source_info(
     };
     let index =
         crate::owned_mp4_audio::mp4_audio_index(&reader, selected).map_err(|e| e.to_string())?;
+    mp4_source_info_from_reader(&reader, index, options)
+}
+
+pub(crate) fn mp4_source_info_from_reader<R: std::io::Read + std::io::Seek>(
+    reader: &crate::owned_mp4::Mp4Reader<R>,
+    index: usize,
+    options: &fvid_control::CopyOptions,
+) -> Result<Vec<u8>> {
     let track = &reader.tracks()[index];
     let info = info_for_file_tags(
         reader.tags(),
@@ -298,12 +306,21 @@ pub(crate) fn matroska_source_info_with_interval(
     };
     let index = crate::owned_matroska_audio::matroska_audio_index(&reader, selected)
         .map_err(|e| e.to_string())?;
+    matroska_source_info_from_reader(&mut reader, index, interval, options)
+}
+
+pub(crate) fn matroska_source_info_from_reader<R: std::io::Read + std::io::Seek>(
+    reader: &mut crate::owned_webm::WebmReader<R>,
+    index: usize,
+    interval: Option<(std::time::Duration, std::time::Duration)>,
+    options: &fvid_control::CopyOptions,
+) -> Result<Vec<u8>> {
     if options.max_controlled_bytes.is_some() {
-        crate::owned_matroska_audio::admit_audio_reader_with_interval(&mut reader, index, interval, options)
+        crate::owned_matroska_audio::admit_audio_reader_with_interval(reader, index, interval, options)
             .map_err(|e| e.to_string())?;
     } else {
         crate::owned_matroska_audio::validate_audio_packet_budget_with_interval(
-            &mut reader, index, interval, options,
+            reader, index, interval, options,
         )
         .map_err(|e| e.to_string())?;
     }

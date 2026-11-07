@@ -53,7 +53,6 @@ pub(crate) fn preflight(
     let mut at = 0u64;
     let mut packets = 0usize;
     let mut streams = 0usize;
-    let mut pages = 0usize;
     while at < length {
         check(options)?;
         let mut header = [0; 27];
@@ -77,7 +76,6 @@ pub(crate) fn preflight(
             .filter(|&end| end <= length)
             .ok_or("Ogg page exceeds input")?;
         file.seek(SeekFrom::Start(at)).map_err(|e| e.to_string())?;
-        pages += 1;
     }
     let length = usize::try_from(length).map_err(|_| "Ogg file size overflow")?;
     let estimate = length
@@ -152,22 +150,35 @@ pub(crate) fn open_with_transform(
     options: &CopyOptions,
 ) -> Result<Program> {
     check(options)?;
+    let mut file = File::open(source).map_err(|e| e.to_string())?;
+    let (limits, index) = preflight(&mut file, options)?;
+    let mut bytes = Vec::new();
+    bytes
+        .try_reserve_exact(limits.file_bytes)
+        .map_err(|_| "Opus input allocation failed")?;
+    CheckedRead {
+        input: BufReader::new(file),
+        options,
+    }
+    .read_to_end(&mut bytes)
+    .map_err(|e| e.to_string())?;
+    let ogg = crate::owned_ogg::Ogg::parse(&bytes, &limits).map_err(|e| e.to_string())?;
+    drop(bytes);
+    open_from_ogg_with_transform(ogg, index, transform, options).map(|(p, _)| p)
+}
+pub(crate) fn open_from_ogg_with_transform(
+    ogg: crate::owned_ogg::Ogg,
+    index: usize,
+    transform: Option<AudioDecodeTransform>,
+    options: &CopyOptions,
+) -> Result<(Program, Vec<u8>)> {
+    check(options)?;
     let selected = match options.streams.as_slice() {
         [] => None,
         [index] => Some(*index),
         _ => return Err("select exactly one audio stream".into()),
     };
-    let mut file = File::open(source).map_err(|e| e.to_string())?;
-    let (limits, index) = preflight(&mut file, options)?;
-    let program = Program::open_source_track(
-        CheckedRead {
-            input: BufReader::new(file),
-            options,
-        },
-        limits,
-        selected,
-    )
-    .map_err(|e| e.to_string())?;
+    let program = Program::from_ogg_source_track(ogg, selected).map_err(|e| e.to_string())?;
     let info = source_info(&program, options)?;
     let wave_meta_bytes =
         crate::owned_wave_metadata::wave_metadata_working_bytes(info.len(), options)?;
@@ -194,7 +205,7 @@ pub(crate) fn open_with_transform(
     let prefix_samples = program.prefix_end_samples(until, options.max_packets);
     check_nonempty_interval_prefix(transform, 48000, prefix_samples)?;
     check(options)?;
-    Ok(program)
+    Ok((program, info))
 }
 pub(crate) fn supports(
     source: &Path,

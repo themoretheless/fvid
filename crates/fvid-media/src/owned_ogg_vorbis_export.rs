@@ -33,6 +33,15 @@ pub(crate) fn open_with_transform(
     .map_err(|e| e.to_string())?;
     let ogg = crate::owned_ogg::Ogg::parse(&bytes, &limits).map_err(|e| e.to_string())?;
     drop(bytes);
+    open_from_ogg_with_transform(ogg, index, transform, options)
+}
+pub(crate) fn open_from_ogg_with_transform(
+    ogg: crate::owned_ogg::Ogg,
+    index: usize,
+    transform: Option<AudioDecodeTransform>,
+    options: &CopyOptions,
+) -> Result<(Program, Vec<u8>)> {
+    check(options)?;
     let selection = match options.streams.as_slice() {
         [] => None,
         [index] => Some(*index),

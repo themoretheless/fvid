@@ -94,7 +94,7 @@ pub(crate) fn descriptor_for_decode(
     transform: Option<AudioDecodeTransform>,
     options: &CopyOptions,
 ) -> Result<(usize, u32, u16, u32, String)> {
-    let (index, rate, channels, mask, codec, _) =
+    let (index, rate, channels, mask, codec, _, _) =
         descriptor_and_reader_for_decode(source, transform, options)?;
     Ok((index, rate, channels, mask, codec))
 }
@@ -108,6 +108,7 @@ fn descriptor_and_reader_for_decode(
     u16,
     u32,
     String,
+    Vec<u8>,
     crate::owned_mp4::Mp4Reader<BufReader<File>>,
 )> {
     let mut reader = open(source, options)?;
@@ -127,7 +128,7 @@ fn descriptor_and_reader_for_decode(
     let interval = transform.and_then(|t| prefix(t, initial_rate));
     crate::owned_mp4_audio::admit_audio_reader_with_interval(&reader, index, interval, options, None)
         .map_err(|e| e.to_string())?;
-    let _ = crate::owned_wave_metadata::mp4_source_info(source, options)?;
+    let info = crate::owned_wave_metadata::mp4_source_info_from_reader(&reader, index, options)?;
     if options.max_packet_bytes < crate::owned_mp4::Limits::default().packet_bytes {
         let track = &reader.tracks()[index];
         let max_samples = crate::owned_mp4_audio::mp4_active_samples(track, reader.movie_timescale(), interval, options.max_packets);
@@ -201,6 +202,7 @@ fn descriptor_and_reader_for_decode(
         decoder.channels(),
         decoder.channel_mask(),
         codec,
+        info,
         reader,
     ))
 }
@@ -218,7 +220,7 @@ pub(crate) fn geometry_and_frames_for_decode(
     transform: Option<AudioDecodeTransform>,
     options: &CopyOptions,
 ) -> Result<(u32, u16, u32, bool, u64)> {
-    let (_, rate, channels, mask, _, precise, frames) =
+    let (_, rate, channels, mask, _, precise, frames, _) =
         descriptor_with_frames_for_decode(source, transform, options)?;
     Ok((rate, channels, mask, precise, frames))
 }
@@ -226,8 +228,8 @@ pub(crate) fn descriptor_with_frames_for_decode(
     source: &Path,
     transform: Option<AudioDecodeTransform>,
     options: &CopyOptions,
-) -> Result<(usize, u32, u16, u32, String, bool, u64)> {
-    let (index, rate, channels, mask, codec, mut reader) =
+) -> Result<(usize, u32, u16, u32, String, bool, u64, Vec<u8>)> {
+    let (index, rate, channels, mask, codec, info, mut reader) =
         descriptor_and_reader_for_decode(source, transform, options)?;
     let track = &reader.tracks()[index];
     let interval = transform.and_then(|t| prefix(t, rate));
@@ -330,6 +332,7 @@ pub(crate) fn descriptor_with_frames_for_decode(
         codec,
         precise,
         estimated_frames,
+        info,
     ))
 }
 pub(crate) fn normalization_target(source:&Path,transform:AudioDecodeTransform,options:&CopyOptions,rate:u32,channels:u16,mask:u32)->Result<Option<(u32,u16,u32)>> {
@@ -436,8 +439,8 @@ pub(crate) fn apply(
     if destination.symlink_metadata().is_ok() {
         return Err("output already exists".into());
     }
-    let (source_rate, channels, mask, precise, source_frames) =
-        geometry_and_frames_for_decode(source, Some(transform), options)?;
+    let (_, source_rate, channels, mask, _, precise, source_frames, info) =
+        descriptor_with_frames_for_decode(source, Some(transform), options)?;
     let target=normalization_target(source,transform,options,source_rate,channels,mask)?;
     let (rate,channels,mask)=target.unwrap_or((source_rate,channels,mask));
     let stage2_frames = if rate != source_rate && source_rate > 0 {
@@ -445,7 +448,6 @@ pub(crate) fn apply(
     } else {
         source_frames
     };
-    let info = crate::owned_wave_metadata::mp4_source_info(source, options)?;
     let aac_fold = target.is_none()
         && !precise
         && transform

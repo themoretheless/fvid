@@ -4386,6 +4386,16 @@ See `batch-597-validation.json`.
 
 See `batch-598-validation.json`.
 
+## Batch 599 — FVID-0725..0729: Single-pass Ogg audio descriptor, reuse opened MP4/Matroska readers for RIFF INFO metadata, and single-open ADTS reader in `owned_adts_export`
+
+- **FVID-0725** — Reuse the opened and parsed `Ogg` container in `owned_ogg_audio_export::descriptor_for_decode` (`crates/fvid-media/src/owned_ogg_audio_export.rs`, `crates/fvid-media/src/owned_ogg_opus.rs`, `crates/fvid-media/src/owned_ogg_opus_export.rs`, `crates/fvid-media/src/owned_ogg_vorbis_export.rs`, `crates/fvid-media/src/owned_ogg_joint_export.rs`, `tests/ogg_mp4_matroska_adts_single_pass_info.rs`).
+- **FVID-0726** — Extract `mp4_source_info_from_reader` and reuse it across `owned_mp4_audio_export` and `owned_audio_plan` without re-opening and re-indexing the MP4 file (`crates/fvid-media/src/owned_wave_metadata.rs`, `crates/fvid-media/src/owned_mp4_audio_export.rs`, `crates/fvid-media/src/owned_audio_plan.rs`, `tests/ogg_mp4_matroska_adts_single_pass_info.rs`).
+- **FVID-0727** — Extract `matroska_source_info_from_reader` so Matroska audio geometry/frame preflight reuses the already-opened `WebmReader` (`crates/fvid-media/src/owned_wave_metadata.rs`, `crates/fvid-media/src/owned_matroska_aac_export.rs`, `crates/fvid-media/src/owned_matroska_opus_export.rs`, `crates/fvid-media/src/owned_matroska_flac_export.rs`, `crates/fvid-media/src/owned_matroska_alac_export.rs`, `crates/fvid-media/src/owned_matroska_mp3_export.rs`, `crates/fvid-media/src/owned_matroska_pcm_export.rs`, `tests/ogg_mp4_matroska_adts_single_pass_info.rs`).
+- **FVID-0728** — Return RIFF `INFO` metadata bytes alongside Matroska geometry and frame estimates to eliminate redundant Matroska opens in `apply` and `owned_audio_plan` (`crates/fvid-media/src/owned_audio_plan.rs`, `crates/fvid-media/src/owned_matroska_aac_export.rs`, `crates/fvid-media/src/owned_matroska_opus_export.rs`, `crates/fvid-media/src/owned_matroska_flac_export.rs`, `crates/fvid-media/src/owned_matroska_alac_export.rs`, `crates/fvid-media/src/owned_matroska_mp3_export.rs`, `crates/fvid-media/src/owned_matroska_pcm_export.rs`, `tests/ogg_mp4_matroska_adts_single_pass_info.rs`).
+- **FVID-0729** — Reuse the opened `AdtsStreamReader` in `owned_adts_export::supports` and `decode_to_wave_with_rate` via `decode_adts_reader_pcm` (`crates/fvid-media/src/owned_adts_export.rs`, `crates/fvid-media/src/owned_aac/stream.rs`, `tests/ogg_mp4_matroska_adts_single_pass_info.rs`).
+
+See `batch-599-validation.json`.
+
 
 
 

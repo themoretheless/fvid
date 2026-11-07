@@ -98,13 +98,8 @@ pub(crate) fn apply(
     if destination.symlink_metadata().is_ok() {
         return Err("output already exists".into());
     }
-    let (rate, channels, frames) =
-        geometry_and_frames_for_decode(source, Some(transform), options)?;
-    let info = crate::owned_wave_metadata::matroska_source_info_with_interval(
-        source,
-        prefix(transform, rate),
-        options,
-    )?;
+    let (rate, channels, frames, info) =
+        geometry_frames_and_info_for_decode(source, Some(transform), options)?;
     crate::owned_adts_export::check_spool_wave_export_budget(
         rate,
         channels,
@@ -152,6 +147,16 @@ pub(crate) fn geometry_and_frames_for_decode(
     transform: Option<AudioDecodeTransform>,
     options: &CopyOptions,
 ) -> Result<(u32, u16, u64)> {
+    let (rate, channels, frames, _) =
+        geometry_frames_and_info_for_decode(source, transform, options)?;
+    Ok((rate, channels, frames))
+}
+
+pub(crate) fn geometry_frames_and_info_for_decode(
+    source: &Path,
+    transform: Option<AudioDecodeTransform>,
+    options: &CopyOptions,
+) -> Result<(u32, u16, u64, Vec<u8>)> {
     let mut reader = crate::owned_matroska_audio::open_audio_reader(
         BufReader::new(File::open(source).map_err(|e| e.to_string())?),
         options,
@@ -185,7 +190,9 @@ pub(crate) fn geometry_and_frames_for_decode(
         interval,
         options.max_packets,
     );
-    let _ = crate::owned_wave_metadata::matroska_source_info_with_interval(source, interval, options)?;
+    let info = crate::owned_wave_metadata::matroska_source_info_from_reader(
+        &mut reader, index, interval, options,
+    )?;
     if transform.is_some_and(|t| t.interval.is_some()) {
         let mut probe = decode_options(options);
         probe.progress = None;
@@ -203,5 +210,5 @@ pub(crate) fn geometry_and_frames_for_decode(
         )?;
         estimated_frames = stats.sample_frames;
     }
-    Ok((rate, channels, estimated_frames))
+    Ok((rate, channels, estimated_frames, info))
 }

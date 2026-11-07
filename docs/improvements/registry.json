@@ -1,8 +1,8 @@
 {
   "target": 1000,
   "counting_rule": "One independently confirmed problem or useful capability; fixture variants and baseline integration repairs are excluded. Only accepted entries count.",
-  "accepted_count": 724,
-  "next_id": "FVID-0725",
+  "accepted_count": 729,
+  "next_id": "FVID-0730",
   "entries": [
     {
       "id": "FVID-0001",
@@ -8155,6 +8155,61 @@
       "result": "Extract descriptor_and_reader_for_decode and descriptor_with_frames_for_decode in owned_mp4_audio_export so geometry_and_frames_for_decode and owned_audio_plan::source_descriptor_for_decode reuse a single opened MP4 reader.",
       "status": "accepted",
       "validation": "batch-598-validation.json"
+    },
+    {
+      "id": "FVID-0725",
+      "batch": 599,
+      "title": "Reuse the opened and parsed Ogg container in owned_ogg_audio_export::descriptor_for_decode",
+      "source": "crates/fvid-media/src/owned_ogg_audio_export.rs",
+      "regression": "tests/ogg_mp4_matroska_adts_single_pass_info.rs",
+      "before": "owned_ogg_audio_export::descriptor_for_decode called select_backend (which preflighted, read, and parsed the entire Ogg file into memory), dropped the parsed Ogg, and then called open_with_transform on the Opus/Vorbis/Joint backend, which opened, preflighted, read, and parsed the entire Ogg file a second time.",
+      "result": "Expose open_from_ogg_with_transform in owned_ogg_opus_export, owned_ogg_vorbis_export, and owned_ogg_joint_export and pass the already-parsed Ogg and preflight index estimate directly from descriptor_for_decode.",
+      "status": "accepted",
+      "validation": "batch-599-validation.json"
+    },
+    {
+      "id": "FVID-0726",
+      "batch": 599,
+      "title": "Extract mp4_source_info_from_reader and reuse it across owned_mp4_audio_export and owned_audio_plan without re-opening and re-indexing the MP4 file",
+      "source": "crates/fvid-media/src/owned_wave_metadata.rs",
+      "regression": "tests/ogg_mp4_matroska_adts_single_pass_info.rs",
+      "before": "descriptor_and_reader_for_decode, apply, and owned_audio_plan::source_descriptor_for_decode each called mp4_source_info(source, options), which opened and indexed the MP4 file from scratch up to 3 times per operation.",
+      "result": "Extract mp4_source_info_from_reader(&reader, index, options) in owned_wave_metadata and return the computed RIFF INFO bytes from descriptor_with_frames_for_decode for reuse in apply and owned_audio_plan.",
+      "status": "accepted",
+      "validation": "batch-599-validation.json"
+    },
+    {
+      "id": "FVID-0727",
+      "batch": 599,
+      "title": "Extract matroska_source_info_from_reader so Matroska audio geometry/frame preflight reuses the already-opened WebmReader",
+      "source": "crates/fvid-media/src/owned_wave_metadata.rs",
+      "regression": "tests/ogg_mp4_matroska_adts_single_pass_info.rs",
+      "before": "All 6 Matroska audio export modules (AAC, Opus, FLAC, ALAC, MP3, PCM) called matroska_source_info_with_interval(source, interval, options) inside their geometry_and_frames_for_decode preflight, re-opening and re-scanning the Matroska file.",
+      "result": "Extract matroska_source_info_from_reader(&mut reader, index, interval, options) in owned_wave_metadata and call it on the already-opened WebmReader.",
+      "status": "accepted",
+      "validation": "batch-599-validation.json"
+    },
+    {
+      "id": "FVID-0728",
+      "batch": 599,
+      "title": "Return RIFF INFO metadata bytes alongside Matroska geometry and frame estimates to eliminate redundant Matroska opens in apply and owned_audio_plan",
+      "source": "crates/fvid-media/src/owned_audio_plan.rs",
+      "regression": "tests/ogg_mp4_matroska_adts_single_pass_info.rs",
+      "before": "Each Matroska audio export apply function and owned_audio_plan::source_descriptor_for_decode called geometry_and_frames_for_decode (which computed matroska_source_info and discarded it) and then called matroska_source_info_with_interval(source, ...) again.",
+      "result": "Return the RIFF INFO Vec<u8> from geometry_frames_and_info_for_decode / geometry_with_mask_frames_and_info_for_decode and reuse it in apply and matroska_descriptor_for_decode.",
+      "status": "accepted",
+      "validation": "batch-599-validation.json"
+    },
+    {
+      "id": "FVID-0729",
+      "batch": 599,
+      "title": "Reuse the opened AdtsStreamReader in owned_adts_export::supports and decode_to_wave_with_rate via decode_adts_reader_pcm",
+      "source": "crates/fvid-media/src/owned_adts_export.rs",
+      "regression": "tests/ogg_mp4_matroska_adts_single_pass_info.rs",
+      "before": "owned_adts_export::supports and decode_to_wave_with_rate opened an AdtsStreamReader to inspect configuration and ASC, dropped it, and then called decode_adts_pcm(File::open(source), ...), which opened the file and parsed the initial ADTS header a second time.",
+      "result": "Expose decode_adts_reader_pcm in owned_aac::stream and pass the already-opened AdtsStreamReader directly in supports and decode_to_wave_with_rate.",
+      "status": "accepted",
+      "validation": "batch-599-validation.json"
     }
   ]
 }

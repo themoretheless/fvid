@@ -165,24 +165,25 @@ pub(crate) fn supports(
         let config = reader.configuration();
         crate::owned_aac::stream::check_adts_decode_admission(reader.audio_specific_config(), options)
             .map_err(|e| e.to_string())?;
-        let asc=reader.audio_specific_config().to_vec();
-        drop(reader);
-        let mut probe = pcm_decode_options(options);
-        probe.progress = None;
+        let asc_mask = crate::owned_aac::NativeAacDecoder::new(reader.audio_specific_config())
+            .map_err(|e| e.to_string())?
+            .channel_mask();
+        let mut quiet = pcm_decode_options(options);
+        quiet.progress = None;
         let prefix = decoded_prefix(transform, config.sample_rate);
-        let stats=crate::owned_aac::decode_adts_pcm(
-            BufReader::new(File::open(source).map_err(|e| e.to_string())?),
+        let stats = crate::owned_aac::stream::decode_adts_reader_pcm(
+            reader,
             &mut std::io::sink(),
             prefix,
-            &probe,
+            &quiet,
         )
         .map_err(|e| e.to_string())?;
         let output=transform.channels.unwrap_or(i32::from(stats.channels));
         if output!=i32::from(stats.channels){
             if matches!(output,1|2){
-                if crate::owned_aac_export_routing::router_for_decode(source,stats.sample_rate,stats.channels,Some(transform),&probe)?.is_none(){return Err("AAC speaker routing is absent".into());}
+                if crate::owned_aac_export_routing::router_for_decode(source,stats.sample_rate,stats.channels,Some(transform),&quiet)?.is_none(){return Err("AAC speaker routing is absent".into());}
             }else{
-                let mask=if config.channels==1&&stats.channels==2{3}else{crate::owned_aac::NativeAacDecoder::new(&asc).map_err(|e|e.to_string())?.channel_mask()};
+                let mask=if config.channels==1&&stats.channels==2{3}else{asc_mask};
                 if stats.channels>2||!(1..=8).contains(&output)||!crate::owned_pcm_channels::standard_mask(stats.channels).is_some_and(|m|m==u64::from(mask)){return Err("unsupported channel conversion".into());}
             }
         }
@@ -393,20 +394,14 @@ fn decode_to_wave_with_rate(
     let mask = crate::owned_aac::NativeAacDecoder::new(reader.audio_specific_config())
         .map_err(|e| e.to_string())?
         .channel_mask();
-    drop(reader);
     spool_decoded(
         config.sample_rate,
         config.channels,
         mask,
         options,
-        |writer, options| {
-            crate::owned_aac::decode_adts_pcm(
-                BufReader::new(File::open(source).map_err(|e| e.to_string())?),
-                writer,
-                interval,
-                options,
-            )
-            .map_err(|e| e.to_string())
+        move |writer, options| {
+            crate::owned_aac::stream::decode_adts_reader_pcm(reader, writer, interval, options)
+                .map_err(|e| e.to_string())
         },
     )
 }

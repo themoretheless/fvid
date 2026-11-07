@@ -248,6 +248,43 @@ pub fn decode_adts_pcm<R: Read>(
     )?;
     decode_adts_aac_reader_controlled(reader, output, interval, &mut control)
 }
+pub(crate) fn decode_adts_reader_pcm<R: Read>(
+    reader: AdtsStreamReader<R>,
+    output: &mut impl Write,
+    interval: Option<(Duration, Duration)>,
+    options: &CopyOptions,
+) -> Result<AudioDecodeStats> {
+    let mut control = DecodeProgress {
+        options,
+        event: ProgressEvent {
+            packets: 0,
+            payload_bytes: 0,
+            done: false,
+        },
+    };
+    control.check()?;
+    if !(options.streams.is_empty() || options.streams == [0]) {
+        return Err(invalid("ADTS has only stream 0"));
+    }
+    if !options.metadata_set.is_empty()
+        || !options.metadata_delete.is_empty()
+        || !options.stream_metadata_set.is_empty()
+        || !options.stream_metadata_delete.is_empty()
+    {
+        return Err(invalid("raw PCM stream cannot apply metadata mutations"));
+    }
+    if interval.is_some_and(|(from, to)| from >= to) {
+        return Err(invalid("audio interval requires from < to"));
+    }
+    if let Some(progress) = &options.progress {
+        progress.emit(control.event);
+    }
+    control.check()?;
+    if control.packet_limit_reached() {
+        return Err(invalid("audio interval contains no samples"));
+    }
+    decode_adts_aac_reader_controlled(reader, output, interval, &mut control)
+}
 /// Read-only clock/layout negotiation for file plans and loudness admission.
 /// Uses the same selected prefix and decoder budget as execution, but never
 /// emits progress or publishes PCM. SBR can be identified before source EOF.

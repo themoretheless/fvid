@@ -17,9 +17,16 @@ pub(crate) fn select_backend(
     source: &Path,
     options: &CopyOptions,
 ) -> Result<(usize, Backend), String> {
+    let (stream_index, backend, _, _) = open_selected_ogg(source, options)?;
+    Ok((stream_index, backend))
+}
+fn open_selected_ogg(
+    source: &Path,
+    options: &CopyOptions,
+) -> Result<(usize, Backend, crate::owned_ogg::Ogg, usize), String> {
     check(options)?;
     let mut file = File::open(source).map_err(|e| e.to_string())?;
-    let (limits, _) = preflight(&mut file, options)?;
+    let (limits, index) = preflight(&mut file, options)?;
     let mut bytes = Vec::new();
     bytes
         .try_reserve_exact(limits.file_bytes)
@@ -31,6 +38,7 @@ pub(crate) fn select_backend(
     .read_to_end(&mut bytes)
     .map_err(|e| e.to_string())?;
     let ogg = crate::owned_ogg::Ogg::parse(&bytes, &limits).map_err(|e| e.to_string())?;
+    drop(bytes);
     let catalog = crate::owned_ogg_audio_catalog::from_ogg(&ogg).map_err(|e| e.to_string())?;
     let selected = match options.streams.as_slice() {
         [] if catalog.len() == 1 => &catalog[0],
@@ -47,14 +55,18 @@ pub(crate) fn select_backend(
         .iter()
         .position(|t| t.source_index == source_index)
         .unwrap();
-    if crate::owned_ogg_audio_catalog::needs_joint_program(&ogg, nth).map_err(|e| e.to_string())? {
-        return Ok((source_index, Backend::Joint));
-    }
-    match selected.coding {
-        Coding::Vorbis => Ok((source_index, Backend::Vorbis)),
-        Coding::Opus => Ok((source_index, Backend::Opus)),
-        _ => Err("unsupported Ogg audio source codec".into()),
-    }
+    let backend = if crate::owned_ogg_audio_catalog::needs_joint_program(&ogg, nth)
+        .map_err(|e| e.to_string())?
+    {
+        Backend::Joint
+    } else {
+        match selected.coding {
+            Coding::Vorbis => Backend::Vorbis,
+            Coding::Opus => Backend::Opus,
+            _ => return Err("unsupported Ogg audio source codec".into()),
+        }
+    };
+    Ok((source_index, backend, ogg, index))
 }
 pub(crate) fn coding(source: &Path, options: &CopyOptions) -> Result<Backend, String> {
     select_backend(source, options).map(|(_, backend)| backend)
@@ -71,10 +83,12 @@ pub(crate) fn descriptor_for_decode(
     transform: Option<AudioDecodeTransform>,
     options: &CopyOptions,
 ) -> Result<(usize, u32, u16, u32, &'static str, u64, usize), String> {
-    let (stream_index, backend) = select_backend(source, options)?;
+    let (stream_index, backend, ogg, index) = open_selected_ogg(source, options)?;
     match backend {
         Backend::Opus => {
-            let p = crate::owned_ogg_opus_export::open_with_transform(source, transform, options)?;
+            let (p, info) = crate::owned_ogg_opus_export::open_from_ogg_with_transform(
+                ogg, index, transform, options,
+            )?;
             if p.end_samples() <= 0 {
                 return Err("Ogg Opus audio stream contains no audible samples".into());
             }
@@ -86,8 +100,6 @@ pub(crate) fn descriptor_for_decode(
                 })
                 .transpose()?;
             let prefix_samples = p.prefix_end_samples(until, options.max_packets);
-            let tags = p.source_tags().map_err(|e| e.to_string())?;
-            let info_len = crate::owned_ogg_opus_export::info_for_tags(&tags)?.len();
             Ok((
                 stream_index,
                 p.sample_rate(),
@@ -95,12 +107,13 @@ pub(crate) fn descriptor_for_decode(
                 p.output_channel_mask().unwrap_or(0),
                 "opus",
                 prefix_samples,
-                info_len,
+                info.len(),
             ))
         }
         Backend::Vorbis => {
-            let (p, info) =
-                crate::owned_ogg_vorbis_export::open_with_transform(source, transform, options)?;
+            let (p, info) = crate::owned_ogg_vorbis_export::open_from_ogg_with_transform(
+                ogg, index, transform, options,
+            )?;
             if p.duration().is_none_or(|d| d.is_zero()) {
                 return Err("Ogg Vorbis audio stream contains no audible samples".into());
             }
@@ -124,8 +137,9 @@ pub(crate) fn descriptor_for_decode(
             ))
         }
         Backend::Joint => {
-            let (p, info) =
-                crate::owned_ogg_joint_export::open_with_transform(source, transform, options)?;
+            let (p, info) = crate::owned_ogg_joint_export::open_from_ogg_with_transform(
+                ogg, index, transform, options,
+            )?;
             if p.end_samples() <= 0 {
                 return Err("Ogg linked audio stream contains no audible samples".into());
             }
