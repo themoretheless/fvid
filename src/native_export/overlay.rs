@@ -272,18 +272,7 @@ impl TimedOverlay {
 
 /// Owned lossless main admission; other main formats retain legacy routing.
 pub fn overlay_eligible(main: &Path) -> Result<bool> {
-    if crate::native_lossless_y4m::eligible(main)? {
-        return Ok(true);
-    }
-    let mut input = File::open(main)?;
-    let mut prefix = [0; 8];
-    if input.read(&mut prefix)? != 8 {
-        return Ok(false);
-    }
-    Ok(
-        crate::container::mp4::recognizes_prefix(&prefix)
-            && crate::native_lossless::eligible(main)?,
-    )
+    crate::native_lossless::eligible(main)
 }
 /// Composite a single foreground video; retain all supported main audio companions.
 /// File origins align to the first presented frame, EOF repeats the last frame.
@@ -332,7 +321,8 @@ pub fn overlay_video_transformed(
     if destination.symlink_metadata().is_ok() {
         return Err(invalid("overlay destination already exists"));
     }
-    if !overlay_eligible(main)? {
+    let planar_eligible = crate::native_lossless_y4m::eligible(main)?;
+    if !planar_eligible && !crate::native_lossless::eligible(main)? {
         return Err(invalid(
             "owned overlay requires a supported owned lossless main input",
         ));
@@ -384,7 +374,7 @@ pub fn overlay_video_transformed(
         compositor.apply(frame, depth, pts, cancel)
     };
     let mut output = BufWriter::new(file);
-    let (stats, event) = if crate::native_lossless_y4m::eligible(main)? {
+    let (stats, event) = if planar_eligible {
         crate::native_lossless_y4m::write_processed(
             main,
             &mut output,

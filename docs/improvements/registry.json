@@ -1,8 +1,8 @@
 {
   "target": 1000,
   "counting_rule": "One independently confirmed problem or useful capability; fixture variants and baseline integration repairs are excluded. Only accepted entries count.",
-  "accepted_count": 764,
-  "next_id": "FVID-0765",
+  "accepted_count": 769,
+  "next_id": "FVID-0770",
   "entries": [
     {
       "id": "FVID-0001",
@@ -8595,6 +8595,61 @@
       "result": "Validate finite samples and write &buffer[..n] directly when info.float && sample_bytes == 4, and batch converted f32 samples into float_buf for one output.write_all(&float_buf) per block otherwise.",
       "status": "accepted",
       "validation": "batch-606-validation.json"
+    },
+    {
+      "id": "FVID-0765",
+      "batch": 607,
+      "title": "Open source once in native_lossless_y4m::eligible instead of up to three times",
+      "source": "src/native_lossless_y4m.rs",
+      "regression": "tests/lossless_y4m_and_overlay_single_open.rs",
+      "before": "native_lossless_y4m::eligible called is_source(source) (opening source), then native_export::is_matroska_source(source) (opening source again), and then opened source a third time for WebmReader::open or Y4M header parsing.",
+      "result": "Open BufReader::new(File::open(source)?) once, inspect the 9-byte prefix, seek back to 0, and reuse input for Y4M header parsing or WebmReader::open.",
+      "status": "accepted",
+      "validation": "batch-607-validation.json"
+    },
+    {
+      "id": "FVID-0766",
+      "batch": 607,
+      "title": "Validate and open Y4M/Matroska sources in a single pass via open_lossless_source in native_lossless_y4m::validate_first_frame and write_selected",
+      "source": "src/native_lossless_y4m.rs",
+      "regression": "tests/lossless_y4m_and_overlay_single_open.rs",
+      "before": "validate_first_frame and write_selected called eligible(source) (which opened and scanned the entire Matroska container), then called is_source(source), and then opened and scanned the entire Matroska container a second time.",
+      "result": "Extract open_lossless_source(source) and eligible_webm(&webm) so validate_first_frame and write_selected open, scan, and validate the source container in one pass.",
+      "status": "accepted",
+      "validation": "batch-607-validation.json"
+    },
+    {
+      "id": "FVID-0767",
+      "batch": 607,
+      "title": "Reuse a single BufReader<File> for MP4 prefix check and Mp4Reader::open in native_lossless::eligible",
+      "source": "src/native_lossless.rs",
+      "regression": "tests/lossless_y4m_and_overlay_single_open.rs",
+      "before": "native_lossless::eligible opened source once to read the 8-byte MP4 prefix and then opened source a second time for Mp4Reader::open.",
+      "result": "Open BufReader::new(File::open(source)?) once, seek back to 0 after recognizes_prefix, and pass input directly to Mp4Reader::open.",
+      "status": "accepted",
+      "validation": "batch-607-validation.json"
+    },
+    {
+      "id": "FVID-0768",
+      "batch": 607,
+      "title": "Delegate native_export::overlay::overlay_eligible directly to native_lossless::eligible",
+      "source": "src/native_export/overlay.rs",
+      "regression": "tests/lossless_y4m_and_overlay_single_open.rs",
+      "before": "overlay_eligible called native_lossless_y4m::eligible(main), opened main to check recognizes_prefix, and then called native_lossless::eligible(main) which called native_lossless_y4m::eligible(main) and recognizes_prefix a second time.",
+      "result": "Delegate overlay_eligible(main) directly to crate::native_lossless::eligible(main).",
+      "status": "accepted",
+      "validation": "batch-607-validation.json"
+    },
+    {
+      "id": "FVID-0769",
+      "batch": 607,
+      "title": "Cache planar_eligible in native_export::overlay::overlay_video_transformed",
+      "source": "src/native_export/overlay.rs",
+      "regression": "tests/lossless_y4m_and_overlay_single_open.rs",
+      "before": "overlay_video_transformed called overlay_eligible(main) (which checked native_lossless_y4m::eligible(main)) and then called native_lossless_y4m::eligible(main) again before dispatching to write_processed or write_mp4_processed.",
+      "result": "Compute planar_eligible = crate::native_lossless_y4m::eligible(main)? once and reuse it to dispatch between write_processed and write_mp4_processed.",
+      "status": "accepted",
+      "validation": "batch-607-validation.json"
     }
   ],
   "pending_count": 0

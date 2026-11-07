@@ -4466,9 +4466,14 @@ See `batch-605-validation.json`.
 
 See `batch-606-validation.json`.
 
+## Batch 607 — FVID-0765..0769: Single-open and single-scan Y4M/Matroska/MP4 lossless eligibility and overlay admission in `native_lossless_y4m`, `native_lossless`, and `native_export::overlay`
 
+- **FVID-0765** — Open `source` once in `native_lossless_y4m::eligible` instead of up to three times (`src/native_lossless_y4m.rs`, `tests/lossless_y4m_and_overlay_single_open.rs`).
+- **FVID-0766** — Validate and open Y4M/Matroska sources in a single pass via `open_lossless_source` in `native_lossless_y4m::validate_first_frame` and `write_selected` (`src/native_lossless_y4m.rs`, `tests/lossless_y4m_and_overlay_single_open.rs`).
+- **FVID-0767** — Reuse a single `BufReader<File>` for the MP4 prefix check and `Mp4Reader::open` in `native_lossless::eligible` (`src/native_lossless.rs`, `tests/lossless_y4m_and_overlay_single_open.rs`).
+- **FVID-0768** — Delegate `native_export::overlay::overlay_eligible` directly to `native_lossless::eligible` (`src/native_export/overlay.rs`, `tests/lossless_y4m_and_overlay_single_open.rs`).
+- **FVID-0769** — Cache `planar_eligible` in `native_export::overlay::overlay_video_transformed` (`src/native_export/overlay.rs`, `tests/lossless_y4m_and_overlay_single_open.rs`).
 
-
-
+See `batch-607-validation.json`.
 
 

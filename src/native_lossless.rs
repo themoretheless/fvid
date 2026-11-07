@@ -26,13 +26,17 @@ fn check(cancel: Option<&CancelFlag>) -> Result<()> {
 }
 /// All tracks must be represented; no unsupported stream may disappear.
 pub fn eligible(source: &Path) -> Result<bool> {
-    if crate::native_lossless_y4m::eligible(source)? { return Ok(true); }
-    let mut input = File::open(source)?;
+    use std::io::SeekFrom;
+    if crate::native_lossless_y4m::eligible(source)? {
+        return Ok(true);
+    }
+    let mut input = BufReader::new(File::open(source)?);
     let mut prefix = [0; 8];
     if input.read(&mut prefix)? != 8 || !crate::container::mp4::recognizes_prefix(&prefix) {
         return Ok(false);
     }
-    let input = Mp4Reader::open(BufReader::new(File::open(source)?), Default::default())?;
+    input.seek(SeekFrom::Start(0))?;
+    let input = Mp4Reader::open(input, Default::default())?;
     Ok(mp4_matroska::eligible(&input)
         && input
             .tracks()

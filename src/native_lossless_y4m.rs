@@ -25,40 +25,19 @@ pub fn is_source(source: &Path) -> Result<bool> {
 }
 /// Admission preserves the legacy path for Y4M profiles not owned yet.
 pub fn eligible(source: &Path) -> Result<bool> {
-    if !is_source(source)? {
-        if !crate::native_export::is_matroska_source(source)? {
+    use std::io::SeekFrom;
+    let mut input = BufReader::new(File::open(source)?);
+    let mut prefix = [0u8; 9];
+    let read = input.read(&mut prefix)?;
+    input.seek(SeekFrom::Start(0))?;
+    if read != 9 || &prefix != b"YUV4MPEG2" {
+        if read < 4 || prefix[..4] != [0x1a, 0x45, 0xdf, 0xa3] {
             return Ok(false);
         }
-        let mut input = crate::container::webm::WebmReader::open(
-            BufReader::new(File::open(source)?),
-            Default::default(),
-        )?;
+        let mut input = crate::container::webm::WebmReader::open(input, Default::default())?;
         input.scan_all()?;
-        let videos: Vec<_> = input.tracks.iter().filter(|t| t.kind == 1).collect();
-        return Ok(videos.len() == 1
-            && matches!(
-                videos[0].codec.as_str(),
-                "V_VP9" | "V_AV1" | "V_MPEG4/ISO/AVC" | "V_MPEGH/ISO/HEVC" | "V_FFV1"
-            )
-            && input.tracks.iter().all(|t| {
-                t.kind == 1
-                    || (t.kind == 2
-                        && ((t.codec == "A_AAC"
-                            && crate::codec::config::AacConfig::parse(&t.codec_private).is_ok())
-                            || (t.codec == "A_OPUS"
-                                && crate::container::opus_packet::header_channels(
-                                    &t.codec_private,
-                                )
-                                .is_ok_and(|c| u64::from(c) == t.channels)
-                                && crate::container::opus_packet::pre_skip_ns(&t.codec_private)
-                                    .is_ok_and(|delay| delay == t.codec_delay_ns)
-                                && u32::from_le_bytes(
-                                    t.codec_private[12..16].try_into().unwrap(),
-                                ) != 0)))
-            })
-            && input.packets.iter().all(|p| p.pts_ns >= 0));
+        return Ok(eligible_webm(&input));
     }
-    let mut input = BufReader::new(File::open(source)?);
     let mut line = Vec::new();
     crate::line(&mut input, &mut line)?;
     let Ok(header) = crate::Header::parse(&line) else {
@@ -99,6 +78,66 @@ pub fn write_processed<W: Write + Seek>(
     )
 }
 
+fn eligible_webm(input: &crate::container::webm::WebmReader<BufReader<File>>) -> bool {
+    let videos: Vec<_> = input.tracks.iter().filter(|t| t.kind == 1).collect();
+    videos.len() == 1
+        && matches!(
+            videos[0].codec.as_str(),
+            "V_VP9" | "V_AV1" | "V_MPEG4/ISO/AVC" | "V_MPEGH/ISO/HEVC" | "V_FFV1"
+        )
+        && input.tracks.iter().all(|t| {
+            t.kind == 1
+                || (t.kind == 2
+                    && ((t.codec == "A_AAC"
+                        && crate::codec::config::AacConfig::parse(&t.codec_private).is_ok())
+                        || (t.codec == "A_OPUS"
+                            && crate::container::opus_packet::header_channels(
+                                &t.codec_private,
+                            )
+                            .is_ok_and(|c| u64::from(c) == t.channels)
+                            && crate::container::opus_packet::pre_skip_ns(&t.codec_private)
+                                .is_ok_and(|delay| delay == t.codec_delay_ns)
+                            && u32::from_le_bytes(
+                                t.codec_private[12..16].try_into().unwrap(),
+                            ) != 0)))
+        })
+        && input.packets.iter().all(|p| p.pts_ns >= 0)
+}
+
+fn open_lossless_source(
+    source: &Path,
+) -> Result<Option<crate::container::webm::WebmReader<BufReader<File>>>> {
+    use std::io::SeekFrom;
+    let mut input = BufReader::new(File::open(source)?);
+    let mut prefix = [0u8; 9];
+    let read = input.read(&mut prefix)?;
+    input.seek(SeekFrom::Start(0))?;
+    if read == 9 && &prefix == b"YUV4MPEG2" {
+        let mut line = Vec::new();
+        crate::line(&mut input, &mut line)?;
+        let Ok(header) = crate::Header::parse(&line) else {
+            return Err(invalid("unsupported owned planar lossless source"));
+        };
+        if header
+            .tokens
+            .iter()
+            .any(|t| matches!(t.as_str(), "C420mpeg2" | "C420paldv"))
+        {
+            return Err(invalid("unsupported owned planar lossless source"));
+        }
+        return Ok(None);
+    }
+    if read < 4 || prefix[..4] != [0x1a, 0x45, 0xdf, 0xa3] {
+        return Err(invalid("unsupported owned planar lossless source"));
+    }
+    let mut webm = crate::container::webm::WebmReader::open(input, Default::default())?;
+    webm.scan_all()?;
+    if !eligible_webm(&webm) {
+        return Err(invalid("unsupported owned planar lossless source"));
+    }
+    Ok(Some(webm))
+}
+
 /// Validate first-frame presence, geometry, and filter sample planes without writing output.
 pub(crate) fn validate_first_frame(
     source: &Path,
@@ -106,20 +145,7 @@ pub(crate) fn validate_first_frame(
     filters: &PixelFilters,
     processed: bool,
 ) -> Result<()> {
-    if !eligible(source)? {
-        return Err(invalid("unsupported owned planar lossless source"));
-    }
-    let mut webm = if is_source(source)? {
-        None
-    } else {
-        Some(crate::container::webm::WebmReader::open(
-            BufReader::new(File::open(source)?),
-            Default::default(),
-        )?)
-    };
-    if let Some(input) = webm.as_mut() {
-        input.scan_all()?;
-    }
+    let webm = open_lossless_source(source)?;
     let video_index = webm
         .as_ref()
         .and_then(|r| r.tracks.iter().position(|t| t.kind == 1))
@@ -218,20 +244,7 @@ pub fn write_selected<W: Write + Seek>(
     step:fvid_media::owned_framestep::FrameStep,
 )->Result<(crate::media_info::LosslessStats,ProgressEvent)> {
     check(cancel)?;
-    if !eligible(source)? {
-        return Err(invalid("unsupported owned planar lossless source"));
-    }
-    let mut webm = if is_source(source)? {
-        None
-    } else {
-        Some(crate::container::webm::WebmReader::open(
-            BufReader::new(File::open(source)?),
-            Default::default(),
-        )?)
-    };
-    if let Some(input) = webm.as_mut() {
-        input.scan_all()?;
-    }
+    let mut webm = open_lossless_source(source)?;
     let video_index = webm
         .as_ref()
         .and_then(|r| r.tracks.iter().position(|t| t.kind == 1))
