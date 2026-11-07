@@ -592,15 +592,28 @@ pub fn remux_with_options(
         "FVid ADTS AAC packet copy into MP4 or Matroska; preserve encoder priming"
     };
     drop(input);
-    let info = if matroska {
-        crate::native_probe::matroska_with_options(source, options)?
-    } else if adts {
-        let mut probe_opts = options.clone();
-        probe_opts.max_controlled_bytes = None;
-        probe_opts.max_packets = None;
-        crate::native_probe::probe_with_options(source, &probe_opts)?
+    let streams = if adts {
+        vec![PlanStream {
+            index: 0,
+            media_type: "audio".into(),
+            codec: "aac".into(),
+            disposition: "copy".into(),
+        }]
     } else {
-        crate::native_probe::probe_with_options(source, options)?
+        let info = if matroska {
+            crate::native_probe::matroska_with_options(source, options)?
+        } else {
+            crate::native_probe::probe_with_options(source, options)?
+        };
+        info.streams
+            .into_iter()
+            .map(|s| PlanStream {
+                index: s.index,
+                media_type: s.media_type,
+                codec: s.codec,
+                disposition: "copy".into(),
+            })
+            .collect()
     };
     let mut notes = vec![
         "backend: fvid; no decode/encode or external demuxer".into(),
@@ -632,9 +645,7 @@ pub fn remux_with_options(
     }
     Ok(Some(MediaPlan {
         command: "remux".into(), input: source.to_owned(), inputs: vec![source.to_owned()],
-        streams: info.streams.into_iter().map(|s| PlanStream {
-            index: s.index, media_type: s.media_type, codec: s.codec, disposition: "copy".into(),
-        }).collect(),
+        streams,
         steps,
         graph: None,
         notes,
@@ -767,6 +778,14 @@ pub fn concat_wave_with_options(
     sources: &[std::path::PathBuf],
     options: &fvid_media::CopyOptions,
 ) -> Result<MediaPlan> {
+    concat_wave_with_options_and_cached_info(sources, options, None)
+}
+
+pub(crate) fn concat_wave_with_options_and_cached_info(
+    sources: &[std::path::PathBuf],
+    options: &fvid_media::CopyOptions,
+    cached: Option<(crate::native_pcm::WaveInfo, u64)>,
+) -> Result<MediaPlan> {
     if options.cancel.as_ref().is_some_and(|c| c.is_cancelled()) {
         return Err("media operation cancelled".into());
     }
@@ -791,9 +810,11 @@ pub fn concat_wave_with_options(
     {
         return fvid_media::owned_wave_plan::plan_concat(sources, options);
     }
-    let (info, frames) =
-        crate::native_pcm::concat_info_with_cancel(sources, options.cancel.as_ref())
-            .map_err(|e| e.to_string())?;
+    let (info, frames) = match cached {
+        Some(cached) => cached,
+        None => crate::native_pcm::concat_info_with_cancel(sources, options.cancel.as_ref())
+            .map_err(|e| e.to_string())?,
+    };
     Ok(MediaPlan {
         command: "concat".into(), input: sources[0].clone(), inputs: sources.to_vec(),
         streams: vec![PlanStream {index:0,media_type:"audio".into(),codec:info.codec(),disposition:"copy".into()}],
@@ -1197,9 +1218,39 @@ pub fn trim_aac_with_options(
     to: i64,
     options: &fvid_media::CopyOptions,
 ) -> Result<MediaPlan> {
+    if options.cancel.as_ref().is_some_and(|c| c.is_cancelled()) {
+        return Err("media operation cancelled".into());
+    }
+    if options.max_packet_bytes == 0 {
+        return Err("packet byte limit must be positive".into());
+    }
+    if options.max_packets == Some(0) {
+        return Err("packet work limit requires at least one packet".into());
+    }
+    if options.max_controlled_bytes == Some(0) {
+        return Err("controlled memory limit must be positive".into());
+    }
+    fvid_media::owned_budget::check_rss_budget(options)?;
     let selected = options.streams.first().copied();
     let interval=(from>=0 && to>from).then(||(std::time::Duration::from_micros(from as u64),std::time::Duration::from_micros(to as u64)));
-    let index = aac_trim_selection_with_interval_and_options(source, selected, interval, options)?;
+    let index = audio_stream_index_from_metadata(source, selected, options)?;
+    if let Ok(info) = crate::native_media::constant_audio_source_info_selected_with_interval_and_options(
+        source,
+        Some(index),
+        interval,
+        options,
+    ) {
+        if info.codec == "aac" {
+            return finish_trim_aac_plan(source, from, to, index, Some(&info), options);
+        }
+    }
+    crate::native_media::aac_source_info_selected_with_options(
+        source,
+        Some(index),
+        interval,
+        options,
+    )
+    .map_err(|e| e.to_string())?;
     finish_trim_aac_plan(source, from, to, index, None, options)
 }
 

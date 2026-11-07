@@ -1,8 +1,8 @@
 {
   "target": 1000,
   "counting_rule": "One independently confirmed problem or useful capability; fixture variants and baseline integration repairs are excluded. Only accepted entries count.",
-  "accepted_count": 909,
-  "next_id": "FVID-0910",
+  "accepted_count": 914,
+  "next_id": "FVID-0915",
   "entries": [
     {
       "id": "FVID-0001",
@@ -10190,6 +10190,61 @@
       "result": "Tries constant_audio_source_info_selected_with_options directly first when options.max_controlled_bytes is None and falls back to is_owned_audio_source_with_options only on failure.",
       "status": "accepted",
       "validation": "batch-635-validation.json"
+    },
+    {
+      "id": "FVID-0910",
+      "batch": 636,
+      "title": "Reuse WAVE concat_info_with_cancel inspection in media::plan_concat",
+      "source": "src/media.rs",
+      "regression": "tests/wave_concat_aac_trim_and_adts_remux_plan_reuse.rs",
+      "before": "media::plan_concat called native_pcm::concat_info_with_cancel on all WAVE inputs to check compatibility, discarded the result, and immediately called native_plan::concat_wave_with_options which invoked concat_info_with_cancel a second time.",
+      "result": "Forwards the (WaveInfo, u64) tuple from concat_info_with_cancel directly into concat_wave_with_options_and_cached_info.",
+      "status": "accepted",
+      "validation": "batch-636-validation.json"
+    },
+    {
+      "id": "FVID-0911",
+      "batch": 636,
+      "title": "Reuse constant AudioSourceInfo in native_plan::trim_aac_with_options",
+      "source": "src/native_plan.rs",
+      "regression": "tests/wave_concat_aac_trim_and_adts_remux_plan_reuse.rs",
+      "before": "native_plan::trim_aac_with_options called aac_trim_selection_with_interval_and_options and then passed None as cached_info to finish_trim_aac_plan, reopening and rescanning the container in decode_audio_with_options.",
+      "result": "Inspects constant-format AAC sources via constant_audio_source_info_selected_with_interval_and_options and passes Some(&info) to finish_trim_aac_plan.",
+      "status": "accepted",
+      "validation": "batch-636-validation.json"
+    },
+    {
+      "id": "FVID-0912",
+      "batch": 636,
+      "title": "Inspect constant-audio sources directly in native_audio_mix::eligible_with_options when memory budget is unbounded",
+      "source": "src/native_audio_mix.rs",
+      "regression": "tests/wave_concat_aac_trim_and_adts_remux_plan_reuse.rs",
+      "before": "native_audio_mix::eligible_with_options called is_owned_audio_source_with_options before constant_audio_source_info_selected_with_options on every non-WAVE input, scanning constant-audio containers twice.",
+      "result": "Tries constant_audio_source_info_selected_with_options directly first when options.max_controlled_bytes is None before falling back to is_owned_audio_source_with_options.",
+      "status": "accepted",
+      "validation": "batch-636-validation.json"
+    },
+    {
+      "id": "FVID-0913",
+      "batch": 636,
+      "title": "Inspect constant-audio sources before is_owned_audio_source_with_options in decode_source_to_f32le_with_options",
+      "source": "src/native_audio_mix.rs",
+      "regression": "tests/wave_concat_aac_trim_and_adts_remux_plan_reuse.rs",
+      "before": "decode_source_to_f32le_with_options called is_owned_audio_source_with_options before export_audio_pcm_transformed_with_controls, performing an extra AAC fallback check when constant_audio_source_info_selected_with_options already qualifies the source.",
+      "result": "Checks constant_audio_source_info_selected_with_options first before falling back to is_owned_audio_source_with_options.",
+      "status": "accepted",
+      "validation": "batch-636-validation.json"
+    },
+    {
+      "id": "FVID-0914",
+      "batch": 636,
+      "title": "Build ADTS PlanStream directly without full-file probe_with_options rescan in native_plan::remux_with_options",
+      "source": "src/native_plan.rs",
+      "regression": "tests/wave_concat_aac_trim_and_adts_remux_plan_reuse.rs",
+      "before": "After scanning all ADTS packets to validate packet and memory limits, native_plan::remux_with_options called native_probe::probe_with_options with unbounded packet limits, reopening and scanning the entire ADTS file a second time.",
+      "result": "Constructs the single-stream AAC PlanStream descriptor directly for ADTS inputs in remux_with_options.",
+      "status": "accepted",
+      "validation": "batch-636-validation.json"
     }
   ],
   "pending_count": 126

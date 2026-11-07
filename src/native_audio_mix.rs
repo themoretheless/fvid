@@ -248,7 +248,15 @@ pub(crate) fn decode_source_to_f32le_with_options(
         let mut wave_file = File::open(source)?;
         let is_wave = crate::native_pcm::is_wave_reader(&mut wave_file)?;
         drop(wave_file);
-        if is_wave || crate::native_media::is_owned_audio_source_with_options(source, &clean_opts)? {
+        if is_wave
+            || crate::native_media::constant_audio_source_info_selected_with_options(
+                source,
+                None,
+                &clean_opts,
+            )
+            .is_ok()
+            || crate::native_media::is_owned_audio_source_with_options(source, &clean_opts)?
+        {
             let mut export_opts = clean_opts;
             export_opts.progress = None;
             return crate::native_export::export_audio_pcm_transformed_with_controls(
@@ -337,8 +345,22 @@ pub fn eligible_with_options(
             }
         } else if {
             drop(wave_file);
-            crate::native_media::is_owned_audio_source_with_options(source, &clean_opts)?
-        } {
+            options.max_controlled_bytes.is_none()
+        } && let Ok(_) = crate::native_media::constant_audio_source_info_selected_with_options(
+            source,
+            None,
+            &clean_opts,
+        ) {
+            if crate::native_probe::try_probe_metadata_with_options(source, &clean_opts)
+                .is_ok_and(|probe| {
+                    probe.is_some_and(|p| {
+                        p.streams.iter().filter(|s| s.media_type == "audio").count() != 1
+                    })
+                })
+            {
+                return Ok(false);
+            }
+        } else if crate::native_media::is_owned_audio_source_with_options(source, &clean_opts)? {
             let Ok(_) = crate::native_media::constant_audio_source_info_selected_with_options(source, None, &clean_opts) else {
                 return Ok(false);
             };

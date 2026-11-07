@@ -4742,5 +4742,14 @@ See `batch-628-validation.json`.
 - **FVID-0908**: Inspect constant-audio MP4 and Matroska sources before AAC fallback in `is_owned_audio_source_with_interval_and_options` (`src/native_media.rs`).
 - **FVID-0909**: Inspect constant-audio sources before whole-container eligibility check in `native_audio_mix::validate_and_inspect_source_with_options` (`src/native_audio_mix.rs`).
 
+## Batch 636 (FVID-0910..0914)
+
+- **FVID-0910**: Reuse WAVE `concat_info_with_cancel` inspection in `media::plan_concat` (`src/media.rs`, `src/native_plan.rs`).
+- **FVID-0911**: Reuse constant `AudioSourceInfo` in `native_plan::trim_aac_with_options` (`src/native_plan.rs`).
+- **FVID-0912**: Inspect constant-audio sources directly in `native_audio_mix::eligible_with_options` when memory budget is unbounded (`src/native_audio_mix.rs`).
+- **FVID-0913**: Inspect constant-audio sources before `is_owned_audio_source_with_options` in `decode_source_to_f32le_with_options` (`src/native_audio_mix.rs`).
+- **FVID-0914**: Build ADTS `PlanStream` directly without full-file `probe_with_options` rescan in `native_plan::remux_with_options` (`src/native_plan.rs`).
+
+
 
 

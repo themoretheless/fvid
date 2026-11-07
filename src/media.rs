@@ -1265,7 +1265,7 @@ pub fn plan_concat(sources: &[std::path::PathBuf], options: &CopyOptions) -> Res
         validate_concat_matroska_options(options)?;
     }
     if all_wave
-        && crate::native_pcm::concat_info_with_cancel(sources, options.cancel.as_ref()).is_ok()
+        && let Ok(wave_concat) = crate::native_pcm::concat_info_with_cancel(sources, options.cancel.as_ref())
     {
         if options.streams.iter().any(|&s|s!=0) {return Err("WAVE has only stream 0".into());}
         if validate_native_copy_options(options, true).is_err() {
@@ -1276,7 +1276,11 @@ pub fn plan_concat(sources: &[std::path::PathBuf], options: &CopyOptions) -> Res
                 return Ok(plan);
             }
         } else {
-            return crate::native_plan::concat_wave_with_options(sources, options);
+            return crate::native_plan::concat_wave_with_options_and_cached_info(
+                sources,
+                options,
+                Some(wave_concat),
+            );
         }
     }
     if validate_concat_matroska_options(options).is_ok()
