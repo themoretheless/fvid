@@ -1,8 +1,8 @@
 {
   "target": 1000,
   "counting_rule": "One independently confirmed problem or useful capability; fixture variants and baseline integration repairs are excluded. Only accepted entries count.",
-  "accepted_count": 689,
-  "next_id": "FVID-0690",
+  "accepted_count": 694,
+  "next_id": "FVID-0695",
   "entries": [
     {
       "id": "FVID-0001",
@@ -7770,6 +7770,61 @@
       "result": "Charge index_bytes.saturating_add(max_sample_bytes) for MP4 and index_bytes.saturating_add(pkt_bytes).saturating_add(overhead) for Matroska against max_controlled_bytes in validate_encoded_audio_packet_budget.",
       "status": "accepted",
       "validation": "batch-591-validation.json"
+    },
+    {
+      "id": "FVID-0690",
+      "batch": 592,
+      "title": "Reject existing destinations upfront and eliminate redundant intermediate Vec<f32> allocations in owned audio mix and merge",
+      "source": "crates/fvid-media/src/owned_audio_mix.rs",
+      "regression": "tests/audio_mix_loudnorm_subtitle_and_wave_preflight.rs",
+      "before": "media::mix_audio_with_controls and media::merge_audio_with_controls probed all sources in native_audio_mix::eligible_with_options before checking if destination already existed, owned_audio_mix::mix_with_controls_and_decoder and merge_with_controls_and_decoder decoded all inputs in worker threads before write_wav_f32le checked destination.symlink_metadata(), and merge_with_controls_and_decoder allocated two full intermediate Vec<f32> buffers with infallible .collect() in addition to out.",
+      "result": "Check destination.symlink_metadata().is_ok() upfront in media::mix_audio_with_controls, media::merge_audio_with_controls, and owned_audio_mix mix/merge, and populate the fallibly reserved merge output buffer directly from decoded PCM byte slices.",
+      "status": "accepted",
+      "validation": "batch-592-validation.json"
+    },
+    {
+      "id": "FVID-0691",
+      "batch": 592,
+      "title": "Reject existing destinations upfront before pass-1 measurement or WAVE processing and use fallibly reserved block buffers in loudnorm and normalize-loudness",
+      "source": "crates/fvid-media/src/owned_loudnorm.rs",
+      "regression": "tests/audio_mix_loudnorm_subtitle_and_wave_preflight.rs",
+      "before": "owned_loudnorm::apply_resolved and apply_dynamic read the source WAVE, emitted progress events, and ran resampling/dynamic normalization before write_wav_f32le_with_side_data_checked checked destination.symlink_metadata(); apply_dynamic allocated per-block Vec<u8> and Vec<f64> buffers with infallible Vec::with_capacity / .collect(); native_loudnorm::try_apply checked destination.exists() (missing broken symlinks) only after scanning inputs; and normalize_file_with_options ran pass-1 loudness measurement before checking if destination existed.",
+      "result": "Check destination.symlink_metadata().is_ok() upfront in owned_loudnorm::apply_resolved, apply_dynamic, native_loudnorm::try_apply, and normalize_file_with_options before any input scan or progress emission, and reuse fallibly reserved block scratch buffers in apply_dynamic.",
+      "status": "accepted",
+      "validation": "batch-592-validation.json"
+    },
+    {
+      "id": "FVID-0692",
+      "batch": 592,
+      "title": "Defer 0-packet WAVE loudness progress until preflight and use fallible allocations in measure_for_normalization and LoudnessMeter::new",
+      "source": "crates/fvid-media/src/owned_wave_loudness.rs",
+      "regression": "tests/audio_mix_loudnorm_subtitle_and_wave_preflight.rs",
+      "before": "owned_wave_loudness::measure_for_normalization emitted a 0-packet ProgressEvent before check(options) and allocated buffer and pcm with infallible vec! and Vec::with_capacity, and LoudnessMeter::new allocated its 3-second short_ring and 0.4-second ring buffers with infallible vec![0.0; ...].",
+      "result": "Check options and allocate buffer and pcm via owned_frame::buffer and try_reserve_exact before emitting initial progress in measure_for_normalization, and use fallible try_reserve_exact for short_ring, ring, and weights in LoudnessMeter::new.",
+      "status": "accepted",
+      "validation": "batch-592-validation.json"
+    },
+    {
+      "id": "FVID-0693",
+      "batch": 592,
+      "title": "Reject existing subtitle destinations upfront before reading inputs and use fallible source buffers in ASS and SRT conversion",
+      "source": "crates/fvid-media/src/owned_subtitle_impl.rs",
+      "regression": "tests/audio_mix_loudnorm_subtitle_and_wave_preflight.rs",
+      "before": "try_convert_matroska_inner, try_convert_ass_inner, and try_convert_srt_inner read and parsed the entire subtitle input and wrote a temporary Matroska file before failing at std::fs::hard_link when destination already existed, and try_convert_ass_inner / try_convert_srt_inner read up to 64 MiB into an unreserved Vec::new().",
+      "result": "Check !dry_run && destination.symlink_metadata().is_ok() upfront in try_convert_matroska_inner, try_convert_ass_inner, try_convert_srt_inner, and publish_events_with_metadata, and pre-reserve ASS/SRT input buffers via try_reserve_exact.",
+      "status": "accepted",
+      "validation": "batch-592-validation.json"
+    },
+    {
+      "id": "FVID-0694",
+      "batch": 592,
+      "title": "Reject existing destinations upfront in native WAVE trim/concat, native and owned ADTS remux/concat, and owned WAVE audio export",
+      "source": "src/native_pcm.rs",
+      "regression": "tests/audio_mix_loudnorm_subtitle_and_wave_preflight.rs",
+      "before": "native_pcm::trim_wave, concat_wave, and write_wave inspected inputs and wrote temporary WAVE files before failing at std::fs::hard_link when destination existed; native_export::remux_adts_aac_with_options, concat_adts_aac_with_options, and publish_adts_readers_limited opened ADTS inputs and muxed temporary outputs before checking destination; and owned_adts_remux::remux, owned_concat::concat, and owned_audio_export::decode_audio_transformed opened or read inputs before checking destination.symlink_metadata().",
+      "result": "Check destination.symlink_metadata().is_ok() upfront before opening or reading inputs in native_pcm::trim_wave, concat_wave, write_wave, native_export ADTS remux/concat, owned_adts_remux::remux, owned_concat::concat, and owned_audio_export::decode_audio_transformed.",
+      "status": "accepted",
+      "validation": "batch-592-validation.json"
     }
   ]
 }

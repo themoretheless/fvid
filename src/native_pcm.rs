@@ -182,6 +182,9 @@ pub fn trim_wave(
     if destination.extension().and_then(|s| s.to_str()) != Some("wav") {
         return Err(invalid("native WAVE trim output requires .wav"));
     }
+    if destination.symlink_metadata().is_ok() {
+        return Err(invalid("output already exists"));
+    }
     let mut input = File::open(source)?;
     let info = inspect(&mut input, cancel)?;
     let range = info.interval(from, to)?;
@@ -228,6 +231,9 @@ fn write_wave(
         return Err(invalid(
             "concatenated WAVE exceeds RIFF size or sample count range",
         ));
+    }
+    if destination.symlink_metadata().is_ok() {
+        return Err(invalid("output already exists"));
     }
     let directory = destination
         .parent()
@@ -530,6 +536,12 @@ pub fn concat_wave(
     check(cancel)?;
     if destination.extension().and_then(|s| s.to_str()) != Some("wav") {
         return Err(invalid("native WAVE concat output requires .wav"));
+    }
+    if !(2..=256).contains(&sources.len()) {
+        return Err(invalid("concat requires 2..=256 inputs"));
+    }
+    if destination.symlink_metadata().is_ok() {
+        return Err(invalid("output already exists"));
     }
     let (info, frames, mut segments) = concat_inputs(sources, cancel)?;
     let bytes = frames * u64::from(info.block);

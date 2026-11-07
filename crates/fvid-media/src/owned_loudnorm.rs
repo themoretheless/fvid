@@ -557,6 +557,9 @@ fn apply_resolved(
             "owned linear loudnorm requires WAVE output, stream 0 and no metadata edits".into(),
         );
     }
+    if destination.symlink_metadata().is_ok() {
+        return Err("output already exists".into());
+    }
     let mut event = ProgressEvent {
         packets: 0,
         payload_bytes: 0,
@@ -737,6 +740,9 @@ fn apply_dynamic(
     if !policies(options) || destination.extension().and_then(|s| s.to_str()) != Some("wav") {
         return Err("owned loudnorm requires WAVE output, stream 0 and no metadata edits".into());
     }
+    if destination.symlink_metadata().is_ok() {
+        return Err("output already exists".into());
+    }
     let mut event = ProgressEvent {
         packets: 0,
         payload_bytes: 0,
@@ -837,9 +843,14 @@ fn apply_dynamic(
         input.channels as u16,
     )
     .map_err(|e| e.to_string())?;
-    for block in raw.chunks(width * input.channels as usize * 4096) {
+    let max_block_samples = input.channels as usize * 4096;
+    let mut pcm_bytes = Vec::new();
+    pcm_bytes
+        .try_reserve_exact(max_block_samples * 8)
+        .map_err(|_| "cannot allocate loudnorm block buffer")?;
+    for block in raw.chunks(width * max_block_samples) {
         check()?;
-        let mut pcm = Vec::with_capacity(block.len() / width * 8);
+        pcm_bytes.clear();
         for sample in block.chunks_exact(width) {
             use crate::owned_pcm_integer::Format;
             let value = match (float, width) {
@@ -851,26 +862,30 @@ fn apply_dynamic(
                 (false, 4) => Format::I32.decode(sample)?,
                 _ => return Err("unsupported loudnorm PCM format".into()),
             };
-            pcm.extend_from_slice(&value.to_le_bytes());
+            pcm_bytes.extend_from_slice(&value.to_le_bytes());
         }
-        resampler.write_all(&pcm).map_err(|e| e.to_string())?;
+        resampler.write_all(&pcm_bytes).map_err(|e| e.to_string())?;
     }
     let frames = resampler.finish().map_err(|e| e.to_string())?;
     drop(resampler);
+    drop(pcm_bytes);
     drop(raw);
     let mut meter = crate::owned_loudness::LoudnessMeter::new(192000, &weights)?;
     let mut peak = 0f64;
-    for block in data.chunks(8 * input.channels as usize * 4096) {
+    let mut pcm = Vec::new();
+    pcm.try_reserve_exact(max_block_samples)
+        .map_err(|_| "cannot allocate loudnorm meter buffer")?;
+    for block in data.chunks(8 * max_block_samples) {
         check()?;
-        let pcm: Vec<f64> = block
-            .chunks_exact(8)
-            .map(|bytes| f64::from_le_bytes(bytes.try_into().unwrap()))
-            .collect();
-        for &value in &pcm {
+        pcm.clear();
+        for bytes in block.chunks_exact(8) {
+            let value = f64::from_le_bytes(bytes.try_into().unwrap());
             peak = peak.max(value.abs());
+            pcm.push(value);
         }
         meter.push(&pcm)?;
     }
+    drop(pcm);
     let global = meter.histogram_integrated_lufs();
     drop(meter);
     let output = if frames >= 576000 {

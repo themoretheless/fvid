@@ -35,16 +35,37 @@ impl LoudnessMeter {
             );
         }
         let filter = KWeighting::new(sample_rate, weights.len())?;
+        let short_len = (sample_rate as usize)
+            .checked_mul(3)
+            .ok_or("loudness short ring size overflow")?;
+        let mut short_ring = Vec::new();
+        short_ring
+            .try_reserve_exact(short_len)
+            .map_err(|_| "cannot allocate loudness short ring")?;
+        short_ring.resize(short_len, 0.0);
+        let ring_len = (sample_rate as usize)
+            .checked_mul(2)
+            .ok_or("loudness ring size overflow")?
+            / 5;
+        let mut ring = Vec::new();
+        ring.try_reserve_exact(ring_len)
+            .map_err(|_| "cannot allocate loudness ring")?;
+        ring.resize(ring_len, 0.0);
+        let mut owned_weights = Vec::new();
+        owned_weights
+            .try_reserve_exact(weights.len())
+            .map_err(|_| "cannot allocate loudness channel weights")?;
+        owned_weights.extend_from_slice(weights);
         Ok(Self {
             true_peak: None,
-            short_ring: vec![0.0; sample_rate as usize * 3],
+            short_ring,
             short_position: 0,
             short_sum: 0.0,
             short_energies: BTreeMap::new(),
             sample_peak: 0.0,
             filter,
-            weights: weights.to_vec(),
-            ring: vec![0.0; sample_rate as usize * 2 / 5],
+            weights: owned_weights,
+            ring,
             position: 0,
             sum: 0.0,
             frames: 0,

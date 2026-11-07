@@ -39,6 +39,9 @@ pub fn concat(
         }
         return crate::owned_wave_remux::concat(sources, destination, options);
     }
+    if destination.symlink_metadata().is_ok() {
+        return Err("output already exists".into());
+    }
     let readers = open_readers(sources, options)?;
     let mut stats = crate::owned_matroska_remux::publish(destination, options, |output| {
         crate::owned_matroska::concat_adts_with_options(

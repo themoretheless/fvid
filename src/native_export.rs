@@ -2042,6 +2042,9 @@ pub fn remux_adts_aac_with_options(
         return Err(invalid("controlled memory limit must be positive"));
     }
     fvid_media::owned_budget::check_rss_budget(options).map_err(|e| invalid(&e))?;
+    if destination.symlink_metadata().is_ok() {
+        return Err(invalid("output already exists"));
+    }
     if options
         .max_controlled_bytes
         .is_some_and(|limit| limit < 16384)
@@ -2107,6 +2110,9 @@ pub fn concat_adts_aac_with_options(
     fvid_media::owned_budget::check_rss_budget(options).map_err(|e| invalid(&e))?;
     if !(2..=256).contains(&sources.len()) {return Err(invalid("concat requires 2..=256 inputs"));}
     if !matches!(destination.extension().and_then(|s|s.to_str()),Some("mp4"|"m4a"|"mka"|"mkv")) {return Err(invalid("native ADTS concat output requires .mp4/.m4a or .mka/.mkv"));}
+    if destination.symlink_metadata().is_ok() {
+        return Err(invalid("output already exists"));
+    }
     if options
         .max_controlled_bytes
         .is_some_and(|limit| sources.len().saturating_mul(8192).saturating_add(16384) > limit)
@@ -2153,6 +2159,9 @@ fn publish_adts_readers_limited(
         })
     {
         return Err(invalid("ADTS MP4 output does not support metadata mutations"));
+    }
+    if destination.symlink_metadata().is_ok() {
+        return Err(invalid("output already exists"));
     }
     if matroska_out {
         let meta_bytes =

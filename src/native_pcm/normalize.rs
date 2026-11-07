@@ -73,6 +73,9 @@ pub fn normalize_file_with_options(
         )
         .map_err(|e| invalid(&e))?;
     }
+    if destination.symlink_metadata().is_ok() {
+        return Err(invalid("output already exists"));
+    }
     let before = std::fs::metadata(source)?;
     let measure_hook = progress.map(|hook| hook.for_phase(NormalizationPhase::Measure));
     let mut measure_options = options.clone();

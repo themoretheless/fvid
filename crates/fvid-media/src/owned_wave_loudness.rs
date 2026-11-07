@@ -201,10 +201,12 @@ pub(crate) fn measure_for_normalization(
             hook.emit(event);
         }
     };
-    emit(event);
     check(options)?;
-    let mut buffer = vec![0; input.capacity];
-    let mut pcm = Vec::with_capacity(input.capacity / usize::from(input.info.bits_per_sample / 8));
+    let mut buffer = crate::owned_frame::buffer(input.capacity)?;
+    let mut pcm = Vec::new();
+    pcm.try_reserve_exact(input.capacity / usize::from(input.info.bits_per_sample / 8))
+        .map_err(|_| "cannot allocate loudness PCM buffer".to_string())?;
+    emit(event);
     input
         .file
         .seek(SeekFrom::Start(input.info.data_offset))

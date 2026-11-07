@@ -50,6 +50,9 @@ pub fn remux(
     if !supports(source, destination, options) {
         return Err("request is not an owned ADTS Matroska remux".into());
     }
+    if destination.symlink_metadata().is_ok() {
+        return Err("output already exists".into());
+    }
     let meta_bytes = crate::owned_matroska::estimate_adts_matroska_metadata_bytes(Some(options))
         .map_err(|e| e.to_string())?;
     if options

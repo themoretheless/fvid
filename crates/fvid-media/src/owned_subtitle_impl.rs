@@ -757,6 +757,12 @@ fn try_convert_matroska_inner(
     dry_run: bool,
 ) -> Result<Option<SubtitleStats>> {
     let max_controlled_bytes = controls.and_then(|c| c.max_controlled_bytes);
+    if !dry_run
+        && destination.extension().and_then(|s| s.to_str()) == Some("mkv")
+        && destination.symlink_metadata().is_ok()
+    {
+        return Err(invalid("output already exists"));
+    }
     let effective_packet_bytes = max_packet_bytes.min(max_controlled_bytes.unwrap_or(usize::MAX));
     let memory_packets = max_controlled_bytes
         .map(|limit| limit / std::mem::size_of::<webm::Packet>());
@@ -1140,6 +1146,9 @@ fn try_convert_ass_inner(
         return Err(invalid("ASS has only subtitle stream 0"));
     }
     let meta = apply_subtitle_matroska_metadata("", "", None, None, None, controls)?;
+    if !dry_run && destination.symlink_metadata().is_ok() {
+        return Err(invalid("output already exists"));
+    }
     let meta_working_bytes = estimate_subtitle_matroska_metadata_working_bytes(&meta);
     let max_controlled_bytes = controls.and_then(|c| c.max_controlled_bytes);
     if let Some(limit) = max_controlled_bytes
@@ -1162,6 +1171,9 @@ fn try_convert_ass_inner(
         }
     }
     let mut bytes = Vec::new();
+    bytes
+        .try_reserve_exact(usize::try_from(file_len).unwrap_or(0))
+        .map_err(|_| invalid("cannot allocate ASS subtitle buffer"))?;
     File::open(source)?
         .take((64 << 20) + 1)
         .read_to_end(&mut bytes)?;
@@ -1360,6 +1372,9 @@ fn try_convert_srt_inner(
         return Err(invalid("SRT has only subtitle stream 0"));
     }
     let meta = apply_subtitle_matroska_metadata("", "und", None, None, None, controls)?;
+    if !dry_run && destination.symlink_metadata().is_ok() {
+        return Err(invalid("output already exists"));
+    }
     let meta_working_bytes = estimate_subtitle_matroska_metadata_working_bytes(&meta);
     let max_controlled_bytes = controls.and_then(|c| c.max_controlled_bytes);
     if let Some(limit) = max_controlled_bytes
@@ -1382,6 +1397,9 @@ fn try_convert_srt_inner(
         }
     }
     let mut bytes = Vec::new();
+    bytes
+        .try_reserve_exact(usize::try_from(file_len).unwrap_or(0))
+        .map_err(|_| invalid("cannot allocate SRT subtitle buffer"))?;
     File::open(source)?
         .take((64 << 20) + 1)
         .read_to_end(&mut bytes)?;
@@ -1608,6 +1626,9 @@ fn publish_events_with_metadata(
             packets_out: events.len() as u64,
             payload_bytes: total_payload_bytes,
         }));
+    }
+    if destination.symlink_metadata().is_ok() {
+        return Err(invalid("output already exists"));
     }
     let directory = destination
         .parent()

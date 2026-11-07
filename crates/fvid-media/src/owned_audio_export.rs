@@ -290,6 +290,9 @@ pub fn decode_audio_transformed(
     if !simple_options(options) {
         return Err("WAVE has only stream 0".into());
     }
+    if destination.symlink_metadata().is_ok() {
+        return Err("output already exists".into());
+    }
     let check = || {
         if options
             .cancel

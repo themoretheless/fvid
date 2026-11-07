@@ -1,0 +1,27 @@
+{
+  "status": "accepted",
+  "accepted_ids": [
+    "FVID-0690",
+    "FVID-0691",
+    "FVID-0692",
+    "FVID-0693",
+    "FVID-0694"
+  ],
+  "count_delta": 5,
+  "accepted_count": 694,
+  "next_id": "FVID-0695",
+  "qualification": [
+    {
+      "name": "audio-mix-loudnorm-subtitle-and-wave-preflight",
+      "command": [
+        "cargo",
+        "test",
+        "--test",
+        "audio_mix_loudnorm_subtitle_and_wave_preflight"
+      ],
+      "exit_code": 0,
+      "passed": 5,
+      "ignored": 0
+    }
+  ]
+}

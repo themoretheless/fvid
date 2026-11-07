@@ -584,6 +584,9 @@ where
     if destination.extension().and_then(|v| v.to_str()) != Some("wav") {
         return Err("mix-audio requires a .wav output".into());
     }
+    if destination.symlink_metadata().is_ok() {
+        return Err("output already exists".into());
+    }
     let _ = options.duration;
     let weights = expand_weights(sources.len(), &options.weights)?;
     let weight_sum: f32 = weights.iter().copied().sum();
@@ -738,6 +741,9 @@ where
     if destination.extension().and_then(|v| v.to_str()) != Some("wav") {
         return Err("merge-audio requires a .wav output".into());
     }
+    if destination.symlink_metadata().is_ok() {
+        return Err("output already exists".into());
+    }
     let (decoded_a, decoded_b) = std::thread::scope(|scope| {
         let left = scope.spawn(|| decoder(&sources[0], controls));
         let right = scope.spawn(|| decoder(&sources[1], controls));
@@ -774,16 +780,6 @@ where
             return Err("controlled memory budget exceeded by audio merge output buffer".into());
         }
     }
-    let a: Vec<_> = pcm_a
-        .chunks_exact(4)
-        .take(frames * ch_a)
-        .map(|v| f32::from_le_bytes(v.try_into().unwrap()))
-        .collect();
-    let b: Vec<_> = pcm_b
-        .chunks_exact(4)
-        .take(frames * ch_b)
-        .map(|v| f32::from_le_bytes(v.try_into().unwrap()))
-        .collect();
     let total_samples = frames
         .checked_mul(out_ch)
         .ok_or("merge-audio sample count overflow")?;
@@ -796,8 +792,18 @@ where
             validate_mix_controls(controls)?;
         }
         let dst = &mut out[frame * out_ch..(frame + 1) * out_ch];
-        dst[..ch_a].copy_from_slice(&a[frame * ch_a..(frame + 1) * ch_a]);
-        dst[ch_a..].copy_from_slice(&b[frame * ch_b..(frame + 1) * ch_b]);
+        for (slot, sample) in dst[..ch_a]
+            .iter_mut()
+            .zip(pcm_a[frame * ch_a * 4..(frame + 1) * ch_a * 4].chunks_exact(4))
+        {
+            *slot = f32::from_le_bytes(sample.try_into().unwrap());
+        }
+        for (slot, sample) in dst[ch_a..]
+            .iter_mut()
+            .zip(pcm_b[frame * ch_b * 4..(frame + 1) * ch_b * 4].chunks_exact(4))
+        {
+            *slot = f32::from_le_bytes(sample.try_into().unwrap());
+        }
     }
     validate_mix_controls(controls)?;
     write_wav_f32le(destination, stats_a.sample_rate, out_ch as i32, &out)?;

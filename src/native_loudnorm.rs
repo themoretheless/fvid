@@ -543,6 +543,9 @@ pub fn try_apply(
         )?;
         return Err("invalid WAVE INFO metadata mutation".into());
     }
+    if ext == Some("wav") && destination.symlink_metadata().is_ok() {
+        return Err("loudnorm destination already exists".into());
+    }
     let normalize = |input: &Path, options: &CopyOptions| {
         if dual_pass {
             fvid_media::owned_loudnorm::apply_loudnorm_dual(input, destination, args, options)
@@ -681,7 +684,7 @@ pub fn try_apply(
     if options.streams.len() > 1 {
         return Err("loudnorm requires one selected audio stream".into());
     }
-    if destination.exists() {
+    if destination.symlink_metadata().is_ok() {
         return Err("loudnorm destination already exists".into());
     }
     if destination.extension().and_then(|s| s.to_str()) != Some("wav") {

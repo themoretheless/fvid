@@ -4316,5 +4316,16 @@ See `batch-590-validation.json`.
 
 See `batch-591-validation.json`.
 
+## Batch 592 — FVID-0690..0694: Upfront destination checks and direct output filling in owned audio mix/merge, upfront destination checks and fallible block buffers in loudnorm and normalize-loudness, deferred progress and fallible rings in WAVE loudness and `LoudnessMeter`, upfront destination checks and fallible buffers in subtitle conversion, and upfront destination checks in WAVE trim/concat and ADTS remux/concat
+
+- **FVID-0690** — Reject existing destinations upfront and eliminate redundant intermediate `Vec<f32>` allocations in owned audio mix and merge (`crates/fvid-media/src/owned_audio_mix.rs`, `src/media.rs`, `tests/audio_mix_loudnorm_subtitle_and_wave_preflight.rs`).
+- **FVID-0691** — Reject existing destinations upfront before pass-1 measurement or WAVE processing and use fallibly reserved block buffers in loudnorm and normalize-loudness (`crates/fvid-media/src/owned_loudnorm.rs`, `src/native_loudnorm.rs`, `src/native_pcm/normalize.rs`, `tests/audio_mix_loudnorm_subtitle_and_wave_preflight.rs`).
+- **FVID-0692** — Defer 0-packet WAVE loudness progress until preflight and use fallible allocations in `measure_for_normalization` and `LoudnessMeter::new` (`crates/fvid-media/src/owned_wave_loudness.rs`, `crates/fvid-media/src/owned_loudness.rs`, `tests/audio_mix_loudnorm_subtitle_and_wave_preflight.rs`).
+- **FVID-0693** — Reject existing subtitle destinations upfront before reading inputs and use fallible source buffers in ASS and SRT conversion (`crates/fvid-media/src/owned_subtitle_impl.rs`, `tests/audio_mix_loudnorm_subtitle_and_wave_preflight.rs`).
+- **FVID-0694** — Reject existing destinations upfront in native WAVE trim/concat, native and owned ADTS remux/concat, and owned WAVE audio export (`src/native_pcm.rs`, `src/native_export.rs`, `crates/fvid-media/src/owned_adts_remux.rs`, `crates/fvid-media/src/owned_concat.rs`, `crates/fvid-media/src/owned_audio_export.rs`, `tests/audio_mix_loudnorm_subtitle_and_wave_preflight.rs`).
+
+See `batch-592-validation.json`.
+
+
 
 

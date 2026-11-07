@@ -1254,6 +1254,11 @@ pub fn mix_audio_with_controls(
     controls: &CopyOptions,
 ) -> Result<MixAudioStats> {
     validate_concat_matroska_options(controls)?;
+    if destination.extension().and_then(|s| s.to_str()) == Some("wav")
+        && destination.symlink_metadata().is_ok()
+    {
+        return Err("output already exists".into());
+    }
     let mut default_controls = CopyOptions::default();
     default_controls.cancel = controls.cancel.clone();
     default_controls.max_rss_bytes = controls.max_rss_bytes;
@@ -1308,6 +1313,11 @@ pub fn merge_audio_with_controls(
     controls: &CopyOptions,
 ) -> Result<MergeAudioStats> {
     validate_concat_matroska_options(controls)?;
+    if destination.extension().and_then(|s| s.to_str()) == Some("wav")
+        && destination.symlink_metadata().is_ok()
+    {
+        return Err("output already exists".into());
+    }
     let mut default_controls = CopyOptions::default();
     default_controls.cancel = controls.cancel.clone();
     default_controls.max_rss_bytes = controls.max_rss_bytes;
