@@ -239,7 +239,7 @@ unsafe fn hflip_plane_copy_avx2(
 /// 8-tap vertical subpel filter: `out[c] = clamp((sum_t coef[t]*rows[t][c] + 64) >> 7, 0, max)`.
 ///
 /// Each of the eight source rows must hold at least `out.len()` samples. NEON on aarch64,
-/// scalar elsewhere (bit-identical), so callers get one definition to test against.
+/// AVX2 on x86/x86_64 when available, scalar elsewhere (bit-identical), so callers get one definition to test against.
 pub fn interp8_vertical(rows: [&[i32]; 8], coef: &[i32; 8], max: i32, out: &mut [u16]) {
     let n = out.len();
     debug_assert!(rows.iter().all(|r| r.len() >= n));
@@ -259,6 +259,24 @@ pub fn interp8_vertical(rows: [&[i32]; 8], coef: &[i32; 8], max: i32, out: &mut 
         unsafe { interp8_vertical_neon(ptrs, coef, max, out.as_mut_ptr(), n) };
         return;
     }
+    #[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
+    {
+        if is_x86_feature_detected!("avx2") {
+            let ptrs: [*const i32; 8] = [
+                rows[0].as_ptr(),
+                rows[1].as_ptr(),
+                rows[2].as_ptr(),
+                rows[3].as_ptr(),
+                rows[4].as_ptr(),
+                rows[5].as_ptr(),
+                rows[6].as_ptr(),
+                rows[7].as_ptr(),
+            ];
+            // SAFETY: each row has >= n readable i32 and `out` has n writable u16 (asserted above).
+            unsafe { interp8_vertical_avx2(ptrs, coef, max, out.as_mut_ptr(), n) };
+            return;
+        }
+    }
     #[cfg(not(target_arch = "aarch64"))]
     for (c, o) in out.iter_mut().enumerate() {
         let mut sum = 0;
@@ -266,6 +284,58 @@ pub fn interp8_vertical(rows: [&[i32]; 8], coef: &[i32; 8], max: i32, out: &mut 
             sum += coef[t] * rows[t][c];
         }
         *o = ((sum + 64) >> 7).clamp(0, max) as u16;
+    }
+}
+
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
+#[target_feature(enable = "avx2")]
+unsafe fn interp8_vertical_avx2(
+    rows: [*const i32; 8],
+    coef: &[i32; 8],
+    max: i32,
+    out: *mut u16,
+    n: usize,
+) {
+    #[cfg(target_arch = "x86")]
+    use std::arch::x86::*;
+    #[cfg(target_arch = "x86_64")]
+    use std::arch::x86_64::*;
+    unsafe {
+        let cf = [
+            _mm256_set1_epi32(coef[0]),
+            _mm256_set1_epi32(coef[1]),
+            _mm256_set1_epi32(coef[2]),
+            _mm256_set1_epi32(coef[3]),
+            _mm256_set1_epi32(coef[4]),
+            _mm256_set1_epi32(coef[5]),
+            _mm256_set1_epi32(coef[6]),
+            _mm256_set1_epi32(coef[7]),
+        ];
+        let round = _mm256_set1_epi32(64);
+        let zero = _mm256_setzero_si256();
+        let vmax = _mm256_set1_epi32(max);
+        let mut c = 0usize;
+        while c + 8 <= n {
+            let mut acc = _mm256_mullo_epi32(cf[0], _mm256_loadu_si256(rows[0].add(c).cast()));
+            for t in 1..8 {
+                let prod = _mm256_mullo_epi32(cf[t], _mm256_loadu_si256(rows[t].add(c).cast()));
+                acc = _mm256_add_epi32(acc, prod);
+            }
+            let shifted = _mm256_srai_epi32::<7>(_mm256_add_epi32(acc, round));
+            let clamped = _mm256_min_epi32(_mm256_max_epi32(shifted, zero), vmax);
+            let lo = _mm256_castsi256_si128(clamped);
+            let hi = _mm256_extracti128_si256::<1>(clamped);
+            let packed = _mm_packus_epi32(lo, hi);
+            _mm_storeu_si128(out.add(c).cast(), packed);
+            c += 8;
+        }
+        for k in c..n {
+            let mut sum = 0;
+            for t in 0..8 {
+                sum += coef[t] * *rows[t].add(k);
+            }
+            *out.add(k) = ((sum + 64) >> 7).clamp(0, max) as u16;
+        }
     }
 }
 
@@ -622,6 +692,7 @@ pub enum HevcLumaFilter {
 }
 
 /// Scalar reference for hevc_deblock_luma_batch4 (bit-identical to parent crate).
+#[allow(dead_code)]
 fn hevc_deblock_luma_batch4_scalar(
     p: [[u16; 4]; 4],
     q: [[u16; 4]; 4],
@@ -701,9 +772,129 @@ unsafe fn hevc_deblock_luma_batch4_neon(
     filter: HevcLumaFilter,
     enabled: [[bool; 2]; 4],
 ) -> ([[u16; 4]; 4], [[u16; 4]; 4]) {
-    // For HEVC, all 4 lines use the same filter mode. This NEON version just unrolls
-    // the scalar code for 4 lines to allow better compiler optimization.
-    hevc_deblock_luma_batch4_scalar(p, q, tc, depth, filter, enabled)
+    use std::arch::aarch64::*;
+    if matches!(filter, HevcLumaFilter::Off) {
+        return (p, q);
+    }
+    unsafe {
+        let mut a = [vdupq_n_s32(0); 4];
+        let mut b = [vdupq_n_s32(0); 4];
+        let mut tmp = [0i32; 4];
+        for i in 0..4 {
+            for k in 0..4 {
+                tmp[k] = i32::from(p[k][i]);
+            }
+            a[i] = vld1q_s32(tmp.as_ptr());
+            for k in 0..4 {
+                tmp[k] = i32::from(q[k][i]);
+            }
+            b[i] = vld1q_s32(tmp.as_ptr());
+        }
+        let mut out_a = a;
+        let mut out_b = b;
+        let max = (1i32 << depth) - 1;
+        let vzero = vdupq_n_s32(0);
+        let vmax = vdupq_n_s32(max);
+
+        match filter {
+            HevcLumaFilter::Off => {}
+            HevcLumaFilter::Strong => {
+                let v2tc = vdupq_n_s32(2 * tc);
+                let vneg2tc = vdupq_n_s32(-2 * tc);
+                let v2 = vdupq_n_s32(2);
+                let v4 = vdupq_n_s32(4);
+                for side in 0..2 {
+                    let (sa, sb, out) = if side == 0 {
+                        (&a, &b, &mut out_a)
+                    } else {
+                        (&b, &a, &mut out_b)
+                    };
+                    // v0 = (sa[2] + 2*sa[1] + 2*sa[0] + 2*sb[0] + sb[1] + 4) >> 3
+                    let s01b0 = vaddq_s32(vaddq_s32(sa[1], sa[0]), sb[0]);
+                    let mut sum0 = vaddq_s32(sa[2], sb[1]);
+                    sum0 = vmlaq_n_s32(sum0, s01b0, 2);
+                    let v0 = vshrq_n_s32::<3>(vaddq_s32(sum0, v4));
+
+                    // v1 = (sa[2] + sa[1] + sa[0] + sb[0] + 2) >> 2
+                    let sum1 = vaddq_s32(sa[2], s01b0);
+                    let v1 = vshrq_n_s32::<2>(vaddq_s32(sum1, v2));
+
+                    // v2 = (2*sa[3] + 3*sa[2] + sa[1] + sa[0] + sb[0] + 4) >> 3
+                    let mut sum2 = vmlaq_n_s32(s01b0, sa[3], 2);
+                    sum2 = vmlaq_n_s32(sum2, sa[2], 3);
+                    let v2_val = vshrq_n_s32::<3>(vaddq_s32(sum2, v4));
+
+                    let vals = [v0, v1, v2_val];
+                    for i in 0..3 {
+                        let lo = vaddq_s32(sa[i], vneg2tc);
+                        let hi = vaddq_s32(sa[i], v2tc);
+                        out[i] = vminq_s32(vmaxq_s32(vals[i], lo), hi);
+                    }
+                }
+            }
+            HevcLumaFilter::Weak { second } => {
+                let v8 = vdupq_n_s32(8);
+                let v1 = vdupq_n_s32(1);
+                let v10tc = vdupq_n_s32(10 * tc);
+                let vtc = vdupq_n_s32(tc);
+                let vnegtc = vdupq_n_s32(-tc);
+                let vtc_half = vdupq_n_s32(tc >> 1);
+                let vnegtc_half = vdupq_n_s32(-(tc >> 1));
+
+                let diff0 = vsubq_s32(b[0], a[0]);
+                let diff1 = vsubq_s32(b[1], a[1]);
+                let mut num = vmlaq_n_s32(v8, diff0, 9);
+                num = vmlsq_n_s32(num, diff1, 3);
+                let raw_delta = vshrq_n_s32::<4>(num);
+                let active = vcltq_s32(vabsq_s32(raw_delta), v10tc);
+                let delta = vminq_s32(vmaxq_s32(raw_delta, vnegtc), vtc);
+
+                let na0 = vminq_s32(vmaxq_s32(vaddq_s32(a[0], delta), vzero), vmax);
+                let nb0 = vminq_s32(vmaxq_s32(vsubq_s32(b[0], delta), vzero), vmax);
+                out_a[0] = vbslq_s32(active, na0, a[0]);
+                out_b[0] = vbslq_s32(active, nb0, b[0]);
+
+                if second[0] {
+                    let avg = vshrq_n_s32::<1>(vaddq_s32(vaddq_s32(a[2], a[0]), v1));
+                    let d_raw = vshrq_n_s32::<1>(vaddq_s32(vsubq_s32(avg, a[1]), delta));
+                    let d = vminq_s32(vmaxq_s32(d_raw, vnegtc_half), vtc_half);
+                    let na1 = vminq_s32(vmaxq_s32(vaddq_s32(a[1], d), vzero), vmax);
+                    out_a[1] = vbslq_s32(active, na1, a[1]);
+                }
+                if second[1] {
+                    let avg = vshrq_n_s32::<1>(vaddq_s32(vaddq_s32(b[2], b[0]), v1));
+                    let d_raw = vshrq_n_s32::<1>(vsubq_s32(vsubq_s32(avg, b[1]), delta));
+                    let d = vminq_s32(vmaxq_s32(d_raw, vnegtc_half), vtc_half);
+                    let nb1 = vminq_s32(vmaxq_s32(vaddq_s32(b[1], d), vzero), vmax);
+                    out_b[1] = vbslq_s32(active, nb1, b[1]);
+                }
+            }
+        }
+
+        let mut mask_p = [0u32; 4];
+        let mut mask_q = [0u32; 4];
+        for k in 0..4 {
+            mask_p[k] = if enabled[k][0] { u32::MAX } else { 0 };
+            mask_q[k] = if enabled[k][1] { u32::MAX } else { 0 };
+        }
+        let vmask_p = vld1q_u32(mask_p.as_ptr());
+        let vmask_q = vld1q_u32(mask_q.as_ptr());
+        let mut out_p = [[0u16; 4]; 4];
+        let mut out_q = [[0u16; 4]; 4];
+        for i in 0..4 {
+            let rp = vbslq_s32(vmask_p, out_a[i], a[i]);
+            vst1q_s32(tmp.as_mut_ptr(), rp);
+            for k in 0..4 {
+                out_p[k][i] = tmp[k] as u16;
+            }
+            let rq = vbslq_s32(vmask_q, out_b[i], b[i]);
+            vst1q_s32(tmp.as_mut_ptr(), rq);
+            for k in 0..4 {
+                out_q[k][i] = tmp[k] as u16;
+            }
+        }
+        (out_p, out_q)
+    }
 }
 
 /// One CDEF neighbour tap: its position relative to the filtered pixel and the
@@ -2024,6 +2215,52 @@ mod mc_avx2 {
     }
 
     #[target_feature(enable = "avx2")]
+    pub unsafe fn avc_chroma_bilinear_avx2(
+        top: &[u16],
+        bottom: &[u16],
+        out: &mut [u16],
+        weights: [i32; 4],
+    ) {
+        let n = out.len();
+        assert!(top.len() >= n + 1 && bottom.len() >= n + 1);
+        let mut col = 0;
+        unsafe {
+            let w0 = _mm256_set1_epi32(weights[0]);
+            let w1 = _mm256_set1_epi32(weights[1]);
+            let w2 = _mm256_set1_epi32(weights[2]);
+            let w3 = _mm256_set1_epi32(weights[3]);
+            let round = _mm256_set1_epi32(32);
+            while col + 8 <= n {
+                let t0 = _mm256_cvtepu16_epi32(_mm_loadu_si128(top.as_ptr().add(col).cast()));
+                let t1 = _mm256_cvtepu16_epi32(_mm_loadu_si128(top.as_ptr().add(col + 1).cast()));
+                let b0 = _mm256_cvtepu16_epi32(_mm_loadu_si128(bottom.as_ptr().add(col).cast()));
+                let b1 =
+                    _mm256_cvtepu16_epi32(_mm_loadu_si128(bottom.as_ptr().add(col + 1).cast()));
+
+                let p0 = _mm256_mullo_epi32(t0, w0);
+                let p1 = _mm256_mullo_epi32(t1, w1);
+                let p2 = _mm256_mullo_epi32(b0, w2);
+                let p3 = _mm256_mullo_epi32(b1, w3);
+                let sum = _mm256_add_epi32(_mm256_add_epi32(p0, p1), _mm256_add_epi32(p2, p3));
+                let shifted = _mm256_srai_epi32::<6>(_mm256_add_epi32(sum, round));
+                let lo = _mm256_castsi256_si128(shifted);
+                let hi = _mm256_extracti128_si256::<1>(shifted);
+                let packed = _mm_packus_epi32(lo, hi);
+                _mm_storeu_si128(out.as_mut_ptr().add(col).cast(), packed);
+                col += 8;
+            }
+            while col < n {
+                let value = weights[0] * i32::from(*top.get_unchecked(col))
+                    + weights[1] * i32::from(*top.get_unchecked(col + 1))
+                    + weights[2] * i32::from(*bottom.get_unchecked(col))
+                    + weights[3] * i32::from(*bottom.get_unchecked(col + 1));
+                *out.get_unchecked_mut(col) = ((value + 32) >> 6) as u16;
+                col += 1;
+            }
+        }
+    }
+
+    #[target_feature(enable = "avx2")]
     pub unsafe fn hevc_fir_accumulate_u16_avx2(target: &mut [i32], source: &[u16], weight: i32) {
         let n = target.len().min(source.len());
         let mut c = 0;
@@ -2179,6 +2416,70 @@ mod mc_avx2 {
             }
         }
     }
+
+    #[target_feature(enable = "avx2")]
+    pub unsafe fn sbr_qmf_synthesis_slot_avx2(
+        slot: &[Complex64; 64],
+        transform: &[[Complex64; 64]; 128],
+        history: &mut [f64; 128],
+    ) -> bool {
+        unsafe {
+            let slot_ptr = slot.as_ptr().cast::<f64>();
+            for n in 0..128 {
+                let t_ptr = transform[n].as_ptr().cast::<f64>();
+                let mut sum = 0.0f64;
+                let mut k = 0;
+                while k < 64 {
+                    let s01 = _mm256_loadu_pd(slot_ptr.add(k * 2));
+                    let t01 = _mm256_loadu_pd(t_ptr.add(k * 2));
+                    let p01 = _mm256_mul_pd(s01, t01);
+                    let d01 = _mm256_hsub_pd(p01, p01);
+                    let lo = _mm256_castpd256_pd128(d01);
+                    let hi = _mm256_extractf128_pd::<1>(d01);
+                    sum += _mm_cvtsd_f64(lo);
+                    sum += _mm_cvtsd_f64(hi);
+                    k += 2;
+                }
+                if !sum.is_finite() {
+                    return false;
+                }
+                history[n] = sum;
+            }
+        }
+        true
+    }
+
+    #[target_feature(enable = "avx2")]
+    pub unsafe fn sbr_qmf_synthesis32_slot_avx2(
+        slot: &[Complex64; 32],
+        transform: &[[Complex64; 32]; 64],
+        history: &mut [f64; 64],
+    ) -> bool {
+        unsafe {
+            let slot_ptr = slot.as_ptr().cast::<f64>();
+            for n in 0..64 {
+                let t_ptr = transform[n].as_ptr().cast::<f64>();
+                let mut sum = 0.0f64;
+                let mut k = 0;
+                while k < 32 {
+                    let s01 = _mm256_loadu_pd(slot_ptr.add(k * 2));
+                    let t01 = _mm256_loadu_pd(t_ptr.add(k * 2));
+                    let p01 = _mm256_mul_pd(s01, t01);
+                    let d01 = _mm256_hsub_pd(p01, p01);
+                    let lo = _mm256_castpd256_pd128(d01);
+                    let hi = _mm256_extractf128_pd::<1>(d01);
+                    sum += _mm_cvtsd_f64(lo);
+                    sum += _mm_cvtsd_f64(hi);
+                    k += 2;
+                }
+                if !sum.is_finite() {
+                    return false;
+                }
+                history[n] = sum;
+            }
+        }
+        true
+    }
 }
 
 pub fn avc_luma_hsum_6tap(src: &[u16], out: &mut [i32]) {
@@ -2251,7 +2552,15 @@ pub fn avc_chroma_bilinear(
     {
         unsafe { mc_neon::avc_chroma_bilinear_neon(top, bottom, out, weights) }
     }
-    #[cfg(not(target_arch = "aarch64"))]
+    #[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
+    {
+        if is_x86_feature_detected!("avx2") {
+            unsafe { mc_avx2::avc_chroma_bilinear_avx2(top, bottom, out, weights) };
+        } else {
+            avc_chroma_bilinear_scalar(top, bottom, out, weights);
+        }
+    }
+    #[cfg(not(any(target_arch = "aarch64", target_arch = "x86", target_arch = "x86_64")))]
     {
         avc_chroma_bilinear_scalar(top, bottom, out, weights);
     }
@@ -2304,7 +2613,15 @@ pub fn sbr_qmf_synthesis_slot(
     {
         unsafe { mc_neon::sbr_qmf_synthesis_slot_neon(slot, transform, history) }
     }
-    #[cfg(not(target_arch = "aarch64"))]
+    #[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
+    {
+        if is_x86_feature_detected!("avx2") {
+            unsafe { mc_avx2::sbr_qmf_synthesis_slot_avx2(slot, transform, history) }
+        } else {
+            sbr_qmf_synthesis_slot_scalar(slot, transform, history)
+        }
+    }
+    #[cfg(not(any(target_arch = "aarch64", target_arch = "x86", target_arch = "x86_64")))]
     {
         sbr_qmf_synthesis_slot_scalar(slot, transform, history)
     }
@@ -2319,7 +2636,15 @@ pub fn sbr_qmf_synthesis32_slot(
     {
         unsafe { mc_neon::sbr_qmf_synthesis32_slot_neon(slot, transform, history) }
     }
-    #[cfg(not(target_arch = "aarch64"))]
+    #[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
+    {
+        if is_x86_feature_detected!("avx2") {
+            unsafe { mc_avx2::sbr_qmf_synthesis32_slot_avx2(slot, transform, history) }
+        } else {
+            sbr_qmf_synthesis32_slot_scalar(slot, transform, history)
+        }
+    }
+    #[cfg(not(any(target_arch = "aarch64", target_arch = "x86", target_arch = "x86_64")))]
     {
         sbr_qmf_synthesis32_slot_scalar(slot, transform, history)
     }
@@ -2595,14 +2920,22 @@ mod tests {
         for depth in [8u8, 10] {
             let mask = (1u16 << depth) - 1;
             for tc in [0i32, 1, 4, 16] {
-                for filter_idx in 0..3 {
-                    let filter = match filter_idx {
-                        0 => HevcLumaFilter::Off,
-                        1 => HevcLumaFilter::Strong,
-                        _ => HevcLumaFilter::Weak {
-                            second: [true, true],
-                        },
-                    };
+                for filter in [
+                    HevcLumaFilter::Off,
+                    HevcLumaFilter::Strong,
+                    HevcLumaFilter::Weak {
+                        second: [false, false],
+                    },
+                    HevcLumaFilter::Weak {
+                        second: [true, false],
+                    },
+                    HevcLumaFilter::Weak {
+                        second: [false, true],
+                    },
+                    HevcLumaFilter::Weak {
+                        second: [true, true],
+                    },
+                ] {
                     for _ in 0..10 {
                         let p: [[u16; 4]; 4] = std::array::from_fn(|_| {
                             std::array::from_fn(|_| (xorshift(&mut state) as u16) & mask)
@@ -2610,7 +2943,9 @@ mod tests {
                         let q: [[u16; 4]; 4] = std::array::from_fn(|_| {
                             std::array::from_fn(|_| (xorshift(&mut state) as u16) & mask)
                         });
-                        let enabled = [[true, true]; 4];
+                        let enabled: [[bool; 2]; 4] = std::array::from_fn(|_| {
+                            std::array::from_fn(|_| (xorshift(&mut state) & 1) != 0)
+                        });
                         let (got_p, got_q) = unsafe {
                             hevc_deblock_luma_batch4_neon(p, q, tc, depth, filter, enabled)
                         };

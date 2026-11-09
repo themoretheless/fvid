@@ -192,7 +192,27 @@ pub(crate) fn cdef(
     if params.strengths == [[0; 4]; 8] {
         return;
     }
-    let input = image.clone();
+    let has_chroma_strength =
+        !monochrome && params.strengths.iter().any(|s| s[2] != 0 || s[3] != 0);
+    let empty_plane = || Plane {
+        width: 0,
+        height: 0,
+        samples: Vec::new(),
+    };
+    let input_planes = [
+        image.planes[0].clone(),
+        if has_chroma_strength {
+            image.planes[1].clone()
+        } else {
+            empty_plane()
+        },
+        if has_chroma_strength {
+            image.planes[2].clone()
+        } else {
+            empty_plane()
+        },
+    ];
+    let plane_count = if has_chroma_strength { 3 } else { 1 };
     let cols = image.planes[0].width / 4;
     let rows = image.planes[0].height / 4;
     for r in (0..rows).step_by(2) {
@@ -210,7 +230,7 @@ pub(crate) fn cdef(
             {
                 continue;
             }
-            let (dir, variance) = direction(&input.planes[0], col * 4, r * 4, image.depth);
+            let (dir, variance) = direction(&input_planes[0], col * 4, r * 4, image.depth);
             let strength = params.strengths[idx as usize];
             let shift = image.depth - 8;
             let var_strength = if variance >> 6 != 0 {
@@ -218,7 +238,7 @@ pub(crate) fn cdef(
             } else {
                 0
             };
-            for p in 0..if monochrome { 1 } else { 3 } {
+            for p in 0..plane_count {
                 let [sub_x, sub_y] = if p == 0 {
                     [0; 2]
                 } else {
@@ -245,7 +265,7 @@ pub(crate) fn cdef(
                     };
                 }
                 let damping = i32::from(params.damping) + i32::from(shift) - i32::from(p > 0);
-                let source = &input.planes[p];
+                let source = &input_planes[p];
                 let target = &mut image.planes[p];
                 let size = [8 >> sub_x, 8 >> sub_y];
                 let pri_taps = if (pri >> shift) & 1 == 0 {

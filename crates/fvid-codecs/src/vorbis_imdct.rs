@@ -50,12 +50,20 @@ pub fn inverse(coefficients: &[f32], output: &mut [f32], scratch: &mut [(f64, f6
         }
         stage *= 2;
     }
+    let step_phase = -2. * std::f64::consts::PI / length as f64;
+    let (step_sin, step_cos) = step_phase.sin_cos();
+    let init_freq = 1 + n / 2;
+    let init_phase = -std::f64::consts::PI * init_freq as f64 / length as f64;
+    let (mut sine, mut cosine) = init_phase.sin_cos();
+    let mask = length - 1;
     for (t, sample) in output.iter_mut().enumerate() {
-        let frequency = 2 * t + 1 + n / 2;
-        let (real, imaginary) = scratch[frequency % length];
-        let phase = -std::f64::consts::PI * frequency as f64 / length as f64;
-        let (sine, cosine) = phase.sin_cos();
+        let frequency = 2 * t + init_freq;
+        let (real, imaginary) = scratch[frequency & mask];
         *sample = (real * cosine - imaginary * sine) as f32;
+        (cosine, sine) = (
+            cosine * step_cos - sine * step_sin,
+            sine * step_cos + cosine * step_sin,
+        );
     }
     Ok(())
 }

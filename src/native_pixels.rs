@@ -296,7 +296,7 @@ impl PixelFilters {
         if let Some(filter) = &self.hue {
             filter.at(n,t).map_err(|error| invalid(&error))?.apply(frame, depth).map_err(|error| invalid(&error))?;
         }
-        if let Some(filter) = self.gblur {
+        if let Some(filter) = &self.gblur {
             filter.apply(frame, depth).map_err(|e| invalid(&e))?;
         }
         if let Some(filter) = self.avgblur {

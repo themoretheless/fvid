@@ -3,7 +3,7 @@ struct Range<'a> {
     at: usize,
     low: u32,
     range: u32,
-    transitions: [u8; 256],
+    transitions: &'a [u8; 256],
 }
 impl<'a> Range<'a> {
     fn new(data: &'a [u8]) -> Result<Self> {
@@ -19,7 +19,7 @@ impl<'a> Range<'a> {
             at: 2,
             low,
             range: 0xff00,
-            transitions: TRANSITION,
+            transitions: &TRANSITION,
         })
     }
     fn bit(&mut self, state: &mut u8) -> Result<bool> {
@@ -286,7 +286,8 @@ impl Decoder {
         } else {
             old.ok_or_else(|| invalid("FFV1 frame requires a preceding keyframe"))?
         };
-        r.transitions = state.transitions;
+        let transitions = state.transitions;
+        r.transitions = &transitions;
         let mut rice = if state.rice.is_some() {
             r.bit(&mut 129)?;
             let start =

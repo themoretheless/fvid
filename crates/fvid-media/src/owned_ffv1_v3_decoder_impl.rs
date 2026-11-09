@@ -165,7 +165,7 @@ impl V3 {
     ) -> Result<Decoded> {
         let slices = self.config.slices(packet, budget)?;
         let mut first = Range::new(slices[0].payload)?;
-        first.transitions = self.config.transitions;
+        first.transitions = &self.config.transitions;
         let keyframe = first.bit(&mut 128)?;
         let mut first = Some(first);
         if self.config.intra && !keyframe {
@@ -263,7 +263,7 @@ impl V3 {
                 first.take().unwrap()
             } else {
                 let mut r = Range::new(slice.payload)?;
-                r.transitions = self.config.transitions;
+                r.transitions = &self.config.transitions;
                 r
             };
             let mut h = [128; 32];

@@ -33,7 +33,7 @@ pub struct PeakReport {
 }
 pub struct TruePeakMeter {
     interpolator: Option<Box<Interpolator>>,
-    history: Vec<[f64; TAPS]>,
+    history: Vec<[f64; TAPS * 2]>,
     position: usize,
     frames: u64,
     sample_peak: f64,
@@ -47,7 +47,7 @@ impl TruePeakMeter {
         }
         Ok(Self {
             interpolator: None,
-            history: vec![[0.; TAPS]; channels],
+            history: vec![[0.; TAPS * 2]; channels],
             position: 0,
             frames: 0,
             sample_peak: 0.,
@@ -104,20 +104,24 @@ impl TruePeakMeter {
             interpolator.filter(frame);
             return;
         }
+        let pos = if self.position == 0 {
+            TAPS - 1
+        } else {
+            self.position - 1
+        };
+        self.position = pos;
         for (history, sample) in self.history.iter_mut().zip(frame) {
-            history[self.position] = *sample;
-        }
-        for phase in COEFFICIENTS {
-            for history in &self.history {
+            history[pos] = *sample;
+            history[pos + TAPS] = *sample;
+            let window = &history[pos..pos + TAPS];
+            for phase in COEFFICIENTS {
                 let mut value = 0.;
-                for (tap, coefficient) in phase.into_iter().enumerate() {
-                    value += history[(self.position + TAPS - tap) % TAPS] * f64::from(coefficient)
-                        / 8192.;
+                for (&h, coefficient) in window.iter().zip(phase) {
+                    value += h * f64::from(coefficient) / 8192.;
                 }
                 self.interpolated_peak = self.interpolated_peak.max(value.abs());
             }
         }
-        self.position = (self.position + 1) % TAPS;
     }
     /// Flush the remaining zero-padded FIR tail, retaining original frame
     /// counts. Idempotent; accepting more PCM after finishing would split the
@@ -158,7 +162,7 @@ impl TruePeakMeter {
 // This is interpolation, not a downsampling filter: no 0.94 bandwidth loss.
 struct Interpolator {
     coefficients: Vec<[f64; 32]>,
-    history: Vec<[f64; 32]>,
+    history: Vec<[f64; 64]>,
     position: usize,
     peak: f64,
 }
@@ -192,26 +196,30 @@ impl Interpolator {
             .collect();
         Self {
             coefficients,
-            history: vec![[0.; 32]; channels],
+            history: vec![[0.; 64]; channels],
             position: 0,
             peak: 0.,
         }
     }
     fn filter(&mut self, frame: &[f64]) {
+        let pos = if self.position == 0 {
+            31
+        } else {
+            self.position - 1
+        };
+        self.position = pos;
         for (history, sample) in self.history.iter_mut().zip(frame) {
-            history[self.position] = *sample;
+            history[pos] = *sample;
+            history[pos + 32] = *sample;
+            let window = &history[pos..pos + 32];
             for phase in &self.coefficients {
-                let value: f64 = phase
-                    .iter()
-                    .enumerate()
-                    .map(|(tap, coefficient)| {
-                        history[(self.position + 32 - tap) % 32] * coefficient
-                    })
-                    .sum();
+                let mut value = 0.;
+                for (&h, &coefficient) in window.iter().zip(phase) {
+                    value += h * coefficient;
+                }
                 self.peak = self.peak.max(value.abs());
             }
         }
-        self.position = (self.position + 1) % 32;
     }
 }
 #[cfg(test)]

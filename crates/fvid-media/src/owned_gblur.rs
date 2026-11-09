@@ -1,11 +1,12 @@
 //! Separable Gaussian convolution of integer YUV planes with replicated edges.
 use crate::owned_frame::GeometryFrame;
 type Result<T> = std::result::Result<T, String>;
-#[derive(Clone, Copy, Debug)]
+#[derive(Clone, Debug)]
 pub struct GaussianBlur {
     sigma: [f64; 2],
     steps: usize,
     planes: u8,
+    kernels: [Option<(usize, Vec<f64>)>; 2],
 }
 impl GaussianBlur {
     pub fn parse(args: &str) -> Result<Self> {
@@ -39,20 +40,46 @@ impl GaussianBlur {
                 values[index] = n;
             }
         }
+        let sigma = [
+            values[0],
+            if values[1] < 0.0 {
+                values[0]
+            } else {
+                values[1]
+            },
+        ];
+        let steps = values[2] as usize;
+        let planes = values[3] as u8;
+        let mut kernels: [Option<(usize, Vec<f64>)>; 2] = [None, None];
+        if planes & 7 != 0 && sigma != [0.0, 0.0] {
+            for axis in 0..2 {
+                let s = sigma[axis] / (steps as f64).sqrt();
+                if s != 0.0 {
+                    let radius = (s * 4.0).ceil() as usize;
+                    let mut weights = Vec::new();
+                    weights
+                        .try_reserve_exact(2 * radius + 1)
+                        .map_err(|e| e.to_string())?;
+                    for i in 0..=2 * radius {
+                        let d = i as f64 - radius as f64;
+                        weights.push((-d * d / (2.0 * s * s)).exp());
+                    }
+                    let sum: f64 = weights.iter().sum();
+                    for weight in &mut weights {
+                        *weight /= sum;
+                    }
+                    kernels[axis] = Some((radius, weights));
+                }
+            }
+        }
         Ok(Self {
-            sigma: [
-                values[0],
-                if values[1] < 0.0 {
-                    values[0]
-                } else {
-                    values[1]
-                },
-            ],
-            steps: values[2] as usize,
-            planes: values[3] as u8,
+            sigma,
+            steps,
+            planes,
+            kernels,
         })
     }
-    pub fn apply(self, frame: &mut GeometryFrame, depth: u8) -> Result<()> {
+    pub fn apply(&self, frame: &mut GeometryFrame, depth: u8) -> Result<()> {
         let [sx, sy] = frame.subsampling.ok_or("gblur requires planar YUV")?;
         if sx == 0 || sy == 0 || frame.width == 0 || frame.height == 0 || !(8..=16).contains(&depth)
         {
@@ -85,26 +112,7 @@ impl GaussianBlur {
         if self.planes & 7 == 0 || self.sigma == [0.0, 0.0] {
             return Ok(());
         }
-        let mut kernels: [Option<(usize, Vec<f64>)>; 2] = [None, None];
-        for axis in 0..2 {
-            let sigma = self.sigma[axis] / (self.steps as f64).sqrt();
-            if sigma != 0.0 {
-                let radius = (sigma * 4.0).ceil() as usize;
-                let mut weights = Vec::new();
-                weights
-                    .try_reserve_exact(2 * radius + 1)
-                    .map_err(|e| e.to_string())?;
-                for i in 0..=2 * radius {
-                    let d = i as f64 - radius as f64;
-                    weights.push((-d * d / (2.0 * sigma * sigma)).exp());
-                }
-                let sum: f64 = weights.iter().sum();
-                for weight in &mut weights {
-                    *weight /= sum;
-                }
-                kernels[axis] = Some((radius, weights));
-            }
-        }
+        let kernels = &self.kernels;
         let mut base = 0;
         for (plane, (w, h)) in sizes.into_iter().enumerate() {
             let area = w * h;

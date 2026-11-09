@@ -723,17 +723,33 @@ pub(crate) fn apply_pixel_filters_clock(
                 else {crate::owned_eq::EqualizerProgram::parse(args)?.apply(&mut frame,header.depth(),n,t)?;}
             }
             if let Some(args) = transform.unsharp.as_deref() {
-                crate::owned_unsharp::Unsharp::parse(args)?.apply(&mut frame, header.depth())?;
+                if let Some(filter) = history.and_then(|h| h.unsharp.as_ref()) {
+                    filter.apply(&mut frame, header.depth())?;
+                } else {
+                    crate::owned_unsharp::Unsharp::parse(args)?.apply(&mut frame, header.depth())?;
+                }
             }
             if let Some(args) = transform.hue.as_deref() {
-                crate::owned_hue::HueProgram::parse(args)?.at(n,t)?.apply(&mut frame, header.depth())?;
+                if let Some(filter) = history.and_then(|h| h.hue.as_ref()) {
+                    filter.at(n, t)?.apply(&mut frame, header.depth())?;
+                } else {
+                    crate::owned_hue::HueProgram::parse(args)?.at(n,t)?.apply(&mut frame, header.depth())?;
+                }
             }
             if let Some(args) = transform.gblur.as_deref() {
-                crate::owned_gblur::GaussianBlur::parse(args)?.apply(&mut frame, header.depth())?;
+                if let Some(filter) = history.and_then(|h| h.gblur.as_ref()) {
+                    filter.apply(&mut frame, header.depth())?;
+                } else {
+                    crate::owned_gblur::GaussianBlur::parse(args)?.apply(&mut frame, header.depth())?;
+                }
             }
             if let Some(args) = transform.avgblur.as_deref() {
-                crate::owned_avgblur::AverageBlur::parse(args)?
-                    .apply(&mut frame, header.depth())?;
+                if let Some(filter) = history.and_then(|h| h.avgblur.as_ref()) {
+                    filter.apply(&mut frame, header.depth())?;
+                } else {
+                    crate::owned_avgblur::AverageBlur::parse(args)?
+                        .apply(&mut frame, header.depth())?;
+                }
             }
             if let Some(args) = transform.boxblur.as_deref() {
                 if let Some(filter) = history.and_then(|context| context.boxblur.as_ref()) {
@@ -743,12 +759,20 @@ pub(crate) fn apply_pixel_filters_clock(
                 }
             }
             if let Some(args) = transform.negate.as_deref() {
-                crate::owned_negate::Negate::parse(args)?.apply(&mut frame.data, header.depth())?;
+                if let Some(filter) = history.and_then(|h| h.negate.as_ref()) {
+                    filter.apply(&mut frame.data, header.depth())?;
+                } else {
+                    crate::owned_negate::Negate::parse(args)?.apply(&mut frame.data, header.depth())?;
+                }
             }
-            for (kind, args) in gradients(transform) {
+            for (idx, (kind, args)) in gradients(transform).into_iter().enumerate() {
                 if let Some(args) = args.as_deref() {
-                    crate::owned_gradient::Gradient::parse(kind, args)?
-                        .apply(&mut frame, header.depth())?;
+                    if let Some(filter) = history.and_then(|h| h.gradients[idx].as_ref()) {
+                        filter.apply(&mut frame, header.depth())?;
+                    } else {
+                        crate::owned_gradient::Gradient::parse(kind, args)?
+                            .apply(&mut frame, header.depth())?;
+                    }
                 }
             }
             if let Some(args) = transform.smartblur.as_deref() {
@@ -760,10 +784,18 @@ pub(crate) fn apply_pixel_filters_clock(
                 else {crate::owned_sab::Sab::parse(args)?.apply(&mut frame,header.depth(),n,t)?;}
             }
             if let Some(args) = transform.bilateral.as_deref() {
-                crate::owned_bilateral::Bilateral::parse(args)?.apply(&mut frame, header.depth())?;
+                if let Some(filter) = history.and_then(|h| h.bilateral.as_ref()) {
+                    filter.apply(&mut frame, header.depth())?;
+                } else {
+                    crate::owned_bilateral::Bilateral::parse(args)?.apply(&mut frame, header.depth())?;
+                }
             }
             if let Some(args) = transform.cas.as_deref() {
-                crate::owned_cas::Cas::parse(args)?.apply(&mut frame,header.depth())?;
+                if let Some(filter) = history.and_then(|h| h.cas.as_ref()) {
+                    filter.apply(&mut frame, header.depth())?;
+                } else {
+                    crate::owned_cas::Cas::parse(args)?.apply(&mut frame,header.depth())?;
+                }
             }
             if transform.vignette.is_some() {
                 if let Some(filter)=history.and_then(|h|h.vignette.as_ref()) {let rate=if header.tokens.iter().any(|t|t.starts_with('F')) {Some(header.frame_rate()?)} else {None};
@@ -788,23 +820,43 @@ pub(crate) fn apply_pixel_filters_clock(
                 if let Some(filter)=history.and_then(|h|h.curves.as_ref()) {apply(filter,&mut frame)?;} else {apply(&crate::owned_curves::Curves::parse(args)?,&mut frame)?;}
             }
             if let Some(args) = transform.colorbalance.as_deref() {
-                crate::owned_colorbalance::ColorBalance::parse(args)?.apply_yuv(&mut frame,header.depth(),header.full_range()?,crate::owned_yuv_rgb::Matrix::from_code(matrix)?,
-                )?;
+                if let Some(filter) = history.and_then(|h| h.colorbalance.as_ref()) {
+                    filter.apply_yuv(&mut frame, header.depth(), header.full_range()?, crate::owned_yuv_rgb::Matrix::from_code(matrix)?)?;
+                } else {
+                    crate::owned_colorbalance::ColorBalance::parse(args)?.apply_yuv(&mut frame,header.depth(),header.full_range()?,crate::owned_yuv_rgb::Matrix::from_code(matrix)?,
+                    )?;
+                }
             }
             if let Some(args) = transform.colorlevels.as_deref() {
-                crate::owned_colorlevels::ColorLevels::parse(args)?.apply_yuv(&mut frame,header.depth(),header.full_range()?,crate::owned_yuv_rgb::Matrix::from_code(matrix)?,
-                )?;
+                if let Some(filter) = history.and_then(|h| h.colorlevels.as_ref()) {
+                    filter.apply_yuv(&mut frame, header.depth(), header.full_range()?, crate::owned_yuv_rgb::Matrix::from_code(matrix)?)?;
+                } else {
+                    crate::owned_colorlevels::ColorLevels::parse(args)?.apply_yuv(&mut frame,header.depth(),header.full_range()?,crate::owned_yuv_rgb::Matrix::from_code(matrix)?,
+                    )?;
+                }
             }
             if let Some(args) = transform.colorchannelmixer.as_deref() {
-                crate::owned_colorchannelmixer::ColorChannelMixer::parse(args)?.apply_yuv(&mut frame,header.depth(),header.full_range()?,crate::owned_yuv_rgb::Matrix::from_code(matrix)?,
-                )?;
+                if let Some(filter) = history.and_then(|h| h.colorchannelmixer.as_ref()) {
+                    filter.apply_yuv(&mut frame, header.depth(), header.full_range()?, crate::owned_yuv_rgb::Matrix::from_code(matrix)?)?;
+                } else {
+                    crate::owned_colorchannelmixer::ColorChannelMixer::parse(args)?.apply_yuv(&mut frame,header.depth(),header.full_range()?,crate::owned_yuv_rgb::Matrix::from_code(matrix)?,
+                    )?;
+                }
             }
             if let Some(args) = transform.monochrome.as_deref() {
-                crate::owned_monochrome::Monochrome::parse(args)?.apply(&mut frame, header.depth())?;
+                if let Some(filter) = history.and_then(|h| h.monochrome.as_ref()) {
+                    filter.apply(&mut frame, header.depth())?;
+                } else {
+                    crate::owned_monochrome::Monochrome::parse(args)?.apply(&mut frame, header.depth())?;
+                }
             }
             if let Some(args) = transform.grayworld.as_deref() {
-                if crate::owned_timeline::Timeline::grayworld(args)?.enabled(n,t,frame.width,frame.height,
-                )? {
+                let enabled = if let Some(filter) = history.and_then(|h| h.grayworld.as_ref()) {
+                    filter.enabled(n, t, frame.width, frame.height)?
+                } else {
+                    crate::owned_timeline::Timeline::grayworld(args)?.enabled(n, t, frame.width, frame.height)?
+                };
+                if enabled {
                     crate::owned_grayworld::GrayWorld::default().apply_yuv(&mut frame,header.depth(),header.full_range()?,crate::owned_yuv_rgb::Matrix::from_code(matrix)?,
                     )?;
                 }
@@ -839,7 +891,11 @@ pub(crate) fn apply_pixel_filters_clock(
                 else {crate::owned_lenscorrection::LensCorrection::parse(args)?.apply(&mut frame,header.depth(),n,t)?;}
             }
             if let Some(args) = transform.pixelize.as_deref() {
-                crate::owned_pixelize::Pixelize::parse(args)?.apply(&mut frame, header.depth())?;
+                if let Some(filter) = history.and_then(|h| h.pixelize.as_ref()) {
+                    filter.apply(&mut frame, header.depth())?;
+                } else {
+                    crate::owned_pixelize::Pixelize::parse(args)?.apply(&mut frame, header.depth())?;
+                }
             }
             if let Some(args) = transform.removegrain.as_deref() {
                 if let Some(filter)=history.and_then(|h|h.removegrain.as_ref()) {filter.apply(&mut frame,header.depth(),n,t)?;}
@@ -850,36 +906,69 @@ pub(crate) fn apply_pixel_filters_clock(
                 else {crate::owned_yaepblur::YaepBlur::parse(args)?.apply(&mut frame,header.depth(),n,t)?;}
             }
             if let Some(args) = transform.vibrance.as_deref() {
-                crate::owned_vibrance::Vibrance::parse(args)?.apply_yuv(&mut frame,header.depth(),header.full_range()?,crate::owned_yuv_rgb::Matrix::from_code(matrix)?,
-                )?;
+                if let Some(filter) = history.and_then(|h| h.vibrance.as_ref()) {
+                    filter.apply_yuv(&mut frame, header.depth(), header.full_range()?, crate::owned_yuv_rgb::Matrix::from_code(matrix)?)?;
+                } else {
+                    crate::owned_vibrance::Vibrance::parse(args)?.apply_yuv(&mut frame,header.depth(),header.full_range()?,crate::owned_yuv_rgb::Matrix::from_code(matrix)?,
+                    )?;
+                }
             }
-            for (kind, args) in morphology(transform) {
+            for (idx, (kind, args)) in morphology(transform).into_iter().enumerate() {
                 if let Some(args) = args.as_deref() {
-                    crate::owned_morphology::Morphology::parse(kind, args)?
-                        .apply(&mut frame, header.depth())?;
+                    if let Some(filter) = history.and_then(|h| h.morphology[idx].as_ref()) {
+                        filter.apply(&mut frame, header.depth())?;
+                    } else {
+                        crate::owned_morphology::Morphology::parse(kind, args)?
+                            .apply(&mut frame, header.depth())?;
+                    }
                 }
             }
             if let Some(args) = transform.colorize.as_deref() {
-                crate::owned_colorize::Colorize::parse(args)?.apply(&mut frame, header.depth())?;
+                if let Some(filter) = history.and_then(|h| h.colorize.as_ref()) {
+                    filter.apply(&mut frame, header.depth())?;
+                } else {
+                    crate::owned_colorize::Colorize::parse(args)?.apply(&mut frame, header.depth())?;
+                }
             }
             if let Some(args) = transform.exposure.as_deref() {
-                crate::owned_exposure::Exposure::parse(args)?.apply_yuv(&mut frame,header.depth(),header.full_range()?,crate::owned_yuv_rgb::Matrix::from_code(matrix)?,
-                )?;
+                if let Some(filter) = history.and_then(|h| h.exposure.as_ref()) {
+                    filter.apply_yuv(&mut frame, header.depth(), header.full_range()?, crate::owned_yuv_rgb::Matrix::from_code(matrix)?)?;
+                } else {
+                    crate::owned_exposure::Exposure::parse(args)?.apply_yuv(&mut frame,header.depth(),header.full_range()?,crate::owned_yuv_rgb::Matrix::from_code(matrix)?,
+                    )?;
+                }
             }
             if let Some(args) = transform.chromashift.as_deref() {
-                crate::owned_chromashift::ChromaShift::parse(args)?
-                    .apply(&mut frame, header.depth())?;
+                if let Some(filter) = history.and_then(|h| h.chromashift.as_ref()) {
+                    filter.apply(&mut frame, header.depth())?;
+                } else {
+                    crate::owned_chromashift::ChromaShift::parse(args)?
+                        .apply(&mut frame, header.depth())?;
+                }
             }
             if let Some(args) = transform.colorcontrast.as_deref() {
-                crate::owned_colorcontrast::ColorContrast::parse(args)?.apply_yuv(&mut frame,header.depth(),header.full_range()?,crate::owned_yuv_rgb::Matrix::from_code(matrix)?,
-                )?;
+                if let Some(filter) = history.and_then(|h| h.colorcontrast.as_ref()) {
+                    filter.apply_yuv(&mut frame, header.depth(), header.full_range()?, crate::owned_yuv_rgb::Matrix::from_code(matrix)?)?;
+                } else {
+                    crate::owned_colorcontrast::ColorContrast::parse(args)?.apply_yuv(&mut frame,header.depth(),header.full_range()?,crate::owned_yuv_rgb::Matrix::from_code(matrix)?,
+                    )?;
+                }
             }
             if let Some(args) = transform.colorcorrect.as_deref() {
-                crate::owned_colorcorrect::ColorCorrect::parse(args)?.apply(&mut frame,header.depth())?;
+                if let Some(filter) = history.and_then(|h| h.colorcorrect.as_ref()) {
+                    filter.apply(&mut frame, header.depth())?;
+                } else {
+                    crate::owned_colorcorrect::ColorCorrect::parse(args)?.apply(&mut frame,header.depth())?;
+                }
             }
             if let Some(args) = transform.shuffleplanes.as_deref() {
+                let filter = if let Some(filter) = history.and_then(|h| h.shuffleplanes.as_ref()) {
+                    *filter
+                } else {
+                    crate::owned_shuffleplanes::ShufflePlanes::parse(args)?
+                };
                 frame.subsampling = Some(
-                    crate::owned_shuffleplanes::ShufflePlanes::parse(args)?.apply_yuv(
+                    filter.apply_yuv(
                         &mut frame.data,
                         width,
                         height,
@@ -894,8 +983,12 @@ pub(crate) fn apply_pixel_filters_clock(
                     )?;}
             }
             if let Some(args) = transform.colorhold.as_deref() {
-                crate::owned_colorhold::ColorHold::parse(args)?.apply_yuv(&mut frame,header.depth(),header.full_range()?,crate::owned_yuv_rgb::Matrix::from_code(matrix)?,
-                )?;
+                if let Some(filter) = history.and_then(|h| h.colorhold.as_ref()) {
+                    filter.apply_yuv(&mut frame, header.depth(), header.full_range()?, crate::owned_yuv_rgb::Matrix::from_code(matrix)?)?;
+                } else {
+                    crate::owned_colorhold::ColorHold::parse(args)?.apply_yuv(&mut frame,header.depth(),header.full_range()?,crate::owned_yuv_rgb::Matrix::from_code(matrix)?,
+                    )?;
+                }
             }
             if let Some(args)=transform.fade.as_deref() {
                 let filter = if let Some(fade) = fade {
@@ -998,15 +1091,45 @@ fn transform_frame_into(
                 ((code * ((1u32 << header.depth()) - 1) + 127) / 255) as u16
             }
             .to_le_bytes();
+            let mut col_samples = Vec::new();
+            col_samples
+                .try_reserve_exact(dw)
+                .map_err(|e| e.to_string())?;
+            for col in 0..dw {
+                col_samples.push(point_sample(col, canvas_w, dw));
+            }
             for row in 0..dh {
                 let cy = point_sample(row, canvas_h, dh);
-                for col in 0..dw {
-                    let cx = point_sample(col, canvas_w, dw);
-                    if cx < px || cy < py || cx - px >= tw || cy - py >= th {
+                if cy < py || cy - py >= th {
+                    for _ in 0..dw {
+                        output.extend_from_slice(&black[..step]);
+                    }
+                    continue;
+                }
+                let ty = cy - py;
+                if transpose.is_none() && canvas_w == dw && !horizontal {
+                    let y = if vertical { ih - 1 - ty } else { ty };
+                    let left_pad = px.min(dw);
+                    for _ in 0..left_pad {
+                        output.extend_from_slice(&black[..step]);
+                    }
+                    let copy_w = tw.min(dw.saturating_sub(left_pad));
+                    if copy_w > 0 {
+                        let start = offset + (crop.y / dy + y) * stride + (crop.x / dx) * step;
+                        output.extend_from_slice(&frame[start..start + copy_w * step]);
+                    }
+                    let right_pad = dw.saturating_sub(left_pad + copy_w);
+                    for _ in 0..right_pad {
+                        output.extend_from_slice(&black[..step]);
+                    }
+                    continue;
+                }
+                for &cx in &col_samples {
+                    if cx < px || cx - px >= tw {
                         output.extend_from_slice(&black[..step]);
                         continue;
                     }
-                    let (tx, ty) = (cx - px, cy - py);
+                    let tx = cx - px;
                     let (mut x, mut y) = match transpose {
                         None => (tx, ty),
                         Some(TransposeMode::Clock) => (ty, ih - 1 - tx),

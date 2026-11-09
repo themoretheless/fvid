@@ -221,9 +221,18 @@ impl VideoGeometry {
                 {
                     return Err(invalid("invalid decoded plane lengths"));
                 }
-                let mut data = p.y.clone();
+                let mut data = Vec::with_capacity(p.y.len() + p.cb.len() + p.cr.len());
+                data.extend_from_slice(&p.y);
                 data.extend_from_slice(&p.cb);
                 data.extend_from_slice(&p.cr);
+                if self.is_identity() {
+                    return Ok(GeometryFrame {
+                        width,
+                        height,
+                        subsampling: Some([sx, sy]),
+                        data,
+                    });
+                }
                 (Cow::Owned(data), sx, sy, false)
             }
             RawFrame::Yuv {
@@ -450,14 +459,16 @@ impl VideoGeometry {
         {
             return Err(invalid("video geometry must align with chroma samples"));
         }
+        let shapes_buf = [(1, 1), (sx, sy), (sx, sy)];
         let shapes = if rgb {
-            vec![(1, 1)]
+            &shapes_buf[..1]
         } else {
-            vec![(1, 1), (sx, sy), (sx, sy)]
+            &shapes_buf[..]
         };
         let mut result = Vec::new();
+        let mut col_samples = Vec::new();
         let mut offset: usize = 0;
-        for (plane, (dx, dy)) in shapes.into_iter().enumerate() {
+        for (plane, &(dx, dy)) in shapes.iter().enumerate() {
             let pw = width.div_ceil(dx);
             let ph = height.div_ceil(dy);
             let size = pw
@@ -502,19 +513,51 @@ impl VideoGeometry {
                     if sample==1 {fill[channel]=black as u8;} else {fill[2*channel..2*channel+2].copy_from_slice(&black.to_le_bytes());}
                 }
             } else {fill[..2].copy_from_slice(&black.to_le_bytes());}
+            let canvas_pw = canvas_w.div_ceil(odx);
+            let canvas_ph = canvas_h.div_ceil(ody);
+            let pad_px = pad_x / odx;
+            let pad_py = pad_y / ody;
+            let t_pw = tw.div_ceil(odx);
+            let t_ph = th.div_ceil(ody);
+            col_samples.clear();
+            col_samples
+                .try_reserve(dw)
+                .map_err(|_| invalid("cannot allocate transformed frame"))?;
+            for col in 0..dw {
+                col_samples.push(sample_index(col, canvas_pw, dw, media));
+            }
             for row in 0..dh {
-                let py = sample_index(row, canvas_h.div_ceil(ody), dh, media);
-                for col in 0..dw {
-                    let px = sample_index(col, canvas_w.div_ceil(odx), dw, media);
-                    if px < pad_x / odx
-                        || py < pad_y / ody
-                        || px - pad_x / odx >= tw.div_ceil(odx)
-                        || py - pad_y / ody >= th.div_ceil(ody)
-                    {
+                let py = sample_index(row, canvas_ph, dh, media);
+                if py < pad_py || py - pad_py >= t_ph {
+                    for _ in 0..dw {
+                        result.extend_from_slice(&fill[..bytes]);
+                    }
+                    continue;
+                }
+                let ty = py - pad_py;
+                if self.transpose.is_none() && canvas_pw == dw && !self.horizontal_flip {
+                    let iy = if self.vertical_flip { ch - 1 - ty } else { ty };
+                    let left_pad = pad_px.min(dw);
+                    for _ in 0..left_pad {
+                        result.extend_from_slice(&fill[..bytes]);
+                    }
+                    let copy_w = t_pw.min(dw.saturating_sub(left_pad));
+                    if copy_w > 0 {
+                        let start = ((y / dy + iy) * pw + x / dx) * bytes;
+                        result.extend_from_slice(&input[start..start + copy_w * bytes]);
+                    }
+                    let right_pad = dw.saturating_sub(left_pad + copy_w);
+                    for _ in 0..right_pad {
+                        result.extend_from_slice(&fill[..bytes]);
+                    }
+                    continue;
+                }
+                for &px in &col_samples {
+                    if px < pad_px || px - pad_px >= t_pw {
                         result.extend_from_slice(&fill[..bytes]);
                         continue;
                     }
-                    let (tx, ty) = (px - pad_x / odx, py - pad_y / ody);
+                    let tx = px - pad_px;
                     let (mut ix, mut iy) = self
                         .transpose
                         .map_or((tx, ty), |mode| mode.source(tx, ty, cw, ch));

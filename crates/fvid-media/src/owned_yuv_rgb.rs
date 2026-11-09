@@ -125,6 +125,7 @@ pub fn filter_rgb16_sampled(
         .map_err(|e| e.to_string())?;
     output.extend_from_slice(&frame.data);
     let mut rgb = Vec::new();
+    let mut before = Vec::new();
     for cy in 0..ch {
         for cx in 0..cw {
             rgb.clear();
@@ -169,7 +170,11 @@ pub fn filter_rgb16_sampled(
                     }
                 }
             }
-            let before = rgb.clone();
+            before.clear();
+            before
+                .try_reserve(rgb.len())
+                .map_err(|e| e.to_string())?;
+            before.extend_from_slice(&rgb);
             filter(&mut rgb)?;
             if before == rgb {
                 continue;

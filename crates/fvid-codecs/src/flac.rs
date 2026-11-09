@@ -25,10 +25,26 @@ impl Bits<'_> {
         {
             return Err(invalid("truncated FLAC bits"));
         }
-        let mut value = 0;
-        for _ in 0..n {
-            value = (value << 1) | u64::from((self.bytes[self.pos / 8] >> (7 - self.pos % 8)) & 1);
-            self.pos += 1;
+        if n == 0 {
+            return Ok(0);
+        }
+        let mut value = 0u64;
+        let mut rem = n;
+        while rem > 0 {
+            let byte_idx = self.pos / 8;
+            let bit_off = self.pos % 8;
+            let avail = 8 - bit_off;
+            let take = rem.min(avail);
+            let shift = avail - take;
+            let mask = ((1u16 << take) - 1) as u8;
+            let chunk = (self.bytes[byte_idx] >> shift) & mask;
+            value = if take == 64 {
+                u64::from(chunk)
+            } else {
+                (value << take) | u64::from(chunk)
+            };
+            self.pos += take;
+            rem -= take;
         }
         Ok(value)
     }
@@ -40,16 +56,77 @@ impl Bits<'_> {
         Ok(((value << (64 - n)) as i64) >> (64 - n))
     }
     fn unary(&mut self) -> Result<u64> {
-        let mut n = 0;
-        while self.read(1)? == 0 {
-            n += 1;
+        let mut n = 0u64;
+        let total_bits = self.bytes.len() * 8;
+        while self.pos < total_bits {
+            let byte_idx = self.pos / 8;
+            let bit_off = self.pos % 8;
+            let shifted = self.bytes[byte_idx] << bit_off;
+            if shifted == 0 {
+                let avail = 8 - bit_off;
+                let rem = total_bits - self.pos;
+                if avail > rem {
+                    self.pos = total_bits;
+                    return Err(invalid("truncated FLAC bits"));
+                }
+                n += avail as u64;
+                self.pos += avail;
+            } else {
+                let lz = shifted.leading_zeros() as usize;
+                if self.pos + lz >= total_bits {
+                    self.pos = total_bits;
+                    return Err(invalid("truncated FLAC bits"));
+                }
+                n += lz as u64;
+                self.pos += lz + 1;
+                return Ok(n);
+            }
         }
-        Ok(n)
+        Err(invalid("truncated FLAC bits"))
     }
 }
+const fn build_crc_nibble_table(width: u32, poly: u32) -> [u32; 16] {
+    let mut table = [0u32; 16];
+    let mask = (1u32 << width) - 1;
+    let mut i = 0;
+    while i < 16 {
+        let mut c = (i as u32) << (width - 4);
+        let mut bit = 0;
+        while bit < 4 {
+            c = ((c << 1) ^ if c & (1 << (width - 1)) != 0 { poly } else { 0 }) & mask;
+            bit += 1;
+        }
+        table[i] = c;
+        i += 1;
+    }
+    table
+}
+const CRC8_TABLE: [u32; 16] = build_crc_nibble_table(8, 7);
+const CRC16_TABLE: [u32; 16] = build_crc_nibble_table(16, 0x8005);
+
 fn crc(bytes: &[u8], width: u32, poly: u32) -> u32 {
-    let mut c = 0;
     let mask = (1 << width) - 1;
+    if width == 8 && poly == 7 {
+        let mut c = 0u32;
+        for &v in bytes {
+            let hi = ((c >> 4) ^ u32::from(v >> 4)) & 0xf;
+            c = ((c << 4) & mask) ^ CRC8_TABLE[hi as usize];
+            let lo = ((c >> 4) ^ u32::from(v & 0xf)) & 0xf;
+            c = ((c << 4) & mask) ^ CRC8_TABLE[lo as usize];
+        }
+        return c;
+    }
+    if width == 16 && poly == 0x8005 {
+        let mut c = 0u32;
+        for &v in bytes {
+            let hi = ((c >> 12) ^ u32::from(v >> 4)) & 0xf;
+            c = ((c << 4) & mask) ^ CRC16_TABLE[hi as usize];
+            let lo = ((c >> 12) ^ u32::from(v & 0xf)) & 0xf;
+            c = ((c << 4) & mask) ^ CRC16_TABLE[lo as usize];
+        }
+        return c;
+    }
+    let mut c = 0;
     for &v in bytes {
         c ^= u32::from(v) << (width - 8);
         for _ in 0..8 {

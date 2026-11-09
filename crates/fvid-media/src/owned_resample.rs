@@ -133,8 +133,12 @@ impl<W: ResamplerOutput> Resampler<W> {
     }
     fn emit(&mut self, finalizing: bool) -> io::Result<()> {
         let total = self.output_end()?;
+        if u128::from(self.emitted) >= total {
+            return Ok(());
+        }
+        let mut current = self.position()?;
         while u128::from(self.emitted) < total {
-            let (center, fraction) = self.position()?;
+            let (center, fraction) = current;
             if !finalizing && center + self.radius >= self.count as i64 {
                 break;
             }
@@ -146,7 +150,8 @@ impl<W: ResamplerOutput> Resampler<W> {
                     continue;
                 }
                 let angle = std::f64::consts::PI * distance / self.radius as f64;
-                let window = 0.42 + 0.5 * angle.cos() + 0.08 * (2.0 * angle).cos();
+                let cos_angle = angle.cos();
+                let window = 0.42 + 0.5 * cos_angle + 0.08 * (2.0 * cos_angle * cos_angle - 1.0);
                 let phase = std::f64::consts::PI * self.cutoff * distance;
                 let sinc = if phase.abs() < 1e-12 {
                     1.0
@@ -177,7 +182,8 @@ impl<W: ResamplerOutput> Resampler<W> {
                 self.output.write_sample_bytes(&value.to_le_bytes())?;
             }
             self.emitted += 1;
-            let next = self.position()?.0 as u64;
+            current = self.position()?;
+            let next = current.0 as u64;
             let keep = next.saturating_sub(self.radius as u64);
             while self.base < keep && !self.queue.is_empty() {
                 self.queue.pop_front();
@@ -209,7 +215,26 @@ impl<W: ResamplerOutput> Write for Resampler<W> {
         if bytes.len() % 4 != 0 {
             return Err(io::Error::other("partial resampler PCM sample"));
         }
-        for sample in bytes.chunks_exact(4) {
+        let mut remaining = bytes;
+        if self.passthrough() && self.filled == 0 {
+            let frame_bytes = self.channels * 4;
+            let bulk_len = (remaining.len() / frame_bytes) * frame_bytes;
+            if bulk_len > 0 {
+                let (bulk, tail) = remaining.split_at(bulk_len);
+                for sample in bulk.chunks_exact(4) {
+                    let sample = f32::from_le_bytes(sample.try_into().unwrap());
+                    if !sample.is_finite() {
+                        return Err(io::Error::other("non-finite resampler input"));
+                    }
+                }
+                self.output.write_sample_bytes(bulk)?;
+                let frames = (bulk_len / frame_bytes) as u64;
+                self.emitted += frames;
+                self.count += frames;
+                remaining = tail;
+            }
+        }
+        for sample in remaining.chunks_exact(4) {
             let sample = f32::from_le_bytes(sample.try_into().unwrap());
             if !sample.is_finite() {
                 return Err(io::Error::other("non-finite resampler input"));

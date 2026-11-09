@@ -16,9 +16,14 @@ impl RangeWriter {
         }
     }
     fn emit(&mut self, byte: u8) -> Result<()> {
-        self.output
-            .try_reserve(1)
-            .map_err(|_| invalid("cannot allocate FFV1 packet"))?;
+        if self.output.len() == self.output.capacity() {
+            let chunk = self.output.capacity().clamp(4096, 65536);
+            if self.output.try_reserve(chunk).is_err() {
+                self.output
+                    .try_reserve(1)
+                    .map_err(|_| invalid("cannot allocate FFV1 packet"))?;
+            }
+        }
         self.output.push(byte);
         Ok(())
     }
