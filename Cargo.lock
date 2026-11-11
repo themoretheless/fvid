@@ -1618,7 +1618,7 @@ dependencies = [
 
 [[package]]
 name = "fvid"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "airbug",
  "airbug-bench",
@@ -1649,7 +1649,7 @@ dependencies = [
 
 [[package]]
 name = "fvid-codecs"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "fvid-control",
  "fvid-cpu",
@@ -1659,15 +1659,15 @@ dependencies = [
 
 [[package]]
 name = "fvid-control"
-version = "0.1.0"
+version = "0.2.0"
 
 [[package]]
 name = "fvid-cpu"
-version = "0.1.0"
+version = "0.2.0"
 
 [[package]]
 name = "fvid-cuda"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "cudarc",
  "libloading 0.9.0",
@@ -1675,7 +1675,7 @@ dependencies = [
 
 [[package]]
 name = "fvid-media"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "ab_glyph",
  "epaint_default_fonts",
@@ -1694,21 +1694,21 @@ dependencies = [
 
 [[package]]
 name = "fvid-media-info"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "serde",
 ]
 
 [[package]]
 name = "fvid-opus"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "fvid-cpu",
 ]
 
 [[package]]
 name = "fvid-platform"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "objc2 0.6.4",
  "objc2-foundation 0.3.2",
@@ -1716,7 +1716,7 @@ dependencies = [
 
 [[package]]
 name = "fvid-vt"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "gpu-compute",
  "objc2 0.6.4",

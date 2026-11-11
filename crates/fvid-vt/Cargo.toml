@@ -1,6 +1,6 @@
 [package]
 name = "fvid-vt"
-version = "0.1.0"
+version = "0.2.0"
 edition = "2024"
 description = "Hardware video decoding and H.264/HEVC encoding through Apple VideoToolbox (macOS)"
 license = "MIT"

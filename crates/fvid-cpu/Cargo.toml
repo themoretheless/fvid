@@ -1,6 +1,6 @@
 [package]
 name = "fvid-cpu"
-version = "0.1.0"
+version = "0.2.0"
 edition = "2024"
 description = "CPU SIMD helpers for planar video (hflip)"
 license = "MIT"
