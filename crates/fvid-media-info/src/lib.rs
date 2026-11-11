@@ -1,10 +1,46 @@
 //! Shared media descriptions and operation results, with no demuxer or codec dependencies.
 #![forbid(unsafe_code)]
 mod video;
-pub use video::{CropRect, ScaleSize, OverlaySpec, XfadeSpec, LosslessTransform, DecodeTransform, TransposeMode, PadRect, RotateAngle};
+pub use video::{
+    CropRect, DecodeTransform, LosslessTransform, OverlaySpec, PadRect, RotateAngle, ScaleSize,
+    TransposeMode, VideoFilterSpec, XfadeSpec,
+};
 
 use serde::Serialize;
 use std::{collections::BTreeMap, path::PathBuf};
+
+/// PCM sample format produced by decoders and consumed by backends.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum SampleFormat {
+    /// Signed 16-bit little-endian interleaved samples.
+    I16,
+    /// Signed 32-bit little-endian interleaved samples.
+    I32,
+    /// 32-bit IEEE 754 little-endian interleaved samples.
+    F32,
+}
+
+/// Description of a decoded audio stream.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub struct AudioSpec {
+    /// Sample rate in Hz.
+    pub sample_rate: u32,
+    /// Number of interleaved channels.
+    pub channels: u16,
+    /// Sample format.
+    pub format: SampleFormat,
+}
+
+impl AudioSpec {
+    /// Bytes per interleaved frame (one sample per channel).
+    pub fn frame_size(&self) -> usize {
+        let sample = match self.format {
+            SampleFormat::I16 => 2,
+            SampleFormat::I32 | SampleFormat::F32 => 4,
+        };
+        sample * self.channels as usize
+    }
+}
 
 #[derive(Serialize, Clone, Debug, PartialEq)]
 pub struct StreamInfo {

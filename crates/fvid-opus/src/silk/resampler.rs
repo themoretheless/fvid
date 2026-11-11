@@ -52,35 +52,10 @@ const FIR_COEFS_12_8: [[i16; 8]; 12] = build_fir12_8();
 
 /// Bit-exact 8-tap fractional-FIR dot product: `Σ buf[bi+j] * coef[ti][j]` in
 /// wrapping i32. Matches the scalar `silk_smlabb` chain exactly (i32 addition is
-/// associative under wrapping, so `madd`'s pairwise sum is identical). SSE2
-/// `_mm_madd_epi16` on x86, scalar elsewhere.
+/// associative under wrapping, so pairwise SIMD sum is identical).
 #[inline]
 fn resampler_fir12_8(buf: &[i16], bi: usize, ti: usize) -> i32 {
-    let c = &FIR_COEFS_12_8[ti];
-    #[cfg(all(any(), target_arch = "x86_64"))]
-    {
-        if std::arch::is_x86_feature_detected!("sse2") {
-            return unsafe { resampler_fir12_8_sse2(&buf[bi..bi + 8], c) };
-        }
-    }
-    let mut r = 0i32;
-    for j in 0..8 {
-        r = r.wrapping_add((buf[bi + j] as i32) * (c[j] as i32));
-    }
-    r
-}
-
-#[cfg(all(any(), target_arch = "x86_64"))]
-#[target_feature(enable = "sse2")]
-unsafe fn resampler_fir12_8_sse2(buf8: &[i16], c: &[i16; 8]) -> i32 {
-    use std::arch::x86_64::*;
-    let b = _mm_loadu_si128(buf8.as_ptr() as *const __m128i);
-    let cc = _mm_loadu_si128(c.as_ptr() as *const __m128i);
-    let m = _mm_madd_epi16(b, cc); // 4x i32: pairwise products summed
-    // Horizontal sum the 4 lanes (i32 add is associative under wrapping).
-    let t = _mm_add_epi32(m, _mm_shuffle_epi32(m, 0b01_00_11_10)); // [2,3,0,1]
-    let t = _mm_add_epi32(t, _mm_shuffle_epi32(t, 0b00_00_00_01)); // + lane 1
-    _mm_cvtsi128_si32(t)
+    fvid_cpu::opus_simd::resampler_fir12_8(&buf[bi..bi + 8], &FIR_COEFS_12_8[ti])
 }
 
 const DELAY_MATRIX_DEC: [[i8; 6]; 3] =

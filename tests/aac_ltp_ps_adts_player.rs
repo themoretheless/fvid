@@ -38,7 +38,7 @@ fn play(reader: &mut dyn AudioStream) -> Vec<u8> {
     output
 }
 
-fn check(file: &str, channels: u16) {
+fn check(file: &str, #[cfg_attr(not(feature = "player"), allow(unused_variables))] channels: u16) {
     let data = bytes(file);
     let mut expected = Vec::new();
     fvid_media::owned_aac::decode_adts_pcm(

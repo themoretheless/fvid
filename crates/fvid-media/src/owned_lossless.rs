@@ -772,12 +772,6 @@ pub fn transcode(
     transcode_lossless(source, destination, transform, options)
 }
 
-pub(crate) fn check_encoded_ffv1(
-    view: crate::owned_video_decode::FrameView<'_>,
-    max_packet_bytes: usize,
-) -> Result<(), String> {
-    check_encoded_ffv1_with_controlled(view, max_packet_bytes, None, 0)
-}
 
 pub(crate) fn check_encoded_ffv1_with_controlled(
     view: crate::owned_video_decode::FrameView<'_>,

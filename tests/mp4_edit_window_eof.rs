@@ -10,6 +10,7 @@ fn path(n: &str) -> PathBuf {
 fn bytes(n: &str) -> Vec<u8> {
     std::fs::read(path(n)).unwrap()
 }
+#[cfg(feature = "player")]
 fn cases() -> Vec<serde_json::Value> {
     serde_json::from_slice::<serde_json::Value>(&bytes("manifest.json")).unwrap()["cases"]
         .as_array()

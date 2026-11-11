@@ -39,6 +39,7 @@ fn check_options(options: &CopyOptions) -> Result<()> {
     }
     crate::owned_budget::check_rss_budget(options)
 }
+#[cfg(test)]
 pub(crate) fn supports(source: &Path, destination: &Path, options: &CopyOptions) -> bool {
     destination.extension().and_then(|s| s.to_str()) == Some("wav")
         && policies(options)
@@ -144,6 +145,7 @@ pub fn concat(
     let paths: Vec<_> = sources.iter().map(|p| p.as_path()).collect();
     copy_waves(&paths, Some(destination), None, options).map(|(stats, _, _)| stats)
 }
+#[cfg(test)]
 pub(crate) fn supports_concat(
     sources: &[std::path::PathBuf],
     destination: &Path,
@@ -162,13 +164,6 @@ fn copy_wave(
 ) -> Result<(CopyStats, u64)> {
     copy_waves(&[source], Some(destination), interval, options)
         .map(|(stats, frames, _)| (stats, frames))
-}
-pub(crate) fn inspect_copy(
-    sources: &[&Path],
-    interval: Option<(i64, i64)>,
-    options: &CopyOptions,
-) -> Result<(CopyStats, u64, crate::owned_wave_inspect::WaveInfo)> {
-    inspect_copy_with_first_file(sources, None, interval, options)
 }
 pub(crate) fn inspect_copy_with_first_file(
     sources: &[&Path],

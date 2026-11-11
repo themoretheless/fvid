@@ -4,18 +4,10 @@ use fvid_control::CopyOptions;
 use fvid_media_info::{AudioDecodeStats, AudioDecodeTransform};
 use std::{
     fs::File,
-    io::{BufReader, Read, Seek, SeekFrom, Write},
+    io::{Read, Seek, SeekFrom, Write},
     path::Path,
 };
 type Result<T> = std::result::Result<T, String>;
-pub(crate) fn router(
-    source: &Path,
-    rate: u32,
-    channels: u16,
-    options: &CopyOptions,
-) -> Result<Option<StereoRouter>> {
-    router_for_decode(source, rate, channels, None, options)
-}
 pub(crate) fn router_from_mp4_reader<R: Read + Seek>(
     reader: &mut crate::owned_mp4::Mp4Reader<R>,
     index: usize,
@@ -136,81 +128,6 @@ pub(crate) fn router_from_asc(
     let ps = channels == 2 && parsed.core.channels == 1;
     crate::owned_aac::speaker_routing::stereo_router(asc, rate, channels, ps).map(Some)
 }
-pub(crate) fn router_for_decode(
-    source: &Path,
-    rate: u32,
-    channels: u16,
-    transform: Option<AudioDecodeTransform>,
-    options: &CopyOptions,
-) -> Result<Option<StereoRouter>> {
-    check(options)?;
-    let mut prefix = [0; 8];
-    let mut file = File::open(source).map_err(|e| e.to_string())?;
-    let n = file.read(&mut prefix).map_err(|e| e.to_string())?;
-    let selected = match options.streams.as_slice() {
-        [] => None,
-        [i] => Some(*i),
-        _ => return Err("select exactly one audio stream".into()),
-    };
-    let asc = if n >= 8 && crate::owned_mp4::recognizes_prefix(&prefix) {
-        file.seek(SeekFrom::Start(0)).map_err(|e| e.to_string())?;
-        let metadata_bytes = crate::owned_mp4::Limits::default()
-            .metadata_bytes
-            .min(options.max_controlled_bytes.unwrap_or(usize::MAX));
-        let mut reader = crate::owned_mp4::Mp4Reader::open_indexed(
-            BufReader::new(file),
-            crate::owned_mp4::Limits {
-                metadata_bytes,
-                ..Default::default()
-            },
-        )
-        .map_err(|error| {
-            if metadata_bytes < crate::owned_mp4::Limits::default().metadata_bytes
-                && error.to_string().contains("MP4 metadata exceeds budget")
-            {
-                "controlled memory budget exceeded: MP4 metadata exceeds budget".to_owned()
-            } else {
-                error.to_string()
-            }
-        })?;
-        reader.restrict_packet_bytes(options.max_packet_bytes);
-        let index = crate::owned_mp4_audio::mp4_audio_index(&reader, selected)
-            .map_err(|e| e.to_string())?;
-        return router_from_mp4_reader(&mut reader, index, rate, channels, transform, options);
-    } else if n >= 4 && prefix[..4] == [0x1a, 0x45, 0xdf, 0xa3] {
-        file.seek(SeekFrom::Start(0)).map_err(|e| e.to_string())?;
-        let mut reader = crate::owned_matroska_audio::open_aac_reader(
-            BufReader::new(file),
-            options,
-            options.max_packet_bytes,
-        )
-        .map_err(|e| e.to_string())?;
-        let index = crate::owned_matroska_audio::matroska_audio_index(&reader, selected)
-            .map_err(|e| e.to_string())?;
-        return router_from_matroska_reader(&mut reader, index, rate, channels, transform, options);
-    } else if crate::owned_aac::adts::header(&prefix[..n]).is_some() {
-        if selected.is_some_and(|i| i != 0) {
-            return Err("ADTS has only stream 0".into());
-        }
-        file.seek(SeekFrom::Start(0)).map_err(|e| e.to_string())?;
-        let reader = crate::owned_aac::adts::StreamReader::open_with_packet_limit(
-            BufReader::new(file),
-            options
-                .max_packet_bytes
-                .min(options.max_controlled_bytes.unwrap_or(usize::MAX)),
-        )
-        .map_err(|e| e.to_string())?;
-        crate::owned_aac::stream::check_adts_decode_admission(
-            reader.audio_specific_config(),
-            options,
-        )
-        .map_err(|e| e.to_string())?;
-        reader.audio_specific_config().to_vec()
-    } else {
-        return Ok(None);
-    };
-    router_from_asc(&asc, rate, channels, options)
-}
 fn check(options: &CopyOptions) -> Result<()> {
     if options.cancel.as_ref().is_some_and(|c| c.is_cancelled()) {
         return Err("media operation cancelled".into());
@@ -225,30 +142,6 @@ fn check(options: &CopyOptions) -> Result<()> {
         return Err("controlled memory limit must be positive".into());
     }
     crate::owned_budget::check_rss_budget(options)
-}
-pub(crate) fn export(
-    source: &Path,
-    spool: crate::owned_adts_export::DecodedSpool,
-    destination: &Path,
-    transform: AudioDecodeTransform,
-    options: &CopyOptions,
-) -> Result<AudioDecodeStats> {
-    check(options)?;
-    let fold = transform
-        .channels
-        .is_some_and(|output| output != i32::from(spool.stats.channels) && matches!(output, 1 | 2));
-    let router = if fold {
-        router_for_decode(
-            source,
-            spool.stats.sample_rate,
-            spool.stats.channels,
-            Some(transform),
-            options,
-        )?
-    } else {
-        None
-    };
-    export_with_router(router, spool, destination, transform, options)
 }
 pub(crate) fn export_with_router(
     router: Option<StereoRouter>,

@@ -1,11 +1,10 @@
 //! Sample-rate selection of AAC-LC scale-factor band geometry.
-use crate::{Result, invalid, unsupported};
-use fvid_media::owned_aac::aac_bands as band_geometry;
-include!("../../crates/fvid-media/src/owned_aac/aac_bands_impl.rs");
+pub use fvid_media::owned_aac::aac_geometry::*;
 
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::codec::{bits::BitReader, config::AacConfig};
     fn config(rate: u32) -> AacConfig {
         AacConfig {
             channel_configuration: 2,

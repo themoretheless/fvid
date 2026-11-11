@@ -3,10 +3,11 @@ use fvid_control::CopyOptions;
 use fvid_media_info::{AudioDecodeStats, AudioDecodeTransform};
 use std::{
     fs::File,
-    io::{BufReader, Read},
+    io::BufReader,
     path::Path,
 };
 type Result<T> = std::result::Result<T, String>;
+#[cfg(test)]
 fn open(
     source: &Path,
     options: &CopyOptions,
@@ -58,17 +59,6 @@ pub(crate) fn open_from_file(
     }
     Ok(reader)
 }
-pub(crate) fn recognizes(source: &Path, options: &CopyOptions) -> Result<bool> {
-    use std::io::{Seek, SeekFrom};
-    let mut prefix = [0; 8];
-    let mut file = File::open(source).map_err(|e| e.to_string())?;
-    if file.read_exact(&mut prefix).is_err() || !crate::owned_mp4::recognizes_prefix(&prefix) {
-        return Ok(false);
-    }
-    file.seek(SeekFrom::Start(0)).map_err(|e| e.to_string())?;
-    let reader = open_from_file(file, options)?;
-    Ok(recognizes_reader(&reader, options))
-}
 pub(crate) fn recognizes_reader(
     reader: &crate::owned_mp4::Mp4Reader<BufReader<File>>,
     options: &CopyOptions,
@@ -98,46 +88,12 @@ pub(crate) fn recognizes_reader(
             )
     })
 }
-pub(crate) fn try_descriptor_with_frames_for_decode(
-    source: &Path,
-    transform: Option<AudioDecodeTransform>,
-    options: &CopyOptions,
-) -> Result<Option<(usize, u32, u16, u32, String, bool, u64, Vec<u8>)>> {
-    let file = File::open(source).map_err(|e| e.to_string())?;
-    try_descriptor_with_frames_from_file_for_decode(source, file, transform, options)
-}
-pub(crate) fn try_descriptor_with_frames_from_file_for_decode(
+pub(crate) fn try_source_descriptor_from_file_for_decode(
     source: &Path,
     file: File,
     transform: Option<AudioDecodeTransform>,
     options: &CopyOptions,
-) -> Result<Option<(usize, u32, u16, u32, String, bool, u64, Vec<u8>)>> {
-    try_descriptor_with_frames_and_target_from_file_for_decode(source, file, transform, options)
-        .map(|opt| {
-            opt.map(|(index, rate, channels, mask, codec, precise, frames, info, _, _)| {
-                (index, rate, channels, mask, codec, precise, frames, info)
-            })
-        })
-}
-pub(crate) fn try_descriptor_with_frames_and_target_from_file_for_decode(
-    source: &Path,
-    file: File,
-    transform: Option<AudioDecodeTransform>,
-    options: &CopyOptions,
-) -> Result<
-    Option<(
-        usize,
-        u32,
-        u16,
-        u32,
-        String,
-        bool,
-        u64,
-        Vec<u8>,
-        Option<(u32, u16, u32)>,
-        bool,
-    )>,
-> {
+) -> Result<Option<crate::owned_audio_source::AudioSourceDescriptor>> {
     let reader = open_from_file(file, options)?;
     if !recognizes_reader(&reader, options) {
         return Ok(None);
@@ -165,47 +121,20 @@ pub(crate) fn try_descriptor_with_frames_and_target_from_file_for_decode(
     } else {
         false
     };
-    Ok(Some((
-        index, rate, channels, mask, codec, precise, frames, info, target, aac_fold,
-    )))
-}
-pub(crate) fn descriptor(
-    source: &Path,
-    options: &CopyOptions,
-) -> Result<(usize, u32, u16, u32, String)> {
-    descriptor_for_decode(source, None, options)
-}
-pub(crate) fn try_descriptor(
-    source: &Path,
-    options: &CopyOptions,
-) -> Result<Option<(usize, u32, u16, u32, String)>> {
-    try_descriptor_with_frames_for_decode(source, None, options)
-        .map(|opt| opt.map(|(index, rate, channels, mask, codec, _, _, _)| (index, rate, channels, mask, codec)))
-}
-pub(crate) fn descriptor_for_decode(
-    source: &Path,
-    transform: Option<AudioDecodeTransform>,
-    options: &CopyOptions,
-) -> Result<(usize, u32, u16, u32, String)> {
-    let (index, rate, channels, mask, codec, _, _) =
-        descriptor_and_reader_for_decode(source, transform, options)?;
-    Ok((index, rate, channels, mask, codec))
-}
-fn descriptor_and_reader_for_decode(
-    source: &Path,
-    transform: Option<AudioDecodeTransform>,
-    options: &CopyOptions,
-) -> Result<(
-    usize,
-    u32,
-    u16,
-    u32,
-    String,
-    Vec<u8>,
-    crate::owned_mp4::Mp4Reader<BufReader<File>>,
-)> {
-    let reader = open(source, options)?;
-    descriptor_and_reader_from_reader_for_decode(reader, transform, options)
+    let precision = if precise || codec.starts_with("pcm_") {
+        "float64"
+    } else {
+        "float32"
+    };
+    Ok(Some(
+        crate::owned_audio_source::AudioSourceDescriptor::float32(
+            index, rate, channels, mask, codec, frames, 0,
+        )
+        .with_precision(precision)
+        .with_info(info)
+        .with_mp4_target(target)
+        .with_aac_fold(aac_fold),
+    ))
 }
 fn descriptor_and_reader_from_reader_for_decode(
     mut reader: crate::owned_mp4::Mp4Reader<BufReader<File>>,
@@ -314,53 +243,6 @@ fn descriptor_and_reader_from_reader_for_decode(
         reader,
     ))
 }
-pub(crate) fn geometry_for_decode(
-    source: &Path,
-    transform: Option<AudioDecodeTransform>,
-    options: &CopyOptions,
-) -> Result<(u32, u16, u32, bool)> {
-    let (rate, channels, mask, precise, _) =
-        geometry_and_frames_for_decode(source, transform, options)?;
-    Ok((rate, channels, mask, precise))
-}
-pub(crate) fn geometry_and_frames_for_decode(
-    source: &Path,
-    transform: Option<AudioDecodeTransform>,
-    options: &CopyOptions,
-) -> Result<(u32, u16, u32, bool, u64)> {
-    let (_, rate, channels, mask, _, precise, frames, _) =
-        descriptor_with_frames_for_decode(source, transform, options)?;
-    Ok((rate, channels, mask, precise, frames))
-}
-pub(crate) fn descriptor_with_frames_for_decode(
-    source: &Path,
-    transform: Option<AudioDecodeTransform>,
-    options: &CopyOptions,
-) -> Result<(usize, u32, u16, u32, String, bool, u64, Vec<u8>)> {
-    let reader = open(source, options)?;
-    descriptor_with_frames_from_reader_for_decode(source, reader, transform, options)
-}
-fn descriptor_with_frames_from_reader_for_decode(
-    source: &Path,
-    reader: crate::owned_mp4::Mp4Reader<BufReader<File>>,
-    transform: Option<AudioDecodeTransform>,
-    options: &CopyOptions,
-) -> Result<(usize, u32, u16, u32, String, bool, u64, Vec<u8>)> {
-    let (index, rate, channels, mask, codec, precise, estimated_frames, info, _) =
-        descriptor_with_frames_and_reader_from_reader_for_decode(
-            source, reader, transform, options,
-        )?;
-    Ok((
-        index,
-        rate,
-        channels,
-        mask,
-        codec,
-        precise,
-        estimated_frames,
-        info,
-    ))
-}
 fn descriptor_with_frames_and_reader_from_reader_for_decode(
     source: &Path,
     reader: crate::owned_mp4::Mp4Reader<BufReader<File>>,
@@ -462,13 +344,6 @@ fn descriptor_with_frames_and_reader_from_reader_for_decode(
         reader,
     ))
 }
-pub(crate) fn normalization_target(source:&Path,transform:AudioDecodeTransform,options:&CopyOptions,rate:u32,channels:u16,mask:u32)->Result<Option<(u32,u16,u32)>> {
-    let requested=transform.channels.is_some()||transform.sample_rate.is_some();
-    if !requested&&mask!=0 {return Ok(None);}
-    let mut reader=open(source,options)?;
-    let index=crate::owned_mp4_audio::mp4_audio_index(&reader,options.streams.first().copied()).map_err(|e|e.to_string())?;
-    normalization_target_from_reader(&mut reader,index,transform,options,rate,channels,mask)
-}
 fn normalization_target_from_reader(
     reader: &mut crate::owned_mp4::Mp4Reader<BufReader<File>>,
     index: usize,
@@ -508,14 +383,7 @@ fn normalization_target_from_reader(
     Ok(Some((rate,output,mask)))
 }
 use crate::owned_adts_export::decoded_prefix as prefix;
-pub(crate) fn try_supports(
-    source: &Path,
-    transform: AudioDecodeTransform,
-    options: &CopyOptions,
-) -> Option<bool> {
-    let file = File::open(source).ok()?;
-    try_supports_from_file(source, file, transform, options)
-}
+#[cfg(test)]
 pub(crate) fn try_supports_from_file(
     source: &Path,
     file: File,
@@ -543,6 +411,7 @@ pub(crate) fn try_supports_from_file(
         source, reader, index, transform, options, rate, channels, mask, precise,
     ))
 }
+#[cfg(test)]
 pub(crate) fn supports(
     source: &Path,
     transform: AudioDecodeTransform,
@@ -566,6 +435,7 @@ pub(crate) fn supports(
         source, reader, index, transform, options, rate, channels, mask, precise,
     )
 }
+#[cfg(test)]
 fn supports_from_reader(
     _source: &Path,
     mut reader: crate::owned_mp4::Mp4Reader<BufReader<File>>,
@@ -637,60 +507,6 @@ fn supports_from_reader(
         || result
             .err()
             .is_some_and(|e| e.to_string().starts_with("controlled memory budget exceeded:"))
-}
-pub(crate) fn apply(
-    source: &Path,
-    destination: &Path,
-    transform: AudioDecodeTransform,
-    options: &CopyOptions,
-) -> Result<AudioDecodeStats> {
-    if options.cancel.as_ref().is_some_and(|c| c.is_cancelled()) {
-        return Err("media operation cancelled".into());
-    }
-    if options.max_packet_bytes == 0 {
-        return Err("packet byte limit must be positive".into());
-    }
-    if options.max_packets == Some(0) {
-        return Err("packet work limit requires at least one packet".into());
-    }
-    if options.max_controlled_bytes == Some(0) {
-        return Err("controlled memory limit must be positive".into());
-    }
-    crate::owned_budget::check_rss_budget(options)?;
-    if destination.symlink_metadata().is_ok() {
-        return Err("output already exists".into());
-    }
-    let reader = open(source, options)?;
-    let (index, source_rate, channels, mask, _, precise, source_frames, info, reader) =
-        descriptor_with_frames_and_reader_from_reader_for_decode(
-            source,
-            reader,
-            Some(transform),
-            options,
-        )?;
-    apply_from_descriptor_and_reader(
-        source,
-        reader,
-        index,
-        destination,
-        transform,
-        options,
-        source_rate,
-        channels,
-        mask,
-        precise,
-        source_frames,
-        info,
-    )
-}
-pub(crate) fn try_apply(
-    source: &Path,
-    destination: &Path,
-    transform: AudioDecodeTransform,
-    options: &CopyOptions,
-) -> Result<Option<AudioDecodeStats>> {
-    let file = File::open(source).map_err(|e| e.to_string())?;
-    try_apply_from_file(source, file, destination, transform, options)
 }
 pub(crate) fn try_apply_from_file(
     source: &Path,

@@ -446,7 +446,7 @@ mod tests {
             let mut state = State::default();
             let before = state.clone();
             assert_eq!(
-                state.read(&mut bits, text.len(), 32).unwrap_err().0,
+                state.read(&mut bits, text.len(), 32).unwrap_err().to_string(),
                 expected
             );
             assert_eq!(bits.position(), 0);
@@ -476,7 +476,7 @@ mod tests {
             let mut state = State::default();
             let before = state.clone();
             assert_eq!(
-                state.read(&mut bits, text.len(), 30).unwrap_err().0,
+                state.read(&mut bits, text.len(), 30).unwrap_err().to_string(),
                 expected,
                 "{text}"
             );
@@ -514,7 +514,7 @@ mod tests {
         let before = state.clone();
         let two = packed("10111010000010111100000000");
         assert_eq!(
-            state.read_sbr_extensions(&two, 32).unwrap_err().0,
+            state.read_sbr_extensions(&two, 32).unwrap_err().to_string(),
             "reserved PS IID mode"
         );
         assert_eq!(state, before);
@@ -542,7 +542,7 @@ mod tests {
             let mut bits = BitReader::new(&bytes);
             let mut state = State::default();
             assert_eq!(
-                state.read(&mut bits, text.len(), 32).unwrap_err().0,
+                state.read(&mut bits, text.len(), 32).unwrap_err().to_string(),
                 "PS mode change requires frequency-coded first envelope"
             );
             assert_eq!(bits.position(), 0);

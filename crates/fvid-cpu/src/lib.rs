@@ -1,7 +1,11 @@
-//! Fast planar row horizontal flips (8-bit groups).
+//! CPU SIMD kernels and persistent elastic worker pool for planar video & audio codecs.
 //!
-//! On x86_64 with AVX2, uses byte-shuffle reverses; otherwise falls back to
-//! scalar pairwise swaps. Safe API; unsafe is confined to SIMD loads/stores.
+//! Safe public APIs dispatch to NEON on `aarch64`, AVX2 on `x86`/`x86_64` when
+//! detected at runtime, and bit-equivalent scalar fallbacks elsewhere.
+
+pub mod opus_simd;
+pub mod parallel;
+pub use parallel::{Scope, ScopedJoinHandle, par_chunks_mut, parallelism, scope, span_workers};
 
 /// Reverse `width` pixels of `step` bytes each in `row` (in-place).
 pub fn hflip_row(row: &mut [u8], width: usize, step: usize) {
@@ -17,14 +21,17 @@ pub fn hflip_row(row: &mut [u8], width: usize, step: usize) {
         hflip_bytes(row);
         return;
     }
+    if step == 2 {
+        hflip_u16_bytes(row);
+        return;
+    }
     let mut i = 0;
     let mut j = width - 1;
     while i < j {
         let a = i * step;
         let b = j * step;
-        for k in 0..step {
-            row.swap(a + k, b + k);
-        }
+        let (left, right) = row.split_at_mut(b);
+        left[a..a + step].swap_with_slice(&mut right[..step]);
         i += 1;
         j -= 1;
     }
@@ -47,10 +54,12 @@ pub fn hflip_row_copy(dst: &mut [u8], src: &[u8], width: usize, step: usize) {
         hflip_bytes_copy(dst, src);
         return;
     }
-    for i in 0..width {
-        let s = (width - 1 - i) * step;
-        let d = i * step;
-        dst[d..d + step].copy_from_slice(&src[s..s + step]);
+    if step == 2 {
+        hflip_u16_bytes_copy(dst, src);
+        return;
+    }
+    for (dst_chunk, src_chunk) in dst.chunks_exact_mut(step).zip(src.chunks_exact(step).rev()) {
+        dst_chunk.copy_from_slice(src_chunk);
     }
 }
 
@@ -70,6 +79,14 @@ pub unsafe fn hflip_plane_copy(
     if width == 0 || height == 0 {
         return;
     }
+    #[cfg(target_arch = "aarch64")]
+    {
+        // SAFETY: NEON is baseline on aarch64 and caller guarantees all plane rows.
+        unsafe {
+            hflip_plane_copy_neon(dst, dst_stride, src, src_stride, width, height);
+        }
+        return;
+    }
     #[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
     if has_avx2() {
         // SAFETY: AVX2 was detected and the caller guarantees all plane rows.
@@ -78,6 +95,7 @@ pub unsafe fn hflip_plane_copy(
         }
         return;
     }
+    #[cfg(not(target_arch = "aarch64"))]
     for row in 0..height {
         // SAFETY: Guaranteed by this function's caller.
         unsafe {
@@ -92,6 +110,14 @@ pub unsafe fn hflip_plane_copy(
 }
 
 fn hflip_bytes(row: &mut [u8]) {
+    #[cfg(target_arch = "aarch64")]
+    {
+        // SAFETY: NEON is baseline on aarch64; `row` is a valid mutable byte slice.
+        unsafe {
+            hflip_bytes_neon(row);
+        }
+        return;
+    }
     #[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
     {
         if has_avx2() {
@@ -102,6 +128,7 @@ fn hflip_bytes(row: &mut [u8]) {
             return;
         }
     }
+    #[cfg(not(target_arch = "aarch64"))]
     row.reverse();
 }
 
@@ -109,6 +136,14 @@ fn hflip_bytes_copy(dst: &mut [u8], src: &[u8]) {
     let n = dst.len().min(src.len());
     let dst = &mut dst[..n];
     let src = &src[..n];
+    #[cfg(target_arch = "aarch64")]
+    {
+        // SAFETY: NEON is baseline on aarch64; equal-length slices.
+        unsafe {
+            hflip_bytes_copy_neon(dst, src);
+        }
+        return;
+    }
     #[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
     {
         if has_avx2() {
@@ -119,8 +154,289 @@ fn hflip_bytes_copy(dst: &mut [u8], src: &[u8]) {
             return;
         }
     }
+    #[cfg(not(target_arch = "aarch64"))]
     for (i, b) in src.iter().rev().enumerate() {
         dst[i] = *b;
+    }
+}
+
+fn hflip_u16_bytes(row: &mut [u8]) {
+    debug_assert_eq!(row.len() % 2, 0);
+    #[cfg(target_arch = "aarch64")]
+    {
+        unsafe {
+            hflip_u16_bytes_neon(row);
+        }
+        return;
+    }
+    #[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
+    {
+        if has_avx2() {
+            unsafe {
+                hflip_u16_bytes_avx2(row);
+            }
+            return;
+        }
+    }
+    #[cfg(not(target_arch = "aarch64"))]
+    {
+        let width = row.len() / 2;
+        let mut i = 0;
+        let mut j = width.saturating_sub(1);
+        while i < j {
+            let a = i * 2;
+            let b = j * 2;
+            row.swap(a, b);
+            row.swap(a + 1, b + 1);
+            i += 1;
+            j -= 1;
+        }
+    }
+}
+
+fn hflip_u16_bytes_copy(dst: &mut [u8], src: &[u8]) {
+    let n = (dst.len().min(src.len())) & !1;
+    let dst = &mut dst[..n];
+    let src = &src[..n];
+    #[cfg(target_arch = "aarch64")]
+    {
+        unsafe {
+            hflip_u16_bytes_copy_neon(dst, src);
+        }
+        return;
+    }
+    #[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
+    {
+        if has_avx2() {
+            unsafe {
+                hflip_u16_bytes_copy_avx2(dst, src);
+            }
+            return;
+        }
+    }
+    #[cfg(not(target_arch = "aarch64"))]
+    for (dst_pair, src_pair) in dst.chunks_exact_mut(2).zip(src.chunks_exact(2).rev()) {
+        dst_pair[0] = src_pair[0];
+        dst_pair[1] = src_pair[1];
+    }
+}
+
+#[cfg(target_arch = "aarch64")]
+#[target_feature(enable = "neon")]
+unsafe fn hflip_bytes_neon(row: &mut [u8]) {
+    use std::arch::aarch64::*;
+    unsafe {
+        let ptr = row.as_mut_ptr();
+        let mut left = 0usize;
+        let mut right = row.len();
+        while right - left >= 32 {
+            right -= 16;
+            let a = vld1q_u8(ptr.add(left));
+            let b = vld1q_u8(ptr.add(right));
+            let a_rev64 = vrev64q_u8(a);
+            let b_rev64 = vrev64q_u8(b);
+            let a_rev = vextq_u8::<8>(a_rev64, a_rev64);
+            let b_rev = vextq_u8::<8>(b_rev64, b_rev64);
+            vst1q_u8(ptr.add(left), b_rev);
+            vst1q_u8(ptr.add(right), a_rev);
+            left += 16;
+        }
+        while right - left >= 2 {
+            right -= 1;
+            let tmp = *ptr.add(left);
+            *ptr.add(left) = *ptr.add(right);
+            *ptr.add(right) = tmp;
+            left += 1;
+        }
+    }
+}
+
+#[cfg(target_arch = "aarch64")]
+#[target_feature(enable = "neon")]
+unsafe fn hflip_bytes_copy_neon(dst: &mut [u8], src: &[u8]) {
+    use std::arch::aarch64::*;
+    unsafe {
+        let n = dst.len();
+        let d = dst.as_mut_ptr();
+        let s = src.as_ptr();
+        let mut i = 0usize;
+        while i + 64 <= n {
+            for block in 0..4 {
+                let out_off = i + block * 16;
+                let src_off = n - 16 - out_off;
+                let v = vld1q_u8(s.add(src_off));
+                let rev64 = vrev64q_u8(v);
+                let rev = vextq_u8::<8>(rev64, rev64);
+                vst1q_u8(d.add(out_off), rev);
+            }
+            i += 64;
+        }
+        while i + 16 <= n {
+            let src_off = n - 16 - i;
+            let v = vld1q_u8(s.add(src_off));
+            let rev64 = vrev64q_u8(v);
+            let rev = vextq_u8::<8>(rev64, rev64);
+            vst1q_u8(d.add(i), rev);
+            i += 16;
+        }
+        while i < n {
+            *d.add(i) = *s.add(n - 1 - i);
+            i += 1;
+        }
+    }
+}
+
+#[cfg(target_arch = "aarch64")]
+#[target_feature(enable = "neon")]
+unsafe fn hflip_plane_copy_neon(
+    dst: *mut u8,
+    dst_stride: isize,
+    src: *const u8,
+    src_stride: isize,
+    width: usize,
+    height: usize,
+) {
+    for row in 0..height {
+        unsafe {
+            let source = std::slice::from_raw_parts(src.offset(row as isize * src_stride), width);
+            let target =
+                std::slice::from_raw_parts_mut(dst.offset(row as isize * dst_stride), width);
+            hflip_bytes_copy_neon(target, source);
+        }
+    }
+}
+
+#[cfg(target_arch = "aarch64")]
+#[target_feature(enable = "neon")]
+unsafe fn hflip_u16_bytes_neon(row: &mut [u8]) {
+    use std::arch::aarch64::*;
+    unsafe {
+        let ptr = row.as_mut_ptr();
+        let mut left = 0usize;
+        let mut right = row.len();
+        while right - left >= 32 {
+            right -= 16;
+            let a = vreinterpretq_u16_u8(vld1q_u8(ptr.add(left)));
+            let b = vreinterpretq_u16_u8(vld1q_u8(ptr.add(right)));
+            let a_rev64 = vrev64q_u16(a);
+            let b_rev64 = vrev64q_u16(b);
+            let a_rev = vextq_u16::<4>(a_rev64, a_rev64);
+            let b_rev = vextq_u16::<4>(b_rev64, b_rev64);
+            vst1q_u8(ptr.add(left), vreinterpretq_u8_u16(b_rev));
+            vst1q_u8(ptr.add(right), vreinterpretq_u8_u16(a_rev));
+            left += 16;
+        }
+        while right - left >= 4 {
+            right -= 2;
+            let t0 = *ptr.add(left);
+            let t1 = *ptr.add(left + 1);
+            *ptr.add(left) = *ptr.add(right);
+            *ptr.add(left + 1) = *ptr.add(right + 1);
+            *ptr.add(right) = t0;
+            *ptr.add(right + 1) = t1;
+            left += 2;
+        }
+    }
+}
+
+#[cfg(target_arch = "aarch64")]
+#[target_feature(enable = "neon")]
+unsafe fn hflip_u16_bytes_copy_neon(dst: &mut [u8], src: &[u8]) {
+    use std::arch::aarch64::*;
+    unsafe {
+        let n = dst.len();
+        let d = dst.as_mut_ptr();
+        let s = src.as_ptr();
+        let mut i = 0usize;
+        while i + 16 <= n {
+            let src_off = n - 16 - i;
+            let v = vreinterpretq_u16_u8(vld1q_u8(s.add(src_off)));
+            let rev64 = vrev64q_u16(v);
+            let rev = vextq_u16::<4>(rev64, rev64);
+            vst1q_u8(d.add(i), vreinterpretq_u8_u16(rev));
+            i += 16;
+        }
+        while i + 2 <= n {
+            let src_off = n - 2 - i;
+            *d.add(i) = *s.add(src_off);
+            *d.add(i + 1) = *s.add(src_off + 1);
+            i += 2;
+        }
+    }
+}
+
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
+#[target_feature(enable = "avx2")]
+unsafe fn hflip_u16_bytes_avx2(row: &mut [u8]) {
+    #[cfg(target_arch = "x86")]
+    use std::arch::x86::*;
+    #[cfg(target_arch = "x86_64")]
+    use std::arch::x86_64::*;
+
+    unsafe {
+        let shuffle = _mm256_setr_epi8(
+            14, 15, 12, 13, 10, 11, 8, 9, 6, 7, 4, 5, 2, 3, 0, 1,
+            14, 15, 12, 13, 10, 11, 8, 9, 6, 7, 4, 5, 2, 3, 0, 1,
+        );
+        let ptr = row.as_mut_ptr();
+        let mut left = 0usize;
+        let mut right = row.len();
+        while right - left >= 64 {
+            right -= 32;
+            let a = _mm256_loadu_si256(ptr.add(left).cast());
+            let b = _mm256_loadu_si256(ptr.add(right).cast());
+            let a_rev = _mm256_shuffle_epi8(a, shuffle);
+            let b_rev = _mm256_shuffle_epi8(b, shuffle);
+            let a_sw = _mm256_permute2x128_si256(a_rev, a_rev, 0x01);
+            let b_sw = _mm256_permute2x128_si256(b_rev, b_rev, 0x01);
+            _mm256_storeu_si256(ptr.add(left).cast(), b_sw);
+            _mm256_storeu_si256(ptr.add(right).cast(), a_sw);
+            left += 32;
+        }
+        while right - left >= 4 {
+            right -= 2;
+            let t0 = *ptr.add(left);
+            let t1 = *ptr.add(left + 1);
+            *ptr.add(left) = *ptr.add(right);
+            *ptr.add(left + 1) = *ptr.add(right + 1);
+            *ptr.add(right) = t0;
+            *ptr.add(right + 1) = t1;
+            left += 2;
+        }
+    }
+}
+
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
+#[target_feature(enable = "avx2")]
+unsafe fn hflip_u16_bytes_copy_avx2(dst: &mut [u8], src: &[u8]) {
+    #[cfg(target_arch = "x86")]
+    use std::arch::x86::*;
+    #[cfg(target_arch = "x86_64")]
+    use std::arch::x86_64::*;
+
+    unsafe {
+        let shuffle = _mm256_setr_epi8(
+            14, 15, 12, 13, 10, 11, 8, 9, 6, 7, 4, 5, 2, 3, 0, 1,
+            14, 15, 12, 13, 10, 11, 8, 9, 6, 7, 4, 5, 2, 3, 0, 1,
+        );
+        let n = dst.len();
+        let d = dst.as_mut_ptr();
+        let s = src.as_ptr();
+        let mut i = 0usize;
+        while i + 32 <= n {
+            let src_off = n - 32 - i;
+            let v = _mm256_loadu_si256(s.add(src_off).cast());
+            let rev = _mm256_shuffle_epi8(v, shuffle);
+            let sw = _mm256_permute2x128_si256(rev, rev, 0x01);
+            _mm256_storeu_si256(d.add(i).cast(), sw);
+            i += 32;
+        }
+        while i + 2 <= n {
+            let src_off = n - 2 - i;
+            *d.add(i) = *s.add(src_off);
+            *d.add(i + 1) = *s.add(src_off + 1);
+            i += 2;
+        }
     }
 }
 
@@ -261,7 +577,7 @@ pub fn interp8_vertical(rows: [&[i32]; 8], coef: &[i32; 8], max: i32, out: &mut 
     }
     #[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
     {
-        if is_x86_feature_detected!("avx2") {
+        if has_avx2() {
             let ptrs: [*const i32; 8] = [
                 rows[0].as_ptr(),
                 rows[1].as_ptr(),
@@ -366,6 +682,20 @@ unsafe fn interp8_vertical_neon(
         let vmax = vdupq_n_s32(max);
         let neg7 = vdupq_n_s32(-7);
         let mut c = 0usize;
+        while c + 8 <= n {
+            let mut acc0 = vmulq_s32(cf[0], vld1q_s32(rows[0].add(c)));
+            let mut acc1 = vmulq_s32(cf[0], vld1q_s32(rows[0].add(c + 4)));
+            for t in 1..8 {
+                acc0 = vmlaq_s32(acc0, cf[t], vld1q_s32(rows[t].add(c)));
+                acc1 = vmlaq_s32(acc1, cf[t], vld1q_s32(rows[t].add(c + 4)));
+            }
+            let s0 = vshlq_s32(vaddq_s32(acc0, round), neg7);
+            let s1 = vshlq_s32(vaddq_s32(acc1, round), neg7);
+            let cl0 = vminq_s32(vmaxq_s32(s0, zero), vmax);
+            let cl1 = vminq_s32(vmaxq_s32(s1, zero), vmax);
+            vst1q_u16(out.add(c), vcombine_u16(vqmovun_s32(cl0), vqmovun_s32(cl1)));
+            c += 8;
+        }
         while c + 4 <= n {
             let mut acc = vmulq_s32(cf[0], vld1q_s32(rows[0].add(c)));
             for t in 1..8 {
@@ -388,8 +718,8 @@ unsafe fn interp8_vertical_neon(
 
 /// Four independent loop-filter edge lines sharing one set of parameters.
 /// Each line is sixteen original samples ordered p7..p0,q0..q7. The four lines
-/// are pixel-independent, so NEON packs them into lanes of `int32x4_t`. The
-/// scalar reference (`vp9_filter_lane`, bit-identical to the parent crate's
+/// are pixel-independent, so NEON / AVX2 pack them into 4x32-bit SIMD lanes.
+/// The scalar reference (`vp9_filter_lane`, bit-identical to the parent crate's
 /// `filter_fast`) runs elsewhere and is always used by the parity test.
 pub fn vp9_filter_batch4(
     lines: [[u16; 16]; 4],
@@ -399,10 +729,19 @@ pub fn vp9_filter_batch4(
     sharpness: u8,
 ) -> [[u16; 16]; 4] {
     #[cfg(target_arch = "aarch64")]
-    let out = unsafe { vp9_filter_batch4_neon(lines, depth, width, level, sharpness) };
+    {
+        return unsafe { vp9_filter_batch4_neon(lines, depth, width, level, sharpness) };
+    }
+    #[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
+    {
+        if has_avx2() {
+            return unsafe { vp9_filter_batch4_avx2(lines, depth, width, level, sharpness) };
+        }
+    }
     #[cfg(not(target_arch = "aarch64"))]
-    let out = lines.map(|s| vp9_filter_lane(s, depth, width, level, sharpness));
-    out
+    {
+        lines.map(|s| vp9_filter_lane(s, depth, width, level, sharpness))
+    }
 }
 
 /// Scalar reference mirroring the parent crate's `filter_fast` exactly. Used
@@ -661,9 +1000,192 @@ unsafe fn vp9_filter_batch4_neon(
     }
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
+#[target_feature(enable = "avx2")]
+unsafe fn vp9_filter_batch4_avx2(
+    lines: [[u16; 16]; 4],
+    depth: u8,
+    width: usize,
+    level: u8,
+    sharpness: u8,
+) -> [[u16; 16]; 4] {
+    #[cfg(target_arch = "x86")]
+    use std::arch::x86::*;
+    #[cfg(target_arch = "x86_64")]
+    use std::arch::x86_64::*;
+
+    if level == 0 {
+        return lines;
+    }
+    unsafe {
+        let mut s = [_mm_setzero_si128(); 16];
+        let mut tmp = [0i32; 4];
+        for i in 0..16 {
+            tmp[0] = i32::from(lines[0][i]);
+            tmp[1] = i32::from(lines[1][i]);
+            tmp[2] = i32::from(lines[2][i]);
+            tmp[3] = i32::from(lines[3][i]);
+            s[i] = _mm_loadu_si128(tmp.as_ptr().cast());
+        }
+        let bd = i32::from(depth - 8);
+        let lvl = i32::from(level);
+        let sh = i32::from(sharpness);
+        let shift = if sharpness > 4 {
+            2
+        } else if sharpness > 0 {
+            1
+        } else {
+            0
+        };
+        let mut limit = (lvl >> shift).max(1);
+        if sharpness > 0 {
+            limit = limit.min(9 - sh);
+        }
+        let blimit = (2 * (lvl + 2) + limit) << bd;
+        let limit_bd = limit << bd;
+        let thresh = (lvl >> 4) << bd;
+        let mid = 1i32 << (depth - 1);
+
+        let vlim = _mm_set1_epi32(limit_bd);
+        let vblim = _mm_set1_epi32(blimit);
+        let vthresh = _mm_set1_epi32(thresh);
+        let vone_bd = _mm_set1_epi32(1 << bd);
+        let vneg_mid = _mm_set1_epi32(-mid);
+        let vmid_m1 = _mm_set1_epi32(mid - 1);
+        let vmid = _mm_set1_epi32(mid);
+        let vzero = _mm_setzero_si128();
+        let vone = _mm_set1_epi32(1);
+        let vthree = _mm_set1_epi32(3);
+        let vfour = _mm_set1_epi32(4);
+        let veight = _mm_set1_epi32(8);
+        let all_ones = _mm_cmpeq_epi32(vzero, vzero);
+
+        macro_rules! dif {
+            ($a:expr, $b:expr) => {
+                _mm_abs_epi32(_mm_sub_epi32(s[$a], s[$b]))
+            };
+        }
+        macro_rules! gt {
+            ($a:expr, $b:expr) => {
+                _mm_cmpgt_epi32(dif!($a, $b), vlim)
+            };
+        }
+        macro_rules! leq {
+            ($a:expr, $b:expr) => {
+                _mm_xor_si128(_mm_cmpgt_epi32(dif!($a, $b), vone_bd), all_ones)
+            };
+        }
+        macro_rules! cl {
+            ($v:expr) => {
+                _mm_min_epi32(_mm_max_epi32($v, vneg_mid), vmid_m1)
+            };
+        }
+
+        let mut masked = vzero;
+        masked = _mm_or_si128(masked, gt!(4, 5));
+        masked = _mm_or_si128(masked, gt!(5, 6));
+        masked = _mm_or_si128(masked, gt!(6, 7));
+        masked = _mm_or_si128(masked, gt!(8, 9));
+        masked = _mm_or_si128(masked, gt!(9, 10));
+        masked = _mm_or_si128(masked, gt!(10, 11));
+        let bl = _mm_add_epi32(_mm_slli_epi32::<1>(dif!(7, 8)), _mm_srli_epi32::<1>(dif!(6, 9)));
+        masked = _mm_or_si128(masked, _mm_cmpgt_epi32(bl, vblim));
+
+        let hev = _mm_or_si128(
+            _mm_cmpgt_epi32(dif!(6, 7), vthresh),
+            _mm_cmpgt_epi32(dif!(9, 8), vthresh),
+        );
+
+        let mut flat = vzero;
+        if width >= 8 {
+            flat = leq!(4, 7);
+            flat = _mm_and_si128(flat, leq!(5, 7));
+            flat = _mm_and_si128(flat, leq!(6, 7));
+            flat = _mm_and_si128(flat, leq!(9, 8));
+            flat = _mm_and_si128(flat, leq!(10, 8));
+            flat = _mm_and_si128(flat, leq!(11, 8));
+        }
+        let mut flat2 = vzero;
+        if width == 16 {
+            flat2 = leq!(0, 7);
+            flat2 = _mm_and_si128(flat2, leq!(1, 7));
+            flat2 = _mm_and_si128(flat2, leq!(2, 7));
+            flat2 = _mm_and_si128(flat2, leq!(3, 7));
+            flat2 = _mm_and_si128(flat2, leq!(12, 8));
+            flat2 = _mm_and_si128(flat2, leq!(13, 8));
+            flat2 = _mm_and_si128(flat2, leq!(14, 8));
+            flat2 = _mm_and_si128(flat2, leq!(15, 8));
+        }
+
+        let mut nf = s;
+        let hc = cl!(_mm_sub_epi32(s[6], s[9]));
+        let hterm = _mm_blendv_epi8(vzero, hc, hev);
+        let a3 = _mm_mullo_epi32(vthree, _mm_sub_epi32(s[8], s[7]));
+        let f = cl!(_mm_add_epi32(hterm, a3));
+        let f1 = _mm_srai_epi32::<3>(cl!(_mm_add_epi32(f, vfour)));
+        let f2 = _mm_srai_epi32::<3>(cl!(_mm_add_epi32(f, vthree)));
+        let vv = _mm_srai_epi32::<1>(_mm_add_epi32(f1, vone));
+        nf[8] = _mm_add_epi32(cl!(_mm_sub_epi32(_mm_sub_epi32(s[8], vmid), f1)), vmid);
+        nf[7] = _mm_add_epi32(cl!(_mm_add_epi32(_mm_sub_epi32(s[7], vmid), f2)), vmid);
+        nf[9] = _mm_blendv_epi8(
+            _mm_add_epi32(cl!(_mm_sub_epi32(_mm_sub_epi32(s[9], vmid), vv)), vmid),
+            s[9],
+            hev,
+        );
+        nf[6] = _mm_blendv_epi8(
+            _mm_add_epi32(cl!(_mm_add_epi32(_mm_sub_epi32(s[6], vmid), vv)), vmid),
+            s[6],
+            hev,
+        );
+
+        let mut fl1 = s;
+        if width >= 8 {
+            let mut i = -3i32;
+            while i < 3 {
+                let mut sum = s[(8 + i) as usize];
+                let mut j = -3i32;
+                while j <= 3 {
+                    let idx = (8 + (i + j).clamp(-4, 3)) as usize;
+                    sum = _mm_add_epi32(sum, s[idx]);
+                    j += 1;
+                }
+                fl1[(8 + i) as usize] = _mm_srai_epi32::<3>(_mm_add_epi32(sum, vfour));
+                i += 1;
+            }
+        }
+        let mut fl2 = s;
+        if width == 16 {
+            let mut i = -7i32;
+            while i < 7 {
+                let mut sum = s[(8 + i) as usize];
+                let mut j = -7i32;
+                while j <= 7 {
+                    let idx = (8 + (i + j).clamp(-8, 7)) as usize;
+                    sum = _mm_add_epi32(sum, s[idx]);
+                    j += 1;
+                }
+                fl2[(8 + i) as usize] = _mm_srai_epi32::<4>(_mm_add_epi32(sum, veight));
+                i += 1;
+            }
+        }
+
+        let mut out_lines = [[0u16; 16]; 4];
+        for i in 0..16 {
+            let flatv = _mm_blendv_epi8(fl1[i], fl2[i], flat2);
+            let chosen = _mm_blendv_epi8(nf[i], flatv, flat);
+            let r = _mm_blendv_epi8(chosen, s[i], masked);
+            _mm_storeu_si128(tmp.as_mut_ptr().cast(), r);
+            for k in 0..4 {
+                out_lines[k][i] = tmp[k] as u16;
+            }
+        }
+        out_lines
+    }
+}
+
 /// HEVC deblock luma filter: 4 independent lines, each with p/q arrays (4 samples each).
 /// All lines use the same filter mode (from luma_decision). `enabled` is per-line per-side.
-/// Returns filtered p/q for each line. On aarch64 uses NEON, elsewhere scalar.
+/// Returns filtered p/q for each line. Dispatches to NEON on aarch64, AVX2 on x86_64, scalar elsewhere.
 pub fn hevc_deblock_luma_batch4(
     p: [[u16; 4]; 4],
     q: [[u16; 4]; 4],
@@ -675,7 +1197,13 @@ pub fn hevc_deblock_luma_batch4(
     #[cfg(target_arch = "aarch64")]
     {
         // SAFETY: NEON is baseline on aarch64; arrays are fixed-size.
-        unsafe { hevc_deblock_luma_batch4_neon(p, q, tc, depth, filter, enabled) }
+        return unsafe { hevc_deblock_luma_batch4_neon(p, q, tc, depth, filter, enabled) };
+    }
+    #[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
+    {
+        if has_avx2() {
+            return unsafe { hevc_deblock_luma_batch4_avx2(p, q, tc, depth, filter, enabled) };
+        }
     }
     #[cfg(not(target_arch = "aarch64"))]
     {
@@ -897,6 +1425,151 @@ unsafe fn hevc_deblock_luma_batch4_neon(
     }
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
+#[target_feature(enable = "avx2")]
+unsafe fn hevc_deblock_luma_batch4_avx2(
+    p: [[u16; 4]; 4],
+    q: [[u16; 4]; 4],
+    tc: i32,
+    depth: u8,
+    filter: HevcLumaFilter,
+    enabled: [[bool; 2]; 4],
+) -> ([[u16; 4]; 4], [[u16; 4]; 4]) {
+    #[cfg(target_arch = "x86")]
+    use std::arch::x86::*;
+    #[cfg(target_arch = "x86_64")]
+    use std::arch::x86_64::*;
+
+    if matches!(filter, HevcLumaFilter::Off) {
+        return (p, q);
+    }
+    unsafe {
+        let mut a = [_mm_setzero_si128(); 4];
+        let mut b = [_mm_setzero_si128(); 4];
+        let mut tmp = [0i32; 4];
+        for i in 0..4 {
+            for k in 0..4 {
+                tmp[k] = i32::from(p[k][i]);
+            }
+            a[i] = _mm_loadu_si128(tmp.as_ptr().cast());
+            for k in 0..4 {
+                tmp[k] = i32::from(q[k][i]);
+            }
+            b[i] = _mm_loadu_si128(tmp.as_ptr().cast());
+        }
+        let mut out_a = a;
+        let mut out_b = b;
+        let max = (1i32 << depth) - 1;
+        let vzero = _mm_setzero_si128();
+        let vmax = _mm_set1_epi32(max);
+
+        match filter {
+            HevcLumaFilter::Off => {}
+            HevcLumaFilter::Strong => {
+                let v2tc = _mm_set1_epi32(2 * tc);
+                let vneg2tc = _mm_set1_epi32(-2 * tc);
+                let v2 = _mm_set1_epi32(2);
+                let v3 = _mm_set1_epi32(3);
+                let v4 = _mm_set1_epi32(4);
+                for side in 0..2 {
+                    let (sa, sb, out) = if side == 0 {
+                        (&a, &b, &mut out_a)
+                    } else {
+                        (&b, &a, &mut out_b)
+                    };
+                    let s01b0 = _mm_add_epi32(_mm_add_epi32(sa[1], sa[0]), sb[0]);
+                    let sum0 = _mm_add_epi32(
+                        _mm_add_epi32(sa[2], sb[1]),
+                        _mm_slli_epi32::<1>(s01b0),
+                    );
+                    let v0 = _mm_srai_epi32::<3>(_mm_add_epi32(sum0, v4));
+
+                    let sum1 = _mm_add_epi32(sa[2], s01b0);
+                    let v1 = _mm_srai_epi32::<2>(_mm_add_epi32(sum1, v2));
+
+                    let sum2 = _mm_add_epi32(
+                        _mm_add_epi32(s01b0, _mm_slli_epi32::<1>(sa[3])),
+                        _mm_mullo_epi32(sa[2], v3),
+                    );
+                    let v2_val = _mm_srai_epi32::<3>(_mm_add_epi32(sum2, v4));
+
+                    let vals = [v0, v1, v2_val];
+                    for i in 0..3 {
+                        let lo = _mm_add_epi32(sa[i], vneg2tc);
+                        let hi = _mm_add_epi32(sa[i], v2tc);
+                        out[i] = _mm_min_epi32(_mm_max_epi32(vals[i], lo), hi);
+                    }
+                }
+            }
+            HevcLumaFilter::Weak { second } => {
+                let v8 = _mm_set1_epi32(8);
+                let v1 = _mm_set1_epi32(1);
+                let v3 = _mm_set1_epi32(3);
+                let v9 = _mm_set1_epi32(9);
+                let v10tc = _mm_set1_epi32(10 * tc);
+                let vtc = _mm_set1_epi32(tc);
+                let vnegtc = _mm_set1_epi32(-tc);
+                let vtc_half = _mm_set1_epi32(tc >> 1);
+                let vnegtc_half = _mm_set1_epi32(-(tc >> 1));
+
+                let diff0 = _mm_sub_epi32(b[0], a[0]);
+                let diff1 = _mm_sub_epi32(b[1], a[1]);
+                let num = _mm_sub_epi32(
+                    _mm_add_epi32(v8, _mm_mullo_epi32(diff0, v9)),
+                    _mm_mullo_epi32(diff1, v3),
+                );
+                let raw_delta = _mm_srai_epi32::<4>(num);
+                let active = _mm_cmplt_epi32(_mm_abs_epi32(raw_delta), v10tc);
+                let delta = _mm_min_epi32(_mm_max_epi32(raw_delta, vnegtc), vtc);
+
+                let na0 = _mm_min_epi32(_mm_max_epi32(_mm_add_epi32(a[0], delta), vzero), vmax);
+                let nb0 = _mm_min_epi32(_mm_max_epi32(_mm_sub_epi32(b[0], delta), vzero), vmax);
+                out_a[0] = _mm_blendv_epi8(a[0], na0, active);
+                out_b[0] = _mm_blendv_epi8(b[0], nb0, active);
+
+                if second[0] {
+                    let avg = _mm_srai_epi32::<1>(_mm_add_epi32(_mm_add_epi32(a[2], a[0]), v1));
+                    let d_raw = _mm_srai_epi32::<1>(_mm_add_epi32(_mm_sub_epi32(avg, a[1]), delta));
+                    let d = _mm_min_epi32(_mm_max_epi32(d_raw, vnegtc_half), vtc_half);
+                    let na1 = _mm_min_epi32(_mm_max_epi32(_mm_add_epi32(a[1], d), vzero), vmax);
+                    out_a[1] = _mm_blendv_epi8(a[1], na1, active);
+                }
+                if second[1] {
+                    let avg = _mm_srai_epi32::<1>(_mm_add_epi32(_mm_add_epi32(b[2], b[0]), v1));
+                    let d_raw = _mm_srai_epi32::<1>(_mm_sub_epi32(_mm_sub_epi32(avg, b[1]), delta));
+                    let d = _mm_min_epi32(_mm_max_epi32(d_raw, vnegtc_half), vtc_half);
+                    let nb1 = _mm_min_epi32(_mm_max_epi32(_mm_add_epi32(b[1], d), vzero), vmax);
+                    out_b[1] = _mm_blendv_epi8(b[1], nb1, active);
+                }
+            }
+        }
+
+        let mut mask_p = [0i32; 4];
+        let mut mask_q = [0i32; 4];
+        for k in 0..4 {
+            mask_p[k] = if enabled[k][0] { -1 } else { 0 };
+            mask_q[k] = if enabled[k][1] { -1 } else { 0 };
+        }
+        let vmask_p = _mm_loadu_si128(mask_p.as_ptr().cast());
+        let vmask_q = _mm_loadu_si128(mask_q.as_ptr().cast());
+        let mut out_p = [[0u16; 4]; 4];
+        let mut out_q = [[0u16; 4]; 4];
+        for i in 0..4 {
+            let rp = _mm_blendv_epi8(a[i], out_a[i], vmask_p);
+            _mm_storeu_si128(tmp.as_mut_ptr().cast(), rp);
+            for k in 0..4 {
+                out_p[k][i] = tmp[k] as u16;
+            }
+            let rq = _mm_blendv_epi8(b[i], out_b[i], vmask_q);
+            _mm_storeu_si128(tmp.as_mut_ptr().cast(), rq);
+            for k in 0..4 {
+                out_q[k][i] = tmp[k] as u16;
+            }
+        }
+        (out_p, out_q)
+    }
+}
+
 /// One CDEF neighbour tap: its position relative to the filtered pixel and the
 /// fixed threshold, right shift and weight applied to the sample difference.
 #[derive(Clone, Copy, Default, Debug)]
@@ -908,8 +1581,8 @@ pub struct CdefTap {
     pub weight: i16,
 }
 
-/// Constrained directional enhancement of one block. NEON on aarch64, scalar
-/// elsewhere and for any partial eight-sample chunk (bit-identical).
+/// Constrained directional enhancement of one block. NEON on aarch64, AVX2 on
+/// x86_64, scalar elsewhere and for any partial chunk (bit-identical).
 ///
 /// The caller must keep every tap neighbourhood in bounds for the whole block,
 /// so border blocks are filtered by the parent crate's bounds-checked path.
@@ -931,6 +1604,16 @@ pub fn av1_cdef_block(
             av1_cdef_block_neon(src, dst, stride, x, y, w, h, taps);
         }
         return;
+    }
+    #[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
+    {
+        if has_avx2() {
+            // SAFETY: AVX2 detected; caller guarantees the extents.
+            unsafe {
+                av1_cdef_block_avx2(src, dst, stride, x, y, w, h, taps);
+            }
+            return;
+        }
     }
     #[cfg(not(target_arch = "aarch64"))]
     av1_cdef_block_scalar(src, dst, stride, x, y, w, h, taps);
@@ -1047,6 +1730,106 @@ unsafe fn av1_cdef_block_neon(
                 let delta = vshr_n_s16(vsub_s16(vadd_s16(sum, eight4), bias), 4);
                 let out = vmax_s16(vmin_s16(vadd_s16(current, delta), hi), lo);
                 vst1_u16(dst.add(base), vreinterpret_u16_s16(out));
+                col += 4;
+            }
+            for c in col..w {
+                let base = (y + row) * stride + x + c;
+                let current = i32::from(*src.add(base));
+                let (mut lo, mut hi, mut sum) = (current, current, 0);
+                for t in taps {
+                    let value = i32::from(*src.add(
+                        (base as isize
+                            + i64::from(t.dy) as isize * stride as isize
+                            + i64::from(t.dx) as isize) as usize,
+                    ));
+                    let difference = (value - current).abs();
+                    let filtered = difference
+                        .min((i32::from(t.threshold) - (difference >> i32::from(t.shift))).max(0));
+                    sum += i32::from(t.weight) * if value < current { -filtered } else { filtered };
+                    lo = lo.min(value);
+                    hi = hi.max(value);
+                }
+                *dst.add(base) =
+                    (current + ((8 + sum - i32::from(sum < 0)) >> 4)).clamp(lo, hi) as u16;
+            }
+        }
+    }
+}
+
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
+#[target_feature(enable = "avx2")]
+unsafe fn av1_cdef_block_avx2(
+    src: &[u16],
+    dst: &mut [u16],
+    stride: usize,
+    x: usize,
+    y: usize,
+    w: usize,
+    h: usize,
+    taps: &[CdefTap],
+) {
+    #[cfg(target_arch = "x86")]
+    use std::arch::x86::*;
+    #[cfg(target_arch = "x86_64")]
+    use std::arch::x86_64::*;
+
+    unsafe {
+        let src = src.as_ptr();
+        let dst = dst.as_mut_ptr();
+        let zero = _mm_setzero_si128();
+        let eight = _mm_set1_epi16(8);
+        let mut offsets = [0isize; 12];
+        for (offset, t) in offsets.iter_mut().zip(taps) {
+            *offset = i64::from(t.dy) as isize * stride as isize + i64::from(t.dx) as isize;
+        }
+        for row in 0..h {
+            let mut col = 0usize;
+            while col + 8 <= w {
+                let base = (y + row) * stride + x + col;
+                let current = _mm_loadu_si128(src.add(base).cast());
+                let mut sum = zero;
+                let mut lo = current;
+                let mut hi = current;
+                for (offset, t) in offsets.iter().zip(taps) {
+                    let near = _mm_loadu_si128(src.add(base).offset(*offset).cast());
+                    let diff = _mm_sub_epi16(near, current);
+                    let abs = _mm_abs_epi16(diff);
+                    let scaled = _mm_srl_epi16(abs, _mm_cvtsi32_si128(i32::from(t.shift)));
+                    let limit = _mm_max_epi16(_mm_sub_epi16(_mm_set1_epi16(t.threshold), scaled), zero);
+                    let filtered = _mm_min_epi16(abs, limit);
+                    let signed = _mm_sign_epi16(filtered, diff);
+                    sum = _mm_add_epi16(sum, _mm_mullo_epi16(signed, _mm_set1_epi16(t.weight)));
+                    lo = _mm_min_epi16(lo, near);
+                    hi = _mm_max_epi16(hi, near);
+                }
+                let bias = _mm_srli_epi16::<15>(sum);
+                let delta = _mm_srai_epi16::<4>(_mm_sub_epi16(_mm_add_epi16(sum, eight), bias));
+                let out = _mm_max_epi16(_mm_min_epi16(_mm_add_epi16(current, delta), hi), lo);
+                _mm_storeu_si128(dst.add(base).cast(), out);
+                col += 8;
+            }
+            while col + 4 <= w {
+                let base = (y + row) * stride + x + col;
+                let current = _mm_loadl_epi64(src.add(base).cast());
+                let mut sum = zero;
+                let mut lo = current;
+                let mut hi = current;
+                for (offset, t) in offsets.iter().zip(taps) {
+                    let near = _mm_loadl_epi64(src.add(base).offset(*offset).cast());
+                    let diff = _mm_sub_epi16(near, current);
+                    let abs = _mm_abs_epi16(diff);
+                    let scaled = _mm_srl_epi16(abs, _mm_cvtsi32_si128(i32::from(t.shift)));
+                    let limit = _mm_max_epi16(_mm_sub_epi16(_mm_set1_epi16(t.threshold), scaled), zero);
+                    let filtered = _mm_min_epi16(abs, limit);
+                    let signed = _mm_sign_epi16(filtered, diff);
+                    sum = _mm_add_epi16(sum, _mm_mullo_epi16(signed, _mm_set1_epi16(t.weight)));
+                    lo = _mm_min_epi16(lo, near);
+                    hi = _mm_max_epi16(hi, near);
+                }
+                let bias = _mm_srli_epi16::<15>(sum);
+                let delta = _mm_srai_epi16::<4>(_mm_sub_epi16(_mm_add_epi16(sum, eight), bias));
+                let out = _mm_max_epi16(_mm_min_epi16(_mm_add_epi16(current, delta), hi), lo);
+                _mm_storel_epi64(dst.add(base).cast(), out);
                 col += 4;
             }
             for c in col..w {
@@ -1714,6 +2497,29 @@ mod mc_neon {
         assert!(src.len() >= n + 5);
         let mut c = 0;
         unsafe {
+            while c + 8 <= n {
+                let ptr = src.as_ptr().add(c);
+                let u0 = vld1q_u16(ptr);
+                let u1 = vld1q_u16(ptr.add(1));
+                let u2 = vld1q_u16(ptr.add(2));
+                let u3 = vld1q_u16(ptr.add(3));
+                let u4 = vld1q_u16(ptr.add(4));
+                let u5 = vld1q_u16(ptr.add(5));
+
+                let s05_lo = vreinterpretq_s32_u32(vaddl_u16(vget_low_u16(u0), vget_low_u16(u5)));
+                let s14_lo = vreinterpretq_s32_u32(vaddl_u16(vget_low_u16(u1), vget_low_u16(u4)));
+                let s23_lo = vreinterpretq_s32_u32(vaddl_u16(vget_low_u16(u2), vget_low_u16(u3)));
+                let res_lo = vmlsq_n_s32(vmlaq_n_s32(s05_lo, s23_lo, 20), s14_lo, 5);
+
+                let s05_hi = vreinterpretq_s32_u32(vaddl_high_u16(u0, u5));
+                let s14_hi = vreinterpretq_s32_u32(vaddl_high_u16(u1, u4));
+                let s23_hi = vreinterpretq_s32_u32(vaddl_high_u16(u2, u3));
+                let res_hi = vmlsq_n_s32(vmlaq_n_s32(s05_hi, s23_hi, 20), s14_hi, 5);
+
+                vst1q_s32(out.as_mut_ptr().add(c), res_lo);
+                vst1q_s32(out.as_mut_ptr().add(c + 4), res_hi);
+                c += 8;
+            }
             while c + 4 <= n {
                 let ptr = src.as_ptr().add(c);
                 let s0 = vreinterpretq_s32_u32(vmovl_u16(vld1_u16(ptr)));
@@ -1755,6 +2561,28 @@ mod mc_neon {
         assert!(r0.len() >= n && r1.len() >= n && r2.len() >= n && r3.len() >= n && r4.len() >= n && r5.len() >= n);
         let mut c = 0;
         unsafe {
+            while c + 8 <= n {
+                let u0 = vld1q_u16(r0.as_ptr().add(c));
+                let u1 = vld1q_u16(r1.as_ptr().add(c));
+                let u2 = vld1q_u16(r2.as_ptr().add(c));
+                let u3 = vld1q_u16(r3.as_ptr().add(c));
+                let u4 = vld1q_u16(r4.as_ptr().add(c));
+                let u5 = vld1q_u16(r5.as_ptr().add(c));
+
+                let s05_lo = vreinterpretq_s32_u32(vaddl_u16(vget_low_u16(u0), vget_low_u16(u5)));
+                let s14_lo = vreinterpretq_s32_u32(vaddl_u16(vget_low_u16(u1), vget_low_u16(u4)));
+                let s23_lo = vreinterpretq_s32_u32(vaddl_u16(vget_low_u16(u2), vget_low_u16(u3)));
+                let res_lo = vmlsq_n_s32(vmlaq_n_s32(s05_lo, s23_lo, 20), s14_lo, 5);
+
+                let s05_hi = vreinterpretq_s32_u32(vaddl_high_u16(u0, u5));
+                let s14_hi = vreinterpretq_s32_u32(vaddl_high_u16(u1, u4));
+                let s23_hi = vreinterpretq_s32_u32(vaddl_high_u16(u2, u3));
+                let res_hi = vmlsq_n_s32(vmlaq_n_s32(s05_hi, s23_hi, 20), s14_hi, 5);
+
+                vst1q_s32(out.as_mut_ptr().add(c), res_lo);
+                vst1q_s32(out.as_mut_ptr().add(c + 4), res_hi);
+                c += 8;
+            }
             while c + 4 <= n {
                 let s0 = vreinterpretq_s32_u32(vmovl_u16(vld1_u16(r0.as_ptr().add(c))));
                 let s1 = vreinterpretq_s32_u32(vmovl_u16(vld1_u16(r1.as_ptr().add(c))));
@@ -1795,6 +2623,21 @@ mod mc_neon {
         assert!(r0.len() >= n && r1.len() >= n && r2.len() >= n && r3.len() >= n && r4.len() >= n && r5.len() >= n);
         let mut c = 0;
         unsafe {
+            while c + 8 <= n {
+                let s05_a = vaddq_s32(vld1q_s32(r0.as_ptr().add(c)), vld1q_s32(r5.as_ptr().add(c)));
+                let s14_a = vaddq_s32(vld1q_s32(r1.as_ptr().add(c)), vld1q_s32(r4.as_ptr().add(c)));
+                let s23_a = vaddq_s32(vld1q_s32(r2.as_ptr().add(c)), vld1q_s32(r3.as_ptr().add(c)));
+                let res_a = vmlsq_n_s32(vmlaq_n_s32(s05_a, s23_a, 20), s14_a, 5);
+
+                let s05_b = vaddq_s32(vld1q_s32(r0.as_ptr().add(c + 4)), vld1q_s32(r5.as_ptr().add(c + 4)));
+                let s14_b = vaddq_s32(vld1q_s32(r1.as_ptr().add(c + 4)), vld1q_s32(r4.as_ptr().add(c + 4)));
+                let s23_b = vaddq_s32(vld1q_s32(r2.as_ptr().add(c + 4)), vld1q_s32(r3.as_ptr().add(c + 4)));
+                let res_b = vmlsq_n_s32(vmlaq_n_s32(s05_b, s23_b, 20), s14_b, 5);
+
+                vst1q_s32(out.as_mut_ptr().add(c), res_a);
+                vst1q_s32(out.as_mut_ptr().add(c + 4), res_b);
+                c += 8;
+            }
             while c + 4 <= n {
                 let s0 = vld1q_s32(r0.as_ptr().add(c));
                 let s1 = vld1q_s32(r1.as_ptr().add(c));
@@ -1838,6 +2681,27 @@ mod mc_neon {
             let w2 = vdupq_n_s32(weights[2]);
             let w3 = vdupq_n_s32(weights[3]);
             let round = vdupq_n_s32(32);
+            while col + 8 <= n {
+                let tu0 = vld1q_u16(top.as_ptr().add(col));
+                let tu1 = vld1q_u16(top.as_ptr().add(col + 1));
+                let bu0 = vld1q_u16(bottom.as_ptr().add(col));
+                let bu1 = vld1q_u16(bottom.as_ptr().add(col + 1));
+
+                let mut acc_lo = vmlaq_s32(round, vreinterpretq_s32_u32(vmovl_u16(vget_low_u16(tu0))), w0);
+                acc_lo = vmlaq_s32(acc_lo, vreinterpretq_s32_u32(vmovl_u16(vget_low_u16(tu1))), w1);
+                acc_lo = vmlaq_s32(acc_lo, vreinterpretq_s32_u32(vmovl_u16(vget_low_u16(bu0))), w2);
+                acc_lo = vmlaq_s32(acc_lo, vreinterpretq_s32_u32(vmovl_u16(vget_low_u16(bu1))), w3);
+
+                let mut acc_hi = vmlaq_s32(round, vreinterpretq_s32_u32(vmovl_high_u16(tu0)), w0);
+                acc_hi = vmlaq_s32(acc_hi, vreinterpretq_s32_u32(vmovl_high_u16(tu1)), w1);
+                acc_hi = vmlaq_s32(acc_hi, vreinterpretq_s32_u32(vmovl_high_u16(bu0)), w2);
+                acc_hi = vmlaq_s32(acc_hi, vreinterpretq_s32_u32(vmovl_high_u16(bu1)), w3);
+
+                let res_lo = vmovn_u32(vreinterpretq_u32_s32(vshrq_n_s32(acc_lo, 6)));
+                let res_hi = vmovn_u32(vreinterpretq_u32_s32(vshrq_n_s32(acc_hi, 6)));
+                vst1q_u16(out.as_mut_ptr().add(col), vcombine_u16(res_lo, res_hi));
+                col += 8;
+            }
             while col + 4 <= n {
                 let t0 = vreinterpretq_s32_u32(vmovl_u16(vld1_u16(top.as_ptr().add(col))));
                 let t1 = vreinterpretq_s32_u32(vmovl_u16(vld1_u16(top.as_ptr().add(col + 1))));
@@ -1871,6 +2735,16 @@ mod mc_neon {
         let mut c = 0;
         unsafe {
             let w = vdupq_n_s32(weight);
+            while c + 8 <= n {
+                let u = vld1q_u16(source.as_ptr().add(c));
+                let s_lo = vreinterpretq_s32_u32(vmovl_u16(vget_low_u16(u)));
+                let s_hi = vreinterpretq_s32_u32(vmovl_high_u16(u));
+                let t_lo = vld1q_s32(target.as_ptr().add(c));
+                let t_hi = vld1q_s32(target.as_ptr().add(c + 4));
+                vst1q_s32(target.as_mut_ptr().add(c), vmlaq_s32(t_lo, s_lo, w));
+                vst1q_s32(target.as_mut_ptr().add(c + 4), vmlaq_s32(t_hi, s_hi, w));
+                c += 8;
+            }
             while c + 4 <= n {
                 let s_u16 = vld1_u16(source.as_ptr().add(c));
                 let s_s32 = vreinterpretq_s32_u32(vmovl_u16(s_u16));
@@ -1892,6 +2766,15 @@ mod mc_neon {
         let mut c = 0;
         unsafe {
             let w = vdupq_n_s32(weight);
+            while c + 8 <= n {
+                let s0 = vld1q_s32(source.as_ptr().add(c));
+                let s1 = vld1q_s32(source.as_ptr().add(c + 4));
+                let t0 = vld1q_s32(target.as_ptr().add(c));
+                let t1 = vld1q_s32(target.as_ptr().add(c + 4));
+                vst1q_s32(target.as_mut_ptr().add(c), vmlaq_s32(t0, s0, w));
+                vst1q_s32(target.as_mut_ptr().add(c + 4), vmlaq_s32(t1, s1, w));
+                c += 8;
+            }
             while c + 4 <= n {
                 let s = vld1q_s32(source.as_ptr().add(c));
                 let t = vld1q_s32(target.as_ptr().add(c));
@@ -1916,23 +2799,22 @@ mod mc_neon {
             let slot_ptr = slot.as_ptr().cast::<f64>();
             for n in 0..128 {
                 let t_ptr = transform[n].as_ptr().cast::<f64>();
-                let mut sum = 0.0f64;
+                let mut acc0 = vdupq_n_f64(0.0);
+                let mut acc1 = vdupq_n_f64(0.0);
                 let mut k = 0;
                 while k < 64 {
                     let x0 = vld2q_f64(slot_ptr.add(k * 2));
                     let m0 = vld2q_f64(t_ptr.add(k * 2));
-                    let d0 = vsubq_f64(vmulq_f64(x0.0, m0.0), vmulq_f64(x0.1, m0.1));
+                    let d0 = vfmsq_f64(vmulq_f64(x0.0, m0.0), x0.1, m0.1);
+                    acc0 = vaddq_f64(acc0, d0);
 
                     let x1 = vld2q_f64(slot_ptr.add((k + 2) * 2));
                     let m1 = vld2q_f64(t_ptr.add((k + 2) * 2));
-                    let d1 = vsubq_f64(vmulq_f64(x1.0, m1.0), vmulq_f64(x1.1, m1.1));
-
-                    sum += vgetq_lane_f64::<0>(d0);
-                    sum += vgetq_lane_f64::<1>(d0);
-                    sum += vgetq_lane_f64::<0>(d1);
-                    sum += vgetq_lane_f64::<1>(d1);
+                    let d1 = vfmsq_f64(vmulq_f64(x1.0, m1.0), x1.1, m1.1);
+                    acc1 = vaddq_f64(acc1, d1);
                     k += 4;
                 }
+                let sum = vaddvq_f64(vaddq_f64(acc0, acc1));
                 if !sum.is_finite() {
                     return false;
                 }
@@ -1952,23 +2834,22 @@ mod mc_neon {
             let slot_ptr = slot.as_ptr().cast::<f64>();
             for n in 0..64 {
                 let t_ptr = transform[n].as_ptr().cast::<f64>();
-                let mut sum = 0.0f64;
+                let mut acc0 = vdupq_n_f64(0.0);
+                let mut acc1 = vdupq_n_f64(0.0);
                 let mut k = 0;
                 while k < 32 {
                     let x0 = vld2q_f64(slot_ptr.add(k * 2));
                     let m0 = vld2q_f64(t_ptr.add(k * 2));
-                    let d0 = vsubq_f64(vmulq_f64(x0.0, m0.0), vmulq_f64(x0.1, m0.1));
+                    let d0 = vfmsq_f64(vmulq_f64(x0.0, m0.0), x0.1, m0.1);
+                    acc0 = vaddq_f64(acc0, d0);
 
                     let x1 = vld2q_f64(slot_ptr.add((k + 2) * 2));
                     let m1 = vld2q_f64(t_ptr.add((k + 2) * 2));
-                    let d1 = vsubq_f64(vmulq_f64(x1.0, m1.0), vmulq_f64(x1.1, m1.1));
-
-                    sum += vgetq_lane_f64::<0>(d0);
-                    sum += vgetq_lane_f64::<1>(d0);
-                    sum += vgetq_lane_f64::<0>(d1);
-                    sum += vgetq_lane_f64::<1>(d1);
+                    let d1 = vfmsq_f64(vmulq_f64(x1.0, m1.0), x1.1, m1.1);
+                    acc1 = vaddq_f64(acc1, d1);
                     k += 4;
                 }
+                let sum = vaddvq_f64(vaddq_f64(acc0, acc1));
                 if !sum.is_finite() {
                     return false;
                 }
@@ -2000,6 +2881,40 @@ mod mc_neon {
             let vshift = vdupq_n_s32(-(r0 as i32));
             let vmin = vdupq_n_s32(min_val);
             let vmax = vdupq_n_s32(max_val);
+            while col + 8 <= n {
+                let ptr = padded_row.as_ptr().add(col);
+                let u0 = vld1q_u16(ptr);
+                let u1 = vld1q_u16(ptr.add(1));
+                let u2 = vld1q_u16(ptr.add(2));
+                let u3 = vld1q_u16(ptr.add(3));
+                let u4 = vld1q_u16(ptr.add(4));
+                let u5 = vld1q_u16(ptr.add(5));
+                let u6 = vld1q_u16(ptr.add(6));
+
+                let s06_lo = vreinterpretq_s32_u32(vaddl_u16(vget_low_u16(u0), vget_low_u16(u6)));
+                let s15_lo = vreinterpretq_s32_u32(vaddl_u16(vget_low_u16(u1), vget_low_u16(u5)));
+                let s24_lo = vreinterpretq_s32_u32(vaddl_u16(vget_low_u16(u2), vget_low_u16(u4)));
+                let s3_lo = vreinterpretq_s32_u32(vmovl_u16(vget_low_u16(u3)));
+                let mut sum_lo = vmulq_s32(s06_lo, f0);
+                sum_lo = vmlaq_s32(sum_lo, s15_lo, f1);
+                sum_lo = vmlaq_s32(sum_lo, s24_lo, f2);
+                sum_lo = vmlaq_s32(sum_lo, s3_lo, f3);
+                let cl_lo = vminq_s32(vmaxq_s32(vshlq_s32(vaddq_s32(sum_lo, vbias), vshift), vmin), vmax);
+
+                let s06_hi = vreinterpretq_s32_u32(vaddl_high_u16(u0, u6));
+                let s15_hi = vreinterpretq_s32_u32(vaddl_high_u16(u1, u5));
+                let s24_hi = vreinterpretq_s32_u32(vaddl_high_u16(u2, u4));
+                let s3_hi = vreinterpretq_s32_u32(vmovl_high_u16(u3));
+                let mut sum_hi = vmulq_s32(s06_hi, f0);
+                sum_hi = vmlaq_s32(sum_hi, s15_hi, f1);
+                sum_hi = vmlaq_s32(sum_hi, s24_hi, f2);
+                sum_hi = vmlaq_s32(sum_hi, s3_hi, f3);
+                let cl_hi = vminq_s32(vmaxq_s32(vshlq_s32(vaddq_s32(sum_hi, vbias), vshift), vmin), vmax);
+
+                vst1q_s32(out.as_mut_ptr().add(col), cl_lo);
+                vst1q_s32(out.as_mut_ptr().add(col + 4), cl_hi);
+                col += 8;
+            }
             while col + 4 <= n {
                 let ptr = padded_row.as_ptr().add(col);
                 let s0 = vreinterpretq_s32_u32(vmovl_u16(vld1_u16(ptr)));
@@ -2059,6 +2974,30 @@ mod mc_neon {
             let vshift = vdupq_n_s32(-(shift as i32));
             let vzero = vdupq_n_s32(0);
             let vmax = vdupq_n_s32(max_sample);
+            while col + 8 <= n {
+                let s06_a = vaddq_s32(vld1q_s32(r0.as_ptr().add(col)), vld1q_s32(r6.as_ptr().add(col)));
+                let s15_a = vaddq_s32(vld1q_s32(r1.as_ptr().add(col)), vld1q_s32(r5.as_ptr().add(col)));
+                let s24_a = vaddq_s32(vld1q_s32(r2.as_ptr().add(col)), vld1q_s32(r4.as_ptr().add(col)));
+                let s3_a = vld1q_s32(r3.as_ptr().add(col));
+                let mut sum_a = vmulq_s32(s06_a, f0);
+                sum_a = vmlaq_s32(sum_a, s15_a, f1);
+                sum_a = vmlaq_s32(sum_a, s24_a, f2);
+                sum_a = vmlaq_s32(sum_a, s3_a, f3);
+                let cl_a = vminq_s32(vmaxq_s32(vshlq_s32(vaddq_s32(sum_a, vbias), vshift), vzero), vmax);
+
+                let s06_b = vaddq_s32(vld1q_s32(r0.as_ptr().add(col + 4)), vld1q_s32(r6.as_ptr().add(col + 4)));
+                let s15_b = vaddq_s32(vld1q_s32(r1.as_ptr().add(col + 4)), vld1q_s32(r5.as_ptr().add(col + 4)));
+                let s24_b = vaddq_s32(vld1q_s32(r2.as_ptr().add(col + 4)), vld1q_s32(r4.as_ptr().add(col + 4)));
+                let s3_b = vld1q_s32(r3.as_ptr().add(col + 4));
+                let mut sum_b = vmulq_s32(s06_b, f0);
+                sum_b = vmlaq_s32(sum_b, s15_b, f1);
+                sum_b = vmlaq_s32(sum_b, s24_b, f2);
+                sum_b = vmlaq_s32(sum_b, s3_b, f3);
+                let cl_b = vminq_s32(vmaxq_s32(vshlq_s32(vaddq_s32(sum_b, vbias), vshift), vzero), vmax);
+
+                vst1q_u16(out.as_mut_ptr().add(col), vcombine_u16(vqmovun_s32(cl_a), vqmovun_s32(cl_b)));
+                col += 8;
+            }
             while col + 4 <= n {
                 let s06 = vaddq_s32(vld1q_s32(r0.as_ptr().add(col)), vld1q_s32(r6.as_ptr().add(col)));
                 let s15 = vaddq_s32(vld1q_s32(r1.as_ptr().add(col)), vld1q_s32(r5.as_ptr().add(col)));
@@ -2083,6 +3022,117 @@ mod mc_neon {
                     + vf[3] * *r3.get_unchecked(col);
                 let rounded = (sum + bias) >> shift;
                 *out.get_unchecked_mut(col) = rounded.clamp(0, max_sample) as u16;
+                col += 1;
+            }
+        }
+    }
+
+    #[target_feature(enable = "neon")]
+    pub unsafe fn av1_convolve_8tap_horiz_neon(
+        src: &[u16],
+        fx: &[i32; 8],
+        round0: u32,
+        out: &mut [i32],
+    ) {
+        let n = out.len();
+        assert!(src.len() >= n + 7);
+        let bias = if round0 == 0 { 0 } else { 1i32 << (round0 - 1) };
+        let mut col = 0;
+        unsafe {
+            let cf = [
+                vdupq_n_s32(fx[0]),
+                vdupq_n_s32(fx[1]),
+                vdupq_n_s32(fx[2]),
+                vdupq_n_s32(fx[3]),
+                vdupq_n_s32(fx[4]),
+                vdupq_n_s32(fx[5]),
+                vdupq_n_s32(fx[6]),
+                vdupq_n_s32(fx[7]),
+            ];
+            let vbias = vdupq_n_s32(bias);
+            let vshift = vdupq_n_s32(-(round0 as i32));
+            while col + 8 <= n {
+                let ptr = src.as_ptr().add(col);
+                let u0 = vld1q_u16(ptr);
+                let mut acc_lo = vmulq_s32(cf[0], vreinterpretq_s32_u32(vmovl_u16(vget_low_u16(u0))));
+                let mut acc_hi = vmulq_s32(cf[0], vreinterpretq_s32_u32(vmovl_high_u16(u0)));
+                for t in 1..8 {
+                    let u = vld1q_u16(ptr.add(t));
+                    acc_lo = vmlaq_s32(acc_lo, cf[t], vreinterpretq_s32_u32(vmovl_u16(vget_low_u16(u))));
+                    acc_hi = vmlaq_s32(acc_hi, cf[t], vreinterpretq_s32_u32(vmovl_high_u16(u)));
+                }
+                vst1q_s32(out.as_mut_ptr().add(col), vshlq_s32(vaddq_s32(acc_lo, vbias), vshift));
+                vst1q_s32(out.as_mut_ptr().add(col + 4), vshlq_s32(vaddq_s32(acc_hi, vbias), vshift));
+                col += 8;
+            }
+            while col + 4 <= n {
+                let ptr = src.as_ptr().add(col);
+                let mut acc = vmulq_s32(cf[0], vreinterpretq_s32_u32(vmovl_u16(vld1_u16(ptr))));
+                for t in 1..8 {
+                    acc = vmlaq_s32(acc, cf[t], vreinterpretq_s32_u32(vmovl_u16(vld1_u16(ptr.add(t)))));
+                }
+                vst1q_s32(out.as_mut_ptr().add(col), vshlq_s32(vaddq_s32(acc, vbias), vshift));
+                col += 4;
+            }
+            while col < n {
+                let mut sum = 0i32;
+                for t in 0..8 {
+                    sum += fx[t] * i32::from(*src.get_unchecked(col + t));
+                }
+                *out.get_unchecked_mut(col) = (sum + bias) >> round0;
+                col += 1;
+            }
+        }
+    }
+
+    #[target_feature(enable = "neon")]
+    pub unsafe fn av1_convolve_8tap_vert_neon(
+        rows: [*const i32; 8],
+        fy: &[i32; 8],
+        round1: u32,
+        out: *mut i32,
+        n: usize,
+    ) {
+        let bias = if round1 == 0 { 0 } else { 1i32 << (round1 - 1) };
+        let mut col = 0usize;
+        unsafe {
+            let cf = [
+                vdupq_n_s32(fy[0]),
+                vdupq_n_s32(fy[1]),
+                vdupq_n_s32(fy[2]),
+                vdupq_n_s32(fy[3]),
+                vdupq_n_s32(fy[4]),
+                vdupq_n_s32(fy[5]),
+                vdupq_n_s32(fy[6]),
+                vdupq_n_s32(fy[7]),
+            ];
+            let vbias = vdupq_n_s32(bias);
+            let vshift = vdupq_n_s32(-(round1 as i32));
+            while col + 8 <= n {
+                let mut acc0 = vmulq_s32(cf[0], vld1q_s32(rows[0].add(col)));
+                let mut acc1 = vmulq_s32(cf[0], vld1q_s32(rows[0].add(col + 4)));
+                for t in 1..8 {
+                    acc0 = vmlaq_s32(acc0, cf[t], vld1q_s32(rows[t].add(col)));
+                    acc1 = vmlaq_s32(acc1, cf[t], vld1q_s32(rows[t].add(col + 4)));
+                }
+                vst1q_s32(out.add(col), vshlq_s32(vaddq_s32(acc0, vbias), vshift));
+                vst1q_s32(out.add(col + 4), vshlq_s32(vaddq_s32(acc1, vbias), vshift));
+                col += 8;
+            }
+            while col + 4 <= n {
+                let mut acc = vmulq_s32(cf[0], vld1q_s32(rows[0].add(col)));
+                for t in 1..8 {
+                    acc = vmlaq_s32(acc, cf[t], vld1q_s32(rows[t].add(col)));
+                }
+                vst1q_s32(out.add(col), vshlq_s32(vaddq_s32(acc, vbias), vshift));
+                col += 4;
+            }
+            while col < n {
+                let mut sum = 0i32;
+                for t in 0..8 {
+                    sum += fy[t] * *rows[t].add(col);
+                }
+                *out.add(col) = (sum + bias) >> round1;
                 col += 1;
             }
         }
@@ -2427,19 +3477,24 @@ mod mc_avx2 {
             let slot_ptr = slot.as_ptr().cast::<f64>();
             for n in 0..128 {
                 let t_ptr = transform[n].as_ptr().cast::<f64>();
-                let mut sum = 0.0f64;
+                let mut acc0 = _mm256_setzero_pd();
+                let mut acc1 = _mm256_setzero_pd();
                 let mut k = 0;
                 while k < 64 {
                     let s01 = _mm256_loadu_pd(slot_ptr.add(k * 2));
                     let t01 = _mm256_loadu_pd(t_ptr.add(k * 2));
-                    let p01 = _mm256_mul_pd(s01, t01);
-                    let d01 = _mm256_hsub_pd(p01, p01);
-                    let lo = _mm256_castpd256_pd128(d01);
-                    let hi = _mm256_extractf128_pd::<1>(d01);
-                    sum += _mm_cvtsd_f64(lo);
-                    sum += _mm_cvtsd_f64(hi);
-                    k += 2;
+                    acc0 = _mm256_add_pd(acc0, _mm256_mul_pd(s01, t01));
+
+                    let s23 = _mm256_loadu_pd(slot_ptr.add((k + 2) * 2));
+                    let t23 = _mm256_loadu_pd(t_ptr.add((k + 2) * 2));
+                    acc1 = _mm256_add_pd(acc1, _mm256_mul_pd(s23, t23));
+                    k += 4;
                 }
+                let acc = _mm256_add_pd(acc0, acc1);
+                let diff = _mm256_hsub_pd(acc, acc);
+                let lo = _mm256_castpd256_pd128(diff);
+                let hi = _mm256_extractf128_pd::<1>(diff);
+                let sum = _mm_cvtsd_f64(_mm_add_sd(lo, hi));
                 if !sum.is_finite() {
                     return false;
                 }
@@ -2459,19 +3514,24 @@ mod mc_avx2 {
             let slot_ptr = slot.as_ptr().cast::<f64>();
             for n in 0..64 {
                 let t_ptr = transform[n].as_ptr().cast::<f64>();
-                let mut sum = 0.0f64;
+                let mut acc0 = _mm256_setzero_pd();
+                let mut acc1 = _mm256_setzero_pd();
                 let mut k = 0;
                 while k < 32 {
                     let s01 = _mm256_loadu_pd(slot_ptr.add(k * 2));
                     let t01 = _mm256_loadu_pd(t_ptr.add(k * 2));
-                    let p01 = _mm256_mul_pd(s01, t01);
-                    let d01 = _mm256_hsub_pd(p01, p01);
-                    let lo = _mm256_castpd256_pd128(d01);
-                    let hi = _mm256_extractf128_pd::<1>(d01);
-                    sum += _mm_cvtsd_f64(lo);
-                    sum += _mm_cvtsd_f64(hi);
-                    k += 2;
+                    acc0 = _mm256_add_pd(acc0, _mm256_mul_pd(s01, t01));
+
+                    let s23 = _mm256_loadu_pd(slot_ptr.add((k + 2) * 2));
+                    let t23 = _mm256_loadu_pd(t_ptr.add((k + 2) * 2));
+                    acc1 = _mm256_add_pd(acc1, _mm256_mul_pd(s23, t23));
+                    k += 4;
                 }
+                let acc = _mm256_add_pd(acc0, acc1);
+                let diff = _mm256_hsub_pd(acc, acc);
+                let lo = _mm256_castpd256_pd128(diff);
+                let hi = _mm256_extractf128_pd::<1>(diff);
+                let sum = _mm_cvtsd_f64(_mm_add_sd(lo, hi));
                 if !sum.is_finite() {
                     return false;
                 }
@@ -2479,6 +3539,99 @@ mod mc_avx2 {
             }
         }
         true
+    }
+
+    #[target_feature(enable = "avx2")]
+    pub unsafe fn av1_convolve_8tap_horiz_avx2(
+        src: &[u16],
+        fx: &[i32; 8],
+        round0: u32,
+        out: &mut [i32],
+    ) {
+        let n = out.len();
+        assert!(src.len() >= n + 7);
+        let bias = if round0 == 0 { 0 } else { 1i32 << (round0 - 1) };
+        let mut col = 0;
+        unsafe {
+            let cf = [
+                _mm256_set1_epi32(fx[0]),
+                _mm256_set1_epi32(fx[1]),
+                _mm256_set1_epi32(fx[2]),
+                _mm256_set1_epi32(fx[3]),
+                _mm256_set1_epi32(fx[4]),
+                _mm256_set1_epi32(fx[5]),
+                _mm256_set1_epi32(fx[6]),
+                _mm256_set1_epi32(fx[7]),
+            ];
+            let vbias = _mm256_set1_epi32(bias);
+            let vshift = _mm_cvtsi32_si128(round0 as i32);
+            while col + 8 <= n {
+                let ptr = src.as_ptr().add(col);
+                let mut acc = _mm256_mullo_epi32(
+                    cf[0],
+                    _mm256_cvtepu16_epi32(_mm_loadu_si128(ptr.cast())),
+                );
+                for t in 1..8 {
+                    let s = _mm256_cvtepu16_epi32(_mm_loadu_si128(ptr.add(t).cast()));
+                    acc = _mm256_add_epi32(acc, _mm256_mullo_epi32(cf[t], s));
+                }
+                let rounded = _mm256_sra_epi32(_mm256_add_epi32(acc, vbias), vshift);
+                _mm256_storeu_si256(out.as_mut_ptr().add(col).cast(), rounded);
+                col += 8;
+            }
+            while col < n {
+                let mut sum = 0i32;
+                for t in 0..8 {
+                    sum += fx[t] * i32::from(*src.get_unchecked(col + t));
+                }
+                *out.get_unchecked_mut(col) = (sum + bias) >> round0;
+                col += 1;
+            }
+        }
+    }
+
+    #[target_feature(enable = "avx2")]
+    pub unsafe fn av1_convolve_8tap_vert_avx2(
+        rows: [*const i32; 8],
+        fy: &[i32; 8],
+        round1: u32,
+        out: *mut i32,
+        n: usize,
+    ) {
+        let bias = if round1 == 0 { 0 } else { 1i32 << (round1 - 1) };
+        let mut col = 0usize;
+        unsafe {
+            let cf = [
+                _mm256_set1_epi32(fy[0]),
+                _mm256_set1_epi32(fy[1]),
+                _mm256_set1_epi32(fy[2]),
+                _mm256_set1_epi32(fy[3]),
+                _mm256_set1_epi32(fy[4]),
+                _mm256_set1_epi32(fy[5]),
+                _mm256_set1_epi32(fy[6]),
+                _mm256_set1_epi32(fy[7]),
+            ];
+            let vbias = _mm256_set1_epi32(bias);
+            let vshift = _mm_cvtsi32_si128(round1 as i32);
+            while col + 8 <= n {
+                let mut acc = _mm256_mullo_epi32(cf[0], _mm256_loadu_si256(rows[0].add(col).cast()));
+                for t in 1..8 {
+                    let s = _mm256_loadu_si256(rows[t].add(col).cast());
+                    acc = _mm256_add_epi32(acc, _mm256_mullo_epi32(cf[t], s));
+                }
+                let rounded = _mm256_sra_epi32(_mm256_add_epi32(acc, vbias), vshift);
+                _mm256_storeu_si256(out.add(col).cast(), rounded);
+                col += 8;
+            }
+            while col < n {
+                let mut sum = 0i32;
+                for t in 0..8 {
+                    sum += fy[t] * *rows[t].add(col);
+                }
+                *out.add(col) = (sum + bias) >> round1;
+                col += 1;
+            }
+        }
     }
 }
 
@@ -2489,7 +3642,7 @@ pub fn avc_luma_hsum_6tap(src: &[u16], out: &mut [i32]) {
     }
     #[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
     {
-        if is_x86_feature_detected!("avx2") {
+        if has_avx2() {
             unsafe { mc_avx2::avc_luma_hsum_6tap_avx2(src, out) };
         } else {
             avc_luma_hsum_6tap_scalar(src, out);
@@ -2511,7 +3664,7 @@ pub fn avc_luma_vsum_6tap(
     }
     #[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
     {
-        if is_x86_feature_detected!("avx2") {
+        if has_avx2() {
             unsafe { mc_avx2::avc_luma_vsum_6tap_avx2(r0, r1, r2, r3, r4, r5, out) };
         } else {
             avc_luma_vsum_6tap_scalar(r0, r1, r2, r3, r4, r5, out);
@@ -2533,7 +3686,7 @@ pub fn avc_luma_vsum_i32_6tap(
     }
     #[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
     {
-        if is_x86_feature_detected!("avx2") {
+        if has_avx2() {
             unsafe { mc_avx2::avc_luma_vsum_i32_6tap_avx2(r0, r1, r2, r3, r4, r5, out) };
         } else {
             avc_luma_vsum_i32_6tap_scalar(r0, r1, r2, r3, r4, r5, out);
@@ -2554,7 +3707,7 @@ pub fn avc_chroma_bilinear(
     }
     #[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
     {
-        if is_x86_feature_detected!("avx2") {
+        if has_avx2() {
             unsafe { mc_avx2::avc_chroma_bilinear_avx2(top, bottom, out, weights) };
         } else {
             avc_chroma_bilinear_scalar(top, bottom, out, weights);
@@ -2573,7 +3726,7 @@ pub fn hevc_fir_accumulate_u16(target: &mut [i32], source: &[u16], weight: i32) 
     }
     #[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
     {
-        if is_x86_feature_detected!("avx2") {
+        if has_avx2() {
             unsafe { mc_avx2::hevc_fir_accumulate_u16_avx2(target, source, weight) };
         } else {
             hevc_fir_accumulate_u16_scalar(target, source, weight);
@@ -2592,7 +3745,7 @@ pub fn hevc_fir_accumulate_i32(target: &mut [i32], source: &[i32], weight: i32) 
     }
     #[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
     {
-        if is_x86_feature_detected!("avx2") {
+        if has_avx2() {
             unsafe { mc_avx2::hevc_fir_accumulate_i32_avx2(target, source, weight) };
         } else {
             hevc_fir_accumulate_i32_scalar(target, source, weight);
@@ -2615,7 +3768,7 @@ pub fn sbr_qmf_synthesis_slot(
     }
     #[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
     {
-        if is_x86_feature_detected!("avx2") {
+        if has_avx2() {
             unsafe { mc_avx2::sbr_qmf_synthesis_slot_avx2(slot, transform, history) }
         } else {
             sbr_qmf_synthesis_slot_scalar(slot, transform, history)
@@ -2638,7 +3791,7 @@ pub fn sbr_qmf_synthesis32_slot(
     }
     #[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
     {
-        if is_x86_feature_detected!("avx2") {
+        if has_avx2() {
             unsafe { mc_avx2::sbr_qmf_synthesis32_slot_avx2(slot, transform, history) }
         } else {
             sbr_qmf_synthesis32_slot_scalar(slot, transform, history)
@@ -2664,7 +3817,7 @@ pub fn av1_wiener_h_7tap(
     }
     #[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
     {
-        if is_x86_feature_detected!("avx2") {
+        if has_avx2() {
             unsafe { mc_avx2::av1_wiener_h_7tap_avx2(padded_row, hf, r0, min_val, max_val, out) };
         } else {
             av1_wiener_h_7tap_scalar(padded_row, hf, r0, min_val, max_val, out);
@@ -2690,7 +3843,7 @@ pub fn av1_wiener_v_7tap(
     }
     #[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
     {
-        if is_x86_feature_detected!("avx2") {
+        if has_avx2() {
             unsafe { mc_avx2::av1_wiener_v_7tap_avx2(r0, r1, r2, r3, r4, r5, r6, vf, shift, max_sample, out) };
         } else {
             av1_wiener_v_7tap_scalar(r0, r1, r2, r3, r4, r5, r6, vf, shift, max_sample, out);
@@ -2699,6 +3852,81 @@ pub fn av1_wiener_v_7tap(
     #[cfg(not(any(target_arch = "aarch64", target_arch = "x86", target_arch = "x86_64")))]
     {
         av1_wiener_v_7tap_scalar(r0, r1, r2, r3, r4, r5, r6, vf, shift, max_sample, out);
+    }
+}
+
+pub fn av1_convolve_8tap_horiz_scalar(src: &[u16], fx: &[i32; 8], round0: u32, out: &mut [i32]) {
+    let n = out.len();
+    assert!(src.len() >= n + 7);
+    let bias = if round0 == 0 { 0 } else { 1i32 << (round0 - 1) };
+    for (col, dst) in out.iter_mut().enumerate() {
+        let mut sum = 0i32;
+        for (t, &k) in fx.iter().enumerate() {
+            sum += k * i32::from(src[col + t]);
+        }
+        *dst = (sum + bias) >> round0;
+    }
+}
+
+pub fn av1_convolve_8tap_vert_scalar(
+    rows: [&[i32]; 8],
+    fy: &[i32; 8],
+    round1: u32,
+    out: &mut [i32],
+) {
+    let n = out.len();
+    assert!(rows.iter().all(|r| r.len() >= n));
+    let bias = if round1 == 0 { 0 } else { 1i32 << (round1 - 1) };
+    for (col, dst) in out.iter_mut().enumerate() {
+        let mut sum = 0i32;
+        for (t, &k) in fy.iter().enumerate() {
+            sum += k * rows[t][col];
+        }
+        *dst = (sum + bias) >> round1;
+    }
+}
+
+/// AV1 8-tap horizontal subpel convolution (`src.len() >= out.len() + 7`).
+pub fn av1_convolve_8tap_horiz(src: &[u16], fx: &[i32; 8], round0: u32, out: &mut [i32]) {
+    #[cfg(target_arch = "aarch64")]
+    {
+        unsafe { mc_neon::av1_convolve_8tap_horiz_neon(src, fx, round0, out) }
+    }
+    #[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
+    {
+        if has_avx2() {
+            unsafe { mc_avx2::av1_convolve_8tap_horiz_avx2(src, fx, round0, out) };
+        } else {
+            av1_convolve_8tap_horiz_scalar(src, fx, round0, out);
+        }
+    }
+    #[cfg(not(any(target_arch = "aarch64", target_arch = "x86", target_arch = "x86_64")))]
+    {
+        av1_convolve_8tap_horiz_scalar(src, fx, round0, out);
+    }
+}
+
+/// AV1 8-tap vertical subpel convolution (`rows[t].len() >= out.len()`).
+pub fn av1_convolve_8tap_vert(rows: [&[i32]; 8], fy: &[i32; 8], round1: u32, out: &mut [i32]) {
+    let n = out.len();
+    assert!(rows.iter().all(|r| r.len() >= n));
+    #[cfg(target_arch = "aarch64")]
+    {
+        let ptrs: [*const i32; 8] = std::array::from_fn(|t| rows[t].as_ptr());
+        unsafe { mc_neon::av1_convolve_8tap_vert_neon(ptrs, fy, round1, out.as_mut_ptr(), n) }
+    }
+    #[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
+    {
+        if has_avx2() {
+            let ptrs: [*const i32; 8] = std::array::from_fn(|t| rows[t].as_ptr());
+            unsafe { mc_avx2::av1_convolve_8tap_vert_avx2(ptrs, fy, round1, out.as_mut_ptr(), n) };
+        } else {
+            av1_convolve_8tap_vert_scalar(rows, fy, round1, out);
+        }
+    }
+    #[cfg(not(any(target_arch = "aarch64", target_arch = "x86", target_arch = "x86_64")))]
+    {
+        av1_convolve_8tap_vert_scalar(rows, fy, round1, out);
     }
 }
 
@@ -3188,7 +4416,76 @@ mod tests {
         let mut history_scalar = [0.0f64; 64];
         assert!(sbr_qmf_synthesis32_slot(&slot, &transform, &mut history_simd));
         assert!(sbr_qmf_synthesis32_slot_scalar(&slot, &transform, &mut history_scalar));
-        assert_eq!(history_simd, history_scalar);
+        for n in 0..64 {
+            let diff = (history_simd[n] - history_scalar[n]).abs();
+            let max_val = history_scalar[n].abs().max(1.0);
+            assert!(
+                diff / max_val < 1e-12,
+                "n={n} simd={} scalar={} diff={}",
+                history_simd[n],
+                history_scalar[n],
+                diff
+            );
+        }
+    }
+
+    #[test]
+    fn hflip_u16_matches_reference() {
+        for width in [0usize, 1, 2, 7, 8, 15, 16, 31, 32, 65, 129] {
+            let src: Vec<u8> = (0..width * 2).map(|i| ((i * 37 + 11) & 0xFF) as u8).collect();
+            let mut inplace = src.clone();
+            hflip_row(&mut inplace, width, 2);
+            let mut copy_out = vec![0u8; width * 2];
+            hflip_row_copy(&mut copy_out, &src, width, 2);
+
+            let mut expected = Vec::with_capacity(width * 2);
+            for pair in src.chunks_exact(2).rev() {
+                expected.extend_from_slice(pair);
+            }
+            assert_eq!(inplace, expected, "inplace width={width}");
+            assert_eq!(copy_out, expected, "copy width={width}");
+        }
+    }
+
+    #[test]
+    fn av1_convolve_8tap_matches_scalar() {
+        let mut state = 0xCAFE_BABE_DEAD_BEEF_u64;
+        let fx = [-2, 6, -14, 96, 52, -12, 4, 0];
+        let fy = [0, 4, -10, 80, 62, -10, 2, 0];
+        for (depth, round0, round1) in [(8u8, 3u32, 11u32), (10, 3, 7), (12, 5, 9)] {
+            let max_sample = (1u64 << depth) - 1;
+            for w in [2usize, 4, 6, 8, 12, 16, 24, 32, 64, 65] {
+                let src: Vec<u16> = (0..w + 7)
+                    .map(|_| (xorshift(&mut state) % (max_sample + 1)) as u16)
+                    .collect();
+                let mut h_simd = vec![0i32; w];
+                let mut h_scalar = vec![0i32; w];
+                av1_convolve_8tap_horiz(&src, &fx, round0, &mut h_simd);
+                av1_convolve_8tap_horiz_scalar(&src, &fx, round0, &mut h_scalar);
+                assert_eq!(h_simd, h_scalar, "horiz depth={depth} w={w}");
+
+                let rows: [Vec<i32>; 8] = std::array::from_fn(|_| {
+                    (0..w)
+                        .map(|_| (xorshift(&mut state) as i16) as i32)
+                        .collect()
+                });
+                let row_refs = [
+                    rows[0].as_slice(),
+                    rows[1].as_slice(),
+                    rows[2].as_slice(),
+                    rows[3].as_slice(),
+                    rows[4].as_slice(),
+                    rows[5].as_slice(),
+                    rows[6].as_slice(),
+                    rows[7].as_slice(),
+                ];
+                let mut v_simd = vec![0i32; w];
+                let mut v_scalar = vec![0i32; w];
+                av1_convolve_8tap_vert(row_refs, &fy, round1, &mut v_simd);
+                av1_convolve_8tap_vert_scalar(row_refs, &fy, round1, &mut v_scalar);
+                assert_eq!(v_simd, v_scalar, "vert depth={depth} w={w}");
+            }
+        }
     }
 
     #[test]

@@ -144,12 +144,6 @@ fn format(bytes: &[u8]) -> Result<(u32, u16, u16, bool, u16, u16, u32, bool)> {
 pub fn inspect<R: Read + Seek>(input: &mut R, cancel: Option<&CancelFlag>) -> Result<WaveInfo> {
     inspect_impl(input, cancel, true, None)
 }
-/// Read PCM geometry without copying or retiming opaque ancillary chunks.
-/// All chunk extents and audio geometry remain strictly validated.
-pub(crate) fn inspect_probe<R: Read + Seek>(input: &mut R) -> Result<WaveInfo> {
-    let law = g711_law(input, None)?;
-    inspect_probe_with_law(input, None, law)
-}
 pub(crate) fn inspect_probe_with_law<R: Read + Seek>(
     input: &mut R,
     cancel: Option<&CancelFlag>,

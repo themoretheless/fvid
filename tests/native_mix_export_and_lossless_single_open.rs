@@ -1,4 +1,4 @@
-use std::path::{Path, PathBuf};
+use std::path::PathBuf;
 use fvid::{
     media::{self, CopyOptions, MixAudioOptions},
     native_audio_mix, native_lossless,

@@ -145,14 +145,17 @@ impl Unsharp {
             let shift = (mx + my - 2) as u32;
             let round = 1u64 << (shift - 1);
             let amount = i64::from(amount);
+            let mut row_sums = vec![0u64; w];
             for row in 0..h {
-                for x in 0..w {
-                    let mut sum = 0u64;
-                    for k in 0..my as usize {
-                        let py =
-                            (row as i64 + k as i64 - ry as i64).clamp(0, h as i64 - 1) as usize;
-                        sum += horizontal[py * w + x] * wy[k];
+                row_sums.fill(0);
+                for (k, &wy_k) in wy[..my as usize].iter().enumerate() {
+                    let py = (row as i64 + k as i64 - ry as i64).clamp(0, h as i64 - 1) as usize;
+                    let h_row = &horizontal[py * w..py * w + w];
+                    for (sum, &h_val) in row_sums.iter_mut().zip(h_row) {
+                        *sum += h_val * wy_k;
                     }
+                }
+                for (x, &sum) in row_sums.iter().enumerate() {
                     let blurred = (sum.wrapping_add(round) >> shift) as i64;
                     let index = start + row * w + x;
                     let original = read(index) as i64;

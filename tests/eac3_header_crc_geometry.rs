@@ -69,7 +69,6 @@ fn crc_invalid_eac3_header_does_not_define_container_geometry() {
         3
     );
     let mut d = fvid::codec::eac3_decoder::Eac3Decoder::new(&[], 48000, 3).unwrap();
-    use fvid::audio::AudioDecode;
     let decoded = d.decode_complete(&bad, 0, 4608).unwrap().unwrap().data;
     let mut wanted = vec![0; 256 * 3 * 4];
     wanted.extend(decoded);

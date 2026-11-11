@@ -1678,8 +1678,6 @@ name = "fvid-media"
 version = "0.1.0"
 dependencies = [
  "ab_glyph",
- "cpal",
- "eframe",
  "epaint_default_fonts",
  "fvid-codecs",
  "fvid-control",
@@ -1690,7 +1688,6 @@ dependencies = [
  "libc",
  "miniz_oxide 0.8.9",
  "reqwest",
- "rfd",
  "serde",
  "serde_json",
 ]
@@ -1705,6 +1702,9 @@ dependencies = [
 [[package]]
 name = "fvid-opus"
 version = "0.1.0"
+dependencies = [
+ "fvid-cpu",
+]
 
 [[package]]
 name = "fvid-platform"

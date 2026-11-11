@@ -419,6 +419,19 @@ fn calc_lowcomp(a: i32, first: i32, second: i32, bin: usize) -> i32 {
     }
 }
 
+#[inline]
+pub(crate) fn eac3_trace_enabled() -> bool {
+    #[cfg(debug_assertions)]
+    {
+        static ENABLED: std::sync::OnceLock<bool> = std::sync::OnceLock::new();
+        *ENABLED.get_or_init(|| std::env::var_os("EAC3_TRACE").is_some())
+    }
+    #[cfg(not(debug_assertions))]
+    {
+        false
+    }
+}
+
 /// Bits read from the top of each byte down, which is the order Section 5.3 states.
 /// Reading past the packet sets `overrun` and yields zeros: one flag checked once
 /// per frame says the same thing as a `Result` threaded through every loop.
@@ -448,34 +461,51 @@ impl<'a> Bits<'a> {
     }
 
     /// The next `count` bits as an unsigned value, for `count` up to 32.
+    #[inline]
     pub(crate) fn take(&mut self, count: usize) -> i32 {
-        let mut value = 0i32;
-        for _ in 0..count {
-            value = (value << 1) | self.bit();
+        if count == 0 {
+            return 0;
         }
-        value
+        let bit_pos = self.pos;
+        let end_pos = bit_pos + count;
+        self.pos = end_pos;
+        let byte_idx = bit_pos >> 3;
+        let bit_off = bit_pos & 7;
+        if let Some(chunk) = self.data.get(byte_idx..byte_idx + 8) {
+            let word = u64::from_be_bytes(chunk.try_into().unwrap());
+            return ((word << bit_off) >> (64 - count)) as i32;
+        }
+        let total_bits = self.data.len() << 3;
+        if end_pos > total_bits {
+            self.overrun = true;
+        }
+        let mut word = 0u64;
+        for i in 0..8 {
+            if let Some(&b) = self.data.get(byte_idx + i) {
+                word |= u64::from(b) << (56 - i * 8);
+            }
+        }
+        ((word << bit_off) >> (64 - count)) as i32
     }
 
     /// One bit as a flag.
+    #[inline]
     pub(crate) fn flag(&mut self) -> bool {
-        self.bit() == 1
+        let byte = self.pos >> 3;
+        let bit_off = self.pos & 7;
+        self.pos += 1;
+        if let Some(&b) = self.data.get(byte) {
+            ((b >> (7 - bit_off)) & 1) != 0
+        } else {
+            self.overrun = true;
+            false
+        }
     }
 
     /// Move past `count` bits whose content no part of the decoder reads.
+    #[inline]
     pub(crate) fn skip(&mut self, count: usize) {
         self.pos += count;
-    }
-
-    fn bit(&mut self) -> i32 {
-        let byte = self.pos >> 3;
-        if byte >= self.data.len() {
-            self.overrun = true;
-            self.pos += 1;
-            return 0;
-        }
-        let bit = i32::from((self.data[byte] >> (7 - (self.pos & 7))) & 1);
-        self.pos += 1;
-        bit
     }
 }
 
@@ -1518,6 +1548,10 @@ pub(crate) struct Folding {
 }
 
 impl Folding {
+    #[inline]
+    pub(crate) fn width(&self) -> usize {
+        self.width
+    }
     /// Preserve output geometry when an invalid frame contributes silence.
     pub(crate) fn silence(width:usize)->Self {
         Self {width,weight:[[0.0;PLANES];SLOTS]}
@@ -2291,7 +2325,7 @@ impl Core {
     pub(crate) fn plane_mantissas(&mut self, bits: &mut Bits<'_>, plane: usize) {
         let start = self.strategy.start[plane];
         let end = self.strategy.end[plane];
-        if std::env::var("EAC3_TRACE").is_ok() {
+        if eac3_trace_enabled() {
             let run = &self.strategy.bap[plane][start.min(BINS)..end.min(BINS)];
             let exp = &self.strategy.exp[plane][start.min(BINS)..end.min(BINS)];
             let words: usize = run
@@ -3231,6 +3265,7 @@ mod pre_fold_pcm_regressions {
         let mut core=Core::new();core.strategy.gain=[2.0,3.0];
         let gains=core.output_gains(header);let mixing=Folding::coded(header);
         core.strategy.gain=[0.25,0.125];
+        let _ = &core;
         let mut pcm=[[0.0;SAMPLES];PLANES];pcm[0].fill(0.25);pcm[1].fill(0.125);
         let mut out=Vec::new();mixing.write_pcm(&pcm,&gains,&mut out,false);
         assert!(out.chunks_exact(2).all(|pair|pair==[0.5,0.375]));

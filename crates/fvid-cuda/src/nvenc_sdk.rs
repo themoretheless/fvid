@@ -176,7 +176,7 @@ pub type SIZE_T = ULONG_PTR;
 #[repr(C)]
 #[derive(Debug, Default, Copy, Clone)]
 pub struct _GUID {
-    pub Data1: ::std::os::raw::c_ulong,
+    pub Data1: u32,
     pub Data2: ::std::os::raw::c_ushort,
     pub Data3: ::std::os::raw::c_ushort,
     pub Data4: [::std::os::raw::c_uchar; 8usize],

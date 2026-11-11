@@ -1,11 +1,10 @@
 //! AAC-LC channel-pair syntax, prior to stereo spectral reconstruction.
-use crate::{Result, invalid};
-use super::aac_bands::BandTables;
-include!("../../crates/fvid-media/src/owned_aac/aac_pair_impl.rs");
+pub use fvid_media::owned_aac::aac_pair::*;
 
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::codec::{aac_channel::ChannelData, bits::BitReader, config::AacConfig};
     fn pack(fields: &[(u32, u8)]) -> (Vec<u8>, usize) {
         let mut data = Vec::new();
         let mut n = 0;

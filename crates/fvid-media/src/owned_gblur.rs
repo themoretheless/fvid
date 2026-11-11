@@ -154,13 +154,13 @@ impl GaussianBlur {
                         let max_y = h as i64 - 1;
                         for y in 0..h {
                             let dst_row = &mut scratch[y * w..(y + 1) * w];
-                            for x in 0..w {
-                                let mut value = 0.0;
-                                for (i, &weight) in weights.iter().enumerate() {
-                                    let yy = (y as i64 + i as i64 - r_i64).clamp(0, max_y) as usize;
-                                    value += data[yy * w + x] * weight;
+                            dst_row.fill(0.0);
+                            for (i, &weight) in weights.iter().enumerate() {
+                                let yy = (y as i64 + i as i64 - r_i64).clamp(0, max_y) as usize;
+                                let src_row = &data[yy * w..(yy + 1) * w];
+                                for (dst, &src) in dst_row.iter_mut().zip(src_row) {
+                                    *dst += src * weight;
                                 }
-                                dst_row[x] = value;
                             }
                         }
                         std::mem::swap(&mut data, &mut scratch);

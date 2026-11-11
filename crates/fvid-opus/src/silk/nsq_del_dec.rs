@@ -1,5 +1,3 @@
-#[cfg(any(all(any(), target_arch = "x86"), all(any(), target_arch = "x86_64")))]
-use crate::cpu_features::FeatureCache;
 use crate::silk::define::*;
 use crate::silk::macros::*;
 use crate::silk::sigproc_fix::*;
@@ -125,138 +123,7 @@ fn silk_nsq_del_dec_scale_states(
     }
 }
 
-#[cfg(all(any(), target_arch = "aarch64"))]
-#[inline(always)]
-#[allow(unsafe_op_in_unsafe_fn)]
-unsafe fn silk_lpc_prediction_neon(
-    ps_lpc_q14: &[i32],
-    idx: usize,
-    a_q12: &[i16],
-    predict_lpc_order: i32,
-) -> i32 {
-    use std::arch::aarch64::*;
-
-    let order = predict_lpc_order as usize;
-    let lpc_base = ps_lpc_q14.as_ptr().add(idx);
-    let a_ptr = a_q12.as_ptr();
-
-    let mut acc = vdupq_n_s32(0i32);
-    let neon_taps = order & !3;
-
-    let mut j = 0usize;
-    while j < neon_taps {
-        let lpc_asc = vld1q_s32(lpc_base.sub(j + 3));
-
-        let coef_narrow = vld1_s16(a_ptr.add(j));
-        let coef_wide = vmovl_s16(coef_narrow);
-
-        let coef_rev = vrev64q_s32(vcombine_s32(
-            vget_high_s32(coef_wide),
-            vget_low_s32(coef_wide),
-        ));
-
-        let prod_lo = vmull_s32(vget_low_s32(lpc_asc), vget_low_s32(coef_rev));
-        let prod_hi = vmull_s32(vget_high_s32(lpc_asc), vget_high_s32(coef_rev));
-
-        let shr_lo = vshrn_n_s64::<16>(prod_lo); // int32x2
-        let shr_hi = vshrn_n_s64::<16>(prod_hi); // int32x2
-
-        acc = vaddq_s32(acc, vcombine_s32(shr_lo, shr_hi));
-        j += 4;
-    }
-
-    let mut out = silk_rshift(predict_lpc_order, 1) + vaddvq_s32(acc);
-
-    while j < order {
-        out = silk_smlawb(out, ps_lpc_q14[idx - j], a_q12[j] as i32);
-        j += 1;
-    }
-
-    out
-}
-
-#[inline]
-/// AVX2 twin of the 16/10-tap LPC short-prediction dot product (S1c).
-///
-/// Byte-identical to the scalar: each per-tap product is
-/// `(lpc[idx-j] as i64 * a[j] as i64) >> 16` narrowed to i32, and i32
-/// wrapping-addition is associative so the lane reduction matches the sequential
-/// sum exactly. AVX2 has no signed 64-bit shift, so `>>16` is emulated
-/// (logical shift + sign fill). Processes 8 taps/iteration; scalar tail.
-///
-/// SAFETY: caller guarantees `idx >= predict_lpc_order - 1` (SILK frame sizing,
-/// same precondition the scalar path relies on) so the 8 loads at
-/// `lpc[idx-j-7 ..= idx-j]` are in bounds; AVX2 availability is checked by the
-/// caller via `is_x86_feature_detected!`.
-#[cfg(all(any(), target_arch = "x86_64"))]
-#[target_feature(enable = "avx2")]
-unsafe fn silk_lpc_prediction_avx2(
-    ps_lpc_q14: &[i32],
-    idx: usize,
-    a_q12: &[i16],
-    predict_lpc_order: i32,
-) -> i32 {
-    use core::arch::x86_64::*;
-
-    let order = predict_lpc_order as usize;
-    let lpc = ps_lpc_q14.as_ptr();
-    // Each per-tap product `(lpc*a)>>16` fits in i32 (|lpc|<2^31, |a|<2^15 →
-    // |product|<2^46, >>16 <2^31), so accumulating the products as i64 lanes and
-    // truncating to i32 once at the end equals the scalar's i32 wrapping sum.
-    let mut acc_e = _mm256_setzero_si256();
-    let mut acc_o = _mm256_setzero_si256();
-    // Arithmetic >>16 of packed i64 (0<16<32): logical shift + sign fill.
-    let asr16 = |x: __m256i| -> __m256i {
-        let sign = _mm256_cmpgt_epi64(_mm256_setzero_si256(), x); // -1 where x<0
-        let fill = _mm256_slli_epi64(sign, 64 - 16);
-        _mm256_or_si256(_mm256_srli_epi64(x, 16), fill)
-    };
-
-    let mut j = 0usize;
-    let main = order & !7; // multiple of 8
-    while j < main {
-        // L[k] = lpc[idx-j-7+k] (k=0..7); product_t = lpc[idx-j-t]*a[j+t]
-        //      = L[7-t]*C[t]. Order of the sum is irrelevant (associative), so
-        //      pair L[k] with a_q12[j+7-k] by loading coefs reversed.
-        let l = _mm256_loadu_si256(lpc.add(idx - j - 7) as *const __m256i);
-        let c16 = _mm_loadu_si128(a_q12.as_ptr().add(j) as *const __m128i);
-        let c = _mm256_cvtepi16_epi32(c16); // [a[j]..a[j+7]] i32
-        let crev = _mm256_permutevar8x32_epi32(c, _mm256_setr_epi32(7, 6, 5, 4, 3, 2, 1, 0));
-
-        // Even 32-bit lanes -> 4 i64 products; odd lanes via a dword shuffle.
-        let pe = _mm256_mul_epi32(l, crev);
-        let lo = _mm256_shuffle_epi32(l, 0b11_11_01_01);
-        let co = _mm256_shuffle_epi32(crev, 0b11_11_01_01);
-        let po = _mm256_mul_epi32(lo, co);
-
-        acc_e = _mm256_add_epi64(acc_e, asr16(pe));
-        acc_o = _mm256_add_epi64(acc_o, asr16(po));
-        j += 8;
-    }
-
-    // Sum the 8 i64 lanes; only the low 32 bits matter (== i32 wrapping sum).
-    let s = _mm256_add_epi64(acc_e, acc_o); // 4 i64
-    let s2 = _mm_add_epi64(_mm256_castsi256_si128(s), _mm256_extracti128_si256(s, 1)); // 2 i64
-    let s3 = _mm_add_epi64(s2, _mm_unpackhi_epi64(s2, s2)); // 1 i64 in low lane
-    let mut out = silk_rshift(predict_lpc_order, 1).wrapping_add(_mm_cvtsi128_si32(s3));
-
-    while j < order {
-        out = silk_smlawb(out, ps_lpc_q14[idx - j], a_q12[j] as i32);
-        j += 1;
-    }
-    out
-}
-
-/// Cached AVX2 dispatch decision: `is_x86_feature_detected!("avx2")` unless the
-/// `RUSTY_OPUS_NO_AVX2` env var is set (for interleaved A/B against the scalar
-/// twin). Cached so the hot path pays no per-call feature-detect cost.
-#[cfg(all(any(), target_arch = "x86_64"))]
-#[inline(always)]
-fn lpc_avx2_enabled() -> bool {
-    static CACHE: FeatureCache = FeatureCache::new();
-    CACHE.get(|| is_x86_feature_detected!("avx2"))
-}
-
+#[cfg(test)]
 #[inline(always)]
 fn silk_lpc_prediction_scalar(
     ps_lpc_q14: &[i32],
@@ -271,41 +138,32 @@ fn silk_lpc_prediction_scalar(
     out
 }
 
+#[inline]
 pub(crate) fn silk_noise_shape_quantizer_short_prediction(
     ps_lpc_q14: &[i32],
     idx: usize,
     a_q12: &[i16],
     predict_lpc_order: i32,
 ) -> i32 {
-    #[cfg(all(any(), target_arch = "aarch64"))]
     if idx + 1 >= predict_lpc_order as usize {
-        // SAFETY: aarch64 always has NEON; idx precondition guarantees the loads.
-        return unsafe { silk_lpc_prediction_neon(ps_lpc_q14, idx, a_q12, predict_lpc_order) };
+        return fvid_cpu::opus_simd::silk_lpc_prediction(
+            ps_lpc_q14,
+            idx,
+            a_q12,
+            predict_lpc_order,
+        );
     }
-    #[cfg(all(any(), target_arch = "x86_64"))]
-    {
-        // Runtime-dispatched; the scalar twin stays the oracle/fallback and the
-        // feature detect is cached once. `avx2_matches_scalar` asserts they agree.
-        if lpc_avx2_enabled() && idx + 1 >= predict_lpc_order as usize {
-            // SAFETY: avx2 verified at runtime; idx precondition guarantees the loads.
-            return unsafe { silk_lpc_prediction_avx2(ps_lpc_q14, idx, a_q12, predict_lpc_order) };
-        }
+    let mut out = silk_rshift(predict_lpc_order, 1);
+    for j in 0..predict_lpc_order as usize {
+        out = silk_smlawb(out, ps_lpc_q14[idx - j], a_q12[j] as i32);
     }
-    #[allow(unreachable_code)]
-    silk_lpc_prediction_scalar(ps_lpc_q14, idx, a_q12, predict_lpc_order)
-}
-
-/// Cached AVX2 dispatch for the cross-state NSQ shaping filter (S1d/Path 2).
-#[cfg(all(any(), target_arch = "x86_64"))]
-#[inline(always)]
-fn nsq_shape_avx2_enabled() -> bool {
-    static CACHE: FeatureCache = FeatureCache::new();
-    CACHE.get(|| is_x86_feature_detected!("avx2"))
+    out
 }
 
 /// Cross-state warped shaping AR filter over a state-minor SoA buffer
 /// `sar[tap][state]` (the 4 del-dec states are the lanes). Serial in the tap
-/// dimension; scalar twin = the oracle for the AVX2 version below.
+/// dimension; scalar twin = the oracle for the SIMD version.
+#[cfg(test)]
 #[inline(always)]
 fn nsq_shape_filter_soa_scalar(
     sar: &mut [[i32; 4]],
@@ -336,72 +194,6 @@ fn nsq_shape_filter_soa_scalar(
     }
 }
 
-/// Hand-AVX2 twin: the 4 states run as 4 **i64 lanes** of a `__m256i` throughout
-/// the recurrence (values stay i32-range) — the key over the reverted S1d attempt
-/// is that nothing narrows/permutes per op; the narrow-to-i32 happens once, on
-/// store. Byte-identical to the scalar twin (`silk_sub32_ovflw` never wraps here:
-/// the shaping states are bounded Q14 values, verified by the oracle + unit test).
-/// Micro-benchmarked at ~1.56× the 4-chain scalar.
-///
-/// SAFETY: AVX2 verified by the caller; `sar`/`n_ar` sized ≥ order/4.
-#[cfg(all(any(), target_arch = "x86_64"))]
-#[target_feature(enable = "avx2")]
-unsafe fn nsq_shape_filter_soa_avx2(
-    sar: &mut [[i32; 4]],
-    diff: &[i32; 4],
-    warp: i32,
-    ar_shp_q13: &[i16],
-    order: usize,
-    base: i32,
-    n_ar: &mut [i32; 4],
-) {
-    use core::arch::x86_64::*;
-    let wb = _mm256_set1_epi64x(warp as i64);
-    let asr16 = |x: __m256i| {
-        let s = _mm256_cmpgt_epi64(_mm256_setzero_si256(), x);
-        _mm256_or_si256(_mm256_srli_epi64(x, 16), _mm256_slli_epi64(s, 48))
-    };
-    let smlawb_v =
-        |a: __m256i, b: __m256i, cb: __m256i| _mm256_add_epi64(a, asr16(_mm256_mul_epi32(b, cb)));
-    let ldv = |p: &[i32; 4]| _mm256_cvtepi32_epi64(_mm_loadu_si128(p.as_ptr() as *const __m128i));
-    let stv = |p: &mut [i32; 4], v: __m256i| {
-        let g = _mm256_permutevar8x32_epi32(v, _mm256_setr_epi32(0, 2, 4, 6, 0, 2, 4, 6));
-        _mm_storeu_si128(p.as_mut_ptr() as *mut __m128i, _mm256_castsi256_si128(g));
-    };
-    let cbv = |c: i32| _mm256_set1_epi64x(c as i16 as i64);
-
-    // Load the state column-vectors once (i64 lanes); operate in-register.
-    let mut vsar = [_mm256_setzero_si256(); MAX_SHAPE_LPC_ORDER];
-    for j in 0..order {
-        vsar[j] = ldv(&sar[j]);
-    }
-    let vdiff = ldv(diff);
-    let mut tmp2 = smlawb_v(vdiff, vsar[0], wb);
-    let mut tmp1 = smlawb_v(vsar[0], _mm256_sub_epi64(vsar[1], tmp2), wb);
-    vsar[0] = tmp2;
-    let mut acc = smlawb_v(
-        _mm256_set1_epi64x(base as i64),
-        tmp2,
-        cbv(ar_shp_q13[0] as i32),
-    );
-    let mut j = 2;
-    while j < order {
-        tmp2 = smlawb_v(vsar[j - 1], _mm256_sub_epi64(vsar[j], tmp1), wb);
-        vsar[j - 1] = tmp1;
-        acc = smlawb_v(acc, tmp1, cbv(ar_shp_q13[j - 1] as i32));
-        tmp1 = smlawb_v(vsar[j], _mm256_sub_epi64(vsar[j + 1], tmp2), wb);
-        vsar[j] = tmp2;
-        acc = smlawb_v(acc, tmp2, cbv(ar_shp_q13[j] as i32));
-        j += 2;
-    }
-    vsar[order - 1] = tmp1;
-    acc = smlawb_v(acc, tmp1, cbv(ar_shp_q13[order - 1] as i32));
-    for j in 0..order {
-        stv(&mut sar[j], vsar[j]);
-    }
-    stv(n_ar, acc);
-}
-
 #[inline(always)]
 fn nsq_shape_filter_soa(
     sar: &mut [[i32; 4]],
@@ -412,28 +204,17 @@ fn nsq_shape_filter_soa(
     base: i32,
     n_ar: &mut [i32; 4],
 ) {
-    #[cfg(all(any(), target_arch = "x86_64"))]
-    {
-        if nsq_shape_avx2_enabled() {
-            // SAFETY: avx2 checked; sar/n_ar sized ≥ order/4.
-            unsafe { nsq_shape_filter_soa_avx2(sar, diff, warp, ar_shp_q13, order, base, n_ar) };
-            return;
-        }
-    }
-    nsq_shape_filter_soa_scalar(sar, diff, warp, ar_shp_q13, order, base, n_ar);
+    fvid_cpu::opus_simd::nsq_shape_filter_soa(sar, diff, warp, ar_shp_q13, order, base, n_ar);
 }
 
-#[cfg(all(test, all(any(), target_arch = "x86_64")))]
-mod lpc_pred_avx2_tests {
+#[cfg(test)]
+mod lpc_pred_simd_tests {
     use super::*;
 
-    /// AVX2 twin must be BYTE-IDENTICAL to the scalar oracle over random inputs
+    /// SIMD twin must be BYTE-IDENTICAL to the scalar oracle over random inputs
     /// at every valid LPC order.
     #[test]
-    fn avx2_matches_scalar() {
-        if !is_x86_feature_detected!("avx2") {
-            return;
-        }
+    fn simd_matches_scalar() {
         // xorshift for deterministic pseudo-random coverage.
         let mut s: u64 = 0x1234_5678_9abc_def1;
         let mut rng = || {
@@ -455,22 +236,18 @@ mod lpc_pred_avx2_tests {
                     *v = (rng() as i16) >> (rng() as u32 % 3);
                 }
                 let idx = 32 + (rng() as usize % 16);
-                let got = unsafe { silk_lpc_prediction_avx2(&lpc, idx, &a, order as i32) };
+                let got =
+                    silk_noise_shape_quantizer_short_prediction(&lpc, idx, &a, order as i32);
                 let want = silk_lpc_prediction_scalar(&lpc, idx, &a, order as i32);
                 assert_eq!(got, want, "order={order} idx={idx}");
             }
         }
     }
 
-    /// Cross-state shaping filter (Path 2): the i64-lane AVX2 must match the
-    /// scalar SoA twin over random states, incl. large magnitudes (stresses the
-    /// `silk_sub32_ovflw` i32-wrap assumption — the shaping states are bounded in
-    /// practice, but this covers well beyond the realistic range).
+    /// Cross-state shaping filter (Path 2): SIMD must match the scalar SoA twin
+    /// over random states, incl. large magnitudes.
     #[test]
-    fn nsq_shape_filter_avx2_matches_scalar() {
-        if !is_x86_feature_detected!("avx2") {
-            return;
-        }
+    fn nsq_shape_filter_simd_matches_scalar() {
         let mut s: u64 = 0xC0FF_EE00_1234_5678;
         let mut rng = || {
             s ^= s << 13;
@@ -500,9 +277,7 @@ mod lpc_pred_avx2_tests {
                 let mut na = [0i32; 4];
                 let mut nb = [0i32; 4];
                 nsq_shape_filter_soa_scalar(&mut sar_a, &diff, warp, &ar, order, base, &mut na);
-                unsafe {
-                    nsq_shape_filter_soa_avx2(&mut sar_b, &diff, warp, &ar, order, base, &mut nb)
-                };
+                nsq_shape_filter_soa(&mut sar_b, &diff, warp, &ar, order, base, &mut nb);
                 assert_eq!(na, nb, "n_ar mismatch order={order} sh={sh}");
                 assert_eq!(sar_a, sar_b, "sar mismatch order={order} sh={sh}");
             }
@@ -1129,41 +904,6 @@ pub fn silk_nsq_del_dec(
         .copy_within(frame_len..frame_len + ltp_mem_len, 0);
 
     ps_del_dec[winner_ind].seed_init
-}
-
-/// The aarch64 twin of [`lpc_pred_avx2_tests::avx2_matches_scalar`]. SILK is
-/// fixed point, so the vectorised prediction has to be byte-identical to the
-/// scalar oracle, not merely close.
-#[cfg(all(test, all(any(), target_arch = "aarch64")))]
-mod lpc_pred_neon_tests {
-    use super::*;
-
-    #[test]
-    fn neon_matches_scalar() {
-        let mut s: u64 = 0x1234_5678_9abc_def1;
-        let mut rng = || {
-            s ^= s << 13;
-            s ^= s >> 7;
-            s ^= s << 17;
-            s
-        };
-        for order in [10usize, 12, 14, 16] {
-            for _ in 0..50_000 {
-                let mut lpc = [0i32; 64];
-                for v in lpc.iter_mut() {
-                    *v = (rng() as i32) >> (rng() as u32 % 12);
-                }
-                let mut a = [0i16; 16];
-                for v in a.iter_mut().take(order) {
-                    *v = (rng() as i16) >> (rng() as u32 % 3);
-                }
-                let idx = 32 + (rng() as usize % 16);
-                let got = unsafe { silk_lpc_prediction_neon(&lpc, idx, &a, order as i32) };
-                let want = silk_lpc_prediction_scalar(&lpc, idx, &a, order as i32);
-                assert_eq!(got, want, "order={order} idx={idx}");
-            }
-        }
-    }
 }
 
 /// The shaping filter's dispatcher, on whatever path this target takes.

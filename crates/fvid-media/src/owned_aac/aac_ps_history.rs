@@ -708,7 +708,7 @@ mod tests {
             let mut bits = reader(bad);
             let start = bits.position();
             assert_eq!(
-                stream.read(&mut bits, end(bad), 32).unwrap_err().0,
+                stream.read(&mut bits, end(bad), 32).unwrap_err().to_string(),
                 bad["error"].as_str().unwrap()
             );
             assert_eq!(bits.position(), start);
@@ -717,7 +717,7 @@ mod tests {
             // block in the same SBR extension has an invalid recovered index.
             let area = packed(&("10".to_owned() + &text(seed) + "10" + &text(bad)));
             assert_eq!(
-                stream.read_sbr_extensions(&area, 32).unwrap_err().0,
+                stream.read_sbr_extensions(&area, 32).unwrap_err().to_string(),
                 bad["error"].as_str().unwrap()
             );
             assert_eq!(stream, before);

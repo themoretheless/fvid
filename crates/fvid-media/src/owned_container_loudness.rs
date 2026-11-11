@@ -92,47 +92,7 @@ pub(crate) fn recognizes_from_head(
     recognizes_standalone_from_head(source, head, head_len, options)
 }
 
-fn recognizes_from_file_and_head(
-    file: File,
-    head: &[u8; 12],
-    head_len: usize,
-    options: &CopyOptions,
-) -> Result<bool> {
-    if head_len < 4 {
-        return Ok(false);
-    }
-    if head[..4] == [0x1a, 0x45, 0xdf, 0xa3]
-        || (head_len >= 8 && crate::owned_mp4::recognizes_prefix(&head[..8]))
-    {
-        return Ok(true);
-    }
-    recognizes_standalone_from_file_and_head(file, head, head_len, options)
-}
 
-pub(crate) fn recognizes(source: &Path) -> Result<bool> {
-    recognizes_with_options(source, &Default::default())
-}
-pub(crate) fn recognizes_with_options(source: &Path, options: &CopyOptions) -> Result<bool> {
-    if options.cancel.as_ref().is_some_and(|c| c.is_cancelled()) {
-        return Err("media operation cancelled".into());
-    }
-    if options.max_packet_bytes == 0 {
-        return Err("packet byte limit must be positive".into());
-    }
-    if options.max_packets == Some(0) {
-        return Err("packet work limit requires at least one packet".into());
-    }
-    if options.max_controlled_bytes == Some(0) {
-        return Err("controlled memory limit must be positive".into());
-    }
-    crate::owned_budget::check_rss_budget(options)?;
-    let (file, head, head_len) = crate::owned_audio_plan::open_source_head(source)?;
-    recognizes_from_file_and_head(file, &head, head_len, options)
-}
-fn geometry_unqualified(source: &Path, options: &CopyOptions) -> Result<(u32, u16, u32, String)> {
-    let (rate, channels, mask, codec, _, _) = geometry_with_frames_unqualified(source, options)?;
-    Ok((rate, channels, mask, codec))
-}
 pub fn geometry_with_frames_unqualified(
     source: &Path,
     options: &CopyOptions,
@@ -181,70 +141,114 @@ pub fn geometry_with_frames_unqualified(
             head_file
                 .seek(SeekFrom::Start(0))
                 .map_err(|e| e.to_string())?;
-            let (index, rate, channels, mask, codec, _, frames, info) =
-                crate::owned_mp4_audio_export::try_descriptor_with_frames_from_file_for_decode(
+            let desc =
+                crate::owned_mp4_audio_export::try_source_descriptor_from_file_for_decode(
                     source, head_file, None, options,
                 )?
                 .ok_or("source is not a supported Matroska audio container")?;
-            (index, rate, channels, mask, codec, frames, Some(info))
+            (
+                desc.stream_index,
+                desc.sample_rate,
+                desc.channels,
+                desc.channel_mask,
+                desc.codec,
+                desc.estimated_frames,
+                desc.info_chunk,
+            )
         } else if matches!(&head[..4], b"RIFF" | b"RIFX" | b"RF64") {
             head_file
                 .seek(SeekFrom::Start(0))
                 .map_err(|e| e.to_string())?;
-            let (rate, channels, mask, codec, frames, _) =
-                crate::owned_g711_wave_export::try_descriptor_from_file_for_decode(
-                    head_file, None, options,
-                )?
-                .ok_or("source is not an owned audio container")?;
-            if frames == 0 {
+            let desc = crate::owned_g711_wave_export::try_descriptor_from_file_for_decode(
+                head_file, None, options,
+            )?
+            .ok_or("source is not an owned audio container")?;
+            if desc.estimated_frames == 0 {
                 return Err("loudness requires at least one audio frame".into());
             }
-            (0, rate, channels, mask, codec.into(), frames, None)
+            (
+                desc.stream_index,
+                desc.sample_rate,
+                desc.channels,
+                desc.channel_mask,
+                desc.codec,
+                desc.estimated_frames,
+                None,
+            )
         } else if head_slice.starts_with(b"OggS") {
             head_file
                 .seek(SeekFrom::Start(0))
                 .map_err(|e| e.to_string())?;
-            let (index, rate, channels, mask, codec, frames, _) =
-                crate::owned_ogg_audio_export::descriptor_from_file_for_decode(
-                    head_file, None, options,
-                )?;
-            let effective_mask = if mask == 0 && channels <= 2 {
-                crate::owned_pcm_channels::standard_mask(channels).unwrap_or(0) as u32
+            let desc = crate::owned_ogg_audio_export::descriptor_from_file_for_decode(
+                head_file, None, options,
+            )?;
+            let effective_mask = if desc.channel_mask == 0 && desc.channels <= 2 {
+                crate::owned_pcm_channels::standard_mask(desc.channels).unwrap_or(0) as u32
             } else {
-                mask
+                desc.channel_mask
             };
-            (index, rate, channels, effective_mask, codec.into(), frames, None)
+            (
+                desc.stream_index,
+                desc.sample_rate,
+                desc.channels,
+                effective_mask,
+                desc.codec,
+                desc.estimated_frames,
+                None,
+            )
         } else if head_slice.starts_with(b"fLaC") {
             head_file
                 .seek(SeekFrom::Start(0))
                 .map_err(|e| e.to_string())?;
-            let (rate, channels, mask, frames, _) =
+            let desc =
                 crate::owned_raw_flac::descriptor_from_file_for_decode(head_file, None, options)?;
-            let effective_mask = if mask == 0 && channels <= 2 {
-                crate::owned_pcm_channels::standard_mask(channels).unwrap_or(0) as u32
+            let effective_mask = if desc.channel_mask == 0 && desc.channels <= 2 {
+                crate::owned_pcm_channels::standard_mask(desc.channels).unwrap_or(0) as u32
             } else {
-                mask
+                desc.channel_mask
             };
-            (0, rate, channels, effective_mask, "flac".into(), frames, None)
+            (
+                desc.stream_index,
+                desc.sample_rate,
+                desc.channels,
+                effective_mask,
+                desc.codec,
+                desc.estimated_frames,
+                None,
+            )
         } else if !(head_len >= 7 && crate::owned_aac::adts::header(&head[..7]).is_some())
             && crate::owned_mpeg_audio::has_signature(&head[..head_len.min(10)])
         {
             head_file
                 .seek(SeekFrom::Start(0))
                 .map_err(|e| e.to_string())?;
-            let (rate, channels, codec, frames, _) =
+            let desc =
                 crate::owned_raw_mp3::descriptor_from_file_for_decode(head_file, None, options)?;
-            let mask = crate::owned_pcm_channels::standard_mask(channels).unwrap_or(0) as u32;
-            (0, rate, channels, mask, codec.into(), frames, None)
+            (
+                desc.stream_index,
+                desc.sample_rate,
+                desc.channels,
+                desc.channel_mask,
+                desc.codec,
+                desc.estimated_frames,
+                None,
+            )
         } else if head[..4] == [0x1a, 0x45, 0xdf, 0xa3] {
             head_file
                 .seek(SeekFrom::Start(0))
                 .map_err(|e| e.to_string())?;
-            let (index, rate, channels, mask, codec, _, frames, info, _) =
-                crate::owned_audio_plan::matroska_descriptor_from_file_for_decode(
-                    source, head_file, None, options,
-                )?;
-            (index, rate, channels, mask, codec, frames, Some(info))
+            let desc = crate::owned_audio_plan::matroska_descriptor_from_file_for_decode(
+                source, head_file, None, options,
+            )?;
+            (
+                desc.stream_index,
+                desc.sample_rate,
+                desc.channels,
+                desc.channel_mask,
+                desc.codec,
+                desc.estimated_frames,
+                desc.info_chunk,
+            )
         } else {
             return Err("source is not an owned audio container".into());
         };
@@ -277,6 +281,7 @@ pub(crate) fn supports_plan(source: &Path, options: &CopyOptions) -> bool {
             || matches!(error.as_str(), "MP4 packet exceeds budget" | "WebM packet exceeds budget"),
     }
 }
+#[cfg(test)]
 pub(crate) fn supports(source: &Path, options: &CopyOptions) -> bool {
     match geometry(source, options) {
         Ok(_) => crate::owned_audio_export::supports(
@@ -307,16 +312,6 @@ pub fn decode_adts_to_wave(
     options: &CopyOptions,
 ) -> Result<crate::owned_adts_export::DecodedSpool> {
     crate::owned_adts_export::decode_to_wave(source, None, options)
-}
-pub(crate) fn decode_to_wave_from_geometry(
-    source: &Path,
-    rate: u32,
-    channels: u16,
-    mask: u32,
-    codec: &str,
-    options: &CopyOptions,
-) -> Result<crate::owned_adts_export::DecodedSpool> {
-    decode_to_wave_from_geometry_with_info(source, rate, channels, mask, codec, None, options)
 }
 pub fn decode_to_wave_from_geometry_with_info(
     source: &Path,

@@ -150,6 +150,7 @@ pub fn probe_as_with_options(
     Err("container has no owned media-library probe yet".into())
 }
 
+#[cfg(test)]
 /// Select owned MP4 inspection before the remaining legacy container paths.
 /// A hint selects the parser even for malformed input; without a hint the
 /// opening atom selects it. Explicit hints for other formats are preserved.
@@ -175,6 +176,7 @@ pub(crate) fn try_mp4_as(path: &Path, format: Option<&str>) -> Result<Option<Med
     crate::owned_mp4_probe::try_mp4_from_file(path, file)
 }
 
+#[cfg(test)]
 pub(crate) fn try_webm_as(path: &Path, format: Option<&str>) -> Result<Option<MediaInfo>, String> {
     if let Some(hint) = format {
         if !matches!(hint, "webm" | "matroska" | "matroska,webm") {
@@ -194,6 +196,7 @@ pub(crate) fn try_webm_as(path: &Path, format: Option<&str>) -> Result<Option<Me
     crate::owned_webm_probe::try_probe_webm_from_file(path, file)
 }
 
+#[cfg(test)]
 /// Select supported AAC ADTS framing before legacy inspection. Once a
 /// supported header selects this parser, packet errors cannot trigger fallback.
 pub(crate) fn try_adts_as(path: &Path, format: Option<&str>) -> Result<Option<MediaInfo>, String> {

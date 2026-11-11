@@ -144,9 +144,9 @@ fn er_lc_er_ltp_and_er_ld_pce_native_mp4_and_matroska_acceptance() {
             let expected_bytes: Vec<u8> = expected.iter().flat_map(|v| v.to_le_bytes()).collect();
             assert_eq!(mp4_pcm, expected_bytes, "{name} MP4");
 
-            let mkv = bytes(c["mkv"].as_str().unwrap());
             #[cfg(feature = "player")]
             {
+                let mkv = bytes(c["mkv"].as_str().unwrap());
                 let mut mp4_reader = fvid::playback_mp4_audio::Mp4AudioReader::open(
                     Cursor::new(&mp4),
                     Default::default(),
@@ -163,6 +163,7 @@ fn er_lc_er_ltp_and_er_ld_pce_native_mp4_and_matroska_acceptance() {
             continue;
         }
 
+        #[cfg(feature = "player")]
         let channels = c["channels"].as_u64().unwrap() as usize;
         let n = c["n"].as_u64().unwrap() as usize;
         let mut decoder = NativeAacDecoder::new(&asc).unwrap();

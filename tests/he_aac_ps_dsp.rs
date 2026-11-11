@@ -319,7 +319,7 @@ fn late_failures_roll_back_matrix_hybrid_decorrelation_pcm_and_retained_lookahea
             OutputRate::Double,
         )
         .unwrap_err();
-    assert!(err.0.contains("energy is not representable"), "{err}");
+    assert!(err.to_string().contains("energy is not representable"), "{err}");
     assert_eq!(state, before);
     for bad in [f64::NAN, f64::INFINITY, f64::NEG_INFINITY] {
         let mut malformed = block.to_vec();
@@ -398,7 +398,7 @@ fn late_failures_roll_back_matrix_hybrid_decorrelation_pcm_and_retained_lookahea
             OutputRate::Double,
         )
         .unwrap_err();
-    assert!(err.0.contains("overlap"));
+    assert!(err.to_string().contains("overlap"));
     assert_eq!(state, before);
     assert!(
         state

@@ -35,6 +35,7 @@ impl<'a> PacketBits<'a> {
         self.bit = end;
         Ok(())
     }
+    #[inline]
     pub fn read(&mut self, width: u8) -> Result<u32> {
         if self.ended {
             return Err(invalid("end of Vorbis packet"));
@@ -50,13 +51,25 @@ impl<'a> PacketBits<'a> {
             self.ended = true;
             return Err(invalid("truncated Vorbis packet"));
         }
-        let mut value = 0;
-        for shift in 0..width {
-            let at = self.bit + usize::from(shift);
-            value |= u32::from((self.bytes[at / 8] >> (at % 8)) & 1) << shift;
+        if width == 0 {
+            return Ok(0);
         }
+        let byte = self.bit / 8;
+        let offset = self.bit % 8;
+        let bits = usize::from(width);
+        let word = match self.bytes[byte..].first_chunk::<8>() {
+            Some(chunk) => u64::from_le_bytes(*chunk) >> offset,
+            None => {
+                let needed = (offset + bits).div_ceil(8);
+                let mut acc = 0u64;
+                for (i, &b) in self.bytes[byte..byte + needed].iter().enumerate() {
+                    acc |= u64::from(b) << (i * 8);
+                }
+                acc >> offset
+            }
+        };
         self.bit = end;
-        Ok(value)
+        Ok((word & ((1u64 << bits) - 1)) as u32)
     }
 }
 

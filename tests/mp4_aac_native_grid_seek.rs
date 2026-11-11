@@ -128,7 +128,6 @@ fn changing_aac_duration_seek_preserves_exact_native_windows() {
     assert!(failures.is_empty(), "{failures:?}");
 }
 
-use fvid::audio::AudioBackend as _;
 struct FlushCapture {
     inner: transitions::Capture,
     anchors: std::sync::Arc<std::sync::Mutex<Vec<Duration>>>,

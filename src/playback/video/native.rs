@@ -22,7 +22,7 @@ mod packed;
 pub use packed::{PackedPlanar, rgba_to_rgb_on_black};
 pub(crate) use packed::{
     av1_picture, avc_picture_with_vui_and_fallback, hevc_picture_with_vui,
-    hevc_picture_with_vui_and_fallback, vp9_picture,
+    hevc_picture_with_vui_and_fallback, planar_yuv_slice_to_rgb, vp9_picture,
 };
 
 pub use fvid_media::owned_video_timeline::PlaybackEdit;
@@ -73,17 +73,44 @@ pub fn rotate_plane(
         _ => (width, height),
     };
     let mut out = vec![0u8; w * h * bytes];
-    for (y, row) in out.chunks_exact_mut(w * bytes).enumerate() {
-        for (x, pixel) in row.chunks_exact_mut(bytes).enumerate() {
-            // Where this pixel was in the picture as decoded.
-            let (sx, sy) = match rotation {
-                90 => (y, height - 1 - x),
-                180 => (width - 1 - x, height - 1 - y),
-                270 => (width - 1 - y, x),
-                _ => (x, y),
-            };
-            let from = (sy * width + sx) * bytes;
-            pixel.copy_from_slice(&data[from..from + bytes]);
+    if w == 0 || h == 0 || bytes == 0 {
+        return out;
+    }
+    match rotation {
+        90 | 270 => {
+            const TILE: usize = 32;
+            let row_stride = w * bytes;
+            let src_stride = width * bytes;
+            for ty in (0..h).step_by(TILE) {
+                let y_end = (ty + TILE).min(h);
+                for tx in (0..w).step_by(TILE) {
+                    let x_end = (tx + TILE).min(w);
+                    for y in ty..y_end {
+                        let out_row = &mut out[y * row_stride..(y + 1) * row_stride];
+                        for x in tx..x_end {
+                            let (sx, sy) = if rotation == 90 {
+                                (y, height - 1 - x)
+                            } else {
+                                (width - 1 - y, x)
+                            };
+                            let from = sy * src_stride + sx * bytes;
+                            let to = x * bytes;
+                            out_row[to..to + bytes].copy_from_slice(&data[from..from + bytes]);
+                        }
+                    }
+                }
+            }
+        }
+        180 => {
+            let row_stride = w * bytes;
+            for (y, out_row) in out.chunks_exact_mut(row_stride).enumerate() {
+                let sy = height - 1 - y;
+                let src_row = &data[sy * row_stride..(sy + 1) * row_stride];
+                fvid_cpu::hflip_row_copy(out_row, src_row, w, bytes);
+            }
+        }
+        _ => {
+            out.copy_from_slice(&data[..w * h * bytes]);
         }
     }
     out
@@ -1507,10 +1534,8 @@ fn rgb_from_planes<T: Copy + Into<f32> + Sync>(
         return Ok(());
     }
     let rows_per_span = h.div_ceil(workers);
-    std::thread::scope(|scope| {
-        for (index, span) in rgb.chunks_mut(rows_per_span * w * 3).enumerate() {
-            scope.spawn(move || rows(index * rows_per_span, span));
-        }
+    fvid_cpu::par_chunks_mut(rgb, rows_per_span * w * 3, |index, span| {
+        rows(index * rows_per_span, span);
     });
     Ok(())
 }

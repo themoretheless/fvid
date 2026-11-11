@@ -1,5 +1,7 @@
+#[cfg(feature = "player")]
 use std::io::Cursor;
 use std::path::Path;
+#[cfg(feature = "player")]
 use std::time::Duration;
 
 fn fixture_path(name: &str) -> std::path::PathBuf {
@@ -112,6 +114,7 @@ fn vorbis_comments_and_file_tags_normalize_year_organization_and_encoded_by() {
     assert!(wave_info.windows(4).any(|w| w == b"ITRK"));
 }
 
+#[cfg(feature = "player")]
 #[test]
 fn smf_and_xm_audio_readers_seek_time_ceil_sub_millisecond_targets() {
     use fvid::audio::AudioStream;

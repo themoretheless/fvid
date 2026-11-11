@@ -1492,16 +1492,11 @@ pub fn concat_y4m_with_options(
     let mut active_sources = 0usize;
     let mut cached_layouts = Vec::with_capacity(sources.len());
     for source in sources {
-        let (layout, upper_bound) = crate::native_export::validate_video_packet_budget_and_layout(
-            source,
-            &Default::default(),
-            &Default::default(),
-            options,
-            None,
-            false,
-            remaining_packets,
-        )
-        .map_err(|e| e.to_string())?;
+        let (layout, upper_bound) =
+            crate::native_export::PacketBudgetRequest::new(source, options)
+                .max_packets(remaining_packets)
+                .validate_with_layout()
+                .map_err(|e| e.to_string())?;
         if let Some(layout) = layout {
             cached_layouts.push(layout);
         }
@@ -1574,18 +1569,16 @@ pub fn trim_y4m_with_options(
     if from < 0 || to <= from {return Err("trim requires 0 <= from < to".into());}
     let selected = options.streams.first().copied();
     crate::native_export::validate_video_selection_with_options(source, selected, options).map_err(|e| e.to_string())?;
-    crate::native_export::validate_video_packet_budget_with_geometry_interval_and_limit(
-        source,
-        &Default::default(),
-        options,
-        Some((
-            std::time::Duration::from_micros(from as u64),
-            std::time::Duration::from_micros(to as u64),
-        )),
-        true,
-        options.max_packets,
-    )
-    .map_err(|e| e.to_string())?;
+    crate::native_export::PacketBudgetRequest::new(source, options)
+        .interval(
+            Some((
+                std::time::Duration::from_micros(from as u64),
+                std::time::Duration::from_micros(to as u64),
+            )),
+            true,
+        )
+        .validate()
+        .map_err(|e| e.to_string())?;
     if options.max_packets == Some(0) {
         return Err("input has no decoded video frames".into());
     }
@@ -1630,16 +1623,12 @@ pub fn export_y4m_with_options(
     }
     let selected = options.streams.first().copied();
     crate::native_export::validate_video_selection_with_options(source, selected, options).map_err(|e| e.to_string())?;
-    crate::native_export::validate_video_packet_budget_with_geometry_filters_interval_and_limit(
-        source,
-        geometry,
-        filters,
-        options,
-        interval,
-        false,
-        options.max_packets,
-    )
-    .map_err(|e| e.to_string())?;
+    crate::native_export::PacketBudgetRequest::new(source, options)
+        .geometry(geometry)
+        .filters(filters)
+        .interval(interval, false)
+        .validate()
+        .map_err(|e| e.to_string())?;
     if options.max_packets == Some(0) {
         return Err("input has no decoded video frames".into());
     }

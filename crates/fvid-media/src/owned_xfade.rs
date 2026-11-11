@@ -619,7 +619,7 @@ pub fn visit_y4m(
     other: impl BufRead,
     header: &Header,
     timeline: FadeTimeline,
-    mut visit: impl FnMut(&GeometryFrame, u64, u64) -> Result<(), String>,
+    visit: impl FnMut(&GeometryFrame, u64, u64) -> Result<(), String>,
 ) -> Result<u64, String> {
     visit_y4m_counted(main, other, header, timeline, None, visit).map(|counts| counts.0)
 }
@@ -958,7 +958,7 @@ fn export_y4m_ffv1_counted_from_readers(
         |file| {
             let (frames, decoded_frames, event) =
                 write_y4m_ffv1_counted(input, other, &header, timeline, file, options)
-                    .map_err(crate::owned_matroska::Error)?;
+                    .map_err(crate::owned_matroska::Error::from)?;
             Ok((
                 fvid_media_info::DecodeStats {
                     backend: "owned Y4M cross-fade FFV1 export",

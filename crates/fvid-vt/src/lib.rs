@@ -66,17 +66,16 @@ unsafe extern "C" {
     fn CFStringCreateWithCString(allocator: CFRef, c_str: *const u8, encoding: u32) -> CFRef;
 }
 const K_CF_STRING_ENCODING_UTF8: u32 = 0x0800_0100;
-fn cfstr(s: &str) -> CFRef {
-    // SAFETY: s is a valid UTF-8 string that we pass as a C string with a null terminator.
+fn cfstr(c_str_with_nul: &[u8]) -> CFRef {
+    debug_assert_eq!(c_str_with_nul.last(), Some(&0));
+    // SAFETY: Caller passes a valid UTF-8 byte slice terminated with a NUL byte.
     unsafe {
-        let mut buf = s.as_bytes().to_vec();
-        buf.push(0);
-        CFStringCreateWithCString(ptr::null(), buf.as_ptr(), K_CF_STRING_ENCODING_UTF8)
+        CFStringCreateWithCString(ptr::null(), c_str_with_nul.as_ptr(), K_CF_STRING_ENCODING_UTF8)
     }
 }
 macro_rules! CFSTR {
-    ($s:expr) => {
-        cfstr($s)
+    ($s:literal) => {
+        cfstr(concat!($s, "\0").as_bytes())
     };
 }
 #[link(name = "CoreMedia", kind = "framework")]
@@ -466,22 +465,31 @@ fn unpack_biplanar(
         .map_err(|e| Error(e.to_string()))?;
     cr.try_reserve_exact(chroma_bytes)
         .map_err(|e| Error(e.to_string()))?;
-    let append = |out: &mut Vec<u8>, bytes: &[u8]| {
-        if depth == 8 {
-            out.push(bytes[0]);
-        } else {
-            out.extend((u16::from_le_bytes([bytes[0], bytes[1]]) >> 6).to_le_bytes());
+    if depth == 8 {
+        for row in 0..height {
+            let start = row * y_stride;
+            luma.extend_from_slice(&y[start..start + width]);
         }
-    };
-    for row in 0..height {
-        for bytes in y[row * y_stride..row * y_stride + width * bpp].chunks_exact(bpp) {
-            append(&mut luma, bytes);
+        for row in 0..ch {
+            let start = row * uv_stride;
+            for pair in uv[start..start + cw * 2].chunks_exact(2) {
+                cb.push(pair[0]);
+                cr.push(pair[1]);
+            }
         }
-    }
-    for row in 0..ch {
-        for bytes in uv[row * uv_stride..row * uv_stride + cw * 2 * bpp].chunks_exact(2 * bpp) {
-            append(&mut cb, &bytes[..bpp]);
-            append(&mut cr, &bytes[bpp..]);
+    } else {
+        for row in 0..height {
+            let start = row * y_stride;
+            for bytes in y[start..start + width * 2].chunks_exact(2) {
+                luma.extend_from_slice(&(u16::from_le_bytes([bytes[0], bytes[1]]) >> 6).to_le_bytes());
+            }
+        }
+        for row in 0..ch {
+            let start = row * uv_stride;
+            for bytes in uv[start..start + cw * 4].chunks_exact(4) {
+                cb.extend_from_slice(&(u16::from_le_bytes([bytes[0], bytes[1]]) >> 6).to_le_bytes());
+                cr.extend_from_slice(&(u16::from_le_bytes([bytes[2], bytes[3]]) >> 6).to_le_bytes());
+            }
         }
     }
     Ok(Planes {
@@ -752,6 +760,9 @@ impl Session {
                 &kCFTypeDictionaryKeyCallBacks,
                 &kCFTypeDictionaryValueCallBacks,
             );
+            if !keys[0].is_null() {
+                CFRelease(keys[0]);
+            }
             CFRelease(config_data);
             let mut format = ptr::null();
             let code = CMVideoFormatDescriptionCreate(
@@ -826,6 +837,9 @@ impl Session {
                 &kCFTypeDictionaryKeyCallBacks,
                 &kCFTypeDictionaryValueCallBacks,
             );
+            if !keys[0].is_null() {
+                CFRelease(keys[0]);
+            }
             CFRelease(config_data);
             let mut format = ptr::null();
             let code = CMVideoFormatDescriptionCreate(

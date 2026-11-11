@@ -1,5 +1,137 @@
-//! FVid-owned Vorbis inverse MDCT using a radix-two complex FFT.
+//! FVid-owned Vorbis inverse MDCT using an N/4-point complex FFT with cached twiddles.
 use crate::{Result, invalid};
+use std::sync::OnceLock;
+
+struct ImdctPlan {
+    bitrev: Vec<u16>,
+    pre: Vec<(f32, f32)>,
+    post: Vec<(f32, f32)>,
+    fft_twiddles: Vec<(f32, f32)>,
+}
+
+impl ImdctPlan {
+    fn new(n: usize) -> Self {
+        let l = n / 4;
+        let mut bitrev = vec![0u16; l];
+        let mut rev = 0usize;
+        for slot in &mut bitrev {
+            *slot = rev as u16;
+            let mut bit = l >> 1;
+            while rev & bit != 0 {
+                rev ^= bit;
+                bit >>= 1;
+            }
+            rev ^= bit;
+        }
+        let scale = 2.0 * std::f64::consts::PI / n as f64;
+        let pre = (0..l)
+            .map(|r| {
+                let angle = scale * (r as f64 + 0.25);
+                let (s, c) = angle.sin_cos();
+                (c as f32, s as f32)
+            })
+            .collect();
+        let post = (0..l)
+            .map(|p| {
+                let angle = scale * p as f64;
+                let (s, c) = angle.sin_cos();
+                (c as f32, s as f32)
+            })
+            .collect();
+        // Concatenated stage twiddles for stage = 2, 4, ..., L (total L - 1 entries).
+        let mut fft_twiddles = Vec::with_capacity(l.saturating_sub(1));
+        let mut stage = 2usize;
+        while stage <= l {
+            let step = -2.0 * std::f64::consts::PI / stage as f64;
+            for k in 0..stage / 2 {
+                let (s, c) = (step * k as f64).sin_cos();
+                fft_twiddles.push((c as f32, s as f32));
+            }
+            stage <<= 1;
+        }
+        Self {
+            bitrev,
+            pre,
+            post,
+            fft_twiddles,
+        }
+    }
+}
+
+fn plan(n: usize) -> &'static ImdctPlan {
+    static PLANS: OnceLock<[ImdctPlan; 8]> = OnceLock::new();
+    let idx = (n.trailing_zeros() as usize) - 6;
+    &PLANS.get_or_init(|| std::array::from_fn(|i| ImdctPlan::new(64usize << i)))[idx]
+}
+
+/// Fast N/4-point complex f32 Vorbis IMDCT. `scratch` requires only `output.len() / 4` pairs.
+pub fn inverse_fast(
+    coefficients: &[f32],
+    output: &mut [f32],
+    scratch: &mut [(f32, f32)],
+) -> Result<()> {
+    let n = output.len();
+    let l = n / 4;
+    if !n.is_power_of_two()
+        || !(64..=8192).contains(&n)
+        || coefficients.len() != n / 2
+        || scratch.len() < l
+    {
+        return Err(invalid("invalid Vorbis IMDCT geometry or scratch"));
+    }
+    let p = plan(n);
+    let buf = &mut scratch[..l];
+    let n2 = n / 2;
+    for r in 0..l {
+        let a = coefficients[2 * r];
+        let b = coefficients[n2 - 1 - 2 * r];
+        let (c, s) = p.pre[r];
+        buf[usize::from(p.bitrev[r])] = (a * c + b * s, b * c - a * s);
+    }
+    let mut tw_offset = 0usize;
+    let mut stage = 2usize;
+    while stage <= l {
+        let half = stage / 2;
+        let twiddles = &p.fft_twiddles[tw_offset..tw_offset + half];
+        for block in buf.chunks_exact_mut(stage) {
+            let (left, right) = block.split_at_mut(half);
+            for ((a, b), &(wr, wi)) in left.iter_mut().zip(right.iter_mut()).zip(twiddles) {
+                let (ar, ai) = *a;
+                let (br, bi) = *b;
+                let tr = wr * br - wi * bi;
+                let ti = wr * bi + wi * br;
+                *a = (ar + tr, ai + ti);
+                *b = (ar - tr, ai - ti);
+            }
+        }
+        tw_offset += half;
+        stage <<= 1;
+    }
+    let n8 = n / 8;
+    for k in 0..n8 {
+        let (fr, fi) = buf[k];
+        let (c, s) = p.post[k];
+        let re = fr * c + fi * s;
+        let im = fr * s - fi * c;
+        let i0 = l - 1 - 2 * k;
+        output[n2 + i0] = -re;
+        output[n - 1 - i0] = -re;
+        output[i0] = im;
+        output[n2 - 1 - i0] = -im;
+    }
+    for k in n8..l {
+        let (fr, fi) = buf[k];
+        let (c, s) = p.post[k];
+        let re = fr * c + fi * s;
+        let im = fr * s - fi * c;
+        let i1 = 2 * k - l;
+        output[i1] = re;
+        output[n2 - 1 - i1] = -re;
+        output[n2 + i1] = -im;
+        output[n - 1 - i1] = -im;
+    }
+    Ok(())
+}
 
 /// Unnormalized Vorbis synthesis transform. For output length N and N/2
 /// coefficients, computes sum X[k] cos(2*pi/N*(t+1/2+N/4)*(k+1/2)).
@@ -13,59 +145,8 @@ pub fn inverse(coefficients: &[f32], output: &mut [f32], scratch: &mut [(f64, f6
     {
         return Err(invalid("invalid Vorbis IMDCT geometry or scratch"));
     }
-    let scratch = &mut scratch[..2 * n];
-    scratch.fill((0., 0.));
-    for (to, &value) in scratch.iter_mut().zip(coefficients) {
-        to.0 = f64::from(value);
-    }
-    // FFT of zero-padded coefficients. Odd frequency samples and a half-bin
-    // phase rotation evaluate the MDCT cosine basis without a quadratic matrix.
-    let length = scratch.len();
-    let mut reversed = 0usize;
-    for i in 1..length {
-        let mut bit = length >> 1;
-        while reversed & bit != 0 {
-            reversed ^= bit;
-            bit >>= 1;
-        }
-        reversed ^= bit;
-        if i < reversed {
-            scratch.swap(i, reversed);
-        }
-    }
-    let mut stage = 2;
-    while stage <= length {
-        let phase = -2. * std::f64::consts::PI / stage as f64;
-        let (sine, cosine) = phase.sin_cos();
-        for block in scratch.chunks_exact_mut(stage) {
-            let (mut wr, mut wi) = (1., 0.);
-            for i in 0..stage / 2 {
-                let (ar, ai) = block[i];
-                let (br, bi) = block[i + stage / 2];
-                let (tr, ti) = (wr * br - wi * bi, wr * bi + wi * br);
-                block[i] = (ar + tr, ai + ti);
-                block[i + stage / 2] = (ar - tr, ai - ti);
-                (wr, wi) = (wr * cosine - wi * sine, wr * sine + wi * cosine);
-            }
-        }
-        stage *= 2;
-    }
-    let step_phase = -2. * std::f64::consts::PI / length as f64;
-    let (step_sin, step_cos) = step_phase.sin_cos();
-    let init_freq = 1 + n / 2;
-    let init_phase = -std::f64::consts::PI * init_freq as f64 / length as f64;
-    let (mut sine, mut cosine) = init_phase.sin_cos();
-    let mask = length - 1;
-    for (t, sample) in output.iter_mut().enumerate() {
-        let frequency = 2 * t + init_freq;
-        let (real, imaginary) = scratch[frequency & mask];
-        *sample = (real * cosine - imaginary * sine) as f32;
-        (cosine, sine) = (
-            cosine * step_cos - sine * step_sin,
-            sine * step_cos + cosine * step_sin,
-        );
-    }
-    Ok(())
+    let mut fast_scratch = [(0.0f32, 0.0f32); 2048];
+    inverse_fast(coefficients, output, &mut fast_scratch[..n / 4])
 }
 #[cfg(test)]
 mod tests {

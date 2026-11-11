@@ -141,12 +141,12 @@ fn damaged_v3_frames_fail_exactly_and_invalidate_adaptation_until_keyframe() {
                 .unwrap();
         decoder.decode(&good).unwrap();
         assert_eq!(
-            decoder.decode(&packet).err().unwrap(),
+            decoder.decode(&packet).err().unwrap().to_string(),
             invalid["error"].as_str().unwrap()
         );
         assert_eq!(decoder.monochrome(), None);
         assert_eq!(
-            decoder.decode(&nonkey).err().unwrap(),
+            decoder.decode(&nonkey).err().unwrap().to_string(),
             "FFV1 frame requires a preceding keyframe"
         );
         let recovered = decoder.decode(&good).unwrap();

@@ -1,6 +1,6 @@
 //! Owned FLAC reconstruction adapter for library presentation timelines.
 use crate::owned_matroska_audio::{invalid, Error};
-pub(crate) struct FlacDecoder {
+pub struct FlacDecoder {
     config: fvid_codecs::flac::Config,
     mask: u32,
 }

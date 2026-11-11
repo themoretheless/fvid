@@ -59,7 +59,7 @@ fn advance(state: &mut phase::State, parameters: &common::Frame, expected: &Valu
     let result = state.process(parameters);
     if !expected["accepted"].as_bool().unwrap() {
         assert_eq!(
-            result.unwrap_err().0,
+            result.unwrap_err().to_string(),
             "PS phase history requires initialized parameters"
         );
         assert_eq!(*state, before);
@@ -217,7 +217,7 @@ fn run_video(video: &Value, common_expected: &Value, expected: &Value, packets: 
             let mut fresh = phase::State::default();
             let before = fresh.clone();
             assert_eq!(
-                fresh.process(&parameters).unwrap_err().0,
+                fresh.process(&parameters).unwrap_err().to_string(),
                 "PS phase history startup requires new envelopes"
             );
             assert_eq!(fresh, before);

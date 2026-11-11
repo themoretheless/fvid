@@ -1,3 +1,4 @@
+#![allow(dead_code)]
 use fvid::audio::{AudioBackend,AudioError,AudioPacket,AudioSpec,AudioStep,AudioStream,DecodedAudio};
 use std::{sync::{Arc,Mutex},time::Duration};
 #[derive(Clone,Debug)]

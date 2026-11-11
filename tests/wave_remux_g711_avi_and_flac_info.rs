@@ -66,6 +66,7 @@ fn extensible_g711_rejects_valid_bits_not_equal_to_eight() {
     );
 }
 
+#[cfg(feature = "player")]
 #[test]
 fn avi_audio_reader_accepts_wave_format_extensible_g711() {
     use fvid::audio::AudioStream;

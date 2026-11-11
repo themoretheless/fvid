@@ -107,7 +107,6 @@ fn gap_seek_clock_anchor_matches_the_first_native_silence_sample() {
     assert!(failures.is_empty(), "{failures:?}");
 }
 
-use fvid::audio::AudioBackend as _;
 struct FlushCapture {
     inner: transitions::Capture,
     anchors: std::sync::Arc<std::sync::Mutex<Vec<Duration>>>,

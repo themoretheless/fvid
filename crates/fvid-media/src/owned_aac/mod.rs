@@ -10,7 +10,7 @@ pub mod aac_ssr_ipqf;
 pub mod aac_ssr_gain;
 pub mod aac_ssr_synthesis;
 pub mod aac_ssr_alignment;
-mod aac_ssr_metadata;
+pub mod aac_ssr_metadata;
 pub mod aac_ps_data;
 pub mod aac_ps_hybrid_filter;
 pub mod aac_ps_hybrid;
@@ -68,11 +68,8 @@ pub mod aac_sbr_downsampled_qmf;
 mod aac_sbr_qmf_window;
 mod aac_sbr_huffman_tables;
 pub mod aac_tns;
-pub use fvid_control::error::BitstreamError as Error;
-pub type Result<T> = std::result::Result<T, Error>;
-fn invalid(message: &str) -> Error {
-    Error(message.into())
-}
+pub use fvid_control::error::{Error, Result};
+pub(crate) use fvid_control::error::{invalid, unsupported};
 mod aac_band_tables;
 pub mod aac_bands;
 
@@ -81,9 +78,6 @@ pub mod adts;
 pub mod adts_crc;
 pub mod bits;
 pub mod config;
-fn unsupported(message: &str) -> Error {
-    Error(message.into())
-}
 
 pub mod aac_geometry;
 
@@ -114,7 +108,7 @@ pub mod aac_tns_syntax;
 
 pub mod aac_native;
 
-mod aac_huffman_tables;
+pub mod aac_huffman_tables;
 
 pub use aac_native::{AacCheckpoint, NativeAacDecoder};
 #[cfg(test)]

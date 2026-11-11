@@ -17,6 +17,19 @@ fn correction_start(transient: i64, length: u8) -> Result<i64> {
         .ok_or_else(|| invalid("E-AC-3 transient destination clock overflow"))
 }
 
+fn fade_tables() -> &'static ([f32; 256], [f32; 128]) {
+    static TABLES: std::sync::OnceLock<([f32; 256], [f32; 128])> = std::sync::OnceLock::new();
+    TABLES.get_or_init(|| {
+        let f256 = std::array::from_fn(|sample| {
+            (0.5 - 0.5 * (std::f64::consts::PI * sample as f64 / 255.0).cos()) as f32
+        });
+        let f128 = std::array::from_fn(|sample| {
+            (0.5 - 0.5 * (std::f64::consts::PI * sample as f64 / 127.0).cos()) as f32
+        });
+        (f256, f128)
+    })
+}
+
 fn apply_inner(
     pcm: &mut [f32],
     buffer_start: i64,
@@ -69,16 +82,14 @@ fn apply_inner(
     // Snapshot before writing: the source and corrected regions can overlap.
     let mut synthesis = [0.0f32; 1023];
     synthesis[..count].copy_from_slice(&pcm[source..source_end]);
-    let fade = |sample: usize, count: usize| {
-        (0.5 - 0.5 * (std::f64::consts::PI * sample as f64 / (count - 1) as f64).cos()) as f32
-    };
+    let (fade_256, fade_128) = fade_tables();
     for sample in 0..visible {
         let at = destination + sample;
         pcm[at] = if sample < TC1 {
-            let weight = fade(sample, TC1);
+            let weight = fade_256[sample];
             pcm[at] * (1.0 - weight) + synthesis[sample] * weight
         } else if sample >= total - TC2 {
-            let weight = fade(sample - (total - TC2), TC2);
+            let weight = fade_128[sample - (total - TC2)];
             pcm[at] * weight + synthesis[sample] * (1.0 - weight)
         } else {
             synthesis[sample]

@@ -1,11 +1,11 @@
 //! AAC temporal noise shaping side-information parser.
-use crate::{Result, invalid};
-pub use fvid_media::owned_aac::aac_tns::{TnsData, TnsFilter};
-include!("../../crates/fvid-media/src/owned_aac/aac_tns_impl.rs");
+pub use fvid_media::owned_aac::aac_tns_syntax::*;
 
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::codec::{aac_synthesis::WindowSequence, bits::BitReader};
+    use std::f64::consts::FRAC_PI_2;
     fn pack(fields: &[(u32, u8)]) -> (Vec<u8>, usize) {
         let mut data = Vec::new();
         let mut n = 0;

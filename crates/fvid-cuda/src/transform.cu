@@ -11,8 +11,10 @@ extern "C" __global__ void fvid_transform(
     unsigned int plane = index < params[9] ? 0 : (index < params[17] ? 1 : 2);
     const unsigned int* p = params + plane * 8;
     const unsigned int local = index - p[1];
-    unsigned int x = local % p[5];
-    unsigned int y = local / p[5];
+    const unsigned int out_x = local % p[5];
+    const unsigned int out_y = local / p[5];
+    unsigned int x = out_x;
+    unsigned int y = out_y;
     if (params[24]) x = p[5] - 1 - x;
     if (params[25]) y = p[6] - 1 - y;
     const unsigned int source = p[0] + (p[4] + y) * p[2] + p[3] + x;

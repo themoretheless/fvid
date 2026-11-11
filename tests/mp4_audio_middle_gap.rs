@@ -527,7 +527,7 @@ fn middle_silence_does_not_mask_a_broken_following_codec_packet() {
             let trace = Arc::new(Mutex::new(transitions::Trace::default()));
             let captured = trace.clone();
             let r = Mp4AudioReader::open(Cursor::new(bytes(&n)), Default::default()).unwrap();
-            let mut audio = AudioPlayback::start(Box::new(r), move || {
+            let audio = AudioPlayback::start(Box::new(r), move || {
                 Box::new(transitions::Capture::new(captured))
             });
             audio.play();

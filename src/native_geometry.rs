@@ -535,7 +535,7 @@ impl VideoGeometry {
                     continue;
                 }
                 let ty = py - pad_py;
-                if self.transpose.is_none() && canvas_pw == dw && !self.horizontal_flip {
+                if self.transpose.is_none() && canvas_pw == dw {
                     let iy = if self.vertical_flip { ch - 1 - ty } else { ty };
                     let left_pad = pad_px.min(dw);
                     for _ in 0..left_pad {
@@ -544,7 +544,18 @@ impl VideoGeometry {
                     let copy_w = t_pw.min(dw.saturating_sub(left_pad));
                     if copy_w > 0 {
                         let start = ((y / dy + iy) * pw + x / dx) * bytes;
-                        result.extend_from_slice(&input[start..start + copy_w * bytes]);
+                        if !self.horizontal_flip {
+                            result.extend_from_slice(&input[start..start + copy_w * bytes]);
+                        } else {
+                            let dst_start = result.len();
+                            result.resize(dst_start + copy_w * bytes, 0);
+                            fvid_cpu::hflip_row_copy(
+                                &mut result[dst_start..],
+                                &input[start + (cw - copy_w) * bytes..start + cw * bytes],
+                                copy_w,
+                                bytes,
+                            );
+                        }
                     }
                     let right_pad = dw.saturating_sub(left_pad + copy_w);
                     for _ in 0..right_pad {

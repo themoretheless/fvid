@@ -1,41 +1,12 @@
 //! Controlled native file export for Ogg programs that change audio codec.
 use crate::{
     owned_ogg_audio_program::Program,
-    owned_ogg_opus_export::{CheckedRead, admit, check, preflight},
+    owned_ogg_opus_export::{admit, check},
 };
 use fvid_control::CopyOptions;
 use fvid_media_info::{AudioDecodeStats, AudioDecodeTransform};
-use std::{
-    fs::File,
-    io::{BufReader, Read, Write},
-    path::Path,
-};
+use std::{io::Write, path::Path};
 type Result<T> = std::result::Result<T, String>;
-pub(crate) fn open(path: &Path, options: &CopyOptions) -> Result<(Program, Vec<u8>)> {
-    open_with_transform(path, None, options)
-}
-pub(crate) fn open_with_transform(
-    path: &Path,
-    transform: Option<AudioDecodeTransform>,
-    options: &CopyOptions,
-) -> Result<(Program, Vec<u8>)> {
-    check(options)?;
-    let mut file = File::open(path).map_err(|e| e.to_string())?;
-    let (limits, index) = preflight(&mut file, options)?;
-    let mut bytes = Vec::new();
-    bytes
-        .try_reserve_exact(limits.file_bytes)
-        .map_err(|_| "Ogg input allocation failed")?;
-    CheckedRead {
-        input: BufReader::new(file),
-        options,
-    }
-    .read_to_end(&mut bytes)
-    .map_err(|e| e.to_string())?;
-    let ogg = crate::owned_ogg::Ogg::parse(&bytes, &limits).map_err(|e| e.to_string())?;
-    drop(bytes);
-    open_from_ogg_with_transform(ogg, index, transform, options)
-}
 pub(crate) fn open_from_ogg_with_transform(
     ogg: crate::owned_ogg::Ogg,
     index: usize,
@@ -106,16 +77,7 @@ pub(crate) fn open_from_ogg_with_transform(
     check(options)?;
     Ok((program, info))
 }
-pub(crate) fn supports(
-    source: &Path,
-    transform: AudioDecodeTransform,
-    options: &CopyOptions,
-) -> bool {
-    match open_with_transform(source, Some(transform), options) {
-        Ok((p, _)) => supports_program(&p, transform),
-        Err(e) => e.starts_with("controlled memory budget exceeded:"),
-    }
-}
+#[cfg(test)]
 pub(crate) fn supports_from_ogg(
     ogg: crate::owned_ogg::Ogg,
     index: usize,
@@ -127,6 +89,7 @@ pub(crate) fn supports_from_ogg(
         Err(e) => e.starts_with("controlled memory budget exceeded:"),
     }
 }
+#[cfg(test)]
 fn supports_program(p: &Program, transform: AudioDecodeTransform) -> bool {
     let target = transform.channels.unwrap_or(i32::from(p.channels()));
     target == i32::from(p.channels())
@@ -175,14 +138,6 @@ fn decode(
         channels: program.channels(),
     })
 }
-pub(crate) fn decode_to_wave(
-    source: &Path,
-    options: &CopyOptions,
-) -> Result<crate::owned_adts_export::DecodedSpool> {
-    check(options)?;
-    let (program, info) = open(source, options)?;
-    decode_program_to_wave(program, info, options)
-}
 pub(crate) fn decode_to_wave_from_ogg(
     ogg: crate::owned_ogg::Ogg,
     index: usize,
@@ -210,19 +165,6 @@ fn decode_program_to_wave(
     check(options)?;
     crate::owned_ogg_opus_export::append_info(&spool.wave, &info)?;
     Ok(spool)
-}
-pub(crate) fn apply(
-    source: &Path,
-    destination: &Path,
-    transform: AudioDecodeTransform,
-    options: &CopyOptions,
-) -> Result<AudioDecodeStats> {
-    check(options)?;
-    if destination.symlink_metadata().is_ok() {
-        return Err("destination already exists".into());
-    }
-    let (program, info) = open_with_transform(source, Some(transform), options)?;
-    apply_program(program, info, destination, transform, options)
 }
 pub(crate) fn apply_from_ogg(
     ogg: crate::owned_ogg::Ogg,

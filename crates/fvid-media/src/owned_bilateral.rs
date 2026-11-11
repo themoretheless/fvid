@@ -85,6 +85,21 @@ impl Bilateral {
         if spatial_denominator == 0.0 || range_denominator == 0.0 {
             return Ok(());
         }
+        let mut spatial_lut = Vec::with_capacity((radius + 1) * (radius + 1));
+        for dy in 0..=radius {
+            let dy_f = dy as f64;
+            for dx in 0..=radius {
+                let dx_f = dx as f64;
+                spatial_lut.push((-(dx_f * dx_f + dy_f * dy_f) / spatial_denominator).exp());
+            }
+        }
+        let max_usize = maximum as usize;
+        let mut range_lut = Vec::with_capacity(max_usize + 1);
+        for diff in 0..=max_usize {
+            let d = diff as f64;
+            range_lut.push((-(d * d) / range_denominator).exp());
+        }
+        let stride = radius + 1;
         let mut base = 0;
         for (plane, (w, h)) in sizes.into_iter().enumerate() {
             let area = w * h;
@@ -93,11 +108,11 @@ impl Bilateral {
                 source.try_reserve_exact(area).map_err(|e| e.to_string())?;
                 if bytes == 1 {
                     for &b in &frame.data[base..base + area] {
-                        source.push(f64::from(b));
+                        source.push(u16::from(b));
                     }
                 } else {
                     for chunk in frame.data[base..base + area * 2].chunks_exact(2) {
-                        source.push(f64::from(u16::from_le_bytes([chunk[0], chunk[1]])));
+                        source.push(u16::from_le_bytes([chunk[0], chunk[1]]));
                     }
                 }
                 for y in 0..h {
@@ -109,18 +124,15 @@ impl Bilateral {
                         let xx_min = x.saturating_sub(radius);
                         let xx_max = x.saturating_add(radius).min(w - 1);
                         for yy in yy_min..=yy_max {
-                            let dy = y.abs_diff(yy) as f64;
-                            let dy_sq = dy * dy;
+                            let dy = y.abs_diff(yy);
+                            let spatial_row = &spatial_lut[dy * stride..dy * stride + stride];
                             let row_slice = &source[yy * w..yy * w + w];
-                            for xx in xx_min..=xx_max {
-                                let dx = x.abs_diff(xx) as f64;
-                                let sample = row_slice[xx];
-                                let difference = sample - center;
-                                let weight = (-(dx * dx + dy_sq) / spatial_denominator
-                                    - difference * difference / range_denominator)
-                                    .exp();
+                            for (xx, &sample_u16) in row_slice[xx_min..=xx_max].iter().enumerate() {
+                                let dx = x.abs_diff(xx_min + xx);
+                                let diff = usize::from(sample_u16.abs_diff(center));
+                                let weight = spatial_row[dx] * range_lut[diff];
                                 weight_sum += weight;
-                                sum += sample * weight;
+                                sum += f64::from(sample_u16) * weight;
                             }
                         }
                         let value =

@@ -33,6 +33,7 @@ pub struct Nv12Buffer {
     height: u32,
     pitch: u32,
     bytes: usize,
+    #[cfg_attr(not(any(target_os = "linux", target_os = "windows")), allow(dead_code))]
     sample_bytes: u32,
     #[cfg(any(target_os = "linux", target_os = "windows"))]
     host_staging: Option<Vec<u8>>,
@@ -296,6 +297,7 @@ fn plane_bytes(pitch: u32, height: u32) -> Result<(usize, usize), String> {
     }
     Ok((y, uv))
 }
+#[cfg(test)]
 fn layout(width: u32, height: u32) -> Result<(u32, usize), String> {
     layout_format(width, height, 1)
 }
@@ -320,9 +322,14 @@ fn layout_format(width: u32, height: u32, sample_bytes: u32) -> Result<(u32, usi
     }
     Ok((pitch, bytes))
 }
+#[cfg(test)]
 fn make_view(pointer: u64, width: u32, height: u32, pitch: u32) -> Result<Nv12View, String> {
     make_view_format(pointer, width, height, pitch, 1)
 }
+#[cfg_attr(
+    not(any(test, target_os = "linux", target_os = "windows")),
+    allow(dead_code)
+)]
 fn make_view_format(
     pointer: u64,
     width: u32,

@@ -119,13 +119,6 @@ fn metadata<R: std::io::Read + std::io::Seek>(
     }
     (metadata, text)
 }
-fn open(
-    source: &Path,
-    options: &CopyOptions,
-) -> crate::owned_mp4::Result<crate::owned_mp4::Mp4Reader<BufReader<File>>> {
-    let file = File::open(source)?;
-    open_from_file(file, options)
-}
 
 fn open_from_file(
     file: File,
@@ -346,15 +339,6 @@ fn qualify_from_file(
     Qualification::Qualified(reader, selected, plans)
 }
 
-pub(crate) fn supports(source: &Path, destination: &Path, options: &CopyOptions) -> bool {
-    let Ok(file) = File::open(source) else {
-        return false;
-    };
-    !matches!(
-        qualify_from_file(file, destination, options),
-        Qualification::NotEligible
-    )
-}
 
 /// Copy supported AVC/HEVC/AAC packets unchanged with their presentation edits.
 /// Known container tags and track title/language may be deleted/set; aggregate/RSS policies

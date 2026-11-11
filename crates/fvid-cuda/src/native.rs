@@ -204,9 +204,18 @@ impl Processor {
     }
 
     fn drain_pipeline(&mut self) -> Result<(), String> {
-        let mut sink = vec![0u8; self.output_len()];
+        if self.queued == 0 {
+            self.next_slot = 0;
+            self.oldest_slot = 0;
+            return Ok(());
+        }
         while self.queued > 0 {
-            self.complete_oldest(&mut sink)?;
+            let slot = self.oldest_slot as usize;
+            self.slots[slot]
+                .stream
+                .synchronize()
+                .map_err(|err| format!("CUDA frame synchronization failed: {err}"))?;
+            self.oldest_slot ^= 1;
             self.queued -= 1;
         }
         self.next_slot = 0;

@@ -181,22 +181,6 @@ impl TimedOverlay {
         self.origin.get_or_insert(pts);
         Ok(())
     }
-    pub(crate) fn validate_pair_with_geometry(
-        main: &Path,
-        foreground: &Path,
-        x: i64,
-        y: i64,
-        geometry: &VideoGeometry,
-    ) -> Result<()> {
-        Self::validate_pair_with_geometry_and_filters(
-            main,
-            foreground,
-            x,
-            y,
-            geometry,
-            &Default::default(),
-        )
-    }
     pub(crate) fn validate_pair_with_geometry_and_filters(
         main: &Path,
         foreground: &Path,

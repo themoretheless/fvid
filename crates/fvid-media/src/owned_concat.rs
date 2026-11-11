@@ -6,12 +6,6 @@ use std::{
     io::{BufReader, Read, Seek, SeekFrom},
     path::{Path, PathBuf},
 };
-pub(crate) fn supports(sources: &[PathBuf], destination: &Path, options: &CopyOptions) -> bool {
-    (2..=256).contains(&sources.len())
-        && sources
-            .iter()
-            .all(|source| crate::owned_adts_remux::supports(source, destination, options))
-}
 fn open_supported_files(
     sources: &[PathBuf],
     destination: &Path,

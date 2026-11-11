@@ -3,14 +3,23 @@ use crate::vorbis::{Floor, Identification, PacketBits, PacketMode, Setup};
 use crate::vorbis_synthesis::{Overlap, window};
 use crate::{Result, invalid};
 
+fn resize_zeroed<T: Clone>(values: &mut Vec<T>, count: usize, value: T) -> Result<()> {
+    values.clear();
+    if values.capacity() < count {
+        values
+            .try_reserve_exact(count - values.len())
+            .map_err(|_| invalid("cannot allocate Vorbis decode workspace"))?;
+    }
+    values.resize(count, value);
+    Ok(())
+}
+
 fn zeroed<T: Clone>(count: usize, value: T) -> Result<Vec<T>> {
     let mut values = Vec::new();
-    values
-        .try_reserve_exact(count)
-        .map_err(|_| invalid("cannot allocate Vorbis decode workspace"))?;
-    values.resize(count, value);
+    resize_zeroed(&mut values, count, value)?;
     Ok(values)
 }
+
 /// Stateful packet decoder. Output is interleaved f32 in Vorbis channel order.
 /// The first packet primes overlap and returns zero samples. Granule trimming,
 /// stream gains and output speaker permutation belong to the container adapter.
@@ -19,6 +28,15 @@ pub struct Decoder {
     setup: Setup,
     overlap: Vec<Overlap>,
     workspace_bytes: usize,
+    envelopes: Vec<Vec<f32>>,
+    spectra: Vec<Vec<f32>>,
+    nonzero: Vec<bool>,
+    floor_scratch: Vec<u8>,
+    submap_flags: Vec<bool>,
+    imdct_scratch: Vec<(f32, f32)>,
+    time: Vec<f32>,
+    taper: Vec<f32>,
+    channel_pcm: Vec<Vec<f32>>,
 }
 impl Decoder {
     pub fn new(
@@ -45,11 +63,35 @@ impl Decoder {
             .try_reserve_exact(channels)
             .map_err(|_| invalid("cannot allocate Vorbis channel state"))?;
         overlap.resize_with(channels, Overlap::default);
+        let mut envelopes = Vec::new();
+        envelopes
+            .try_reserve_exact(channels)
+            .map_err(|_| invalid("cannot allocate Vorbis floor channels"))?;
+        envelopes.resize_with(channels, Vec::new);
+        let mut spectra = Vec::new();
+        spectra
+            .try_reserve_exact(channels)
+            .map_err(|_| invalid("cannot allocate Vorbis spectrum channels"))?;
+        spectra.resize_with(channels, Vec::new);
+        let mut channel_pcm = Vec::new();
+        channel_pcm
+            .try_reserve_exact(channels)
+            .map_err(|_| invalid("cannot allocate Vorbis output channels"))?;
+        channel_pcm.resize_with(channels, Vec::new);
         Ok(Self {
             identification,
             setup,
             overlap,
             workspace_bytes,
+            envelopes,
+            spectra,
+            nonzero: zeroed(channels, false)?,
+            floor_scratch: Vec::new(),
+            submap_flags: Vec::new(),
+            imdct_scratch: Vec::new(),
+            time: Vec::new(),
+            taper: Vec::new(),
+            channel_pcm,
         })
     }
     pub fn channels(&self) -> u8 {
@@ -81,12 +123,8 @@ impl Decoder {
             return Err(invalid("Vorbis frame exceeds workspace budget"));
         }
         let residue_values = (self.workspace_bytes - base) / 16;
-        let mut envelopes = Vec::new();
-        envelopes
-            .try_reserve_exact(channels)
-            .map_err(|_| invalid("cannot allocate Vorbis floor channels"))?;
-        let mut nonzero = zeroed(channels, false)?;
-        let mut scratch = zeroed(n / 2, 0u8)?;
+        self.nonzero.fill(false);
+        resize_zeroed(&mut self.floor_scratch, n / 2, 0u8)?;
         for channel in 0..channels {
             let submap = mapping
                 .submaps
@@ -97,11 +135,11 @@ impl Decoder {
                 .floors
                 .get(usize::from(submap.floor))
                 .ok_or_else(|| invalid("invalid Vorbis submap floor"))?;
-            let mut envelope = zeroed(n / 2, 0f32)?;
+            resize_zeroed(&mut self.envelopes[channel], n / 2, 0f32)?;
             let used = match floor {
                 Floor::One(floor) => match floor.decode_y(&mut bits, &self.setup.codebooks)? {
                     Some(y) => {
-                        floor.curve(&y, &mut envelope, &mut scratch)?;
+                        floor.curve(&y, &mut self.envelopes[channel], &mut self.floor_scratch)?;
                         true
                     }
                     None => false,
@@ -109,23 +147,18 @@ impl Decoder {
                 Floor::Zero(floor) => {
                     match floor.decode_lsp(&mut bits, &self.setup.codebooks, residue_values)? {
                         Some(lsp) => {
-                            floor.curve(&lsp, &mut envelope)?;
+                            floor.curve(&lsp, &mut self.envelopes[channel])?;
                             true
                         }
                         None => false,
                     }
                 }
             };
-            nonzero[channel] = used;
-            envelopes.push(envelope);
+            self.nonzero[channel] = used;
         }
-        mapping.propagate_nonzero(&mut nonzero)?;
-        let mut spectra = Vec::new();
-        spectra
-            .try_reserve_exact(channels)
-            .map_err(|_| invalid("cannot allocate Vorbis spectrum channels"))?;
-        for _ in 0..channels {
-            spectra.push(zeroed(n / 2, 0f32)?);
+        mapping.propagate_nonzero(&mut self.nonzero)?;
+        for channel in 0..channels {
+            resize_zeroed(&mut self.spectra[channel], n / 2, 0f32)?;
         }
         for (index, submap) in mapping.submaps.iter().enumerate() {
             let residue = self
@@ -133,20 +166,22 @@ impl Decoder {
                 .residues
                 .get(usize::from(submap.residue))
                 .ok_or_else(|| invalid("invalid Vorbis submap residue"))?;
-            let mut flags = Vec::new();
-            flags
-                .try_reserve_exact(channels)
-                .map_err(|_| invalid("cannot allocate Vorbis submap flags"))?;
+            self.submap_flags.clear();
+            if self.submap_flags.capacity() < channels {
+                self.submap_flags
+                    .try_reserve_exact(channels - self.submap_flags.len())
+                    .map_err(|_| invalid("cannot allocate Vorbis submap flags"))?;
+            }
             for (channel, &mux) in mapping.mux.iter().enumerate() {
                 if usize::from(mux) == index {
-                    flags.push(nonzero[channel]);
+                    self.submap_flags.push(self.nonzero[channel]);
                 }
             }
             let mut bundle = Vec::new();
             bundle
                 .try_reserve_exact(channels)
                 .map_err(|_| invalid("cannot allocate Vorbis submap bundle"))?;
-            for (channel, spectrum) in spectra.iter_mut().enumerate() {
+            for (channel, spectrum) in self.spectra.iter_mut().enumerate() {
                 if usize::from(mapping.mux[channel]) == index {
                     bundle.push(spectrum.as_mut_slice());
                 }
@@ -154,44 +189,47 @@ impl Decoder {
             residue.decode(
                 &mut bits,
                 &self.setup.codebooks,
-                &flags,
+                &self.submap_flags,
                 &mut bundle,
                 residue_values,
             )?;
         }
-        mapping.inverse_coupling(&mut spectra)?;
-        let mut fft = zeroed(2 * n, (0f64, 0f64))?;
-        let mut time = zeroed(n, 0f32)?;
-        let mut taper = zeroed(n, 0f32)?;
+        mapping.inverse_coupling(&mut self.spectra)?;
+        resize_zeroed(&mut self.imdct_scratch, n / 4, (0f32, 0f32))?;
+        resize_zeroed(&mut self.time, n, 0f32)?;
+        resize_zeroed(&mut self.taper, n, 0f32)?;
         window(
             1usize << self.identification.block_exponents[0],
             mode.long,
             header.previous_long,
             header.next_long,
-            &mut taper,
+            &mut self.taper,
         )?;
-        let mut decoded = Vec::new();
-        decoded
-            .try_reserve_exact(channels)
-            .map_err(|_| invalid("cannot allocate Vorbis output channels"))?;
         for channel in 0..channels {
-            for (value, &floor) in spectra[channel].iter_mut().zip(&envelopes[channel]) {
+            for (value, &floor) in self.spectra[channel]
+                .iter_mut()
+                .zip(&self.envelopes[channel])
+            {
                 *value *= floor;
             }
-            crate::vorbis_imdct::inverse(&spectra[channel], &mut time, &mut fft)?;
-            for (value, &weight) in time.iter_mut().zip(&taper) {
+            crate::vorbis_imdct::inverse_fast(
+                &self.spectra[channel],
+                &mut self.time,
+                &mut self.imdct_scratch,
+            )?;
+            for (value, &weight) in self.time.iter_mut().zip(&self.taper) {
                 *value *= weight;
             }
-            decoded.push(self.overlap[channel].push(&time)?);
+            self.overlap[channel].push_into(&self.time, &mut self.channel_pcm[channel])?;
         }
-        let frames = decoded.first().map_or(0, Vec::len);
-        if decoded.iter().any(|v| v.len() != frames) {
+        let frames = self.channel_pcm.first().map_or(0, Vec::len);
+        if self.channel_pcm.iter().any(|v| v.len() != frames) {
             return Err(invalid("Vorbis channel overlap clocks disagree"));
         }
         let mut interleaved = zeroed(frames * channels, 0f32)?;
         for (frame, to) in interleaved.chunks_exact_mut(channels).enumerate() {
             for (channel, value) in to.iter_mut().enumerate() {
-                *value = decoded[channel][frame];
+                *value = self.channel_pcm[channel][frame];
             }
         }
         Ok(interleaved)

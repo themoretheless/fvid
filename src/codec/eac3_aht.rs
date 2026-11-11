@@ -42,15 +42,58 @@ fn signed(bits: &mut Bits<'_>, width: usize) -> i32 {
     let value = bits.take(width);
     (value << (32 - width)) >> (32 - width)
 }
-pub(super) fn inverse(input: [f32; 6]) -> [f32; 6] {
-    std::array::from_fn(|m| {
-        let mut value = f64::from(input[0]);
-        for j in 1..6 {
-            value += f64::from(input[j])
-                * std::f64::consts::SQRT_2
-                * ((2 * m + 1) as f64 * j as f64 * std::f64::consts::PI / 12.0).cos();
+const COS_SQRT2_PI_12: [f64; 24] = [
+    1.41421356237309504880168872420969808,
+    1.36602540378443864676372317075293618,
+    1.22474487139158894066786203906262205,
+    1.0,
+    0.707106781186547524400844362104849039,
+    0.366025403784438646763723170752936183,
+    0.0,
+    -0.366025403784438646763723170752936183,
+    -0.707106781186547524400844362104849039,
+    -1.0,
+    -1.22474487139158894066786203906262205,
+    -1.36602540378443864676372317075293618,
+    -1.41421356237309504880168872420969808,
+    -1.36602540378443864676372317075293618,
+    -1.22474487139158894066786203906262205,
+    -1.0,
+    -0.707106781186547524400844362104849039,
+    -0.366025403784438646763723170752936183,
+    0.0,
+    0.366025403784438646763723170752936183,
+    0.707106781186547524400844362104849039,
+    1.0,
+    1.22474487139158894066786203906262205,
+    1.36602540378443864676372317075293618,
+];
+
+const IDCT6_BASIS: [[f64; 5]; 6] = {
+    let mut table = [[0.0; 5]; 6];
+    let mut m = 0usize;
+    while m < 6 {
+        let mut j = 1usize;
+        while j < 6 {
+            table[m][j - 1] = COS_SQRT2_PI_12[((2 * m + 1) * j) % 24];
+            j += 1;
         }
-        value as f32
+        m += 1;
+    }
+    table
+};
+
+#[inline]
+pub(super) fn inverse(input: [f32; 6]) -> [f32; 6] {
+    let x0 = f64::from(input[0]);
+    let x1 = f64::from(input[1]);
+    let x2 = f64::from(input[2]);
+    let x3 = f64::from(input[3]);
+    let x4 = f64::from(input[4]);
+    let x5 = f64::from(input[5]);
+    std::array::from_fn(|m| {
+        let row = &IDCT6_BASIS[m];
+        (x0 + x1 * row[0] + x2 * row[1] + x3 * row[2] + x4 * row[3] + x5 * row[4]) as f32
     })
 }
 fn scalar(bits: &mut Bits<'_>, hebap: usize, gain: usize) -> f32 {
@@ -77,40 +120,60 @@ fn scalar(bits: &mut Bits<'_>, hebap: usize, gain: usize) -> f32 {
         }
     }
 }
+#[cfg(test)]
 pub(super) fn read_plane(
     bits: &mut Bits<'_>,
     pointers: &[u8],
-    mut noise: impl FnMut() -> f32,
+    noise: impl FnMut() -> f32,
 ) -> Result<Vec<[f32; 6]>> {
+    let mut out = Vec::new();
+    read_plane_into(bits, pointers, noise, &mut out)?;
+    Ok(out)
+}
+
+pub(super) fn read_plane_into(
+    bits: &mut Bits<'_>,
+    pointers: &[u8],
+    mut noise: impl FnMut() -> f32,
+    out: &mut Vec<[f32; 6]>,
+) -> Result<()> {
     if pointers.len() > 256 || pointers.iter().any(|&p| p > 19) {
         return Err(invalid("invalid E-AC-3 AHT allocation"));
     }
     let mode = bits.take(2) as usize;
     let end = if mode < 2 { 12 } else { 17 };
     let mut gains = [0usize; 256];
-    let active: Vec<usize> = pointers
-        .iter()
-        .enumerate()
-        .filter_map(|(i, &p)| (mode != 0 && p > 7 && usize::from(p) < end).then_some(i))
-        .collect();
+    let mut active_buf = [0u8; 256];
+    let mut active_len = 0usize;
+    if mode != 0 {
+        for (i, &p) in pointers.iter().enumerate() {
+            if p > 7 && usize::from(p) < end {
+                active_buf[active_len] = i as u8;
+                active_len += 1;
+            }
+        }
+    }
+    let active = &active_buf[..active_len];
     if mode == 3 {
         for group in active.chunks(3) {
             let packed = bits.take(5) as usize;
             if packed > 26 {
                 return Err(invalid("reserved E-AC-3 AHT gain group"));
             }
-            for (index, divisor) in group.iter().zip([9, 3, 1]) {
-                gains[*index] = (packed / divisor) % 3;
+            for (&index, divisor) in group.iter().zip([9, 3, 1]) {
+                gains[usize::from(index)] = (packed / divisor) % 3;
             }
         }
     } else if mode != 0 {
-        for i in active {
-            gains[i] = (bits.take(1) as usize) * (mode);
+        for &i in active {
+            gains[usize::from(i)] = (bits.take(1) as usize) * mode;
         }
     }
-    let mut out = Vec::new();
-    out.try_reserve_exact(pointers.len())
-        .map_err(|_| invalid("cannot allocate E-AC-3 AHT spectrum"))?;
+    out.clear();
+    if out.capacity() < pointers.len() {
+        out.try_reserve_exact(pointers.len() - out.len())
+            .map_err(|_| invalid("cannot allocate E-AC-3 AHT spectrum"))?;
+    }
     for (i, &p) in pointers.iter().enumerate() {
         let spectrum = match p {
             0 => std::array::from_fn(|_| noise()),
@@ -132,9 +195,10 @@ pub(super) fn read_plane(
         out.push(inverse(spectrum));
     }
     if bits.overrun {
+        out.clear();
         return Err(invalid("truncated E-AC-3 AHT spectrum"));
     }
-    Ok(out)
+    Ok(())
 }
 
 #[cfg(test)]

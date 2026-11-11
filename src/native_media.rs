@@ -1,11 +1,7 @@
 //! Media operations implemented by FVid's own container and codec pipeline.
 //! This module is available without the legacy `media` feature or FFmpeg.
-use fvid_media::owned_mp4_audio_packet_frames::frames as mp4_coded_packet_frames;
-use fvid_media::owned_mp4_audio_normalization::opaque_positions as mp4_opaque_positions;
 use crate::playback_native::{NativeReader, RawFrame};
 use crate::{Result, invalid};
-use fvid_media::owned_matroska_sample_clock::quantized_sample_matches as aac_quantized_sample_matches;
-use fvid_media::owned_matroska_grid_clock::grid_sample_matches as aac_quantized_grid_matches;
 use std::{fs::File, io::BufReader, path::Path, time::Duration};
 
 pub use fvid_media_info::{DecodeStats, DecodeTransform};
@@ -267,14 +263,38 @@ impl<'a> DecodeProgress<'a> {
     }
 }
 
-/// Result of owned audio decoding to interleaved little-endian float PCM.
-#[derive(Debug, PartialEq, Eq)]
-pub struct AudioDecodeStats {
-    pub sample_frames: u64,
-    pub decoded_frames: u64,
-    pub sample_rate: u32,
-    pub channels: u16,
+impl fvid_media::owned_audio_control::AudioDecodeControl for DecodeProgress<'_> {
+    fn check(&self) -> Result<()> {
+        DecodeProgress::check(self)
+    }
+    fn check_admission(&self, asc: &[u8]) -> Result<()> {
+        DecodeProgress::check_admission(self, asc)
+    }
+    fn packet_limit(&self) -> Option<u64> {
+        DecodeProgress::packet_limit(self)
+    }
+    fn packet_limit_reached(&self) -> bool {
+        DecodeProgress::packet_limit_reached(self)
+    }
+    fn packet(&mut self, bytes: usize) -> Result<()> {
+        DecodeProgress::packet(self, bytes)
+    }
 }
+
+/// Result of owned audio decoding to interleaved little-endian float PCM.
+pub use fvid_media::owned_aac::stream::AudioDecodeStats;
+pub(crate) use fvid_media::owned_aac::stream::{
+    NegotiatedAdts, adts_sample_boundary, decode_adts_aac_reader_controlled,
+    negotiate_adts_aac_reader,
+};
+pub(crate) use fvid_media::owned_matroska_audio::{
+    matroska_active_track_packets, negotiate_matroska_ps,
+    negotiate_matroska_ps_with_interval,
+};
+pub(crate) use fvid_media::owned_mp4_audio::{
+    mp4_active_samples, mp4_normalized_geometry_controlled_with_interval,
+    negotiate_mp4_ps, negotiate_mp4_ps_with_interval,
+};
 
 /// Decode ADTS packets using the owned AAC codec, without playback dependencies.
 /// Encoder priming/padding is retained because ADTS carries no trim metadata.
@@ -315,12 +335,6 @@ pub fn decode_adts_aac_reader<R: std::io::Read>(
     let mut control = DecodeProgress::new(None, None)?;
     decode_adts_aac_reader_controlled(reader, output, interval, &mut control)
 }
-
-use crate::container::adts::StreamReader as AdtsStreamReader;
-use crate::codec::config::AudioSpecificConfig as AdtsAudioConfig;
-use crate::codec::aac_native::NativeAacDecoder as AdtsPacketDecoder;
-use crate::codec::aac_ps_native::{NativePsAacDecoder as AdtsPsDecoder, InBandPsProbe as AdtsPsProbe};
-include!("../crates/fvid-media/src/owned_aac/stream_impl.rs");
 
 /// Decode a single AAC MP4 track with its priming/tail edit applied.
 /// Accepts sample-aligned track clocks, repeated media edits and empty edits.
@@ -368,24 +382,34 @@ pub(crate) fn decode_mp4_aac_reader_controlled<R: std::io::Read + std::io::Seek>
     decode_mp4_audio_reader_controlled(reader,output,interval,selected,control)
 }
 
-use crate::codec::config::aac_specific_config as mp4_probe_config;
-use crate::container::mp4::Mp4Reader as Mp4TimelineReader;
-use crate::native_audio_decoder::PacketPcmDecoder as Mp4TimelineDecoder;
-use crate::container::audio_timeline::AudioTimeline as Mp4AudioSchedule;
-use crate::native_audio_decoder::NativeAudioCheckpoint as Mp4AacCheckpoint;
-use fvid_media::owned_mp4_audio_normalization::coefficients as mp4_normalization_coefficients;
-type Mp4NormalizationTrack = crate::container::mp4::Track;
-type Mp4NormalizationSampleIndex = crate::container::mp4::SampleIndex;
-type Mp4PcmScalar = f32;
-type Mp4OutputResampler = fvid_media::owned_resample::Resampler<Vec<u8>>;
-#[allow(dead_code)] // Export uses only the arithmetic subset of the shared playback clock.
-mod mp4_export_clock {
-    use crate::{Error, Result, invalid};
-    use crate::container::mp4::Edit;
-    use std::{cmp::Ordering, time::Duration};
-    include!("../crates/fvid-media/src/owned_mp4_edit_clock_impl.rs");
+pub(crate) fn decode_mp4_audio_reader_controlled<R: std::io::Read + std::io::Seek>(
+    reader: crate::container::mp4::Mp4Reader<R>,
+    output: &mut impl std::io::Write,
+    interval: Option<(Duration, Duration)>,
+    selected: Option<usize>,
+    control: &mut DecodeProgress<'_>,
+) -> Result<AudioDecodeStats> {
+    decode_mp4_audio_reader_targeted(reader, output, interval, selected, control, None)
 }
-include!("../crates/fvid-media/src/owned_mp4_audio_timeline_impl.rs");
+
+pub(crate) fn decode_mp4_audio_reader_targeted<R: std::io::Read + std::io::Seek>(
+    reader: crate::container::mp4::Mp4Reader<R>,
+    output: &mut impl std::io::Write,
+    interval: Option<(Duration, Duration)>,
+    selected: Option<usize>,
+    control: &mut DecodeProgress<'_>,
+    target: Option<(u32, u16, u32)>,
+) -> Result<AudioDecodeStats> {
+    let index = mp4_audio_index(&reader, selected)?;
+    fvid_media::owned_mp4_audio::decode_mp4_audio_reader_targeted(
+        reader,
+        output,
+        interval,
+        Some(index),
+        control,
+        target,
+    )
+}
 
 /// Decode Matroska AAC on its container presentation timeline. Decode negative
 /// preroll for history, trim signed padding and preserve timestamp gaps as silence.
@@ -422,40 +446,22 @@ pub(crate) fn decode_matroska_aac_reader_controlled<R:std::io::Read+std::io::See
     decode_matroska_audio_reader_controlled(reader,output,interval,selected,control)
 }
 
-use crate::container::webm::WebmReader as MatroskaTimelineReader;
-use crate::codec::aac_ps_native::InBandPsProbe;
-struct MatroskaTimelineDecoder(crate::native_audio_decoder::PacketPcmDecoder);
-impl MatroskaTimelineDecoder {
-    const SAMPLE_BYTES: usize = 4;
-    fn with_in_band_ps(track: &crate::container::webm::Track) -> Result<Self> {
-        Ok(Self(crate::native_audio_decoder::PacketPcmDecoder::Ps(Box::new(
-            crate::codec::aac_ps_native::NativePsAacDecoder::new_with_in_band_ps(&track.codec_private,
-                u32::try_from(track.sample_rate).map_err(|_| invalid("AAC output clock overflow"))?).map_err(|e| invalid(&e.0))?
-        ))))
-    }
-
-    fn from_matroska(track: &crate::container::webm::Track) -> Result<Self> {
-        Ok(Self(
-            crate::native_audio_decoder::PacketPcmDecoder::from_matroska(track)?,
-        ))
-    }
-    fn sample_rate(&self) -> u32 {
-        self.0.sample_rate()
-    }
-    fn channels(&self) -> u16 {
-        self.0.channels()
-    }
-    fn delayed(&self) -> bool {
-        self.0.delayed()
-    }
-    fn decode(&mut self, data: &[u8]) -> Result<Option<Vec<f32>>> {
-        self.0.decode_delayed(data)
-    }
-    fn finish(&mut self) -> Result<Option<Vec<f32>>> {
-        self.0.finish_delayed()
-    }
+pub(crate) fn decode_matroska_audio_reader_controlled<R: std::io::Read + std::io::Seek>(
+    reader: crate::container::webm::WebmReader<R>,
+    output: &mut impl std::io::Write,
+    interval: Option<(Duration, Duration)>,
+    selected: Option<usize>,
+    control: &mut DecodeProgress<'_>,
+) -> Result<AudioDecodeStats> {
+    let index = matroska_audio_index(&reader, selected)?;
+    fvid_media::owned_matroska_audio::decode_matroska_audio_reader_controlled(
+        reader,
+        output,
+        interval,
+        Some(index),
+        control,
+    )
 }
-include!("../crates/fvid-media/src/owned_matroska_audio_timeline_impl.rs");
 
 /// Identify AAC in supported containers by their headers and track configuration.
 /// This only detects the codec; decoding still validates the complete bitstream.
@@ -1546,7 +1552,7 @@ pub(crate) fn inspect_audio_source_selected_from_file(
             reader.restrict_packet_bytes(options.max_packet_bytes);
             let in_band_ps=negotiate_matroska_ps_with_interval(&mut reader,index,interval,options.max_packets,||control.check())?;
             let track=&reader.tracks[index];
-            let decoder=if in_band_ps {MatroskaTimelineDecoder::with_in_band_ps(track)?.0} else {crate::native_audio_decoder::PacketPcmDecoder::from_matroska(track)?};
+            let decoder=if in_band_ps {fvid_media::owned_matroska_audio::MatroskaTimelineDecoder::with_in_band_ps(track)?} else {fvid_media::owned_matroska_audio::MatroskaTimelineDecoder::from_matroska(track)?};
             if track.sample_rate!=u64::from(decoder.sample_rate()) || (!in_band_ps && track.channels!=u64::from(decoder.channels())) {return Err(invalid("Matroska audio geometry disagrees with configuration"));}
             return Ok(AudioSourceInfo {
                 channel_mask: decoder.channel_mask(),
@@ -1637,12 +1643,12 @@ pub(crate) fn inspect_audio_source_selected_from_file(
         let first = source_track.samples.get(0).ok_or_else(|| invalid("MP4 audio has no samples"))?;
         let setup = source_track.decoder_setup(first.description_index)?;
         let track = &setup;
-        let decoder = if in_band_ps {crate::native_audio_decoder::PacketPcmDecoder::with_in_band_ps(track)?} else {crate::native_audio_decoder::PacketPcmDecoder::new(track)?};
+        let decoder = if in_band_ps {fvid_media::owned_mp4_audio::Mp4TimelineDecoder::with_in_band_ps(track)?} else {fvid_media::owned_mp4_audio::Mp4TimelineDecoder::new(track)?};
         if track.sample_rate != decoder.sample_rate() || (!in_band_ps && track.channels != decoder.channels()) {
             return Err(invalid("MP4 container and decoder geometry disagree"));
         }
         Ok(AudioSourceInfo {
-            channel_mask: decoder.channel_mask(),
+            channel_mask: decoder.channel_mask_opt(),
             stream_index: index,
             sample_rate: decoder.sample_rate(),
             channels: decoder.channels(),

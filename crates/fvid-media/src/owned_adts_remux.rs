@@ -13,22 +13,6 @@ pub(crate) fn adts_matroska_policies(options: &CopyOptions) -> bool {
         && options.max_packet_bytes > 0
         && crate::owned_matroska::extract_adts_matroska_metadata(Some(options)).is_ok()
 }
-pub(crate) fn supports(source: &Path, destination: &Path, options: &CopyOptions) -> bool {
-    if options.cancel.as_ref().is_some_and(|c| c.is_cancelled())
-        || !(options.streams.is_empty() || options.streams == [0])
-        || !adts_matroska_policies(options)
-        || !matches!(
-            destination.extension().and_then(|s| s.to_str()),
-            Some("mkv" | "mka")
-        )
-    {
-        return false;
-    }
-    let mut prefix = [0; 7];
-    File::open(source).is_ok_and(|mut f| {
-        f.read_exact(&mut prefix).is_ok() && crate::owned_aac::adts::header(&prefix).is_some()
-    })
-}
 pub fn remux(
     source: &Path,
     destination: &Path,

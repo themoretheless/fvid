@@ -1,3 +1,4 @@
+#![allow(dead_code)]
 use fvid::{
     audio::{AudioBackend, AudioError, AudioSpec, AudioStep, AudioStream},
     audio_thread::{AudioEvent, AudioPlayback},

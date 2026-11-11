@@ -27,39 +27,50 @@ pub const TAG: &str = "A_FLAC";
 /// Bytes in the `STREAMINFO` record the decoder is handed as setup data.
 const STREAM_INFO: usize = 34;
 
+const fn build_crc_nibble_table(width: u32, poly: u32) -> [u32; 16] {
+    let mut table = [0u32; 16];
+    let mask = (1u32 << width) - 1;
+    let mut i = 0;
+    while i < 16 {
+        let mut c = (i as u32) << (width - 4);
+        let mut bit = 0;
+        while bit < 4 {
+            c = ((c << 1) ^ if c & (1 << (width - 1)) != 0 { poly } else { 0 }) & mask;
+            bit += 1;
+        }
+        table[i] = c;
+        i += 1;
+    }
+    table
+}
+const CRC8_TABLE: [u32; 16] = build_crc_nibble_table(8, 0x07);
+const CRC16_TABLE: [u32; 16] = build_crc_nibble_table(16, 0x8005);
+
 /// CRC-8 of a frame header: polynomial 0x07, no reflection, zero initial value.
 #[doc(hidden)]
 pub fn crc8(bytes: &[u8]) -> u8 {
-    let mut crc = 0u8;
-    for byte in bytes {
-        crc ^= byte;
-        for _ in 0..8 {
-            crc = if crc & 0x80 != 0 {
-                (crc << 1) ^ 0x07
-            } else {
-                crc << 1
-            };
-        }
+    let mut c = 0u32;
+    for &v in bytes {
+        let hi = ((c >> 4) ^ u32::from(v >> 4)) & 0xf;
+        c = ((c << 4) & 0xff) ^ CRC8_TABLE[hi as usize];
+        let lo = ((c >> 4) ^ u32::from(v & 0xf)) & 0xf;
+        c = ((c << 4) & 0xff) ^ CRC8_TABLE[lo as usize];
     }
-    crc
+    c as u8
 }
 
 /// CRC-16 of a frame: polynomial 0x8005, no reflection, zero initial value. This
 /// verifies the encoded frame after its subframe structure establishes the end.
 #[doc(hidden)]
 pub fn crc16(bytes: &[u8]) -> u16 {
-    let mut crc = 0u16;
-    for byte in bytes {
-        crc ^= u16::from(*byte) << 8;
-        for _ in 0..8 {
-            crc = if crc & 0x8000 != 0 {
-                (crc << 1) ^ 0x8005
-            } else {
-                crc << 1
-            };
-        }
+    let mut c = 0u32;
+    for &v in bytes {
+        let hi = ((c >> 12) ^ u32::from(v >> 4)) & 0xf;
+        c = ((c << 4) & 0xffff) ^ CRC16_TABLE[hi as usize];
+        let lo = ((c >> 12) ^ u32::from(v & 0xf)) & 0xf;
+        c = ((c << 4) & 0xffff) ^ CRC16_TABLE[lo as usize];
     }
-    crc
+    c as u16
 }
 
 fn be16(bytes: &[u8]) -> u16 {

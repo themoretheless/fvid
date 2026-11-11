@@ -561,14 +561,17 @@ impl PresentationDecoder {
             child.channels = roles.len();
             child.compression_mode = self.compression_mode;
             child.dialogue_normalization = self.dialogue_normalization;
-            let mut decoded = Vec::new();
+            let mut sink = Vec::new();
             let canonical=crate::codec::ac3_decoder::dolby_frame(bytes)?;
             let mut bits = Bits::at(canonical.as_ref(), d.frame.audio_bit);
             child.native_capture = Some(Vec::new());
-            let sound = child.syncframe(&d.frame, &mut bits, &mut decoded);
+            let sound = child.syncframe(&d.frame, &mut bits, &mut sink);
             // Restore the capture switch even when syntax decoding errors.
             let native = child.native_capture.take().unwrap();
-            if !sound? || native.len() != blocks || decoded.len() != samples * roles.len() {
+            if !sound?
+                || native.len() != blocks
+                || native.iter().any(|b| b.mixing.width() != roles.len())
+            {
                 return Err(invalid("invalid E-AC-3 presentation audio block"));
             }
             gains = child.frame_gains;

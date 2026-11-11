@@ -1,5 +1,3 @@
-#[cfg(any(all(any(), target_arch = "x86"), all(any(), target_arch = "x86_64")))]
-use super::have_avx2_fma;
 use crate::celt::modes::CeltMode;
 use crate::celt::pvq::*;
 use crate::celt::rate::{bits2pulses, get_pulses, pulses2bits};
@@ -253,182 +251,9 @@ pub fn compute_qn(n: usize, b: i32, offset: i32, pulse_cap: i32, stereo: bool) -
     }
 }
 
-#[cfg(all(any(), target_arch = "aarch64"))]
 #[inline(always)]
-#[allow(unsafe_op_in_unsafe_fn)]
-unsafe fn stereo_itheta_neon(x: &[f32], y: &[f32], stereo: bool, n: usize) -> i32 {
-    use std::arch::aarch64::*;
-
-    // The loads below walk `n` elements of each channel; trimming to `n` here
-    // is what puts them in bounds.
-    let x = &x[..n];
-    let y = &y[..n];
-
-    let mut emid = 1e-15f32;
-    let mut eside = 1e-15f32;
-
-    if stereo {
-        let mut sum_mid = vdupq_n_f32(0.0);
-        let mut sum_side = vdupq_n_f32(0.0);
-        let mut i = 0;
-
-        while i + 16 <= n {
-            let x0 = vld1q_f32(x.as_ptr().add(i));
-            let x1 = vld1q_f32(x.as_ptr().add(i + 4));
-            let x2 = vld1q_f32(x.as_ptr().add(i + 8));
-            let x3 = vld1q_f32(x.as_ptr().add(i + 12));
-            let y0 = vld1q_f32(y.as_ptr().add(i));
-            let y1 = vld1q_f32(y.as_ptr().add(i + 4));
-            let y2 = vld1q_f32(y.as_ptr().add(i + 8));
-            let y3 = vld1q_f32(y.as_ptr().add(i + 12));
-
-            let m0 = vaddq_f32(x0, y0);
-            let m1 = vaddq_f32(x1, y1);
-            let m2 = vaddq_f32(x2, y2);
-            let m3 = vaddq_f32(x3, y3);
-            let s0 = vsubq_f32(x0, y0);
-            let s1 = vsubq_f32(x1, y1);
-            let s2 = vsubq_f32(x2, y2);
-            let s3 = vsubq_f32(x3, y3);
-
-            sum_mid = vfmaq_f32(sum_mid, m0, m0);
-            sum_mid = vfmaq_f32(sum_mid, m1, m1);
-            sum_mid = vfmaq_f32(sum_mid, m2, m2);
-            sum_mid = vfmaq_f32(sum_mid, m3, m3);
-            sum_side = vfmaq_f32(sum_side, s0, s0);
-            sum_side = vfmaq_f32(sum_side, s1, s1);
-            sum_side = vfmaq_f32(sum_side, s2, s2);
-            sum_side = vfmaq_f32(sum_side, s3, s3);
-
-            i += 16;
-        }
-
-        while i + 8 <= n {
-            let x0 = vld1q_f32(x.as_ptr().add(i));
-            let x1 = vld1q_f32(x.as_ptr().add(i + 4));
-            let y0 = vld1q_f32(y.as_ptr().add(i));
-            let y1 = vld1q_f32(y.as_ptr().add(i + 4));
-
-            let m0 = vaddq_f32(x0, y0);
-            let m1 = vaddq_f32(x1, y1);
-            let s0 = vsubq_f32(x0, y0);
-            let s1 = vsubq_f32(x1, y1);
-
-            sum_mid = vfmaq_f32(sum_mid, m0, m0);
-            sum_mid = vfmaq_f32(sum_mid, m1, m1);
-            sum_side = vfmaq_f32(sum_side, s0, s0);
-            sum_side = vfmaq_f32(sum_side, s1, s1);
-
-            i += 8;
-        }
-
-        while i + 4 <= n {
-            let x0 = vld1q_f32(x.as_ptr().add(i));
-            let y0 = vld1q_f32(y.as_ptr().add(i));
-            let m0 = vaddq_f32(x0, y0);
-            let s0 = vsubq_f32(x0, y0);
-            sum_mid = vfmaq_f32(sum_mid, m0, m0);
-            sum_side = vfmaq_f32(sum_side, s0, s0);
-            i += 4;
-        }
-
-        emid += vaddvq_f32(sum_mid);
-        eside += vaddvq_f32(sum_side);
-
-        for j in i..n {
-            let m = x[j] + y[j];
-            let s = x[j] - y[j];
-            emid += m * m;
-            eside += s * s;
-        }
-    } else {
-        let mut sum_mid = vdupq_n_f32(0.0);
-        let mut sum_side = vdupq_n_f32(0.0);
-        let mut i = 0;
-
-        while i + 16 <= n {
-            let x0 = vld1q_f32(x.as_ptr().add(i));
-            let x1 = vld1q_f32(x.as_ptr().add(i + 4));
-            let x2 = vld1q_f32(x.as_ptr().add(i + 8));
-            let x3 = vld1q_f32(x.as_ptr().add(i + 12));
-            let y0 = vld1q_f32(y.as_ptr().add(i));
-            let y1 = vld1q_f32(y.as_ptr().add(i + 4));
-            let y2 = vld1q_f32(y.as_ptr().add(i + 8));
-            let y3 = vld1q_f32(y.as_ptr().add(i + 12));
-
-            sum_mid = vfmaq_f32(sum_mid, x0, x0);
-            sum_mid = vfmaq_f32(sum_mid, x1, x1);
-            sum_mid = vfmaq_f32(sum_mid, x2, x2);
-            sum_mid = vfmaq_f32(sum_mid, x3, x3);
-            sum_side = vfmaq_f32(sum_side, y0, y0);
-            sum_side = vfmaq_f32(sum_side, y1, y1);
-            sum_side = vfmaq_f32(sum_side, y2, y2);
-            sum_side = vfmaq_f32(sum_side, y3, y3);
-
-            i += 16;
-        }
-
-        while i + 8 <= n {
-            let x0 = vld1q_f32(x.as_ptr().add(i));
-            let x1 = vld1q_f32(x.as_ptr().add(i + 4));
-            let y0 = vld1q_f32(y.as_ptr().add(i));
-            let y1 = vld1q_f32(y.as_ptr().add(i + 4));
-
-            sum_mid = vfmaq_f32(sum_mid, x0, x0);
-            sum_mid = vfmaq_f32(sum_mid, x1, x1);
-            sum_side = vfmaq_f32(sum_side, y0, y0);
-            sum_side = vfmaq_f32(sum_side, y1, y1);
-
-            i += 8;
-        }
-
-        while i + 4 <= n {
-            let x0 = vld1q_f32(x.as_ptr().add(i));
-            let y0 = vld1q_f32(y.as_ptr().add(i));
-            sum_mid = vfmaq_f32(sum_mid, x0, x0);
-            sum_side = vfmaq_f32(sum_side, y0, y0);
-            i += 4;
-        }
-
-        emid += vaddvq_f32(sum_mid);
-        eside += vaddvq_f32(sum_side);
-
-        for j in i..n {
-            emid += x[j] * x[j];
-            eside += y[j] * y[j];
-        }
-    }
-
-    let mid = emid.sqrt();
-    let side = eside.sqrt();
-    let theta_norm = celt_atan2p_norm(side, mid);
-    (0.5 + 16384.0 * theta_norm) as i32
-}
-
-#[inline(always)]
-#[cfg(all(any(), target_arch = "aarch64"))]
 pub fn stereo_itheta(x: &[f32], y: &[f32], stereo: bool, n: usize) -> i32 {
-    unsafe { stereo_itheta_neon(x, y, stereo, n) }
-}
-
-#[inline(always)]
-#[cfg(not(all(any(), target_arch = "aarch64")))]
-pub fn stereo_itheta(x: &[f32], y: &[f32], stereo: bool, n: usize) -> i32 {
-    let mut emid = 1e-15f32;
-    let mut eside = 1e-15f32;
-    if stereo {
-        for i in 0..n {
-            let m = x[i] + y[i];
-            let s = x[i] - y[i];
-            emid += m * m;
-            eside += s * s;
-        }
-    } else {
-        for i in 0..n {
-            emid += x[i] * x[i];
-            eside += y[i] * y[i];
-        }
-    }
+    let (emid, eside) = fvid_cpu::opus_simd::stereo_energy_pair(x, y, stereo, n);
     let mid = emid.sqrt();
     let side = eside.sqrt();
     let theta_norm = celt_atan2p_norm(side, mid);
@@ -2039,99 +1864,6 @@ pub fn quant_all_bands(
     *seed = ctx_seed;
 }
 
-#[cfg(all(any(), target_arch = "aarch64"))]
-fn compute_band_energy_neon(band: &[f32]) -> f32 {
-    use std::arch::aarch64::*;
-
-    let n = band.len();
-    let mut sum = 1e-27f32;
-
-    unsafe {
-        let n16 = n & !15;
-        if n16 > 0 {
-            let mut acc0 = vdupq_n_f32(0.0);
-            let mut acc1 = vdupq_n_f32(0.0);
-            let mut acc2 = vdupq_n_f32(0.0);
-            let mut acc3 = vdupq_n_f32(0.0);
-
-            for i in (0..n16).step_by(16) {
-                let v0 = vld1q_f32(band.as_ptr().add(i));
-                let v1 = vld1q_f32(band.as_ptr().add(i + 4));
-                let v2 = vld1q_f32(band.as_ptr().add(i + 8));
-                let v3 = vld1q_f32(band.as_ptr().add(i + 12));
-
-                acc0 = vfmaq_f32(acc0, v0, v0);
-                acc1 = vfmaq_f32(acc1, v1, v1);
-                acc2 = vfmaq_f32(acc2, v2, v2);
-                acc3 = vfmaq_f32(acc3, v3, v3);
-            }
-
-            acc0 = vaddq_f32(acc0, acc1);
-            acc2 = vaddq_f32(acc2, acc3);
-            acc0 = vaddq_f32(acc0, acc2);
-            sum += vaddvq_f32(acc0);
-        }
-
-        let n4 = (n & !3) - n16;
-        if n4 > 0 {
-            let mut acc = vdupq_n_f32(0.0);
-            for i in (n16..n16 + n4).step_by(4) {
-                let v = vld1q_f32(band.as_ptr().add(i));
-                acc = vfmaq_f32(acc, v, v);
-            }
-            sum += vaddvq_f32(acc);
-        }
-
-        for i in (n16 + n4)..n {
-            let v = band[i];
-            sum += v * v;
-        }
-    }
-
-    sum.sqrt()
-}
-
-#[cfg(all(any(), target_arch = "x86_64"))]
-#[target_feature(enable = "avx2,fma")]
-unsafe fn compute_band_energy_avx2(band: &[f32]) -> f32 {
-    use std::arch::x86_64::*;
-
-    let n = band.len();
-    let mut i = 0usize;
-
-    let mut acc0 = _mm256_setzero_ps();
-    let mut acc1 = _mm256_setzero_ps();
-
-    while i + 16 <= n {
-        let v0 = _mm256_loadu_ps(band.as_ptr().add(i));
-        let v1 = _mm256_loadu_ps(band.as_ptr().add(i + 8));
-        acc0 = _mm256_fmadd_ps(v0, v0, acc0);
-        acc1 = _mm256_fmadd_ps(v1, v1, acc1);
-        i += 16;
-    }
-
-    if i + 8 <= n {
-        let v0 = _mm256_loadu_ps(band.as_ptr().add(i));
-        acc0 = _mm256_fmadd_ps(v0, v0, acc0);
-        i += 8;
-    }
-
-    let acc = _mm256_add_ps(acc0, acc1);
-    let hi = _mm256_extractf128_ps(acc, 1);
-    let lo = _mm256_castps256_ps128(acc);
-    let s4 = _mm_add_ps(lo, hi);
-    let t1 = _mm_movehl_ps(s4, s4);
-    let s2 = _mm_add_ps(s4, t1);
-    let t2 = _mm_shuffle_ps(s2, s2, 0x55);
-    let mut sum = 1e-27f32 + _mm_cvtss_f32(_mm_add_ss(s2, t2));
-
-    for &v in &band[i..] {
-        sum += v * v;
-    }
-
-    sum.sqrt()
-}
-
 pub fn compute_band_energies(
     m: &CeltMode,
     x: &[f32],
@@ -2142,34 +1874,13 @@ pub fn compute_band_energies(
 ) {
     let frame_size = m.short_mdct_size << lm;
 
-    #[cfg(all(any(), target_arch = "x86_64"))]
-    let use_avx2 = have_avx2_fma();
-
     for c in 0..channels {
         let ch = &x[c * frame_size..(c + 1) * frame_size];
         for i in 0..end {
             let offset = (m.e_bands[i] as usize) << lm;
             let n = ((m.e_bands[i + 1] - m.e_bands[i]) as usize) << lm;
             let band = &ch[offset..offset + n];
-
-            #[cfg(all(any(), target_arch = "aarch64"))]
-            {
-                band_e[c * m.nb_ebands + i] = compute_band_energy_neon(band);
-            }
-            #[cfg(all(any(), target_arch = "x86_64"))]
-            {
-                if n >= 8 && use_avx2 {
-                    band_e[c * m.nb_ebands + i] = unsafe { compute_band_energy_avx2(band) };
-                } else {
-                    let sum = band.iter().fold(1e-27f32, |acc, &v| acc + v * v);
-                    band_e[c * m.nb_ebands + i] = sum.sqrt();
-                }
-            }
-            #[cfg(all(not(all(any(), target_arch = "aarch64")), not(all(any(), target_arch = "x86_64"))))]
-            {
-                let sum = band.iter().fold(1e-27f32, |acc, &v| acc + v * v);
-                band_e[c * m.nb_ebands + i] = sum.sqrt();
-            }
+            band_e[c * m.nb_ebands + i] = fvid_cpu::opus_simd::compute_band_energy(band);
         }
     }
 }
@@ -2212,8 +1923,6 @@ pub fn normalise_bands(
 ) {
     let lm = m_val.trailing_zeros() as usize;
     let frame_size = m.short_mdct_size << lm;
-    #[cfg(all(any(), target_arch = "x86_64"))]
-    let use_avx2 = std::arch::is_x86_feature_detected!("avx2");
     for c in 0..channels {
         for i in 0..end {
             let base = c * frame_size + ((m.e_bands[i] as usize) << lm);
@@ -2221,90 +1930,8 @@ pub fn normalise_bands(
             let norm = 1.0 / (1e-27 + band_e[c * m.nb_ebands + i]);
             let src = &freq[base..base + n];
             let dst = &mut x[base..base + n];
-            #[cfg(all(any(), target_arch = "x86_64"))]
-            if n >= 8 && use_avx2 {
-                unsafe { scale_slice_avx2(src, dst, norm, n) };
-                continue;
-            }
-            #[cfg(all(any(), target_arch = "aarch64"))]
-            if n >= 8 {
-                unsafe { scale_slice_neon(src, dst, norm, n) };
-                continue;
-            }
-            for (d, &s) in dst.iter_mut().zip(src) {
-                *d = s * norm;
-            }
+            fvid_cpu::opus_simd::scale_slice(src, dst, norm, n);
         }
-    }
-}
-
-#[cfg(all(any(), target_arch = "x86_64"))]
-#[target_feature(enable = "avx2")]
-unsafe fn scale_slice_avx2(src: &[f32], dst: &mut [f32], scale: f32, n: usize) {
-    use std::arch::x86_64::*;
-
-    // The loads and stores below walk `n` elements; trimming to `n` here is
-    // what puts them in bounds.
-    let src = &src[..n];
-    let dst = &mut dst[..n];
-    let vscale = _mm256_set1_ps(scale);
-    let mut i = 0;
-
-    while i + 16 <= n {
-        let s0 = _mm256_loadu_ps(src.as_ptr().add(i));
-        let s1 = _mm256_loadu_ps(src.as_ptr().add(i + 8));
-        _mm256_storeu_ps(dst.as_mut_ptr().add(i), _mm256_mul_ps(s0, vscale));
-        _mm256_storeu_ps(dst.as_mut_ptr().add(i + 8), _mm256_mul_ps(s1, vscale));
-        i += 16;
-    }
-    while i + 8 <= n {
-        let sv = _mm256_loadu_ps(src.as_ptr().add(i));
-        _mm256_storeu_ps(dst.as_mut_ptr().add(i), _mm256_mul_ps(sv, vscale));
-        i += 8;
-    }
-    for j in i..n {
-        dst[j] = src[j] * scale;
-    }
-}
-
-#[cfg(all(any(), target_arch = "aarch64"))]
-#[inline(always)]
-#[allow(unsafe_op_in_unsafe_fn)]
-unsafe fn scale_slice_neon(src: &[f32], dst: &mut [f32], scale: f32, n: usize) {
-    use std::arch::aarch64::*;
-
-    // The loads and stores below walk `n` elements; trimming to `n` here is
-    // what puts them in bounds.
-    let src = &src[..n];
-    let dst = &mut dst[..n];
-    let vscale = vdupq_n_f32(scale);
-    let mut i = 0;
-
-    while i + 16 <= n {
-        let s0 = vld1q_f32(src.as_ptr().add(i));
-        let s1 = vld1q_f32(src.as_ptr().add(i + 4));
-        let s2 = vld1q_f32(src.as_ptr().add(i + 8));
-        let s3 = vld1q_f32(src.as_ptr().add(i + 12));
-        vst1q_f32(dst.as_mut_ptr().add(i), vmulq_f32(s0, vscale));
-        vst1q_f32(dst.as_mut_ptr().add(i + 4), vmulq_f32(s1, vscale));
-        vst1q_f32(dst.as_mut_ptr().add(i + 8), vmulq_f32(s2, vscale));
-        vst1q_f32(dst.as_mut_ptr().add(i + 12), vmulq_f32(s3, vscale));
-        i += 16;
-    }
-    while i + 8 <= n {
-        let s0 = vld1q_f32(src.as_ptr().add(i));
-        let s1 = vld1q_f32(src.as_ptr().add(i + 4));
-        vst1q_f32(dst.as_mut_ptr().add(i), vmulq_f32(s0, vscale));
-        vst1q_f32(dst.as_mut_ptr().add(i + 4), vmulq_f32(s1, vscale));
-        i += 8;
-    }
-    while i + 4 <= n {
-        let s0 = vld1q_f32(src.as_ptr().add(i));
-        vst1q_f32(dst.as_mut_ptr().add(i), vmulq_f32(s0, vscale));
-        i += 4;
-    }
-    for j in i..n {
-        dst[j] = src[j] * scale;
     }
 }
 
@@ -2320,8 +1947,6 @@ pub fn denormalise_bands(
 ) {
     let lm = m_val.trailing_zeros() as usize;
     let frame_size = m.short_mdct_size << lm;
-    #[cfg(all(any(), target_arch = "x86_64"))]
-    let use_avx2 = std::arch::is_x86_feature_detected!("avx2");
 
     for c in 0..channels {
         for i in start..end {
@@ -2339,19 +1964,7 @@ pub fn denormalise_bands(
             let g = (2.0f32).powf(band_log.min(32.0));
             let src = &x[base..base + n];
             let dst = &mut freq[base..base + n];
-            #[cfg(all(any(), target_arch = "x86_64"))]
-            if n >= 8 && use_avx2 {
-                unsafe { scale_slice_avx2(src, dst, g, n) };
-                continue;
-            }
-            #[cfg(all(any(), target_arch = "aarch64"))]
-            if n >= 8 {
-                unsafe { scale_slice_neon(src, dst, g, n) };
-                continue;
-            }
-            for (d, &s) in dst.iter_mut().zip(src) {
-                *d = s * g;
-            }
+            fvid_cpu::opus_simd::scale_slice(src, dst, g, n);
         }
     }
 }
@@ -2360,182 +1973,9 @@ pub fn celt_lcg_rand(seed: u32) -> u32 {
     seed.wrapping_mul(1664525).wrapping_add(1013904223)
 }
 
-#[cfg(all(any(), target_arch = "aarch64"))]
-#[inline(always)]
-#[allow(unsafe_op_in_unsafe_fn)]
-unsafe fn renormalise_vector_neon(x: &mut [f32], n: usize, gain: f32) {
-    use std::arch::aarch64::*;
-
-    // The loads and stores below walk `n` elements; trimming to `n` here is
-    // what puts them in bounds.
-    let x = &mut x[..n];
-
-    let mut sum_vec = vdupq_n_f32(0.0);
-    let mut i = 0;
-
-    while i + 16 <= n {
-        let x0 = vld1q_f32(x.as_ptr().add(i));
-        let x1 = vld1q_f32(x.as_ptr().add(i + 4));
-        let x2 = vld1q_f32(x.as_ptr().add(i + 8));
-        let x3 = vld1q_f32(x.as_ptr().add(i + 12));
-        sum_vec = vfmaq_f32(sum_vec, x0, x0);
-        sum_vec = vfmaq_f32(sum_vec, x1, x1);
-        sum_vec = vfmaq_f32(sum_vec, x2, x2);
-        sum_vec = vfmaq_f32(sum_vec, x3, x3);
-        i += 16;
-    }
-
-    while i + 8 <= n {
-        let x0 = vld1q_f32(x.as_ptr().add(i));
-        let x1 = vld1q_f32(x.as_ptr().add(i + 4));
-        sum_vec = vfmaq_f32(sum_vec, x0, x0);
-        sum_vec = vfmaq_f32(sum_vec, x1, x1);
-        i += 8;
-    }
-
-    while i + 4 <= n {
-        let x0 = vld1q_f32(x.as_ptr().add(i));
-        sum_vec = vfmaq_f32(sum_vec, x0, x0);
-        i += 4;
-    }
-
-    let mut e = 1e-15f32 + vaddvq_f32(sum_vec);
-
-    for j in i..n {
-        e += x[j] * x[j];
-    }
-
-    let norm = gain / e.sqrt();
-    let vnorm = vdupq_n_f32(norm);
-
-    i = 0;
-    while i + 16 <= n {
-        let x0 = vld1q_f32(x.as_ptr().add(i));
-        let x1 = vld1q_f32(x.as_ptr().add(i + 4));
-        let x2 = vld1q_f32(x.as_ptr().add(i + 8));
-        let x3 = vld1q_f32(x.as_ptr().add(i + 12));
-        vst1q_f32(x.as_mut_ptr().add(i), vmulq_f32(x0, vnorm));
-        vst1q_f32(x.as_mut_ptr().add(i + 4), vmulq_f32(x1, vnorm));
-        vst1q_f32(x.as_mut_ptr().add(i + 8), vmulq_f32(x2, vnorm));
-        vst1q_f32(x.as_mut_ptr().add(i + 12), vmulq_f32(x3, vnorm));
-        i += 16;
-    }
-
-    while i + 8 <= n {
-        let x0 = vld1q_f32(x.as_ptr().add(i));
-        let x1 = vld1q_f32(x.as_ptr().add(i + 4));
-        vst1q_f32(x.as_mut_ptr().add(i), vmulq_f32(x0, vnorm));
-        vst1q_f32(x.as_mut_ptr().add(i + 4), vmulq_f32(x1, vnorm));
-        i += 8;
-    }
-
-    while i + 4 <= n {
-        let x0 = vld1q_f32(x.as_ptr().add(i));
-        vst1q_f32(x.as_mut_ptr().add(i), vmulq_f32(x0, vnorm));
-        i += 4;
-    }
-
-    for j in i..n {
-        x[j] *= norm;
-    }
-}
-
-#[cfg(all(any(), target_arch = "x86_64"))]
-#[target_feature(enable = "avx2,fma")]
-unsafe fn renormalise_vector_avx2(x: &mut [f32], n: usize, gain: f32) {
-    use std::arch::x86_64::*;
-
-    // The loads and stores below walk `n` elements; trimming to `n` here is
-    // what puts them in bounds.
-    let x = &mut x[..n];
-
-    let mut i = 0usize;
-
-    let mut acc0 = _mm256_setzero_ps();
-    let mut acc1 = _mm256_setzero_ps();
-
-    while i + 16 <= n {
-        let v0 = _mm256_loadu_ps(x.as_ptr().add(i));
-        let v1 = _mm256_loadu_ps(x.as_ptr().add(i + 8));
-        acc0 = _mm256_fmadd_ps(v0, v0, acc0);
-        acc1 = _mm256_fmadd_ps(v1, v1, acc1);
-        i += 16;
-    }
-
-    if i + 8 <= n {
-        let v0 = _mm256_loadu_ps(x.as_ptr().add(i));
-        acc0 = _mm256_fmadd_ps(v0, v0, acc0);
-        i += 8;
-    }
-
-    let acc = _mm256_add_ps(acc0, acc1);
-    let hi = _mm256_extractf128_ps(acc, 1);
-    let lo = _mm256_castps256_ps128(acc);
-    let s4 = _mm_add_ps(lo, hi);
-    let t1 = _mm_movehl_ps(s4, s4);
-    let s2 = _mm_add_ps(s4, t1);
-    let t2 = _mm_shuffle_ps(s2, s2, 0x55);
-    let mut e = 1e-15f32 + _mm_cvtss_f32(_mm_add_ss(s2, t2));
-
-    for &v in &x[i..n] {
-        e += v * v;
-    }
-
-    let norm = gain / e.sqrt();
-    let vnorm = _mm256_set1_ps(norm);
-
-    i = 0;
-    while i + 16 <= n {
-        let v0 = _mm256_loadu_ps(x.as_ptr().add(i));
-        let v1 = _mm256_loadu_ps(x.as_ptr().add(i + 8));
-        _mm256_storeu_ps(x.as_mut_ptr().add(i), _mm256_mul_ps(v0, vnorm));
-        _mm256_storeu_ps(x.as_mut_ptr().add(i + 8), _mm256_mul_ps(v1, vnorm));
-        i += 16;
-    }
-    while i + 8 <= n {
-        let v = _mm256_loadu_ps(x.as_ptr().add(i));
-        _mm256_storeu_ps(x.as_mut_ptr().add(i), _mm256_mul_ps(v, vnorm));
-        i += 8;
-    }
-    for v in &mut x[i..n] {
-        *v *= norm;
-    }
-}
-
+#[inline]
 pub fn renormalise_vector(x: &mut [f32], n: usize, gain: f32) {
-    #[cfg(all(any(), target_arch = "aarch64"))]
-    unsafe {
-        renormalise_vector_neon(x, n, gain);
-    }
-    #[cfg(all(any(), target_arch = "x86_64"))]
-    unsafe {
-        if n >= 16 && have_avx2_fma() {
-            renormalise_vector_avx2(x, n, gain);
-            return;
-        }
-    }
-    #[cfg(all(not(all(any(), target_arch = "aarch64")), not(all(any(), target_arch = "x86_64"))))]
-    {
-        let mut e = 1e-15f32;
-        for &xv in x[..n].iter() {
-            e += xv * xv;
-        }
-        let norm = gain / e.sqrt();
-        for xv in x[..n].iter_mut() {
-            *xv *= norm;
-        }
-    }
-    #[cfg(all(any(), target_arch = "x86_64"))]
-    {
-        let mut e = 1e-15f32;
-        for &xv in x[..n].iter() {
-            e += xv * xv;
-        }
-        let norm = gain / e.sqrt();
-        for xv in x[..n].iter_mut() {
-            *xv *= norm;
-        }
-    }
+    fvid_cpu::opus_simd::renormalise_vector(x, n, gain);
 }
 
 pub fn anti_collapse(

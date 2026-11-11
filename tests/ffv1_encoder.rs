@@ -250,7 +250,7 @@ fn library_ffv1_stream_transposes_filters_and_stops_on_sink_error() {
         Err("sink stopped".into())
     })
     .unwrap_err();
-    assert_eq!(error, "sink stopped");
+    assert_eq!(error.to_string(), "sink stopped");
     input.pop();
     let mut called = false;
     let error = ffv1_encoder::encode_y4m(Cursor::new(input), &transform, |_, _, _, _| {
@@ -258,7 +258,7 @@ fn library_ffv1_stream_transposes_filters_and_stops_on_sink_error() {
         Ok(())
     })
     .unwrap_err();
-    assert!(error.contains("truncated Y4M"));
+    assert!(error.to_string().contains("truncated Y4M"));
     assert!(!called);
 }
 

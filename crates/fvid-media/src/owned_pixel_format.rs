@@ -6,7 +6,6 @@ macro_rules! formats {
         impl PixelFormat {
             pub const ALL: &'static [Self] = &[$(Self::$variant,)*];
             pub fn name(self) -> &'static str { match self { $( Self::$variant => $name, )* } }
-            pub(crate) fn nul_name(self) -> &'static [u8] { match self { $( Self::$variant => concat!($name, "\0").as_bytes(), )* } }
             pub fn frame_bytes(self, width: usize, height: usize) -> Result<usize, String> {
                 match self { $( Self::$variant => crate::owned_frame_layout::planar_bytes(width, height, $chroma, $bytes), )* }
             }

@@ -15,70 +15,26 @@ pub mod edit;
 pub mod mcp;
 pub mod playback;
 #[cfg(feature = "player")]
-#[path = "playback/audio/aac.rs"]
-pub mod playback_aac;
+pub use playback::audio::{
+    aac as playback_aac, ac3 as playback_ac3, aiff as playback_aiff, au as playback_au,
+    avi_audio as playback_avi_audio, flac as playback_flac, mp3 as playback_mp3,
+    mp4_audio as playback_mp4_audio, ogg_audio as playback_ogg_audio,
+    ogg_catalog as playback_ogg_catalog, ogg_opus as playback_ogg_opus, smf as playback_smf,
+    wav as playback_wav, wavpack as playback_wavpack, webm_audio as playback_webm_audio,
+    xm as playback_xm,
+};
+pub use playback::runtime::{spool as playback_spool, thread as playback_thread};
 #[cfg(feature = "player")]
-#[path = "playback/audio/ac3.rs"]
-pub mod playback_ac3;
-#[cfg(feature = "player")]
-#[path = "playback/audio/aiff.rs"]
-pub mod playback_aiff;
-#[cfg(feature = "player")]
-#[path = "playback/audio/au.rs"]
-pub mod playback_au;
-#[cfg(feature = "player")]
-#[path = "playback/audio/avi_audio.rs"]
-pub mod playback_avi_audio;
-#[cfg(feature = "player")]
-#[path = "playback/audio/wavpack.rs"]
-pub mod playback_wavpack;
-#[cfg(feature = "player")]
-#[path = "playback/audio/flac.rs"]
-pub mod playback_flac;
-#[cfg(feature = "player")]
-#[path = "playback/audio/mp3.rs"]
-pub mod playback_mp3;
-#[path = "playback/video/mp4.rs"]
-pub mod playback_mp4;
-#[cfg(feature = "player")]
-#[path = "playback/audio/mp4_audio.rs"]
-pub mod playback_mp4_audio;
-#[cfg(feature = "player")]
-#[path = "playback/subtitles/mp4_subtitles.rs"]
-pub mod playback_mp4_subtitles;
-#[path = "playback/video/native.rs"]
-pub mod playback_native;
-#[cfg(feature = "player")]
-#[path = "playback/audio/ogg_audio.rs"]
-pub mod playback_ogg_audio;
-#[cfg(feature = "player")]
-#[path = "playback/audio/ogg_opus.rs"]
-pub mod playback_ogg_opus;
-#[cfg(feature = "player")]
-#[path = "playback/audio/smf.rs"]
-pub mod playback_smf;
-#[path = "playback/runtime/spool.rs"]
-pub mod playback_spool;
-#[path = "playback/runtime/thread.rs"]
-pub mod playback_thread;
-#[cfg(feature = "player")]
-#[path = "playback/audio/wav.rs"]
-pub mod playback_wav;
-#[path = "playback/video/webm.rs"]
-pub mod playback_webm;
-#[cfg(feature = "player")]
-#[path = "playback/audio/webm_audio.rs"]
-pub mod playback_webm_audio;
-#[cfg(feature = "player")]
-#[path = "playback/subtitles/webm_subtitles.rs"]
-pub mod playback_webm_subtitles;
-#[cfg(feature = "player")]
-#[path = "playback/audio/xm.rs"]
-pub mod playback_xm;
+pub use playback::subtitles::{
+    mp4_subtitles as playback_mp4_subtitles, webm_subtitles as playback_webm_subtitles,
+};
+pub use playback::video::{
+    mp4 as playback_mp4, native as playback_native, webm as playback_webm,
+};
 #[cfg(feature = "player")]
 pub mod player;
 #[cfg(feature = "player")]
-pub mod player_gpu;
+pub use player::gpu as player_gpu;
 pub mod media;
 pub mod native_media;
 pub mod native_capabilities;
@@ -103,7 +59,6 @@ pub use error::{Error, Result};
 pub(crate) use error::{invalid, unsupported};
 mod view;
 pub use view::{FrameView, PlaneView, RowView};
-#[path = "memory.rs"]
 mod memory;
 mod parallel;
 pub(crate) use memory::buffer;
@@ -126,7 +81,6 @@ pub mod virtual_camera;
 
 mod pcm_resample;
 
-#[path = "media_probe.rs"]
 pub mod native_probe;
 
 pub mod native_plan;
@@ -139,10 +93,4 @@ pub mod native_boxblur;
 
 pub mod native_audio_mix;
 
-mod native_audio_decoder;
-
 pub mod native_shuffleplanes;
-
-#[cfg(feature="player")]
-#[path="playback/audio/ogg_catalog.rs"]
-pub mod playback_ogg_catalog;

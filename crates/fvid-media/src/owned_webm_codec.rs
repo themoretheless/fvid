@@ -39,6 +39,7 @@ pub(crate) struct Decoder {
     colour: Option<(bool, u8, u8, u8)>,
 }
 impl Decoder {
+    #[cfg(test)]
     pub fn new(codec: &str, private: &[u8], width: usize, height: usize) -> Result<Option<Self>> {
         Self::new_with_budget(codec, private, width, height, usize::MAX)
     }
@@ -55,7 +56,10 @@ impl Decoder {
                 height,
                 private,
                 budget,
-            )?),
+            ).map_err(|error| match error {
+                Error::Unsupported(value) => format!("{}{value}", crate::owned_ffv1_decoder::UNSUPPORTED_PREFIX),
+                other => other.to_string(),
+            })?),
             "V_MPEG4/ISO/AVC" => {
                 let decoder = match avc_decoder::AvcDecoder::new(private, budget) {
                     Ok(value) => value,
@@ -112,7 +116,10 @@ impl Decoder {
         let mut shown = None;
         match &mut self.kind {
             Kind::Ffv1(decoder) => {
-                let decoded = decoder.decode(packet)?;
+                let decoded = decoder.decode(packet).map_err(|error| match error {
+                    Error::Unsupported(value) => format!("{}{value}", crate::owned_ffv1_decoder::UNSUPPORTED_PREFIX),
+                    other => other.to_string(),
+                })?;
                 self.mono = decoder.monochrome();
                 return Ok(Some(Decoded {
                     alpha: decoded.alpha,

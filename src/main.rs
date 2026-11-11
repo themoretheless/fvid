@@ -1,6 +1,5 @@
 use fvid::{Crop, ExecutionOptions};
-mod media_cli;
-mod owned_loudnorm_cli;
+mod cli;
 #[cfg(all(target_os = "macos", feature = "player"))]
 mod shader_export_cli;
 use std::fs::{self, File, OpenOptions};
@@ -73,7 +72,7 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
         return Err("MCP requires cargo build --release --features mcp".into());
     }
     if args.first().is_some_and(|a| a == "media") {
-        return media_cli::run(&args[1..]);
+        return cli::run(&args[1..]);
     }
     if args.first().is_some_and(|a| a == "play") {
         #[cfg(feature = "player")]

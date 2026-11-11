@@ -131,7 +131,6 @@ fn native_grid_silence_seek_anchor_matches_independent_rational_lattice() {
     }
     assert!(failures.is_empty(), "{failures:?}");
 }
-use fvid::audio::AudioBackend as _;
 struct FlushCapture {
     inner: transitions::Capture,
     anchors: std::sync::Arc<std::sync::Mutex<Vec<Duration>>>,

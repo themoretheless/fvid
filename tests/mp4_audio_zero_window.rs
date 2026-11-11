@@ -261,7 +261,7 @@ fn terminal_payload_validation_and_packet_budget_are_not_skipped() {
 fn raw_zero_timing_and_exact_video_companions_remain_valid() {
     for c in manifest()["cases"].as_array().unwrap() {
         let name = c["file"].as_str().unwrap();
-        let mut r = fvid::container::mp4::Mp4Reader::open_indexed(
+        let r = fvid::container::mp4::Mp4Reader::open_indexed(
             Cursor::new(bytes(name)),
             Default::default(),
         )

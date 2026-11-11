@@ -27,6 +27,7 @@ fn policies(options: &CopyOptions) -> bool {
             .iter()
             .any(|(_, value)| value.contains('\0'))
 }
+#[cfg(test)]
 pub(crate) fn supports(
     source: &Path,
     destination: &Path,

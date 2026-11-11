@@ -1,32 +1,14 @@
 //! Owned AAC-LC raw-data-block decoder. The caller supplies ASC and strips any
 //! ADTS/container framing. Remaining tools are explicit errors, never fallbacks.
-use crate::{Result, invalid, unsupported};
-use super::aac_bands::BandTables;
-use super::aac_coupling::Coupling;
-use crate::native_export::default_pcm_mask;
-use crate::Error;
-use fvid_media::owned_aac::{aac_sbr_history as sbr_history, aac_sbr_dsp as sbr_dsp, bits::BitReader as SbrBitReader};
-// Only syntax metadata crosses the compatibility boundary; decoder state and
-// transform processing remain owned by fvid-media.
-fn ltp_data_for_channel(data: &super::aac_ltp_syntax::LtpData) -> std::borrow::Cow<'_, fvid_media::owned_aac::aac_ltp_syntax::LtpData> {
-    use fvid_media::owned_aac::aac_ltp_syntax as owned;
-    use super::aac_ltp_syntax::Usage;
-    std::borrow::Cow::Owned(owned::LtpData {
-        lag: data.lag,
-        coefficient_index: data.coefficient_index,
-        usage: match &data.usage {
-            Usage::Bands(flags) => owned::Usage::Bands(flags.clone()),
-            Usage::Windows(windows) => owned::Usage::Windows(std::array::from_fn(|i| windows[i].as_ref().map(|data| owned::ShortPrediction { lag_offset: data.lag_offset }))),
-        },
-    })
-}
-include!("../../crates/fvid-media/src/owned_aac/aac_native_impl.rs");
-include!("../../crates/fvid-media/src/owned_aac/aac_ld_native_impl.rs");
-include!("../../crates/fvid-media/src/owned_aac/aac_eld_native_impl.rs");
+pub use fvid_media::owned_aac::aac_native::*;
 
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::codec::{
+        aac_channel::ChannelData, aac_synthesis::LongSineSynthesis, bits::BitReader,
+        config::AacConfig,
+    };
     fn packets() -> Vec<&'static [u8]> {
         let data = include_bytes!("../../tests/fixtures/audio/aac-stereo.aac");
         let mut at = 0;
@@ -113,7 +95,7 @@ mod tests {
     }
     #[test]
     fn packet_tns_filters_spectrum_before_synthesis() {
-        use crate::codec::aac_huffman_tables::*;
+        use fvid_media::owned_aac::aac_huffman_tables::*;
         let fields = [
             (0u32, 3u8),
             (0, 4),
@@ -282,11 +264,9 @@ mod tests {
 }
 
 #[cfg(test)]
-mod he_aac_native_tests { include!("../../crates/fvid-media/src/owned_aac/he_aac_native_tests.rs"); }
-
-#[cfg(test)]
 mod ltp_compat_dispatch_tests {
     use super::*;
+    use crate::codec::config::AudioSpecificConfig;
     #[test]
     fn root_ltp_long_short_transitions_match_scalar_pcm() {
         let root =

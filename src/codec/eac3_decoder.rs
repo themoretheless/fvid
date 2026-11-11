@@ -1548,7 +1548,8 @@ impl Eac3Decoder {
             // that end, so a truncated tail mutes rather than reaching into whatever
             // follows the packet.
             let mut bits = Bits::at(&raw[..usable], frame.audio_bit);
-            let mut samples = Vec::with_capacity(silence);
+            let capturing = self.native_capture.is_some();
+            let mut samples = Vec::with_capacity(if capturing { 0 } else { silence });
             let capture_start=self.native_capture.as_ref().map(Vec::len);
             let sound = protected
                 && self.syncframe(&frame, &mut bits, &mut samples)?;
@@ -1560,7 +1561,7 @@ impl Eac3Decoder {
                     capture.push(transient::NativeBlock::silence(self.channels));
                 }
             }
-            if std::env::var("EAC3_TRACE").is_ok() {
+            if super::ac3_decoder::eac3_trace_enabled() {
                 eprintln!(
                     "frame@{offset} bytes={} bits={} audio_bit={} ends={} overrun={} sound={sound}",
                     frame.frame_bytes,
@@ -1570,13 +1571,15 @@ impl Eac3Decoder {
                     bits.overrun,
                 );
             }
-            if sound {
-                samples.truncate(silence);
-            } else {
-                samples.clear();
-                samples.resize(silence, 0.0);
+            if !capturing {
+                if sound {
+                    samples.truncate(silence);
+                } else {
+                    samples.clear();
+                    samples.resize(silence, 0.0);
+                }
+                out.extend(samples);
             }
-            out.extend(samples);
             offset += frame.frame_bytes;
             decoded += 1;
         }
@@ -1835,7 +1838,7 @@ impl Eac3Decoder {
         }
         say("sideinfo", blk, bits.pos);
         strategy.measure(header);
-        if std::env::var("EAC3_TRACE").is_ok() {
+        if super::ac3_decoder::eac3_trace_enabled() {
             let p = &strategy.params;
             eprintln!(
                 "      expstr={:?} start={:?} end={:?} cpl beg={} end={} sub={} bnd={} incpl={:?} ph={:?}",
@@ -2031,7 +2034,6 @@ impl Eac3Decoder {
             pcm[..header.nfchans].copy_from_slice(&reconstructed[..header.nfchans]);
             if header.lfeon {pcm[LFE]=reconstructed[LFE];}
             let windows=if blk==0 {frame.transient_windows}else{[None;CHANS]};
-            folding.write_pcm(&pcm,&gains,out,!self.assembly_mode);
             capture.push(transient::NativeBlock {pcm,windows,mixing:*folding,gains,clip:!self.assembly_mode});
         } else if self.assembly_mode {
             self.core.spectrum_to_sound_unclipped(header,folding,out);
@@ -2054,14 +2056,23 @@ impl Eac3Decoder {
         if !frame.aht[plane] {self.core.plane_mantissas(bits,plane);return Ok(());}
         let start=self.core.strategy.start[plane];let end=self.core.strategy.end[plane];
         if block==0 {
-            let pointers=self.core.strategy.bap[plane][start..end].to_vec();
+            let span = end - start;
+            let mut pointers_buf = [0u8; 253];
+            pointers_buf[..span].copy_from_slice(&self.core.strategy.bap[plane][start..end]);
+            let pointers = &pointers_buf[..span];
             if plane < FBW || plane == LFE {
                 self.aht_zero_bits[plane].fill(false);
                 for (i,&pointer) in pointers.iter().enumerate() {
                     self.aht_zero_bits[plane][i]=pointer==0;
                 }
             }
-            self.aht_cache[plane]=aht::read_plane(bits,&pointers,||self.core.aht_noise())?;
+            let core = &mut self.core;
+            aht::read_plane_into(
+                bits,
+                pointers,
+                || core.aht_noise(),
+                &mut self.aht_cache[plane],
+            )?;
             for (i,values) in self.aht_cache[plane].iter_mut().enumerate() {
                 let scale=2.0f32.powi(-self.core.strategy.exp[plane][start+i].clamp(0,24));
                 for v in values {*v*=scale;}
@@ -3285,7 +3296,7 @@ mod tests {
 
 
 fn say(name: &str, blk: usize, pos: usize) {
-    if std::env::var("EAC3_TRACE").is_ok() {
+    if super::ac3_decoder::eac3_trace_enabled() {
         eprintln!("  blk {blk} {pos:6} {name}");
     }
 }

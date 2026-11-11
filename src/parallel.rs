@@ -5,10 +5,7 @@
 /// small picture keeps the one thread it came with. Both the YUV-to-RGB pass and
 /// the grade read this: each costs a few nanoseconds a pixel, so the same floor
 /// serves both.
+#[inline]
 pub(crate) fn span_workers(bytes: usize) -> usize {
-    /// Pixels a span has to carry before a worker is worth waking for it: well
-    /// over the tens of microseconds a thread costs to start.
-    const MIN_SPAN_PIXELS: usize = 1 << 14;
-    let parallelism = std::thread::available_parallelism().map_or(1, |n| n.get());
-    parallelism.min(bytes / 3 / MIN_SPAN_PIXELS).max(1)
+    fvid_cpu::span_workers(bytes)
 }

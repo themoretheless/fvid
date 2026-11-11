@@ -107,7 +107,7 @@ fn advance(state: &mut controller::State, p: &aac_ps_history::Parameters, e: &Va
     let result = state.process(p, slots);
     if !e["accepted"].as_bool().unwrap() {
         assert_eq!(
-            result.unwrap_err().0,
+            result.unwrap_err().to_string(),
             "PS matrix controller requires initialized parameters"
         );
         assert_eq!(*state, before);
@@ -257,7 +257,7 @@ fn video(video: &Value, expected: &Value, packets: &[u8]) {
             let mut fresh = controller::State::default();
             let before = fresh.clone();
             assert_eq!(
-                fresh.process(p, 32).unwrap_err().0,
+                fresh.process(p, 32).unwrap_err().to_string(),
                 "PS phase history startup requires new envelopes"
             );
             assert_eq!(fresh, before);
@@ -324,7 +324,7 @@ fn malformed_controls_late_signal_failure_and_slot_epoch_are_transactional() {
     state.process(&p, 24).unwrap();
     let before = state.clone();
     assert_eq!(
-        state.process(&p, 32).unwrap_err().0,
+        state.process(&p, 32).unwrap_err().to_string(),
         "PS matrix controller slot count changed without reset"
     );
     assert_eq!(state, before);

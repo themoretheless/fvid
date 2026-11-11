@@ -1,11 +1,7 @@
 //! Decoder configuration records and length-delimited NAL units.
 //! These parsers extract codec initialization data; they do not decode samples.
-use super::bits::BitReader;
-use super::hevc_nal;
-use crate::{Result, invalid};
-
-include!("../../crates/fvid-media/src/owned_codec_config_impl.rs");
-include!("../../crates/fvid-media/src/owned_aac/config_impl.rs");
+pub use fvid_codecs::codec::config::*;
+pub use fvid_media::owned_aac::config::{AacConfig, AudioSpecificConfig};
 
 #[cfg(test)]
 mod tests {

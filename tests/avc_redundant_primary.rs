@@ -3,7 +3,9 @@ use fvid::codec::{
     avc_decoder::AvcDecoder,
     config::AvcConfig,
 };
-use std::{io::Cursor, path::PathBuf};
+#[cfg(feature = "player")]
+use std::io::Cursor;
+use std::path::PathBuf;
 fn root() -> PathBuf {
     PathBuf::from(env!("CARGO_MANIFEST_DIR"))
         .join("tests/fixtures/playback-errors/avc-redundant-primary")

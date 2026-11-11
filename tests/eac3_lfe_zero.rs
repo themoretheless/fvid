@@ -3,7 +3,7 @@
 mod decode_support;
 use decode_support::DecodeComplete;
 use fvid::{
-    audio::{AudioDecode, AudioStep, AudioStream},
+    audio::{AudioStep, AudioStream},
     codec::eac3_decoder::{Eac3Decoder, frame},
 };
 use std::{io::Cursor, path::Path, time::Duration};

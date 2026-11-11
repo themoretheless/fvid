@@ -4,6 +4,7 @@ use fvid_control::CopyOptions;
 use fvid_media_info::{DecodeStats, DecodeTransform};
 use std::{fs::File, io::BufReader, path::Path};
 type Result<T> = std::result::Result<T, String>;
+#[cfg(test)]
 fn input(source: &Path) -> Result<crate::owned_webm::WebmReader<BufReader<File>>> {
     input_limited(source, usize::MAX, None)
 }
@@ -46,6 +47,7 @@ fn input_limited(
     input.restrict_packet_bytes(max_packet_bytes);
     Ok(input)
 }
+#[cfg(test)]
 pub(crate) fn supports(source: &Path, transform: &DecodeTransform) -> bool {
     supports_with_options(source, transform, None)
 }
@@ -557,12 +559,13 @@ pub(crate) fn export_processed(
                 Some(&mut visitor),
                 Some(options),
             )
-            .map_err(mkv::Error)?;
+            .map_err(mkv::Error::from)?;
             drop(visitor);
-            let (stats, consumed) = result
-                .ok_or_else(|| mkv::Error("unsupported owned FFV1 export capability".into()))?;
+            let (stats, consumed) = result.ok_or_else(|| {
+                mkv::Error::from("unsupported owned FFV1 export capability")
+            })?;
             let event = writer
-                .ok_or_else(|| mkv::Error("Matroska has no selected frames".into()))?
+                .ok_or_else(|| mkv::Error::from("Matroska has no selected frames"))?
                 .finish()?;
             Ok((stats, event, consumed))
         },

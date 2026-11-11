@@ -187,6 +187,8 @@ struct Window {
     base: u64,
     /// Upper bound of cached bytes; there may be gaps between blocks.
     end: u64,
+    /// Total cached bytes across all blocks in `blocks` (maintained incrementally).
+    used_bytes: u64,
     /// Where the reader stands, so the copier runs ahead of playback rather
     /// than ahead of nothing.
     read_at: u64,
@@ -231,8 +233,7 @@ impl Shared {
     /// of date by the time it lands, and a preroll would wait on a lead that
     /// has already been bitten.
     fn mirror(&self, window: &Window) {
-        let held = window.blocks.values().map(|(_, bytes)| bytes).sum();
-        self.held.store(held, Ordering::Release);
+        self.held.store(window.used_bytes, Ordering::Release);
         let position = window.play_at.unwrap_or(window.read_at);
         let mut end = position;
         loop {
@@ -450,7 +451,7 @@ pub struct SpoolHandle {
 }
 
 impl SpoolHandle {
-    #[cfg(test)]
+    #[cfg(all(test, feature = "player"))]
     pub(crate) fn pending_lead_for_test(&self)->Self {
         Self{slack:Arc::new(AtomicU64::new(0)),finished:Arc::new(AtomicBool::new(false)),..self.clone()}
     }
@@ -613,6 +614,7 @@ impl Spool {
             window: Mutex::new(Window {
                 base: 0,
                 end: 0,
+                used_bytes: 0,
                 read_at: 0,
                 play_at: None,
                 requested: None,
@@ -733,11 +735,11 @@ fn copy(source: Arc<File>, spool: &mut Backing, size: u64, lead: u64, shared: &A
         let mut window = shared.window.lock().unwrap_or_else(|p| p.into_inner());
         // Allocate a free slot; when full, evict played blocks before any data
         // ahead. Among future blocks keep the closest ones to playback.
-        let slot = if window.blocks.len() < (lead.div_ceil(CHUNK) + 1) as usize {
+        let (slot, evicted_bytes) = if window.blocks.len() < (lead.div_ceil(CHUNK) + 1) as usize {
             // Slots are allocated consecutively until full; eviction reuses
             // its victim's slot without creating holes. Scanning every used
             // slot here made each insertion quadratic while holding the lock.
-            window.blocks.len() as u64
+            (window.blocks.len() as u64, None)
         } else {
             let victim = window
                 .blocks
@@ -747,8 +749,11 @@ fn copy(source: Arc<File>, spool: &mut Backing, size: u64, lead: u64, shared: &A
                     offset.saturating_add(CHUNK) <= window.play_at.unwrap_or(window.read_at)
                 })
                 .unwrap_or_else(|| *window.blocks.keys().next_back().unwrap());
-            window.blocks.remove(&victim).unwrap().0
+            let (slot, old_bytes) = window.blocks.remove(&victim).unwrap();
+            window.used_bytes -= old_bytes;
+            (slot, Some((victim, old_bytes)))
         };
+        let _ = evicted_bytes;
         debug_assert!(slot < shared.slots);
         if spool
             .seek(SeekFrom::Start(slot * CHUNK))
@@ -757,7 +762,10 @@ fn copy(source: Arc<File>, spool: &mut Backing, size: u64, lead: u64, shared: &A
         {
             break;
         }
-        window.blocks.insert(at, (slot, bytes));
+        if let Some((_, old_bytes)) = window.blocks.insert(at, (slot, bytes)) {
+            window.used_bytes -= old_bytes;
+        }
+        window.used_bytes += bytes;
         window.base = *window.blocks.keys().next().unwrap();
         window.end = window
             .blocks

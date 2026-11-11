@@ -1,5 +1,5 @@
 use fvid::media::{self, CopyOptions, SubtitleConvertOptions};
-use std::path::{Path, PathBuf};
+use std::path::PathBuf;
 use std::sync::atomic::{AtomicU64, Ordering};
 
 struct TempDir(PathBuf);

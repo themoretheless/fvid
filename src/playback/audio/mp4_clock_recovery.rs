@@ -1,9 +1,7 @@
 //! Exact native sample coordinates beneath quantized MP4 packet points.
 use super::{Result, invalid, edit_clock::Time as Mp4ExportTime};
 use crate::{container::mp4::{Mp4Reader as Mp4TimelineReader, Track},native_media::DecodeProgress};
-fn mp4_coded_packet_frames(codec:&[u8;4], configuration:&[u8], rate:u32, channels:u16, bits:u16, bytes:usize, payload:Option<&[u8]>)->std::result::Result<u64,String> {
-    mp4_coded_packet_frames_for_programme(0,codec,configuration,rate,channels,bits,bytes,payload)
-}
+use fvid_media::owned_mp4_clock_runs::{Mp4PacketClockRun, mp4_packet_clock_runs, mp4_packet_clock_runs_with};
 pub(super) fn mp4_coded_packet_frames_for_programme(programme:u8,codec:&[u8;4], configuration:&[u8], rate:u32, channels:u16, bits:u16, bytes:usize, payload:Option<&[u8]>)->std::result::Result<u64,String> {
     if codec==b"ec-3" {
         let mut encoded=payload.ok_or("E-AC-3 coded count requires packet headers")?;
@@ -34,7 +32,6 @@ pub(super) fn mp4_coded_packet_frames_for_programme(programme:u8,codec:&[u8;4], 
     if frames==0 {return Err("empty MP4 AC-3 clock packet".into());}
     Ok(frames)
 }
-include!("../../../crates/fvid-media/src/owned_mp4_audio_clock_runs_impl.rs");
 // Compact PCM indexes already identify the selected description per chunk.
 // Consult a readable sample at each run start so virtual coordinate failures
 // keep the same semantics as the reference sample walk. Dense/general indexes
@@ -85,8 +82,8 @@ impl PlaybackClock {
         if !coarse {return Ok(None);}
         let control=DecodeProgress::new(None,None)?;
         let override_rates=rates.iter().zip(&reader.tracks()[index].sample_descriptions).any(|(rate,d)|*rate!=d.sample_rate);
-        let runs=if programme==0 && !override_rates {mp4_packet_clock_runs(reader,index,&control)?}else{
-            mp4_packet_clock_runs_with(reader,index,&control,Some(&rates),|a,b,c,d,e,f,g|mp4_coded_packet_frames_for_programme(programme,a,b,c,d,e,f,g))?
+        let runs=if programme==0 && !override_rates {mp4_packet_clock_runs(reader,index,control.packet_limit(),||control.check())?}else{
+            mp4_packet_clock_runs_with(reader,index,control.packet_limit(),||control.check(),Some(&rates),|a,b,c,d,e,f,g|mp4_coded_packet_frames_for_programme(programme,a,b,c,d,e,f,g))?
         };
         // A Dolby packet can span an integral number of container ticks while
         // the user's seek target falls between them. Keep its compatible native

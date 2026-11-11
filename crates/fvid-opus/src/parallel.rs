@@ -198,9 +198,7 @@ impl ParallelConfig {
     pub fn plan(&self, total_frames: usize, frame_size: usize) -> ParallelPlan {
         let warmup = self.warmup_frames(frame_size);
         let requested = if self.threads == 0 {
-            std::thread::available_parallelism()
-                .map(|n| n.get())
-                .unwrap_or(1)
+            fvid_cpu::parallelism()
         } else {
             self.threads
         };
@@ -286,7 +284,7 @@ pub fn encode_parallel(
     let warmup = plan.warmup_frames;
 
     let mut chunks: Vec<Result<Vec<Vec<u8>>>> = Vec::with_capacity(plan.workers);
-    std::thread::scope(|scope| {
+    fvid_cpu::scope(|scope| {
         let handles: Vec<_> = plan
             .ranges
             .iter()

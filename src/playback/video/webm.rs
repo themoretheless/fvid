@@ -460,7 +460,7 @@ impl<R: Read + Seek> WebmVideoReader<R> {
         let path = path.to_owned();
         let duration = self.duration();
         let workers = if duration.is_some_and(|d| d > Duration::from_secs(10)) {
-            std::thread::available_parallelism().map_or(1, |n| n.get().saturating_sub(2).clamp(1, 4))
+            fvid_cpu::parallelism().saturating_sub(2).clamp(1, 4)
         } else { 1 };
         std::thread::spawn(move || {
             std::thread::scope(|scope| {

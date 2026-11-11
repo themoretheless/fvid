@@ -23,8 +23,7 @@ impl Negate {
     }
 }
 
-use fvid_media::owned_expression as gradient_expression;
-include!("../crates/fvid-media/src/owned_gradient_impl.rs");
+pub use fvid_media::owned_gradient::{Gradient, GradientKind};
 
 /// Native filter order matches the public media request, independent of CLI
 /// flag order: equalization, unsharp, hue, Gaussian blur, average blur, box blur, inversion, Sobel, Prewitt, Roberts, Kirsch, Scharr, monochrome, pixelize, dilation, erosion, colorize, chroma shift, plane shuffle.
@@ -186,7 +185,7 @@ impl PixelFilters {
     /// Match the fixed option order used by media transform requests.
     /// Explicit callers can otherwise keep their vector pipeline order.
     pub fn canonicalize_option_order(&mut self) {
-        self.gradients.sort_by_key(|filter|filter.kind);
+        self.gradients.sort_by_key(|filter|filter.kind());
         self.morphology.sort_by_key(|filter|filter.kind());
     }
 

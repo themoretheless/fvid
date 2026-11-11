@@ -110,6 +110,29 @@ impl Layout {
         }
     }
 }
+fn pack_u32x32(params: [u32; 32]) -> [u8; 128] {
+    let mut bytes = [0u8; 128];
+    for (dst, &val) in bytes.chunks_exact_mut(4).zip(&params) {
+        dst.copy_from_slice(&val.to_le_bytes());
+    }
+    bytes
+}
+
+#[cfg(target_os = "macos")]
+struct VtImportCache {
+    bind_layout: wgpu::BindGroupLayout,
+    pipeline: wgpu::ComputePipeline,
+    uniform: wgpu::Buffer,
+}
+
+#[cfg(target_os = "macos")]
+struct VtExportCache {
+    uniform: wgpu::Buffer,
+    bindings: wgpu::BindGroup,
+    y_pipeline: wgpu::RenderPipeline,
+    uv_pipeline: wgpu::RenderPipeline,
+}
+
 pub(crate) struct GpuProcessor {
     device: wgpu::Device,
     queue: wgpu::Queue,
@@ -125,6 +148,10 @@ pub(crate) struct GpuProcessor {
     poisoned: bool,
     map_sender: mpsc::SyncSender<std::result::Result<(), wgpu::BufferAsyncError>>,
     map_receiver: mpsc::Receiver<std::result::Result<(), wgpu::BufferAsyncError>>,
+    #[cfg(target_os = "macos")]
+    vt_import: Option<VtImportCache>,
+    #[cfg(target_os = "macos")]
+    vt_export: Option<VtExportCache>,
 }
 
 enum ExecutionMode {
@@ -333,6 +360,10 @@ impl GpuProcessor {
             controlled_memory,
             transfers: TransferStats::default(),
             poisoned: false,
+            #[cfg(target_os = "macos")]
+            vt_import: None,
+            #[cfg(target_os = "macos")]
+            vt_export: None,
         })
     }
 
@@ -487,7 +518,7 @@ impl GpuProcessor {
             let mut params = plan.gpu_params()?;
             params[28] = layouts[index].width;
             params[29] = layouts[index + 1].width;
-            let bytes: Vec<u8> = params.into_iter().flat_map(u32::to_le_bytes).collect();
+            let bytes = pack_u32x32(params);
             let uniform = device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
                 label: Some("resident stage plan"),
                 contents: &bytes,
@@ -615,7 +646,7 @@ impl GpuProcessor {
             let mut params = plan.gpu_params()?;
             params[28] = layouts[index].width;
             params[29] = layouts[index + 1].width;
-            let bytes: Vec<u8> = params.into_iter().flat_map(u32::to_le_bytes).collect();
+            let bytes = pack_u32x32(params);
             let uniform = device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
                 label: Some("compute stage plan"),
                 contents: &bytes,
@@ -705,9 +736,198 @@ impl GpuProcessor {
         if input.len() != self.input_len || output.len() != self.output_len {
             return Err(gpu_error("GPU frame length does not match plan"));
         }
-        self.upload_frame(input)?;
-        self.dispatch_resident()?;
-        self.download_frame(output)
+        #[cfg(target_os = "macos")]
+        if matches!(self.execution, ExecutionMode::UmaCompute { .. }) {
+            self.upload_frame(input)?;
+            self.dispatch_resident()?;
+            return self.download_frame(output);
+        }
+        let result = self.apply_staged_inner(input, output);
+        if result.is_err() {
+            self.poisoned = true;
+        }
+        result
+    }
+    fn apply_staged_inner(&mut self, input: &[u8], output: &mut [u8]) -> Result<()> {
+        self.check_error()?;
+        let (submission, pass_count) = match &mut self.execution {
+            #[cfg(target_os = "macos")]
+            ExecutionMode::UmaCompute { .. } => unreachable!("handled by UMA path"),
+            ExecutionMode::StagedCompute {
+                buffers,
+                stages,
+                upload,
+                readback,
+            } => {
+                let tx = self.map_sender.clone();
+                upload.slice(..).map_async(wgpu::MapMode::Write, move |r| {
+                    let _ = tx.send(r);
+                });
+                self.device
+                    .poll(wgpu::PollType::Wait {
+                        submission_index: None,
+                        timeout: Some(Duration::from_secs(30)),
+                    })
+                    .map_err(gpu_error)?;
+                self.map_receiver
+                    .recv_timeout(Duration::from_secs(30))
+                    .map_err(gpu_error)?
+                    .map_err(gpu_error)?;
+                {
+                    let mut mapped = upload
+                        .slice(..)
+                        .get_mapped_range_mut()
+                        .map_err(gpu_error)?;
+                    mapped.slice(..input.len()).copy_from_slice(input);
+                    mapped.slice(input.len()..).fill(0);
+                }
+                upload.unmap();
+                let mut encoder =
+                    self.device
+                        .create_command_encoder(&wgpu::CommandEncoderDescriptor {
+                            label: Some("fvid staged compute apply"),
+                        });
+                encoder.copy_buffer_to_buffer(
+                    upload,
+                    0,
+                    &buffers[0],
+                    0,
+                    self.input_layout.bytes as u64,
+                );
+                for stage in stages.iter() {
+                    let mut pass = encoder.begin_compute_pass(&wgpu::ComputePassDescriptor {
+                        label: Some("fvid staged compute transform"),
+                        timestamp_writes: None,
+                    });
+                    pass.set_pipeline(&stage.pipeline);
+                    pass.set_bind_group(0, &stage.bindings, &[]);
+                    pass.dispatch_workgroups(stage.groups_x, stage.groups_y, 1);
+                }
+                encoder.copy_buffer_to_buffer(
+                    buffers.last().expect("resident compute output"),
+                    0,
+                    readback,
+                    0,
+                    self.output_layout.bytes as u64,
+                );
+                let sub = self.queue.submit([encoder.finish()]);
+                let tx = self.map_sender.clone();
+                readback.slice(..).map_async(wgpu::MapMode::Read, move |r| {
+                    let _ = tx.send(r);
+                });
+                (sub, stages.len())
+            }
+            ExecutionMode::Render {
+                frames,
+                stages,
+                upload,
+                readback,
+            } => {
+                let tx = self.map_sender.clone();
+                upload.slice(..).map_async(wgpu::MapMode::Write, move |r| {
+                    let _ = tx.send(r);
+                });
+                self.device
+                    .poll(wgpu::PollType::Wait {
+                        submission_index: None,
+                        timeout: Some(Duration::from_secs(30)),
+                    })
+                    .map_err(gpu_error)?;
+                self.map_receiver
+                    .recv_timeout(Duration::from_secs(30))
+                    .map_err(gpu_error)?
+                    .map_err(gpu_error)?;
+                {
+                    let mut mapped = upload
+                        .slice(..)
+                        .get_mapped_range_mut()
+                        .map_err(gpu_error)?;
+                    mapped.slice(..input.len()).copy_from_slice(input);
+                    mapped.slice(input.len()..).fill(0);
+                }
+                upload.unmap();
+                let mut encoder =
+                    self.device
+                        .create_command_encoder(&wgpu::CommandEncoderDescriptor {
+                            label: Some("fvid render apply"),
+                        });
+                encoder.copy_buffer_to_texture(
+                    wgpu::TexelCopyBufferInfo {
+                        buffer: upload,
+                        layout: self.input_layout.copy_layout(),
+                    },
+                    frames[0].as_image_copy(),
+                    self.input_layout.extent(),
+                );
+                for stage in stages.iter() {
+                    let mut pass = encoder.begin_render_pass(&wgpu::RenderPassDescriptor {
+                        label: Some("fvid transform"),
+                        color_attachments: &[Some(wgpu::RenderPassColorAttachment {
+                            view: &stage.output_view,
+                            depth_slice: None,
+                            resolve_target: None,
+                            ops: wgpu::Operations {
+                                load: wgpu::LoadOp::Clear(wgpu::Color::TRANSPARENT),
+                                store: wgpu::StoreOp::Store,
+                            },
+                        })],
+                        depth_stencil_attachment: None,
+                        timestamp_writes: None,
+                        occlusion_query_set: None,
+                        multiview_mask: None,
+                    });
+                    pass.set_pipeline(&stage.pipeline);
+                    pass.set_bind_group(0, &stage.bindings, &[]);
+                    pass.draw(0..3, 0..1);
+                }
+                encoder.copy_texture_to_buffer(
+                    frames.last().expect("resident output").as_image_copy(),
+                    wgpu::TexelCopyBufferInfo {
+                        buffer: readback,
+                        layout: self.output_layout.copy_layout(),
+                    },
+                    self.output_layout.extent(),
+                );
+                let sub = self.queue.submit([encoder.finish()]);
+                let tx = self.map_sender.clone();
+                readback.slice(..).map_async(wgpu::MapMode::Read, move |r| {
+                    let _ = tx.send(r);
+                });
+                (sub, stages.len())
+            }
+        };
+        self.device
+            .poll(wgpu::PollType::Wait {
+                submission_index: Some(submission),
+                timeout: Some(Duration::from_secs(30)),
+            })
+            .map_err(gpu_error)?;
+        self.map_receiver
+            .recv_timeout(Duration::from_secs(30))
+            .map_err(gpu_error)?
+            .map_err(gpu_error)?;
+        match &self.execution {
+            #[cfg(target_os = "macos")]
+            ExecutionMode::UmaCompute { .. } => unreachable!(),
+            ExecutionMode::StagedCompute { readback, .. }
+            | ExecutionMode::Render { readback, .. } => {
+                let mapped = readback
+                    .slice(..)
+                    .get_mapped_range()
+                    .map_err(gpu_error)?;
+                output.copy_from_slice(&mapped[..output.len()]);
+                drop(mapped);
+                readback.unmap();
+            }
+        }
+        self.transfers.uploads += 1;
+        self.transfers.upload_bytes += input.len() as u64;
+        self.transfers.upload_staging_bytes += self.input_layout.bytes as u64;
+        self.transfers.filter_passes += pass_count as u64;
+        self.transfers.downloads += 1;
+        self.transfers.download_bytes += output.len() as u64;
+        self.transfers.download_staging_bytes += self.output_layout.bytes as u64;
+        self.check_error()
     }
     pub(crate) fn upload_frame(&mut self, input: &[u8]) -> Result<()> {
         if input.len() != self.input_len {
@@ -1080,80 +1300,88 @@ impl GpuProcessor {
             total_len as u32,
             tri_planar,
         ];
-        let param_bytes: Vec<u8> = params.into_iter().flat_map(u32::to_le_bytes).collect();
-        let uniform = self
-            .device
-            .create_buffer_init(&wgpu::util::BufferInitDescriptor {
+        let param_bytes: [u8; 32] = std::array::from_fn(|i| params[i / 4].to_le_bytes()[i % 4]);
+        let import_cache = self.vt_import.get_or_insert_with(|| {
+            let tex_entry = |binding| wgpu::BindGroupLayoutEntry {
+                binding,
+                visibility: wgpu::ShaderStages::COMPUTE,
+                ty: wgpu::BindingType::Texture {
+                    sample_type: wgpu::TextureSampleType::Float { filterable: false },
+                    view_dimension: wgpu::TextureViewDimension::D2,
+                    multisampled: false,
+                },
+                count: None,
+            };
+            let bind_layout =
+                self.device
+                    .create_bind_group_layout(&wgpu::BindGroupLayoutDescriptor {
+                        label: Some("fvid surface import bindings"),
+                        entries: &[
+                            tex_entry(0),
+                            tex_entry(1),
+                            tex_entry(2),
+                            wgpu::BindGroupLayoutEntry {
+                                binding: 3,
+                                visibility: wgpu::ShaderStages::COMPUTE,
+                                ty: wgpu::BindingType::Buffer {
+                                    ty: wgpu::BufferBindingType::Storage { read_only: false },
+                                    has_dynamic_offset: false,
+                                    min_binding_size: wgpu::BufferSize::new(4),
+                                },
+                                count: None,
+                            },
+                            wgpu::BindGroupLayoutEntry {
+                                binding: 4,
+                                visibility: wgpu::ShaderStages::COMPUTE,
+                                ty: wgpu::BindingType::Buffer {
+                                    ty: wgpu::BufferBindingType::Uniform,
+                                    has_dynamic_offset: false,
+                                    min_binding_size: wgpu::BufferSize::new(32),
+                                },
+                                count: None,
+                            },
+                        ],
+                    });
+            let pipeline_layout =
+                self.device
+                    .create_pipeline_layout(&wgpu::PipelineLayoutDescriptor {
+                        label: Some("fvid surface import pipeline"),
+                        bind_group_layouts: &[Some(&bind_layout)],
+                        immediate_size: 0,
+                    });
+            let shader = self
+                .device
+                .create_shader_module(wgpu::ShaderModuleDescriptor {
+                    label: Some("fvid surface import shader"),
+                    source: wgpu::ShaderSource::Wgsl(SURFACE_IMPORT_WGSL.into()),
+                });
+            let pipeline = self
+                .device
+                .create_compute_pipeline(&wgpu::ComputePipelineDescriptor {
+                    label: Some("fvid surface import compute"),
+                    layout: Some(&pipeline_layout),
+                    module: &shader,
+                    entry_point: Some("import_surface_main"),
+                    compilation_options: Default::default(),
+                    cache: None,
+                });
+            let uniform = self.device.create_buffer(&wgpu::BufferDescriptor {
                 label: Some("fvid surface import params"),
-                contents: &param_bytes,
-                usage: wgpu::BufferUsages::UNIFORM,
+                size: 32,
+                usage: wgpu::BufferUsages::UNIFORM | wgpu::BufferUsages::COPY_DST,
+                mapped_at_creation: false,
             });
-        let tex_entry = |binding| wgpu::BindGroupLayoutEntry {
-            binding,
-            visibility: wgpu::ShaderStages::COMPUTE,
-            ty: wgpu::BindingType::Texture {
-                sample_type: wgpu::TextureSampleType::Float { filterable: false },
-                view_dimension: wgpu::TextureViewDimension::D2,
-                multisampled: false,
-            },
-            count: None,
-        };
-        let bind_layout =
-            self.device
-                .create_bind_group_layout(&wgpu::BindGroupLayoutDescriptor {
-                    label: Some("fvid surface import bindings"),
-                    entries: &[
-                        tex_entry(0),
-                        tex_entry(1),
-                        tex_entry(2),
-                        wgpu::BindGroupLayoutEntry {
-                            binding: 3,
-                            visibility: wgpu::ShaderStages::COMPUTE,
-                            ty: wgpu::BindingType::Buffer {
-                                ty: wgpu::BufferBindingType::Storage { read_only: false },
-                                has_dynamic_offset: false,
-                                min_binding_size: wgpu::BufferSize::new(4),
-                            },
-                            count: None,
-                        },
-                        wgpu::BindGroupLayoutEntry {
-                            binding: 4,
-                            visibility: wgpu::ShaderStages::COMPUTE,
-                            ty: wgpu::BindingType::Buffer {
-                                ty: wgpu::BufferBindingType::Uniform,
-                                has_dynamic_offset: false,
-                                min_binding_size: wgpu::BufferSize::new(32),
-                            },
-                            count: None,
-                        },
-                    ],
-                });
-        let pipeline_layout =
-            self.device
-                .create_pipeline_layout(&wgpu::PipelineLayoutDescriptor {
-                    label: Some("fvid surface import pipeline"),
-                    bind_group_layouts: &[Some(&bind_layout)],
-                    immediate_size: 0,
-                });
-        let shader = self
-            .device
-            .create_shader_module(wgpu::ShaderModuleDescriptor {
-                label: Some("fvid surface import shader"),
-                source: wgpu::ShaderSource::Wgsl(SURFACE_IMPORT_WGSL.into()),
-            });
-        let pipeline = self
-            .device
-            .create_compute_pipeline(&wgpu::ComputePipelineDescriptor {
-                label: Some("fvid surface import compute"),
-                layout: Some(&pipeline_layout),
-                module: &shader,
-                entry_point: Some("import_surface_main"),
-                compilation_options: Default::default(),
-                cache: None,
-            });
+            VtImportCache {
+                bind_layout,
+                pipeline,
+                uniform,
+            }
+        });
+        self.queue
+            .write_buffer(&import_cache.uniform, 0, &param_bytes);
         let bindings = self.device.create_bind_group(&wgpu::BindGroupDescriptor {
             label: Some("fvid surface import bind group"),
-            layout: &bind_layout,
+            layout: &import_cache.bind_layout,
             entries: &[
                 wgpu::BindGroupEntry {
                     binding: 0,
@@ -1173,7 +1401,7 @@ impl GpuProcessor {
                 },
                 wgpu::BindGroupEntry {
                     binding: 4,
-                    resource: uniform.as_entire_binding(),
+                    resource: import_cache.uniform.as_entire_binding(),
                 },
             ],
         });
@@ -1196,7 +1424,7 @@ impl GpuProcessor {
                 label: Some("fvid surface import pass"),
                 timestamp_writes: None,
             });
-            pass.set_pipeline(&pipeline);
+            pass.set_pipeline(&import_cache.pipeline);
             pass.set_bind_group(0, &bindings, &[]);
             pass.dispatch_workgroups(groups_x, groups_y, 1);
         }
@@ -1267,98 +1495,107 @@ impl GpuProcessor {
             total_len as u32,
             0,
         ];
-        let param_bytes: Vec<u8> = params.into_iter().flat_map(u32::to_le_bytes).collect();
-        let uniform = self
-            .device
-            .create_buffer_init(&wgpu::util::BufferInitDescriptor {
+        let param_bytes: [u8; 32] = std::array::from_fn(|i| params[i / 4].to_le_bytes()[i % 4]);
+        let export_cache = self.vt_export.get_or_insert_with(|| {
+            let bind_layout =
+                self.device
+                    .create_bind_group_layout(&wgpu::BindGroupLayoutDescriptor {
+                        label: Some("fvid surface export bindings"),
+                        entries: &[
+                            wgpu::BindGroupLayoutEntry {
+                                binding: 0,
+                                visibility: wgpu::ShaderStages::FRAGMENT,
+                                ty: wgpu::BindingType::Buffer {
+                                    ty: wgpu::BufferBindingType::Storage { read_only: true },
+                                    has_dynamic_offset: false,
+                                    min_binding_size: wgpu::BufferSize::new(4),
+                                },
+                                count: None,
+                            },
+                            wgpu::BindGroupLayoutEntry {
+                                binding: 1,
+                                visibility: wgpu::ShaderStages::FRAGMENT,
+                                ty: wgpu::BindingType::Buffer {
+                                    ty: wgpu::BufferBindingType::Uniform,
+                                    has_dynamic_offset: false,
+                                    min_binding_size: wgpu::BufferSize::new(32),
+                                },
+                                count: None,
+                            },
+                        ],
+                    });
+            let pipeline_layout =
+                self.device
+                    .create_pipeline_layout(&wgpu::PipelineLayoutDescriptor {
+                        label: Some("fvid surface export pipeline"),
+                        bind_group_layouts: &[Some(&bind_layout)],
+                        immediate_size: 0,
+                    });
+            let shader = self
+                .device
+                .create_shader_module(wgpu::ShaderModuleDescriptor {
+                    label: Some("fvid surface export shader"),
+                    source: wgpu::ShaderSource::Wgsl(SURFACE_EXPORT_WGSL.into()),
+                });
+            let make_pipeline = |entry_point: &str, format: wgpu::TextureFormat| {
+                self.device
+                    .create_render_pipeline(&wgpu::RenderPipelineDescriptor {
+                        label: Some("fvid surface export render"),
+                        layout: Some(&pipeline_layout),
+                        vertex: wgpu::VertexState {
+                            module: &shader,
+                            entry_point: Some("export_vs"),
+                            compilation_options: Default::default(),
+                            buffers: &[],
+                        },
+                        primitive: Default::default(),
+                        depth_stencil: None,
+                        multisample: Default::default(),
+                        fragment: Some(wgpu::FragmentState {
+                            module: &shader,
+                            entry_point: Some(entry_point),
+                            compilation_options: Default::default(),
+                            targets: &[Some(wgpu::ColorTargetState {
+                                format,
+                                blend: None,
+                                write_mask: wgpu::ColorWrites::ALL,
+                            })],
+                        }),
+                        multiview_mask: None,
+                        cache: None,
+                    })
+            };
+            let y_pipeline = make_pipeline("export_y", wgpu::TextureFormat::R8Unorm);
+            let uv_pipeline = make_pipeline("export_uv", wgpu::TextureFormat::Rg8Unorm);
+            let uniform = self.device.create_buffer(&wgpu::BufferDescriptor {
                 label: Some("fvid surface export params"),
-                contents: &param_bytes,
-                usage: wgpu::BufferUsages::UNIFORM,
+                size: 32,
+                usage: wgpu::BufferUsages::UNIFORM | wgpu::BufferUsages::COPY_DST,
+                mapped_at_creation: false,
             });
-        let bind_layout =
-            self.device
-                .create_bind_group_layout(&wgpu::BindGroupLayoutDescriptor {
-                    label: Some("fvid surface export bindings"),
-                    entries: &[
-                        wgpu::BindGroupLayoutEntry {
-                            binding: 0,
-                            visibility: wgpu::ShaderStages::FRAGMENT,
-                            ty: wgpu::BindingType::Buffer {
-                                ty: wgpu::BufferBindingType::Storage { read_only: true },
-                                has_dynamic_offset: false,
-                                min_binding_size: wgpu::BufferSize::new(4),
-                            },
-                            count: None,
-                        },
-                        wgpu::BindGroupLayoutEntry {
-                            binding: 1,
-                            visibility: wgpu::ShaderStages::FRAGMENT,
-                            ty: wgpu::BindingType::Buffer {
-                                ty: wgpu::BufferBindingType::Uniform,
-                                has_dynamic_offset: false,
-                                min_binding_size: wgpu::BufferSize::new(32),
-                            },
-                            count: None,
-                        },
-                    ],
-                });
-        let pipeline_layout =
-            self.device
-                .create_pipeline_layout(&wgpu::PipelineLayoutDescriptor {
-                    label: Some("fvid surface export pipeline"),
-                    bind_group_layouts: &[Some(&bind_layout)],
-                    immediate_size: 0,
-                });
-        let shader = self
-            .device
-            .create_shader_module(wgpu::ShaderModuleDescriptor {
-                label: Some("fvid surface export shader"),
-                source: wgpu::ShaderSource::Wgsl(SURFACE_EXPORT_WGSL.into()),
-            });
-        let make_pipeline = |entry_point: &str, format: wgpu::TextureFormat| {
-            self.device
-                .create_render_pipeline(&wgpu::RenderPipelineDescriptor {
-                    label: Some("fvid surface export render"),
-                    layout: Some(&pipeline_layout),
-                    vertex: wgpu::VertexState {
-                        module: &shader,
-                        entry_point: Some("export_vs"),
-                        compilation_options: Default::default(),
-                        buffers: &[],
+            let bindings = self.device.create_bind_group(&wgpu::BindGroupDescriptor {
+                label: Some("fvid surface export bind group"),
+                layout: &bind_layout,
+                entries: &[
+                    wgpu::BindGroupEntry {
+                        binding: 0,
+                        resource: source_buffer.as_entire_binding(),
                     },
-                    primitive: Default::default(),
-                    depth_stencil: None,
-                    multisample: Default::default(),
-                    fragment: Some(wgpu::FragmentState {
-                        module: &shader,
-                        entry_point: Some(entry_point),
-                        compilation_options: Default::default(),
-                        targets: &[Some(wgpu::ColorTargetState {
-                            format,
-                            blend: None,
-                            write_mask: wgpu::ColorWrites::ALL,
-                        })],
-                    }),
-                    multiview_mask: None,
-                    cache: None,
-                })
-        };
-        let y_pipeline = make_pipeline("export_y", wgpu::TextureFormat::R8Unorm);
-        let uv_pipeline = make_pipeline("export_uv", wgpu::TextureFormat::Rg8Unorm);
-        let bindings = self.device.create_bind_group(&wgpu::BindGroupDescriptor {
-            label: Some("fvid surface export bind group"),
-            layout: &bind_layout,
-            entries: &[
-                wgpu::BindGroupEntry {
-                    binding: 0,
-                    resource: source_buffer.as_entire_binding(),
-                },
-                wgpu::BindGroupEntry {
-                    binding: 1,
-                    resource: uniform.as_entire_binding(),
-                },
-            ],
+                    wgpu::BindGroupEntry {
+                        binding: 1,
+                        resource: uniform.as_entire_binding(),
+                    },
+                ],
+            });
+            VtExportCache {
+                uniform,
+                bindings,
+                y_pipeline,
+                uv_pipeline,
+            }
         });
+        self.queue
+            .write_buffer(&export_cache.uniform, 0, &param_bytes);
         let surface = fvid_vt::Surface::metal_render(
             &self.device,
             &self.queue,
@@ -1368,11 +1605,11 @@ impl GpuProcessor {
             full_range,
             |pass, plane| {
                 pass.set_pipeline(if plane == 0 {
-                    &y_pipeline
+                    &export_cache.y_pipeline
                 } else {
-                    &uv_pipeline
+                    &export_cache.uv_pipeline
                 });
-                pass.set_bind_group(0, &bindings, &[]);
+                pass.set_bind_group(0, &export_cache.bindings, &[]);
                 pass.draw(0..3, 0..1);
             },
         )

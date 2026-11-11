@@ -87,9 +87,9 @@ impl ByteShader {
     #[cfg(any(target_os = "linux", target_os = "windows", test))]
     pub(crate) fn kernel_source(&self) -> String {
         let call = if self.sampling {
-            "output[index] = (unsigned char)process_byte((unsigned int)input[source], plane, local % p[5], local / p[5], FvidSampler{input, params, plane});"
+            "output[index] = (unsigned char)process_byte((unsigned int)input[source], plane, out_x, out_y, FvidSampler{input, params, plane});"
         } else {
-            "output[index] = (unsigned char)process_byte((unsigned int)input[source], plane, local % p[5], local / p[5]);"
+            "output[index] = (unsigned char)process_byte((unsigned int)input[source], plane, out_x, out_y);"
         };
         let kernel = include_str!("transform.cu").replace("output[index] = input[source];", call);
         let preamble = if self.sampling {
@@ -174,8 +174,10 @@ mod tests {
         let shader = ByteShader::new("__device__ unsigned int process_byte(unsigned int v, unsigned int p, unsigned int x, unsigned int y) { return 255 - v; }").unwrap();
         let kernel = shader.kernel_source();
         assert!(kernel.contains("if (index >= params[27]) return;"));
+        assert!(kernel.contains("const unsigned int out_x = local % p[5];"));
+        assert!(kernel.contains("const unsigned int out_y = local / p[5];"));
         assert!(kernel.contains(
-            "process_byte((unsigned int)input[source], plane, local % p[5], local / p[5])"
+            "process_byte((unsigned int)input[source], plane, out_x, out_y)"
         ));
     }
 }

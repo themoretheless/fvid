@@ -1,7 +1,42 @@
 //! Owned PCM WAV writers, independent of libav.
 type Result<T> = std::result::Result<T, String>;
+use std::cell::Cell;
 use std::io::Write;
-use std::path::Path;
+use std::path::{Path, PathBuf};
+
+thread_local! {
+    static IN_MEMORY_CAPTURE: Cell<Option<(PathBuf, Vec<u8>)>> = const { Cell::new(None) };
+}
+
+struct InMemoryCaptureGuard {
+    previous: Option<(PathBuf, Vec<u8>)>,
+}
+
+impl Drop for InMemoryCaptureGuard {
+    fn drop(&mut self) {
+        IN_MEMORY_CAPTURE.with(|slot| slot.set(self.previous.take()));
+    }
+}
+
+/// Execute `f` with a virtual `.wav` destination path whose RIFF WAVE payload is captured
+/// directly in RAM instead of writing and unlinking a temporary file on disk.
+pub(crate) fn capture_in_memory_wave<T, F: FnOnce(&Path) -> Result<T>>(
+    f: F,
+) -> Result<(T, Vec<u8>)> {
+    static NEXT_MEM: std::sync::atomic::AtomicU64 = std::sync::atomic::AtomicU64::new(0);
+    let sentinel = PathBuf::from(format!(
+        "/__fvid_in_memory_wave__/{}-{}.wav",
+        std::process::id(),
+        NEXT_MEM.fetch_add(1, std::sync::atomic::Ordering::Relaxed)
+    ));
+    let previous = IN_MEMORY_CAPTURE.with(|slot| slot.replace(Some((sentinel.clone(), Vec::new()))));
+    let _guard = InMemoryCaptureGuard { previous };
+    let out = f(&sentinel)?;
+    let (_, bytes) = IN_MEMORY_CAPTURE
+        .with(|slot| slot.take())
+        .ok_or("in-memory WAVE capture lost")?;
+    Ok((out, bytes))
+}
 
 /// Write IEEE float little-endian WAV without lavf mux overhead.
 pub fn write_wav_f32le(
@@ -198,30 +233,7 @@ fn write_pcm_wave<const WIDTH: usize, F: FnMut() -> Result<()>>(
     if riff_size > u32::MAX as u64 || data_bytes > u32::MAX as u64 {
         return Err("wav payload exceeds 4 GiB".into());
     }
-    let directory = destination
-        .parent()
-        .filter(|p| !p.as_os_str().is_empty())
-        .unwrap_or(Path::new("."));
-    let mut temporary = None;
-    static NEXT: std::sync::atomic::AtomicU64 = std::sync::atomic::AtomicU64::new(0);
-    for _ in 0..100 {
-        let attempt = NEXT.fetch_add(1, std::sync::atomic::Ordering::Relaxed);
-        let path = directory.join(format!(".fvid-wav-{}-{attempt}.tmp", std::process::id()));
-        match std::fs::OpenOptions::new()
-            .write(true)
-            .create_new(true)
-            .open(&path)
-        {
-            Ok(file) => {
-                temporary = Some((path, file));
-                break;
-            }
-            Err(e) if e.kind() == std::io::ErrorKind::AlreadyExists => continue,
-            Err(e) => return Err(e.to_string()),
-        }
-    }
-    let (temporary, mut file) = temporary.ok_or("cannot reserve temporary output")?;
-    let write = (|| -> Result<()> {
+    let build_header = || -> Result<Vec<u8>> {
         let block_align = (channels as u16)
             .checked_mul(WIDTH as u16)
             .ok_or("wav block align overflow")?;
@@ -255,6 +267,68 @@ fn write_pcm_wave<const WIDTH: usize, F: FnMut() -> Result<()>>(
             header.to_vec()
         };
         header[4..8].copy_from_slice(&(riff_size as u32).to_le_bytes());
+        Ok(header)
+    };
+    let is_in_memory = IN_MEMORY_CAPTURE.with(|slot| {
+        let current = slot.take();
+        let matched = current
+            .as_ref()
+            .is_some_and(|(sentinel, _)| sentinel.as_path() == destination);
+        slot.set(current);
+        matched
+    });
+    if is_in_memory {
+        let header = build_header()?;
+        let total_len = usize::try_from(riff_size.saturating_add(8))
+            .map_err(|_| "wav payload exceeds address space")?;
+        let mut buf = Vec::new();
+        buf.try_reserve_exact(total_len)
+            .map_err(|_| "WAVE output allocation failed")?;
+        buf.extend_from_slice(&header);
+        for (index, sample) in samples.enumerate() {
+            if index % 16384 == 0 {
+                check()?;
+            }
+            buf.extend_from_slice(&sample);
+        }
+        check()?;
+        if padding != 0 {
+            buf.push(0);
+        }
+        buf.extend_from_slice(info_chunks);
+        check()?;
+        IN_MEMORY_CAPTURE.with(|slot| {
+            if let Some((sentinel, _)) = slot.take() {
+                slot.set(Some((sentinel, buf)));
+            }
+        });
+        return Ok(());
+    }
+    let directory = destination
+        .parent()
+        .filter(|p| !p.as_os_str().is_empty())
+        .unwrap_or(Path::new("."));
+    let mut temporary = None;
+    static NEXT: std::sync::atomic::AtomicU64 = std::sync::atomic::AtomicU64::new(0);
+    for _ in 0..100 {
+        let attempt = NEXT.fetch_add(1, std::sync::atomic::Ordering::Relaxed);
+        let path = directory.join(format!(".fvid-wav-{}-{attempt}.tmp", std::process::id()));
+        match std::fs::OpenOptions::new()
+            .write(true)
+            .create_new(true)
+            .open(&path)
+        {
+            Ok(file) => {
+                temporary = Some((path, file));
+                break;
+            }
+            Err(e) if e.kind() == std::io::ErrorKind::AlreadyExists => continue,
+            Err(e) => return Err(e.to_string()),
+        }
+    }
+    let (temporary, mut file) = temporary.ok_or("cannot reserve temporary output")?;
+    let write = (|| -> Result<()> {
+        let header = build_header()?;
         file.write_all(&header).map_err(|e| e.to_string())?;
         let mut output = std::io::BufWriter::new(file);
         let mut chunk = [0u8; 4096];

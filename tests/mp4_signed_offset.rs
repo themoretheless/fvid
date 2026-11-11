@@ -1,12 +1,14 @@
 use fvid::container::mp4::{Limits, Mp4Reader};
 use std::{
-    io::{self, BufReader, Read, Seek, SeekFrom},
+    io::{self, Read, Seek, SeekFrom},
     path::PathBuf,
     sync::{
         Arc,
         atomic::{AtomicUsize, Ordering},
     },
 };
+#[cfg(feature = "player")]
+use std::io::BufReader;
 fn bytes(n: &str) -> Vec<u8> {
     std::fs::read(
         PathBuf::from(env!("CARGO_MANIFEST_DIR"))

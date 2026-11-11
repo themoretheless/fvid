@@ -3,9 +3,6 @@ use fvid_control::CopyOptions;
 use fvid_media_info::{MediaPlan, PlanStep, PlanStream};
 use std::path::{Path, PathBuf};
 type Result<T> = std::result::Result<T, String>;
-pub(crate) fn supports(source: &Path, options: &CopyOptions) -> bool {
-    crate::owned_wave_remux::supports(source, Path::new("planned.wav"), options)
-}
 fn plan(
     sources: &[&Path],
     first_file: Option<std::fs::File>,

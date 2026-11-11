@@ -268,9 +268,9 @@ pub(super) fn measure_file_with_optional_weights_and_kind(
         let in_band_ps = native_media::negotiate_mp4_ps(&mut reader, index, options.max_packets, || control.check())?;
         let track = &reader.tracks()[index];
         let decoder = if in_band_ps {
-            crate::native_audio_decoder::PacketPcmDecoder::with_in_band_ps(track)?
+            fvid_media::owned_mp4_audio::Mp4TimelineDecoder::with_in_band_ps(track)?
         } else {
-            crate::native_audio_decoder::PacketPcmDecoder::new(track)?
+            fvid_media::owned_mp4_audio::Mp4TimelineDecoder::new(track)?
         };
         let (rate, channels) = (decoder.sample_rate(), decoder.channels());
         (Input::Mp4(Box::new(reader)), rate, channels)
@@ -287,16 +287,9 @@ pub(super) fn measure_file_with_optional_weights_and_kind(
             native_media::negotiate_matroska_ps(&mut reader, index, options.max_packets, || control.check())?;
         let track = &reader.tracks[index];
         let decoder = if in_band_ps {
-            crate::native_audio_decoder::PacketPcmDecoder::Ps(Box::new(
-                crate::codec::aac_ps_native::NativePsAacDecoder::new_with_in_band_ps(
-                    &track.codec_private,
-                    u32::try_from(track.sample_rate)
-                        .map_err(|_| invalid("AAC output clock overflow"))?,
-                )
-                .map_err(|e| invalid(&e.0))?,
-            ))
+            fvid_media::owned_matroska_audio::MatroskaTimelineDecoder::with_in_band_ps(track)?
         } else {
-            crate::native_audio_decoder::PacketPcmDecoder::from_matroska(track)?
+            fvid_media::owned_matroska_audio::MatroskaTimelineDecoder::from_matroska(track)?
         };
         let (rate, channels) = (decoder.sample_rate(), decoder.channels());
         (Input::Mka(Box::new(reader)), rate, channels)

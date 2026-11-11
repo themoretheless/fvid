@@ -1,19 +1,227 @@
 //! Owned PCM packet decoding; sample arithmetic shared with the frontend.
 #![forbid(unsafe_code)]
-#[derive(Debug)]
-pub struct Error(String);
-impl std::fmt::Display for Error {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.write_str(&self.0)
+pub use fvid_control::error::{Error, Result};
+use fvid_control::error::invalid;
+/// How the bytes of one sample are laid out.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum PcmFormat {
+    /// Unsigned 8-bit integer PCM, as specified by Matroska.
+    Unsigned8,
+    ALaw,
+    MuLaw,
+    /// Signed integer of `bits` bits per sample, packed with no padding.
+    Int { bits: u8, big_endian: bool },
+    /// IEEE float of 32 or 64 bits, little-endian.
+    Float { bits: u8 },
+}
+
+impl PcmFormat {
+    pub fn bits(self) -> u8 {
+        match self {
+            Self::Unsigned8 | Self::ALaw | Self::MuLaw => 8,
+            Self::Int { bits, .. } | Self::Float { bits } => bits,
+        }
+    }
+
+    /// Bytes of one channel's sample.
+    fn sample_bytes(self) -> usize {
+        usize::from(self.bits()) / 8
+    }
+
+    /// Widths this decoder reads. 8-bit integers are taken as signed, which is
+    /// what QuickTime signed tags mean; the unsigned QuickTime variants
+    /// name themselves differently and stay refused rather than playing noise.
+    fn supported(self) -> bool {
+        match self {
+            Self::Unsigned8 | Self::ALaw | Self::MuLaw => true,
+            Self::Int { bits, .. } => matches!(bits, 8 | 16 | 24 | 32),
+            Self::Float { bits } => matches!(bits, 32 | 64),
+        }
+    }
+
+    /// One sample widened into -1.0..=1.0.
+    fn sample_f32(self, bytes: &[u8]) -> f32 {
+        match self {
+            Self::ALaw => f32::from(fvid_codecs::g711::Law::ALaw.decode(bytes[0]))/32768.,
+            Self::MuLaw => f32::from(fvid_codecs::g711::Law::MuLaw.decode(bytes[0]))/32768.,
+            Self::Unsigned8 => (f32::from(bytes[0]) - 128.0) / 128.0,
+            Self::Int { bits, big_endian } => {
+                sign_extended(bytes, big_endian) as f32 / (1i64 << (i64::from(bits) - 1)) as f32
+            }
+            Self::Float { bits: 32 } => f32::from_le_bytes(bytes[..4].try_into().unwrap_or([0; 4])),
+            Self::Float { bits: 64 } => {
+                f64::from_le_bytes(bytes[..8].try_into().unwrap_or([0; 8])) as f32
+            }
+            Self::Float { .. } => 0.0,
+        }
     }
 }
-impl std::error::Error for Error {}
-type Result<T> = std::result::Result<T, Error>;
-fn invalid(message: &str) -> Error {
-    Error(message.into())
+
+/// Pack a 1..=4 byte sample into the top of a 32-bit word and arithmetic-shift it
+/// back down, which both reads the value and extends its sign in either order.
+fn sign_extended(bytes: &[u8], big_endian: bool) -> i32 {
+    let mut word = [0u8; 4];
+    let offset = 4 - bytes.len();
+    for (i, byte) in bytes.iter().enumerate() {
+        // Whichever end the container packed at, the sample's most significant
+        // byte is the one that ends up at the top of the word.
+        let at = offset + if big_endian { i } else { bytes.len() - 1 - i };
+        word[at] = *byte;
+    }
+    let shift = 8 * offset;
+    ((u32::from_be_bytes(word) << shift) as i32) >> shift
 }
-include!("owned_pcm_decoder_impl.rs");
+
+/// PCM decoder: converts container bytes into f32 packets.
+pub struct PcmDecoder {
+    format: PcmFormat,
+    float_big_endian: bool,
+    sample_rate: u32,
+    channels: u16,
+}
+
 impl PcmDecoder {
+    /// Stored bytes in one complete interleaved source frame.
+    pub fn encoded_frame_bytes(&self) -> Result<usize> {
+        usize::from(self.channels).checked_mul(self.format.sample_bytes())
+            .ok_or_else(||invalid("PCM source frame size overflow"))
+    }
+    pub fn new(format: PcmFormat, sample_rate: u32, channels: u16) -> Result<Self> {
+        if !format.supported() {
+            return Err(invalid(&format!(
+                "unsupported {} PCM at {} bits",
+                match format {
+                    PcmFormat::ALaw | PcmFormat::MuLaw => "G.711",
+                    PcmFormat::Unsigned8 | PcmFormat::Int { .. } => "integer",
+                    PcmFormat::Float { .. } => "float",
+                },
+                format.bits()
+            )));
+        }
+        if channels == 0 || sample_rate == 0 {
+            return Err(invalid("PCM track has no sample rate or channel count"));
+        }
+        Ok(Self {
+            format,
+            float_big_endian: false,
+            sample_rate,
+            channels,
+        })
+    }
+
+    pub fn set_float_big_endian(&mut self, big: bool) { self.float_big_endian=big; }
+    fn sample(&self, bytes:&[u8]) -> f32 {
+        if self.float_big_endian {
+            match self.format {
+                PcmFormat::Float {bits:32} => return f32::from_be_bytes(bytes.try_into().unwrap()),
+                PcmFormat::Float {bits:64} => return f64::from_be_bytes(bytes.try_into().unwrap()) as f32,
+                _=>{},
+            }
+        }
+        self.format.sample_f32(bytes)
+    }
+
+    /// Integer PCM named by width and byte order, as the containers describe it.
+    /// A zero width is taken as 16-bit, the default both containers mean.
+    pub fn int(bits: u16, big_endian: bool, sample_rate: u32, channels: u16) -> Result<Self> {
+        let bits = if bits == 0 { 16 } else {
+            u8::try_from(bits).map_err(|_| invalid(&format!("unsupported integer PCM at {bits} bits")))?
+        };
+        Self::new(PcmFormat::Int { bits, big_endian }, sample_rate, channels)
+    }
+
+    /// IEEE float PCM of 32 or 64 bits.
+    pub fn float(bits: u16, sample_rate: u32, channels: u16) -> Result<Self> {
+        let bits = if bits == 0 { 32 } else {
+            u8::try_from(bits).map_err(|_| invalid(&format!("unsupported float PCM at {bits} bits")))?
+        };
+        Self::new(PcmFormat::Float { bits }, sample_rate, channels)
+    }
+
+    /// Widen complete finite channel frames into interleaved f32 bytes.
+    /// Refuse malformed packets before publishing any samples to playback.
+    pub fn convert(&self, data: &[u8]) -> Result<Vec<u8>> {
+        let sample_bytes = self.format.sample_bytes();
+        let frame = sample_bytes * usize::from(self.channels);
+        if !data.len().is_multiple_of(frame) {
+            return Err(invalid("PCM packet ends in an incomplete channel frame"));
+        }
+        let bytes = (data.len() / sample_bytes).checked_mul(4)
+            .ok_or_else(|| invalid("decoded PCM size overflow"))?;
+        let mut out = Vec::new();
+        out.try_reserve_exact(bytes).map_err(|_| invalid("decoded PCM allocation failed"))?;
+        for sample in data.chunks_exact(sample_bytes) {
+            let sample = self.sample(sample);
+            if !sample.is_finite() {
+                return Err(invalid("PCM packet contains non-finite samples"));
+            }
+            out.extend_from_slice(&sample.to_le_bytes());
+        }
+        Ok(out)
+    }
+
+    /// Strict packet conversion for container export: reject incomplete frames.
+    pub fn decode_pcm(&self, data: &[u8]) -> Result<Vec<f32>> {
+        let sample_bytes = self.format.sample_bytes();
+        let frame = sample_bytes * usize::from(self.channels);
+        if !data.len().is_multiple_of(frame) {
+            return Err(invalid("PCM packet ends in an incomplete channel frame"));
+        }
+        let mut samples = Vec::new();
+        samples
+            .try_reserve_exact(data.len() / sample_bytes)
+            .map_err(|_| invalid("PCM output allocation failed"))?;
+        for s in data.chunks_exact(sample_bytes) {
+            let sample = self.sample(s);
+            if !sample.is_finite() {
+                return Err(invalid("PCM packet contains non-finite samples"));
+            }
+            samples.push(sample);
+        }
+        Ok(samples)
+    }
+
+    /// Preserve all stored integer bits and IEEE float64 precision in normalized f64.
+    pub fn decode_pcm_f64(&self, data: &[u8]) -> Result<Vec<f64>> {
+        let sample_bytes = self.format.sample_bytes();
+        let frame = sample_bytes * usize::from(self.channels);
+        if !data.len().is_multiple_of(frame) {
+            return Err(invalid("PCM packet ends in an incomplete channel frame"));
+        }
+        let mut samples = Vec::new();
+        samples
+            .try_reserve_exact(data.len() / sample_bytes)
+            .map_err(|_| invalid("PCM output allocation failed"))?;
+        for bytes in data.chunks_exact(sample_bytes) {
+            let sample = match self.format {
+                PcmFormat::ALaw => f64::from(fvid_codecs::g711::Law::ALaw.decode(bytes[0]))/32768.,
+                PcmFormat::MuLaw => f64::from(fvid_codecs::g711::Law::MuLaw.decode(bytes[0]))/32768.,
+                PcmFormat::Unsigned8 => (f64::from(bytes[0]) - 128.0) / 128.0,
+                PcmFormat::Int { bits, big_endian } => f64::from(sign_extended(bytes, big_endian)) / (1u64 << (bits - 1)) as f64,
+                PcmFormat::Float { bits: 32 } => f64::from(if self.float_big_endian { f32::from_be_bytes(bytes.try_into().unwrap()) } else { f32::from_le_bytes(bytes.try_into().unwrap()) }),
+                PcmFormat::Float { bits: 64 } => if self.float_big_endian { f64::from_be_bytes(bytes.try_into().unwrap()) } else { f64::from_le_bytes(bytes.try_into().unwrap()) },
+                PcmFormat::Float { .. } => unreachable!(),
+            };
+            if !sample.is_finite() {
+                return Err(invalid("PCM packet contains non-finite samples"));
+            }
+            samples.push(sample);
+        }
+        Ok(samples)
+    }
+
+}
+impl PcmDecoder {
+    pub fn format(&self) -> PcmFormat {
+        self.format
+    }
+    pub fn spec(&self) -> fvid_media_info::AudioSpec {
+        fvid_media_info::AudioSpec {
+            sample_rate: self.sample_rate,
+            channels: self.channels,
+            format: fvid_media_info::SampleFormat::F32,
+        }
+    }
     pub fn sample_rate(&self) -> u32 {
         self.sample_rate
     }
@@ -127,5 +335,182 @@ mod constructor_width_regressions {
             let error=PcmDecoder::float(bits,8000,1).err().expect("unsupported float width accepted");
             assert!(error.to_string().contains(&bits.to_string()));
         }
+    }
+}
+
+#[cfg(test)]
+mod unit_tests {
+    use super::{PcmDecoder, PcmFormat, sign_extended};
+
+    fn decode(format: PcmFormat, channels: u16, bytes: &[u8]) -> Vec<f32> {
+        let decoder = PcmDecoder::new(format, 48_000, channels).expect("decoder");
+        decoder
+            .convert(bytes)
+            .expect("convert")
+            .as_chunks::<4>()
+            .0
+            .iter()
+            .map(|chunk| f32::from_le_bytes(*chunk))
+            .collect()
+    }
+
+    #[test]
+    fn sign_extension_reads_both_byte_orders() {
+        for (bytes, big, expected) in [
+            (&[0x80][..], false, -128),
+            (&[0x7f][..], false, 127),
+            (&[0x01, 0x00][..], true, 256),
+            (&[0xff, 0xff][..], true, -1),
+            (&[0x80, 0x00, 0x00][..], true, -8_388_608),
+            (&[0x00, 0x00, 0x80][..], false, -8_388_608),
+            (&[0xff, 0xff, 0xff, 0xff][..], false, -1),
+            (&[0x00, 0x01, 0x00, 0x00][..], true, 65_536),
+            (&[0x00, 0x00, 0x01, 0x00][..], false, 65_536),
+        ] {
+            assert_eq!(sign_extended(bytes, big), expected, "{bytes:?} big={big}");
+        }
+    }
+
+    #[test]
+    fn integers_of_every_width_land_on_the_same_scale() {
+        assert_eq!(
+            decode(
+                PcmFormat::Int {
+                    bits: 8,
+                    big_endian: false
+                },
+                1,
+                &[0x80, 0x7f, 0x00]
+            ),
+            vec![-1.0, 127.0 / 128.0, 0.0]
+        );
+        assert_eq!(
+            decode(
+                PcmFormat::Int {
+                    bits: 16,
+                    big_endian: false
+                },
+                1,
+                &[0x00, 0x80, 0xff, 0x7f]
+            ),
+            vec![-1.0, 32767.0 / 32768.0]
+        );
+        assert_eq!(
+            decode(
+                PcmFormat::Int {
+                    bits: 24,
+                    big_endian: true
+                },
+                1,
+                &[0x80, 0x00, 0x00, 0x7f, 0xff, 0xff]
+            ),
+            vec![-1.0, (8_388_607.0 / 8_388_608.0) as f32]
+        );
+        let full = decode(
+            PcmFormat::Int {
+                bits: 32,
+                big_endian: true,
+            },
+            1,
+            &[0x80, 0x00, 0x00, 0x00],
+        );
+        assert_eq!(full, vec![-1.0]);
+    }
+
+    #[test]
+    fn a_24_bit_sample_keeps_its_value_across_the_wrap() {
+        let one_step = decode(
+            PcmFormat::Int {
+                bits: 24,
+                big_endian: true,
+            },
+            1,
+            &[0x00, 0x00, 0x01],
+        );
+        assert!(one_step[0] > 1.0e-7 && one_step[0] < 1.2e-7, "{one_step:?}");
+    }
+
+    #[test]
+    fn interleaved_channels_stay_interleaved() {
+        let bytes: Vec<u8> = vec![0xff, 0x7f, 0x00, 0x80, 0x00, 0x00, 0xff, 0xff];
+        let out = decode(
+            PcmFormat::Int {
+                bits: 16,
+                big_endian: false,
+            },
+            2,
+            &bytes,
+        );
+        assert_eq!(out.len(), 4);
+        assert_eq!(&out[..2], &[32767.0 / 32768.0, -1.0]);
+        assert_eq!(&out[2..], &[0.0, -1.0 / 32768.0]);
+    }
+
+    #[test]
+    fn floats_pass_through_in_both_widths() {
+        let mut bytes = 0.5f32.to_le_bytes().to_vec();
+        bytes.extend_from_slice(&(-0.25f32).to_le_bytes());
+        assert_eq!(
+            decode(PcmFormat::Float { bits: 32 }, 2, &bytes),
+            vec![0.5, -0.25]
+        );
+        let mut wide = 0.75f64.to_le_bytes().to_vec();
+        wide.extend_from_slice(&0.25f64.to_le_bytes());
+        assert_eq!(
+            decode(PcmFormat::Float { bits: 64 }, 2, &wide),
+            vec![0.75, 0.25]
+        );
+    }
+
+    #[test]
+    fn a_partial_frame_is_refused_before_publication() {
+        let decoder = PcmDecoder::int(16, false, 48000, 1).unwrap();
+        let bytes = [0, 128, 64];
+        let error = decoder.convert(&bytes).err().expect("partial frame accepted");
+        assert!(error.to_string().contains("incomplete channel frame"));
+    }
+
+    #[test]
+    fn widths_with_no_definition_are_refused_at_open() {
+        for format in [
+            PcmFormat::Int {
+                bits: 12,
+                big_endian: false,
+            },
+            PcmFormat::Float { bits: 16 },
+            PcmFormat::Int {
+                bits: 0,
+                big_endian: false,
+            },
+        ] {
+            let error = PcmDecoder::new(format, 48_000, 2)
+                .err()
+                .expect("unsupported width");
+            assert!(error.to_string().contains("unsupported"), "{error}");
+        }
+        assert!(
+            PcmDecoder::new(
+                PcmFormat::Int {
+                    bits: 16,
+                    big_endian: false
+                },
+                48_000,
+                0
+            )
+            .is_err()
+        );
+    }
+
+    #[test]
+    fn a_missing_width_falls_back_to_the_containers_default() {
+        let decoder = PcmDecoder::int(0, false, 44_100, 1).expect("16 bit default");
+        assert_eq!(decoder.spec().sample_rate, 44_100);
+        assert_eq!(
+            PcmDecoder::float(0, 44_100, 1)
+                .expect("32 bit float default")
+                .format()
+                .bits(),
+            32
+        );
     }
 }

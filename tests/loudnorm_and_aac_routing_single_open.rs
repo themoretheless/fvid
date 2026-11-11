@@ -13,7 +13,6 @@ fn ogg_opus_export_and_loudnorm_single_pass_info_and_geometry() {
     let aac = root.join("tests/fixtures/audio/aac-stereo.aac");
     let mka = root.join("tests/fixtures/audio/aac-stereo.mka");
     let flac_mka = root.join("tests/fixtures/playback-errors/container-loudness-plan/flac-loudness.mka");
-    let wav = root.join("tests/fixtures/playback-errors/wave-ogg-flac-plan/pcm-stereo.wav");
 
     let mut options = CopyOptions {
         max_controlled_bytes: Some(64 * 1024 * 1024),

@@ -75,7 +75,32 @@ impl Lut1d {
     }
 
     pub fn sample(&self, channel: usize, value: f32) -> f32 {
-        let lut = &self.data[channel.min(2)];
+        self.prepare().sample_channel(channel, value)
+    }
+
+    #[inline]
+    pub fn prepare(&self) -> PreparedLut1d<'_> {
+        PreparedLut1d {
+            lut: self,
+            inv_span: std::array::from_fn(|ch| {
+                1.0 / (self.domain_max[ch] - self.domain_min[ch]).max(1e-6)
+            }),
+        }
+    }
+}
+
+/// Precomputed reciprocal-domain sampler for [`Lut1d`].
+#[derive(Clone, Copy, Debug)]
+pub struct PreparedLut1d<'a> {
+    lut: &'a Lut1d,
+    inv_span: [f32; 3],
+}
+
+impl PreparedLut1d<'_> {
+    #[inline]
+    pub fn sample_channel(&self, channel: usize, value: f32) -> f32 {
+        let ch = channel.min(2);
+        let lut = &self.lut.data[ch];
         if lut.is_empty() {
             return value;
         }
@@ -84,14 +109,21 @@ impl Lut1d {
         }
         // The declared range scales the index, never the values: an input at the
         // top of the domain reads the last node whatever numbers that node holds.
-        let ch = channel.min(2);
-        let lo = self.domain_min[ch];
-        let span = (self.domain_max[ch] - lo).max(1e-6);
-        let pos = ((value - lo) / span).clamp(0.0, 1.0) * (lut.len() - 1) as f32;
-        let lo = pos.floor() as usize;
-        let hi = (lo + 1).min(lut.len() - 1);
-        let frac = pos - lo as f32;
-        lut[lo].mul_add(1.0 - frac, lut[hi] * frac)
+        let lo = self.lut.domain_min[ch];
+        let pos = ((value - lo) * self.inv_span[ch]).clamp(0.0, 1.0) * (lut.len() - 1) as f32;
+        let idx = pos as usize;
+        let hi = (idx + 1).min(lut.len() - 1);
+        let frac = pos - idx as f32;
+        lut[idx].mul_add(1.0 - frac, lut[hi] * frac)
+    }
+
+    #[inline]
+    pub fn sample(&self, rgb: [f32; 3]) -> [f32; 3] {
+        [
+            self.sample_channel(0, rgb[0]),
+            self.sample_channel(1, rgb[1]),
+            self.sample_channel(2, rgb[2]),
+        ]
     }
 }
 
@@ -105,18 +137,106 @@ pub struct Lut3d {
     pub data: Vec<[f32; 3]>,
 }
 
+/// Precomputed reciprocal-domain and stride sampler for [`Lut3d`].
+#[derive(Clone, Copy, Debug)]
+pub struct PreparedLut3d<'a> {
+    lut: &'a Lut3d,
+    inv_span: [f32; 3],
+    size_sq: usize,
+}
+
+impl PreparedLut3d<'_> {
+    #[inline]
+    pub fn sample(&self, rgb: [f32; 3], interp: Interpolation) -> [f32; 3] {
+        let size = self.lut.size;
+        let n = size - 1;
+        let nf = n as f32;
+        let fr = ((rgb[0] - self.lut.domain_min[0]) * self.inv_span[0]).clamp(0.0, 1.0) * nf;
+        let fg = ((rgb[1] - self.lut.domain_min[1]) * self.inv_span[1]).clamp(0.0, 1.0) * nf;
+        let fb = ((rgb[2] - self.lut.domain_min[2]) * self.inv_span[2]).clamp(0.0, 1.0) * nf;
+        let (r0, g0, b0) = (fr as usize, fg as usize, fb as usize);
+        let (dr, dg, db) = (fr - r0 as f32, fg - g0 as f32, fb - b0 as f32);
+        let data = &self.lut.data;
+        let base = r0 + size * g0 + self.size_sq * b0;
+        let step_r = usize::from(r0 < n);
+        let step_g = if g0 < n { size } else { 0 };
+        let step_b = if b0 < n { self.size_sq } else { 0 };
+        match interp {
+            Interpolation::Nearest => {
+                let off_r = if dr > 0.5 { step_r } else { 0 };
+                let off_g = if dg > 0.5 { step_g } else { 0 };
+                let off_b = if db > 0.5 { step_b } else { 0 };
+                data[base + off_r + off_g + off_b]
+            }
+            Interpolation::Trilinear => {
+                let c000 = data[base];
+                let c100 = data[base + step_r];
+                let c010 = data[base + step_g];
+                let c110 = data[base + step_r + step_g];
+                let c001 = data[base + step_b];
+                let c101 = data[base + step_r + step_b];
+                let c011 = data[base + step_g + step_b];
+                let c111 = data[base + step_r + step_g + step_b];
+                let mut out = [0.0f32; 3];
+                for ch in 0..3 {
+                    let x00 = c000[ch].mul_add(1.0 - dr, c100[ch] * dr);
+                    let x10 = c010[ch].mul_add(1.0 - dr, c110[ch] * dr);
+                    let x01 = c001[ch].mul_add(1.0 - dr, c101[ch] * dr);
+                    let x11 = c011[ch].mul_add(1.0 - dr, c111[ch] * dr);
+                    let y0 = x00.mul_add(1.0 - dg, x10 * dg);
+                    let y1 = x01.mul_add(1.0 - dg, x11 * dg);
+                    out[ch] = y0.mul_add(1.0 - db, y1 * db);
+                }
+                out
+            }
+            Interpolation::Tetrahedral => {
+                let (s0, s1, s2, off1, off2) = if dr >= dg {
+                    if dg >= db {
+                        (dr, dg, db, step_r, step_r + step_g)
+                    } else if dr >= db {
+                        (dr, db, dg, step_r, step_r + step_b)
+                    } else {
+                        (db, dr, dg, step_b, step_r + step_b)
+                    }
+                } else if dr >= db {
+                    (dg, dr, db, step_g, step_r + step_g)
+                } else if dg >= db {
+                    (dg, db, dr, step_g, step_g + step_b)
+                } else {
+                    (db, dg, dr, step_b, step_g + step_b)
+                };
+                let n0 = data[base];
+                let n1 = data[base + off1];
+                let n2 = data[base + off2];
+                let n3 = data[base + step_r + step_g + step_b];
+                let w1 = s0 - s1;
+                let w2 = s1 - s2;
+                [
+                    n0[0].mul_add(1.0 - s0, n1[0] * w1 + n2[0] * w2 + n3[0] * s2),
+                    n0[1].mul_add(1.0 - s0, n1[1] * w1 + n2[1] * w2 + n3[1] * s2),
+                    n0[2].mul_add(1.0 - s0, n1[2] * w1 + n2[2] * w2 + n3[2] * s2),
+                ]
+            }
+        }
+    }
+}
+
 impl Lut3d {
+    #[inline]
+    pub fn at(&self, r: usize, g: usize, b: usize) -> [f32; 3] {
+        self.data[(b * self.size + g) * self.size + r]
+    }
+
     pub fn identity(size: usize) -> Self {
         let size = size.clamp(2, 128);
+        let inv = 1.0 / (size - 1) as f32;
         let mut data = Vec::with_capacity(size * size * size);
         for b in 0..size {
+            let bf = b as f32 * inv;
             for g in 0..size {
+                let gf = g as f32 * inv;
                 for r in 0..size {
-                    data.push([
-                        r as f32 / (size - 1) as f32,
-                        g as f32 / (size - 1) as f32,
-                        b as f32 / (size - 1) as f32,
-                    ]);
+                    data.push([r as f32 * inv, gf, bf]);
                 }
             }
         }
@@ -137,96 +257,39 @@ impl Lut3d {
         lut
     }
 
-    fn at(&self, r: usize, g: usize, b: usize) -> [f32; 3] {
-        self.data[r + self.size * (g + self.size * b)]
+    /// Parallel cube builder for thread-safe pure transforms (`size >= 17`).
+    pub fn from_par_fn<F: Fn([f32; 3]) -> [f32; 3] + Sync>(size: usize, f: F) -> Self {
+        let mut lut = Self::identity(size);
+        let total = lut.data.len();
+        let workers = fvid_cpu::span_workers(total * 16);
+        if workers < 2 || size < 17 {
+            for v in lut.data.iter_mut() {
+                *v = f(*v);
+            }
+        } else {
+            let chunk_len = total.div_ceil(workers);
+            fvid_cpu::par_chunks_mut(&mut lut.data, chunk_len, |_, slice| {
+                for v in slice {
+                    *v = f(*v);
+                }
+            });
+        }
+        lut
     }
 
-    /// Normalise an input into the authored domain, clamping outside it.
-    fn scale(&self, rgb: [f32; 3]) -> [f32; 3] {
-        let mut out = [0.0f32; 3];
-        for i in 0..3 {
-            let lo = self.domain_min[i];
-            let span = (self.domain_max[i] - lo).max(1e-6);
-            out[i] = ((rgb[i] - lo) / span).clamp(0.0, 1.0);
+    #[inline]
+    pub fn prepare(&self) -> PreparedLut3d<'_> {
+        PreparedLut3d {
+            lut: self,
+            inv_span: std::array::from_fn(|i| {
+                1.0 / (self.domain_max[i] - self.domain_min[i]).max(1e-6)
+            }),
+            size_sq: self.size * self.size,
         }
-        out
     }
 
     pub fn sample(&self, rgb: [f32; 3], interp: Interpolation) -> [f32; 3] {
-        let n = self.size - 1;
-        let [r, g, b] = self.scale(rgb);
-        let (fr, fg, fb) = (r * n as f32, g * n as f32, b * n as f32);
-        let (r0, g0, b0) = (fr as usize, fg as usize, fb as usize);
-        let (dr, dg, db) = (fr - r0 as f32, fg - g0 as f32, fb - b0 as f32);
-        match interp {
-            Interpolation::Nearest => {
-                let ri = if dr > 0.5 { (r0 + 1).min(n) } else { r0 };
-                let gi = if dg > 0.5 { (g0 + 1).min(n) } else { g0 };
-                let bi = if db > 0.5 { (b0 + 1).min(n) } else { b0 };
-                self.at(ri, gi, bi)
-            }
-            Interpolation::Trilinear => {
-                let (r1, g1, b1) = ((r0 + 1).min(n), (g0 + 1).min(n), (b0 + 1).min(n));
-                let c000 = self.at(r0, g0, b0);
-                let c100 = self.at(r1, g0, b0);
-                let c010 = self.at(r0, g1, b0);
-                let c110 = self.at(r1, g1, b0);
-                let c001 = self.at(r0, g0, b1);
-                let c101 = self.at(r1, g0, b1);
-                let c011 = self.at(r0, g1, b1);
-                let c111 = self.at(r1, g1, b1);
-                let mut out = [0.0f32; 3];
-                for ch in 0..3 {
-                    let x00 = c000[ch].mul_add(1.0 - dr, c100[ch] * dr);
-                    let x10 = c010[ch].mul_add(1.0 - dr, c110[ch] * dr);
-                    let x01 = c001[ch].mul_add(1.0 - dr, c101[ch] * dr);
-                    let x11 = c011[ch].mul_add(1.0 - dr, c111[ch] * dr);
-                    let y0 = x00.mul_add(1.0 - dg, x10 * dg);
-                    let y1 = x01.mul_add(1.0 - dg, x11 * dg);
-                    out[ch] = y0.mul_add(1.0 - db, y1 * db);
-                }
-                out
-            }
-            Interpolation::Tetrahedral => {
-                // Order the axes by offset, then walk the four vertices of that
-                // tetrahedron: origin, +biggest, +middle, +all.
-                let d = [dr, dg, db];
-                let mut order = [0usize, 1, 2];
-                if d[order[1]].total_cmp(&d[order[0]]).is_gt() {
-                    order.swap(0, 1);
-                }
-                if d[order[2]].total_cmp(&d[order[1]]).is_gt() {
-                    order.swap(1, 2);
-                    if d[order[1]].total_cmp(&d[order[0]]).is_gt() {
-                        order.swap(0, 1);
-                    }
-                }
-                let node = |mask: usize| -> [f32; 3] {
-                    self.at(
-                        (r0 + (mask & 1)).min(n),
-                        (g0 + ((mask >> 1) & 1)).min(n),
-                        (b0 + ((mask >> 2) & 1)).min(n),
-                    )
-                };
-                let m1 = 1 << order[0];
-                let m2 = m1 | (1 << order[1]);
-                // The four weights are the ordered offsets' differences, so the
-                // sum telescopes to 1 and each vertex only sees its own tetra.
-                let (s0, s1, s2) = (d[order[0]], d[order[1]], d[order[2]]);
-                let n0 = node(0);
-                let n1 = node(m1);
-                let n2 = node(m2);
-                let n3 = node(7);
-                let mut out = [0.0f32; 3];
-                for ch in 0..3 {
-                    out[ch] = n0[ch].mul_add(
-                        1.0 - s0,
-                        n1[ch] * (s0 - s1) + n2[ch] * (s1 - s2) + n3[ch] * s2,
-                    );
-                }
-                out
-            }
-        }
+        self.prepare().sample(rgb, interp)
     }
 }
 
@@ -237,7 +300,32 @@ pub enum Lut {
     Three(Lut3d),
 }
 
+/// Precomputed reciprocal-domain sampler for [`Lut`].
+#[derive(Clone, Copy, Debug)]
+pub enum PreparedLut<'a> {
+    One(PreparedLut1d<'a>),
+    Three(PreparedLut3d<'a>),
+}
+
+impl PreparedLut<'_> {
+    #[inline]
+    pub fn sample(&self, rgb: [f32; 3], interp: Interpolation) -> [f32; 3] {
+        match self {
+            Self::One(l) => l.sample(rgb),
+            Self::Three(l) => l.sample(rgb, interp),
+        }
+    }
+}
+
 impl Lut {
+    #[inline]
+    pub fn prepare(&self) -> PreparedLut<'_> {
+        match self {
+            Self::One(l) => PreparedLut::One(l.prepare()),
+            Self::Three(l) => PreparedLut::Three(l.prepare()),
+        }
+    }
+
     /// Resolve/Adobe `.cube`, including the files that write a 1D table ahead of
     /// the 3D one and the exports that carry a pre-LUT or a shaper in front of
     /// it — those sections are read and dropped, which is what both reference
@@ -1403,42 +1491,67 @@ impl CubePlan {
             Some(_) => self.sdr_white_nits,
             None => full_scale(self.from),
         };
-        Lut3d::from_fn(self.size, |rgb| {
-            let mut lin = [0.0f32; 3];
-            for (out, v) in lin.iter_mut().zip(rgb) {
-                *out = match self.log {
+        let hlg_gamma = (self.from == Transfer::Hlg && self.log.is_none())
+            .then(|| hlg_system_gamma(panel));
+        let unmapped_ratio = self.tone_map.is_none().then(|| scale / full_scale(self.to));
+        let size = self.size.clamp(2, 128);
+        let input_linear: Vec<f32> = (0..size)
+            .map(|i| {
+                let v = i as f32 / (size - 1) as f32;
+                match self.log {
                     Some(profile) => profile.to_linear(v),
                     None => self.from.eotf(v).unwrap_or(v),
-                };
-            }
-            if self.from == Transfer::Hlg && self.log.is_none() {
-                lin = hlg_ootf_rgb(lin, kr, kb, hlg_system_gamma(panel));
-            }
-            let mapped = compress_gamut(apply(m, lin.map(f64::from)).map(|v| v as f32), self.dest);
-            let display = match self.tone_map {
-                // No compression means no panel to fit the light into, but the
-                // two curves still disagree about how much light a code carries:
-                // read the source's linear as cd/m² and hand the destination
-                // curve its own fraction of that. Where the families agree the
-                // ratio is one and the conversion stays what it was.
-                None => {
-                    let to = full_scale(self.to);
-                    mapped.map(|v| v * (scale / to))
                 }
-                Some(mode) => tone_map_rgb(
-                    mapped.map(|v| v * scale),
-                    mode,
-                    self.target.unwrap_or_default(),
-                    self.content,
-                    self.dest,
-                ),
-            };
-            let mut out = [0.0f32; 3];
-            for (o, v) in out.iter_mut().zip(display) {
-                *o = self.to.oetf(v).unwrap_or(v).clamp(0.0, 1.0);
+            })
+            .collect();
+        let mut data = vec![[0.0f32; 3]; size * size * size];
+        let eval_slice = |b_start: usize, out_slice: &mut [[f32; 3]]| {
+            let plane = size * size;
+            for (idx, dst) in out_slice.iter_mut().enumerate() {
+                let flat = b_start * plane + idx;
+                let r = flat % size;
+                let g = (flat / size) % size;
+                let b = flat / plane;
+                let mut lin = [input_linear[r], input_linear[g], input_linear[b]];
+                if let Some(gamma) = hlg_gamma {
+                    lin = hlg_ootf_rgb(lin, kr, kb, gamma);
+                }
+                let mapped =
+                    compress_gamut(apply(m, lin.map(f64::from)).map(|v| v as f32), self.dest);
+                let display = match (self.tone_map, unmapped_ratio) {
+                    (None, Some(ratio)) => mapped.map(|v| v * ratio),
+                    (Some(mode), _) => tone_map_rgb(
+                        mapped.map(|v| v * scale),
+                        mode,
+                        self.target.unwrap_or_default(),
+                        self.content,
+                        self.dest,
+                    ),
+                    (None, None) => unreachable!(),
+                };
+                let mut out = [0.0f32; 3];
+                for (o, v) in out.iter_mut().zip(display) {
+                    *o = self.to.oetf(v).unwrap_or(v).clamp(0.0, 1.0);
+                }
+                *dst = out;
             }
-            out
-        })
+        };
+        let workers = fvid_cpu::span_workers(data.len() * 16);
+        if workers < 2 || size < 17 {
+            eval_slice(0, &mut data);
+        } else {
+            let planes_per_chunk = size.div_ceil(workers);
+            let chunk_elems = planes_per_chunk * size * size;
+            fvid_cpu::par_chunks_mut(&mut data, chunk_elems, |chunk_idx, slice| {
+                eval_slice(chunk_idx * planes_per_chunk, slice);
+            });
+        }
+        Lut3d {
+            size,
+            domain_min: [0.0, 0.0, 0.0],
+            domain_max: [1.0, 1.0, 1.0],
+            data,
+        }
     }
 }
 

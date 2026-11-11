@@ -8,7 +8,6 @@ use rational::{Packet, collect, exact};
 use std::{
     io::Cursor,
     sync::{Arc, Mutex},
-    time::Duration,
 };
 fn bytes(n: &str) -> Vec<u8> {
     std::fs::read(

@@ -77,6 +77,7 @@ pub(crate) fn weights(info: &crate::owned_wave_inspect::WaveInfo) -> Result<Vec<
         })
         .collect())
 }
+#[cfg(test)]
 pub(crate) fn supports(source: &Path, options: &CopyOptions) -> bool {
     policies(options)
         && File::open(source).is_ok_and(|mut file| {

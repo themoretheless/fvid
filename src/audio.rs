@@ -14,38 +14,7 @@ pub use cpal_backend::CpalBackend as PlatformBackend;
 
 use std::time::Duration;
 
-/// PCM sample format produced by decoders and consumed by backends.
-#[derive(Clone, Copy, Debug, PartialEq, Eq)]
-pub enum SampleFormat {
-    /// Signed 16-bit little-endian interleaved samples.
-    I16,
-    /// Signed 32-bit little-endian interleaved samples.
-    I32,
-    /// 32-bit IEEE 754 little-endian interleaved samples.
-    F32,
-}
-
-/// Description of a decoded audio stream.
-#[derive(Clone, Copy, Debug, PartialEq, Eq)]
-pub struct AudioSpec {
-    /// Sample rate in Hz.
-    pub sample_rate: u32,
-    /// Number of interleaved channels.
-    pub channels: u16,
-    /// Sample format.
-    pub format: SampleFormat,
-}
-
-impl AudioSpec {
-    /// Bytes per interleaved frame (one sample per channel).
-    pub fn frame_size(&self) -> usize {
-        let sample = match self.format {
-            SampleFormat::I16 => 2,
-            SampleFormat::I32 | SampleFormat::F32 => 4,
-        };
-        sample * self.channels as usize
-    }
-}
+pub use fvid_media_info::{AudioSpec, SampleFormat};
 
 /// A decoded audio packet ready for playback.
 pub struct AudioPacket {
@@ -260,9 +229,11 @@ impl Stretch {
     /// Finish a source ending at `end`; the caller pads its processing window
     /// with zeros beyond that frame. Only the remaining nominal duration is
     /// emitted, and search history is retired when no future input can use it.
+    #[cfg(feature = "player")]
     pub(crate) fn fill_final(&mut self, base: usize, input: &[f32], end: usize, output: &mut [f32]) -> usize {
         self.fill_bounded(base, input, output, Some(end))
     }
+    #[cfg(feature = "player")]
     pub(crate) fn has_pending_output(&self) -> bool { self.taken < STRETCH_FADE }
 
     fn fill_bounded(&mut self, base: usize, input: &[f32], output: &mut [f32], end: Option<usize>) -> usize {
@@ -333,10 +304,15 @@ impl Stretch {
         let head = (start - base) * channels;
         let end = head + STRETCH_SEGMENT * channels;
         self.segment.resize(STRETCH_FADE * channels, 0.0);
+        static STRETCH_MIX: std::sync::LazyLock<[f32; STRETCH_FADE]> =
+            std::sync::LazyLock::new(|| {
+                std::array::from_fn(|frame| {
+                    0.5 - 0.5 * (std::f32::consts::PI * frame as f32 / STRETCH_FADE as f32).cos()
+                })
+            });
         // Both halves of the joint keep their own samples and only their weights
         // change, so the splice leaves the loudness where it was.
-        for frame in 0..STRETCH_FADE {
-            let mix = 0.5 - 0.5 * (std::f32::consts::PI * frame as f32 / STRETCH_FADE as f32).cos();
+        for (frame, &mix) in STRETCH_MIX.iter().enumerate() {
             for channel in 0..channels {
                 let at = frame * channels + channel;
                 self.segment[at] = if first {
@@ -348,7 +324,9 @@ impl Stretch {
         }
         // The reference is the unblended tail, so a segment cut at the place the
         // rate asks for hands the stream's own samples back.
-        self.held = input[end - STRETCH_FADE * channels..end].to_vec();
+        self.held.clear();
+        self.held
+            .extend_from_slice(&input[end - STRETCH_FADE * channels..end]);
         self.segment_start = self.nominal.max(base);
         self.segment_rate = self.milli;
         self.segment_phase = self.phase;

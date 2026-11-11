@@ -30,7 +30,7 @@ pub struct DecodedFrame {
 impl PsAacDecoder {
     pub fn new(configuration: &[u8], sample_rate: u32, channels: u16) -> crate::Result<Self> {
         let asc = crate::codec::config::aac_specific_config(configuration)?;
-        let decoder = NativePsAacDecoder::new(asc).map_err(|e| crate::invalid(&e.0))?;
+        let decoder = NativePsAacDecoder::new(asc)?;
         if decoder.sample_rate() != sample_rate || u16::from(decoder.channels()) != channels {
             return Err(crate::invalid(
                 "PS AAC configuration disagrees with container sample rate or channels",
@@ -51,8 +51,7 @@ impl PsAacDecoder {
         channels: u16,
     ) -> crate::Result<Self> {
         let asc = crate::codec::config::aac_specific_config(configuration)?;
-        let decoder = NativePsAacDecoder::new_with_in_band_ps(asc, sample_rate)
-            .map_err(|e| crate::invalid(&e.0))?;
+        let decoder = NativePsAacDecoder::new_with_in_band_ps(asc, sample_rate)?;
         if channels != 2 {
             return Err(crate::invalid(
                 "in-band PS requires negotiated stereo layout",
@@ -81,9 +80,7 @@ impl PsAacDecoder {
         })
     }
     pub fn restore(&mut self, state: &Checkpoint) -> crate::Result<()> {
-        self.decoder
-            .restore(&state.native)
-            .map_err(|e| crate::invalid(&e.0))?;
+        self.decoder.restore(&state.native)?;
         self.pending = state.pending.clone();
         self.failed = false;
         Ok(())
@@ -143,9 +140,7 @@ impl PsAacDecoder {
         let index = match self.decoder.pending_frame_index() {
             Some(index) => index,
             None => {
-                self.decoder
-                    .restore(&native)
-                    .map_err(|e| crate::invalid(&e.0))?;
+                self.decoder.restore(&native)?;
                 self.failed = true;
                 return Err(crate::invalid(
                     "PS AAC accepted input without a pending frame",
@@ -153,18 +148,14 @@ impl PsAacDecoder {
             }
         };
         if self.pending.len() + 1 > 2 + usize::from(output.is_some()) {
-            self.decoder
-                .restore(&native)
-                .map_err(|e| crate::invalid(&e.0))?;
+            self.decoder.restore(&native)?;
             self.failed = true;
             return Err(crate::invalid("PS AAC source timing lookahead exceeded"));
         }
         let output = match self.frame(output) {
             Ok(output) => output,
             Err(e) => {
-                self.decoder
-                    .restore(&native)
-                    .map_err(|e| crate::invalid(&e.0))?;
+                self.decoder.restore(&native)?;
                 self.failed = true;
                 return Err(e);
             }
@@ -202,17 +193,13 @@ impl PsAacDecoder {
         let output = match self.frame(output) {
             Ok(output) => output,
             Err(e) => {
-                self.decoder
-                    .restore(&native)
-                    .map_err(|e| crate::invalid(&e.0))?;
+                self.decoder.restore(&native)?;
                 self.failed = true;
                 return Err(e);
             }
         };
         if output.is_none() && !self.pending.is_empty() {
-            self.decoder
-                .restore(&native)
-                .map_err(|e| crate::invalid(&e.0))?;
+            self.decoder.restore(&native)?;
             self.failed = true;
             return Err(crate::invalid("PS AAC EOF lost pending source timing"));
         }

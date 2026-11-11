@@ -6,11 +6,6 @@ use std::{
     io::{Read, Seek, SeekFrom},
     path::Path,
 };
-pub(crate) fn supports(source: &Path, options: &CopyOptions) -> bool {
-    crate::owned_mp4_remux::supports(source, Path::new("planned.mkv"), options)
-        || crate::owned_adts_remux::supports(source, Path::new("planned.mka"), options)
-        || crate::owned_matroska_remux::supports(source, Path::new("planned.mkv"), options)
-}
 pub fn plan_remux(source: &Path, options: &CopyOptions) -> Result<MediaPlan, String> {
     if options.cancel.as_ref().is_some_and(|c| c.is_cancelled()) {
         return Err("media operation cancelled".into());

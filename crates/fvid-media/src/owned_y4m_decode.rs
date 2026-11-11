@@ -621,28 +621,6 @@ pub(crate) fn has_geometry_or_pixel_transform(transform: &DecodeTransform) -> bo
         || gradients(transform).iter().any(|(_, a)| a.is_some())
         || morphology(transform).iter().any(|(_, a)| a.is_some())
 }
-pub(crate) fn apply_pixel_filters(
-    header: &Header,
-    transform: &DecodeTransform,
-    output: &mut Vec<u8>,
-) -> Result<()> {
-    apply_pixel_filters_cached(header, transform, output, None, 6)
-}
-pub(crate) fn apply_pixel_filters_cached(
-    header: &Header,
-    transform: &DecodeTransform,
-    output: &mut Vec<u8>,
-    lut: Option<&crate::owned_lutyuv::LutYuv>,
-    matrix: u8,
-) -> Result<()> {
-    apply_pixel_filters_cached_at(header, transform, output, lut, matrix, 0, None)
-}
-pub(crate) fn apply_pixel_filters_cached_at(
-    header: &Header, transform: &DecodeTransform, output: &mut Vec<u8>,
-    lut: Option<&crate::owned_lutyuv::LutYuv>, matrix: u8, n:u64, t:Option<f64>,
-) -> Result<()> {
-    apply_pixel_filters_clock(header, transform, output, lut, matrix, n, t, None, None, None)
-}
 pub(crate) fn apply_pixel_filters_clock(
     header: &Header,
     transform: &DecodeTransform,
@@ -712,50 +690,63 @@ pub(crate) fn apply_pixel_filters_clock(
             data: std::mem::take(output),
         };
         let result: Result<()> = (|| {
+            let depth = header.depth();
+            if depth > 8
+                && depth < 16
+                && frame
+                    .data
+                    .as_chunks::<2>()
+                    .0
+                    .iter()
+                    .any(|p| u16::from_le_bytes(*p) >= 1u16 << depth)
+            {
+                return Err("invalid 16-bit planar sample storage".into());
+            }
             if transform.tmix.is_some() {
-                history.and_then(|h|h.tmix.as_ref()).ok_or("tmix requires persistent streaming history")?.apply(&mut frame,header.depth(),n)?;
+                history.and_then(|h|h.tmix.as_ref()).ok_or("tmix requires persistent streaming history")?.apply(&mut frame,depth,n)?;
             }
             if transform.hqdn3d.is_some() {
-                history.and_then(|h|h.hqdn3d.as_ref()).ok_or("hqdn3d requires persistent streaming history")?.apply(&mut frame,header.depth(),n,t)?;
+                history.and_then(|h|h.hqdn3d.as_ref()).ok_or("hqdn3d requires persistent streaming history")?.apply(&mut frame,depth,n,t)?;
             }
             if let Some(args) = transform.eq.as_deref() {
-                if let Some(eq)=history.and_then(|context|context.eq.as_ref()) {eq.apply(&mut frame,header.depth(),n,t)?;}
-                else {crate::owned_eq::EqualizerProgram::parse(args)?.apply(&mut frame,header.depth(),n,t)?;}
+                if let Some(eq)=history.and_then(|context|context.eq.as_ref()) {eq.apply(&mut frame,depth,n,t)?;}
+                else {crate::owned_eq::EqualizerProgram::parse(args)?.apply(&mut frame,depth,n,t)?;}
             }
             if let Some(args) = transform.unsharp.as_deref() {
                 if let Some(filter) = history.and_then(|h| h.unsharp.as_ref()) {
-                    filter.apply(&mut frame, header.depth())?;
+                    filter.apply(&mut frame, depth)?;
                 } else {
-                    crate::owned_unsharp::Unsharp::parse(args)?.apply(&mut frame, header.depth())?;
+                    crate::owned_unsharp::Unsharp::parse(args)?.apply(&mut frame, depth)?;
                 }
             }
             if let Some(args) = transform.hue.as_deref() {
                 if let Some(filter) = history.and_then(|h| h.hue.as_ref()) {
-                    filter.at(n, t)?.apply(&mut frame, header.depth())?;
+                    filter.at(n, t)?.apply(&mut frame, depth)?;
                 } else {
-                    crate::owned_hue::HueProgram::parse(args)?.at(n,t)?.apply(&mut frame, header.depth())?;
+                    crate::owned_hue::HueProgram::parse(args)?.at(n,t)?.apply(&mut frame, depth)?;
                 }
             }
             if let Some(args) = transform.gblur.as_deref() {
                 if let Some(filter) = history.and_then(|h| h.gblur.as_ref()) {
-                    filter.apply(&mut frame, header.depth())?;
+                    filter.apply(&mut frame, depth)?;
                 } else {
-                    crate::owned_gblur::GaussianBlur::parse(args)?.apply(&mut frame, header.depth())?;
+                    crate::owned_gblur::GaussianBlur::parse(args)?.apply(&mut frame, depth)?;
                 }
             }
             if let Some(args) = transform.avgblur.as_deref() {
                 if let Some(filter) = history.and_then(|h| h.avgblur.as_ref()) {
-                    filter.apply(&mut frame, header.depth())?;
+                    filter.apply(&mut frame, depth)?;
                 } else {
                     crate::owned_avgblur::AverageBlur::parse(args)?
-                        .apply(&mut frame, header.depth())?;
+                        .apply(&mut frame, depth)?;
                 }
             }
             if let Some(args) = transform.boxblur.as_deref() {
                 if let Some(filter) = history.and_then(|context| context.boxblur.as_ref()) {
-                    filter.apply(&mut frame, header.depth())?;
+                    filter.apply_validated(&mut frame, depth)?;
                 } else {
-                    crate::owned_boxblur::BoxBlurProgram::parse(args)?.apply(&mut frame, header.depth())?;
+                    crate::owned_boxblur::BoxBlurProgram::parse(args)?
+                        .apply_validated(&mut frame, depth)?;
                 }
             }
             if let Some(args) = transform.negate.as_deref() {
@@ -1241,7 +1232,7 @@ fn decode_reader_frames(
     let width = u32::try_from(ow).map_err(|_| "Y4M width exceeds decode API range")?;
     let height = u32::try_from(oh).map_err(|_| "Y4M height exceeds decode API range")?;
     let mut presented_header = presented_header_after_geometry(&header, transform)?;
-    let aspect = presented_header.pixel_aspect()?;
+    let _aspect = presented_header.pixel_aspect()?;
     let mut overlay = transform
         .overlay
         .as_ref()

@@ -1,7 +1,7 @@
 //! Sample-clock scheduling for unit-rate MP4 audio edits.
+pub use fvid_media::owned_mp4_audio_schedule::*;
+#[cfg(test)]
 use super::mp4::Edit;
-use crate::{Result, invalid};
-include!("../../crates/fvid-media/src/owned_mp4_audio_schedule_impl.rs");
 
 #[cfg(test)]
 mod tests {

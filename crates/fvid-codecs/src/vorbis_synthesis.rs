@@ -1,5 +1,22 @@
 //! Owned Vorbis window and synthesis primitives.
 use crate::{Result, invalid};
+use std::sync::OnceLock;
+
+fn window_slope(span: usize) -> &'static [f32] {
+    static SLOPES: OnceLock<[Vec<f32>; 8]> = OnceLock::new();
+    let idx = (span.trailing_zeros() as usize) - 5;
+    &SLOPES.get_or_init(|| {
+        std::array::from_fn(|k| {
+            let len = 32usize << k;
+            (0..len)
+                .map(|i| {
+                    let x = (i as f64 + 0.5) / len as f64 * std::f64::consts::FRAC_PI_2;
+                    (std::f64::consts::FRAC_PI_2 * x.sin().powi(2)).sin() as f32
+                })
+                .collect()
+        })
+    })[idx]
+}
 
 /// Fill the Vorbis I window, including hybrid short/long transitions.
 /// All geometry is checked before changing caller-owned output.
@@ -30,26 +47,17 @@ pub fn window(
     } else {
         (n / 2, n)
     };
-    output.fill(0.);
+    output[..left_start].fill(0.);
     output[left_end..right_start].fill(1.);
-    let slope = |x: f64| (std::f64::consts::FRAC_PI_2 * x.sin().powi(2)).sin() as f32;
-    for (i, sample) in output
+    output[right_end..].fill(0.);
+    let left_ramp = window_slope(left_end - left_start);
+    output[left_start..left_end].copy_from_slice(left_ramp);
+    let right_ramp = window_slope(right_end - right_start);
+    for (dst, &src) in output[right_start..right_end]
         .iter_mut()
-        .enumerate()
-        .take(left_end)
-        .skip(left_start)
+        .zip(right_ramp.iter().rev())
     {
-        let phase = (i - left_start) as f64 + 0.5;
-        *sample = slope(phase / (left_end - left_start) as f64 * std::f64::consts::FRAC_PI_2);
-    }
-    for (i, sample) in output
-        .iter_mut()
-        .enumerate()
-        .take(right_end)
-        .skip(right_start)
-    {
-        let phase = (right_end - i) as f64 - 0.5;
-        *sample = slope(phase / (right_end - right_start) as f64 * std::f64::consts::FRAC_PI_2);
+        *dst = src;
     }
     Ok(())
 }
@@ -114,26 +122,28 @@ impl Overlap {
         self.previous.clear();
     }
     pub fn push(&mut self, frame: &[f32]) -> Result<Vec<f32>> {
+        let mut output = Vec::new();
+        self.push_into(frame, &mut output)?;
+        Ok(output)
+    }
+
+    pub fn push_into(&mut self, frame: &[f32], output: &mut Vec<f32>) -> Result<()> {
         if !frame.len().is_power_of_two() || !(64..=8192).contains(&frame.len()) {
             return Err(invalid("invalid Vorbis overlap block size"));
         }
-        let mut next = Vec::new();
-        next.try_reserve_exact(frame.len())
-            .map_err(|_| invalid("cannot allocate Vorbis overlap history"))?;
-        next.extend_from_slice(frame);
-        let mut output = Vec::new();
+        output.clear();
         if !self.previous.is_empty() {
             let hop = (self.previous.len() + frame.len()) / 4;
-            output
-                .try_reserve_exact(hop)
-                .map_err(|_| invalid("cannot allocate Vorbis overlap output"))?;
+            if output.capacity() < hop {
+                output
+                    .try_reserve_exact(hop - output.len())
+                    .map_err(|_| invalid("cannot allocate Vorbis overlap output"))?;
+            }
+            let prev_half = self.previous.len() / 2;
+            let frame_half = frame.len() as isize / 2;
             for t in 0..hop {
-                let previous = self
-                    .previous
-                    .get(self.previous.len() / 2 + t)
-                    .copied()
-                    .unwrap_or(0.);
-                let at = frame.len() as isize / 2 + t as isize - hop as isize;
+                let previous = self.previous.get(prev_half + t).copied().unwrap_or(0.);
+                let at = frame_half + t as isize - hop as isize;
                 let current = if at < 0 {
                     0.
                 } else {
@@ -142,8 +152,14 @@ impl Overlap {
                 output.push(previous + current);
             }
         }
-        self.previous = next;
-        Ok(output)
+        if self.previous.capacity() < frame.len() {
+            self.previous
+                .try_reserve_exact(frame.len() - self.previous.len())
+                .map_err(|_| invalid("cannot allocate Vorbis overlap history"))?;
+        }
+        self.previous.clear();
+        self.previous.extend_from_slice(frame);
+        Ok(())
     }
 }
 #[cfg(test)]

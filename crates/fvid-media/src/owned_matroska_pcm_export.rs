@@ -8,28 +8,6 @@ use std::{
     path::Path,
 };
 type Result<T> = std::result::Result<T, String>;
-pub(crate) fn recognizes(source: &Path, options: &CopyOptions) -> Result<bool> {
-    let mut file = File::open(source).map_err(|e| e.to_string())?;
-    let mut signature = [0; 4];
-    if file.read_exact(&mut signature).is_err() || signature != [0x1a, 0x45, 0xdf, 0xa3] {
-        return Ok(false);
-    }
-    let reader = crate::owned_matroska_audio::open_audio_reader(
-        BufReader::new(File::open(source).map_err(|e| e.to_string())?),
-        options,
-        options.max_packet_bytes,
-    )
-    .map_err(|e| e.to_string())?;
-    let preferred=reader.preferred_track_numbers(&reader.tracks.iter().filter(|t|t.kind==2).map(|t|t.number).collect::<Vec<_>>());
-    Ok(reader.tracks.iter().enumerate().any(|(index, t)| {
-        ((options.streams.is_empty() && preferred.contains(&t.number)) || options.streams.contains(&index))
-            && t.kind == 2
-            && matches!(
-                t.codec.as_str(),
-                "A_PCM/INT/LIT" | "A_PCM/INT/BIG" | "A_PCM/FLOAT/IEEE"
-            )
-    }))
-}
 fn decode_options(options: &CopyOptions) -> CopyOptions {
     let mut options = options.clone();
     options.metadata_set.clear();
@@ -39,6 +17,7 @@ fn decode_options(options: &CopyOptions) -> CopyOptions {
     options
 }
 use crate::owned_adts_export::decoded_prefix as prefix;
+#[cfg(test)]
 pub(crate) fn supports(
     source: &Path,
     transform: AudioDecodeTransform,
@@ -65,6 +44,7 @@ pub(crate) fn supports(
     };
     supports_from_reader(source, reader, index, transform, options)
 }
+#[cfg(test)]
 pub(crate) fn supports_from_reader<R: Read + std::io::Seek>(
     source: &Path,
     reader: crate::owned_webm::WebmReader<R>,
@@ -95,43 +75,6 @@ pub(crate) fn supports_from_reader<R: Read + std::io::Seek>(
         || result
             .err()
             .is_some_and(|e| e.to_string().starts_with("controlled memory budget exceeded:"))
-}
-pub(crate) fn apply(
-    source: &Path,
-    destination: &Path,
-    transform: AudioDecodeTransform,
-    options: &CopyOptions,
-) -> Result<AudioDecodeStats> {
-    if options.cancel.as_ref().is_some_and(|c| c.is_cancelled()) {
-        return Err("media operation cancelled".into());
-    }
-    if options.max_packet_bytes == 0 {
-        return Err("packet byte limit must be positive".into());
-    }
-    if options.max_packets == Some(0) {
-        return Err("packet work limit requires at least one packet".into());
-    }
-    if options.max_controlled_bytes == Some(0) {
-        return Err("controlled memory limit must be positive".into());
-    }
-    crate::owned_budget::check_rss_budget(options)?;
-    if destination.symlink_metadata().is_ok() {
-        return Err("output already exists".into());
-    }
-    let reader = crate::owned_matroska_audio::open_audio_reader(
-        BufReader::new(File::open(source).map_err(|e| e.to_string())?),
-        options,
-        options.max_packet_bytes,
-    )
-    .map_err(|e| e.to_string())?;
-    let selected = match options.streams.as_slice() {
-        [] => None,
-        [index] => Some(*index),
-        _ => return Err("select exactly one audio stream".into()),
-    };
-    let index = crate::owned_matroska_audio::matroska_audio_index(&reader, selected)
-        .map_err(|e| e.to_string())?;
-    apply_from_reader(source, reader, index, destination, transform, options)
 }
 
 pub(crate) fn apply_from_reader<R: Read + std::io::Seek>(
@@ -195,49 +138,9 @@ pub(crate) fn apply_from_reader<R: Read + std::io::Seek>(
     crate::owned_adts_export::export_spool(spool, destination, transform, options)
 }
 
-pub(crate) fn geometry(source: &Path, options: &CopyOptions) -> Result<(u32, u16)> {
-    geometry_for_decode(source, None, options)
-}
 
-pub(crate) fn geometry_for_decode(
-    source: &Path,
-    transform: Option<AudioDecodeTransform>,
-    options: &CopyOptions,
-) -> Result<(u32, u16)> {
-    let (rate, channels, _) = geometry_and_frames_for_decode(source, transform, options)?;
-    Ok((rate, channels))
-}
 
-pub(crate) fn geometry_and_frames_for_decode(
-    source: &Path,
-    transform: Option<AudioDecodeTransform>,
-    options: &CopyOptions,
-) -> Result<(u32, u16, u64)> {
-    let (rate, channels, frames, _) =
-        geometry_frames_and_info_for_decode(source, transform, options)?;
-    Ok((rate, channels, frames))
-}
 
-pub(crate) fn geometry_frames_and_info_for_decode(
-    source: &Path,
-    transform: Option<AudioDecodeTransform>,
-    options: &CopyOptions,
-) -> Result<(u32, u16, u64, Vec<u8>)> {
-    let reader = crate::owned_matroska_audio::open_audio_reader(
-        BufReader::new(File::open(source).map_err(|e| e.to_string())?),
-        options,
-        options.max_packet_bytes,
-    )
-    .map_err(|e| e.to_string())?;
-    let selected = match options.streams.as_slice() {
-        [] => None,
-        [index] => Some(*index),
-        _ => return Err("select exactly one audio stream".into()),
-    };
-    let index = crate::owned_matroska_audio::matroska_audio_index(&reader, selected)
-        .map_err(|e| e.to_string())?;
-    geometry_from_reader_for_decode(source, reader, index, transform, options)
-}
 
 pub(crate) fn geometry_from_reader_for_decode<R: Read + std::io::Seek>(
     source: &Path,

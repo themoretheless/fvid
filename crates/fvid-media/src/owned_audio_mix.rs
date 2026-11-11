@@ -5,7 +5,6 @@ use fvid_media_info::AudioDecodeStats;
 pub use fvid_media_info::{MixAudioOptions, MixAudioStats, MixDuration};
 use std::path::{Path, PathBuf};
 type Result<T> = std::result::Result<T, String>;
-type Decoder = fn(&Path) -> Result<(AudioDecodeStats, Vec<u8>)>;
 
 pub fn mix_audio(
     sources: &[PathBuf],
@@ -144,10 +143,14 @@ fn audio_plan_with_controls(
                 crate::owned_wave_inspect::g711_law(&mut file, controls.cancel.as_ref())
                     .map_err(|e| e.to_string())?
             {
-                let (rate, channels, _, _, g711_frames, info_len) =
+                let desc =
                     crate::owned_g711_wave_export::descriptor_from_file_and_law_for_decode(
                         file, law, None, controls,
                     )?;
+                let rate = desc.sample_rate;
+                let channels = desc.channels;
+                let g711_frames = desc.estimated_frames;
+                let info_len = desc.metadata_bytes;
                 crate::owned_adts_export::check_spool_wave_export_budget(
                     rate,
                     channels,
@@ -285,18 +288,13 @@ fn audio_plan_with_controls(
     })
 }
 
-/// Decode through the same owned file-export pipeline used by decode_audio.
-/// The private spool is removed on success and error; it is never published.
-pub(crate) fn decode_owned_audio(source: &Path) -> Result<(AudioDecodeStats, Vec<u8>)> {
-    decode_owned_audio_with_controls(source, &Default::default())
-}
 pub(crate) fn decode_owned_audio_with_controls(
     source: &Path,
     controls: &fvid_control::CopyOptions,
 ) -> Result<(AudioDecodeStats, Vec<u8>)> {
     use std::io::{Seek, SeekFrom};
     validate_mix_controls(controls)?;
-    let (mut file, head, head_len) = crate::owned_audio_plan::open_source_head(source)?;
+    let (file, head, head_len) = crate::owned_audio_plan::open_source_head(source)?;
     let mut head_file = Some(file);
     if head_len == 12 && &head[..4] == b"RIFF" && &head[8..12] == b"WAVE" {
         let mut wave_file = head_file.take().unwrap();
@@ -372,10 +370,12 @@ pub(crate) fn decode_owned_audio_with_controls(
     )
 }
 
+#[cfg(test)]
 pub(crate) fn decode_float_wave(source: &Path) -> Result<(AudioDecodeStats, Vec<u8>)> {
     decode_float_wave_controlled(source, None, |_| Ok(()))
 }
 
+#[cfg(test)]
 pub(crate) fn decode_float_wave_controlled<F: FnMut(usize) -> Result<()>>(
     source: &Path,
     cancel: Option<&fvid_control::CancelFlag>,
@@ -383,6 +383,7 @@ pub(crate) fn decode_float_wave_controlled<F: FnMut(usize) -> Result<()>>(
 ) -> Result<(AudioDecodeStats, Vec<u8>)> {
     read_float_wave_controlled(source, Some(32), cancel, block)
 }
+#[cfg(test)]
 pub(crate) fn read_float_wave_controlled<F: FnMut(usize) -> Result<()>>(
     source: &Path,
     bits: Option<u16>,
@@ -391,6 +392,7 @@ pub(crate) fn read_float_wave_controlled<F: FnMut(usize) -> Result<()>>(
 ) -> Result<(AudioDecodeStats, Vec<u8>)> {
     read_float_wave_with_limits(source, bits, cancel, usize::MAX, None, block)
 }
+#[cfg(test)]
 pub(crate) fn read_float_wave_with_limits<F: FnMut(usize) -> Result<()>>(
     source: &Path,
     bits: Option<u16>,
@@ -569,19 +571,6 @@ where
         pcm,
     ))
 }
-/// Mix two or more audio inputs to float PCM WAV.
-/// Fair-pairs FFmpeg
-/// `amix=inputs=N:duration=shortest:dropout_transition=0:normalize=0|1[:weights=...]`.
-pub(crate) fn mix_with_decoder(
-    sources: &[PathBuf],
-    destination: &Path,
-    options: &MixAudioOptions,
-    decoder: Decoder,
-) -> Result<MixAudioStats> {
-    mix_with_controls_and_decoder(sources, destination, options, &Default::default(), |p, _| {
-        decoder(p)
-    })
-}
 fn mix_with_controls(
     sources: &[PathBuf],
     destination: &Path,
@@ -733,15 +722,6 @@ fn expand_weights(inputs: usize, weights: &[f32]) -> Result<Vec<f32>> {
 
 pub use fvid_media_info::MergeAudioStats;
 
-/// Channel-merge exactly two float PCM inputs (FFmpeg `amerge=inputs=2`).
-/// Same sample rate required; duration is shortest. Output channel count is the sum.
-pub(crate) fn merge_with_decoder(
-    sources: &[PathBuf],
-    destination: &Path,
-    decoder: Decoder,
-) -> Result<MergeAudioStats> {
-    merge_with_controls_and_decoder(sources, destination, &Default::default(), |p, _| decoder(p))
-}
 fn merge_with_controls(
     sources: &[PathBuf],
     destination: &Path,

@@ -264,6 +264,7 @@ pub struct Envelope {
 
 impl Envelope {
     /// Bound all metadata-driven point access before rendering.
+    #[cfg(feature = "player")]
     pub(crate) fn playable(&self) -> bool {
         let n = usize::from(self.length);
         n > 0 && n <= self.points.len() && n <= ENVELOPE_POINTS

@@ -155,464 +155,366 @@ pub struct XfadeSpec {
     pub fps_den: i32,
 }
 
-#[derive(Clone, Debug, Default, PartialEq)]
-pub struct LosslessTransform {
-    pub crop: Option<CropRect>,
-    pub vertical_flip: bool,
-    pub horizontal_flip: bool,
-    /// Exact output size after crop/flips/transpose/rotate/pad. Neighbor sampling matches
-    /// FFmpeg `scale=W:H:flags=neighbor`.
-    pub scale: Option<ScaleSize>,
-    /// FFmpeg `epx=` pixel-art upscale after scale and before burn/overlay (e.g. `n=2`).
-    pub epx: Option<String>,
-    /// FFmpeg-compatible `transpose=` after crop/flips and before rotate/pad/scale.
-    pub transpose: Option<TransposeMode>,
-    /// FFmpeg-compatible `rotate=` after transpose and before pad/scale.
-    pub rotate: Option<RotateAngle>,
-    /// FFmpeg-compatible `pad=W:H:X:Y:black` after rotate and before scale.
-    pub pad: Option<PadRect>,
-    /// External text subtitle file burned via libavfilter `subtitles=` after geometry.
-    pub burn_subs: Option<PathBuf>,
-    /// External video composited via libavfilter `movie=` + `overlay=x:y` after burn-in.
-    pub overlay: Option<OverlaySpec>,
-    /// External video cross-faded via libavfilter `movie=` + `xfade=` (mutually exclusive with overlay).
-    pub xfade: Option<XfadeSpec>,
-    /// FFmpeg `yadif=` option string (e.g. `mode=0`); empty string uses defaults.
-    pub yadif: Option<String>,
-    /// FFmpeg `bwdif=` option string (e.g. `mode=0`); empty string uses defaults.
-    pub bwdif: Option<String>,
-    /// FFmpeg `w3fdif=` option string (e.g. `mode=0`); empty string uses defaults.
-    pub w3fdif: Option<String>,
-    /// FFmpeg `tblend=` option string (e.g. `all_mode=average`).
-    pub tblend: Option<String>,
-    /// FFmpeg `tmix=` option string (e.g. `frames=3`).
-    pub tmix: Option<String>,
-    /// FFmpeg `hqdn3d=` option string (e.g. `4:3:6:4.5`); empty string uses defaults.
-    pub hqdn3d: Option<String>,
-    /// FFmpeg `gblur=` option string (e.g. `sigma=1.5:steps=1`); empty uses defaults.
-    pub gblur: Option<String>,
-    /// FFmpeg `eq=` option string (e.g. `brightness=0.06:contrast=1.2`); empty uses defaults.
-    pub eq: Option<String>,
-    /// FFmpeg `unsharp=` option string (e.g. `5:5:1.0:5:5:0.0`); empty uses defaults.
-    pub unsharp: Option<String>,
-    /// FFmpeg `hue=` option string (e.g. `h=90:s=1.2`); empty uses defaults.
-    pub hue: Option<String>,
-    /// FFmpeg `avgblur=` option string (e.g. `sizeX=5:sizeY=5`); empty uses defaults.
-    pub avgblur: Option<String>,
-    /// FFmpeg `boxblur=` option string (e.g. `2:1`); empty uses defaults.
-    pub boxblur: Option<String>,
-    /// FFmpeg `negate` / `negate=1` (alpha); empty/`0` = components only.
-    pub negate: Option<String>,
-    /// FFmpeg `edgedetect=` option string (e.g. `mode=colormix`); empty uses defaults.
-    pub edgedetect: Option<String>,
-    /// FFmpeg `sobel=` option string (e.g. `scale=2:delta=10`); empty uses defaults.
-    pub sobel: Option<String>,
-    /// FFmpeg `prewitt=` option string (e.g. `scale=2:delta=10`); empty uses defaults.
-    pub prewitt: Option<String>,
-    /// FFmpeg `roberts=` option string (e.g. `scale=2:delta=10`); empty uses defaults.
-    pub roberts: Option<String>,
-    /// FFmpeg `kirsch=` option string (e.g. `scale=2:delta=10`); empty uses defaults.
-    pub kirsch: Option<String>,
-    /// FFmpeg `scharr=` option string (e.g. `scale=2:delta=10`); empty uses defaults.
-    pub scharr: Option<String>,
-    /// FFmpeg `atadenoise=` option string (e.g. `0a=0.02:0b=0.04`); empty uses defaults.
-    pub atadenoise: Option<String>,
-    /// FFmpeg `owdenoise=` option string (e.g. `depth=8:luma_strength=1.0`); empty uses defaults.
-    pub owdenoise: Option<String>,
-    /// FFmpeg `vaguedenoiser=` option string (e.g. `threshold=3`); empty uses defaults.
-    pub vaguedenoiser: Option<String>,
-    /// FFmpeg `nlmeans=` option string (e.g. `s=1.0`); empty uses defaults.
-    pub nlmeans: Option<String>,
-    /// FFmpeg `bm3d=` option string (e.g. `sigma=3`); empty uses defaults.
-    pub bm3d: Option<String>,
-    /// FFmpeg `dctdnoiz=` option string (e.g. `s=3`); empty uses defaults.
-    pub dctdnoiz: Option<String>,
-    /// FFmpeg `fftdnoiz=` option string (e.g. `sigma=1`); empty uses defaults.
-    pub fftdnoiz: Option<String>,
-    /// FFmpeg `smartblur=` option string (e.g. `lr=1.5:ls=-0.5`); empty uses defaults.
-    pub smartblur: Option<String>,
-    /// FFmpeg `sab=` option string (e.g. `lr=2:cr=2`); empty uses defaults.
-    pub sab: Option<String>,
-    /// FFmpeg `bilateral=` option string (e.g. `sigmaS=0.1:sigmaR=0.1`); empty uses defaults.
-    pub bilateral: Option<String>,
-    /// FFmpeg `cas=` option string (e.g. `strength=0.5`); empty uses defaults.
-    pub cas: Option<String>,
-    /// FFmpeg `vignette=` option string (e.g. `angle=PI/4`); empty uses defaults.
-    pub vignette: Option<String>,
-    /// FFmpeg `curves=` option string (e.g. `preset=vintage`); empty uses defaults.
-    pub curves: Option<String>,
-    /// FFmpeg `colorbalance=` option string (e.g. `rs=.1:gs=.05:bs=-.1`); empty uses defaults.
-    pub colorbalance: Option<String>,
-    /// FFmpeg `colorlevels=` option string (e.g. `rimin=0.1:gimin=0.1:bimin=0.1`); empty uses defaults.
-    pub colorlevels: Option<String>,
-    /// FFmpeg `colorchannelmixer=` option string (e.g. `rr=1.1:gg=0.9:bb=1.0`); empty uses defaults.
-    pub colorchannelmixer: Option<String>,
-    /// FFmpeg `deflicker=` option string (e.g. `mode=am:size=5`); empty uses defaults.
-    pub deflicker: Option<String>,
-    /// FFmpeg `photosensitivity=` option string (e.g. `f=5`); empty uses defaults.
-    pub photosensitivity: Option<String>,
-    /// FFmpeg `monochrome=` option string (e.g. `cb=0.2:cr=-0.1`); empty uses defaults.
-    pub monochrome: Option<String>,
-    /// FFmpeg `grayworld` / `grayworld=` (white balance); empty/`0` uses defaults.
-    pub grayworld: Option<String>,
-    /// FFmpeg `drawbox=` option string (e.g. `x=10:y=10:w=40:h=20:color=red`); empty uses defaults.
-    pub drawbox: Option<String>,
-    /// FFmpeg `drawgrid=` option string (e.g. `w=16:h=16:color=white`); empty uses defaults.
-    pub drawgrid: Option<String>,
-    /// FFmpeg `lagfun=` option string (e.g. `decay=0.95`); empty uses defaults.
-    pub lagfun: Option<String>,
-    /// FFmpeg `amplify=` option string (e.g. `radius=2:factor=2`); empty uses defaults.
-    pub amplify: Option<String>,
-    /// FFmpeg `bitplanenoise=` option string (e.g. `bitplane=1:filter=1`); empty uses defaults.
-    pub bitplanenoise: Option<String>,
-    /// FFmpeg `deband=` option string (e.g. `1thr=0.02`); empty uses defaults.
-    pub deband: Option<String>,
-    /// FFmpeg `gradfun=` option string (e.g. `strength=1.2`); empty uses defaults.
-    pub gradfun: Option<String>,
-    /// FFmpeg `lenscorrection=` option string (e.g. `k1=-0.1`); empty uses defaults.
-    pub lenscorrection: Option<String>,
-    /// FFmpeg `pixelize=` option string (e.g. `width=8:height=8`); empty uses defaults.
-    pub pixelize: Option<String>,
-    /// FFmpeg `removegrain=` option string (e.g. `m0=1`); empty uses defaults.
-    pub removegrain: Option<String>,
-    /// FFmpeg `yaepblur=` option string (e.g. `r=3`); empty uses defaults.
-    pub yaepblur: Option<String>,
-    /// FFmpeg `vibrance=` option string (e.g. `intensity=0.3:rbal=1`); empty uses defaults.
-    pub vibrance: Option<String>,
-    /// FFmpeg `dilation=` option string (e.g. `threshold0=10`); empty uses defaults.
-    pub dilation: Option<String>,
-    /// FFmpeg `erosion=` option string (e.g. `threshold0=10`); empty uses defaults.
-    pub erosion: Option<String>,
-    /// FFmpeg `colorize=` option string (e.g. `hue=120:saturation=0.5`); empty uses defaults.
-    pub colorize: Option<String>,
-    /// FFmpeg `exposure=` option string (e.g. `exposure=0.5`); empty uses defaults.
-    pub exposure: Option<String>,
-    /// FFmpeg `chromashift=` option string (e.g. `cbh=4`); empty uses defaults.
-    pub chromashift: Option<String>,
-    /// FFmpeg `colorcontrast=` option string (e.g. `rc=0.1:gm=0.1:by=0.1`); empty uses defaults.
-    pub colorcontrast: Option<String>,
-    /// FFmpeg `colorcorrect=` option string (e.g. `rl=0.1:bl=-0.1`); empty uses defaults.
-    pub colorcorrect: Option<String>,
-    /// FFmpeg `histeq=` option string (e.g. `strength=0.2`); empty uses defaults.
-    pub histeq: Option<String>,
-    /// FFmpeg `shuffleplanes=` option string (e.g. `map0=0:map1=2:map2=1`); empty uses defaults.
-    pub shuffleplanes: Option<String>,
-    /// FFmpeg `lutyuv=` option string (e.g. `y=val*0.8`); empty uses defaults.
-    pub lutyuv: Option<String>,
-    /// FFmpeg `colorhold=` option string (e.g. `similarity=0.2:blend=0.1`); empty uses defaults.
-    pub colorhold: Option<String>,
-    /// FFmpeg `fade=` option string (e.g. `t=in:s=0:n=4`); empty uses defaults.
-    pub fade: Option<String>,
-    /// FFmpeg `perspective=` option string; empty uses defaults.
-    pub perspective: Option<String>,
-    /// FFmpeg `lumakey=` option string (e.g. `threshold=0.1:tolerance=0.1:softness=0.1`); empty uses defaults.
-    pub lumakey: Option<String>,
-    /// FFmpeg `chromakey=` option string (e.g. `similarity=0.3:blend=0.1`); empty uses defaults.
-    pub chromakey: Option<String>,
-    /// FFmpeg `colorkey=` option string (e.g. `color=black:similarity=0.1:blend=0.1`); empty uses defaults.
-    pub colorkey: Option<String>,
-    /// FFmpeg `despill=` option string (e.g. `type=green:mix=0.5`); empty uses defaults.
-    pub despill: Option<String>,
-    /// FFmpeg `selectivecolor=` option string (e.g. `reds=0.2 0 0 0`); empty uses defaults.
-    pub selectivecolor: Option<String>,
-    /// FFmpeg `stereo3d=` option string (e.g. `sbsl:abl`); empty uses defaults.
-    pub stereo3d: Option<String>,
-    /// FFmpeg `field=` option string (e.g. `bottom`); empty uses defaults.
-    pub field: Option<String>,
-    /// FFmpeg `hqx=` pixel-art upscale after field (e.g. `n=2`).
-    pub hqx: Option<String>,
-    /// FFmpeg `xbr=` pixel-art upscale after hqx (e.g. `n=2`).
-    pub xbr: Option<String>,
-    /// FFmpeg `il=` interleave/deinterleave lines (e.g. `l=d:c=d`); empty uses defaults.
-    pub il: Option<String>,
-    /// FFmpeg `super2xsai` 2× pixel-art upscale after il; empty uses defaults.
-    pub super2xsai: Option<String>,
-    /// FFmpeg `kerndeint=` kernel deinterlace after super2xsai (e.g. `thresh=10`); empty uses defaults.
-    pub kerndeint: Option<String>,
-    /// FFmpeg `phase=` field phase shift after kerndeint (e.g. `mode=t`); empty uses defaults.
-    pub phase: Option<String>,
-    /// FFmpeg `estdif=` edge-slope deinterlace after phase (e.g. `mode=frame`); empty uses defaults.
-    pub estdif: Option<String>,
-    /// FFmpeg `tinterlace=` temporal field interlace after estdif (e.g. `mode=merge`); empty uses defaults.
-    pub tinterlace: Option<String>,
-    /// FFmpeg `separatefields` splits each frame into two fields after tinterlace; empty uses defaults.
-    pub separatefields: Option<String>,
-    /// FFmpeg `weave` joins successive fields into frames after separatefields; empty uses defaults.
-    pub weave: Option<String>,
-    /// FFmpeg `doubleweave` weaves each input field into a frame after weave; empty uses defaults.
-    pub doubleweave: Option<String>,
-    /// FFmpeg `framepack=` packs consecutive frames after doubleweave (e.g. `format=sbs`); empty uses defaults.
-    pub framepack: Option<String>,
-    /// FFmpeg `telecine=` applies a pulldown pattern after framepack (e.g. `pattern=23`); empty uses defaults.
-    pub telecine: Option<String>,
-    /// FFmpeg `pullup=` inverse telecine after telecine (e.g. `jl=0:jr=0`); empty uses defaults.
-    pub pullup: Option<String>,
-    /// FFmpeg `decimate=` drops one frame per cycle after pullup (e.g. `cycle=5`); empty uses defaults.
-    pub decimate: Option<String>,
-    /// FFmpeg `mpdecimate=` drops near-duplicate frames after decimate; empty uses defaults.
-    pub mpdecimate: Option<String>,
-    /// FFmpeg `framestep=` keeps one frame every N after mpdecimate (e.g. `2`, `step=2`); empty uses defaults.
-    pub framestep: Option<String>,
-    /// FFmpeg `tile=` packs consecutive frames into a grid after framestep (e.g. `2x2`, `layout=2x2`); empty uses defaults.
-    pub tile: Option<String>,
-    /// FFmpeg `untile=` splits each frame into a grid of frames after tile (e.g. `2x2`, `layout=2x2`); empty uses defaults.
-    pub untile: Option<String>,
-    /// FFmpeg `shuffleframes=` reorders frames after untile (e.g. `2 1 0`, `mapping=2|1|0`); empty uses defaults.
-    pub shuffleframes: Option<String>,
-    /// FFmpeg `reverse` emits frames in reverse order after shuffleframes; empty uses defaults.
-    pub reverse: Option<String>,
-    /// FFmpeg `loop=` repeats a short frame window after reverse (e.g. `loop=1:size=2:start=0`); empty uses defaults.
-    pub r#loop: Option<String>,
-    /// FFmpeg `thumbnail=` picks the most representative frame from every batch of N after loop (e.g. `n=3`, `3`); empty uses defaults.
-    pub thumbnail: Option<String>,
-    /// FFmpeg `freezedetect=` detects frozen input after thumbnail (e.g. `n=0.001:d=0.1`); empty uses defaults.
-    pub freezedetect: Option<String>,
-    /// FFmpeg `pseudocolor=` option string (e.g. `preset=magma`); empty uses defaults.
-    pub pseudocolor: Option<String>,
-    /// FFmpeg `minterpolate=` option string (e.g. `mi_mode=blend:fps=50`); empty uses defaults.
-    pub minterpolate: Option<String>,
-    /// FFmpeg `fps=` rate string (e.g. `25`, `12`, `30000/1001`).
-    pub fps: Option<String>,
-    /// FFmpeg `colorspace=` option string (e.g. `iall=bt470bg:all=bt709`).
-    pub colorspace: Option<String>,
-    /// FFmpeg `zscale=` option string (e.g. `matrixin=bt470bg:matrix=bt709`).
-    pub zscale: Option<String>,
-    /// FFmpeg `tonemap=` option string (e.g. `tonemap=hable`).
-    pub tonemap: Option<String>,
-    /// Convert to this pixel format after geometry (FFmpeg `format=`).
-    pub pix_fmt: Option<String>,
-    /// Half-open presentation-time interval in microseconds relative to container start.
-    pub interval: Option<(i64, i64)>,
-    /// Use demuxer seeking before decoding; requires an interval.
-    pub seek: bool,
+macro_rules! define_video_transforms {
+    (
+        bool_fields: [ $( $(#[$bmeta:meta])* $bfield:ident ),* $(,)? ],
+        opt_fields: [ $( $(#[$ometa:meta])* $ofield:ident : $otype:ty ),* $(,)? ]
+    ) => {
+        /// Shared geometry, compositing, pixel-art, spatial, color, and temporal filter
+        /// specification common to both [`LosslessTransform`] and [`DecodeTransform`].
+        #[derive(Clone, Debug, Default, PartialEq)]
+        pub struct VideoFilterSpec {
+            pub crop: Option<CropRect>,
+            $(
+                $(#[$bmeta])*
+                pub $bfield: bool,
+            )*
+            $(
+                $(#[$ometa])*
+                pub $ofield: Option<$otype>,
+            )*
+        }
+
+        #[derive(Clone, Debug, Default, PartialEq)]
+        pub struct LosslessTransform {
+            pub crop: Option<CropRect>,
+            $(
+                $(#[$bmeta])*
+                pub $bfield: bool,
+            )*
+            $(
+                $(#[$ometa])*
+                pub $ofield: Option<$otype>,
+            )*
+            /// External video cross-faded via libavfilter `movie=` + `xfade=` (mutually exclusive with overlay).
+            pub xfade: Option<XfadeSpec>,
+            /// Half-open presentation-time interval in microseconds relative to container start.
+            pub interval: Option<(i64, i64)>,
+            /// Use demuxer seeking before decoding; requires an interval.
+            pub seek: bool,
+        }
+
+        #[derive(Clone, Debug, Default, PartialEq)]
+        pub struct DecodeTransform {
+            pub crop: Option<CropRect>,
+            $(
+                $(#[$bmeta])*
+                pub $bfield: bool,
+            )*
+            $(
+                $(#[$ometa])*
+                pub $ofield: Option<$otype>,
+            )*
+            /// Half-open presentation interval in microseconds from container start.
+            pub interval: Option<(i64, i64)>,
+            /// Demuxer to read the file with, for a format whose bytes carry no signature — the
+            /// equivalent of ffmpeg's `-f`. `None` requests format detection by the backend.
+            pub input_format: Option<String>,
+        }
+
+        impl VideoFilterSpec {
+            /// Returns `true` if any filter other than `crop` is active.
+            pub fn has_any_non_crop_filter(&self) -> bool {
+                false $( || self.$bfield )* $( || self.$ofield.is_some() )*
+            }
+
+            /// Returns `true` if `crop` or any other filter is active.
+            pub fn has_any_filter(&self) -> bool {
+                self.crop.is_some() || self.has_any_non_crop_filter()
+            }
+
+            /// Convert into [`LosslessTransform`] with optional cross-fade and interval/seek parameters.
+            pub fn into_lossless_transform(
+                self,
+                xfade: Option<XfadeSpec>,
+                interval: Option<(i64, i64)>,
+                seek: bool,
+            ) -> LosslessTransform {
+                LosslessTransform {
+                    crop: self.crop,
+                    $( $bfield: self.$bfield, )*
+                    $( $ofield: self.$ofield, )*
+                    xfade,
+                    interval,
+                    seek,
+                }
+            }
+
+            /// Convert into [`DecodeTransform`] with optional interval and input format.
+            pub fn into_decode_transform(
+                self,
+                interval: Option<(i64, i64)>,
+                input_format: Option<String>,
+            ) -> DecodeTransform {
+                DecodeTransform {
+                    crop: self.crop,
+                    $( $bfield: self.$bfield, )*
+                    $( $ofield: self.$ofield, )*
+                    interval,
+                    input_format,
+                }
+            }
+        }
+
+        impl From<&LosslessTransform> for VideoFilterSpec {
+            fn from(value: &LosslessTransform) -> Self {
+                Self {
+                    crop: value.crop,
+                    $( $bfield: value.$bfield, )*
+                    $( $ofield: value.$ofield.clone(), )*
+                }
+            }
+        }
+
+        impl From<&DecodeTransform> for VideoFilterSpec {
+            fn from(value: &DecodeTransform) -> Self {
+                Self {
+                    crop: value.crop,
+                    $( $bfield: value.$bfield, )*
+                    $( $ofield: value.$ofield.clone(), )*
+                }
+            }
+        }
+
+        impl LosslessTransform {
+            /// Extract the shared [`VideoFilterSpec`] subset.
+            pub fn filter_spec(&self) -> VideoFilterSpec {
+                VideoFilterSpec::from(self)
+            }
+        }
+
+        impl DecodeTransform {
+            /// Extract the shared [`VideoFilterSpec`] subset.
+            pub fn filter_spec(&self) -> VideoFilterSpec {
+                VideoFilterSpec::from(self)
+            }
+        }
+    };
 }
-#[derive(Clone, Debug, Default, PartialEq)]
-pub struct DecodeTransform {
-    pub crop: Option<CropRect>,
-    pub vertical_flip: bool,
-    pub horizontal_flip: bool,
-    /// Exact output size after crop/flips/transpose/rotate/pad. Geometry-only paths
-    /// use nearest-neighbor sampling; consult the selected backend for support.
-    pub scale: Option<ScaleSize>,
-    /// FFmpeg `epx=` pixel-art upscale after scale and before burn/overlay (e.g. `n=2`).
-    pub epx: Option<String>,
-    /// FFmpeg-compatible `transpose=` after crop/flips and before rotate/pad/scale.
-    pub transpose: Option<TransposeMode>,
-    /// FFmpeg-compatible `rotate=` after transpose and before pad/scale.
-    pub rotate: Option<RotateAngle>,
-    /// FFmpeg-compatible `pad=W:H:X:Y:black` after rotate and before scale.
-    pub pad: Option<PadRect>,
-    /// External text subtitle file burned via libavfilter `subtitles=` after geometry.
-    pub burn_subs: Option<PathBuf>,
-    /// External video composited via `movie=` + `overlay=` after burn-in.
-    pub overlay: Option<crate::OverlaySpec>,
-    /// FFmpeg `yadif=` option string (e.g. `mode=0`); empty uses defaults.
-    pub yadif: Option<String>,
-    /// FFmpeg `bwdif=` option string (e.g. `mode=0`); empty uses defaults.
-    pub bwdif: Option<String>,
-    /// FFmpeg `w3fdif=` option string (e.g. `mode=0`); empty uses defaults.
-    pub w3fdif: Option<String>,
-    /// FFmpeg `tblend=` option string (e.g. `all_mode=average`).
-    pub tblend: Option<String>,
-    /// FFmpeg `tmix=` option string (e.g. `frames=3`).
-    pub tmix: Option<String>,
-    /// FFmpeg `hqdn3d=` option string (e.g. `4:3:6:4.5`); empty uses defaults.
-    pub hqdn3d: Option<String>,
-    /// FFmpeg `gblur=` option string (e.g. `sigma=1.5:steps=1`); empty uses defaults.
-    pub gblur: Option<String>,
-    /// FFmpeg `eq=` option string (e.g. `brightness=0.06:contrast=1.2`); empty uses defaults.
-    pub eq: Option<String>,
-    /// FFmpeg `unsharp=` option string (e.g. `5:5:1.0:5:5:0.0`); empty uses defaults.
-    pub unsharp: Option<String>,
-    /// FFmpeg `hue=` option string (e.g. `h=90:s=1.2`); empty uses defaults.
-    pub hue: Option<String>,
-    /// FFmpeg `avgblur=` option string (e.g. `sizeX=5:sizeY=5`); empty uses defaults.
-    pub avgblur: Option<String>,
-    /// FFmpeg `boxblur=` option string (e.g. `2:1`); empty uses defaults.
-    pub boxblur: Option<String>,
-    /// FFmpeg `negate` / `negate=1`; empty/`0` = components only.
-    pub negate: Option<String>,
-    /// FFmpeg `edgedetect=` option string (e.g. `mode=colormix`); empty uses defaults.
-    pub edgedetect: Option<String>,
-    /// FFmpeg `sobel=` option string (e.g. `scale=2:delta=10`); empty uses defaults.
-    pub sobel: Option<String>,
-    /// FFmpeg `prewitt=` option string (e.g. `scale=2:delta=10`); empty uses defaults.
-    pub prewitt: Option<String>,
-    /// FFmpeg `roberts=` option string (e.g. `scale=2:delta=10`); empty uses defaults.
-    pub roberts: Option<String>,
-    /// FFmpeg `kirsch=` option string (e.g. `scale=2:delta=10`); empty uses defaults.
-    pub kirsch: Option<String>,
-    /// FFmpeg `scharr=` option string (e.g. `scale=2:delta=10`); empty uses defaults.
-    pub scharr: Option<String>,
-    /// FFmpeg `atadenoise=` option string (e.g. `0a=0.02:0b=0.04`); empty uses defaults.
-    pub atadenoise: Option<String>,
-    /// FFmpeg `owdenoise=` option string (e.g. `depth=8:luma_strength=1.0`); empty uses defaults.
-    pub owdenoise: Option<String>,
-    /// FFmpeg `vaguedenoiser=` option string (e.g. `threshold=3`); empty uses defaults.
-    pub vaguedenoiser: Option<String>,
-    /// FFmpeg `nlmeans=` option string (e.g. `s=1.0`); empty uses defaults.
-    pub nlmeans: Option<String>,
-    /// FFmpeg `bm3d=` option string (e.g. `sigma=3`); empty uses defaults.
-    pub bm3d: Option<String>,
-    /// FFmpeg `dctdnoiz=` option string (e.g. `s=3`); empty uses defaults.
-    pub dctdnoiz: Option<String>,
-    /// FFmpeg `fftdnoiz=` option string (e.g. `sigma=1`); empty uses defaults.
-    pub fftdnoiz: Option<String>,
-    /// FFmpeg `smartblur=` option string (e.g. `lr=1.5:ls=-0.5`); empty uses defaults.
-    pub smartblur: Option<String>,
-    /// FFmpeg `sab=` option string (e.g. `lr=2:cr=2`); empty uses defaults.
-    pub sab: Option<String>,
-    /// FFmpeg `bilateral=` option string (e.g. `sigmaS=0.1:sigmaR=0.1`); empty uses defaults.
-    pub bilateral: Option<String>,
-    /// FFmpeg `cas=` option string (e.g. `strength=0.5`); empty uses defaults.
-    pub cas: Option<String>,
-    /// FFmpeg `vignette=` option string (e.g. `angle=PI/4`); empty uses defaults.
-    pub vignette: Option<String>,
-    /// FFmpeg `curves=` option string (e.g. `preset=vintage`); empty uses defaults.
-    pub curves: Option<String>,
-    /// FFmpeg `colorbalance=` option string (e.g. `rs=.1:gs=.05:bs=-.1`); empty uses defaults.
-    pub colorbalance: Option<String>,
-    /// FFmpeg `colorlevels=` option string (e.g. `rimin=0.1:gimin=0.1:bimin=0.1`); empty uses defaults.
-    pub colorlevels: Option<String>,
-    /// FFmpeg `colorchannelmixer=` option string (e.g. `rr=1.1:gg=0.9:bb=1.0`); empty uses defaults.
-    pub colorchannelmixer: Option<String>,
-    /// FFmpeg `deflicker=` option string (e.g. `mode=am:size=5`); empty uses defaults.
-    pub deflicker: Option<String>,
-    /// FFmpeg `photosensitivity=` option string (e.g. `f=5`); empty uses defaults.
-    pub photosensitivity: Option<String>,
-    /// FFmpeg `monochrome=` option string (e.g. `cb=0.2:cr=-0.1`); empty uses defaults.
-    pub monochrome: Option<String>,
-    /// FFmpeg `grayworld` / `grayworld=` (white balance); empty/`0` uses defaults.
-    pub grayworld: Option<String>,
-    /// FFmpeg `drawbox=` option string (e.g. `x=10:y=10:w=40:h=20:color=red`); empty uses defaults.
-    pub drawbox: Option<String>,
-    /// FFmpeg `drawgrid=` option string (e.g. `w=16:h=16:color=white`); empty uses defaults.
-    pub drawgrid: Option<String>,
-    /// FFmpeg `lagfun=` option string (e.g. `decay=0.95`); empty uses defaults.
-    pub lagfun: Option<String>,
-    /// FFmpeg `amplify=` option string (e.g. `radius=2:factor=2`); empty uses defaults.
-    pub amplify: Option<String>,
-    /// FFmpeg `bitplanenoise=` option string (e.g. `bitplane=1:filter=1`); empty uses defaults.
-    pub bitplanenoise: Option<String>,
-    /// FFmpeg `deband=` option string (e.g. `1thr=0.02`); empty uses defaults.
-    pub deband: Option<String>,
-    /// FFmpeg `gradfun=` option string (e.g. `strength=1.2`); empty uses defaults.
-    pub gradfun: Option<String>,
-    /// FFmpeg `lenscorrection=` option string (e.g. `k1=-0.1`); empty uses defaults.
-    pub lenscorrection: Option<String>,
-    /// FFmpeg `pixelize=` option string (e.g. `width=8:height=8`); empty uses defaults.
-    pub pixelize: Option<String>,
-    /// FFmpeg `removegrain=` option string (e.g. `m0=1`); empty uses defaults.
-    pub removegrain: Option<String>,
-    /// FFmpeg `yaepblur=` option string (e.g. `r=3`); empty uses defaults.
-    pub yaepblur: Option<String>,
-    /// FFmpeg `vibrance=` option string (e.g. `intensity=0.3:rbal=1`); empty uses defaults.
-    pub vibrance: Option<String>,
-    /// FFmpeg `dilation=` option string (e.g. `threshold0=10`); empty uses defaults.
-    pub dilation: Option<String>,
-    /// FFmpeg `erosion=` option string (e.g. `threshold0=10`); empty uses defaults.
-    pub erosion: Option<String>,
-    /// FFmpeg `colorize=` option string (e.g. `hue=120:saturation=0.5`); empty uses defaults.
-    pub colorize: Option<String>,
-    /// FFmpeg `exposure=` option string (e.g. `exposure=0.5`); empty uses defaults.
-    pub exposure: Option<String>,
-    /// FFmpeg `chromashift=` option string (e.g. `cbh=4`); empty uses defaults.
-    pub chromashift: Option<String>,
-    /// FFmpeg `colorcontrast=` option string (e.g. `rc=0.1:gm=0.1:by=0.1`); empty uses defaults.
-    pub colorcontrast: Option<String>,
-    /// FFmpeg `colorcorrect=` option string (e.g. `rl=0.1:bl=-0.1`); empty uses defaults.
-    pub colorcorrect: Option<String>,
-    /// FFmpeg `histeq=` option string (e.g. `strength=0.2`); empty uses defaults.
-    pub histeq: Option<String>,
-    /// FFmpeg `shuffleplanes=` option string (e.g. `map0=0:map1=2:map2=1`); empty uses defaults.
-    pub shuffleplanes: Option<String>,
-    /// FFmpeg `lutyuv=` option string (e.g. `y=val*0.8`); empty uses defaults.
-    pub lutyuv: Option<String>,
-    /// FFmpeg `colorhold=` option string (e.g. `similarity=0.2:blend=0.1`); empty uses defaults.
-    pub colorhold: Option<String>,
-    /// FFmpeg `fade=` option string (e.g. `t=in:s=0:n=4`); empty uses defaults.
-    pub fade: Option<String>,
-    /// FFmpeg `perspective=` option string; empty uses defaults.
-    pub perspective: Option<String>,
-    /// FFmpeg `lumakey=` option string (e.g. `threshold=0.1:tolerance=0.1:softness=0.1`); empty uses defaults.
-    pub lumakey: Option<String>,
-    /// FFmpeg `chromakey=` option string (e.g. `similarity=0.3:blend=0.1`); empty uses defaults.
-    pub chromakey: Option<String>,
-    /// FFmpeg `colorkey=` option string (e.g. `color=black:similarity=0.1:blend=0.1`); empty uses defaults.
-    pub colorkey: Option<String>,
-    /// FFmpeg `despill=` option string (e.g. `type=green:mix=0.5`); empty uses defaults.
-    pub despill: Option<String>,
-    /// FFmpeg `selectivecolor=` option string (e.g. `reds=0.2 0 0 0`); empty uses defaults.
-    pub selectivecolor: Option<String>,
-    /// FFmpeg `stereo3d=` option string (e.g. `sbsl:abl`); empty uses defaults.
-    pub stereo3d: Option<String>,
-    /// FFmpeg `field=` option string (e.g. `bottom`); empty uses defaults.
-    pub field: Option<String>,
-    /// FFmpeg `hqx=` pixel-art upscale after field (e.g. `n=2`).
-    pub hqx: Option<String>,
-    /// FFmpeg `xbr=` pixel-art upscale after hqx (e.g. `n=2`).
-    pub xbr: Option<String>,
-    /// FFmpeg `il=` interleave/deinterleave lines (e.g. `l=d:c=d`); empty uses defaults.
-    pub il: Option<String>,
-    /// FFmpeg `super2xsai` 2× pixel-art upscale after il; empty uses defaults.
-    pub super2xsai: Option<String>,
-    /// FFmpeg `kerndeint=` kernel deinterlace after super2xsai (e.g. `thresh=10`); empty uses defaults.
-    pub kerndeint: Option<String>,
-    /// FFmpeg `phase=` field phase shift after kerndeint (e.g. `mode=t`); empty uses defaults.
-    pub phase: Option<String>,
-    /// FFmpeg `estdif=` edge-slope deinterlace after phase (e.g. `mode=frame`); empty uses defaults.
-    pub estdif: Option<String>,
-    /// FFmpeg `tinterlace=` temporal field interlace after estdif (e.g. `mode=merge`); empty uses defaults.
-    pub tinterlace: Option<String>,
-    /// FFmpeg `separatefields` splits each frame into two fields after tinterlace; empty uses defaults.
-    pub separatefields: Option<String>,
-    /// FFmpeg `weave` joins successive fields into frames after separatefields; empty uses defaults.
-    pub weave: Option<String>,
-    /// FFmpeg `doubleweave` weaves each input field into a frame after weave; empty uses defaults.
-    pub doubleweave: Option<String>,
-    /// FFmpeg `framepack=` packs consecutive frames after doubleweave (e.g. `format=sbs`); empty uses defaults.
-    pub framepack: Option<String>,
-    /// FFmpeg `telecine=` applies a pulldown pattern after framepack (e.g. `pattern=23`); empty uses defaults.
-    pub telecine: Option<String>,
-    /// FFmpeg `pullup=` inverse telecine after telecine (e.g. `jl=0:jr=0`); empty uses defaults.
-    pub pullup: Option<String>,
-    /// FFmpeg `decimate=` drops one frame per cycle after pullup (e.g. `cycle=5`); empty uses defaults.
-    pub decimate: Option<String>,
-    /// FFmpeg `mpdecimate=` drops near-duplicate frames after decimate; empty uses defaults.
-    pub mpdecimate: Option<String>,
-    /// FFmpeg `framestep=` keeps one frame every N after mpdecimate (e.g. `2`, `step=2`); empty uses defaults.
-    pub framestep: Option<String>,
-    /// FFmpeg `tile=` packs consecutive frames into a grid after framestep (e.g. `2x2`, `layout=2x2`); empty uses defaults.
-    pub tile: Option<String>,
-    /// FFmpeg `untile=` splits each frame into a grid of frames after tile (e.g. `2x2`, `layout=2x2`); empty uses defaults.
-    pub untile: Option<String>,
-    /// FFmpeg `shuffleframes=` reorders frames after untile (e.g. `2 1 0`, `mapping=2|1|0`); empty uses defaults.
-    pub shuffleframes: Option<String>,
-    /// FFmpeg `reverse` emits frames in reverse order after shuffleframes; empty uses defaults.
-    pub reverse: Option<String>,
-    /// FFmpeg `loop=` repeats a short frame window after reverse (e.g. `loop=1:size=2:start=0`); empty uses defaults.
-    pub r#loop: Option<String>,
-    /// FFmpeg `thumbnail=` picks the most representative frame from every batch of N after loop (e.g. `n=3`, `3`); empty uses defaults.
-    pub thumbnail: Option<String>,
-    /// FFmpeg `freezedetect=` detects frozen input after thumbnail (e.g. `n=0.001:d=0.1`); empty uses defaults.
-    pub freezedetect: Option<String>,
-    /// FFmpeg `pseudocolor=` option string (e.g. `preset=magma`); empty uses defaults.
-    pub pseudocolor: Option<String>,
-    /// FFmpeg `minterpolate=` option string (e.g. `mi_mode=blend:fps=50`); empty uses defaults.
-    pub minterpolate: Option<String>,
-    /// FFmpeg `fps=` rate string (e.g. `25`, `12`, `30000/1001`).
-    pub fps: Option<String>,
-    /// FFmpeg `colorspace=` option string (e.g. `iall=bt470bg:all=bt709`).
-    pub colorspace: Option<String>,
-    /// FFmpeg `zscale=` option string (e.g. `matrixin=bt470bg:matrix=bt709`).
-    pub zscale: Option<String>,
-    /// FFmpeg `tonemap=` option string (e.g. `tonemap=hable`).
-    pub tonemap: Option<String>,
-    /// Convert to this pixel format after geometry (FFmpeg `format=`).
-    pub pix_fmt: Option<String>,
-    /// Half-open presentation interval in microseconds from container start.
-    pub interval: Option<(i64, i64)>,
-    /// Demuxer to read the file with, for a format whose bytes carry no signature — the
-    /// equivalent of ffmpeg's `-f`. `None` requests format detection by the backend.
-    pub input_format: Option<String>,
+
+define_video_transforms! {
+    bool_fields: [
+        vertical_flip,
+        horizontal_flip,
+    ],
+    opt_fields: [
+        /// Exact output size after crop/flips/transpose/rotate/pad.
+        scale: ScaleSize,
+        /// FFmpeg `epx=` pixel-art upscale after scale and before burn/overlay (e.g. `n=2`).
+        epx: String,
+        /// FFmpeg-compatible `transpose=` after crop/flips and before rotate/pad/scale.
+        transpose: TransposeMode,
+        /// FFmpeg-compatible `rotate=` after transpose and before pad/scale.
+        rotate: RotateAngle,
+        /// FFmpeg-compatible `pad=W:H:X:Y:black` after rotate and before scale.
+        pad: PadRect,
+        /// External text subtitle file burned after geometry.
+        burn_subs: PathBuf,
+        /// External video composited via `overlay=x:y` after burn-in.
+        overlay: OverlaySpec,
+        /// FFmpeg `yadif=` option string (e.g. `mode=0`); empty string uses defaults.
+        yadif: String,
+        /// FFmpeg `bwdif=` option string (e.g. `mode=0`); empty string uses defaults.
+        bwdif: String,
+        /// FFmpeg `w3fdif=` option string (e.g. `mode=0`); empty string uses defaults.
+        w3fdif: String,
+        /// FFmpeg `tblend=` option string (e.g. `all_mode=average`).
+        tblend: String,
+        /// FFmpeg `tmix=` option string (e.g. `frames=3`).
+        tmix: String,
+        /// FFmpeg `hqdn3d=` option string (e.g. `4:3:6:4.5`); empty string uses defaults.
+        hqdn3d: String,
+        /// FFmpeg `gblur=` option string (e.g. `sigma=1.5:steps=1`); empty uses defaults.
+        gblur: String,
+        /// FFmpeg `eq=` option string (e.g. `brightness=0.06:contrast=1.2`); empty uses defaults.
+        eq: String,
+        /// FFmpeg `unsharp=` option string (e.g. `5:5:1.0:5:5:0.0`); empty uses defaults.
+        unsharp: String,
+        /// FFmpeg `hue=` option string (e.g. `h=90:s=1.2`); empty uses defaults.
+        hue: String,
+        /// FFmpeg `avgblur=` option string (e.g. `sizeX=5:sizeY=5`); empty uses defaults.
+        avgblur: String,
+        /// FFmpeg `boxblur=` option string (e.g. `2:1`); empty uses defaults.
+        boxblur: String,
+        /// FFmpeg `negate` / `negate=1` (alpha); empty/`0` = components only.
+        negate: String,
+        /// FFmpeg `edgedetect=` option string (e.g. `mode=colormix`); empty uses defaults.
+        edgedetect: String,
+        /// FFmpeg `sobel=` option string (e.g. `scale=2:delta=10`); empty uses defaults.
+        sobel: String,
+        /// FFmpeg `prewitt=` option string (e.g. `scale=2:delta=10`); empty uses defaults.
+        prewitt: String,
+        /// FFmpeg `roberts=` option string (e.g. `scale=2:delta=10`); empty uses defaults.
+        roberts: String,
+        /// FFmpeg `kirsch=` option string (e.g. `scale=2:delta=10`); empty uses defaults.
+        kirsch: String,
+        /// FFmpeg `scharr=` option string (e.g. `scale=2:delta=10`); empty uses defaults.
+        scharr: String,
+        /// FFmpeg `atadenoise=` option string (e.g. `0a=0.02:0b=0.04`); empty uses defaults.
+        atadenoise: String,
+        /// FFmpeg `owdenoise=` option string (e.g. `depth=8:luma_strength=1.0`); empty uses defaults.
+        owdenoise: String,
+        /// FFmpeg `vaguedenoiser=` option string (e.g. `threshold=3`); empty uses defaults.
+        vaguedenoiser: String,
+        /// FFmpeg `nlmeans=` option string (e.g. `s=1.0`); empty uses defaults.
+        nlmeans: String,
+        /// FFmpeg `bm3d=` option string (e.g. `sigma=3`); empty uses defaults.
+        bm3d: String,
+        /// FFmpeg `dctdnoiz=` option string (e.g. `s=3`); empty uses defaults.
+        dctdnoiz: String,
+        /// FFmpeg `fftdnoiz=` option string (e.g. `sigma=1`); empty uses defaults.
+        fftdnoiz: String,
+        /// FFmpeg `smartblur=` option string (e.g. `lr=1.5:ls=-0.5`); empty uses defaults.
+        smartblur: String,
+        /// FFmpeg `sab=` option string (e.g. `lr=2:cr=2`); empty uses defaults.
+        sab: String,
+        /// FFmpeg `bilateral=` option string (e.g. `sigmaS=0.1:sigmaR=0.1`); empty uses defaults.
+        bilateral: String,
+        /// FFmpeg `cas=` option string (e.g. `strength=0.5`); empty uses defaults.
+        cas: String,
+        /// FFmpeg `vignette=` option string (e.g. `angle=PI/4`); empty uses defaults.
+        vignette: String,
+        /// FFmpeg `curves=` option string (e.g. `preset=vintage`); empty uses defaults.
+        curves: String,
+        /// FFmpeg `colorbalance=` option string (e.g. `rs=.1:gs=.05:bs=-.1`); empty uses defaults.
+        colorbalance: String,
+        /// FFmpeg `colorlevels=` option string (e.g. `rimin=0.1:gimin=0.1:bimin=0.1`); empty uses defaults.
+        colorlevels: String,
+        /// FFmpeg `colorchannelmixer=` option string (e.g. `rr=1.1:gg=0.9:bb=1.0`); empty uses defaults.
+        colorchannelmixer: String,
+        /// FFmpeg `deflicker=` option string (e.g. `mode=am:size=5`); empty uses defaults.
+        deflicker: String,
+        /// FFmpeg `photosensitivity=` option string (e.g. `f=5`); empty uses defaults.
+        photosensitivity: String,
+        /// FFmpeg `monochrome=` option string (e.g. `cb=0.2:cr=-0.1`); empty uses defaults.
+        monochrome: String,
+        /// FFmpeg `grayworld` / `grayworld=` (white balance); empty/`0` uses defaults.
+        grayworld: String,
+        /// FFmpeg `drawbox=` option string (e.g. `x=10:y=10:w=40:h=20:color=red`); empty uses defaults.
+        drawbox: String,
+        /// FFmpeg `drawgrid=` option string (e.g. `w=16:h=16:color=white`); empty uses defaults.
+        drawgrid: String,
+        /// FFmpeg `lagfun=` option string (e.g. `decay=0.95`); empty uses defaults.
+        lagfun: String,
+        /// FFmpeg `amplify=` option string (e.g. `radius=2:factor=2`); empty uses defaults.
+        amplify: String,
+        /// FFmpeg `bitplanenoise=` option string (e.g. `bitplane=1:filter=1`); empty uses defaults.
+        bitplanenoise: String,
+        /// FFmpeg `deband=` option string (e.g. `1thr=0.02`); empty uses defaults.
+        deband: String,
+        /// FFmpeg `gradfun=` option string (e.g. `strength=1.2`); empty uses defaults.
+        gradfun: String,
+        /// FFmpeg `lenscorrection=` option string (e.g. `k1=-0.1`); empty uses defaults.
+        lenscorrection: String,
+        /// FFmpeg `pixelize=` option string (e.g. `width=8:height=8`); empty uses defaults.
+        pixelize: String,
+        /// FFmpeg `removegrain=` option string (e.g. `m0=1`); empty uses defaults.
+        removegrain: String,
+        /// FFmpeg `yaepblur=` option string (e.g. `r=3`); empty uses defaults.
+        yaepblur: String,
+        /// FFmpeg `vibrance=` option string (e.g. `intensity=0.3:rbal=1`); empty uses defaults.
+        vibrance: String,
+        /// FFmpeg `dilation=` option string (e.g. `threshold0=10`); empty uses defaults.
+        dilation: String,
+        /// FFmpeg `erosion=` option string (e.g. `threshold0=10`); empty uses defaults.
+        erosion: String,
+        /// FFmpeg `colorize=` option string (e.g. `hue=120:saturation=0.5`); empty uses defaults.
+        colorize: String,
+        /// FFmpeg `exposure=` option string (e.g. `exposure=0.5`); empty uses defaults.
+        exposure: String,
+        /// FFmpeg `chromashift=` option string (e.g. `cbh=4`); empty uses defaults.
+        chromashift: String,
+        /// FFmpeg `colorcontrast=` option string (e.g. `rc=0.1:gm=0.1:by=0.1`); empty uses defaults.
+        colorcontrast: String,
+        /// FFmpeg `colorcorrect=` option string (e.g. `rl=0.1:bl=-0.1`); empty uses defaults.
+        colorcorrect: String,
+        /// FFmpeg `histeq=` option string (e.g. `strength=0.2`); empty uses defaults.
+        histeq: String,
+        /// FFmpeg `shuffleplanes=` option string (e.g. `map0=0:map1=2:map2=1`); empty uses defaults.
+        shuffleplanes: String,
+        /// FFmpeg `lutyuv=` option string (e.g. `y=val*0.8`); empty uses defaults.
+        lutyuv: String,
+        /// FFmpeg `colorhold=` option string (e.g. `similarity=0.2:blend=0.1`); empty uses defaults.
+        colorhold: String,
+        /// FFmpeg `fade=` option string (e.g. `t=in:s=0:n=4`); empty uses defaults.
+        fade: String,
+        /// FFmpeg `perspective=` option string; empty uses defaults.
+        perspective: String,
+        /// FFmpeg `lumakey=` option string (e.g. `threshold=0.1:tolerance=0.1:softness=0.1`); empty uses defaults.
+        lumakey: String,
+        /// FFmpeg `chromakey=` option string (e.g. `similarity=0.3:blend=0.1`); empty uses defaults.
+        chromakey: String,
+        /// FFmpeg `colorkey=` option string (e.g. `color=black:similarity=0.1:blend=0.1`); empty uses defaults.
+        colorkey: String,
+        /// FFmpeg `despill=` option string (e.g. `type=green:mix=0.5`); empty uses defaults.
+        despill: String,
+        /// FFmpeg `selectivecolor=` option string (e.g. `reds=0.2 0 0 0`); empty uses defaults.
+        selectivecolor: String,
+        /// FFmpeg `stereo3d=` option string (e.g. `sbsl:abl`); empty uses defaults.
+        stereo3d: String,
+        /// FFmpeg `field=` option string (e.g. `bottom`); empty uses defaults.
+        field: String,
+        /// FFmpeg `hqx=` pixel-art upscale after field (e.g. `n=2`).
+        hqx: String,
+        /// FFmpeg `xbr=` pixel-art upscale after hqx (e.g. `n=2`).
+        xbr: String,
+        /// FFmpeg `il=` interleave/deinterleave lines (e.g. `l=d:c=d`); empty uses defaults.
+        il: String,
+        /// FFmpeg `super2xsai` 2× pixel-art upscale after il; empty uses defaults.
+        super2xsai: String,
+        /// FFmpeg `kerndeint=` kernel deinterlace after super2xsai (e.g. `thresh=10`); empty uses defaults.
+        kerndeint: String,
+        /// FFmpeg `phase=` field phase shift after kerndeint (e.g. `mode=t`); empty uses defaults.
+        phase: String,
+        /// FFmpeg `estdif=` edge-slope deinterlace after phase (e.g. `mode=frame`); empty uses defaults.
+        estdif: String,
+        /// FFmpeg `tinterlace=` temporal field interlace after estdif (e.g. `mode=merge`); empty uses defaults.
+        tinterlace: String,
+        /// FFmpeg `separatefields` splits each frame into two fields after tinterlace; empty uses defaults.
+        separatefields: String,
+        /// FFmpeg `weave` joins successive fields into frames after separatefields; empty uses defaults.
+        weave: String,
+        /// FFmpeg `doubleweave` weaves each input field into a frame after weave; empty uses defaults.
+        doubleweave: String,
+        /// FFmpeg `framepack=` packs consecutive frames after doubleweave (e.g. `format=sbs`); empty uses defaults.
+        framepack: String,
+        /// FFmpeg `telecine=` applies a pulldown pattern after framepack (e.g. `pattern=23`); empty uses defaults.
+        telecine: String,
+        /// FFmpeg `pullup=` inverse telecine after telecine (e.g. `jl=0:jr=0`); empty uses defaults.
+        pullup: String,
+        /// FFmpeg `decimate=` drops one frame per cycle after pullup (e.g. `cycle=5`); empty uses defaults.
+        decimate: String,
+        /// FFmpeg `mpdecimate=` drops near-duplicate frames after decimate; empty uses defaults.
+        mpdecimate: String,
+        /// FFmpeg `framestep=` keeps one frame every N after mpdecimate (e.g. `2`, `step=2`); empty uses defaults.
+        framestep: String,
+        /// FFmpeg `tile=` packs consecutive frames into a grid after framestep (e.g. `2x2`, `layout=2x2`); empty uses defaults.
+        tile: String,
+        /// FFmpeg `untile=` splits each frame into a grid of frames after tile (e.g. `2x2`, `layout=2x2`); empty uses defaults.
+        untile: String,
+        /// FFmpeg `shuffleframes=` reorders frames after untile (e.g. `2 1 0`, `mapping=2|1|0`); empty uses defaults.
+        shuffleframes: String,
+        /// FFmpeg `reverse` emits frames in reverse order after shuffleframes; empty uses defaults.
+        reverse: String,
+        /// FFmpeg `loop=` repeats a short frame window after reverse (e.g. `loop=1:size=2:start=0`); empty uses defaults.
+        r#loop: String,
+        /// FFmpeg `thumbnail=` picks the most representative frame from every batch of N after loop (e.g. `n=3`, `3`); empty uses defaults.
+        thumbnail: String,
+        /// FFmpeg `freezedetect=` detects frozen input after thumbnail (e.g. `n=0.001:d=0.1`); empty uses defaults.
+        freezedetect: String,
+        /// FFmpeg `pseudocolor=` option string (e.g. `preset=magma`); empty uses defaults.
+        pseudocolor: String,
+        /// FFmpeg `minterpolate=` option string (e.g. `mi_mode=blend:fps=50`); empty uses defaults.
+        minterpolate: String,
+        /// FFmpeg `fps=` rate string (e.g. `25`, `12`, `30000/1001`).
+        fps: String,
+        /// FFmpeg `colorspace=` option string (e.g. `iall=bt470bg:all=bt709`).
+        colorspace: String,
+        /// FFmpeg `zscale=` option string (e.g. `matrixin=bt470bg:matrix=bt709`).
+        zscale: String,
+        /// FFmpeg `tonemap=` option string (e.g. `tonemap=hable`).
+        tonemap: String,
+        /// Convert to this pixel format after geometry (FFmpeg `format=`).
+        pix_fmt: String,
+    ]
 }

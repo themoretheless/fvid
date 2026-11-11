@@ -156,7 +156,7 @@ impl OverlayReader {
             i64::from(self.y),
         );
         *frame = destination.data;
-        result
+        result.map_err(String::from)
     }
 }
 

@@ -1,10 +1,15 @@
-//! Owned Matroska PCM presentation timeline to caller-owned float32 PCM.
+//! Owned Matroska PCM presentation timeline to caller-owned float32/float64 PCM.
+use crate::owned_audio_control::CopyProgress;
 pub use crate::owned_matroska_audio::{AudioDecodeStats, Error};
+use crate::owned_matroska_audio::{
+    MatroskaSampleDecoder, decode_matroska_audio_reader_generic, invalid, matroska_audio_index,
+};
 use fvid_control::CopyOptions;
 use std::{
     io::{Read, Seek, Write},
     time::Duration,
 };
+
 /// Decode delay, signed padding, gaps and ceil-rounded interval boundaries.
 /// Errors may leave partial caller-owned PCM; progress never reports publication.
 /// Retained allocation admission is checked before decoding; metadata edits are unsupported.
@@ -27,6 +32,7 @@ pub fn decode_matroska_pcm_f64<R: Read + Seek>(
 ) -> std::result::Result<AudioDecodeStats, Error> {
     precise::decode(source, output, interval, options)
 }
+
 pub(crate) fn decode_matroska_pcm_f64_reader<R: Read + Seek>(
     reader: crate::owned_webm::WebmReader<R>,
     output: &mut impl Write,
@@ -35,21 +41,25 @@ pub(crate) fn decode_matroska_pcm_f64_reader<R: Read + Seek>(
 ) -> std::result::Result<AudioDecodeStats, Error> {
     precise::decode_reader(reader, output, interval, options)
 }
+
 mod precise {
     use super::*;
-    use crate::owned_matroska_sample_clock::quantized_sample_matches as aac_quantized_sample_matches;
-    use crate::owned_matroska_grid_clock::grid_sample_matches as aac_quantized_grid_matches;
-    use crate::owned_matroska_audio::{DecodeProgress, invalid, matroska_audio_index};
+    use crate::owned_audio_control::AudioDecodeControl;
     use crate::owned_webm::WebmReader as MatroskaTimelineReader;
     type Result<T> = std::result::Result<T, Error>;
-    use crate::owned_aac::aac_ps_native::InBandPsProbe;
-    struct MatroskaTimelineDecoder(crate::owned_pcm_decoder::PcmDecoder);
-    impl MatroskaTimelineDecoder {
+
+    struct PreciseMatroskaPcmDecoder(crate::owned_pcm_decoder::PcmDecoder);
+
+    impl MatroskaSampleDecoder for PreciseMatroskaPcmDecoder {
+        type Sample = f64;
         const SAMPLE_BYTES: usize = 8;
+
+        fn push_le_bytes(sample: f64, out: &mut Vec<u8>) {
+            out.extend_from_slice(&sample.to_le_bytes());
+        }
         fn with_in_band_ps(_: &crate::owned_webm::Track) -> Result<Self> {
             Err(invalid("PCM reader cannot select AAC PS"))
         }
-
         fn from_matroska(track: &crate::owned_webm::Track) -> Result<Self> {
             Ok(Self(crate::owned_pcm_decoder::PcmDecoder::from_matroska(
                 track,
@@ -71,20 +81,14 @@ mod precise {
             Ok(Some(self.0.decode_pcm_f64(data)?))
         }
     }
+
     pub(super) fn decode<R: Read + Seek>(
         source: R,
         output: &mut impl Write,
         interval: Option<(Duration, Duration)>,
         options: &CopyOptions,
     ) -> Result<AudioDecodeStats> {
-        let mut control = DecodeProgress {
-            options,
-            event: fvid_control::ProgressEvent {
-                packets: 0,
-                payload_bytes: 0,
-                done: false,
-            },
-        };
+        let mut control = CopyProgress::new(options);
         control.check()?;
         if !options.metadata_set.is_empty()
             || !options.metadata_delete.is_empty()
@@ -116,23 +120,28 @@ mod precise {
                 "selected Matroska audio stream has a different codec",
             ));
         }
-        crate::owned_matroska_audio::admit_audio_reader_with_interval(&mut reader, index, interval, options)?;
-        decode_matroska_audio_reader_controlled(reader, output, interval, selected, &mut control)
+        crate::owned_matroska_audio::admit_audio_reader_with_interval(
+            &mut reader,
+            index,
+            interval,
+            options,
+        )?;
+        decode_matroska_audio_reader_generic::<R, CopyProgress<'_>, PreciseMatroskaPcmDecoder>(
+            reader,
+            output,
+            interval,
+            selected,
+            &mut control,
+        )
     }
+
     pub(super) fn decode_reader<R: Read + Seek>(
         reader: MatroskaTimelineReader<R>,
         output: &mut impl Write,
         interval: Option<(Duration, Duration)>,
         options: &CopyOptions,
     ) -> Result<AudioDecodeStats> {
-        let mut control = DecodeProgress {
-            options,
-            event: fvid_control::ProgressEvent {
-                packets: 0,
-                payload_bytes: 0,
-                done: false,
-            },
-        };
+        let mut control = CopyProgress::new(options);
         control.check()?;
         if !options.metadata_set.is_empty()
             || !options.metadata_delete.is_empty()
@@ -150,7 +159,12 @@ mod precise {
             hook.emit(control.event);
         }
         control.check()?;
-        decode_matroska_audio_reader_controlled(reader, output, interval, selected, &mut control)
+        decode_matroska_audio_reader_generic::<R, CopyProgress<'_>, PreciseMatroskaPcmDecoder>(
+            reader,
+            output,
+            interval,
+            selected,
+            &mut control,
+        )
     }
-    include!("owned_matroska_audio_timeline_impl.rs");
 }

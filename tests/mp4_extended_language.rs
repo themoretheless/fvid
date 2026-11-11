@@ -317,7 +317,6 @@ fn cstring_terminator_separates_language_from_atom_padding() {
 mod transitions;
 #[test]
 fn extended_language_survives_audio_and_subtitle_tracks_without_changing_media() {
-    use fvid::audio::AudioStream;
     let mut reference =
         fvid::playback_native::NativeReader::software(Cursor::new(bytes("v0-en-US.mp4")), 32 << 20)
             .unwrap();

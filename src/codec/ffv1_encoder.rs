@@ -1,5 +1,2 @@
 //! Owned FFV1 version 1 range-coded, all-intra YCbCr encoder.
-//! Bitstream semantics: RFC 9043. One slice and a single residual context
-//! per luma/chroma model; quantization here selects contexts, not sample loss.
-use crate::{Result, invalid, native_geometry::GeometryFrame};
-include!("../../crates/fvid-media/src/owned_ffv1_encoder_impl.rs");
+pub use fvid_media::owned_ffv1_encoder::*;

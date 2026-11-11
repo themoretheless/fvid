@@ -6,8 +6,11 @@ use fvid_codecs::{
     },
 };
 use fvid_media_info::{DecodeStats, DecodeTransform};
-use std::{fs::File, io::BufReader, path::Path};
+use std::{fs::File, io::BufReader};
+#[cfg(test)]
+use std::path::Path;
 type Result<T> = std::result::Result<T, String>;
+#[cfg(test)]
 pub(crate) fn try_decode(
     source: &Path,
     transform: &DecodeTransform,
@@ -38,6 +41,7 @@ pub(crate) fn try_decode_from_file(
 }
 
 pub(crate) type Visitor<'a> = dyn FnMut(&FrameMetadata, &[u8], u64, u64) -> Result<()> + 'a;
+#[cfg(test)]
 pub(crate) fn decode_presented(
     source: &Path,
     transform: &DecodeTransform,

@@ -1,7 +1,5 @@
 //! Owned AAC perceptual-noise band synthesis in spectral units.
-use crate::{Result, invalid};
-
-include!("../../crates/fvid-media/src/owned_aac/aac_noise_impl.rs");
+pub use fvid_media::owned_aac::aac_noise::*;
 
 #[cfg(test)]
 mod tests {

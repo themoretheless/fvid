@@ -83,7 +83,6 @@ fn main_ps_adts_matches_companion_pcm_and_repeated_ranges() {
 #[test]
 fn main_ps_adts_player_rewind_seek_and_eof_preserve_stereo() {
     for c in manifest()["cases"].as_array().unwrap() {
-        let data = bytes(c["adts"].as_str().unwrap());
         let mut expected = vec![];
         fvid::native_media::decode_mp4_aac_pcm(
             &bytes(c["video"]["file"].as_str().unwrap()),
@@ -92,6 +91,7 @@ fn main_ps_adts_player_rewind_seek_and_eof_preserve_stereo() {
         .unwrap();
         #[cfg(feature = "player")]
         {
+            let data = bytes(c["adts"].as_str().unwrap());
             let mut reader =
                 fvid::playback_aac::AacAudioReader::open(Cursor::new(&data), Default::default())
                     .unwrap();

@@ -9,7 +9,7 @@ fn prepare(
     options: &CopyOptions,
 ) -> Result<(
     y4m::Header,
-    Vec<crate::owned_play_controls::SubtitleCue>,
+    Vec<crate::owned_subtitle::SubtitleCue>,
     Option<crate::owned_mp4_video_bridge::Temporary>,
     usize,
     Option<BufReader<File>>,
@@ -166,12 +166,12 @@ fn prepare(
     if !has_cues {
         return Err("owned burn-in currently requires plain SRT".into());
     }
-    let cues = crate::owned_play_controls::parse_subtitle_text(&text)?;
+    let cues = crate::owned_subtitle::parse_subtitle_text(&text)?;
     let cues_only_bytes = cues
         .iter()
         .fold(
             cues.len()
-                .saturating_mul(std::mem::size_of::<crate::owned_play_controls::SubtitleCue>()),
+                .saturating_mul(std::mem::size_of::<crate::owned_subtitle::SubtitleCue>()),
             |acc, cue| acc.saturating_add(cue.text.len()),
         );
     if let Some(limit) = options.max_controlled_bytes.filter(|&limit| limit > 0) {
@@ -645,10 +645,10 @@ pub fn burn_subtitles(
         options.progress.as_ref(),
         |file| {
             let video_metadata = mkv::VideoMetadata {
-                pixel_aspect: header.pixel_aspect().map_err(mkv::Error)?,
+                pixel_aspect: header.pixel_aspect()?,
                 colour: Some(mkv::ColourDescription {
                     matrix: 6,
-                    full_range: header.full_range().map_err(mkv::Error)?,
+                    full_range: header.full_range()?,
                     ..Default::default()
                 }),
                 ..Default::default()
@@ -746,9 +746,9 @@ pub fn burn_subtitles(
                     Ok(())
                 },
             )
-            .map_err(mkv::Error)?;
+            .map_err(mkv::Error::from)?;
             if stats.video_frames == 0 {
-                return Err(mkv::Error("subtitle burn input has no video frames".into()));
+                return Err(mkv::Error::from("subtitle burn input has no video frames"));
             }
             writer.finish()?;
             Ok((stats, event, consumed))
@@ -849,7 +849,7 @@ mod tests {
     }
 }
 
-fn active_text(cues: &[crate::owned_play_controls::SubtitleCue], pts_ns: i64) -> String {
+fn active_text(cues: &[crate::owned_subtitle::SubtitleCue], pts_ns: i64) -> String {
     cues.iter()
         .filter(|cue| {
             i128::from(pts_ns) >= i128::from(cue.start_us) * 1000

@@ -69,7 +69,7 @@ fn original_sbr_ps_payloads_accept_all_three_packets_with_crc_and_retained_heade
             )
             .unwrap_err();
         assert_eq!(
-            error.0,
+            error.to_string(),
             "SBR extended audio/PS synthesis is not yet implemented"
         );
     }
@@ -232,7 +232,7 @@ fn original_varying_ps_video_reconstructs_native_parameters_before_pending_stere
                     aac_sbr_dsp::OutputRate::Double
                 )
                 .unwrap_err()
-                .0,
+                .to_string(),
             "SBR extended audio/PS synthesis is not yet implemented"
         );
     }
@@ -287,7 +287,7 @@ fn original_malformed_ps_index_videos_reach_the_intended_numeric_refusal() {
             assert_eq!(syntax.read_sbr_extensions(area, 32).unwrap().len(), 1);
             let before = ps.clone();
             assert_eq!(
-                ps.read_sbr_extensions(area, 32).unwrap_err().0,
+                ps.read_sbr_extensions(area, 32).unwrap_err().to_string(),
                 case["error"].as_str().unwrap()
             );
             assert_eq!(ps, before);

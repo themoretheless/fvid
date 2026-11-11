@@ -332,6 +332,8 @@ impl Drop for ActiveCallback<'_> {
 
 struct Shared {
     ring: Mutex<Ring>,
+    /// Mirrored lock-free rendered frame position so `position()` never contends with the RT callback.
+    rendered_pos: AtomicU64,
     /// Output gain in thousandths, read by the device callback.
     volume: AtomicU32,
     /// Stream frames consumed per device frame, in thousandths.
@@ -373,6 +375,8 @@ impl Shared {
         } else {
             ring.read_stretched(output, rate) / channels
         };
+        self.rendered_pos
+            .store(ring.position_frames(), Ordering::Release);
         drop(ring);
         apply_volume_frame(output, self.volume.load(Ordering::Relaxed));
         (produced, epoch)
@@ -408,6 +412,7 @@ impl Shared {
     // Called while holding the ring lock, so an in-flight callback can never
     // publish an old tail into a new navigation generation.
     fn reset_output(&self, new_stream: bool) {
+        self.rendered_pos.store(0, Ordering::Release);
         self.output_epoch.fetch_add(1, Ordering::AcqRel);
         let mut tail = self.output_tail.lock().unwrap();
         tail.due = None;
@@ -487,6 +492,7 @@ impl CpalBackend {
             output_device,
             shared: Arc::new(Shared {
                 ring: Mutex::new(Ring::new(2)),
+                rendered_pos: AtomicU64::new(0),
                 volume: AtomicU32::new(1000),
                 rate: AtomicU32::new(1000),
                 output_tail: Mutex::new(OutputTail::default()),
@@ -556,34 +562,40 @@ impl CpalBackend {
                 err_fn,
                 None,
             ),
-            SampleFormat::I16 => device.build_output_stream(
-                &config,
-                move |data: &mut [i16], info: &cpal::OutputCallbackInfo| {
-                    let _callback = shared.callback_guard();
-                    let mut f32_buf = vec![0.0; data.len()];
-                    let (produced, epoch) = shared.render(&mut f32_buf);
-                    for (i, s) in f32_buf.iter().enumerate() {
-                        data[i] = (s.clamp(-1.0, 1.0) * i16::MAX as f32) as i16;
-                    }
-                    shared.record_tail(produced, sample_rate, callback_latency(info), epoch);
-                },
-                err_fn,
-                None,
-            ),
-            SampleFormat::I32 => device.build_output_stream(
-                &config,
-                move |data: &mut [i32], info: &cpal::OutputCallbackInfo| {
-                    let _callback = shared.callback_guard();
-                    let mut f32_buf = vec![0.0; data.len()];
-                    let (produced, epoch) = shared.render(&mut f32_buf);
-                    for (i, s) in f32_buf.iter().enumerate() {
-                        data[i] = (s.clamp(-1.0, 1.0) * i32::MAX as f32) as i32;
-                    }
-                    shared.record_tail(produced, sample_rate, callback_latency(info), epoch);
-                },
-                err_fn,
-                None,
-            ),
+            SampleFormat::I16 => {
+                let mut f32_buf = Vec::<f32>::with_capacity(4096);
+                device.build_output_stream(
+                    &config,
+                    move |data: &mut [i16], info: &cpal::OutputCallbackInfo| {
+                        let _callback = shared.callback_guard();
+                        f32_buf.resize(data.len(), 0.0);
+                        let (produced, epoch) = shared.render(&mut f32_buf);
+                        for (dst, &s) in data.iter_mut().zip(f32_buf.iter()) {
+                            *dst = (s.clamp(-1.0, 1.0) * i16::MAX as f32) as i16;
+                        }
+                        shared.record_tail(produced, sample_rate, callback_latency(info), epoch);
+                    },
+                    err_fn,
+                    None,
+                )
+            }
+            SampleFormat::I32 => {
+                let mut f32_buf = Vec::<f32>::with_capacity(4096);
+                device.build_output_stream(
+                    &config,
+                    move |data: &mut [i32], info: &cpal::OutputCallbackInfo| {
+                        let _callback = shared.callback_guard();
+                        f32_buf.resize(data.len(), 0.0);
+                        let (produced, epoch) = shared.render(&mut f32_buf);
+                        for (dst, &s) in data.iter_mut().zip(f32_buf.iter()) {
+                            *dst = (s.clamp(-1.0, 1.0) * i32::MAX as f32) as i32;
+                        }
+                        shared.record_tail(produced, sample_rate, callback_latency(info), epoch);
+                    },
+                    err_fn,
+                    None,
+                )
+            }
         }
         .map_err(|e| AudioError::InitFailed(format!("build stream: {e}")))?;
 
@@ -715,8 +727,7 @@ impl AudioBackend for CpalBackend {
     }
 
     fn position(&self) -> Duration {
-        let ring = self.shared.ring.lock().unwrap();
-        let frames = ring.position_frames();
+        let frames = self.shared.rendered_pos.load(Ordering::Acquire);
         let elapsed = frames as f64 / self.sample_rate as f64;
         self.base + Duration::from_secs_f64(elapsed)
     }

@@ -89,6 +89,7 @@ pub struct Grade {
     /// whose primaries and highlights are untouched and only its curve changes,
     /// is flattened to tables before a pixel is touched.
     tables: Option<[Vec<u8>; 3]>,
+    identity: bool,
 }
 
 impl Grade {
@@ -188,12 +189,16 @@ impl Grade {
         {
             tables = None;
         }
+        let tol = 0.5 / 255.0;
+        let identity =
+            cube.is_identity(tol) && lut.as_ref().is_none_or(|look| look.is_identity(tol));
         Self {
             cube,
             plan,
             lut,
             interpolation,
             tables,
+            identity,
         }
     }
 
@@ -283,9 +288,7 @@ impl Grade {
     /// True when applying this grade could not change a pixel: the grid is its
     /// own input and no LUT follows it. A caller skips the lookup on this.
     pub fn is_identity(&self) -> bool {
-        // Half a code step at 8 bits; a grade finer than that is not a picture.
-        let tol = 0.5 / 255.0;
-        self.cube.is_identity(tol) && self.lut.as_ref().is_none_or(|lut| lut.is_identity(tol))
+        self.identity
     }
 
     /// Apply the grade to a packed RGB8 image, in place.
@@ -298,20 +301,16 @@ impl Grade {
     /// machine. The workers share nothing but the read-only grid, so the bytes a
     /// pixel ends up with do not depend on which worker was given it.
     pub fn apply(&self, rgb: &mut [u8]) {
-        if self.is_identity() {
+        if self.identity {
             return;
         }
-        let workers = crate::span_workers(rgb.len());
+        let workers = fvid_cpu::span_workers(rgb.len());
         if workers < 2 {
             self.paint(rgb);
             return;
         }
         let span = rgb.len().div_ceil(workers).next_multiple_of(3);
-        std::thread::scope(|scope| {
-            for chunk in rgb.chunks_mut(span) {
-                scope.spawn(|| self.paint(chunk));
-            }
-        });
+        fvid_cpu::par_chunks_mut(rgb, span, |_, chunk| self.paint(chunk));
     }
 
     /// Grade one span of packed pixels, on the thread that calls this.
@@ -326,13 +325,22 @@ impl Grade {
                 }
             }
             None => {
+                const INV_255: f32 = 1.0 / 255.0;
+                let cube_sampler = self.cube.prepare();
+                let lut_sampler = self.lut.as_ref().map(Lut::prepare);
+                let interp = self.interpolation;
                 for pixel in rgb.as_chunks_mut::<3>().0 {
                     let codes = [
-                        f32::from(pixel[0]) / 255.0,
-                        f32::from(pixel[1]) / 255.0,
-                        f32::from(pixel[2]) / 255.0,
+                        f32::from(pixel[0]) * INV_255,
+                        f32::from(pixel[1]) * INV_255,
+                        f32::from(pixel[2]) * INV_255,
                     ];
-                    for (out, value) in pixel.iter_mut().zip(self.rgb(codes)) {
+                    let mapped = cube_sampler.sample(codes, interp);
+                    let graded = match &lut_sampler {
+                        None => mapped,
+                        Some(lut) => lut.sample(mapped, interp),
+                    };
+                    for (out, value) in pixel.iter_mut().zip(graded) {
                         *out = (value.clamp(0.0, 1.0) * 255.0).round() as u8;
                     }
                 }

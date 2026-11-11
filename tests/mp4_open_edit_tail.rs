@@ -395,7 +395,7 @@ fn silence_is_limited_to_declared_source_time_and_does_not_make_overlong_edits_p
             let trace = Arc::new(Mutex::new(transitions::Trace::default()));
             let captured = trace.clone();
             let r = Mp4AudioReader::open(Cursor::new(bytes(&n)), Default::default()).unwrap();
-            let mut audio = AudioPlayback::start(Box::new(r), move || {
+            let audio = AudioPlayback::start(Box::new(r), move || {
                 Box::new(transitions::Capture::new(captured))
             });
             audio.play();

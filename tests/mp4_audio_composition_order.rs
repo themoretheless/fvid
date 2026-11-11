@@ -129,7 +129,7 @@ fn actual_worker_reports_unsupported_without_publishing_pcm() {
     for name in ["reordered", "duplicate", "equal", "overlap"] {
         let trace = Arc::new(Mutex::new(Trace::default()));
         let shared = trace.clone();
-        let mut worker =
+        let worker =
             AudioPlayback::start(Box::new(open(name)), move || Box::new(Capture::new(shared)));
         worker.play();
         let until = Instant::now() + Duration::from_secs(3);

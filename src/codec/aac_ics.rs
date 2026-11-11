@@ -1,12 +1,11 @@
 //! AAC-LC individual-channel window and section syntax.
 //! Spectral Huffman decoding and sample-rate-specific band tables are separate.
-use crate::{Result, invalid, unsupported};
-
-include!("../../crates/fvid-media/src/owned_aac/aac_ics_impl.rs");
+pub use fvid_media::owned_aac::aac_ics::*;
 
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::codec::{aac_synthesis::{WindowSequence, WindowShape}, bits::BitReader};
     fn packed(fields: &[(u32, u8)]) -> (Vec<u8>, usize) {
         let mut data = Vec::new();
         let mut count = 0;

@@ -138,16 +138,16 @@ fn native_lossless_write_mp4_preserves_bitstream_vui_colour_and_cross_filled_met
 #[test]
 fn fvid_media_plain_subtitle_and_parse_subtitle_text_support_hard_space_html_ssa_and_custom_format() {
     assert_eq!(
-        fvid_media::plain_subtitle("0,Marked=0,Default,Alice,0,0,0,,{comment}<b>Hello</b>\\hworld\\Nnext"),
+        fvid_media::owned_subtitle::plain_subtitle("0,Marked=0,Default,Alice,0,0,0,,{comment}<b>Hello</b>\\hworld\\Nnext"),
         "Hello\u{a0}world\nnext"
     );
     assert_eq!(
-        fvid_media::plain_subtitle("dialogue: 0,0:00:01.00,0:00:02.00,Default,,0,0,0,,<i>Case</i>\\htest"),
+        fvid_media::owned_subtitle::plain_subtitle("dialogue: 0,0:00:01.00,0:00:02.00,Default,,0,0,0,,<i>Case</i>\\htest"),
         "Case\u{a0}test"
     );
 
     let vtt_text = std::fs::read_to_string(fixture_dir().join("burn-cues.vtt")).unwrap();
-    let vtt_cues = fvid_media::parse_subtitle_text(&vtt_text).expect("parse WebVTT with inline cue id");
+    let vtt_cues = fvid_media::owned_subtitle::parse_subtitle_text(&vtt_text).expect("parse WebVTT with inline cue id");
     assert_eq!(vtt_cues.len(), 1);
     assert_eq!(
         (vtt_cues[0].start_us, vtt_cues[0].end_us, vtt_cues[0].text.as_str()),
@@ -155,7 +155,7 @@ fn fvid_media_plain_subtitle_and_parse_subtitle_text_support_hard_space_html_ssa
     );
 
     let ass_text = std::fs::read_to_string(fixture_dir().join("burn-cues.ass")).unwrap();
-    let ass_cues = fvid_media::parse_subtitle_text(&ass_text).expect("parse ASS with custom Format:");
+    let ass_cues = fvid_media::owned_subtitle::parse_subtitle_text(&ass_text).expect("parse ASS with custom Format:");
     assert_eq!(ass_cues.len(), 1);
     assert_eq!(
         (ass_cues[0].start_us, ass_cues[0].end_us, ass_cues[0].text.as_str()),
@@ -163,7 +163,7 @@ fn fvid_media_plain_subtitle_and_parse_subtitle_text_support_hard_space_html_ssa
     );
 
     let ssa_text = std::fs::read_to_string(fixture_dir().join("burn-cues.ssa")).unwrap();
-    let ssa_cues = fvid_media::parse_subtitle_text(&ssa_text).expect("parse SSA with Marked=0");
+    let ssa_cues = fvid_media::owned_subtitle::parse_subtitle_text(&ssa_text).expect("parse SSA with Marked=0");
     assert_eq!(ssa_cues.len(), 1);
     assert_eq!(
         (ssa_cues[0].start_us, ssa_cues[0].end_us, ssa_cues[0].text.as_str()),

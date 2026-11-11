@@ -335,6 +335,9 @@ mod native_nv12 {
     use cudarc::driver::sys::{self as cuda, CUDA_MEMCPY2D_v2, CUdeviceptr, CUmemorytype};
     use cudarc::driver::{CudaSlice, CudaStream, DevicePtr, PinnedHostSlice};
 
+    const PARAMS_WORDS: usize = 10;
+    const PARAMS_RING_SLOTS: usize = 8;
+
     pub(super) struct Processor {
         device: Arc<SharedDevice>,
         /// Loaded on first flip; crop-only never pays PTX. Keeps module alive.
@@ -354,8 +357,9 @@ mod native_nv12 {
         /// Device pointer for `params` (valid while `params` is live).
         params_dev: CUdeviceptr,
         /// Last uploaded transform params; skip HtoD when unchanged.
-        cached_params: Option<[u32; 10]>,
+        cached_params: Option<[u32; PARAMS_WORDS]>,
         params_host: Option<PinnedHostSlice<u32>>,
+        params_ring_idx: usize,
     }
 
     fn memcpy2d(
@@ -476,6 +480,7 @@ mod native_nv12 {
                 params_dev: 0,
                 cached_params: None,
                 params_host: None,
+                params_ring_idx: 0,
             })
         }
 
@@ -555,9 +560,10 @@ mod native_nv12 {
                 None => self.device.nv12_module_arc()?,
             };
             let cu_function = nv12.cu_function;
+            let ring_words = PARAMS_WORDS * PARAMS_RING_SLOTS;
             let params = self
                 .stream
-                .alloc_zeros::<u32>(10)
+                .alloc_zeros::<u32>(PARAMS_WORDS)
                 .map_err(|err| format!("NV12 params allocation failed: {err}"))?;
             let params_dev = {
                 let (ptr, sync) = params.device_ptr(&self.stream);
@@ -568,14 +574,14 @@ mod native_nv12 {
             self.stream
                 .synchronize()
                 .map_err(|e| format!("CUDA params initialization failed: {e}"))?;
-            // SAFETY: all ten u32 values are initialized before their first upload.
-            let mut host = unsafe { self.device.context.alloc_pinned::<u32>(10) }
+            // SAFETY: all ring u32 slots are initialized before their first upload.
+            let mut host = unsafe { self.device.context.alloc_pinned::<u32>(ring_words) }
                 .map_err(|e| format!("CUDA pinned params allocation failed: {e}"))?;
             let pointer = host.as_mut_ptr().map_err(|e| e.to_string())?;
-            // SAFETY: allocation contains ten writable u32 slots; initialize
+            // SAFETY: allocation contains `ring_words` writable u32 slots; initialize
             // them through a raw pointer before constructing a typed slice.
             unsafe {
-                pointer.write_bytes(0, 10);
+                pointer.write_bytes(0, ring_words);
             }
             // Params live on the launch stream; no device-wide sync needed.
             self.cu_function = Some(cu_function);
@@ -583,6 +589,7 @@ mod native_nv12 {
             self.params_dev = params_dev;
             self.params = Some(params);
             self.params_host = Some(host);
+            self.params_ring_idx = 0;
             Ok(())
         }
 
@@ -695,27 +702,34 @@ mod native_nv12 {
             use cudarc::driver::result as cuda_result;
             use std::ffi::c_void;
             if self.cached_params != Some(params) {
+                let slot = self.params_ring_idx;
+                let slot_base = slot * PARAMS_WORDS;
+                if slot == 0 && self.cached_params.is_some() {
+                    // Wrapped all 8 pinned staging slots; drain once before reusing slot 0.
+                    self.synchronize_launch()?;
+                }
                 let host = self
                     .params_host
                     .as_mut()
                     .expect("pinned params after ensure");
                 host.as_mut_slice()
-                    .map_err(|e| e.to_string())?
+                    .map_err(|e| e.to_string())?[slot_base..slot_base + PARAMS_WORDS]
                     .copy_from_slice(&params);
-                let pointer = host.as_ptr().map_err(|e| e.to_string())?;
-                let bytes = params.len() * std::mem::size_of::<u32>();
-                // SAFETY: pinned storage stays owned by self through completion;
-                // params_dev is a live allocation and the byte length is exact.
+                let pointer = unsafe {
+                    host.as_ptr()
+                        .map_err(|e| e.to_string())?
+                        .add(slot_base)
+                };
+                let bytes = PARAMS_WORDS * std::mem::size_of::<u32>();
+                // SAFETY: pinned ring slot stays untouched until wrap-around sync or Drop;
+                // params_dev is a live allocation and stream orders HtoD before kernel launch.
                 let code = unsafe {
                     cuda::cuMemcpyHtoDAsync_v2(params_dev, pointer as *const c_void, bytes, stream)
                 };
                 if code != cuda::CUresult::CUDA_SUCCESS {
                     return Err(format!("NV12 params upload failed: {code:?}"));
                 }
-                // Only changed geometry/pitches upload these 40 bytes. Finish
-                // this stream's transfer before reusing the pinned host buffer;
-                // unchanged-frame processing keeps its asynchronous kernel path.
-                self.synchronize_launch()?;
+                self.params_ring_idx = (slot + 1) % PARAMS_RING_SLOTS;
                 self.cached_params = Some(params);
             }
 

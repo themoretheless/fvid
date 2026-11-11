@@ -40,8 +40,7 @@ impl AacAudioReader {
                 crate::codec::aac_ps_native::InBandPsProbe::new(&aac.configuration, rate)?;
             for i in 0..aac.packets() {
                 probe.read(aac.packet(i))?;
-                if fvid_media::owned_aac::adts_crc::has_sbr_fill(aac.packet(i), &aac.configuration)
-                    .map_err(|e| crate::invalid(&e.0))?
+                if fvid_media::owned_aac::adts_crc::has_sbr_fill(aac.packet(i), &aac.configuration)?
                 {
                     output_rate = rate;
                 }
@@ -49,8 +48,7 @@ impl AacAudioReader {
             in_band_ps = probe.ps_detected();
         } else if matches!(parsed.core.object_type, 1 | 2 | 3 | 4) && parsed.sbr_present.is_none() {
             for i in 0..aac.packets() {
-                if fvid_media::owned_aac::adts_crc::has_sbr_fill(aac.packet(i), &aac.configuration)
-                    .map_err(|e| crate::invalid(&e.0))?
+                if fvid_media::owned_aac::adts_crc::has_sbr_fill(aac.packet(i), &aac.configuration)?
                 {
                     let mut probe =
                         crate::codec::aac_native::NativeAacDecoder::new_with_sbr_detection(

@@ -302,35 +302,6 @@ fn uses_native_audio_route(source: &std::path::Path, options: &CopyOptions, tran
     Ok(true)
 }
 
-pub(crate) struct SpoolWave(pub(crate) std::path::PathBuf);
-impl SpoolWave {
-    pub(crate) fn create() -> Result<Self> {
-        static NEXT: std::sync::atomic::AtomicU64 = std::sync::atomic::AtomicU64::new(0);
-        for _ in 0..100 {
-            let path = std::env::temp_dir().join(format!(
-                "fvid-owned-audio-spool-{}-{}.wav",
-                std::process::id(),
-                NEXT.fetch_add(1, std::sync::atomic::Ordering::Relaxed)
-            ));
-            match std::fs::OpenOptions::new().write(true).create_new(true).open(&path) {
-                Ok(file) => {
-                    drop(file);
-                    let _ = std::fs::remove_file(&path);
-                    return Ok(Self(path));
-                }
-                Err(e) if e.kind() == std::io::ErrorKind::AlreadyExists => continue,
-                Err(e) => return Err(e.to_string()),
-            }
-        }
-        Err("cannot reserve private WAVE spool".into())
-    }
-}
-impl Drop for SpoolWave {
-    fn drop(&mut self) {
-        let _ = std::fs::remove_file(&self.0);
-    }
-}
-
 pub(crate) fn decode_fvid_media_audio_to_destination(
     source: &std::path::Path,
     destination: &std::path::Path,
@@ -433,14 +404,17 @@ pub(crate) fn decode_fvid_media_audio_to_destination_with_prechecked_channels(
     if destination.symlink_metadata().is_ok() {
         return Err("output already exists".into());
     }
-    let spool = SpoolWave::create()?;
     let mut spool_options = options.clone();
     spool_options.metadata_set.clear();
     spool_options.metadata_delete.clear();
     spool_options.stream_metadata_set.clear();
     spool_options.stream_metadata_delete.clear();
     let original_progress = spool_options.progress.take();
-    let decoded = fvid_media::decode_audio_transformed(source, &spool.0, transform, &spool_options)?;
+    let (decoded, wave_bytes) = fvid_media::decode_audio_transformed_to_wave_bytes(
+        source,
+        transform,
+        &spool_options,
+    )?;
     if matroska_out && options.max_controlled_bytes.is_some() {
         let decoded_channels = u16::try_from(decoded.channels).unwrap_or(2);
         if prechecked_channels != Some(decoded_channels) {
@@ -498,13 +472,9 @@ pub(crate) fn decode_fvid_media_audio_to_destination_with_prechecked_channels(
     } else {
         None
     };
-    let published = crate::native_export::export_audio_pcm_transformed_with_source_metadata(
-        &spool.0,
+    let published = crate::native_export::export_audio_pcm_from_wave_bytes_with_source_metadata(
+        &wave_bytes,
         destination,
-        None,
-        1.0,
-        None,
-        None,
         &publish_options,
         source_matroska_metadata,
     )

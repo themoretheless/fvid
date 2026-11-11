@@ -30,6 +30,9 @@ opt-level = 3
 [profile.dev.package.fvid-cpu]
 opt-level = 3
 
+[profile.dev.package.fvid-opus]
+opt-level = 3
+
 [profile.release]
 lto = "thin"
 codegen-units = 1

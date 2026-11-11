@@ -1,11 +1,7 @@
 //! Owned AVC SPS/PPS syntax, geometry, VUI and slice-group descriptions.
 //! Parsing parameter sets is not acceptance of every profile/tool for decoding.
-use crate::owned_aac::bits::{BitReader, unescape_rbsp};
-pub use crate::owned_aac::{Error, Result};
-fn invalid(message: &str) -> Error {
-    Error(message.into())
-}
-include!("owned_avc_impl.rs");
+pub use fvid_codecs::codec::avc::*;
+pub use fvid_control::error::{Error, Result};
 
 fn profile_label(profile: u8, constraints: u8) -> Option<&'static str> {
     // Preserve the profiles admitted by this SPS-only probe. Metadata naming

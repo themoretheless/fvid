@@ -78,6 +78,7 @@ pub(crate) fn probe_webm_from_file_with_options(
 pub fn try_probe_webm(path: &Path) -> Result<Option<MediaInfo>, String> {
     try_probe_webm_with_packet_limit(path, Limits::default().packet_bytes)
 }
+#[cfg(test)]
 pub(crate) fn try_probe_webm_from_file(path: &Path, file: File) -> Result<Option<MediaInfo>, String> {
     try_probe_webm_from_file_with_limits(
         path,

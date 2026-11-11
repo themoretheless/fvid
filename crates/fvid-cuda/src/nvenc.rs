@@ -6,6 +6,10 @@ pub struct NvencVersion {
     pub minor: u32,
 }
 impl NvencVersion {
+    #[cfg_attr(
+        not(any(test, target_os = "linux", target_os = "windows")),
+        allow(dead_code)
+    )]
     fn unpack(value: u32) -> Result<Self, String> {
         let version = Self {
             major: value >> 4,
@@ -113,6 +117,10 @@ fn require_version(available: NvencVersion, version: NvencVersion) -> Result<(),
     Ok(())
 }
 
+#[cfg_attr(
+    not(any(test, target_os = "linux", target_os = "windows")),
+    allow(dead_code)
+)]
 fn query_result(status: i32, packed: u32) -> Result<NvencVersion, String> {
     if status != 0 {
         return Err(format!(

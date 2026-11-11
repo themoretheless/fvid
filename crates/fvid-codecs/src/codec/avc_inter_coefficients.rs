@@ -1,0 +1,307 @@
+//! Frame/field 4:2:0 CAVLC inter coefficient parsing.
+use super::{
+    avc_macroblock::luma_block_xy, avc_transform::inverse_scan_4x4,
+    avc_transform8::inverse_scan_8x8, bits::BitReader, cavlc::read_residual,
+};
+use crate::{Result, invalid};
+#[derive(Clone, Copy, Default)]
+pub struct CoefficientNeighbours {
+    pub luma_left: [Option<u8>; 4],
+    pub luma_top: [Option<u8>; 4],
+    pub chroma_left: [[Option<u8>; 2]; 2],
+    pub chroma_top: [[Option<u8>; 2]; 2],
+}
+pub struct InterCoefficients {
+    pub chroma422: Option<Box<InterChroma422>>,
+    pub luma4: [[i32; 16]; 16],
+    pub luma8: [[i32; 64]; 4],
+    pub chroma_dc: [[i32; 4]; 2],
+    pub chroma_ac: [[[i32; 16]; 4]; 2],
+    /// Raster counts for propagation into the next macroblocks' nC context.
+    pub luma_counts: [u8; 16],
+    pub chroma_counts: [[u8; 4]; 2],
+}
+pub struct InterChroma422 {
+    pub dc:[[i32;8];2],
+    pub ac:[[[i32;16];8];2],
+    pub counts:[[u8;8];2],
+}
+#[derive(Default)]
+pub struct Chroma422Neighbours {
+    pub left:[[Option<u8>;4];2],
+    pub top:[[Option<u8>;2];2],
+}
+pub(super) fn read_inter_coefficients_422_field(bits:&mut BitReader<'_>,pattern:u8,transform8:bool,neighbours:CoefficientNeighbours,chroma:Chroma422Neighbours,field:bool)->Result<InterCoefficients> {
+    if pattern>47||chroma.left.iter().flatten().chain(chroma.top.iter().flatten()).any(|n|n.is_some_and(|v|v>16)) {return Err(invalid("invalid 422 residual pattern or coefficient context"));}
+    let mut input=bits.clone();
+    let mut out=read_inter_coefficients_field(&mut input,pattern&15,transform8,neighbours,field)?;
+    if pattern>>4!=0 {
+        let mut wide=Box::new(InterChroma422 {dc:[[0;8];2],ac:[[[0;16];8];2],counts:[[0;8];2]});
+        for component in 0..2 {
+            let values=read_residual(&mut input,-2,8)?.coefficients;
+            for (i,at)in [0,2,1,4,6,3,5,7].into_iter().enumerate(){wide.dc[component][at]=values[i];}
+        }
+        if pattern>>4==2 {
+            for component in 0..2 {for block in 0..8 {
+                let (x,y)=(block%2,block/2);
+                let left=if x==0 {chroma.left[component][y]}else{Some(wide.counts[component][block-1])};
+                let top=if y==0 {chroma.top[component][x]}else{Some(wide.counts[component][block-2])};
+                let r=read_residual(&mut input,context(left,top),15)?;wide.counts[component][block]=r.total_coefficients;
+                let mut levels=[0;16];levels[1..].copy_from_slice(&r.coefficients[..15]);wide.ac[component][block]=inverse_scan_4x4(&levels,field);
+            }}
+        }
+        out.chroma422=Some(wide);
+    }
+    *bits=input;
+    Ok(out)
+}
+fn context(left: Option<u8>, top: Option<u8>) -> i8 {
+    match (left, top) {
+        (Some(a), Some(b)) => ((a + b + 1) / 2) as i8,
+        (Some(a), None) | (None, Some(a)) => a as i8,
+        _ => 0,
+    }
+}
+/// Both bit cursor and caller-owned neighbour state remain unchanged on error.
+/// Returned coefficients are raster ordered; only the selected luma size is used.
+pub fn read_inter_coefficients(
+    bits: &mut BitReader<'_>,
+    pattern: u8,
+    transform8: bool,
+    neighbours: CoefficientNeighbours,
+) -> Result<InterCoefficients> {
+    read_inter_coefficients_field(bits, pattern, transform8, neighbours, false)
+}
+/// The caller supplies neighbours in the current macroblock's sample layout.
+pub fn read_inter_coefficients_field(
+    bits: &mut BitReader<'_>,
+    pattern: u8,
+    transform8: bool,
+    neighbours: CoefficientNeighbours,
+    field: bool,
+) -> Result<InterCoefficients> {
+    if pattern > 47
+        || neighbours
+            .luma_left
+            .iter()
+            .chain(&neighbours.luma_top)
+            .chain(neighbours.chroma_left.iter().flatten())
+            .chain(neighbours.chroma_top.iter().flatten())
+            .any(|n| n.is_some_and(|v| v > 16))
+    {
+        return Err(invalid("invalid AVC coefficient context"));
+    }
+    let mut b = bits.clone();
+    let mut out = InterCoefficients {
+        chroma422:None,
+        luma4: [[0; 16]; 16],
+        luma8: [[0; 64]; 4],
+        chroma_dc: [[0; 4]; 2],
+        chroma_ac: [[[0; 16]; 4]; 2],
+        luma_counts: [0; 16],
+        chroma_counts: [[0; 4]; 2],
+    };
+    for block in 0..16 {
+        let (x, y) = luma_block_xy(block)?;
+        if pattern & (1 << (block / 4)) == 0 {
+            continue;
+        }
+        let left = if x == 0 {
+            neighbours.luma_left[y]
+        } else {
+            Some(out.luma_counts[y * 4 + x - 1])
+        };
+        let top = if y == 0 {
+            neighbours.luma_top[x]
+        } else {
+            Some(out.luma_counts[(y - 1) * 4 + x])
+        };
+        let residual = read_residual(&mut b, context(left, top), 16)?;
+        out.luma_counts[y * 4 + x] = residual.total_coefficients;
+        if transform8 {
+            for i in 0..16 {
+                out.luma8[block / 4][4 * i + block % 4] = residual.coefficients[i];
+            }
+        } else {
+            out.luma4[y * 4 + x] = inverse_scan_4x4(&residual.coefficients, field);
+        }
+    }
+    if transform8 {
+        for block in &mut out.luma8 {
+            *block = inverse_scan_8x8(block, field);
+        }
+    }
+    if pattern >> 4 != 0 {
+        for component in 0..2 {
+            out.chroma_dc[component]
+                .copy_from_slice(&read_residual(&mut b, -1, 4)?.coefficients[..4]);
+        }
+    }
+    if pattern >> 4 == 2 {
+        for component in 0..2 {
+            for block in 0..4 {
+                let (x, y) = (block % 2, block / 2);
+                let left = if x == 0 {
+                    neighbours.chroma_left[component][y]
+                } else {
+                    Some(out.chroma_counts[component][block - 1])
+                };
+                let top = if y == 0 {
+                    neighbours.chroma_top[component][x]
+                } else {
+                    Some(out.chroma_counts[component][block - 2])
+                };
+                let residual = read_residual(&mut b, context(left, top), 15)?;
+                out.chroma_counts[component][block] = residual.total_coefficients;
+                let mut levels = [0; 16];
+                levels[1..].copy_from_slice(&residual.coefficients[..15]);
+                out.chroma_ac[component][block] = inverse_scan_4x4(&levels, field);
+            }
+        }
+    }
+    *bits = b;
+    Ok(out)
+}
+#[cfg(test)]
+mod tests {
+    use super::*;
+    #[test]
+    fn coded_zero_blocks_and_truncation() {
+        for transform8 in [false, true] {
+            let mut b = BitReader::new(&[0xff, 0xff]);
+            let c =
+                read_inter_coefficients(&mut b, 15, transform8, CoefficientNeighbours::default())
+                    .unwrap();
+            assert_eq!(b.position(), 16);
+            assert_eq!(c.luma_counts, [0; 16]);
+            assert_eq!(c.luma4, [[0; 16]; 16]);
+            assert_eq!(c.luma8, [[0; 64]; 4]);
+            let mut b = BitReader::new(&[0xff]);
+            assert!(
+                read_inter_coefficients(&mut b, 15, transform8, CoefficientNeighbours::default())
+                    .is_err()
+            );
+            assert_eq!(b.position(), 0);
+        }
+        let mut b = BitReader::new(&[]);
+        read_inter_coefficients(&mut b, 0, false, CoefficientNeighbours::default()).unwrap();
+        assert_eq!(b.position(), 0);
+    }
+}
+
+#[cfg(test)]
+mod nonzero_tests {
+    use super::*;
+    #[test]
+    fn field_residual_uses_vertical_scan_and_preserves_counts() {
+        // coeff_token(1,1)=01, positive sign=0, total_zeros=1 -> 011;
+        // three remaining coded blocks contain zero coefficients.
+        let mut frame_bits = BitReader::new(&[0x4f, 0x80]);
+        let mut field_bits = frame_bits.clone();
+        let frame =
+            read_inter_coefficients(&mut frame_bits, 1, false, CoefficientNeighbours::default())
+                .unwrap();
+        let field = read_inter_coefficients_field(
+            &mut field_bits,
+            1,
+            false,
+            CoefficientNeighbours::default(),
+            true,
+        )
+        .unwrap();
+        assert_eq!(frame_bits.position(), 9);
+        assert_eq!(field_bits.position(), 9);
+        assert_eq!(frame.luma4[0][1], 1);
+        assert_eq!(field.luma4[0][4], 1);
+        assert_eq!(field.luma4[0][1], 0);
+        assert_eq!(frame.luma_counts, field.luma_counts);
+        assert_eq!(field.luma_counts[0], 1);
+        let mut truncated = BitReader::new(&[0x4f]);
+        assert!(
+            read_inter_coefficients_field(
+                &mut truncated,
+                1,
+                false,
+                CoefficientNeighbours::default(),
+                true
+            )
+            .is_err()
+        );
+        assert_eq!(truncated.position(), 0);
+    }
+    #[test]
+    fn field_8x8_interleave_and_chroma_ac_use_selected_scan() {
+        // One coefficient at residual scan position 2 in the first interleave.
+        for (field, position) in [(false, 17), (true, 2)] {
+            let mut bits = BitReader::new(&[0x4b, 0x80]);
+            let c = read_inter_coefficients_field(
+                &mut bits,
+                1,
+                true,
+                CoefficientNeighbours::default(),
+                field,
+            )
+            .unwrap();
+            assert_eq!(bits.position(), 9);
+            assert_eq!(c.luma8[0][position], 1);
+            assert_eq!(c.luma8[0].iter().sum::<i32>(), 1);
+            assert_eq!(c.luma_counts[0], 1);
+        }
+        // Both chroma DC blocks zero (01 each); first AC has one positive
+        // trailing one, no zeros (0101), seven remaining AC blocks zero.
+        for (field, position) in [(false, 1), (true, 4)] {
+            let mut bits = BitReader::new(&[0x55, 0xfe]);
+            let c = read_inter_coefficients_field(
+                &mut bits,
+                32,
+                false,
+                CoefficientNeighbours::default(),
+                field,
+            )
+            .unwrap();
+            assert_eq!(bits.position(), 15);
+            assert_eq!(c.chroma_dc, [[0; 4]; 2]);
+            assert_eq!(c.chroma_ac[0][0][position], 1);
+            assert_eq!(c.chroma_ac[0][0].iter().sum::<i32>(), 1);
+            assert_eq!(c.chroma_counts, [[1, 0, 0, 0], [0; 4]]);
+        }
+    }
+    #[test]
+    fn one_dc_coefficient_updates_context_and_raster_output() {
+        // First 4x4: coeff_token(1,1)=01, sign=0, total_zeros=0 -> 1;
+        // remaining three coded 4x4 blocks: coeff_token(0,0)=1 each.
+        let mut b = BitReader::new(&[0x5e]);
+        let c =
+            read_inter_coefficients(&mut b, 1, false, CoefficientNeighbours::default()).unwrap();
+        assert_eq!(b.position(), 7);
+        assert_eq!(c.luma_counts[0], 1);
+        assert_eq!(c.luma_counts.iter().sum::<u8>(), 1);
+        assert_eq!(c.luma4[0][0], 1);
+    }
+}
+
+#[cfg(test)]
+mod field_422_scan_tests {
+    use super::*;
+    #[test]
+    fn rectangular_field_ac_scan_is_vertical_and_truncation_is_atomic() {
+        // Two zero DC tokens; one positive AC1 with zero preceding zeros;
+        // the other fifteen chroma AC blocks have zero coefficients.
+        let payload = [0xd7, 0xff, 0xf8];
+        for field in [false, true] {
+            let mut bits = BitReader::new(&payload);
+            let out = read_inter_coefficients_422_field(&mut bits, 32, false,
+                CoefficientNeighbours::default(), Chroma422Neighbours::default(), field).unwrap();
+            assert_eq!(bits.position(), 21);
+            let wide = out.chroma422.unwrap();
+            assert_eq!(wide.counts[0], [1,0,0,0,0,0,0,0]);
+            assert_eq!(wide.counts[1], [0;8]);
+            assert_eq!(wide.ac[0][0][if field {4}else{1}], 1);
+            assert_eq!(wide.ac[0][0].iter().filter(|&&v|v!=0).count(), 1);
+        }
+        let mut truncated = BitReader::new(&payload[..2]);
+        assert!(read_inter_coefficients_422_field(&mut truncated, 32, false,
+            CoefficientNeighbours::default(), Chroma422Neighbours::default(), true).is_err());
+        assert_eq!(truncated.position(), 0);
+    }
+}

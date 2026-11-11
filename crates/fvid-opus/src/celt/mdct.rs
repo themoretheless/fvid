@@ -153,17 +153,11 @@ impl MdctLookup {
             }
         }
 
-        #[cfg(all(any(), target_arch = "aarch64"))]
-        mdct_pre_rotation_neon(f, f2, trig, &st.bitrev[..n4], n4, scale);
-        #[cfg(not(all(any(), target_arch = "aarch64")))]
-        mdct_pre_rotation_scalar(f, f2, trig, &st.bitrev[..n4], n4, scale);
+        fvid_cpu::opus_simd::mdct_pre_rotation(f, f2, trig, &st.bitrev[..n4], n4, scale);
 
         opus_fft_impl(st, f2);
 
-        #[cfg(all(any(), target_arch = "aarch64"))]
-        mdct_post_rotation_neon(f2, trig, output, n4, n2, stride);
-        #[cfg(not(all(any(), target_arch = "aarch64")))]
-        mdct_post_rotation_scalar(f2, trig, output, n4, n2, stride);
+        fvid_cpu::opus_simd::mdct_post_rotation(f2, trig, output, n4, n2, stride);
     }
 
     #[inline]
@@ -197,10 +191,15 @@ impl MdctLookup {
 
         let f2 = &mut f2_buf[..n4];
 
-        #[cfg(all(any(), target_arch = "aarch64"))]
-        mdct_backward_pre_rotation_neon(input, f2, trig, &st.bitrev[..n4], n4, n2, stride);
-        #[cfg(not(all(any(), target_arch = "aarch64")))]
-        mdct_backward_pre_rotation_scalar(input, f2, trig, &st.bitrev[..n4], n4, n2, stride);
+        fvid_cpu::opus_simd::mdct_backward_pre_rotation(
+            input,
+            f2,
+            trig,
+            &st.bitrev[..n4],
+            n4,
+            n2,
+            stride,
+        );
 
         opus_fft_impl(st, f2);
 
@@ -208,108 +207,7 @@ impl MdctLookup {
 
         mdct_backward_post_rotation_scalar(f2, trig, output, n4, n2, overlap2);
 
-        #[cfg(any(all(any(), target_arch = "x86"), all(any(), target_arch = "x86_64")))]
-        unsafe {
-            if super::have_avx() {
-                mdct_tdac_avx(output, window, overlap);
-            } else {
-                mdct_tdac_scalar(output, window, overlap);
-            }
-        }
-        #[cfg(all(
-            not(any(all(any(), target_arch = "x86"), all(any(), target_arch = "x86_64"))),
-            all(any(), target_arch = "aarch64")
-        ))]
-        mdct_tdac_neon(output, window, overlap);
-        #[cfg(all(
-            not(any(all(any(), target_arch = "x86"), all(any(), target_arch = "x86_64"))),
-            not(all(any(), target_arch = "aarch64"))
-        ))]
-        mdct_tdac_scalar(output, window, overlap);
-    }
-}
-
-/// Time-domain aliasing cancellation over the overlap region: the scalar
-/// definition the AVX kernel above is pinned to, and the fallback everywhere
-/// that kernel is unavailable.
-#[cfg(not(all(any(), target_arch = "aarch64")))]
-fn mdct_tdac_scalar(output: &mut [f32], window: &[f32], overlap: usize) {
-    for i in 0..overlap / 2 {
-        let x1 = output[overlap - 1 - i];
-        let x2 = output[i];
-        let wp1 = window[i];
-        let wp2 = window[overlap - 1 - i];
-
-        output[i] = x2 * wp2 - x1 * wp1;
-        output[overlap - 1 - i] = x2 * wp1 + x1 * wp2;
-    }
-}
-
-#[cfg(not(all(any(), target_arch = "aarch64")))]
-fn mdct_pre_rotation_scalar(
-    f: &[f32],
-    f2: &mut [KissCpx],
-    trig: &[f32],
-    bitrev: &[i16],
-    n4: usize,
-    scale: f32,
-) {
-    for i in 0..n4 {
-        let re = f[2 * i];
-        let im = f[2 * i + 1];
-        let t0 = trig[i];
-        let t1 = trig[n4 + i];
-
-        let yr = re * t0 - im * t1;
-        let yi = im * t0 + re * t1;
-
-        f2[bitrev[i] as usize] = KissCpx::new(yr * scale, yi * scale);
-    }
-}
-
-#[cfg(not(all(any(), target_arch = "aarch64")))]
-fn mdct_post_rotation_scalar(
-    f2: &[KissCpx],
-    trig: &[f32],
-    output: &mut [f32],
-    n4: usize,
-    n2: usize,
-    stride: usize,
-) {
-    for i in 0..n4 {
-        let fp = &f2[i];
-        let t0 = trig[i];
-        let t1 = trig[n4 + i];
-
-        let yr = fp.i * t1 - fp.r * t0;
-        let yi = fp.r * t1 + fp.i * t0;
-
-        output[i * 2 * stride] = yr;
-        output[stride * (n2 - 1 - 2 * i)] = yi;
-    }
-}
-
-#[cfg(not(all(any(), target_arch = "aarch64")))]
-fn mdct_backward_pre_rotation_scalar(
-    input: &[f32],
-    f2: &mut [KissCpx],
-    trig: &[f32],
-    bitrev: &[i16],
-    n4: usize,
-    n2: usize,
-    stride: usize,
-) {
-    for i in 0..n4 {
-        let rev = bitrev[i] as usize;
-        let x1 = input[2 * i * stride];
-        let x2 = input[stride * (n2 - 1 - 2 * i)];
-        let t0 = trig[i];
-        let t1 = trig[n4 + i];
-
-        let yr = x2 * t0 + x1 * t1;
-        let yi = x1 * t0 - x2 * t1;
-
-        f2[rev] = KissCpx::new(yi, yr);
+        fvid_cpu::opus_simd::mdct_tdac(output, window, overlap);
     }
 }
 
@@ -343,338 +241,6 @@ fn mdct_backward_post_rotation_scalar(
         output[overlap2 + n2 - 1 - 2 * i] = yi0;
         output[overlap2 + n2 - 2 - 2 * i] = yr1;
         output[overlap2 + 2 * i + 1] = yi1;
-    }
-}
-
-#[cfg(any(all(any(), target_arch = "x86"), all(any(), target_arch = "x86_64")))]
-#[target_feature(enable = "avx")]
-#[inline]
-unsafe fn reverse_ps_avx(v: std::arch::x86_64::__m256) -> std::arch::x86_64::__m256 {
-    use std::arch::x86_64::*;
-    let swapped = _mm256_permute2f128_ps(v, v, 0x01);
-    _mm256_shuffle_ps(swapped, swapped, 0b00_01_10_11)
-}
-
-#[cfg(any(all(any(), target_arch = "x86"), all(any(), target_arch = "x86_64")))]
-#[target_feature(enable = "avx")]
-unsafe fn mdct_tdac_avx(output: &mut [f32], window: &[f32], overlap: usize) {
-    use std::arch::x86_64::*;
-
-    // The fold pairs `output[i]` with `output[overlap - 1 - i]` across the
-    // whole window, so both buffers are covered by their first `overlap`
-    // entries. Trimming to that is what puts the loads below in bounds.
-    let output = &mut output[..overlap];
-    let window = &window[..overlap];
-
-    let overlap2 = overlap / 2;
-    let mut i = 0usize;
-
-    while i + 8 <= overlap2 {
-        let x2 = _mm256_loadu_ps(output.as_ptr().add(i));
-        let rev_idx = overlap - 8 - i;
-
-        let x1_direct = _mm256_loadu_ps(output.as_ptr().add(rev_idx));
-        let x1 = reverse_ps_avx(x1_direct);
-
-        let w1 = _mm256_loadu_ps(window.as_ptr().add(i));
-        let w2_direct = _mm256_loadu_ps(window.as_ptr().add(rev_idx));
-        let w2 = reverse_ps_avx(w2_direct);
-
-        let out_fwd = _mm256_sub_ps(_mm256_mul_ps(x2, w2), _mm256_mul_ps(x1, w1));
-        let out_rev = _mm256_add_ps(_mm256_mul_ps(x2, w1), _mm256_mul_ps(x1, w2));
-
-        _mm256_storeu_ps(output.as_mut_ptr().add(i), out_fwd);
-
-        let out_rev_stored = reverse_ps_avx(out_rev);
-        _mm256_storeu_ps(output.as_mut_ptr().add(rev_idx), out_rev_stored);
-
-        i += 8;
-    }
-
-    for i in i..overlap2 {
-        let x1 = output[overlap - 1 - i];
-        let x2 = output[i];
-        let wp1 = window[i];
-        let wp2 = window[overlap - 1 - i];
-        output[i] = x2 * wp2 - x1 * wp1;
-        output[overlap - 1 - i] = x2 * wp1 + x1 * wp2;
-    }
-}
-
-#[cfg(all(any(), target_arch = "aarch64"))]
-#[inline(always)]
-fn mdct_pre_rotation_neon(
-    f: &[f32],
-    f2: &mut [KissCpx],
-    trig: &[f32],
-    bitrev: &[i16],
-    n4: usize,
-    scale: f32,
-) {
-    use std::arch::aarch64::*;
-
-    unsafe {
-        let vscale = vdupq_n_f32(scale);
-        let f_ptr = f.as_ptr();
-        let trig_ptr = trig.as_ptr();
-        let bitrev_ptr = bitrev.as_ptr();
-        let f2_ptr = f2.as_mut_ptr() as *mut f32;
-
-        let n4_vec = n4 & !3;
-        let mut i = 0;
-
-        while i < n4_vec {
-            let t0 = vld1q_f32(trig_ptr.add(i));
-            let t1 = vld1q_f32(trig_ptr.add(n4 + i));
-
-            let f0 = vld1q_f32(f_ptr.add(2 * i));
-            let f1 = vld1q_f32(f_ptr.add(2 * i + 4));
-
-            let even_odd = vuzpq_f32(f0, f1);
-            let re_v = even_odd.0;
-            let im_v = even_odd.1;
-
-            let yr = vsubq_f32(vmulq_f32(re_v, t0), vmulq_f32(im_v, t1));
-            let yi = vaddq_f32(vmulq_f32(im_v, t0), vmulq_f32(re_v, t1));
-
-            let yr = vmulq_f32(yr, vscale);
-            let yi = vmulq_f32(yi, vscale);
-
-            let yr_arr: [f32; 4] = std::mem::transmute(yr);
-            let yi_arr: [f32; 4] = std::mem::transmute(yi);
-
-            for j in 0..4 {
-                let rev = *bitrev_ptr.add(i + j) as usize;
-                *f2_ptr.add(2 * rev) = yr_arr[j];
-                *f2_ptr.add(2 * rev + 1) = yi_arr[j];
-            }
-
-            i += 4;
-        }
-
-        for i in n4_vec..n4 {
-            let re = *f_ptr.add(2 * i);
-            let im = *f_ptr.add(2 * i + 1);
-            let t0 = *trig_ptr.add(i);
-            let t1 = *trig_ptr.add(n4 + i);
-            let yr = re * t0 - im * t1;
-            let yi = im * t0 + re * t1;
-            let rev = *bitrev_ptr.add(i) as usize;
-            *f2_ptr.add(2 * rev) = yr * scale;
-            *f2_ptr.add(2 * rev + 1) = yi * scale;
-        }
-    }
-}
-
-#[cfg(all(any(), target_arch = "aarch64"))]
-#[inline(always)]
-fn mdct_post_rotation_neon(
-    f2: &[KissCpx],
-    trig: &[f32],
-    output: &mut [f32],
-    n4: usize,
-    n2: usize,
-    stride: usize,
-) {
-    use std::arch::aarch64::*;
-
-    if stride > 1 {
-        for i in 0..n4 {
-            let fp = &f2[i];
-            let t0 = trig[i];
-            let t1 = trig[n4 + i];
-            let yr = fp.i * t1 - fp.r * t0;
-            let yi = fp.r * t1 + fp.i * t0;
-            output[i * 2 * stride] = yr;
-            output[stride * (n2 - 1 - 2 * i)] = yi;
-        }
-        return;
-    }
-
-    unsafe {
-        let f2_ptr = f2.as_ptr() as *const f32;
-        let trig_ptr = trig.as_ptr();
-        let out_ptr = output.as_mut_ptr();
-
-        let n4_vec = n4 & !3;
-        let mut i = 0;
-
-        while i < n4_vec {
-            let c0 = vld1q_f32(f2_ptr.add(2 * i));
-            let c1 = vld1q_f32(f2_ptr.add(2 * i + 4));
-
-            let t0 = vld1q_f32(trig_ptr.add(i));
-            let t1 = vld1q_f32(trig_ptr.add(n4 + i));
-
-            let ri = vuzpq_f32(c0, c1);
-            let r_v = ri.0;
-            let i_v = ri.1;
-
-            let yr = vsubq_f32(vmulq_f32(i_v, t1), vmulq_f32(r_v, t0));
-
-            let yi = vaddq_f32(vmulq_f32(r_v, t1), vmulq_f32(i_v, t0));
-
-            let yr_arr: [f32; 4] = std::mem::transmute(yr);
-            let yi_arr: [f32; 4] = std::mem::transmute(yi);
-
-            for j in 0..4 {
-                *out_ptr.add((i + j) * 2) = yr_arr[j];
-                *out_ptr.add(n2 - 1 - 2 * (i + j)) = yi_arr[j];
-            }
-
-            i += 4;
-        }
-
-        for i in n4_vec..n4 {
-            let fp = &f2[i];
-            let t0 = trig[i];
-            let t1 = trig[n4 + i];
-            let yr = fp.i * t1 - fp.r * t0;
-            let yi = fp.r * t1 + fp.i * t0;
-            output[i * 2] = yr;
-            output[n2 - 1 - 2 * i] = yi;
-        }
-    }
-}
-
-#[cfg(all(any(), target_arch = "aarch64"))]
-#[inline(always)]
-fn mdct_backward_pre_rotation_neon(
-    input: &[f32],
-    f2: &mut [KissCpx],
-    trig: &[f32],
-    bitrev: &[i16],
-    n4: usize,
-    n2: usize,
-    stride: usize,
-) {
-    use std::arch::aarch64::*;
-
-    if stride != 1 {
-        for i in 0..n4 {
-            let rev = bitrev[i] as usize;
-            let x1 = input[2 * i * stride];
-            let x2 = input[stride * (n2 - 1 - 2 * i)];
-            let t0 = trig[i];
-            let t1 = trig[n4 + i];
-            let yr = x2 * t0 + x1 * t1;
-            let yi = x1 * t0 - x2 * t1;
-            f2[rev] = KissCpx::new(yi, yr);
-        }
-        return;
-    }
-
-    unsafe {
-        let in_ptr = input.as_ptr();
-        let trig_ptr = trig.as_ptr();
-        let bitrev_ptr = bitrev.as_ptr();
-        let f2_ptr = f2.as_mut_ptr() as *mut f32;
-
-        let n4_vec = n4 & !3;
-        let mut i = 0;
-
-        while i < n4_vec {
-            let f0 = vld1q_f32(in_ptr.add(2 * i));
-            let f1 = vld1q_f32(in_ptr.add(2 * i + 4));
-            let deint_x1 = vuzpq_f32(f0, f1);
-            let x1_v = deint_x1.0;
-
-            let g0 = vld1q_f32(in_ptr.add(n2 - 7 - 2 * i));
-            let g1 = vld1q_f32(in_ptr.add(n2 - 3 - 2 * i));
-            let deint_x2 = vuzpq_f32(g0, g1);
-
-            let x2_raw = deint_x2.0;
-            let x2_v = vrev64q_f32(x2_raw);
-            let x2_v = vextq_f32(x2_v, x2_v, 2);
-
-            let t0 = vld1q_f32(trig_ptr.add(i));
-            let t1 = vld1q_f32(trig_ptr.add(n4 + i));
-
-            let yr = vaddq_f32(vmulq_f32(x2_v, t0), vmulq_f32(x1_v, t1));
-            let yi = vsubq_f32(vmulq_f32(x1_v, t0), vmulq_f32(x2_v, t1));
-
-            let yr_arr: [f32; 4] = std::mem::transmute(yr);
-            let yi_arr: [f32; 4] = std::mem::transmute(yi);
-
-            for j in 0..4 {
-                let rev = *bitrev_ptr.add(i + j) as usize;
-                *f2_ptr.add(2 * rev) = yi_arr[j];
-                *f2_ptr.add(2 * rev + 1) = yr_arr[j];
-            }
-
-            i += 4;
-        }
-
-        for i in n4_vec..n4 {
-            let rev = *bitrev_ptr.add(i) as usize;
-            let x1 = *in_ptr.add(2 * i);
-            let x2 = *in_ptr.add(n2 - 1 - 2 * i);
-            let t0 = *trig_ptr.add(i);
-            let t1 = *trig_ptr.add(n4 + i);
-            let yr = x2 * t0 + x1 * t1;
-            let yi = x1 * t0 - x2 * t1;
-            *f2_ptr.add(2 * rev) = yi;
-            *f2_ptr.add(2 * rev + 1) = yr;
-        }
-    }
-}
-
-#[cfg(all(any(), target_arch = "aarch64"))]
-#[inline(always)]
-fn mdct_tdac_neon(output: &mut [f32], window: &[f32], overlap: usize) {
-    use std::arch::aarch64::*;
-
-    let overlap2 = overlap / 2;
-    if overlap2 < 4 {
-        for i in 0..overlap2 {
-            let x1 = output[overlap - 1 - i];
-            let x2 = output[i];
-            let wp1 = window[i];
-            let wp2 = window[overlap - 1 - i];
-            output[i] = x2 * wp2 - x1 * wp1;
-            output[overlap - 1 - i] = x2 * wp1 + x1 * wp2;
-        }
-        return;
-    }
-
-    unsafe {
-        let out_ptr = output.as_mut_ptr();
-        let win_ptr = window.as_ptr();
-        let n4 = overlap2 & !3;
-        let mut i = 0;
-
-        while i < n4 {
-            let x2_fwd = vld1q_f32(out_ptr.add(i));
-            let x1_rev = vld1q_f32(out_ptr.add(overlap - 4 - i));
-
-            let x1 = vrev64q_f32(x1_rev);
-            let x1 = vextq_f32(x1, x1, 2);
-
-            let wp1_fwd = vld1q_f32(win_ptr.add(i));
-            let wp2_rev = vld1q_f32(win_ptr.add(overlap - 4 - i));
-            let wp2 = vrev64q_f32(wp2_rev);
-            let wp2 = vextq_f32(wp2, wp2, 2);
-            let wp1 = wp1_fwd;
-
-            let out_fwd = vsubq_f32(vmulq_f32(x2_fwd, wp2), vmulq_f32(x1, wp1));
-
-            let out_rev = vaddq_f32(vmulq_f32(x2_fwd, wp1), vmulq_f32(x1, wp2));
-
-            let out_rev = vrev64q_f32(out_rev);
-            let out_rev = vextq_f32(out_rev, out_rev, 2);
-
-            vst1q_f32(out_ptr.add(i), out_fwd);
-            vst1q_f32(out_ptr.add(overlap - 4 - i), out_rev);
-
-            i += 4;
-        }
-
-        for i in n4..overlap2 {
-            let x1 = output[overlap - 1 - i];
-            let x2 = output[i];
-            output[i] = x2 * window[overlap - 1 - i] - x1 * window[i];
-            output[overlap - 1 - i] = x2 * window[i] + x1 * window[overlap - 1 - i];
-        }
     }
 }
 
@@ -963,12 +529,8 @@ mod mdct_tests {
                     want[bitrev[i] as usize] =
                         KissCpx::new((re * t0 - im * t1) * scale, (im * t0 + re * t1) * scale);
                 }
-                #[allow(unused_mut)]
                 let mut got = vec![KissCpx::new(0.0, 0.0); n4];
-                #[cfg(all(any(), target_arch = "aarch64"))]
-                mdct_pre_rotation_neon(&f, &mut got, &trig, &bitrev, n4, scale);
-                #[cfg(not(all(any(), target_arch = "aarch64")))]
-                mdct_pre_rotation_scalar(&f, &mut got, &trig, &bitrev, n4, scale);
+                fvid_cpu::opus_simd::mdct_pre_rotation(&f, &mut got, &trig, &bitrev, n4, scale);
                 let flat_g: Vec<f32> = got.iter().flat_map(|c| [c.r, c.i]).collect();
                 let flat_w: Vec<f32> = want.iter().flat_map(|c| [c.r, c.i]).collect();
                 close(&flat_g, &flat_w, &format!("mdct pre-rotation n4={n4}"));
@@ -987,12 +549,8 @@ mod mdct_tests {
                     want[i * 2 * stride] = fp.i * t1 - fp.r * t0;
                     want[stride * (n2 - 1 - 2 * i)] = fp.r * t1 + fp.i * t0;
                 }
-                #[allow(unused_mut)]
                 let mut got = vec![0.0f32; out_len];
-                #[cfg(all(any(), target_arch = "aarch64"))]
-                mdct_post_rotation_neon(&f2, &trig, &mut got, n4, n2, stride);
-                #[cfg(not(all(any(), target_arch = "aarch64")))]
-                mdct_post_rotation_scalar(&f2, &trig, &mut got, n4, n2, stride);
+                fvid_cpu::opus_simd::mdct_post_rotation(&f2, &trig, &mut got, n4, n2, stride);
                 close(
                     &got,
                     &want,
@@ -1011,12 +569,10 @@ mod mdct_tests {
                     let (t0, t1) = (trig[i], trig[n4 + i]);
                     want[rev] = KissCpx::new(x1 * t0 - x2 * t1, x2 * t0 + x1 * t1);
                 }
-                #[allow(unused_mut)]
                 let mut got = vec![KissCpx::new(0.0, 0.0); n4];
-                #[cfg(all(any(), target_arch = "aarch64"))]
-                mdct_backward_pre_rotation_neon(&input, &mut got, &trig, &bitrev, n4, n2, stride);
-                #[cfg(not(all(any(), target_arch = "aarch64")))]
-                mdct_backward_pre_rotation_scalar(&input, &mut got, &trig, &bitrev, n4, n2, stride);
+                fvid_cpu::opus_simd::mdct_backward_pre_rotation(
+                    &input, &mut got, &trig, &bitrev, n4, n2, stride,
+                );
                 let flat_g: Vec<f32> = got.iter().flat_map(|c| [c.r, c.i]).collect();
                 let flat_w: Vec<f32> = want.iter().flat_map(|c| [c.r, c.i]).collect();
                 close(
@@ -1044,7 +600,6 @@ mod mdct_tests {
                     want[overlap2 + n2 - 2 - 2 * i] = re1 * t0_1 + im1 * t1_1;
                     want[overlap2 + 2 * i + 1] = re1 * t1_1 - im1 * t0_1;
                 }
-                #[allow(unused_mut)]
                 let mut got = vec![0.0f32; overlap2 + n2];
                 mdct_backward_post_rotation_scalar(&f2, &trig, &mut got, n4, n2, overlap2);
                 close(&got, &want, &format!("mdct backward post-rotation n4={n4}"));
@@ -1069,19 +624,8 @@ mod mdct_tests {
                 want[overlap - 1 - i] = x2 * wp1 + x1 * wp2;
             }
 
-            #[allow(unused_mut)]
             let mut got = src.clone();
-            #[cfg(all(any(), target_arch = "aarch64"))]
-            mdct_tdac_neon(&mut got, &window, overlap);
-            #[cfg(any(all(any(), target_arch = "x86"), all(any(), target_arch = "x86_64")))]
-            unsafe {
-                if std::arch::is_x86_feature_detected!("avx") {
-                    mdct_tdac_avx(&mut got, &window, overlap);
-                } else {
-                    got.copy_from_slice(&want);
-                }
-            }
-            mdct_tdac_scalar(&mut got, &window, overlap);
+            fvid_cpu::opus_simd::mdct_tdac(&mut got, &window, overlap);
             close(&got, &want, &format!("mdct tdac overlap={overlap}"));
         }
     }

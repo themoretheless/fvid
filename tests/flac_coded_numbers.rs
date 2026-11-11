@@ -1,5 +1,5 @@
 #![cfg(feature="player")]
-use fvid::audio::{AudioStream,AudioDecode};
+use fvid::audio::AudioDecode;
 use std::{io::Cursor,path::Path,time::Duration};
 #[path="support/audio_capture.rs"] mod capture;
 fn open(bytes:Vec<u8>)->fvid::playback_flac::FlacAudioReader{fvid::playback_flac::FlacAudioReader::open(Cursor::new(bytes),Default::default()).unwrap()}

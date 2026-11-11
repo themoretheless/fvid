@@ -122,11 +122,16 @@ pub use owned_audio_mix::{
 };
 
 pub mod owned_audio_export;
+mod owned_audio_source;
+pub mod owned_audio_control;
 pub mod owned_audio_plan;
 pub use owned_audio_plan::plan_decode_audio;
 mod owned_adts_export;
 mod owned_aac_export_routing;
-pub use owned_audio_export::{decode_audio, decode_audio_interval, decode_audio_transformed};
+pub use owned_audio_export::{
+    decode_audio, decode_audio_interval, decode_audio_transformed,
+    decode_audio_transformed_to_wave_bytes,
+};
 
 pub mod owned_wave_metadata;
 
@@ -290,7 +295,7 @@ mod owned_matroska_mp3_export;
 
 mod owned_matroska_alac_export;
 
-mod owned_matroska_audio;
+pub mod owned_matroska_audio;
 pub mod owned_matroska_aac;
 mod owned_matroska_aac_export;
 
@@ -305,6 +310,8 @@ pub mod owned_mp4_matroska;
 pub mod owned_mp4_remux;
 
 pub mod owned_mp4_audio_schedule;
+pub mod owned_mp4_edit_clock;
+pub mod owned_mp4_clock_runs;
 pub mod owned_mp4_audio;
 pub mod owned_mp4_audio_normalization;
 
@@ -335,8 +342,10 @@ pub mod owned_ima_wav;
 
 pub mod owned_ms_adpcm;
 
+pub mod owned_subtitle_cues;
+pub mod owned_spherical;
 pub mod owned_play_controls;
-pub use owned_play_controls::*;
+pub use owned_play_controls as play_math;
 
 pub mod owned_text_raster;
 

@@ -143,6 +143,7 @@ impl PackedPlanar {
         }
     }
     /// Borrow the three encoded planes without narrowing samples or converting colour.
+    #[cfg(feature = "player")]
     pub(crate) fn plane_data(&self) -> Result<[&[u8]; 3]> {
         if self.alpha.is_some() {
             return Err(invalid("three-plane presentation cannot discard alpha"));
@@ -410,7 +411,7 @@ impl PackedPlanar {
         Ok(())
     }
     fn colour_to_rgb(&self, rgb: &mut Vec<u8>, budget: usize) -> Result<()> {
-        let (sx, sy, luma, chroma, bytes) = self.layout()?;
+        let (sx, sy, luma, _chroma, bytes) = self.layout()?;
         let len = luma
             .checked_mul(3)
             .filter(|&n| n <= budget)
@@ -435,43 +436,129 @@ impl PackedPlanar {
             }
             return Ok(());
         }
-        let AvcColour { kr, kb, full } = self.colour;
-        if !kr.is_finite() || !kb.is_finite() || kr < 0.0 || kb < 0.0 || kr + kb >= 1.0 {
-            return Err(invalid("invalid planar colour matrix"));
-        }
-        let scale = f64::from(1u32 << (self.depth - 8));
-        let max = f64::from((1u32 << self.depth) - 1);
-        let (offset, yr, cr) = if full {
-            (0.0, max, max)
-        } else {
-            (16.0 * scale, 219.0 * scale, 224.0 * scale)
-        };
-        let cw = self.frame.width.div_ceil(sx);
-        for (i, out) in rgb.as_chunks_mut::<3>().0.iter_mut().enumerate() {
-            let x = i % self.frame.width;
-            let y = i / self.frame.width;
-            let c = (y / sy) * cw + x / sx;
-            let yy = (f64::from(self.sample(i, bytes)) - offset) / yr;
-            let cb = (f64::from(self.sample(luma + c, bytes)) - 128.0 * scale) / cr;
-            let cv = (f64::from(self.sample(luma + chroma + c, bytes)) - 128.0 * scale) / cr;
-            let r = yy + 2.0 * (1.0 - kr) * cv;
-            let b = yy + 2.0 * (1.0 - kb) * cb;
-            let g = (yy - kr * r - kb * b) / (1.0 - kr - kb);
-            for (out, v) in out.iter_mut().zip([r, g, b]) {
-                *out = (v * 255.0).round().clamp(0.0, 255.0) as u8;
-            }
-        }
-        Ok(())
+        planar_yuv_slice_to_rgb(
+            &self.frame.data,
+            self.frame.width,
+            self.frame.height,
+            [sx, sy],
+            self.depth,
+            self.colour,
+            rgb,
+            budget,
+        )
     }
 }
 
-/// Dispatch AVC identity GBR before applying any YUV colour conversion.
-pub(crate) fn avc_picture_with_vui(
-    p: &crate::codec::avc_picture::IntraPicture,
-    vui: Option<&crate::codec::avc::Vui>,
+#[inline]
+fn load_planar_sample(data: &[u8], index: usize, bytes: usize) -> u16 {
+    if bytes == 1 {
+        u16::from(data[index])
+    } else {
+        u16::from_le_bytes([data[2 * index], data[2 * index + 1]])
+    }
+}
+
+pub(crate) fn planar_yuv_slice_to_rgb(
+    data: &[u8],
+    width: usize,
+    height: usize,
+    [sx, sy]: [usize; 2],
+    depth: u8,
+    colour: AvcColour,
+    rgb: &mut Vec<u8>,
     budget: usize,
-) -> Result<PackedPlanar> {
-    avc_picture_with_vui_and_fallback(p, vui, crate::color::hdr::ColourDescription::default(), budget)
+) -> Result<()> {
+    if width == 0 || height == 0 || sx == 0 || sy == 0 || !(8..=16).contains(&depth) {
+        return Err(invalid("invalid planar YUV geometry or depth"));
+    }
+    let bytes = if depth == 8 { 1 } else { 2 };
+    let luma = width
+        .checked_mul(height)
+        .ok_or_else(|| invalid("planar luma size overflow"))?;
+    let cw = width.div_ceil(sx);
+    let ch = height.div_ceil(sy);
+    let chroma = cw
+        .checked_mul(ch)
+        .ok_or_else(|| invalid("planar chroma size overflow"))?;
+    let expected = chroma
+        .checked_mul(2)
+        .and_then(|n| n.checked_add(luma))
+        .and_then(|n| n.checked_mul(bytes))
+        .ok_or_else(|| invalid("planar frame size overflow"))?;
+    if data.len() != expected {
+        return Err(invalid("planar YUV buffer size mismatch"));
+    }
+    if bytes == 2
+        && depth < 16
+        && data
+            .as_chunks::<2>()
+            .0
+            .iter()
+            .any(|p| u16::from_le_bytes(*p) >= 1u16 << depth)
+    {
+        return Err(invalid("planar YUV sample exceeds coded depth"));
+    }
+    let len = luma
+        .checked_mul(3)
+        .filter(|&n| n <= budget)
+        .ok_or_else(|| invalid("RGB frame exceeds playback budget"))?;
+    if rgb.len() != len {
+        *rgb = crate::buffer(len)?;
+    }
+    let AvcColour { kr, kb, full } = colour;
+    if !kr.is_finite() || !kb.is_finite() || kr < 0.0 || kb < 0.0 || kr + kb >= 1.0 {
+        return Err(invalid("invalid planar colour matrix"));
+    }
+    const SHIFT: u32 = 24;
+    const FP_ONE: f64 = (1u64 << SHIFT) as f64;
+    const HALF: i64 = 1i64 << (SHIFT - 1);
+    let scale = 1i64 << (depth - 8);
+    let scale_f = scale as f64;
+    let max_f = f64::from((1u32 << depth) - 1);
+    let (y_off, yr, cr) = if full {
+        (0i64, max_f, max_f)
+    } else {
+        (16 * scale, 219.0 * scale_f, 224.0 * scale_f)
+    };
+    let c_off = 128 * scale;
+    let r_cv = 2.0 * (1.0 - kr);
+    let b_cb = 2.0 * (1.0 - kb);
+    let inv_kg = 1.0 / (1.0 - kr - kb);
+    let cy_fp = (255.0 / yr * FP_ONE).round() as i64;
+    let cr_r_fp = (255.0 * r_cv / cr * FP_ONE).round() as i64;
+    let cb_g_fp = (-255.0 * kb * b_cb * inv_kg / cr * FP_ONE).round() as i64;
+    let cr_g_fp = (-255.0 * kr * r_cv * inv_kg / cr * FP_ONE).round() as i64;
+    let cb_b_fp = (255.0 * b_cb / cr * FP_ONE).round() as i64;
+    let row_stride = width * 3;
+    let convert_rows = |start_y: usize, rows_rgb: &mut [u8]| {
+        for (dy, row_rgb) in rows_rgb.chunks_exact_mut(row_stride).enumerate() {
+            let y = start_y + dy;
+            let cy_base = (y / sy) * cw;
+            let y_base = y * width;
+            for (x, out) in row_rgb.as_chunks_mut::<3>().0.iter_mut().enumerate() {
+                let c = cy_base + x / sx;
+                let yy = (i64::from(load_planar_sample(data, y_base + x, bytes)) - y_off) * cy_fp;
+                let cb = i64::from(load_planar_sample(data, luma + c, bytes)) - c_off;
+                let cv = i64::from(load_planar_sample(data, luma + chroma + c, bytes)) - c_off;
+                let r = (yy + cr_r_fp * cv + HALF) >> SHIFT;
+                let g = (yy + cb_g_fp * cb + cr_g_fp * cv + HALF) >> SHIFT;
+                let b = (yy + cb_b_fp * cb + HALF) >> SHIFT;
+                out[0] = r.clamp(0, 255) as u8;
+                out[1] = g.clamp(0, 255) as u8;
+                out[2] = b.clamp(0, 255) as u8;
+            }
+        }
+    };
+    let workers = fvid_cpu::span_workers(len);
+    if workers < 2 || height < 64 {
+        convert_rows(0, rgb);
+    } else {
+        let rows_per_chunk = height.div_ceil(workers);
+        fvid_cpu::par_chunks_mut(rgb, rows_per_chunk * row_stride, |idx, chunk| {
+            convert_rows(idx * rows_per_chunk, chunk);
+        });
+    }
+    Ok(())
 }
 
 pub(crate) fn avc_picture_with_vui_and_fallback(

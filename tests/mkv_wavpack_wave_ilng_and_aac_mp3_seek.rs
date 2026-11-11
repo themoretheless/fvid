@@ -1,5 +1,7 @@
+#[cfg(feature = "player")]
 use std::io::Cursor;
 use std::path::Path;
+#[cfg(feature = "player")]
 use std::time::Duration;
 
 fn fixture_path(name: &str) -> std::path::PathBuf {
@@ -68,6 +70,7 @@ fn wave_probe_and_metadata_editor_map_ilng_to_language() {
     assert!(edited_info.windows(3).any(|w| w == b"fra"));
 }
 
+#[cfg(feature = "player")]
 #[test]
 fn aac_audio_reader_seek_time_ceils_sub_sample_duration() {
     use fvid::audio::{AudioPacket, AudioStream};
@@ -108,6 +111,7 @@ fn aac_audio_reader_seek_time_ceils_sub_sample_duration() {
     );
 }
 
+#[cfg(feature = "player")]
 #[test]
 fn mp3_audio_reader_seek_time_ceils_sub_sample_duration() {
     use fvid::audio::{AudioPacket, AudioStream};

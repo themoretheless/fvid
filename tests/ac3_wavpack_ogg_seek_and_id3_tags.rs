@@ -1,5 +1,7 @@
+#[cfg(feature = "player")]
 use std::io::Cursor;
 use std::path::Path;
+#[cfg(feature = "player")]
 use std::time::Duration;
 
 fn fixture_path(name: &str) -> std::path::PathBuf {
@@ -8,6 +10,7 @@ fn fixture_path(name: &str) -> std::path::PathBuf {
         .join(name)
 }
 
+#[cfg(feature = "player")]
 #[test]
 fn ac3_audio_reader_seek_time_ceils_sub_sample_duration() {
     use fvid::audio::{AudioPacket, AudioStream};
@@ -37,6 +40,7 @@ fn ac3_audio_reader_seek_time_ceils_sub_sample_duration() {
     assert_eq!(presented.data, vec![1, 0, 0, 0, 2, 0, 0, 0]);
 }
 
+#[cfg(feature = "player")]
 #[test]
 fn wavpack_audio_reader_seek_time_ceils_sub_sample_duration() {
     use fvid::audio::{AudioPacket, AudioStream};
@@ -65,6 +69,7 @@ fn wavpack_audio_reader_seek_time_ceils_sub_sample_duration() {
     assert_eq!(presented.data, vec![1, 0, 0, 0, 2, 0, 0, 0]);
 }
 
+#[cfg(feature = "player")]
 #[test]
 fn ogg_opus_and_catalog_readers_seek_time_ceils_sub_sample_duration() {
     use fvid::audio::{AudioPacket, AudioStream};

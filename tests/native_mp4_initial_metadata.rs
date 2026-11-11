@@ -1,5 +1,4 @@
 #![cfg(feature = "player")]
-use fvid::audio::AudioStream;
 use std::{
     io::Cursor,
     path::{Path, PathBuf},

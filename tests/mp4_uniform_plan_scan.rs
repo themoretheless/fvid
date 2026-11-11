@@ -1,8 +1,10 @@
 use fvid_media::{AudioDecodeTransform, CopyOptions};
 use std::{
-    io::{BufReader, Cursor},
+    io::BufReader,
     path::{Path, PathBuf},
 };
+#[cfg(feature = "player")]
+use std::io::Cursor;
 fn root() -> PathBuf {
     Path::new(env!("CARGO_MANIFEST_DIR"))
         .join("tests/fixtures/playback-errors/mp4-uniform-plan-scan")

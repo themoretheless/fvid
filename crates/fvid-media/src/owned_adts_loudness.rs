@@ -10,14 +10,6 @@ fn policies(options: &CopyOptions) -> bool {
         && options.stream_metadata_set.is_empty()
         && options.stream_metadata_delete.is_empty()
 }
-pub(crate) fn validate_header_configuration_and_channels(
-    source: &Path,
-    options: &CopyOptions,
-) -> Result<(u32, u16)> {
-    let (rate, channels, _, _) =
-        validate_header_configuration_channels_and_reader(source, options)?;
-    Ok((rate, channels))
-}
 pub(crate) fn validate_header_configuration_channels_and_reader(
     source: &Path,
     options: &CopyOptions,
@@ -71,9 +63,6 @@ pub(crate) fn validate_header_configuration_channels_and_reader(
     }
     Ok((config.sample_rate, config.channels, mask, reader))
 }
-pub(crate) fn validate_header_configuration(source: &Path, options: &CopyOptions) -> Result<u32> {
-    validate_header_configuration_and_channels(source, options).map(|(rate, _)| rate)
-}
 fn validate_packet_budget(
     source: &Path,
     reader: Option<crate::owned_aac::adts::StreamReader<BufReader<File>>>,
@@ -120,22 +109,6 @@ pub(crate) fn validate_configuration_and_channels(
 ) -> Result<(u32, u16)> {
     validate_configuration_channels_frames_and_reader(source, options)
         .map(|(rate, channels, _, _)| (rate, channels))
-}
-pub(crate) fn validate_configuration_channels_and_reader(
-    source: &Path,
-    options: &CopyOptions,
-) -> Result<(
-    u32,
-    u16,
-    Option<(
-        u32,
-        u16,
-        u32,
-        crate::owned_aac::adts::StreamReader<BufReader<File>>,
-    )>,
-)> {
-    validate_configuration_channels_frames_and_reader(source, options)
-        .map(|(rate, channels, _, reader)| (rate, channels, reader))
 }
 pub(crate) fn validate_configuration_channels_frames_and_reader(
     source: &Path,
@@ -196,6 +169,7 @@ pub(crate) fn supports_plan(source: &Path, options: &CopyOptions) -> bool {
         Err(error) => error.starts_with("controlled memory budget exceeded:"),
     }
 }
+#[cfg(test)]
 pub(crate) fn supports(source: &Path, options: &CopyOptions) -> bool {
     match validate_configuration(source, options) {
         Ok(_) => crate::owned_adts_export::supports(source, Default::default(), options),
@@ -347,21 +321,6 @@ pub(crate) fn build_loudness_plan(source: &Path, options: &CopyOptions) -> Media
         graph: None,
         notes,
     }
-}
-pub(crate) fn plan_loudness_without_meter_budget(
-    source: &Path,
-    options: &CopyOptions,
-) -> Result<MediaPlan> {
-    validate_configuration(source, options)?;
-    Ok(build_loudness_plan(source, options))
-}
-pub(crate) fn plan_loudness_with_validated_rate(
-    source: &Path,
-    rate: u32,
-    options: &CopyOptions,
-) -> Result<MediaPlan> {
-    check_meter_budget(source, rate, options)?;
-    Ok(build_loudness_plan(source, options))
 }
 pub(crate) fn plan_loudness_with_validated_info(
     source: &Path,

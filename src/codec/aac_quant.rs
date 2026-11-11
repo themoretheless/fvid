@@ -1,8 +1,6 @@
 //! AAC ordinary spectral-band inverse quantization, before window synthesis.
 //! Noise and intensity codebooks require their own reconstruction operations.
-use crate::{Result, invalid};
-
-include!("../../crates/fvid-media/src/owned_aac/aac_quant_impl.rs");
+pub use fvid_media::owned_aac::aac_quant::*;
 
 #[cfg(test)]
 mod tests {

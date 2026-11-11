@@ -4,8 +4,7 @@ use crate::resident;
 use crate::{Backend, ExecutionOptions, FrameView, Result, backend, buffer, invalid};
 use std::io::{BufRead, Write};
 
-fn io_error(error: std::io::Error) -> crate::Error { error.into() }
-include!("../crates/fvid-media/src/owned_y4m_impl.rs");
+pub use fvid_media::owned_y4m::{Header, PixelFormat, line};
 
 #[derive(Clone, Copy, Debug)]
 pub struct Crop {

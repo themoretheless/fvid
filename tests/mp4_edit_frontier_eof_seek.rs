@@ -128,7 +128,6 @@ fn occupied_final_edits_keep_seek_at_the_declared_endpoint() {
     assert!(failures.is_empty(), "{failures:?}");
 }
 
-use fvid::audio::AudioBackend as _;
 struct FlushCapture {
     inner: transitions::Capture,
     anchors: std::sync::Arc<std::sync::Mutex<Vec<Duration>>>,

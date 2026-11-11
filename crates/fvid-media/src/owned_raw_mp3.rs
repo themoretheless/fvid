@@ -25,12 +25,6 @@ fn check(options: &CopyOptions) -> Result<()> {
     }
     crate::owned_budget::check_rss_budget(options)
 }
-pub(crate) fn recognizes(source: &Path) -> Result<bool> {
-    let mut file = File::open(source).map_err(|e| e.to_string())?;
-    let mut head = [0; 10];
-    let count = file.read(&mut head).map_err(|e| e.to_string())?;
-    Ok(crate::owned_mpeg_audio::has_signature(&head[..count]))
-}
 pub(crate) fn open(source: &Path, options: &CopyOptions) -> Result<Mp3> {
     open_with_transform(source, None, options)
 }
@@ -215,30 +209,34 @@ fn open_from_file_with_interval(
     }
     Ok(parsed)
 }
-pub(crate) fn descriptor(source: &Path, options: &CopyOptions) -> Result<(u32, u16, &'static str)> {
-    descriptor_with_transform(source, None, options)
+pub(crate) struct RawMp3ExportSource {
+    pub(crate) file: File,
 }
-pub(crate) fn descriptor_with_transform(
-    source: &Path,
-    transform: Option<AudioDecodeTransform>,
-    options: &CopyOptions,
-) -> Result<(u32, u16, &'static str)> {
-    descriptor_for_decode(source, transform, options)
-        .map(|(rate, channels, codec, _, _)| (rate, channels, codec))
+
+impl crate::owned_audio_source::AudioExportSource for RawMp3ExportSource {
+    fn descriptor(
+        self,
+        transform: Option<AudioDecodeTransform>,
+        options: &CopyOptions,
+    ) -> Result<crate::owned_audio_source::AudioSourceDescriptor> {
+        descriptor_from_file_for_decode(self.file, transform, options)
+    }
+
+    fn apply(
+        self,
+        destination: &Path,
+        transform: AudioDecodeTransform,
+        options: &CopyOptions,
+    ) -> Result<ExportStats> {
+        apply_from_file(self.file, destination, transform, options)
+    }
 }
-pub(crate) fn descriptor_for_decode(
-    source: &Path,
-    transform: Option<AudioDecodeTransform>,
-    options: &CopyOptions,
-) -> Result<(u32, u16, &'static str, u64, usize)> {
-    let parsed = open_with_transform(source, transform, options)?;
-    descriptor_from_parsed(parsed, transform, options)
-}
+
 pub(crate) fn descriptor_from_file_for_decode(
     file: File,
     transform: Option<AudioDecodeTransform>,
     options: &CopyOptions,
-) -> Result<(u32, u16, &'static str, u64, usize)> {
+) -> Result<crate::owned_audio_source::AudioSourceDescriptor> {
     let parsed = open_from_file_with_interval(
         file,
         transform.map(|transform| (transform, None)),
@@ -250,7 +248,7 @@ fn descriptor_from_parsed(
     parsed: Mp3,
     transform: Option<AudioDecodeTransform>,
     options: &CopyOptions,
-) -> Result<(u32, u16, &'static str, u64, usize)> {
+) -> Result<crate::owned_audio_source::AudioSourceDescriptor> {
     if parsed.presentation_samples() == 0 {
         return Err("MPEG audio stream contains no audible samples".into());
     }
@@ -282,14 +280,18 @@ fn descriptor_from_parsed(
     } else {
         last.min(parsed.presentation_samples())
     };
-    Ok((
+    let mask = crate::owned_pcm_channels::standard_mask(parsed.channels).unwrap_or(0) as u32;
+    let codec = match parsed.tag {
+        LAYER_I => "mp1",
+        LAYER_II => "mp2",
+        _ => "mp3",
+    };
+    Ok(crate::owned_audio_source::AudioSourceDescriptor::float32(
+        0,
         parsed.sample_rate,
         parsed.channels,
-        match parsed.tag {
-            LAYER_I => "mp1",
-            LAYER_II => "mp2",
-            _ => "mp3",
-        },
+        mask,
+        codec,
         prefix_samples,
         info.len(),
     ))
@@ -330,17 +332,6 @@ impl MpegDecoder {
         }
     }
 }
-pub(crate) fn geometry_with_transform(
-    source: &Path,
-    transform: Option<AudioDecodeTransform>,
-    options: &CopyOptions,
-) -> Result<(u32, u16)> {
-    let parsed = open_with_transform(source, transform, options)?;
-    if parsed.presentation_samples() == 0 {
-        return Err("MPEG audio stream contains no audible samples".into());
-    }
-    Ok((parsed.sample_rate, parsed.channels))
-}
 fn source_info_from_parsed(parsed: &Mp3, options: &CopyOptions) -> Result<Vec<u8>> {
     let info = parsed.wave_info()?;
     if let Some(max) = options.max_controlled_bytes {
@@ -352,23 +343,7 @@ fn source_info_from_parsed(parsed: &Mp3, options: &CopyOptions) -> Result<Vec<u8
     }
     Ok(info)
 }
-pub(crate) fn source_info(source: &Path, options: &CopyOptions) -> Result<Vec<u8>> {
-    let mut inspect_opts = crate::owned_adts_export::pcm_decode_options(options);
-    inspect_opts.max_packets = None;
-    inspect_opts.max_packet_bytes = usize::MAX;
-    let parsed = open(source, &inspect_opts)?;
-    source_info_from_parsed(&parsed, options)
-}
-pub(crate) fn supports(
-    source: &Path,
-    transform: AudioDecodeTransform,
-    options: &CopyOptions,
-) -> bool {
-    let Ok(file) = File::open(source) else {
-        return false;
-    };
-    supports_from_file(file, transform, options)
-}
+#[cfg(test)]
 pub(crate) fn supports_from_file(
     file: File,
     transform: AudioDecodeTransform,
@@ -450,17 +425,6 @@ fn decode_raw_checked(
         interval,
         options,
     )
-}
-pub(crate) fn decode_to_wave(
-    source: &Path,
-    rate: u32,
-    channels: u16,
-    mask: u32,
-    options: &CopyOptions,
-) -> Result<crate::owned_adts_export::DecodedSpool> {
-    check(options)?;
-    let file = File::open(source).map_err(|e| e.to_string())?;
-    decode_to_wave_from_file(file, rate, channels, mask, options)
 }
 pub(crate) fn decode_to_wave_from_file(
     file: File,
@@ -596,19 +560,6 @@ fn decode_raw_parsed(
         return Err("MPEG audio interval contains no samples".into());
     }
     Ok(stats)
-}
-pub(crate) fn apply(
-    source: &Path,
-    destination: &Path,
-    transform: AudioDecodeTransform,
-    options: &CopyOptions,
-) -> Result<ExportStats> {
-    check(options)?;
-    if destination.symlink_metadata().is_ok() {
-        return Err("output already exists".into());
-    }
-    let file = File::open(source).map_err(|e| e.to_string())?;
-    apply_from_file(file, destination, transform, options)
 }
 pub(crate) fn apply_from_file(
     file: File,

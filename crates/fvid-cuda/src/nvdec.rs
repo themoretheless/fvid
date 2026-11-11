@@ -290,6 +290,7 @@ pub struct NvdecSurface {
 pub struct NvdecSession {
     decoder: DecoderHandle,
     destroy: DestroyDecoder,
+    decode: DecodePicture,
     map: MapFrame,
     unmap: UnmapFrame,
     mapped: Vec<(usize, u64, u32)>,
@@ -329,10 +330,12 @@ impl NvdecSession {
                 caps.supported, caps.min_width, caps.min_height, caps.max_width, caps.max_height));
         }
         let (create, destroy) = api.decoder_entrypoints()?;
+        let decode = api.picture_entrypoint()?;
         let (map, unmap) = api.mapping_entrypoints()?;
         let mut session = Self {
             decoder: std::ptr::null_mut(),
             destroy,
+            decode,
             map,
             unmap,
             mapped: Vec::new(),
@@ -383,11 +386,10 @@ impl NvdecSession {
         };
         validate_slice_offsets(offsets, params.nBitstreamDataLen)?;
         self.device.handles()?;
-        let decode = self.api.picture_entrypoint()?;
         self.submitted[picture as usize] = false;
         // SAFETY: Caller guarantees codec/reference parameters and byte arrays;
         // context is bound and driver library remains loaded.
-        let status = unsafe { decode(self.decoder, params) };
+        let status = unsafe { (self.decode)(self.decoder, params) };
         if status != 0 {
             return Err(format!(
                 "NVDEC picture submission failed with CUDA status {status}"
@@ -508,9 +510,8 @@ impl NvdecApi {
     fn picture_entrypoint(&self) -> Result<DecodePicture, String> {
         #[cfg(any(target_os = "linux", target_os = "windows"))]
         {
-            let name = [b"cuvidDecodePicture".as_slice(), &[0]].concat();
             // SAFETY: Fixed CUDAAPI signature and SDK-generated picture ABI.
-            let decode = unsafe { self.library.get::<DecodePicture>(name.as_slice()) }
+            let decode = unsafe { self.library.get::<DecodePicture>(b"cuvidDecodePicture\0") }
                 .map_err(|e| format!("NVDEC decode entrypoint unavailable: {e}"))?;
             Ok(*decode)
         }
@@ -522,13 +523,11 @@ impl NvdecApi {
     fn mapping_entrypoints(&self) -> Result<(MapFrame, UnmapFrame), String> {
         #[cfg(any(target_os = "linux", target_os = "windows"))]
         {
-            let map_name = [b"cuvidMapVideoFrame64".as_slice(), &[0]].concat();
-            let unmap_name = [b"cuvidUnmapVideoFrame64".as_slice(), &[0]].concat();
             // SAFETY: SDK CUDAAPI 64-bit device-pointer signature.
-            let map = unsafe { self.library.get::<MapFrame>(map_name.as_slice()) }
+            let map = unsafe { self.library.get::<MapFrame>(b"cuvidMapVideoFrame64\0") }
                 .map_err(|e| format!("NVDEC map entrypoint unavailable: {e}"))?;
             // SAFETY: SDK CUDAAPI destructor for a mapped 64-bit device pointer.
-            let unmap = unsafe { self.library.get::<UnmapFrame>(unmap_name.as_slice()) }
+            let unmap = unsafe { self.library.get::<UnmapFrame>(b"cuvidUnmapVideoFrame64\0") }
                 .map_err(|e| format!("NVDEC unmap entrypoint unavailable: {e}"))?;
             Ok((*map, *unmap))
         }
@@ -540,13 +539,11 @@ impl NvdecApi {
     fn decoder_entrypoints(&self) -> Result<(CreateDecoder, DestroyDecoder), String> {
         #[cfg(any(target_os = "linux", target_os = "windows"))]
         {
-            let create_name = [b"cuvidCreateDecoder".as_slice(), &[0]].concat();
-            let destroy_name = [b"cuvidDestroyDecoder".as_slice(), &[0]].concat();
             // SAFETY: Fixed CUDAAPI symbol and C-verified storage layout.
-            let create = unsafe { self.library.get::<CreateDecoder>(create_name.as_slice()) }
+            let create = unsafe { self.library.get::<CreateDecoder>(b"cuvidCreateDecoder\0") }
                 .map_err(|e| format!("NVDEC create entrypoint unavailable: {e}"))?;
             // SAFETY: Fixed CUDAAPI destructor with retained library.
-            let destroy = unsafe { self.library.get::<DestroyDecoder>(destroy_name.as_slice()) }
+            let destroy = unsafe { self.library.get::<DestroyDecoder>(b"cuvidDestroyDecoder\0") }
                 .map_err(|e| format!("NVDEC destroy entrypoint unavailable: {e}"))?;
             Ok((*create, *destroy))
         }

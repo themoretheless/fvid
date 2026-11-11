@@ -8,6 +8,29 @@ pub enum Error {
     Unsupported(String),
     Gpu(String),
 }
+impl Error {
+    pub fn is_unsupported(&self) -> bool {
+        matches!(self, Self::Unsupported(_))
+    }
+    pub fn contains(&self, pat: &str) -> bool {
+        self.to_string().contains(pat)
+    }
+}
+impl PartialEq<str> for Error {
+    fn eq(&self, other: &str) -> bool {
+        self.to_string() == other
+    }
+}
+impl PartialEq<&str> for Error {
+    fn eq(&self, other: &&str) -> bool {
+        self.to_string() == *other
+    }
+}
+impl PartialEq<String> for Error {
+    fn eq(&self, other: &String) -> bool {
+        self.to_string() == *other
+    }
+}
 impl std::fmt::Display for Error {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
@@ -43,6 +66,21 @@ pub fn unsupported(s: &str) -> Error {
     Error::Unsupported(s.into())
 }
 
+impl From<String> for Error {
+    fn from(s: String) -> Self {
+        Self::Invalid(s)
+    }
+}
+impl From<&str> for Error {
+    fn from(s: &str) -> Self {
+        Self::Invalid(s.into())
+    }
+}
+impl From<Error> for String {
+    fn from(error: Error) -> Self {
+        error.to_string()
+    }
+}
 impl From<BitstreamError> for Error {
     fn from(error: BitstreamError) -> Self {
         Self::Invalid(error.0)

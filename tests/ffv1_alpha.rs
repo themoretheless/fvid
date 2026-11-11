@@ -35,6 +35,7 @@ fn decoder(
         .map(|p| std::fs::read(root().join(p)).unwrap())
         .unwrap_or_default();
     fvid_media::owned_ffv1_decoder::Decoder::from_configuration(size[0], size[1], &private, budget)
+        .map_err(|e| e.to_string())
 }
 #[test]
 fn alpha_contexts_color_transform_and_precision_match_independent_arrays() {
@@ -127,11 +128,11 @@ fn alpha_storage_errors_invalidate_history_and_keyframes_recover() {
     for invalid in m["invalid"].as_array().unwrap() {
         let bad = std::fs::read(root().join(invalid["file"].as_str().unwrap())).unwrap();
         assert_eq!(
-            decoder.decode(&bad).err().unwrap(),
+            decoder.decode(&bad).err().unwrap().to_string(),
             invalid["error"].as_str().unwrap()
         );
         assert_eq!(
-            decoder.decode(&next).err().unwrap(),
+            decoder.decode(&next).err().unwrap().to_string(),
             "FFV1 frame requires a preceding keyframe"
         );
         decoder.decode(&good).unwrap();
@@ -144,13 +145,13 @@ fn alpha_storage_errors_invalidate_history_and_keyframes_recover() {
         data: vec![0; 48],
     };
     assert_eq!(
-        fvid_media::owned_ffv1_encoder::encode_with_alpha(&geometry, 10, &[0; 15]).unwrap_err(),
+        fvid_media::owned_ffv1_encoder::encode_with_alpha(&geometry, 10, &[0; 15]).unwrap_err().to_string(),
         "invalid FFV1 alpha sample storage"
     );
     let mut alpha = [0; 16];
     alpha[1] = 4;
     assert_eq!(
-        fvid_media::owned_ffv1_encoder::encode_with_alpha(&geometry, 10, &alpha).unwrap_err(),
+        fvid_media::owned_ffv1_encoder::encode_with_alpha(&geometry, 10, &alpha).unwrap_err().to_string(),
         "invalid FFV1 alpha sample storage"
     );
 }

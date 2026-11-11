@@ -18,48 +18,8 @@ use crate::celt::quant_bands::{
     unquant_energy_finalise, unquant_fine_energy,
 };
 use crate::celt::rate::clt_compute_allocation;
-#[cfg(any(all(any(), target_arch = "x86"), all(any(), target_arch = "x86_64")))]
-use crate::cpu_features::FeatureCache;
 use crate::range_coder::BITRES;
 use crate::range_coder::RangeCoder;
-
-/// Runtime CPU-feature gates for the x86 kernels in this layer.
-///
-/// A dispatch test must name *every* feature the kernel it guards declares in
-/// its `#[target_feature]` list. Testing only `avx` before calling a function
-/// declared `avx,fma` runs FMA instructions on AVX-without-FMA hardware
-/// (Sandy Bridge, Ivy Bridge), which is undefined behaviour. Routing the
-/// combined tests through these two helpers keeps the guard and the kernel it
-/// guards from drifting apart.
-#[cfg(any(all(any(), target_arch = "x86"), all(any(), target_arch = "x86_64")))]
-#[inline]
-pub(crate) fn have_avx_fma() -> bool {
-    static CACHE: FeatureCache = FeatureCache::new();
-    CACHE.get(|| {
-        std::arch::is_x86_feature_detected!("avx") && std::arch::is_x86_feature_detected!("fma")
-    })
-}
-
-/// Companion to [`have_avx_fma`] for kernels declared `avx2,fma`.
-#[cfg(any(all(any(), target_arch = "x86"), all(any(), target_arch = "x86_64")))]
-#[inline]
-pub(crate) fn have_avx2_fma() -> bool {
-    static CACHE: FeatureCache = FeatureCache::new();
-    CACHE.get(|| {
-        std::arch::is_x86_feature_detected!("avx2") && std::arch::is_x86_feature_detected!("fma")
-    })
-}
-
-/// Companion for kernels declared `avx` alone (the MDCT's TDAC fold).
-#[cfg(any(all(any(), target_arch = "x86"), all(any(), target_arch = "x86_64")))]
-#[inline]
-pub(crate) fn have_avx() -> bool {
-    static CACHE: FeatureCache = FeatureCache::new();
-    CACHE.get(|| std::arch::is_x86_feature_detected!("avx"))
-}
-
-#[cfg(all(any(), target_arch = "aarch64"))]
-use std::arch::aarch64::*;
 
 const MAX_FRAME_SIZE: usize = 2880;
 
@@ -190,120 +150,9 @@ fn transient_analysis(
     is_transient
 }
 
+#[inline]
 fn l1_metric(tmp: &[f32], n: usize, lm: i32, bias: f32) -> f32 {
-    #[cfg(all(any(), target_arch = "x86_64"))]
-    unsafe {
-        if n >= 16 && std::arch::is_x86_feature_detected!("avx") {
-            return l1_metric_avx(tmp, n, lm, bias);
-        }
-    }
-    #[cfg(all(any(), target_arch = "aarch64"))]
-    {
-        if n >= 16 {
-            return unsafe { l1_metric_neon(tmp, n, lm, bias) };
-        }
-    }
-
-    let mut l1 = 0.0f32;
-    for &tv in tmp[..n].iter() {
-        l1 += tv.abs();
-    }
-    l1 + (lm as f32) * bias * l1
-}
-
-#[cfg(all(any(), target_arch = "x86_64"))]
-#[target_feature(enable = "avx")]
-unsafe fn sum_abs_avx(x: &[f32], n: usize) -> f32 {
-    use std::arch::x86_64::*;
-
-    // The loads below walk `n` elements; trimming to `n` here is what puts
-    // them in bounds.
-    let x = &x[..n];
-
-    let mut sum0 = _mm256_setzero_ps();
-    let mut sum1 = _mm256_setzero_ps();
-    let mut i = 0usize;
-    let sign_mask = _mm256_set1_ps(-0.0);
-
-    while i + 16 <= n {
-        let v0 = _mm256_loadu_ps(x.as_ptr().add(i));
-        let v1 = _mm256_loadu_ps(x.as_ptr().add(i + 8));
-        sum0 = _mm256_add_ps(sum0, _mm256_andnot_ps(sign_mask, v0));
-        sum1 = _mm256_add_ps(sum1, _mm256_andnot_ps(sign_mask, v1));
-        i += 16;
-    }
-
-    while i + 8 <= n {
-        let v = _mm256_loadu_ps(x.as_ptr().add(i));
-        sum0 = _mm256_add_ps(sum0, _mm256_andnot_ps(sign_mask, v));
-        i += 8;
-    }
-
-    let sum = _mm256_add_ps(sum0, sum1);
-    let hi = _mm256_extractf128_ps(sum, 1);
-    let lo = _mm256_castps256_ps128(sum);
-    let s4 = _mm_add_ps(lo, hi);
-    let t1 = _mm_movehl_ps(s4, s4);
-    let s2 = _mm_add_ps(s4, t1);
-    let t2 = _mm_shuffle_ps(s2, s2, 0x55);
-    let mut out = _mm_cvtss_f32(_mm_add_ss(s2, t2));
-
-    for j in i..n {
-        out += x[j].abs();
-    }
-
-    out
-}
-
-#[cfg(all(any(), target_arch = "x86_64"))]
-#[target_feature(enable = "avx")]
-unsafe fn l1_metric_avx(tmp: &[f32], n: usize, lm: i32, bias: f32) -> f32 {
-    let l1 = sum_abs_avx(tmp, n);
-    l1 + (lm as f32) * bias * l1
-}
-
-#[cfg(all(any(), target_arch = "aarch64"))]
-#[target_feature(enable = "neon")]
-unsafe fn l1_metric_neon(tmp: &[f32], n: usize, lm: i32, bias: f32) -> f32 {
-    // The loads below walk `n` elements; trimming to `n` here is what puts
-    // them in bounds.
-    let tmp = &tmp[..n];
-
-    unsafe {
-        let mut sum4 = vdupq_n_f32(0.0);
-        let mut i = 0;
-
-        while i + 15 < n {
-            let v0 = vld1q_f32(tmp.as_ptr().add(i));
-            let v1 = vld1q_f32(tmp.as_ptr().add(i + 4));
-            let v2 = vld1q_f32(tmp.as_ptr().add(i + 8));
-            let v3 = vld1q_f32(tmp.as_ptr().add(i + 12));
-
-            sum4 = vaddq_f32(sum4, vabsq_f32(v0));
-            sum4 = vaddq_f32(sum4, vabsq_f32(v1));
-            sum4 = vaddq_f32(sum4, vabsq_f32(v2));
-            sum4 = vaddq_f32(sum4, vabsq_f32(v3));
-
-            i += 16;
-        }
-
-        while i + 3 < n {
-            let v = vld1q_f32(tmp.as_ptr().add(i));
-            sum4 = vaddq_f32(sum4, vabsq_f32(v));
-            i += 4;
-        }
-
-        let sum2 = vpaddq_f32(sum4, sum4);
-        let sum1 = vpaddq_f32(sum2, sum2);
-        let mut l1 = vgetq_lane_f32(sum1, 0);
-
-        while i < n {
-            l1 += tmp[i].abs();
-            i += 1;
-        }
-
-        l1 + (lm as f32) * bias * l1
-    }
+    fvid_cpu::opus_simd::l1_metric(tmp, n, lm, bias)
 }
 
 const MAX_NB_EBANDS: usize = 21;
@@ -583,6 +432,7 @@ const PREFILTER_GAINS: [[f32; 3]; 3] = [
     [0.799_804_7, 0.100_097_7, 0.0],
 ];
 
+#[inline]
 fn comb_filter_const(
     y: &mut [f32],
     x: &[f32],
@@ -594,34 +444,11 @@ fn comb_filter_const(
     g11: f32,
     g12: f32,
 ) {
-    #[cfg(all(any(), target_arch = "aarch64"))]
-    {
-        comb_filter_const_neon(y, x, y_idx, x_idx, t, n, g10, g11, g12);
-    }
-    #[cfg(any(all(any(), target_arch = "x86"), all(any(), target_arch = "x86_64")))]
-    unsafe {
-        if have_avx_fma() {
-            comb_filter_const_avx(y, x, y_idx, x_idx, t, n, g10, g11, g12);
-            return;
-        }
-    }
-    #[cfg(all(all(any(), target_arch = "x86_64"), target_feature = "sse"))]
-    unsafe {
-        comb_filter_const_sse(y, x, y_idx, x_idx, t, n, g10, g11, g12);
-        #[allow(clippy::needless_return)]
-        return;
-    }
-    #[cfg(not(any(
-        all(any(), target_arch = "aarch64"),
-        all(all(any(), target_arch = "x86_64"), target_feature = "sse")
-    )))]
-    {
-        comb_filter_const_scalar(y, x, y_idx, x_idx, t, n, g10, g11, g12);
-    }
+    fvid_cpu::opus_simd::comb_filter_const(y, x, y_idx, x_idx, t, n, g10, g11, g12);
 }
 
+#[cfg(test)]
 #[inline]
-#[allow(dead_code)]
 fn comb_filter_const_scalar(
     y: &mut [f32],
     x: &[f32],
@@ -633,370 +460,18 @@ fn comb_filter_const_scalar(
     g11: f32,
     g12: f32,
 ) {
-    let mut x1;
-    let mut x2;
-    let mut x3;
-    let mut x4;
-    let mut x0;
-
-    x4 = x[x_idx - t - 2];
-    x3 = x[x_idx - t - 1];
-    x2 = x[x_idx - t];
-    x1 = x[x_idx - t + 1];
+    let mut x4 = x[x_idx - t - 2];
+    let mut x3 = x[x_idx - t - 1];
+    let mut x2 = x[x_idx - t];
+    let mut x1 = x[x_idx - t + 1];
 
     for i in 0..n {
-        x0 = x[x_idx + i - t + 2];
+        let x0 = x[x_idx + i - t + 2];
         y[y_idx + i] = x[x_idx + i] + g10 * x2 + g11 * (x1 + x3) + g12 * (x0 + x4);
         x4 = x3;
         x3 = x2;
         x2 = x1;
         x1 = x0;
-    }
-}
-
-#[cfg(all(any(), target_arch = "aarch64"))]
-fn comb_filter_const_neon(
-    y: &mut [f32],
-    x: &[f32],
-    y_idx: usize,
-    x_idx: usize,
-    t: usize,
-    n: usize,
-    g10: f32,
-    g11: f32,
-    g12: f32,
-) {
-    unsafe { comb_filter_const_neon_impl(y, x, y_idx, x_idx, t, n, g10, g11, g12) }
-}
-
-#[cfg(all(any(), target_arch = "aarch64"))]
-#[inline(always)]
-#[allow(unsafe_op_in_unsafe_fn)]
-unsafe fn comb_filter_const_neon_impl(
-    y: &mut [f32],
-    x: &[f32],
-    y_idx: usize,
-    x_idx: usize,
-    t: usize,
-    n: usize,
-    g10: f32,
-    g11: f32,
-    g12: f32,
-) {
-    use std::arch::aarch64::*;
-
-    let g10v = vdupq_n_f32(g10);
-    let g11v = vdupq_n_f32(g11);
-    let g12v = vdupq_n_f32(g12);
-
-    // The taps reach two samples either side of the period, so the kernel
-    // reads `x[x_idx - t - 2 .. x_idx + n]` and writes `y[y_idx .. y_idx + n]`.
-    // Naming both spans is what keeps the pointer walk below inside the
-    // buffers; nothing else here ties `n`, `t` and the indices to the lengths
-    // this function was handed.
-    assert!(
-        t >= 2,
-        "comb filter period {t} is shorter than the tap reach"
-    );
-    let xspan = &x[x_idx - t - 2..x_idx + n];
-    let xbase = xspan.as_ptr().add(t + 2);
-    let ybase = y[y_idx..y_idx + n].as_mut_ptr();
-
-    let mut x0v = vld1q_f32(xbase.sub(t + 2));
-
-    let mut i = 0;
-    while i + 4 <= n {
-        let x4v = vld1q_f32(xbase.add(i).sub(t - 2));
-
-        let x2v = vextq_f32(x0v, x4v, 2);
-
-        let x1v = vextq_f32(x0v, x4v, 1);
-
-        let x3v = vextq_f32(x0v, x4v, 3);
-
-        let xi = vld1q_f32(xbase.add(i));
-
-        let mut yi = xi;
-        yi = vfmaq_f32(yi, g10v, x2v);
-        yi = vfmaq_f32(yi, g11v, vaddq_f32(x1v, x3v));
-        yi = vfmaq_f32(yi, g12v, vaddq_f32(x4v, x0v));
-        vst1q_f32(ybase.add(i), yi);
-
-        x0v = x4v;
-        i += 4;
-    }
-
-    let x0v_arr: [f32; 4] = std::mem::transmute(x0v);
-    let mut sx4 = x0v_arr[0];
-    let mut sx3 = x0v_arr[1];
-    let mut sx2 = x0v_arr[2];
-    let mut sx1 = x0v_arr[3];
-
-    while i < n {
-        let sx0 = x[x_idx + i - t + 2];
-        y[y_idx + i] = x[x_idx + i] + g10 * sx2 + g11 * (sx1 + sx3) + g12 * (sx0 + sx4);
-        sx4 = sx3;
-        sx3 = sx2;
-        sx2 = sx1;
-        sx1 = sx0;
-        i += 1;
-    }
-}
-
-#[cfg(all(all(any(), target_arch = "x86_64"), target_feature = "sse"))]
-#[inline(always)]
-#[allow(unsafe_op_in_unsafe_fn)]
-unsafe fn comb_filter_const_sse(
-    y: &mut [f32],
-    x: &[f32],
-    y_idx: usize,
-    x_idx: usize,
-    t: usize,
-    n: usize,
-    g10: f32,
-    g11: f32,
-    g12: f32,
-) {
-    use std::arch::x86_64::*;
-
-    let g10v = _mm_set1_ps(g10);
-    let g11v = _mm_set1_ps(g11);
-    let g12v = _mm_set1_ps(g12);
-
-    // The taps reach two samples either side of the period, so the kernel
-    // reads `x[x_idx - t - 2 .. x_idx + n]` and writes `y[y_idx .. y_idx + n]`.
-    // Naming both spans is what keeps the pointer walk below inside the
-    // buffers; nothing else here ties `n`, `t` and the indices to the lengths
-    // this function was handed.
-    assert!(
-        t >= 2,
-        "comb filter period {t} is shorter than the tap reach"
-    );
-    let xspan = &x[x_idx - t - 2..x_idx + n];
-    let xbase = xspan.as_ptr().add(t + 2);
-    let ybase = y[y_idx..y_idx + n].as_mut_ptr();
-    let mut x0v = _mm_loadu_ps(xbase.sub(t + 2));
-
-    let mut i = 0;
-    while i + 4 <= n {
-        let x4v = _mm_loadu_ps(xbase.add(i).sub(t - 2));
-
-        let x2v = _mm_shuffle_ps(x0v, x4v, 0x4e);
-
-        let x1v = _mm_shuffle_ps(x0v, x2v, 0x99);
-
-        let x3v = _mm_shuffle_ps(x2v, x4v, 0x99);
-
-        let xi = _mm_loadu_ps(xbase.add(i));
-
-        let mut yi = xi;
-        yi = _mm_add_ps(yi, _mm_mul_ps(g10v, x2v));
-        let yi2 = _mm_add_ps(
-            _mm_mul_ps(g11v, _mm_add_ps(x3v, x1v)),
-            _mm_mul_ps(g12v, _mm_add_ps(x4v, x0v)),
-        );
-        yi = _mm_add_ps(yi, yi2);
-        _mm_storeu_ps(ybase.add(i), yi);
-
-        x0v = x4v;
-        i += 4;
-    }
-
-    let x0v_arr: [f32; 4] = std::mem::transmute(x0v);
-    let mut sx4 = x0v_arr[0];
-    let mut sx3 = x0v_arr[1];
-    let mut sx2 = x0v_arr[2];
-    let mut sx1 = x0v_arr[3];
-
-    while i < n {
-        let sx0 = x[x_idx + i - t + 2];
-        y[y_idx + i] = x[x_idx + i] + g10 * sx2 + g11 * (sx1 + sx3) + g12 * (sx0 + sx4);
-        sx4 = sx3;
-        sx3 = sx2;
-        sx2 = sx1;
-        sx1 = sx0;
-        i += 1;
-    }
-}
-
-#[cfg(any(all(any(), target_arch = "x86"), all(any(), target_arch = "x86_64")))]
-#[target_feature(enable = "avx,fma")]
-#[allow(unsafe_op_in_unsafe_fn)]
-unsafe fn comb_filter_const_avx(
-    y: &mut [f32],
-    x: &[f32],
-    y_idx: usize,
-    x_idx: usize,
-    t: usize,
-    n: usize,
-    g10: f32,
-    g11: f32,
-    g12: f32,
-) {
-    use std::arch::x86_64::*;
-
-    let g10v = _mm256_set1_ps(g10);
-    let g11v = _mm256_set1_ps(g11);
-    let g12v = _mm256_set1_ps(g12);
-
-    // The taps reach two samples either side of the period, so the kernel
-    // reads `x[x_idx - t - 2 .. x_idx + n]` and writes `y[y_idx .. y_idx + n]`.
-    // Naming both spans is what keeps the pointer walk below inside the
-    // buffers; nothing else here ties `n`, `t` and the indices to the lengths
-    // this function was handed.
-    assert!(
-        t >= 2,
-        "comb filter period {t} is shorter than the tap reach"
-    );
-    let xspan = &x[x_idx - t - 2..x_idx + n];
-    let xbase = xspan.as_ptr().add(t + 2);
-    let ybase = y[y_idx..y_idx + n].as_mut_ptr();
-
-    let mut i = 0;
-
-    while i + 16 <= n {
-        let xi_a = _mm256_loadu_ps(xbase.add(i));
-        let x0_a = _mm256_loadu_ps(xbase.add(i).sub(t + 2));
-        let x4_a = _mm256_loadu_ps(xbase.add(i).sub(t - 2));
-
-        let x2_a = _mm256_loadu_ps(xbase.add(i).sub(t));
-        let x1x3_a = _mm256_add_ps(
-            _mm256_loadu_ps(xbase.add(i).sub(t + 1)),
-            _mm256_loadu_ps(xbase.add(i).sub(t - 1)),
-        );
-        let x0x4_a = _mm256_add_ps(x0_a, x4_a);
-
-        let mut yi_a = xi_a;
-        yi_a = _mm256_fmadd_ps(g10v, x2_a, yi_a);
-        yi_a = _mm256_fmadd_ps(g11v, x1x3_a, yi_a);
-        yi_a = _mm256_fmadd_ps(g12v, x0x4_a, yi_a);
-        _mm256_storeu_ps(ybase.add(i), yi_a);
-
-        let j = i + 8;
-        let xi_b = _mm256_loadu_ps(xbase.add(j));
-        let x0_b = _mm256_loadu_ps(xbase.add(j).sub(t + 2));
-        let x4_b = _mm256_loadu_ps(xbase.add(j).sub(t - 2));
-        let x2_b = _mm256_loadu_ps(xbase.add(j).sub(t));
-        let x1x3_b = _mm256_add_ps(
-            _mm256_loadu_ps(xbase.add(j).sub(t + 1)),
-            _mm256_loadu_ps(xbase.add(j).sub(t - 1)),
-        );
-        let x0x4_b = _mm256_add_ps(x0_b, x4_b);
-
-        let mut yi_b = xi_b;
-        yi_b = _mm256_fmadd_ps(g10v, x2_b, yi_b);
-        yi_b = _mm256_fmadd_ps(g11v, x1x3_b, yi_b);
-        yi_b = _mm256_fmadd_ps(g12v, x0x4_b, yi_b);
-        _mm256_storeu_ps(ybase.add(j), yi_b);
-
-        i += 16;
-    }
-
-    while i + 8 <= n {
-        let xi = _mm256_loadu_ps(xbase.add(i));
-        let x0 = _mm256_loadu_ps(xbase.add(i).sub(t + 2));
-        let x4 = _mm256_loadu_ps(xbase.add(i).sub(t - 2));
-        let x2 = _mm256_loadu_ps(xbase.add(i).sub(t));
-        let x1x3 = _mm256_add_ps(
-            _mm256_loadu_ps(xbase.add(i).sub(t + 1)),
-            _mm256_loadu_ps(xbase.add(i).sub(t - 1)),
-        );
-        let x0x4 = _mm256_add_ps(x0, x4);
-
-        let mut yi = xi;
-        yi = _mm256_fmadd_ps(g10v, x2, yi);
-        yi = _mm256_fmadd_ps(g11v, x1x3, yi);
-        yi = _mm256_fmadd_ps(g12v, x0x4, yi);
-        _mm256_storeu_ps(ybase.add(i), yi);
-
-        i += 8;
-    }
-
-    if i + 4 <= n {
-        comb_filter_const_sse_fma(y, x, y_idx + i, x_idx + i, t, n - i, g10, g11, g12);
-        return;
-    }
-
-    let mut sx4 = x[x_idx + i - t - 2];
-    let mut sx3 = x[x_idx + i - t - 1];
-    let mut sx2 = x[x_idx + i - t];
-    let mut sx1 = x[x_idx + i - t + 1];
-    while i < n {
-        let sx0 = x[x_idx + i - t + 2];
-        y[y_idx + i] = x[x_idx + i] + g10 * sx2 + g11 * (sx1 + sx3) + g12 * (sx0 + sx4);
-        sx4 = sx3;
-        sx3 = sx2;
-        sx2 = sx1;
-        sx1 = sx0;
-        i += 1;
-    }
-}
-
-#[cfg(any(all(any(), target_arch = "x86"), all(any(), target_arch = "x86_64")))]
-#[target_feature(enable = "avx,fma")]
-#[allow(unsafe_op_in_unsafe_fn)]
-unsafe fn comb_filter_const_sse_fma(
-    y: &mut [f32],
-    x: &[f32],
-    y_idx: usize,
-    x_idx: usize,
-    t: usize,
-    n: usize,
-    g10: f32,
-    g11: f32,
-    g12: f32,
-) {
-    use std::arch::x86_64::*;
-
-    let g10v = _mm_set1_ps(g10);
-    let g11v = _mm_set1_ps(g11);
-    let g12v = _mm_set1_ps(g12);
-
-    // The taps reach two samples either side of the period, so the kernel
-    // reads `x[x_idx - t - 2 .. x_idx + n]` and writes `y[y_idx .. y_idx + n]`.
-    // Naming both spans is what keeps the pointer walk below inside the
-    // buffers; nothing else here ties `n`, `t` and the indices to the lengths
-    // this function was handed.
-    assert!(
-        t >= 2,
-        "comb filter period {t} is shorter than the tap reach"
-    );
-    let xspan = &x[x_idx - t - 2..x_idx + n];
-    let xbase = xspan.as_ptr().add(t + 2);
-    let ybase = y[y_idx..y_idx + n].as_mut_ptr();
-    let mut x0v = _mm_loadu_ps(xbase.sub(t + 2));
-
-    let mut i = 0;
-    while i + 4 <= n {
-        let x4v = _mm_loadu_ps(xbase.add(i).sub(t - 2));
-        let x2v = _mm_shuffle_ps(x0v, x4v, 0x4e);
-        let x1v = _mm_shuffle_ps(x0v, x2v, 0x99);
-        let x3v = _mm_shuffle_ps(x2v, x4v, 0x99);
-        let xi = _mm_loadu_ps(xbase.add(i));
-
-        let mut yi = xi;
-        yi = _mm_fmadd_ps(g10v, x2v, yi);
-        yi = _mm_fmadd_ps(g11v, _mm_add_ps(x1v, x3v), yi);
-        yi = _mm_fmadd_ps(g12v, _mm_add_ps(x0v, x4v), yi);
-        _mm_storeu_ps(ybase.add(i), yi);
-
-        x0v = x4v;
-        i += 4;
-    }
-
-    let x0v_arr: [f32; 4] = std::mem::transmute(x0v);
-    let mut sx4 = x0v_arr[0];
-    let mut sx3 = x0v_arr[1];
-    let mut sx2 = x0v_arr[2];
-    let mut sx1 = x0v_arr[3];
-    while i < n {
-        let sx0 = x[x_idx + i - t + 2];
-        y[y_idx + i] = x[x_idx + i] + g10 * sx2 + g11 * (sx1 + sx3) + g12 * (sx0 + sx4);
-        sx4 = sx3;
-        sx3 = sx2;
-        sx2 = sx1;
-        sx1 = sx0;
-        i += 1;
     }
 }
 
@@ -1275,18 +750,8 @@ fn comb_filter_inplace(
     }
 
     // Constant region: only new filter (t1, g1). The feedback delay t1 >=
-    // COMBFILTER_MINPERIOD (15) >= 10, so an 8-wide vector at [idx, idx+8) never
-    // reads its own writes: the batch's read span [idx-t1-2, idx-t1+9] is disjoint
-    // from the write span [idx, idx+8) iff t1 >= 10 — the past outputs it reads are
-    // already finalized, exactly as the scalar loop sees them.
-    #[cfg(all(any(), target_arch = "x86_64"))]
-    {
-        if i + 8 <= n && t1 >= 10 && std::arch::is_x86_feature_detected!("avx2") {
-            unsafe {
-                i = comb_filter_const_avx2(buf, y_idx, i, n, t1, g10, g11, g12);
-            }
-        }
-    }
+    // COMBFILTER_MINPERIOD (15) >= 10, so a vector batch never reads its own writes.
+    i = fvid_cpu::opus_simd::comb_filter_const_inplace(buf, y_idx, i, n, t1, g10, g11, g12);
     while i < n {
         let idx = y_idx + i;
         let s = buf[idx];
@@ -1298,57 +763,6 @@ fn comb_filter_inplace(
         buf[idx] = s + g10 * r1 + g11 * (r1p1 + r1m1) + g12 * (r1p2 + r1m2);
         i += 1;
     }
-}
-
-/// AVX2 comb-filter constant region: 8 samples/iter, bit-exact vs the scalar
-/// tail below. Uses separate mul+add (NOT FMA) in the scalar op order
-/// `s + g10*r1 + g11*(r1p1+r1m1) + g12*(r1p2+r1m2)` so every rounding matches.
-/// Requires `t1 >= 10` (the batch reads [idx-t1-2, idx-t1+9] stay clear of the
-/// [idx, idx+8) writes). Returns the index `i` where the scalar tail resumes.
-#[cfg(all(any(), target_arch = "x86_64"))]
-#[target_feature(enable = "avx2")]
-unsafe fn comb_filter_const_avx2(
-    buf: &mut [f32],
-    y_idx: usize,
-    mut i: usize,
-    n: usize,
-    t1: usize,
-    g10: f32,
-    g11: f32,
-    g12: f32,
-) -> usize {
-    use std::arch::x86_64::*;
-    let vg10 = _mm256_set1_ps(g10);
-    let vg11 = _mm256_set1_ps(g11);
-    let vg12 = _mm256_set1_ps(g12);
-    // Reads reach back to `buf[y_idx + i - t1 - 2]` and forward to the taps at
-    // `buf[y_idx + i - t1 + 9]`; writes end at `buf[y_idx + n]`. The loads and
-    // stores below use absolute offsets into `buf`, so this is the only place
-    // those bounds are stated.
-    assert!(
-        t1 >= 2 && y_idx + i >= t1 + 2 && y_idx + n <= buf.len(),
-        "comb filter batch runs outside its buffer"
-    );
-    let p = buf.as_mut_ptr();
-    while i + 8 <= n {
-        let idx = y_idx + i;
-        let base = idx - t1; // >= 2 (t1 <= idx-2, and idx >= y_idx >= t1+2)
-        let s = _mm256_loadu_ps(p.add(idx));
-        let r1 = _mm256_loadu_ps(p.add(base));
-        let r1p1 = _mm256_loadu_ps(p.add(base + 1));
-        let r1m1 = _mm256_loadu_ps(p.add(base - 1));
-        let r1p2 = _mm256_loadu_ps(p.add(base + 2));
-        let r1m2 = _mm256_loadu_ps(p.add(base - 2));
-        let a = _mm256_add_ps(r1p1, r1m1);
-        let b = _mm256_add_ps(r1p2, r1m2);
-        // out = ((s + g10*r1) + g11*a) + g12*b  (left-to-right, two-rounding, no FMA)
-        let mut out = _mm256_add_ps(s, _mm256_mul_ps(vg10, r1));
-        out = _mm256_add_ps(out, _mm256_mul_ps(vg11, a));
-        out = _mm256_add_ps(out, _mm256_mul_ps(vg12, b));
-        _mm256_storeu_ps(p.add(idx), out);
-        i += 8;
-    }
-    i
 }
 
 fn run_prefilter(
@@ -4446,33 +3860,33 @@ mod tests {
         #[allow(unused_mut)]
         let mut available: Vec<&str> = Vec::new();
 
-        #[cfg(any(all(any(), target_arch = "x86"), all(any(), target_arch = "x86_64")))]
+        #[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
         {
-            // Each name gates at least one kernel in this crate. The two `-fma`
-            // entries go through the crate's own predicates instead of
-            // repeating their definitions, so this cannot drift away from what
-            // the dispatch sites actually test.
             if std::arch::is_x86_feature_detected!("sse2") {
                 available.push("sse2");
             }
             if std::arch::is_x86_feature_detected!("avx") {
                 available.push("avx");
             }
-            if have_avx_fma() {
+            if std::arch::is_x86_feature_detected!("avx")
+                && std::arch::is_x86_feature_detected!("fma")
+            {
                 available.push("avx-fma");
             }
             if std::arch::is_x86_feature_detected!("avx2") {
                 available.push("avx2");
             }
-            if have_avx2_fma() {
+            if std::arch::is_x86_feature_detected!("avx2")
+                && std::arch::is_x86_feature_detected!("fma")
+            {
                 available.push("avx2-fma");
             }
         }
 
-        #[cfg(all(any(), target_arch = "aarch64"))]
+        #[cfg(target_arch = "aarch64")]
         {
             // NEON is in the aarch64 baseline, so those kernels are compiled in
-            // unconditionally and there is nothing to detect at runtime.
+            // unconditionally via `fvid_cpu::opus_simd`.
             available.push("neon");
         }
 

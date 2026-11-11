@@ -1,4 +1,6 @@
-use std::{io::Cursor, path::Path, time::Duration};
+use std::{io::Cursor, path::Path};
+#[cfg(feature = "player")]
+use std::time::Duration;
 fn bytes(n: &str) -> Vec<u8> {
     std::fs::read(
         Path::new(env!("CARGO_MANIFEST_DIR"))

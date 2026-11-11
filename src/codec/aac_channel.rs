@@ -1,14 +1,15 @@
 //! Owned AAC-LC individual channel parsing.
-use crate::{Result, invalid, unsupported};
-use super::aac_bands::BandTables;
-use super::aac_tns as tns_syntax;
-use crate::Error;
-include!("../../crates/fvid-media/src/owned_aac/aac_channel_impl.rs");
+pub use fvid_media::owned_aac::aac_channel::*;
 
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::codec::{aac_huffman_tables::*, aac_quant, aac_synthesis::LongSineSynthesis};
+    use crate::codec::{
+        aac_bands::BandTables, aac_ics::IcsInfo, aac_quant,
+        aac_scalefactors::BandScale, aac_synthesis::{LongSineSynthesis, WindowSequence},
+        bits::BitReader, config::AacConfig,
+    };
+    use fvid_media::owned_aac::aac_huffman_tables::*;
     fn pack(fields: &[(u32, u8)]) -> (Vec<u8>, usize) {
         let mut data = Vec::new();
         let mut n = 0;

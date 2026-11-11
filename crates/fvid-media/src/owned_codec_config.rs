@@ -1,11 +1,8 @@
 //! Owned AVC/HEVC configuration records, AAC descriptors and NAL framing.
 pub use crate::owned_aac::config::AacConfig;
-pub use crate::owned_aac::{Error, Result};
-use crate::owned_hevc_nal as hevc_nal;
-fn invalid(message: &str) -> Error {
-    Error(message.into())
-}
-include!("owned_codec_config_impl.rs");
+pub use fvid_codecs::codec::config::*;
+pub use fvid_control::error::{Error, Result};
+
 #[cfg(test)]
 mod tests {
     use super::*;

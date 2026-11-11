@@ -1,7 +1,6 @@
-use std::{
-    io::Cursor,
-    path::{Path, PathBuf},
-};
+#[cfg(feature = "player")]
+use std::io::Cursor;
+use std::path::{Path, PathBuf};
 fn root() -> PathBuf {
     Path::new(env!("CARGO_MANIFEST_DIR"))
         .join("tests/fixtures/playback-errors/mp4-admission-catalog")

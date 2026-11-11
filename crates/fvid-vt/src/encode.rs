@@ -181,6 +181,13 @@ unsafe extern "C" fn output(
         state.sample = Some(Sample(unsafe { CFRetain(sample) }));
     }
 }
+struct CachedFormat {
+    format: Sample,
+    parameter_sets: Vec<Vec<u8>>,
+    nal_length_size: u8,
+    decoder_configuration: Vec<u8>,
+}
+
 /// Synchronous hardware encoder. Completing each frame bounds retained output
 /// to one sample and keeps callback lifetime independent of the caller's stack.
 pub struct Encoder {
@@ -192,6 +199,9 @@ pub struct Encoder {
     depth: u8,
     colour: Option<[u8; 3]>,
     started: bool,
+    cached_format: Option<CachedFormat>,
+    cached_colour_surface: Option<(Sample, Sample)>,
+    force_keyframe_props: Option<Sample>,
 }
 impl Drop for Encoder {
     fn drop(&mut self) {
@@ -343,6 +353,9 @@ impl Encoder {
                 started: false,
                 codec,
                 depth,
+                cached_format: None,
+                cached_colour_surface: None,
+                force_keyframe_props: None,
             };
             if depth == 10 {
                 let code = VTSessionSetProperty(
@@ -457,82 +470,97 @@ impl Encoder {
         unsafe {
             // A separate CVPixelBuffer shares the same IOSurface pixels but
             // owns signal attachments. Never mutate a caller's immutable Surface.
-            let input = if let Some([primaries, transfer, matrix]) = self.colour {
+            // Reuse the wrapped CVPixelBuffer whenever the backing IOSurface repeats.
+            let image_to_encode = if let Some([primaries, transfer, matrix]) = self.colour {
                 let backing = CVPixelBufferGetIOSurface(surface.0.image);
                 if backing.is_null() {
                     return Err(Error("colour encoding requires IOSurface input".into()));
                 }
-                let mut image = ptr::null();
-                let code =
-                    CVPixelBufferCreateWithIOSurface(ptr::null(), backing, ptr::null(), &mut image);
-                if code != 0 || image.is_null() {
-                    if !image.is_null() {
-                        CFRelease(image);
+                if let Some((cached_backing, cached_image)) = &self.cached_colour_surface
+                    && cached_backing.0 == backing
+                {
+                    cached_image.0
+                } else {
+                    let mut image = ptr::null();
+                    let code = CVPixelBufferCreateWithIOSurface(
+                        ptr::null(),
+                        backing,
+                        ptr::null(),
+                        &mut image,
+                    );
+                    if code != 0 || image.is_null() {
+                        if !image.is_null() {
+                            CFRelease(image);
+                        }
+                        return Err(status("encoder signal surface", code));
                     }
-                    return Err(status("encoder signal surface", code));
+                    CVBufferSetAttachment(
+                        image,
+                        kCVImageBufferColorPrimariesKey,
+                        if primaries == 1 {
+                            kCVImageBufferColorPrimaries_ITU_R_709_2
+                        } else {
+                            kCVImageBufferColorPrimaries_ITU_R_2020
+                        },
+                        1,
+                    );
+                    CVBufferSetAttachment(
+                        image,
+                        kCVImageBufferTransferFunctionKey,
+                        match transfer {
+                            16 => kCVImageBufferTransferFunction_SMPTE_ST_2084_PQ,
+                            18 => kCVImageBufferTransferFunction_ITU_R_2100_HLG,
+                            _ => kCVImageBufferTransferFunction_ITU_R_709_2,
+                        },
+                        1,
+                    );
+                    CVBufferSetAttachment(
+                        image,
+                        kCVImageBufferYCbCrMatrixKey,
+                        if matrix == 1 {
+                            kCVImageBufferYCbCrMatrix_ITU_R_709_2
+                        } else {
+                            kCVImageBufferYCbCrMatrix_ITU_R_2020
+                        },
+                        1,
+                    );
+                    self.cached_colour_surface =
+                        Some((Sample(CFRetain(backing)), Sample(image)));
+                    image
                 }
-                let buffer = Sample(image);
-                CVBufferSetAttachment(
-                    image,
-                    kCVImageBufferColorPrimariesKey,
-                    if primaries == 1 {
-                        kCVImageBufferColorPrimaries_ITU_R_709_2
-                    } else {
-                        kCVImageBufferColorPrimaries_ITU_R_2020
-                    },
-                    1,
-                );
-                CVBufferSetAttachment(
-                    image,
-                    kCVImageBufferTransferFunctionKey,
-                    match transfer {
-                        16 => kCVImageBufferTransferFunction_SMPTE_ST_2084_PQ,
-                        18 => kCVImageBufferTransferFunction_ITU_R_2100_HLG,
-                        _ => kCVImageBufferTransferFunction_ITU_R_709_2,
-                    },
-                    1,
-                );
-                CVBufferSetAttachment(
-                    image,
-                    kCVImageBufferYCbCrMatrixKey,
-                    if matrix == 1 {
-                        kCVImageBufferYCbCrMatrix_ITU_R_709_2
-                    } else {
-                        kCVImageBufferYCbCrMatrix_ITU_R_2020
-                    },
-                    1,
-                );
-                Some(buffer)
             } else {
-                None
+                surface.0.image
             };
             let properties = if force_keyframe {
-                CFDictionaryCreate(
-                    ptr::null(),
-                    [kVTEncodeFrameOptionKey_ForceKeyFrame].as_ptr(),
-                    [kCFBooleanTrue].as_ptr(),
-                    1,
-                    &kCFTypeDictionaryKeyCallBacks,
-                    &kCFTypeDictionaryValueCallBacks,
-                )
+                if let Some(props) = &self.force_keyframe_props {
+                    props.0
+                } else {
+                    let dict = CFDictionaryCreate(
+                        ptr::null(),
+                        [kVTEncodeFrameOptionKey_ForceKeyFrame].as_ptr(),
+                        [kCFBooleanTrue].as_ptr(),
+                        1,
+                        &kCFTypeDictionaryKeyCallBacks,
+                        &kCFTypeDictionaryValueCallBacks,
+                    );
+                    if dict.is_null() {
+                        return Err(Error("encoder frame properties allocation failed".into()));
+                    }
+                    self.force_keyframe_props = Some(Sample(dict));
+                    dict
+                }
             } else {
                 ptr::null()
             };
-            if force_keyframe && properties.is_null() {
-                return Err(Error("encoder frame properties allocation failed".into()));
-            }
             let code = VTCompressionSessionEncodeFrame(
                 self.session,
-                input.as_ref().map_or(surface.0.image, |image| image.0),
+                image_to_encode,
                 time(pts),
                 time(duration),
                 properties,
                 ptr::null_mut(),
                 ptr::null_mut(),
             );
-            if !properties.is_null() {
-                CFRelease(properties);
-            }
             if code != 0 {
                 return Err(status("encode frame", code));
             }
@@ -549,17 +577,19 @@ impl Encoder {
                 return Err(status("complete encoded frame", code));
             }
         }
-        let mut output = self
-            .output
-            .lock()
-            .map_err(|_| Error("encoder callback poisoned".into()))?;
-        if let Some(code) = output.error.take() {
-            return Err(status("encoder callback", code));
-        }
-        let sample = output
-            .sample
-            .take()
-            .ok_or_else(|| Error("encoder produced no frame".into()))?;
+        let sample = {
+            let mut output = self
+                .output
+                .lock()
+                .map_err(|_| Error("encoder callback poisoned".into()))?;
+            if let Some(code) = output.error.take() {
+                return Err(status("encoder callback", code));
+            }
+            output
+                .sample
+                .take()
+                .ok_or_else(|| Error("encoder produced no frame".into()))?
+        };
         unsafe {
             let buffer = CMSampleBufferGetDataBuffer(sample.0);
             if buffer.is_null() {
@@ -580,75 +610,95 @@ impl Encoder {
             if format.is_null() {
                 return Err(Error("encoded frame has no format description".into()));
             }
-            let get = match self.codec {
-                EncoderCodec::H264 => CMVideoFormatDescriptionGetH264ParameterSetAtIndex,
-                EncoderCodec::Hevc => CMVideoFormatDescriptionGetHEVCParameterSetAtIndex,
-            };
-            let mut count = 0;
-            let mut prefix = 0;
-            let code = get(
-                format,
-                0,
-                ptr::null_mut(),
-                ptr::null_mut(),
-                &mut count,
-                &mut prefix,
-            );
-            if code != 0 {
-                return Err(status("encoder parameter sets", code));
-            }
-            if !(1..=16).contains(&count) || ![1, 2, 4].contains(&prefix) {
-                return Err(Error("unsupported encoder configuration".into()));
-            }
-            let mut parameter_sets = Vec::with_capacity(count);
-            for index in 0..count {
-                let mut bytes = ptr::null();
-                let mut length = 0;
-                let code = get(
-                    format,
-                    index,
-                    &mut bytes,
-                    &mut length,
-                    ptr::null_mut(),
-                    ptr::null_mut(),
-                );
-                if code != 0 {
-                    return Err(status("encoder parameter set", code));
-                }
-                if bytes.is_null() || length == 0 || length > 1024 * 1024 {
-                    return Err(Error("invalid encoder parameter set size".into()));
-                }
-                parameter_sets.push(std::slice::from_raw_parts(bytes, length).to_vec());
-            }
-            let extensions = CMFormatDescriptionGetExtensions(format);
-            if extensions.is_null() {
-                return Err(Error("encoder format has no extensions".into()));
-            }
-            let atoms = CFDictionaryGetValue(
-                extensions,
-                kCMFormatDescriptionExtension_SampleDescriptionExtensionAtoms,
-            );
-            if atoms.is_null() {
-                return Err(Error("encoder format has no configuration atoms".into()));
-            }
-            let key = cfstr(match self.codec {
-                EncoderCodec::H264 => "avcC",
-                EncoderCodec::Hevc => "hvcC",
-            });
-            if key.is_null() {
-                return Err(Error("encoder configuration key allocation failed".into()));
-            }
-            let value = CFDictionaryGetValue(atoms, key);
-            CFRelease(key);
-            if value.is_null() || CFGetTypeID(value) != CFDataGetTypeID() {
-                return Err(Error("encoder configuration atom is not data".into()));
-            }
-            let length = CFDataGetLength(value);
-            let bytes = CFDataGetBytePtr(value);
-            if !(1..=1024 * 1024).contains(&length) || bytes.is_null() {
-                return Err(Error("invalid encoder configuration size".into()));
-            }
-            let decoder_configuration = std::slice::from_raw_parts(bytes, length as usize).to_vec();
+            let (parameter_sets, nal_length_size, decoder_configuration) =
+                if let Some(cached) = &self.cached_format
+                    && cached.format.0 == format
+                {
+                    (
+                        cached.parameter_sets.clone(),
+                        cached.nal_length_size,
+                        cached.decoder_configuration.clone(),
+                    )
+                } else {
+                    let get = match self.codec {
+                        EncoderCodec::H264 => CMVideoFormatDescriptionGetH264ParameterSetAtIndex,
+                        EncoderCodec::Hevc => CMVideoFormatDescriptionGetHEVCParameterSetAtIndex,
+                    };
+                    let mut count = 0;
+                    let mut prefix = 0;
+                    let code = get(
+                        format,
+                        0,
+                        ptr::null_mut(),
+                        ptr::null_mut(),
+                        &mut count,
+                        &mut prefix,
+                    );
+                    if code != 0 {
+                        return Err(status("encoder parameter sets", code));
+                    }
+                    if !(1..=16).contains(&count) || ![1, 2, 4].contains(&prefix) {
+                        return Err(Error("unsupported encoder configuration".into()));
+                    }
+                    let mut parameter_sets = Vec::with_capacity(count);
+                    for index in 0..count {
+                        let mut bytes = ptr::null();
+                        let mut length = 0;
+                        let code = get(
+                            format,
+                            index,
+                            &mut bytes,
+                            &mut length,
+                            ptr::null_mut(),
+                            ptr::null_mut(),
+                        );
+                        if code != 0 {
+                            return Err(status("encoder parameter set", code));
+                        }
+                        if bytes.is_null() || length == 0 || length > 1024 * 1024 {
+                            return Err(Error("invalid encoder parameter set size".into()));
+                        }
+                        parameter_sets.push(std::slice::from_raw_parts(bytes, length).to_vec());
+                    }
+                    let extensions = CMFormatDescriptionGetExtensions(format);
+                    if extensions.is_null() {
+                        return Err(Error("encoder format has no extensions".into()));
+                    }
+                    let atoms = CFDictionaryGetValue(
+                        extensions,
+                        kCMFormatDescriptionExtension_SampleDescriptionExtensionAtoms,
+                    );
+                    if atoms.is_null() {
+                        return Err(Error("encoder format has no configuration atoms".into()));
+                    }
+                    let key = cfstr(match self.codec {
+                        EncoderCodec::H264 => b"avcC\0",
+                        EncoderCodec::Hevc => b"hvcC\0",
+                    });
+                    if key.is_null() {
+                        return Err(Error("encoder configuration key allocation failed".into()));
+                    }
+                    let value = CFDictionaryGetValue(atoms, key);
+                    CFRelease(key);
+                    if value.is_null() || CFGetTypeID(value) != CFDataGetTypeID() {
+                        return Err(Error("encoder configuration atom is not data".into()));
+                    }
+                    let length = CFDataGetLength(value);
+                    let bytes = CFDataGetBytePtr(value);
+                    if !(1..=1024 * 1024).contains(&length) || bytes.is_null() {
+                        return Err(Error("invalid encoder configuration size".into()));
+                    }
+                    let decoder_configuration =
+                        std::slice::from_raw_parts(bytes, length as usize).to_vec();
+                    let nal_length_size = prefix as u8;
+                    self.cached_format = Some(CachedFormat {
+                        format: Sample(CFRetain(format)),
+                        parameter_sets: parameter_sets.clone(),
+                        nal_length_size,
+                        decoder_configuration: decoder_configuration.clone(),
+                    });
+                    (parameter_sets, nal_length_size, decoder_configuration)
+                };
             let attachments = CMSampleBufferGetSampleAttachmentsArray(sample.0, 0);
             let key_frame = if attachments.is_null() || CFArrayGetCount(attachments) == 0 {
                 true
@@ -666,7 +716,7 @@ impl Encoder {
             Ok(EncodedFrame {
                 data,
                 parameter_sets,
-                nal_length_size: prefix as u8,
+                nal_length_size,
                 decoder_configuration,
                 key_frame,
                 pts,

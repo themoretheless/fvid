@@ -120,19 +120,10 @@ pub(crate) fn pcm_decode_options(options: &CopyOptions) -> CopyOptions {
         stream_metadata_delete: Vec::new(),
     }
 }
-pub(crate) fn recognizes(source: &Path) -> Result<bool> {
-    use std::io::Read;
-    let mut file = File::open(source).map_err(|e| e.to_string())?;
-    let mut bytes = [0; 7];
-    match file.read_exact(&mut bytes) {
-        Ok(()) => Ok(crate::owned_aac::adts::header(&bytes).is_some()),
-        Err(e) if e.kind() == std::io::ErrorKind::UnexpectedEof => Ok(false),
-        Err(e) => Err(e.to_string()),
-    }
-}
 // Read-only admission checks the owned packet tools and requested policies.
 // Qualification emits no progress; execution revalidates the source and never
 // retries failures through another decoder.
+#[cfg(test)]
 pub(crate) fn supports(
     source: &Path,
     transform: AudioDecodeTransform,
@@ -143,6 +134,7 @@ pub(crate) fn supports(
     };
     supports_from_file(source, file, transform, options)
 }
+#[cfg(test)]
 pub(crate) fn supports_from_file(
     _source: &Path,
     file: File,
@@ -309,31 +301,6 @@ impl Write for PcmSpool {
     fn flush(&mut self) -> std::io::Result<()> {
         self.output.flush()
     }
-}
-pub(crate) fn apply(
-    source: &Path,
-    destination: &Path,
-    transform: AudioDecodeTransform,
-    options: &CopyOptions,
-) -> Result<AudioDecodeStats> {
-    if options.cancel.as_ref().is_some_and(|c| c.is_cancelled()) {
-        return Err("media operation cancelled".into());
-    }
-    if options.max_packet_bytes == 0 {
-        return Err("packet byte limit must be positive".into());
-    }
-    if options.max_packets == Some(0) {
-        return Err("packet work limit requires at least one packet".into());
-    }
-    if options.max_controlled_bytes == Some(0) {
-        return Err("controlled memory limit must be positive".into());
-    }
-    crate::owned_budget::check_rss_budget(options)?;
-    if destination.symlink_metadata().is_ok() {
-        return Err("output already exists".into());
-    }
-    let file = File::open(source).map_err(|e| e.to_string())?;
-    apply_from_file(source, file, destination, transform, options)
 }
 pub(crate) fn apply_from_file(
     source: &Path,

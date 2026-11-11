@@ -20,20 +20,6 @@ pub(crate) fn unedited_policies(o: &CopyOptions) -> bool {
         && crate::owned_budget::check_rss_budget(o).is_ok()
         && o.max_packet_bytes > 0
 }
-pub(crate) fn supports(source: &Path, destination: &Path, options: &CopyOptions) -> bool {
-    if options.cancel.as_ref().is_some_and(|c| c.is_cancelled())
-        || !policies(options)
-        || !matches!(
-            destination.extension().and_then(|s| s.to_str()),
-            Some("mkv" | "mka")
-        )
-    {
-        return false;
-    }
-    let mut bytes = [0; 4];
-    File::open(source)
-        .is_ok_and(|mut f| f.read_exact(&mut bytes).is_ok() && bytes == [0x1a, 0x45, 0xdf, 0xa3])
-}
 struct Temporary(PathBuf);
 impl Drop for Temporary {
     fn drop(&mut self) {

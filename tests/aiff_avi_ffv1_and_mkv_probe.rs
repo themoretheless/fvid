@@ -1,5 +1,7 @@
+#[cfg(feature = "player")]
 use std::io::Cursor;
 use std::path::Path;
+#[cfg(feature = "player")]
 use std::time::Duration;
 
 fn fixture_path(name: &str) -> std::path::PathBuf {
@@ -8,6 +10,7 @@ fn fixture_path(name: &str) -> std::path::PathBuf {
         .join(name)
 }
 
+#[cfg(feature = "player")]
 #[test]
 fn aiff_rejects_block_aligned_ssnd_when_declared_frames_is_zero() {
     let bytes = std::fs::read(fixture_path("aiff_block_aligned_zero_frames.aiff")).unwrap();
@@ -19,6 +22,7 @@ fn aiff_rejects_block_aligned_ssnd_when_declared_frames_is_zero() {
     );
 }
 
+#[cfg(feature = "player")]
 #[test]
 fn avi_audio_reader_supports_sub_sample_seek_time_and_present_decoded_trimming() {
     use fvid::audio::{AudioPacket, AudioStream};
@@ -65,7 +69,7 @@ fn native_lossless_y4m_accepts_omitted_f_token_with_411_and_410_subsampling() {
             fvid::native_lossless_y4m::eligible(&path).unwrap(),
             "{fixture} without explicit F token must be eligible for owned lossless FFV1 export"
         );
-        let mut out = Cursor::new(Vec::new());
+        let mut out = std::io::Cursor::new(Vec::new());
         let (stats, event) = fvid::native_lossless_y4m::write(
             &path,
             &mut out,

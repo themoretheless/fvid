@@ -1,11 +1,10 @@
 //! AAC pulse reconstruction on long-window quantized coefficients.
-use crate::{Result, invalid};
-
-include!("../../crates/fvid-media/src/owned_aac/aac_pulse_impl.rs");
+pub use fvid_media::owned_aac::aac_pulse::*;
 
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::codec::{aac_synthesis::WindowSequence, bits::BitReader};
     fn pack(fields: &[(u32, u8)]) -> Vec<u8> {
         let mut out = Vec::new();
         let mut n = 0;

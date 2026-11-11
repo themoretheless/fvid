@@ -1,13 +1,15 @@
 //! Grouped AAC spectral payload decoding. Special bands retain zero placeholders
 //! for later noise/intensity reconstruction; they consume no spectral codewords.
-use crate::{Result, invalid};
-
-include!("../../crates/fvid-media/src/owned_aac/aac_spectral_impl.rs");
+pub use fvid_media::owned_aac::aac_spectral::*;
 
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::codec::{aac_huffman_tables::*, aac_synthesis::WindowShape};
+    use crate::codec::{
+        aac_ics::IcsInfo, aac_synthesis::{WindowSequence, WindowShape},
+        bits::BitReader,
+    };
+    use fvid_media::owned_aac::aac_huffman_tables::*;
     fn info(sequence: WindowSequence, groups: Vec<u8>, bands: u8) -> IcsInfo {
         IcsInfo {
             sequence,

@@ -13,21 +13,6 @@ pub(crate) enum Backend {
     Opus,
     Joint,
 }
-pub(crate) fn select_backend(
-    source: &Path,
-    options: &CopyOptions,
-) -> Result<(usize, Backend), String> {
-    let (stream_index, backend, _, _) = open_selected_ogg(source, options)?;
-    Ok((stream_index, backend))
-}
-pub(crate) fn open_selected_ogg(
-    source: &Path,
-    options: &CopyOptions,
-) -> Result<(usize, Backend, crate::owned_ogg::Ogg, usize), String> {
-    check(options)?;
-    let file = File::open(source).map_err(|e| e.to_string())?;
-    open_selected_ogg_from_file(file, options)
-}
 pub(crate) fn open_selected_ogg_from_file(
     mut file: File,
     options: &CopyOptions,
@@ -75,29 +60,45 @@ pub(crate) fn open_selected_ogg_from_file(
     };
     Ok((source_index, backend, ogg, index))
 }
-pub(crate) fn coding(source: &Path, options: &CopyOptions) -> Result<Backend, String> {
-    select_backend(source, options).map(|(_, backend)| backend)
+pub(crate) struct OggAudioExportSource {
+    pub(crate) file: File,
 }
-pub(crate) fn descriptor(
-    source: &Path,
-    options: &CopyOptions,
-) -> Result<(usize, u32, u16, u32, &'static str), String> {
-    descriptor_for_decode(source, None, options)
-        .map(|(index, rate, channels, mask, codec, _, _)| (index, rate, channels, mask, codec))
+
+impl crate::owned_audio_source::AudioExportSource for OggAudioExportSource {
+    fn descriptor(
+        self,
+        transform: Option<AudioDecodeTransform>,
+        options: &CopyOptions,
+    ) -> Result<crate::owned_audio_source::AudioSourceDescriptor, String> {
+        descriptor_from_file_for_decode(self.file, transform, options)
+    }
+
+    fn apply(
+        self,
+        destination: &Path,
+        transform: AudioDecodeTransform,
+        options: &CopyOptions,
+    ) -> Result<fvid_media_info::AudioDecodeStats, String> {
+        let (_, backend, ogg, index) = open_selected_ogg_from_file(self.file, options)?;
+        match backend {
+            Backend::Vorbis => {
+                crate::owned_ogg_vorbis_export::apply_from_ogg(ogg, index, destination, transform, options)
+            }
+            Backend::Opus => {
+                crate::owned_ogg_opus_export::apply_from_ogg(ogg, index, destination, transform, options)
+            }
+            Backend::Joint => {
+                crate::owned_ogg_joint_export::apply_from_ogg(ogg, index, destination, transform, options)
+            }
+        }
+    }
 }
-pub(crate) fn descriptor_for_decode(
-    source: &Path,
-    transform: Option<AudioDecodeTransform>,
-    options: &CopyOptions,
-) -> Result<(usize, u32, u16, u32, &'static str, u64, usize), String> {
-    let file = File::open(source).map_err(|e| e.to_string())?;
-    descriptor_from_file_for_decode(file, transform, options)
-}
+
 pub(crate) fn descriptor_from_file_for_decode(
     file: File,
     transform: Option<AudioDecodeTransform>,
     options: &CopyOptions,
-) -> Result<(usize, u32, u16, u32, &'static str, u64, usize), String> {
+) -> Result<crate::owned_audio_source::AudioSourceDescriptor, String> {
     let (stream_index, backend, ogg, index) = open_selected_ogg_from_file(file, options)?;
     match backend {
         Backend::Opus => {
@@ -115,7 +116,7 @@ pub(crate) fn descriptor_from_file_for_decode(
                 })
                 .transpose()?;
             let prefix_samples = p.prefix_end_samples(until, options.max_packets);
-            Ok((
+            Ok(crate::owned_audio_source::AudioSourceDescriptor::float32(
                 stream_index,
                 p.sample_rate(),
                 p.channels(),
@@ -141,7 +142,7 @@ pub(crate) fn descriptor_from_file_for_decode(
                 })
                 .transpose()?;
             let prefix_samples = p.prefix_end_samples(until, options.max_packets);
-            Ok((
+            Ok(crate::owned_audio_source::AudioSourceDescriptor::float32(
                 stream_index,
                 rate,
                 p.channels(),
@@ -172,7 +173,7 @@ pub(crate) fn descriptor_from_file_for_decode(
                 "A_VORBIS" => "vorbis",
                 _ => "opus",
             };
-            Ok((
+            Ok(crate::owned_audio_source::AudioSourceDescriptor::float32(
                 stream_index,
                 rate,
                 p.channels(),

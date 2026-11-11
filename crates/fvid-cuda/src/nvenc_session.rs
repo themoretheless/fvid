@@ -60,6 +60,10 @@ pub(crate) struct FunctionTable {
     reserved2: [usize; 277],
 }
 impl FunctionTable {
+    #[cfg_attr(
+        not(any(target_os = "linux", target_os = "windows")),
+        allow(dead_code)
+    )]
     pub(crate) fn new() -> Self {
         Self {
             version: version(2),
@@ -947,6 +951,7 @@ fn release_input(
     close_handle(&mut input.registered, unregister)
         .map_err(|e| format!("NVENC input unregister: {e}"))
 }
+#[cfg(test)]
 fn validate_surface(
     pointer: u64,
     width: u32,

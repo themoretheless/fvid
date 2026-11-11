@@ -1,13 +1,12 @@
 //! AAC band scalefactor syntax. Values retain their distinct spectral,
 //! noise-energy and intensity-position units until reconstruction.
-use crate::{Result, invalid};
-
-include!("../../crates/fvid-media/src/owned_aac/aac_scalefactors_impl.rs");
+pub use fvid_media::owned_aac::aac_scalefactors::*;
 
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::codec::aac_huffman_tables::{SCF_CODEBOOK_CODES, SCF_CODEBOOK_LENS};
+    use crate::codec::bits::BitReader;
+    use fvid_media::owned_aac::aac_huffman_tables::{SCF_CODEBOOK_CODES, SCF_CODEBOOK_LENS};
     fn delta(value: i16) -> (u32, u8) {
         let i = (value + 60) as usize;
         (SCF_CODEBOOK_CODES[i], SCF_CODEBOOK_LENS[i])

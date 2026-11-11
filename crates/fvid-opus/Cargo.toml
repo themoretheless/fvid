@@ -11,5 +11,8 @@ name = "fvid_opus"
 [features]
 probe = []
 
+[dependencies]
+fvid-cpu = { path = "../fvid-cpu" }
+
 [lints.rust]
 unsafe_code = "forbid"

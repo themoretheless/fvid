@@ -2,7 +2,7 @@
 use fvid::audio::{AudioStep, AudioStream};
 use std::{
     io::Cursor,
-    path::{Path, PathBuf},
+    path::Path,
     time::Duration,
 };
 #[path = "support/audio_capture.rs"]

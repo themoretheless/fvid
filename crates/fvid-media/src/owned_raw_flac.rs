@@ -25,12 +25,6 @@ fn check(options: &CopyOptions) -> Result<()> {
     }
     crate::owned_budget::check_rss_budget(options)
 }
-pub(crate) fn recognizes(source: &Path) -> Result<bool> {
-    let mut file = File::open(source).map_err(|e| e.to_string())?;
-    let mut head = [0; 10];
-    let count = file.read(&mut head).map_err(|e| e.to_string())?;
-    Ok(head[..count].starts_with(b"fLaC"))
-}
 pub(crate) fn open(source: &Path, options: &CopyOptions) -> Result<Flac> {
     open_with_transform(source, None, options)
 }
@@ -229,30 +223,34 @@ fn open_from_file_with_interval(
     }
     Ok(parsed)
 }
-pub(crate) fn descriptor(source: &Path, options: &CopyOptions) -> Result<(u32, u16, u32)> {
-    descriptor_with_transform(source, None, options)
+pub(crate) struct RawFlacExportSource {
+    pub(crate) file: File,
 }
-pub(crate) fn descriptor_with_transform(
-    source: &Path,
-    transform: Option<AudioDecodeTransform>,
-    options: &CopyOptions,
-) -> Result<(u32, u16, u32)> {
-    descriptor_for_decode(source, transform, options)
-        .map(|(rate, channels, mask, _, _)| (rate, channels, mask))
+
+impl crate::owned_audio_source::AudioExportSource for RawFlacExportSource {
+    fn descriptor(
+        self,
+        transform: Option<AudioDecodeTransform>,
+        options: &CopyOptions,
+    ) -> Result<crate::owned_audio_source::AudioSourceDescriptor> {
+        descriptor_from_file_for_decode(self.file, transform, options)
+    }
+
+    fn apply(
+        self,
+        destination: &Path,
+        transform: AudioDecodeTransform,
+        options: &CopyOptions,
+    ) -> Result<ExportStats> {
+        apply_from_file(self.file, destination, transform, options)
+    }
 }
-pub(crate) fn descriptor_for_decode(
-    source: &Path,
-    transform: Option<AudioDecodeTransform>,
-    options: &CopyOptions,
-) -> Result<(u32, u16, u32, u64, usize)> {
-    let p = open_with_transform(source, transform, options)?;
-    descriptor_from_parsed(p, transform, options)
-}
+
 pub(crate) fn descriptor_from_file_for_decode(
     file: File,
     transform: Option<AudioDecodeTransform>,
     options: &CopyOptions,
-) -> Result<(u32, u16, u32, u64, usize)> {
+) -> Result<crate::owned_audio_source::AudioSourceDescriptor> {
     let p = open_from_file_with_interval(
         file,
         transform.map(|transform| (transform, None)),
@@ -264,7 +262,7 @@ fn descriptor_from_parsed(
     p: Flac,
     transform: Option<AudioDecodeTransform>,
     options: &CopyOptions,
-) -> Result<(u32, u16, u32, u64, usize)> {
+) -> Result<crate::owned_audio_source::AudioSourceDescriptor> {
     if p.samples() == 0 {
         return Err("FLAC stream contains no audible samples".into());
     }
@@ -289,38 +287,26 @@ fn descriptor_from_parsed(
             .min(to),
         None => to,
     };
-    Ok((
+    Ok(crate::owned_audio_source::AudioSourceDescriptor::float32(
+        0,
         p.sample_rate,
         p.channels,
         p.channel_mask,
+        "flac",
         prefix_frames,
         info.len(),
     ))
 }
-pub(crate) fn geometry(source: &Path, options: &CopyOptions) -> Result<(u32, u16)> {
-    let parsed = open(source, options)?;
-    if parsed.samples() == 0 {
-        return Err("FLAC stream contains no audible samples".into());
-    }
-    Ok((parsed.sample_rate, parsed.channels))
-}
-pub(crate) fn supports(
-    source: &Path,
-    transform: AudioDecodeTransform,
-    options: &CopyOptions,
-) -> bool {
-    let Ok(file) = File::open(source) else {
-        return false;
-    };
-    supports_from_file(file, transform, options)
-}
+#[cfg(test)]
 pub(crate) fn supports_from_file(
     file: File,
     transform: AudioDecodeTransform,
     options: &CopyOptions,
 ) -> bool {
     match descriptor_from_file_for_decode(file, Some(transform), options) {
-        Ok((_rate, channels, mask, _, _)) => {
+        Ok(desc) => {
+            let channels = desc.channels;
+            let mask = desc.channel_mask;
             let target = transform.channels.unwrap_or(i32::from(channels));
             target == i32::from(channels)
                 || (((channels <= 8 && matches!(target, 1 | 2))
@@ -375,17 +361,6 @@ fn decode_raw_checked(
         interval,
         options,
     )
-}
-pub(crate) fn decode_to_wave(
-    source: &Path,
-    rate: u32,
-    channels: u16,
-    mask: u32,
-    options: &CopyOptions,
-) -> Result<crate::owned_adts_export::DecodedSpool> {
-    check(options)?;
-    let file = File::open(source).map_err(|e| e.to_string())?;
-    decode_to_wave_from_file(file, rate, channels, mask, options)
 }
 pub(crate) fn decode_to_wave_from_file(
     file: File,
@@ -543,26 +518,6 @@ fn source_info_from_parsed(parsed: &Flac, options: &CopyOptions) -> Result<Vec<u
         }
     }
     Ok(info)
-}
-pub(crate) fn source_info(source: &Path, options: &CopyOptions) -> Result<Vec<u8>> {
-    let mut inspect_opts = crate::owned_adts_export::pcm_decode_options(options);
-    inspect_opts.max_packets = None;
-    inspect_opts.max_packet_bytes = usize::MAX;
-    let parsed = open(source, &inspect_opts)?;
-    source_info_from_parsed(&parsed, options)
-}
-pub(crate) fn apply(
-    source: &Path,
-    destination: &Path,
-    transform: AudioDecodeTransform,
-    options: &CopyOptions,
-) -> Result<ExportStats> {
-    check(options)?;
-    if destination.symlink_metadata().is_ok() {
-        return Err("output already exists".into());
-    }
-    let file = File::open(source).map_err(|e| e.to_string())?;
-    apply_from_file(file, destination, transform, options)
 }
 pub(crate) fn apply_from_file(
     file: File,
