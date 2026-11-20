@@ -167,6 +167,7 @@ fn discarded_indices_have_original_c_cursors_without_weakening_real_band_bounds(
     eprintln!("Original C discarded indices outside current bounds: {out_of_range}");
 }
 
+#[cfg(feature = "player")]
 fn play(reader: &mut dyn fvid::audio::AudioStream) -> Vec<u8> {
     let mut decoder = reader.make_decoder().unwrap();
     let mut out = Vec::new();
@@ -188,6 +189,7 @@ fn play(reader: &mut dyn fvid::audio::AudioStream) -> Vec<u8> {
     }
     out
 }
+#[cfg(feature = "player")]
 #[test]
 fn split_ttt_movies_play_seek_and_rewind_with_exact_audio() {
     use fvid::audio::AudioStream;

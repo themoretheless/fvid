@@ -391,6 +391,7 @@ mod native_nv12 {
             WidthInBytes: width,
             Height: height,
         };
+        // SAFETY: Caller supplies valid device addresses/pitches matching WidthInBytes x Height on `stream`.
         let code = unsafe { cuda::cuMemcpy2DAsync_v2(&copy, stream) };
         if code != cuda::CUresult::CUDA_SUCCESS {
             return Err(format!("CUDA 2D copy failed: {code:?}"));
@@ -405,6 +406,7 @@ mod native_nv12 {
         context: u64,
         stream: u64,
     ) -> Result<(), String> {
+        // SAFETY: Caller passes a live primary/user CUDA context handle for this thread.
         let push = unsafe { cuda::cuCtxPushCurrent_v2(context as cuda::CUcontext) };
         if push != cuda::CUresult::CUDA_SUCCESS {
             return Err(format!("CUDA context push failed: {push:?}"));
@@ -440,6 +442,7 @@ mod native_nv12 {
             )
         })();
         let mut popped = std::ptr::null_mut();
+        // SAFETY: Matches the context pushed at the start of `copy_crop_on_stream`.
         let pop = unsafe { cuda::cuCtxPopCurrent_v2(&mut popped) };
         if pop != cuda::CUresult::CUDA_SUCCESS {
             return Err(format!("CUDA context pop failed: {pop:?}"));
@@ -538,6 +541,7 @@ mod native_nv12 {
                 .bind_to_thread()
                 .map_err(|e| format!("CUDA bind failed: {e}"))?;
             let mut event: cuda::CUevent = std::ptr::null_mut();
+            // SAFETY: Context is bound to the current thread and `event` points to writable stack storage.
             let code = unsafe {
                 cuda::cuEventCreate(
                     &mut event,
@@ -603,10 +607,12 @@ mod native_nv12 {
             }
             self.ensure_order_event()?;
             let event = self.order_event.expect("order event");
+            // SAFETY: `event` and `self.launch` are live CUDA handles owned by/ordered with this processor.
             let code = unsafe { cuda::cuEventRecord(event, self.launch) };
             if code != cuda::CUresult::CUDA_SUCCESS {
                 return Err(format!("CUDA event record failed: {code:?}"));
             }
+            // SAFETY: `follow` is the valid CUDA stream configured for this processor and `event` was just recorded.
             let code = unsafe { cuda::cuStreamWaitEvent(follow, event, 0) };
             if code != cuda::CUresult::CUDA_SUCCESS {
                 return Err(format!("CUDA stream wait failed: {code:?}"));
@@ -715,6 +721,7 @@ mod native_nv12 {
                 host.as_mut_slice()
                     .map_err(|e| e.to_string())?[slot_base..slot_base + PARAMS_WORDS]
                     .copy_from_slice(&params);
+                // SAFETY: `slot_base` is within `ring_words` of the live pinned allocation.
                 let pointer = unsafe {
                     host.as_ptr()
                         .map_err(|e| e.to_string())?
@@ -1048,6 +1055,7 @@ mod native_nv12 {
             let _ = self.synchronize_launch();
             if let Some(event) = self.order_event.take() {
                 let _ = self.device.context.bind_to_thread();
+                // SAFETY: Launch stream was synchronized above and `event` is owned uniquely by this processor.
                 unsafe {
                     let _ = cuda::cuEventDestroy_v2(event);
                 }

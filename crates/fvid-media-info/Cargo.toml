@@ -7,3 +7,6 @@ description = "Backend-independent FVid media inspection data"
 
 [dependencies]
 serde = { version = "1", features = ["derive"] }
+
+[lints]
+workspace = true

@@ -93,6 +93,7 @@ fn ep3_22_2_classes_match_scalar_pcm_and_bad_crc_preserves_all_histories() {
     }
     eprintln!("AAC22.2 EP3 scalar maximum: {maximum}");
 }
+#[cfg(feature = "player")]
 fn play(r: &mut dyn fvid::audio::AudioStream, d: &mut dyn fvid::audio::AudioDecode) -> Vec<u8> {
     let mut out = Vec::new();
     while let Some(p) = r.next_packet().unwrap() {
@@ -112,7 +113,6 @@ fn play(r: &mut dyn fvid::audio::AudioStream, d: &mut dyn fvid::audio::AudioDeco
 }
 #[test]
 fn ep3_22_2_movies_export_rewind_seek_and_reach_the_specific_crc_failure() {
-    use fvid::audio::AudioStream;
     for c in manifest()["cases"].as_array().unwrap() {
         let name = c["name"].as_str().unwrap();
         let mp4 = std::fs::read(root().join(format!("{name}.mp4"))).unwrap();
@@ -138,47 +138,52 @@ fn ep3_22_2_movies_export_rewind_seek_and_reach_the_specific_crc_failure() {
         )
         .unwrap();
         assert_eq!(other, expected);
-        let readers: [Box<dyn AudioStream>; 2] = [
-            Box::new(
-                fvid::playback_mp4_audio::Mp4AudioReader::open(
-                    Cursor::new(mp4),
-                    Default::default(),
-                )
-                .unwrap(),
-            ),
-            Box::new(
-                fvid::playback_webm_audio::WebmAudioReader::open(
-                    Cursor::new(mkv),
-                    Default::default(),
-                )
-                .unwrap(),
-            ),
-        ];
-        for mut r in readers {
-            let mut d = r.make_decoder().unwrap();
-            assert_eq!(play(r.as_mut(), d.as_mut()), expected);
-            r.rewind();
-            d.reset();
-            assert_eq!(play(r.as_mut(), d.as_mut()), expected);
-            for sample in [
-                13,
-                c["n"].as_u64().unwrap(),
-                c["samples"].as_u64().unwrap(),
-                7,
-            ] {
-                let target = (u128::from(sample) * u128::from(r.timescale())
-                    / u128::from(r.sample_rate())) as i64;
-                let landed = r.seek_to(target);
+        #[cfg(feature = "player")]
+        {
+            use fvid::audio::AudioStream;
+            let readers: [Box<dyn AudioStream>; 2] = [
+                Box::new(
+                    fvid::playback_mp4_audio::Mp4AudioReader::open(
+                        Cursor::new(mp4),
+                        Default::default(),
+                    )
+                    .unwrap(),
+                ),
+                Box::new(
+                    fvid::playback_webm_audio::WebmAudioReader::open(
+                        Cursor::new(mkv),
+                        Default::default(),
+                    )
+                    .unwrap(),
+                ),
+            ];
+            for mut r in readers {
+                let mut d = r.make_decoder().unwrap();
+                assert_eq!(play(r.as_mut(), d.as_mut()), expected);
+                r.rewind();
                 d.reset();
-                let at = ((landed.max(0) as u128 * u128::from(r.sample_rate()))
-                    .div_ceil(u128::from(r.timescale())) as usize
-                    * 96)
-                    .min(expected.len());
-                assert_eq!(
-                    play(r.as_mut(), d.as_mut()),
-                    expected[at..],
-                    "{name} seek{sample}"
-                );
+                assert_eq!(play(r.as_mut(), d.as_mut()), expected);
+                for sample in [
+                    13,
+                    c["n"].as_u64().unwrap(),
+                    c["samples"].as_u64().unwrap(),
+                    7,
+                ] {
+                    let target = (u128::from(sample) * u128::from(r.timescale())
+                        / u128::from(r.sample_rate())) as i64;
+                    let landed = r.seek_to(target);
+                    d.reset();
+                    let at = ((landed.max(0) as u128 * u128::from(r.sample_rate()))
+                        .div_ceil(u128::from(r.timescale()))
+                        as usize
+                        * 96)
+                        .min(expected.len());
+                    assert_eq!(
+                        play(r.as_mut(), d.as_mut()),
+                        expected[at..],
+                        "{name} seek{sample}"
+                    );
+                }
             }
         }
         let mut rejected = Vec::new();
@@ -192,7 +197,6 @@ fn ep3_22_2_movies_export_rewind_seek_and_reach_the_specific_crc_failure() {
 
 #[test]
 fn rvlc_22_2_ep1_groups_keep_resilience_pcm_dependencies_and_mp4_navigation() {
-    use fvid::audio::AudioStream;
     use fvid_media::owned_aac::aac_ep1::AccessUnit;
     let m = manifest();
     let units = std::fs::read(root().join("units.bin")).unwrap();
@@ -282,28 +286,35 @@ fn rvlc_22_2_ep1_groups_keep_resilience_pcm_dependencies_and_mp4_navigation() {
         let mut actual = Vec::new();
         fvid::native_media::decode_mp4_aac_pcm(&movie, &mut actual).unwrap();
         assert_eq!(actual, expected);
-        let mut reader =
-            fvid::playback_mp4_audio::Mp4AudioReader::open(Cursor::new(movie), Default::default())
-                .unwrap();
-        let mut d = reader.make_decoder().unwrap();
-        assert_eq!(play(&mut reader, d.as_mut()), expected);
-        reader.rewind();
-        d.reset();
-        assert_eq!(play(&mut reader, d.as_mut()), expected);
-        for sample in [13, n, c["samples"].as_u64().unwrap(), 7] {
-            let target = (u128::from(sample) * u128::from(reader.timescale())
-                / u128::from(reader.sample_rate())) as i64;
-            let landed = reader.seek_to(target);
+        #[cfg(feature = "player")]
+        {
+            use fvid::audio::AudioStream;
+            let mut reader = fvid::playback_mp4_audio::Mp4AudioReader::open(
+                Cursor::new(movie),
+                Default::default(),
+            )
+            .unwrap();
+            let mut d = reader.make_decoder().unwrap();
+            assert_eq!(play(&mut reader, d.as_mut()), expected);
+            reader.rewind();
             d.reset();
-            let at = ((landed.max(0) as u128 * u128::from(reader.sample_rate()))
-                .div_ceil(u128::from(reader.timescale())) as usize
-                * 96)
-                .min(expected.len());
-            assert_eq!(
-                play(&mut reader, d.as_mut()),
-                expected[at..],
-                "{name} seek{sample}"
-            );
+            assert_eq!(play(&mut reader, d.as_mut()), expected);
+            for sample in [13, n, c["samples"].as_u64().unwrap(), 7] {
+                let target = (u128::from(sample) * u128::from(reader.timescale())
+                    / u128::from(reader.sample_rate())) as i64;
+                let landed = reader.seek_to(target);
+                d.reset();
+                let at = ((landed.max(0) as u128 * u128::from(reader.sample_rate()))
+                    .div_ceil(u128::from(reader.timescale()))
+                    as usize
+                    * 96)
+                    .min(expected.len());
+                assert_eq!(
+                    play(&mut reader, d.as_mut()),
+                    expected[at..],
+                    "{name} seek{sample}"
+                );
+            }
         }
     }
 }

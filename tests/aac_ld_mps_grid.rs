@@ -389,6 +389,7 @@ fn native_pcm_matches_independent_iso_matrices_and_indexed_temporal_reference() 
     }
     eprintln!("grid native/reference samples {samples}, maximum absolute difference {maximum}");
 }
+#[cfg(feature = "player")]
 fn play(
     reader: &mut dyn fvid::audio::AudioStream,
     decoder: &mut dyn fvid::audio::AudioDecode,
@@ -418,6 +419,7 @@ fn play(
     assert!(decoder.finish_packet().unwrap().is_none());
     result
 }
+#[cfg(feature = "player")]
 #[test]
 fn every_grid_movie_plays_rewinds_seeks_and_matches_owned_pcm_and_ranges() {
     use fvid::audio::AudioStream;

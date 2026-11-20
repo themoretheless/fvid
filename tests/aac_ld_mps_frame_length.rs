@@ -108,6 +108,7 @@ fn frame_length_transitions_keep_the_fixed_partition_waveform_and_container_wind
     );
 }
 
+#[cfg(feature = "player")]
 fn play(reader: &mut dyn fvid::audio::AudioStream) -> Vec<u8> {
     let mut decoder = reader.make_decoder().unwrap();
     let mut out = Vec::new();
@@ -129,6 +130,7 @@ fn play(reader: &mut dyn fvid::audio::AudioStream) -> Vec<u8> {
     }
     out
 }
+#[cfg(feature = "player")]
 #[test]
 fn variable_spatial_frames_play_seek_and_rewind_with_original_source_windows() {
     use fvid::audio::AudioStream;

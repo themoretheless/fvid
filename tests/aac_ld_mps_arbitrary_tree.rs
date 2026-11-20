@@ -1,5 +1,6 @@
 use fvid_media::owned_aac::{aac_ld_mps_arbitrary_tree::Decoder, aac_sbr_qmf::Complex};
 use serde_json::Value;
+#[cfg(feature = "player")]
 use std::io::Cursor;
 fn root() -> std::path::PathBuf {
     std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
@@ -353,6 +354,7 @@ fn waveform(c: &Value, mode: fvid_media::owned_aac::aac_ld_mps_decor::Mode) -> V
     result
 }
 
+#[cfg(feature = "player")]
 fn play(reader: &mut dyn fvid::audio::AudioStream) -> Vec<u8> {
     let mut decoder = reader.make_decoder().unwrap();
     let mut out = Vec::new();
@@ -374,6 +376,7 @@ fn play(reader: &mut dyn fvid::audio::AudioStream) -> Vec<u8> {
     }
     out
 }
+#[cfg(feature = "player")]
 #[test]
 fn downscaled_spatial_playback_seek_and_rewind_keep_source_windows() {
     use fvid::audio::AudioStream;

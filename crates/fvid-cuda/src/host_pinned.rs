@@ -15,6 +15,8 @@ pub(crate) struct HostPinned {
 // SAFETY: CUDA pinned host memory is accessible from any host thread; the owning
 // SharedDevice/Processor serializes GPU use on one stream.
 unsafe impl Send for HostPinned {}
+// SAFETY: Shared references do not mutate the pinned memory without exclusive `&mut`
+// or synchronized stream ordering in the owning processor.
 unsafe impl Sync for HostPinned {}
 
 impl HostPinned {
@@ -69,8 +71,8 @@ impl HostSlice<u8> for HostPinned {
         &'a self,
         _stream: &'a CudaStream,
     ) -> (&'a [u8], SyncOnDrop<'a>) {
-        // SAFETY: ptr was allocated for `len` bytes and remains valid until Drop.
         (
+            // SAFETY: ptr was allocated for `len` bytes and remains valid until Drop.
             unsafe { std::slice::from_raw_parts(self.ptr, self.len) },
             SyncOnDrop::Sync(None),
         )
@@ -80,8 +82,8 @@ impl HostSlice<u8> for HostPinned {
         &'a mut self,
         _stream: &'a CudaStream,
     ) -> (&'a mut [u8], SyncOnDrop<'a>) {
-        // SAFETY: exclusive &mut self; allocation sized to `len`.
         (
+            // SAFETY: exclusive &mut self; allocation sized to `len`.
             unsafe { std::slice::from_raw_parts_mut(self.ptr, self.len) },
             SyncOnDrop::Sync(None),
         )

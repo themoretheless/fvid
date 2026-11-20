@@ -21,6 +21,7 @@ fn packet<'a>(blob: &'a [u8], r: &Value) -> &'a [u8] {
     let a = r["offset"].as_u64().unwrap() as usize;
     &blob[a..a + r["bytes"].as_u64().unwrap() as usize]
 }
+#[cfg(feature = "player")]
 fn play(r: &mut dyn fvid::audio::AudioStream, d: &mut dyn fvid::audio::AudioDecode) -> Vec<u8> {
     let mut out = Vec::new();
     while let Some(p) = r.next_packet().unwrap() {
@@ -40,7 +41,6 @@ fn play(r: &mut dyn fvid::audio::AudioStream, d: &mut dyn fvid::audio::AudioDeco
 }
 #[test]
 fn local_fragment_replacements_preserve_messages_pcm_checkpoints_and_navigation() {
-    use fvid::audio::AudioStream;
     let m = manifest();
     let data = std::fs::read(root().join("packets.bin")).unwrap();
     let control_data = std::fs::read(parent().join("packets.bin")).unwrap();
@@ -145,43 +145,48 @@ fn local_fragment_replacements_preserve_messages_pcm_checkpoints_and_navigation(
         )
         .unwrap();
         assert_eq!(matroska, expected);
-        let readers: [Box<dyn AudioStream>; 2] = [
-            Box::new(
-                fvid::playback_mp4_audio::Mp4AudioReader::open(
-                    Cursor::new(bytes),
-                    Default::default(),
-                )
-                .unwrap(),
-            ),
-            Box::new(
-                fvid::playback_webm_audio::WebmAudioReader::open(
-                    Cursor::new(mkv),
-                    Default::default(),
-                )
-                .unwrap(),
-            ),
-        ];
-        for mut r in readers {
-            let mut d = r.make_decoder().unwrap();
-            assert_eq!(play(r.as_mut(), d.as_mut()), expected);
-            r.rewind();
-            d.reset();
-            assert_eq!(play(r.as_mut(), d.as_mut()), expected);
-            for target in [13, samples, c["samples"].as_u64().unwrap(), 7] {
-                let at = (u128::from(target) * u128::from(r.timescale())
-                    / u128::from(r.sample_rate())) as i64;
-                let landed = r.seek_to(at);
+        #[cfg(feature = "player")]
+        {
+            use fvid::audio::AudioStream;
+            let readers: [Box<dyn AudioStream>; 2] = [
+                Box::new(
+                    fvid::playback_mp4_audio::Mp4AudioReader::open(
+                        Cursor::new(bytes),
+                        Default::default(),
+                    )
+                    .unwrap(),
+                ),
+                Box::new(
+                    fvid::playback_webm_audio::WebmAudioReader::open(
+                        Cursor::new(mkv),
+                        Default::default(),
+                    )
+                    .unwrap(),
+                ),
+            ];
+            for mut r in readers {
+                let mut d = r.make_decoder().unwrap();
+                assert_eq!(play(r.as_mut(), d.as_mut()), expected);
+                r.rewind();
                 d.reset();
-                let first = ((landed.max(0) as u128 * u128::from(r.sample_rate()))
-                    .div_ceil(u128::from(r.timescale())) as usize
-                    * usize::from(r.channels())
-                    * 4)
-                .min(expected.len());
-                assert_eq!(
-                    play(r.as_mut(), d.as_mut()),
-                    expected[first..],
-                    "{name} seek{target}"
-                );
+                assert_eq!(play(r.as_mut(), d.as_mut()), expected);
+                for target in [13, samples, c["samples"].as_u64().unwrap(), 7] {
+                    let at = (u128::from(target) * u128::from(r.timescale())
+                        / u128::from(r.sample_rate())) as i64;
+                    let landed = r.seek_to(at);
+                    d.reset();
+                    let first = ((landed.max(0) as u128 * u128::from(r.sample_rate()))
+                        .div_ceil(u128::from(r.timescale()))
+                        as usize
+                        * usize::from(r.channels())
+                        * 4)
+                    .min(expected.len());
+                    assert_eq!(
+                        play(r.as_mut(), d.as_mut()),
+                        expected[first..],
+                        "{name} seek{target}"
+                    );
+                }
             }
         }
     }

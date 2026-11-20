@@ -217,17 +217,20 @@ fn historical_ep1_refusals_now_match_scalar_pcm_and_support_navigation() {
         )
         .unwrap();
         assert_eq!(owned, full);
-        let mut reader = fvid::playback_mp4_audio::Mp4AudioReader::open(
-            std::io::Cursor::new(data),
-            Default::default(),
-        )
-        .unwrap();
-        assert_eq!(play(&mut reader), full);
-        reader.rewind();
-        assert_eq!(play(&mut reader), full);
-        for target in [1, 1100, 5800, (full.len() / 4) as i64] {
-            let landed = reader.seek_to(target);
-            assert_eq!(play(&mut reader), full[landed as usize * 4..]);
+        #[cfg(feature = "player")]
+        {
+            let mut reader = fvid::playback_mp4_audio::Mp4AudioReader::open(
+                std::io::Cursor::new(data),
+                Default::default(),
+            )
+            .unwrap();
+            assert_eq!(play(&mut reader), full);
+            reader.rewind();
+            assert_eq!(play(&mut reader), full);
+            for target in [1, 1100, 5800, (full.len() / 4) as i64] {
+                let landed = reader.seek_to(target);
+                assert_eq!(play(&mut reader), full[landed as usize * 4..]);
+            }
         }
     }
 }

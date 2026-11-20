@@ -32,7 +32,7 @@ checksum = "773fa9c96dd0dbef887e39d0ed6177f141cce4d68e6041df77570aa3702dfa13"
 
 [[package]]
 name = "fvid"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "fvid-codecs",
  "fvid-control",
@@ -44,14 +44,14 @@ dependencies = [
 
 [[package]]
 name = "fvid-camera-ffi"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "fvid",
 ]
 
 [[package]]
 name = "fvid-codecs"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "fvid-control",
  "fvid-cpu",
@@ -59,15 +59,15 @@ dependencies = [
 
 [[package]]
 name = "fvid-control"
-version = "0.1.0"
+version = "0.2.0"
 
 [[package]]
 name = "fvid-cpu"
-version = "0.1.0"
+version = "0.2.0"
 
 [[package]]
 name = "fvid-media"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "ab_glyph",
  "epaint_default_fonts",
@@ -84,14 +84,17 @@ dependencies = [
 
 [[package]]
 name = "fvid-media-info"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "serde",
 ]
 
 [[package]]
 name = "fvid-opus"
-version = "0.1.0"
+version = "0.2.0"
+dependencies = [
+ "fvid-cpu",
+]
 
 [[package]]
 name = "itoa"

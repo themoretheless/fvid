@@ -13,6 +13,7 @@ fn hex(v: &Value) -> Vec<u8> {
         .map(|b| u8::from_str_radix(std::str::from_utf8(b).unwrap(), 16).unwrap())
         .collect()
 }
+#[cfg(feature = "player")]
 fn play(
     reader: &mut dyn fvid::audio::AudioStream,
     decoder: &mut dyn fvid::audio::AudioDecode,
@@ -37,7 +38,6 @@ fn play(
 }
 #[test]
 fn predictive_icc_defaults_match_explicit_unity_through_playback_and_seek() {
-    use fvid::audio::AudioStream;
     let m: Value =
         serde_json::from_slice(&std::fs::read(root().join("manifest.json")).unwrap()).unwrap();
     let blob = std::fs::read(root().join("packets.bin")).unwrap();
@@ -179,41 +179,46 @@ fn predictive_icc_defaults_match_explicit_unity_through_playback_and_seek() {
                 scalars += 1;
             }
         }
-        let mkv = std::fs::read(root().join(c["default"]["file"].as_str().unwrap())).unwrap();
-        let readers: [Box<dyn AudioStream>; 2] = [
-            Box::new(
-                fvid::playback_mp4_audio::Mp4AudioReader::open(
-                    Cursor::new(bytes.clone()),
-                    Default::default(),
-                )
-                .unwrap(),
-            ),
-            Box::new(
-                fvid::playback_webm_audio::WebmAudioReader::open(
-                    Cursor::new(mkv),
-                    Default::default(),
-                )
-                .unwrap(),
-            ),
-        ];
-        for mut reader in readers {
-            let width = usize::from(reader.channels()) * 4;
-            let mut decoder = reader.make_decoder().unwrap();
-            assert_eq!(play(reader.as_mut(), decoder.as_mut()), expected);
-            reader.rewind();
-            decoder.reset();
-            assert_eq!(play(reader.as_mut(), decoder.as_mut()), expected);
-            for target in [13, 512, 1024, 1536, 7] {
-                let ticks = (i128::from(target) * i128::from(reader.timescale())
-                    / i128::from(reader.sample_rate())) as i64;
-                let landed = reader.seek_to(ticks);
-                let first = ((landed.max(0) as u128 * u128::from(reader.sample_rate()))
-                    .div_ceil(u128::from(reader.timescale()))
-                    as usize
-                    * width)
-                    .min(expected.len());
+        #[cfg(feature = "player")]
+        {
+            use fvid::audio::AudioStream;
+            let mkv = std::fs::read(root().join(c["default"]["file"].as_str().unwrap())).unwrap();
+            let readers: [Box<dyn AudioStream>; 2] = [
+                Box::new(
+                    fvid::playback_mp4_audio::Mp4AudioReader::open(
+                        Cursor::new(bytes.clone()),
+                        Default::default(),
+                    )
+                    .unwrap(),
+                ),
+                Box::new(
+                    fvid::playback_webm_audio::WebmAudioReader::open(
+                        Cursor::new(mkv),
+                        Default::default(),
+                    )
+                    .unwrap(),
+                ),
+            ];
+            for mut reader in readers {
+                let width = usize::from(reader.channels()) * 4;
+                let mut decoder = reader.make_decoder().unwrap();
+                assert_eq!(play(reader.as_mut(), decoder.as_mut()), expected);
+                reader.rewind();
                 decoder.reset();
-                assert_eq!(play(reader.as_mut(), decoder.as_mut()), expected[first..]);
+                assert_eq!(play(reader.as_mut(), decoder.as_mut()), expected);
+                for target in [13, 512, 1024, 1536, 7] {
+                    let ticks = (i128::from(target) * i128::from(reader.timescale())
+                        / i128::from(reader.sample_rate()))
+                        as i64;
+                    let landed = reader.seek_to(ticks);
+                    let first = ((landed.max(0) as u128 * u128::from(reader.sample_rate()))
+                        .div_ceil(u128::from(reader.timescale()))
+                        as usize
+                        * width)
+                        .min(expected.len());
+                    decoder.reset();
+                    assert_eq!(play(reader.as_mut(), decoder.as_mut()), expected[first..]);
+                }
             }
         }
         let width = c["channels"].as_u64().unwrap() as usize * 4;

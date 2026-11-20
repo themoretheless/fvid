@@ -374,9 +374,9 @@ impl NvencSession {
         let mut preset = crate::nvenc_sdk::NV_ENC_PRESET_CONFIG::default();
         preset.version = version(4) | (1 << 31);
         preset.presetCfg.version = version(8) | (1 << 31);
+        let tuning = crate::nvenc_sdk::NV_ENC_TUNING_INFO_NV_ENC_TUNING_INFO_HIGH_QUALITY;
         // SAFETY: The SDK-generated preset storage and GUIDs have the verified
         // ABI; the session, context and driver remain live for this call.
-        let tuning = crate::nvenc_sdk::NV_ENC_TUNING_INFO_NV_ENC_TUNING_INFO_HIGH_QUALITY;
         let status = unsafe { preset_fn(self.encoder, codec, preset_guid, tuning, &mut preset) };
         if status != 0 {
             return Err(format!("NVENC preset query failed with status {status}"));
@@ -422,6 +422,7 @@ impl NvencSession {
                     if pointer.is_null() {
                         String::new()
                     } else {
+                        // SAFETY: Non-null diagnostic pointer returned by NVENC is valid null-terminated C text for this call.
                         unsafe { std::ffi::CStr::from_ptr(pointer) }
                             .to_string_lossy()
                             .into_owned()
@@ -491,6 +492,7 @@ impl NvencSession {
         pitch: u32,
         allocation_bytes: u64,
     ) -> Result<usize, String> {
+        // SAFETY: Caller upholds all `register_nv12` context, extent, pitch, and lifetime invariants.
         unsafe { self.register_format(pointer, pitch, allocation_bytes, NvencInputFormat::Nv12) }
     }
     /// Register/map caller-owned P010, with ten-bit codes MSB-aligned in words.
@@ -503,6 +505,7 @@ impl NvencSession {
         pitch: u32,
         allocation_bytes: u64,
     ) -> Result<usize, String> {
+        // SAFETY: Caller upholds all `register_p010` context, extent, pitch, word-alignment, and lifetime invariants.
         unsafe { self.register_format(pointer, pitch, allocation_bytes, NvencInputFormat::P010) }
     }
     unsafe fn register_format(
@@ -556,6 +559,7 @@ impl NvencSession {
                     if pointer.is_null() {
                         String::new()
                     } else {
+                        // SAFETY: Non-null diagnostic pointer returned by NVENC is valid null-terminated C text for this call.
                         unsafe { std::ffi::CStr::from_ptr(pointer) }
                             .to_string_lossy()
                             .into_owned()
@@ -1110,6 +1114,7 @@ mod tests {
         assert_eq!(config.profileGUID.Data1, 0xfa4d2b6c);
         assert_eq!(config.profileGUID.Data2, 0x3a5b);
         assert_eq!(config.profileGUID.Data3, 0x411a);
+        // SAFETY: `set_colour` and `set_input_format` initialized `hevcConfig` for `NvencCodec::Hevc`.
         let hevc = unsafe { config.encodeCodecConfig.hevcConfig };
         assert_eq!(hevc.pixelBitDepthMinus8(), 2);
         assert_eq!(hevc.hevcVUIParameters.colourPrimaries, 9);
@@ -1142,6 +1147,7 @@ mod tests {
                 full_range: true,
             };
             super::set_colour(&mut config, codec, colour);
+            // SAFETY: `set_colour` initialized the union variant matching `codec`.
             let vui = unsafe {
                 match codec {
                     super::NvencCodec::H264 => {
@@ -1383,14 +1389,14 @@ mod tests {
         assert!(session.initialize_nv12(codec, 256, 128, 60, 1).is_err());
         for (index, buffer) in buffers.iter().enumerate() {
             let (pointer, _guard) = buffer.device_ptr(&stream);
-            // SAFETY: All allocations use the same pooled primary context,
-            // are synchronized and remain live until successful close.
             let register = if format == NvencInputFormat::P010 {
                 NvencSession::register_p010
             } else {
                 NvencSession::register_nv12
             };
             assert_eq!(
+                // SAFETY: All allocations use the same pooled primary context,
+                // are synchronized and remain live until successful close.
                 unsafe {
                     register(
                         &mut session,
@@ -1405,7 +1411,10 @@ mod tests {
             // Wrong-format registration is rejected without invalidating the
             // session or accepting another driver resource.
             if format == NvencInputFormat::P010 {
-                assert!(unsafe { session.register_nv12(pointer, 256, 256 * 128 * 3) }.is_err());
+                assert!(
+                    // SAFETY: Pitched device pointer and byte extent belong to the pooled context and stay live through close.
+                    unsafe { session.register_nv12(pointer, 256, 256 * 128 * 3) }.is_err()
+                );
             }
             assert_eq!(session.create_output().unwrap(), index);
         }

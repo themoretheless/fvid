@@ -1,5 +1,6 @@
 const CORPUS: &str = "aac-ld-downscaled";
 const CASES: usize = 310;
+#[cfg(feature = "player")]
 const EXPORTS: usize = 310;
 include!("support/aac_eld_downscaled.rs");
 

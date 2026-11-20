@@ -331,6 +331,7 @@ fn whole_native_ges_pcm_matches_separate_qualified_chain_and_config_transitions(
     }
     eprintln!("GES whole-chain samples {count}, maximum native/separate difference {maximum}");
 }
+#[cfg(feature = "player")]
 fn play(
     reader: &mut dyn fvid::audio::AudioStream,
     decoder: &mut dyn fvid::audio::AudioDecode,
@@ -360,6 +361,7 @@ fn play(
     assert!(decoder.finish_packet().unwrap().is_none());
     output
 }
+#[cfg(feature = "player")]
 #[test]
 fn ges_movies_play_rewind_seek_and_repeat_ranges_with_the_same_pcm() {
     use fvid::audio::AudioStream;

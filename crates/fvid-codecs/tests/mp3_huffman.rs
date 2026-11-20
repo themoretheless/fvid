@@ -70,7 +70,9 @@ fn normative_small_codewords_and_reserved_tables() {
     }
     assert!(zero.quad(2).is_err());
     assert!(Cursor::new(&[0], 1..9).is_err());
-    assert!(Cursor::new(&[0], 7..6).is_err());
+    #[allow(clippy::reversed_empty_ranges)]
+    let reversed = 7..6;
+    assert!(Cursor::new(&[0], reversed).is_err());
     assert!(zero.read(1).is_err());
     assert_eq!(zero.read(0).unwrap(), 0);
 }

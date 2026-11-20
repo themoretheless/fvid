@@ -239,6 +239,7 @@ fn all_trees_both_modes_preserve_packet_clocks_and_rollback() {
     }
 }
 
+#[cfg(feature = "player")]
 fn play(reader: &mut dyn fvid::audio::AudioStream) -> Vec<u8> {
     let mut decoder = reader.make_decoder().unwrap();
     let mut out = Vec::new();
@@ -260,6 +261,7 @@ fn play(reader: &mut dyn fvid::audio::AudioStream) -> Vec<u8> {
     }
     out
 }
+#[cfg(feature = "player")]
 #[test]
 fn downscaled_spatial_playback_seek_and_rewind_keep_source_windows() {
     use fvid::audio::AudioStream;

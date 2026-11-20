@@ -188,7 +188,6 @@ fn controlled_numerical_compositions_keep_signal_and_icc_effects_without_profile
 }
 #[test]
 fn mp4_matroska_exports_and_reader_factories_refuse_nonconforming_profiles_before_pcm() {
-    use fvid::audio::AudioStream;
     for c in manifest()["cases"].as_array().unwrap() {
         for mkv in [false, true] {
             let data =
@@ -218,30 +217,34 @@ fn mp4_matroska_exports_and_reader_factories_refuse_nonconforming_profiles_befor
                 c["name"]
             );
             assert!(output.is_empty());
-            let mut reader: Box<dyn AudioStream> = if mkv {
-                Box::new(
-                    fvid::playback_webm_audio::WebmAudioReader::open(
-                        Cursor::new(data),
-                        Default::default(),
+            #[cfg(feature = "player")]
+            {
+                use fvid::audio::AudioStream;
+                let mut reader: Box<dyn AudioStream> = if mkv {
+                    Box::new(
+                        fvid::playback_webm_audio::WebmAudioReader::open(
+                            Cursor::new(data),
+                            Default::default(),
+                        )
+                        .unwrap(),
                     )
-                    .unwrap(),
-                )
-            } else {
-                Box::new(
-                    fvid::playback_mp4_audio::Mp4AudioReader::open(
-                        Cursor::new(data),
-                        Default::default(),
+                } else {
+                    Box::new(
+                        fvid::playback_mp4_audio::Mp4AudioReader::open(
+                            Cursor::new(data),
+                            Default::default(),
+                        )
+                        .unwrap(),
                     )
-                    .unwrap(),
-                )
-            };
-            for _ in 0..2 {
-                let error = match reader.make_decoder() {
-                    Err(e) => e,
-                    Ok(_) => panic!("invalid LD profile accepted"),
                 };
-                assert!(error.to_string().contains(PROFILE_ERROR));
-                reader.rewind();
+                for _ in 0..2 {
+                    let error = match reader.make_decoder() {
+                        Err(e) => e,
+                        Ok(_) => panic!("invalid LD profile accepted"),
+                    };
+                    assert!(error.to_string().contains(PROFILE_ERROR));
+                    reader.rewind();
+                }
             }
         }
     }

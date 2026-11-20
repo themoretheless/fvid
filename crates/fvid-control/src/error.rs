@@ -18,17 +18,20 @@ impl Error {
 }
 impl PartialEq<str> for Error {
     fn eq(&self, other: &str) -> bool {
-        self.to_string() == other
+        match self {
+            Self::Invalid(s) | Self::Unsupported(s) => s == other,
+            Self::Io(_) | Self::Gpu(_) => self.to_string() == other,
+        }
     }
 }
 impl PartialEq<&str> for Error {
     fn eq(&self, other: &&str) -> bool {
-        self.to_string() == *other
+        self == *other
     }
 }
 impl PartialEq<String> for Error {
     fn eq(&self, other: &String) -> bool {
-        self.to_string() == *other
+        self == other.as_str()
     }
 }
 impl std::fmt::Display for Error {

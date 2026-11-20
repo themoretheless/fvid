@@ -1,6 +1,8 @@
 use fvid_media::owned_aac::NativeAacDecoder;
 use serde_json::Value;
-use std::{io::Cursor, path::PathBuf};
+#[cfg(feature = "player")]
+use std::io::Cursor;
+use std::path::PathBuf;
 fn root() -> PathBuf {
     PathBuf::from(env!("CARGO_MANIFEST_DIR"))
         .join("tests/fixtures/playback-errors/aac-22-2-sbr-resilience")
@@ -19,6 +21,7 @@ fn packet(blob: &[u8], r: &Value, key: &str) -> Vec<u8> {
     let len = r[format!("{key}bytes")].as_u64().unwrap() as usize;
     blob[at..at + len].to_vec()
 }
+#[cfg(feature = "player")]
 fn play(r: &mut dyn fvid::audio::AudioStream, d: &mut dyn fvid::audio::AudioDecode) -> Vec<u8> {
     let mut out = Vec::new();
     while let Some(p) = r.next_packet().unwrap() {
@@ -38,7 +41,6 @@ fn play(r: &mut dyn fvid::audio::AudioStream, d: &mut dyn fvid::audio::AudioDeco
 }
 #[test]
 fn combined_ld_sbr_resilience_22_2_matches_scalar_pcm_and_navigates() {
-    use fvid::audio::AudioStream;
     use fvid_media::owned_aac::aac_ep1::AccessUnit;
     let m = manifest();
     let units = std::fs::read(root().join("units.bin")).unwrap();
@@ -132,28 +134,35 @@ fn combined_ld_sbr_resilience_22_2_matches_scalar_pcm_and_navigates() {
         let mut actual = Vec::new();
         fvid::native_media::decode_mp4_aac_pcm(&movie, &mut actual).unwrap();
         assert_eq!(actual, expected);
-        let mut reader =
-            fvid::playback_mp4_audio::Mp4AudioReader::open(Cursor::new(movie), Default::default())
-                .unwrap();
-        let mut d = reader.make_decoder().unwrap();
-        assert_eq!(play(&mut reader, d.as_mut()), expected);
-        reader.rewind();
-        d.reset();
-        assert_eq!(play(&mut reader, d.as_mut()), expected);
-        for sample in [13, n, c["samples"].as_u64().unwrap(), 7] {
-            let target = (u128::from(sample) * u128::from(reader.timescale())
-                / u128::from(reader.sample_rate())) as i64;
-            let landed = reader.seek_to(target);
+        #[cfg(feature = "player")]
+        {
+            use fvid::audio::AudioStream;
+            let mut reader = fvid::playback_mp4_audio::Mp4AudioReader::open(
+                Cursor::new(movie),
+                Default::default(),
+            )
+            .unwrap();
+            let mut d = reader.make_decoder().unwrap();
+            assert_eq!(play(&mut reader, d.as_mut()), expected);
+            reader.rewind();
             d.reset();
-            let at = ((landed.max(0) as u128 * u128::from(reader.sample_rate()))
-                .div_ceil(u128::from(reader.timescale())) as usize
-                * 96)
-                .min(expected.len());
-            assert_eq!(
-                play(&mut reader, d.as_mut()),
-                expected[at..],
-                "{name} seek{sample}"
-            );
+            assert_eq!(play(&mut reader, d.as_mut()), expected);
+            for sample in [13, n, c["samples"].as_u64().unwrap(), 7] {
+                let target = (u128::from(sample) * u128::from(reader.timescale())
+                    / u128::from(reader.sample_rate())) as i64;
+                let landed = reader.seek_to(target);
+                d.reset();
+                let at = ((landed.max(0) as u128 * u128::from(reader.sample_rate()))
+                    .div_ceil(u128::from(reader.timescale()))
+                    as usize
+                    * 96)
+                    .min(expected.len());
+                assert_eq!(
+                    play(&mut reader, d.as_mut()),
+                    expected[at..],
+                    "{name} seek{sample}"
+                );
+            }
         }
     }
     eprintln!("combined LD-SBR: {scalars} scalars, max error {maximum}");

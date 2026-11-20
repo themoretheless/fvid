@@ -473,6 +473,7 @@ fn integrity_and_late_sbr_errors_roll_back_ps_history_partial_pcm_and_presence()
             "{} owned MKV: {e}",
             bad["name"]
         );
+        #[cfg(feature = "player")]
         if bad["signal"] == "implicit" && bad["source_frames"] == 4 {
             let e = fvid::playback_webm_audio::WebmAudioReader::open(
                 Cursor::new(data),

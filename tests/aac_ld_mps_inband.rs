@@ -3,6 +3,7 @@ use fvid_media::owned_aac::{
     bits::BitReader,
 };
 use serde_json::Value;
+#[cfg(feature = "player")]
 use std::io::Cursor;
 fn root() -> std::path::PathBuf {
     std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
@@ -209,6 +210,7 @@ fn header_changes_apply_to_their_own_source_frame_and_identical_headers_keep_his
         "in-band native/staged maximum PCM difference {maximum}; all-state-reset negative-control gap {wrong_reset_gap}"
     );
 }
+#[cfg(feature = "player")]
 fn play(
     reader: &mut dyn fvid::audio::AudioStream,
     decoder: &mut dyn fvid::audio::AudioDecode,
@@ -238,6 +240,7 @@ fn play(
     assert!(decoder.finish_packet().unwrap().is_none());
     output
 }
+#[cfg(feature = "player")]
 #[test]
 fn changed_headers_restore_asc_on_live_rewind_and_seek_and_preserve_ranges() {
     use fvid::audio::AudioStream;

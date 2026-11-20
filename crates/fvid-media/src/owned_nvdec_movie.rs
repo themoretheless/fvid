@@ -282,6 +282,7 @@ impl<R: Read + Seek> MovieReader<R> {
         Ok(())
     }
 }
+#[cfg(test)]
 pub(crate) fn clip_presentations(
     events: Vec<Presentation>,
     interval: Option<(i64, i64)>,

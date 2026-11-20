@@ -452,6 +452,7 @@ fn coupled_native_movies_play_instead_of_returning_only_the_core_downmix() {
     }
 }
 
+#[cfg(feature = "player")]
 fn play_with(
     reader: &mut dyn fvid::audio::AudioStream,
     decoder: &mut dyn fvid::audio::AudioDecode,
@@ -481,6 +482,7 @@ fn play_with(
     assert!(decoder.finish_packet().unwrap().is_none());
     output
 }
+#[cfg(feature = "player")]
 #[test]
 fn coupled_playback_rewind_live_reset_seek_and_ranges_match_full_pcm() {
     use fvid::audio::AudioStream;

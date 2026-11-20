@@ -225,7 +225,7 @@ impl SubtitleCodec {
     pub fn parse(name: &str) -> std::result::Result<Self, String> {
         match name {
             "ass" => Ok(Self::Ass),
-            _ => Err(format!("unsupported subtitle codec: {name}; v1 supports ass").into()),
+            _ => Err(format!("unsupported subtitle codec: {name}; v1 supports ass")),
         }
     }
 

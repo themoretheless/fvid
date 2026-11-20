@@ -14,5 +14,5 @@ probe = []
 [dependencies]
 fvid-cpu = { path = "../fvid-cpu" }
 
-[lints.rust]
-unsafe_code = "forbid"
+[lints]
+workspace = true

@@ -6,3 +6,6 @@ license = "MIT"
 description = "Backend-independent FVid cancellation and progress contracts"
 
 [dependencies]
+
+[lints]
+workspace = true

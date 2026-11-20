@@ -1,3 +1,4 @@
+#[cfg(feature = "player")]
 use fvid::audio::AudioStream;
 use serde_json::Value;
 use std::io::Cursor;
@@ -9,6 +10,7 @@ fn root() -> std::path::PathBuf {
 fn manifest() -> Value {
     serde_json::from_slice(&std::fs::read(root().join("manifest.json")).unwrap()).unwrap()
 }
+#[cfg(feature = "player")]
 fn play(reader: &mut dyn AudioStream) -> Vec<u8> {
     let mut decoder = reader.make_decoder().unwrap();
     let mut output = Vec::new();
@@ -107,27 +109,32 @@ fn arbitrary_aac_alignment_plays_seeks_and_rewinds_with_identical_pcm() {
             )
             .unwrap_or_else(|e| panic!("{} Matroska: {e}", v["name"]));
             assert_eq!(mkv, expected);
-            let mut reader = fvid::playback_mp4_audio::Mp4AudioReader::open(
-                Cursor::new(movie),
-                Default::default(),
-            )
-            .unwrap();
-            assert_eq!(play(&mut reader), expected);
-            reader.rewind();
-            assert_eq!(play(&mut reader), expected);
-            for sample in [13, 512, 7] {
-                let at = sample * i64::from(reader.timescale()) / i64::from(reader.sample_rate());
-                let landed = reader.seek_to(at);
-                let offset = (landed.max(0) as u128 * u128::from(reader.sample_rate()))
-                    .div_ceil(u128::from(reader.timescale())) as usize
-                    * usize::from(reader.channels())
-                    * 4;
-                assert_eq!(
-                    play(&mut reader),
-                    expected[offset.min(expected.len())..],
-                    "{} seek {sample}",
-                    v["name"]
-                );
+            #[cfg(feature = "player")]
+            {
+                let mut reader = fvid::playback_mp4_audio::Mp4AudioReader::open(
+                    Cursor::new(movie),
+                    Default::default(),
+                )
+                .unwrap();
+                assert_eq!(play(&mut reader), expected);
+                reader.rewind();
+                assert_eq!(play(&mut reader), expected);
+                for sample in [13, 512, 7] {
+                    let at =
+                        sample * i64::from(reader.timescale()) / i64::from(reader.sample_rate());
+                    let landed = reader.seek_to(at);
+                    let offset = (landed.max(0) as u128 * u128::from(reader.sample_rate()))
+                        .div_ceil(u128::from(reader.timescale()))
+                        as usize
+                        * usize::from(reader.channels())
+                        * 4;
+                    assert_eq!(
+                        play(&mut reader),
+                        expected[offset.min(expected.len())..],
+                        "{} seek {sample}",
+                        v["name"]
+                    );
+                }
             }
         }
     }

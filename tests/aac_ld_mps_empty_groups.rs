@@ -118,6 +118,7 @@ fn empty_parameters_consume_the_original_c_dummy_payload_and_rollback_prefixes()
     }
 }
 
+#[cfg(feature = "player")]
 fn play(reader: &mut dyn fvid::audio::AudioStream) -> Vec<u8> {
     let mut decoder = reader.make_decoder().unwrap();
     let mut out = Vec::new();
@@ -139,6 +140,7 @@ fn play(reader: &mut dyn fvid::audio::AudioStream) -> Vec<u8> {
     }
     out
 }
+#[cfg(feature = "player")]
 #[test]
 fn grouped_empty_movies_play_seek_and_rewind_with_exact_audio() {
     use fvid::audio::AudioStream;

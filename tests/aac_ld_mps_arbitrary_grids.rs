@@ -192,6 +192,7 @@ fn changed_paths_and_undefined_dormant_grid_conversion_still_refuse_atomically()
     assert!(full.inherit_history(&partial).is_err());
     assert_eq!(full, saved);
 }
+#[cfg(feature = "player")]
 fn play(reader: &mut dyn fvid::audio::AudioStream) -> Vec<u8> {
     let mut decoder = reader.make_decoder().unwrap();
     let mut out = Vec::new();
@@ -213,6 +214,7 @@ fn play(reader: &mut dyn fvid::audio::AudioStream) -> Vec<u8> {
     }
     out
 }
+#[cfg(feature = "player")]
 #[test]
 fn downscaled_spatial_playback_seek_and_rewind_keep_source_windows() {
     use fvid::audio::AudioStream;

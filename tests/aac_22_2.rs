@@ -13,6 +13,7 @@ fn hex(s: &str) -> Vec<u8> {
 fn manifest() -> Value {
     serde_json::from_slice(&std::fs::read(root().join("manifest.json")).unwrap()).unwrap()
 }
+#[cfg(feature = "player")]
 fn play(
     reader: &mut dyn fvid::audio::AudioStream,
     decoder: &mut dyn fvid::audio::AudioDecode,
@@ -177,7 +178,6 @@ fn indexed_22_2_keeps_every_channel_against_sparse_scalar_pcm_and_checkpoints() 
 }
 #[test]
 fn indexed_22_2_mp4_matroska_exports_and_live_navigation_preserve_all_roles() {
-    use fvid::audio::AudioStream;
     let m = manifest();
     for c in m["cases"].as_array().unwrap() {
         let name = c["name"].as_str().unwrap();
@@ -207,49 +207,54 @@ fn indexed_22_2_mp4_matroska_exports_and_live_navigation_preserve_all_roles() {
         )
         .unwrap();
         assert_eq!(mkv, expected);
-        let readers: [Box<dyn AudioStream>; 2] = [
-            Box::new(
-                fvid::playback_mp4_audio::Mp4AudioReader::open(
-                    Cursor::new(bytes),
-                    Default::default(),
-                )
-                .unwrap(),
-            ),
-            Box::new(
-                fvid::playback_webm_audio::WebmAudioReader::open(
-                    Cursor::new(matroska),
-                    Default::default(),
-                )
-                .unwrap(),
-            ),
-        ];
-        for mut reader in readers {
-            assert_eq!(reader.channels(), 24);
-            let mut decoder = reader.make_decoder().unwrap();
-            assert_eq!(play(reader.as_mut(), decoder.as_mut()), expected);
-            reader.rewind();
-            decoder.reset();
-            assert_eq!(play(reader.as_mut(), decoder.as_mut()), expected);
-            for target in [
-                13,
-                c["n"].as_u64().unwrap(),
-                c["samples"].as_u64().unwrap(),
-                7,
-            ] {
-                let ticks = (u128::from(target) * u128::from(reader.timescale())
-                    / u128::from(reader.sample_rate())) as i64;
-                let landed = reader.seek_to(ticks);
+        #[cfg(feature = "player")]
+        {
+            use fvid::audio::AudioStream;
+            let readers: [Box<dyn AudioStream>; 2] = [
+                Box::new(
+                    fvid::playback_mp4_audio::Mp4AudioReader::open(
+                        Cursor::new(bytes),
+                        Default::default(),
+                    )
+                    .unwrap(),
+                ),
+                Box::new(
+                    fvid::playback_webm_audio::WebmAudioReader::open(
+                        Cursor::new(matroska),
+                        Default::default(),
+                    )
+                    .unwrap(),
+                ),
+            ];
+            for mut reader in readers {
+                assert_eq!(reader.channels(), 24);
+                let mut decoder = reader.make_decoder().unwrap();
+                assert_eq!(play(reader.as_mut(), decoder.as_mut()), expected);
+                reader.rewind();
                 decoder.reset();
-                let first = ((landed.max(0) as u128 * u128::from(reader.sample_rate()))
-                    .div_ceil(u128::from(reader.timescale()))
-                    as usize
-                    * 96)
-                    .min(expected.len());
-                assert_eq!(
-                    play(reader.as_mut(), decoder.as_mut()),
-                    expected[first..],
-                    "{name} seek{target}"
-                );
+                assert_eq!(play(reader.as_mut(), decoder.as_mut()), expected);
+                for target in [
+                    13,
+                    c["n"].as_u64().unwrap(),
+                    c["samples"].as_u64().unwrap(),
+                    7,
+                ] {
+                    let ticks = (u128::from(target) * u128::from(reader.timescale())
+                        / u128::from(reader.sample_rate()))
+                        as i64;
+                    let landed = reader.seek_to(ticks);
+                    decoder.reset();
+                    let first = ((landed.max(0) as u128 * u128::from(reader.sample_rate()))
+                        .div_ceil(u128::from(reader.timescale()))
+                        as usize
+                        * 96)
+                        .min(expected.len());
+                    assert_eq!(
+                        play(reader.as_mut(), decoder.as_mut()),
+                        expected[first..],
+                        "{name} seek{target}"
+                    );
+                }
             }
         }
     }

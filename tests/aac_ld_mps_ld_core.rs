@@ -235,6 +235,7 @@ fn original_core_windows_keep_exact_nondefault_source_clocks() {
         }
     }
 }
+#[cfg(feature = "player")]
 fn same_pcm(got: &[u8], want: &[u8], name: &Value, stage: &str) {
     assert_eq!(got.len(), want.len(), "{name} {stage} byte count");
     let first = got.iter().zip(want).position(|(a, b)| a != b);
@@ -243,6 +244,7 @@ fn same_pcm(got: &[u8], want: &[u8], name: &Value, stage: &str) {
         "{name} {stage} first differing byte {first:?}"
     );
 }
+#[cfg(feature = "player")]
 fn play(
     reader: &mut dyn fvid::audio::AudioStream,
     decoder: &mut dyn fvid::audio::AudioDecode,
@@ -280,6 +282,7 @@ fn play(
     assert!(decoder.finish_packet().unwrap().is_none());
     data
 }
+#[cfg(feature = "player")]
 #[test]
 fn stream_playback_rewind_seek_and_repeat_ranges_keep_the_same_source_pcm() {
     use fvid::audio::AudioStream;

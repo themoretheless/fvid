@@ -509,6 +509,7 @@ fn source_span_offsets_and_original_clock_survive_zero_tick_slices() {
     session.finish().unwrap();
 }
 
+#[cfg(feature = "player")]
 fn play(reader: &mut dyn fvid::audio::AudioStream) -> Vec<u8> {
     let mut decoder = reader.make_decoder().unwrap();
     let mut out = Vec::new();
@@ -530,6 +531,7 @@ fn play(reader: &mut dyn fvid::audio::AudioStream) -> Vec<u8> {
     }
     out
 }
+#[cfg(feature = "player")]
 #[test]
 fn split_source_movies_play_seek_and_rewind_without_exposing_partial_windows() {
     use fvid::audio::AudioStream;

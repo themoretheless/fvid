@@ -119,6 +119,7 @@ pub(crate) struct Nv12Module {
 
 // SAFETY: module/function handles are used with context bind; same as cudarc CudaModule.
 unsafe impl Send for Nv12Module {}
+// SAFETY: Immutable CUDA module/function handles may be shared across threads with context binding.
 unsafe impl Sync for Nv12Module {}
 
 impl Drop for Nv12Module {

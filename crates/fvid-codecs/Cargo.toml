@@ -20,3 +20,6 @@ player = ["dep:fvid-platform"]
 [[bench]]
 name = "ffmpeg_vorbis_reference"
 harness = false
+
+[lints]
+workspace = true

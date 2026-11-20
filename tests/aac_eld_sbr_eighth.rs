@@ -1,5 +1,6 @@
 const CORPUS: &str = "aac-eld-sbr-eighth";
 const CASES: usize = 532;
+#[cfg(feature = "player")]
 const EXPORTS: usize = 258;
 include!("support/aac_eld_downscaled.rs");
 

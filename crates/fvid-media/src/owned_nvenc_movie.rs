@@ -370,8 +370,8 @@ impl<R: Read + Seek> MovieEncoder<R> {
         let result = crate::owned_matroska::export_atomic(destination, cancel, progress, |file| {
             let event = self
                 .write_inner(file, max_packet_bytes, cancel, progress)
-                .map_err(crate::owned_matroska::Error)?;
-            self.close().map_err(crate::owned_matroska::Error)?;
+                .map_err(|e| fvid_control::error::invalid(&e))?;
+            self.close().map_err(|e| fvid_control::error::invalid(&e))?;
             Ok((
                 fvid_media_info::DecodeStats {
                     backend: "owned-cuda-nvdec-nvenc",

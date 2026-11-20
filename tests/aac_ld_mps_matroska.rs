@@ -57,6 +57,7 @@ fn two_core_spatial_frames_keep_their_matroska_source_windows() {
     }
 }
 
+#[cfg(feature = "player")]
 fn play(
     reader: &mut dyn fvid::audio::AudioStream,
     decoder: &mut dyn fvid::audio::AudioDecode,
@@ -95,6 +96,7 @@ fn play(
     data
 }
 
+#[cfg(feature = "player")]
 #[test]
 fn matroska_stream_navigation_preserves_every_source_sample() {
     use fvid::audio::AudioStream;

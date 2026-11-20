@@ -122,6 +122,7 @@ fn reference(c: &Value, golden: &[u8]) -> Vec<f64> {
     }
     presented
 }
+#[cfg(feature = "player")]
 fn play(
     reader: &mut dyn fvid::audio::AudioStream,
     decoder: &mut dyn fvid::audio::AudioDecode,
@@ -181,6 +182,7 @@ fn every_multicore_geometry_matches_the_analytical_ld_core_and_spatial_control()
     }
     eprintln!("Multi-core oracle samples {total}; maximum PCM difference {max}");
 }
+#[cfg(feature = "player")]
 #[test]
 fn rounded_nanoseconds_do_not_break_a_spatial_frame() {
     use fvid::audio::AudioStream;
@@ -203,7 +205,6 @@ fn rounded_nanoseconds_do_not_break_a_spatial_frame() {
 }
 #[test]
 fn quantized_matroska_exports_and_navigation_keep_all_source_windows() {
-    use fvid::audio::AudioStream;
     let m = manifest();
     assert_eq!(m["cases"].as_array().unwrap().len(), 606);
     let mut cached = None;
@@ -228,32 +229,37 @@ fn quantized_matroska_exports_and_navigation_keep_all_source_windows() {
         )
         .unwrap_or_else(|e| panic!("{} owned {e}", c["name"]));
         assert!(p == full, "{} owned PCM", c["name"]);
-        let mut r = fvid::playback_webm_audio::WebmAudioReader::open(
-            Cursor::new(bytes.clone()),
-            Default::default(),
-        )
-        .unwrap();
-        let mut d = r.make_decoder().unwrap();
-        let stride = usize::from(r.channels()) * 4;
-        for stage in ["initial", "rewind"] {
-            let p =
-                play(&mut r, d.as_mut()).unwrap_or_else(|e| panic!("{} {stage}: {e}", c["name"]));
-            assert!(p == full, "{} {stage} PCM", c["name"]);
-            r.rewind();
-            d.reset();
-        }
-        for target in [13, 3 * n(&c["n"]) + 7, 7, full.len() / stride] {
-            let ticks =
-                (target as u128 * u128::from(r.timescale()) / u128::from(r.sample_rate())) as i64;
-            let at = r.seek_to(ticks);
-            d.reset();
-            let first = ((at.max(0) as u128 * u128::from(r.sample_rate()))
-                .div_ceil(u128::from(r.timescale())) as usize
-                * stride)
-                .min(full.len());
-            let p = play(&mut r, d.as_mut())
-                .unwrap_or_else(|e| panic!("{} seek{target}: {e}", c["name"]));
-            assert!(p == full[first..], "{} seek{target} PCM", c["name"]);
+        let stride = outputs(&m["mp4_cases"][index]) * 4;
+        #[cfg(feature = "player")]
+        {
+            use fvid::audio::AudioStream;
+            let mut r = fvid::playback_webm_audio::WebmAudioReader::open(
+                Cursor::new(bytes.clone()),
+                Default::default(),
+            )
+            .unwrap();
+            let mut d = r.make_decoder().unwrap();
+            for stage in ["initial", "rewind"] {
+                let p = play(&mut r, d.as_mut())
+                    .unwrap_or_else(|e| panic!("{} {stage}: {e}", c["name"]));
+                assert!(p == full, "{} {stage} PCM", c["name"]);
+                r.rewind();
+                d.reset();
+            }
+            for target in [13, 3 * n(&c["n"]) + 7, 7, full.len() / stride] {
+                let ticks = (target as u128 * u128::from(r.timescale())
+                    / u128::from(r.sample_rate())) as i64;
+                let at = r.seek_to(ticks);
+                d.reset();
+                let first = ((at.max(0) as u128 * u128::from(r.sample_rate()))
+                    .div_ceil(u128::from(r.timescale()))
+                    as usize
+                    * stride)
+                    .min(full.len());
+                let p = play(&mut r, d.as_mut())
+                    .unwrap_or_else(|e| panic!("{} seek{target}: {e}", c["name"]));
+                assert!(p == full[first..], "{} seek{target} PCM", c["name"]);
+            }
         }
         for _ in 0..2 {
             let rate = c["rate"].as_u64().unwrap();
@@ -336,7 +342,6 @@ fn extended_ld_core_history_matches_frozen_scalar_pcm_before_spatial_rendering()
 
 #[test]
 fn late_spatial_corruption_preserves_multicore_history_and_reaches_the_specific_error() {
-    use fvid::audio::AudioStream;
     use fvid_media::owned_aac::NativeAacDecoder;
     let m = manifest();
     let blob = std::fs::read(root().join("packets.bin")).unwrap();
@@ -375,19 +380,25 @@ fn late_spatial_corruption_preserves_multicore_history_and_reaches_the_specific_
             "{} owned Matroska: {e}",
             bad["name"]
         );
-        let mut r =
-            fvid::playback_webm_audio::WebmAudioReader::open(Cursor::new(mkv), Default::default())
-                .unwrap();
-        let mut adapter = r.make_decoder().unwrap();
-        for _ in 0..2 {
-            let e = play(&mut r, adapter.as_mut()).unwrap_err();
-            assert!(
-                e.to_string().contains(expected),
-                "{} playback: {e}",
-                bad["name"]
-            );
-            r.rewind();
-            adapter.reset();
+        #[cfg(feature = "player")]
+        {
+            use fvid::audio::AudioStream;
+            let mut r = fvid::playback_webm_audio::WebmAudioReader::open(
+                Cursor::new(mkv),
+                Default::default(),
+            )
+            .unwrap();
+            let mut adapter = r.make_decoder().unwrap();
+            for _ in 0..2 {
+                let e = play(&mut r, adapter.as_mut()).unwrap_err();
+                assert!(
+                    e.to_string().contains(expected),
+                    "{} playback: {e}",
+                    bad["name"]
+                );
+                r.rewind();
+                adapter.reset();
+            }
         }
         let mut d = NativeAacDecoder::new(&hex(good["asc"].as_str().unwrap())).unwrap();
         let mut control = NativeAacDecoder::new(&hex(good["asc"].as_str().unwrap())).unwrap();

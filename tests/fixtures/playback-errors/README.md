@@ -2183,7 +2183,7 @@ remain available until the item is dropped. A subsequent open sees the new sourc
 
 `vp9-long-gop-seek.webm` contains 10.2 seconds of synthetic moving test pattern
 with 3.4-second keyframe spacing. Generate with
-`scripts/generate_vp9_seek_preroll.py`; ordinary tests require no FFmpeg/network.
+`scripts/benchmark_vp9_seek_preroll_reference.py`; ordinary tests require no FFmpeg/network.
 `vp9_long_gop_seek` forces the owned software decoder and compares forward and
 backward seek timestamps and all RGB pixels with sequential playback, including
 targets near the end of a GOP. Performance is measured separately on the player

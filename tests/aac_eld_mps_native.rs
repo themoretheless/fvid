@@ -32,10 +32,12 @@ fn packets(case: &serde_json::Value, blob: &[u8]) -> Vec<Vec<u8>> {
         })
         .collect()
 }
+#[cfg(feature = "player")]
 fn play(reader: &mut dyn fvid::audio::AudioStream) -> Vec<u8> {
     let mut decoder = reader.make_decoder().unwrap();
     play_with(reader, decoder.as_mut())
 }
+#[cfg(feature = "player")]
 fn play_with(
     reader: &mut dyn fvid::audio::AudioStream,
     decoder: &mut dyn fvid::audio::AudioDecode,
@@ -67,7 +69,6 @@ fn play_with(
 }
 #[test]
 fn native_spatial_mp4_playback_rewind_seek_and_ranges_cover_both_qmf_geometries() {
-    use fvid::audio::AudioStream;
     let manifest = manifest();
     for case in manifest["cases"].as_array().unwrap() {
         let name = case["name"].as_str().unwrap();
@@ -95,29 +96,36 @@ fn native_spatial_mp4_playback_rewind_seek_and_ranges_cover_both_qmf_geometries(
         let rate = u64::from(config.output_sample_rate());
         assert_eq!(full.len(), 3 * n * width, "{name}");
         assert!(full.iter().any(|&b| b != 0));
-        let mut reader =
-            fvid::playback_mp4_audio::Mp4AudioReader::open(Cursor::new(&movie), Default::default())
-                .unwrap();
-        assert_eq!(
-            usize::from(reader.channels()),
-            usize::from(config.output_channels())
-        );
-        assert_eq!(play(&mut reader), full, "{name} playback");
-        reader.rewind();
-        assert_eq!(play(&mut reader), full, "{name} rewind");
-        for target in [13, n as i64, 7, 3 * n as i64] {
-            let ticks = (i128::from(target) * i128::from(reader.timescale())
-                / i128::from(reader.sample_rate())) as i64;
-            let landed = reader.seek_to(ticks);
-            let first = ((landed.max(0) as u128 * u128::from(reader.sample_rate()))
-                .div_ceil(u128::from(reader.timescale())) as usize
-                * width)
-                .min(full.len());
+        #[cfg(feature = "player")]
+        {
+            use fvid::audio::AudioStream;
+            let mut reader = fvid::playback_mp4_audio::Mp4AudioReader::open(
+                Cursor::new(&movie),
+                Default::default(),
+            )
+            .unwrap();
             assert_eq!(
-                play(&mut reader),
-                full[first..],
-                "{name} seek {target} landed {landed}"
+                usize::from(reader.channels()),
+                usize::from(config.output_channels())
             );
+            assert_eq!(play(&mut reader), full, "{name} playback");
+            reader.rewind();
+            assert_eq!(play(&mut reader), full, "{name} rewind");
+            for target in [13, n as i64, 7, 3 * n as i64] {
+                let ticks = (i128::from(target) * i128::from(reader.timescale())
+                    / i128::from(reader.sample_rate())) as i64;
+                let landed = reader.seek_to(ticks);
+                let first = ((landed.max(0) as u128 * u128::from(reader.sample_rate()))
+                    .div_ceil(u128::from(reader.timescale()))
+                    as usize
+                    * width)
+                    .min(full.len());
+                assert_eq!(
+                    play(&mut reader),
+                    full[first..],
+                    "{name} seek {target} landed {landed}"
+                );
+            }
         }
         for (from, to) in [(7, 23), (2, 19), (7, 23)] {
             let mut range = Vec::new();
@@ -364,7 +372,6 @@ fn native_pcm_wave_order_matches_spatial_render_of_independent_core_controls() {
 
 #[test]
 fn all_enabled_native_movie_controls_play_seek_and_reset_a_live_decoder() {
-    use fvid::audio::AudioStream;
     let fixtures = root().parent().unwrap().to_path_buf();
     let mut movies = Vec::new();
     for tree in 0..8 {
@@ -389,41 +396,50 @@ fn all_enabled_native_movie_controls_play_seek_and_reset_a_live_decoder() {
         let movie = std::fs::read(&path).unwrap();
         let mut full = Vec::new();
         fvid::native_media::decode_mp4_aac_pcm(&movie, &mut full).unwrap();
-        let mut reader =
-            fvid::playback_mp4_audio::Mp4AudioReader::open(Cursor::new(&movie), Default::default())
-                .unwrap();
-        let width = usize::from(reader.channels()) * 4;
-        assert_eq!(play(&mut reader), full, "{} full", path.display());
-        reader.rewind();
-        let mut live = reader.make_decoder().unwrap();
-        for _ in 0..2 {
-            let packet = reader.next_packet().unwrap().unwrap();
-            live.decode_packet(&packet.data, packet.pts, packet.duration as u64)
-                .unwrap();
-        }
-        reader.rewind();
-        live.reset();
-        assert_eq!(
-            play_with(&mut reader, live.as_mut()),
-            full,
-            "{} live reset",
-            path.display()
-        );
-        for target in [13, 512, 7, (full.len() / width) as i64] {
-            let ticks = (i128::from(target) * i128::from(reader.timescale())
-                / i128::from(reader.sample_rate())) as i64;
-            let landed = reader.seek_to(ticks);
-            let first = ((landed.max(0) as u128 * u128::from(reader.sample_rate()))
-                .div_ceil(u128::from(reader.timescale())) as usize
-                * width)
-                .min(full.len());
+        #[cfg(not(feature = "player"))]
+        let _ = (&path, &full);
+        #[cfg(feature = "player")]
+        {
+            use fvid::audio::AudioStream;
+            let mut reader = fvid::playback_mp4_audio::Mp4AudioReader::open(
+                Cursor::new(&movie),
+                Default::default(),
+            )
+            .unwrap();
+            let width = usize::from(reader.channels()) * 4;
+            assert_eq!(play(&mut reader), full, "{} full", path.display());
+            reader.rewind();
+            let mut live = reader.make_decoder().unwrap();
+            for _ in 0..2 {
+                let packet = reader.next_packet().unwrap().unwrap();
+                live.decode_packet(&packet.data, packet.pts, packet.duration as u64)
+                    .unwrap();
+            }
+            reader.rewind();
             live.reset();
             assert_eq!(
                 play_with(&mut reader, live.as_mut()),
-                full[first..],
-                "{} live seek {target} landed {landed}",
+                full,
+                "{} live reset",
                 path.display()
             );
+            for target in [13, 512, 7, (full.len() / width) as i64] {
+                let ticks = (i128::from(target) * i128::from(reader.timescale())
+                    / i128::from(reader.sample_rate())) as i64;
+                let landed = reader.seek_to(ticks);
+                let first = ((landed.max(0) as u128 * u128::from(reader.sample_rate()))
+                    .div_ceil(u128::from(reader.timescale()))
+                    as usize
+                    * width)
+                    .min(full.len());
+                live.reset();
+                assert_eq!(
+                    play_with(&mut reader, live.as_mut()),
+                    full[first..],
+                    "{} live seek {target} landed {landed}",
+                    path.display()
+                );
+            }
         }
     }
 }
