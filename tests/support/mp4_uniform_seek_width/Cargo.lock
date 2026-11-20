@@ -32,7 +32,7 @@ checksum = "773fa9c96dd0dbef887e39d0ed6177f141cce4d68e6041df77570aa3702dfa13"
 
 [[package]]
 name = "fvid-codecs"
-version = "0.2.0"
+version = "0.2.1"
 dependencies = [
  "fvid-control",
  "fvid-cpu",
@@ -40,15 +40,15 @@ dependencies = [
 
 [[package]]
 name = "fvid-control"
-version = "0.2.0"
+version = "0.2.1"
 
 [[package]]
 name = "fvid-cpu"
-version = "0.2.0"
+version = "0.2.1"
 
 [[package]]
 name = "fvid-media"
-version = "0.2.0"
+version = "0.2.1"
 dependencies = [
  "ab_glyph",
  "epaint_default_fonts",
@@ -65,7 +65,7 @@ dependencies = [
 
 [[package]]
 name = "fvid-media-info"
-version = "0.2.0"
+version = "0.2.1"
 dependencies = [
  "serde",
 ]
@@ -79,7 +79,7 @@ dependencies = [
 
 [[package]]
 name = "fvid-opus"
-version = "0.2.0"
+version = "0.2.1"
 dependencies = [
  "fvid-cpu",
 ]
