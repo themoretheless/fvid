@@ -1,0 +1,54 @@
+{
+  "commit": "a7ee0e42be659a257f86a6a18971c42b5b53946c",
+  "platform": "macOS arm64",
+  "forced_software_decode": false,
+  "tests": [
+    {
+      "command": "cargo test --locked --offline --no-default-features --features player --test hevc_base_dispatch_seek --test matroska_parameter_seek --test hevc_matroska_layered --test hevc_vpsless_epochs --test mp4_layered_seek_coverage",
+      "passed": 22,
+      "results": [
+        "Running tests/hevc_base_dispatch_seek.rs",
+        "test damaged_pictures_keep_the_specific_nal_header_rbsp_or_lookup_failure ... ok",
+        "test corrupt_received_parameters_and_forbidden_nal_headers_still_refuse ... ok",
+        "test base_only_dispatch_keeps_bounded_source_io ... ok",
+        "test healthy_controls_keep_every_independent_picture_and_clock ... ok",
+        "test default_backend_keeps_the_complete_parameter_changing_sequence ... ok",
+        "test corrupted_old_pictures_refuse_sequentially_but_allow_exact_new_cvs_seek ... ok",
+        "test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.15s",
+        "Running tests/hevc_matroska_layered.rs",
+        "test layered_matroska_refuses_contradictory_outputs_and_requires_rewind ... ok",
+        "test layered_matroska_matches_native_mp4_pixels_timing_seek_and_rewind ... ok",
+        "test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 3.66s",
+        "Running tests/hevc_vpsless_epochs.rs",
+        "test parameter_handoff_snapshots_only_received_bytes_and_keeps_missing_vps_missing ... ok",
+        "test introducing_vps_in_a_running_cvs_does_not_bypass_the_activation_guard ... ok",
+        "test late_selected_entropy_failure_requires_rewind_and_preserves_prefix_recovery ... ok",
+        "test mixed_codec_windows_accept_vpsless_prefixes_with_or_without_later_vps ... ok",
+        "test public_frontends_preserve_actual_layer_identity_across_the_handoff ... ok",
+        "test native_vpsless_prefix_reaches_layered_epochs_and_survives_seek ... ok",
+        "test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.22s",
+        "Running tests/matroska_parameter_seek.rs",
+        "test fixture_index_keeps_real_keyframes_parameter_only_blocks_and_companions ... ok",
+        "test malformed_received_parameters_fail_seek_and_require_rewind ... ok",
+        "test seek_replays_parameters_but_does_not_decode_old_picture_entropy ... ok",
+        "test fresh_and_used_avc_seek_restores_received_parameters ... ok",
+        "test sequential_and_rewind_controls_match_every_owned_component_and_interval ... ok",
+        "test fresh_and_used_hevc_seek_restores_received_parameters ... ok",
+        "test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.53s",
+        "Running tests/mp4_layered_seek_coverage.rs",
+        "test layered_sequential_control_preserves_four_presentation_intervals ... ok",
+        "test layered_seek_preserves_frames_preceding_the_landing_in_decode_order ... ok",
+        "test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.08s"
+      ]
+    },
+    {
+      "command": "cargo test --locked --offline --no-default-features --features player --lib start_bound_presents_the_new_cvs_without_decoding_damaged_old_pictures",
+      "passed": 1,
+      "results": [
+        "Running unittests src/lib.rs",
+        "test player::hevc_start_seek_tests::start_bound_presents_the_new_cvs_without_decoding_damaged_old_pictures ... ok",
+        "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 1233 filtered out; finished in 3.17s"
+      ]
+    }
+  ]
+}
