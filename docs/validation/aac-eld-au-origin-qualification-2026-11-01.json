@@ -1,0 +1,34 @@
+{
+  "scope": "Causal AAC-ELD AU origin;not full codec-gap completion",
+  "completed_at": "2026-11-01T11:13:45.565200+00:00",
+  "rust_media": {
+    "passed": 589,
+    "failed": 0,
+    "ignored": 1
+  },
+  "integration_and_worker": {
+    "passed": 600,
+    "failed": 0,
+    "ignored": 0,
+    "modules": 105,
+    "worker_tests": 35
+  },
+  "python": {
+    "passed": 17,
+    "failed": 0
+  },
+  "total_passed": 1206,
+  "total_failed": 0,
+  "total_ignored": 1,
+  "original_orchestration_timeout": "First runner timed out after1800s;partial results preserved and all remaining named tests executed successfully without wall-clock deadline;no expected-failure exemption",
+  "compressed_inputs_preserved": 257093,
+  "all_generated_inputs_frozen": true,
+  "ordinary_ffmpeg_invocations": 0,
+  "source_sha256": {
+    "crates/fvid-media/src/owned_aac/aac_eld_synthesis.rs": "caa8d82f1ed9d93c0d09b038d075277a43ed8f0d22b2aa502213735e9248d54a",
+    "scripts/generate_aac_eld_fixtures.py": "2a02c0167d4b186fe9e3e0c63cb9e5e0bbe280a406b83cc737a50bdef452a805",
+    "scripts/generate_aac_eld_au_origin_fixtures.py": "80f60b032cbd1654e59009233ba806011b67bd3469d7a6fd7d81320224e8303a",
+    "tests/aac_eld_au_origin.rs": "fd91ef7e819d1a20923e71c238cc3cfa75bf8879d128cf6a3348593d992752b1",
+    "scripts/compare_aac_reference_pcm.py": "2558610333d2b987ee1e16e3205ad818da28bd74d8cd84683a9c529f594cb01c"
+  }
+}

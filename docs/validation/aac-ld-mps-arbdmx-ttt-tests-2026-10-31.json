@@ -1,0 +1,396 @@
+{
+  "date": "2026-10-31",
+  "base_commit": "d71da486c5c7ff53f3dba7876d519dd072c1de64",
+  "goal_status": "active;broader codec gaps remain",
+  "scope": "Ordinary stereo arbitrary-downmix mode1 in native LD-MPS TTT trees2/3/4;L/R gains before inversion and smoothing",
+  "positive_programmes": 270,
+  "transport_programmes": 540,
+  "independent_input_controls": 5,
+  "source_packets": 12,
+  "pcm_values_compared": 12165120,
+  "maximum_compositional_pcm_error": 0,
+  "matrix_endpoints_compared": 4769280,
+  "maximum_independent_matrix_error": 3.47748523665814e-06,
+  "matrix_tolerance": 1e-05,
+  "unique_matrix_geometries": 108,
+  "wrong_post_inversion_order_gap": 0.2831099985159896,
+  "total": {
+    "passed": 1765,
+    "failed": 0,
+    "ignored": 27
+  },
+  "gates": {
+    "targets": [
+      "aac_ld_mps_arbdmx_ttt",
+      "aac_ld_mps_arbdmx",
+      "aac_ld_mps_assemble",
+      "aac_ld_mps_prepare",
+      "aac_ld_mps_frame",
+      "aac_ld_mps_parameters",
+      "aac_ld_mps_matrix_apply",
+      "aac_ld_mps_route",
+      "aac_ld_mps_tree_matrix",
+      "aac_ld_mps_ttt_tree",
+      "aac_ld_mps_qmf",
+      "aac_ld_mps_qmf128",
+      "aac_ld_mps_pcm",
+      "aac_ld_mps_inband",
+      "aac_ld_mps_grid",
+      "aac_ld_mps_stp",
+      "aac_ld_mps_stp_energy",
+      "aac_ld_mps_stp128",
+      "aac_ld_mps_ges",
+      "aac_ld_mps_ges128",
+      "aac_ld_mps_downscaled",
+      "aac_ld_mps_sbr_pcm",
+      "aac_ld_mps_sbr_rates",
+      "aac_ld_mps_shared128",
+      "aac_ld_mps_profile",
+      "aac_ld_mps_session",
+      "aac_eld_mps_native"
+    ],
+    "gates": [
+      {
+        "gate": "media",
+        "command": [
+          "cargo",
+          "--config",
+          "profile.dev.package.fvid-media.opt-level=2",
+          "test",
+          "--offline",
+          "-p",
+          "fvid-media",
+          "--lib"
+        ],
+        "status": 0,
+        "seconds": 32.734286041988526,
+        "log": "/tmp/fvid-ld-mps-arbdmx-ttt-gate-media.log",
+        "log_sha256": "d38b4798cb2db8da7acb5ef962ce1f8a8fb24ec02b1e2df58f832e0f797911dd",
+        "counts": [
+          {
+            "passed": 587,
+            "failed": 0,
+            "ignored": 1
+          }
+        ],
+        "tested_sources": {
+          "crates/fvid-media/src/owned_aac/aac_ld_mps_ttt_tree.rs": "174102c480c340207fdc993863f32875bc67b4dff60f783af94116fceaace599",
+          "crates/fvid-media/src/owned_aac/aac_ld_mps_assemble.rs": "8b6606cdd244b37810b9fe9216143b92821607005d744220102102fb08a09bc9",
+          "src/playback/audio/ep1_worker_tests.rs": "e4bf306f8e0fa6fb996f1b673acfba9f9a062a4525eb4044de7310a1b4a04380",
+          "tests/aac_ld_mps_arbdmx_ttt.rs": "6ac925d74771c349860874ad0ac10ffef81fd9a239194fd3b000ada6cf8d8483",
+          "tests/aac_ld_mps_assemble.rs": "a35cf2b0d5a89e261f42ce037c61dceec4df0b88500b9def6fbeec8fe83c6b09",
+          "tests/support/aac_ld_mps_short_pcm.rs": "d9d4ec9fcfcbd10706cdf035aea9c75ed7fe3b4f1be56ac452ccdb5fcc4dafc9",
+          "scripts/generate_aac_ld_mps_arbdmx_ttt_fixtures.py": "0337396d71a2ac2c83870e8dbbf4876f81928d19940dec64382c2c024bfe8c72",
+          "scripts/generate_aac_ld_mps_arbdmx_ttt_reference.py": "44d0a3583d399759f95e0467717989548e900eb99ed724a22cad2f472fbd4c17",
+          "scripts/support/aac_ld_mps_arbdmx_ttt_reference_probe.c": "6679116a8502cc29a17cbb84a8b37dc9c5b98c8c463917d8de92c188b7639b52"
+        }
+      },
+      {
+        "gate": "root",
+        "command": [
+          "cargo",
+          "--config",
+          "profile.dev.package.fvid-media.opt-level=2",
+          "test",
+          "--offline",
+          "--no-default-features",
+          "--features",
+          "player",
+          "--lib"
+        ],
+        "status": 0,
+        "seconds": 423.53860720800003,
+        "log": "/tmp/fvid-ld-mps-arbdmx-ttt-gate-root.log",
+        "log_sha256": "80358d0003a1de29825a6a5960640b06bb62a8ceddc86250cb762dbfec33a8a1",
+        "counts": [
+          {
+            "passed": 1074,
+            "failed": 0,
+            "ignored": 26
+          }
+        ],
+        "tested_sources": {
+          "crates/fvid-media/src/owned_aac/aac_ld_mps_ttt_tree.rs": "174102c480c340207fdc993863f32875bc67b4dff60f783af94116fceaace599",
+          "crates/fvid-media/src/owned_aac/aac_ld_mps_assemble.rs": "8b6606cdd244b37810b9fe9216143b92821607005d744220102102fb08a09bc9",
+          "src/playback/audio/ep1_worker_tests.rs": "e4bf306f8e0fa6fb996f1b673acfba9f9a062a4525eb4044de7310a1b4a04380",
+          "tests/aac_ld_mps_arbdmx_ttt.rs": "6ac925d74771c349860874ad0ac10ffef81fd9a239194fd3b000ada6cf8d8483",
+          "tests/aac_ld_mps_assemble.rs": "a35cf2b0d5a89e261f42ce037c61dceec4df0b88500b9def6fbeec8fe83c6b09",
+          "tests/support/aac_ld_mps_short_pcm.rs": "d9d4ec9fcfcbd10706cdf035aea9c75ed7fe3b4f1be56ac452ccdb5fcc4dafc9",
+          "scripts/generate_aac_ld_mps_arbdmx_ttt_fixtures.py": "0337396d71a2ac2c83870e8dbbf4876f81928d19940dec64382c2c024bfe8c72",
+          "scripts/generate_aac_ld_mps_arbdmx_ttt_reference.py": "44d0a3583d399759f95e0467717989548e900eb99ed724a22cad2f472fbd4c17",
+          "scripts/support/aac_ld_mps_arbdmx_ttt_reference_probe.c": "6679116a8502cc29a17cbb84a8b37dc9c5b98c8c463917d8de92c188b7639b52"
+        }
+      },
+      {
+        "gate": "integration",
+        "command": [
+          "cargo",
+          "--config",
+          "profile.dev.package.fvid-media.opt-level=2",
+          "test",
+          "--offline",
+          "--no-default-features",
+          "--features",
+          "player",
+          "--test",
+          "aac_ld_mps_arbdmx_ttt",
+          "--test",
+          "aac_ld_mps_arbdmx",
+          "--test",
+          "aac_ld_mps_assemble",
+          "--test",
+          "aac_ld_mps_prepare",
+          "--test",
+          "aac_ld_mps_frame",
+          "--test",
+          "aac_ld_mps_parameters",
+          "--test",
+          "aac_ld_mps_matrix_apply",
+          "--test",
+          "aac_ld_mps_route",
+          "--test",
+          "aac_ld_mps_tree_matrix",
+          "--test",
+          "aac_ld_mps_ttt_tree",
+          "--test",
+          "aac_ld_mps_qmf",
+          "--test",
+          "aac_ld_mps_qmf128",
+          "--test",
+          "aac_ld_mps_pcm",
+          "--test",
+          "aac_ld_mps_inband",
+          "--test",
+          "aac_ld_mps_grid",
+          "--test",
+          "aac_ld_mps_stp",
+          "--test",
+          "aac_ld_mps_stp_energy",
+          "--test",
+          "aac_ld_mps_stp128",
+          "--test",
+          "aac_ld_mps_ges",
+          "--test",
+          "aac_ld_mps_ges128",
+          "--test",
+          "aac_ld_mps_downscaled",
+          "--test",
+          "aac_ld_mps_sbr_pcm",
+          "--test",
+          "aac_ld_mps_sbr_rates",
+          "--test",
+          "aac_ld_mps_shared128",
+          "--test",
+          "aac_ld_mps_profile",
+          "--test",
+          "aac_ld_mps_session",
+          "--test",
+          "aac_eld_mps_native",
+          "--",
+          "--nocapture",
+          "--test-threads=2"
+        ],
+        "status": 0,
+        "seconds": 565.1206140419818,
+        "log": "/tmp/fvid-ld-mps-arbdmx-ttt-gate-integration.log",
+        "log_sha256": "5712b5511548168e904f12009fc6bc363b51bcc799ad69aa940af4f3c7dcc527",
+        "counts": [
+          {
+            "passed": 6,
+            "failed": 0,
+            "ignored": 0
+          },
+          {
+            "passed": 5,
+            "failed": 0,
+            "ignored": 0
+          },
+          {
+            "passed": 7,
+            "failed": 0,
+            "ignored": 0
+          },
+          {
+            "passed": 3,
+            "failed": 0,
+            "ignored": 0
+          },
+          {
+            "passed": 5,
+            "failed": 0,
+            "ignored": 0
+          },
+          {
+            "passed": 4,
+            "failed": 0,
+            "ignored": 0
+          },
+          {
+            "passed": 5,
+            "failed": 0,
+            "ignored": 0
+          },
+          {
+            "passed": 1,
+            "failed": 0,
+            "ignored": 0
+          },
+          {
+            "passed": 4,
+            "failed": 0,
+            "ignored": 0
+          },
+          {
+            "passed": 5,
+            "failed": 0,
+            "ignored": 0
+          },
+          {
+            "passed": 3,
+            "failed": 0,
+            "ignored": 0
+          },
+          {
+            "passed": 4,
+            "failed": 0,
+            "ignored": 0
+          },
+          {
+            "passed": 2,
+            "failed": 0,
+            "ignored": 0
+          },
+          {
+            "passed": 6,
+            "failed": 0,
+            "ignored": 0
+          },
+          {
+            "passed": 2,
+            "failed": 0,
+            "ignored": 0
+          },
+          {
+            "passed": 2,
+            "failed": 0,
+            "ignored": 0
+          },
+          {
+            "passed": 2,
+            "failed": 0,
+            "ignored": 0
+          },
+          {
+            "passed": 3,
+            "failed": 0,
+            "ignored": 0
+          },
+          {
+            "passed": 5,
+            "failed": 0,
+            "ignored": 0
+          },
+          {
+            "passed": 4,
+            "failed": 0,
+            "ignored": 0
+          },
+          {
+            "passed": 10,
+            "failed": 0,
+            "ignored": 0
+          },
+          {
+            "passed": 1,
+            "failed": 0,
+            "ignored": 0
+          },
+          {
+            "passed": 5,
+            "failed": 0,
+            "ignored": 0
+          },
+          {
+            "passed": 1,
+            "failed": 0,
+            "ignored": 0
+          },
+          {
+            "passed": 1,
+            "failed": 0,
+            "ignored": 0
+          },
+          {
+            "passed": 4,
+            "failed": 0,
+            "ignored": 0
+          },
+          {
+            "passed": 4,
+            "failed": 0,
+            "ignored": 0
+          }
+        ],
+        "tested_sources": {
+          "crates/fvid-media/src/owned_aac/aac_ld_mps_ttt_tree.rs": "174102c480c340207fdc993863f32875bc67b4dff60f783af94116fceaace599",
+          "crates/fvid-media/src/owned_aac/aac_ld_mps_assemble.rs": "8b6606cdd244b37810b9fe9216143b92821607005d744220102102fb08a09bc9",
+          "src/playback/audio/ep1_worker_tests.rs": "e4bf306f8e0fa6fb996f1b673acfba9f9a062a4525eb4044de7310a1b4a04380",
+          "tests/aac_ld_mps_arbdmx_ttt.rs": "6ac925d74771c349860874ad0ac10ffef81fd9a239194fd3b000ada6cf8d8483",
+          "tests/aac_ld_mps_assemble.rs": "a35cf2b0d5a89e261f42ce037c61dceec4df0b88500b9def6fbeec8fe83c6b09",
+          "tests/support/aac_ld_mps_short_pcm.rs": "d9d4ec9fcfcbd10706cdf035aea9c75ed7fe3b4f1be56ac452ccdb5fcc4dafc9",
+          "scripts/generate_aac_ld_mps_arbdmx_ttt_fixtures.py": "0337396d71a2ac2c83870e8dbbf4876f81928d19940dec64382c2c024bfe8c72",
+          "scripts/generate_aac_ld_mps_arbdmx_ttt_reference.py": "44d0a3583d399759f95e0467717989548e900eb99ed724a22cad2f472fbd4c17",
+          "scripts/support/aac_ld_mps_arbdmx_ttt_reference_probe.c": "6679116a8502cc29a17cbb84a8b37dc9c5b98c8c463917d8de92c188b7639b52"
+        }
+      }
+    ]
+  },
+  "pre_fix_reproduction": {
+    "base_commit": "d71da486c5c7ff53f3dba7876d519dd072c1de64",
+    "status": 101,
+    "passed": 1,
+    "failed": 3,
+    "ignored": 0,
+    "log": "/tmp/fvid-ld-mps-arbdmx-ttt-before.log",
+    "log_sha256": "13bea98c4eeb247e584e0da994df9e7392dbed3fea092eb5b2253ccf3080ab7a",
+    "error": "LD-MPS arbitrary-downmix/HRTF matrix composition is not yet implemented",
+    "qualification": "Final270 movie programmes/five bare controls before production change. Initial four-test integration wrapper;independent matrix/order/remaining-refusal tests were added afterwards. Bare controls pass;three spatial acceptance/checkpoint/playback tests refuse at exact old constructor guard."
+  },
+  "evidence_sha256": {
+    "docs/validation/aac-ld-mps-arbdmx-ttt-generation-2026-10-31.json": "4afb828f2ee0428b723c602716cc6d76b59681fce494c34e94545e6867d2d82f",
+    "docs/validation/aac-ld-mps-arbdmx-ttt-reference-2026-10-31.json": "e68a8c5ad73d0effd0e3d7d16866dbb9bce8d503ae49bfc7af10aef3e5d2e117",
+    "docs/validation/aac-ld-mps-arbdmx-ttt-source-2026-10-31.json": "6dbc9273a67fb2f15c1c8f3c3bbe2b4e6fa33dd8db154c8287cfeedb78f77957"
+  },
+  "qualified": [
+    "original ISO525/7271/7272 C raw matrices plus80-digit Decimal smoothing",
+    "own independently saved ELD/LD-SBR input PCM plus qualified MPS composition",
+    "timed and untimed native decode",
+    "MP4/MKV export and typed playback readers",
+    "packet/spatial edge seek,rewind,EOF",
+    "checkpoint replay and malformed suffix retry",
+    "truncated gain data retains assembler and cursor",
+    "all six TTT modes with inversion on/off,unity identity,unchanged M2 and invalid gains",
+    "incorrect post-inversion scaling negative control",
+    "old TTT constructor refusal updated to acceptance;trees5/6/7 refusal retained",
+    "AudioWorker queue/source stamps and live-history navigation",
+    "prior ordinary matrices,PCM,QMF,STP,GES,SSC grids and downscale regressions",
+    "movie generation and C/Decimal oracle separately byte-identical twice in isolated folders"
+  ],
+  "ordinary_tests_do_not_require": [
+    "FFmpeg",
+    "network",
+    "fixture generation",
+    "C reference compilation",
+    "external decoder"
+  ],
+  "limitations": [
+    "component evidence is not independent whole-decoder/profile conformance",
+    "trees5/6/7 downmix compensation remains unsupported",
+    "HRTF and arbitrary-tree/downmix-residual extensions remain unsupported",
+    "shared-QMF LD-SBR ingress not newly qualified",
+    "native corpus uses quantization mode0;combined energy-quantization profiles not newly qualified",
+    "dynamic SSC arbitrary-downmix enable/disable not newly qualified",
+    "full normative Annex B not obtained",
+    "physical audio output and realtime performance not qualified"
+  ]
+}

@@ -1,0 +1,14 @@
+{
+  "scope": "Rejected unpublished component design before original-C qualification.",
+  "reason": "Conflated decoded TTT residual input to M1 with W column5 decorrelation. Original row2residual maps column5 to the unused LFE box, not TTT residual box.",
+  "sha256": {
+    "crates/fvid-media/src/owned_aac/aac_ld_mps_route.rs": "f07278467f230d8dcc19bdd7a15e848bc5da10d18c9a7a0ba37e91829400e379",
+    "scripts/generate_aac_ld_mps_route_fixtures.py": "628de274500e1e943e6feba5134d5a0eedcec3ef9e74513b8fe385060a371005",
+    "tests/fixtures/playback-errors/aac-ld-mps-route/expected.bin": "a5aeb24b4abe37163b4dde6c547e30710a9b67e731f4205ab2ea63a8244eaf9b"
+  },
+  "initial_synthetic_only_run": {
+    "log": "/tmp/fvid-ld-mps-route-tests.log",
+    "sha256": "77e2f34141d7a6ce716f228be8558f0a8d0fe613b32af64a97f9c5a3b6fd37f3",
+    "qualification": "Not accepted as independent routing qualification; original-function lookup inspection superseded this initial oracle."
+  }
+}

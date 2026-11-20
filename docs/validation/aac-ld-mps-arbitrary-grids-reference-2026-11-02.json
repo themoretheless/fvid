@@ -1,0 +1,15 @@
+{
+  "flags": [
+    "-O2",
+    "-DLD_MPS"
+  ],
+  "scope": "Original unchanged arbitraryTreeProcess; per-block grid/cutoff/map changes in caller, fixed topology, retained original indexed23-band state",
+  "programmes": 252,
+  "scalars": 1185408,
+  "archive_sha256": "b6b27e2f9af6ee8f950af8d7074afc467e66d93372328c0ec55282fff71d1f83",
+  "original_algorithm_sha256": "9b73935063f3b188a010b0a8da69f114648f4c3a7b6769878071b641e107f2e7",
+  "harness_sha256": "de64aa17458e26c07e0041d127a1b2456cd743101162b8dbe9ca81b59fb47648",
+  "input_sha256": "304f45e51a0014f988d4882a826175d2325c9c0157fa3326fa54b8def38e9abc",
+  "expected_sha256": "d040e703e3993b00c75ee307a47e6cb766983c9853bf64492f8fe13aac32e4ca",
+  "compiler": "Apple clang version 21.0.0 (clang-2100.3.34.2)\nTarget: arm64-apple-darwin25.6.0\nThread model: posix\nInstalledDir: /Library/Developer/CommandLineTools/usr/bin\n"
+}

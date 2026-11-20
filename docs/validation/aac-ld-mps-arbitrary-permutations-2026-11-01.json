@@ -1,0 +1,82 @@
+{
+  "date": "2026-11-01",
+  "base_commit": "4388ad0a84",
+  "scope": "In-band dense output permutations only; unchanged full-band source topology and count. Focused gate, not full-current-tree/codec parity",
+  "command": "CARGO_TARGET_DIR=/Users/themoretheless/.codex/worktrees/aac-eld-extension-gaps/target CARGO_BUILD_JOBS=2 cargo --config profile.dev.package.fvid-media.opt-level=2 test --offline --no-default-features --features player --test aac_ld_mps_arbitrary_permutations --test aac_ld_mps_arbitrary_playback --test aac_ld_mps_arbitrary_tree -- --nocapture",
+  "exit_code": 0,
+  "log": "/tmp/fvid-arbitrary-permutations-final.log",
+  "log_sha256": "cdd9f0901860a548f76de954714f80c79473ac8adf47ae04552f6eba7d75061f",
+  "targets": [
+    {
+      "name": "aac_ld_mps_arbitrary_permutations",
+      "passed": 4,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "name": "aac_ld_mps_arbitrary_playback",
+      "passed": 3,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "name": "aac_ld_mps_arbitrary_tree",
+      "passed": 6,
+      "failed": 0,
+      "ignored": 0
+    }
+  ],
+  "integration_passed": 13,
+  "state_unit": {
+    "command": "CARGO_TARGET_DIR=/Users/themoretheless/.codex/worktrees/aac-eld-extension-gaps/target CARGO_BUILD_JOBS=2 cargo --config profile.dev.package.fvid-media.opt-level=2 test -p fvid-media --offline --no-default-features --lib arbitrary_history_survives_same_layout_headers_and_layout_errors_are_atomic -- --nocapture",
+    "exit_code": 0,
+    "passed": 1,
+    "failed": 0,
+    "ignored": 0,
+    "filtered_out": 591,
+    "log": "/tmp/fvid-arbitrary-permutations-unit.log",
+    "log_sha256": "669becf58a92445c166e485d234dc3dfc4760df96431510410d9c83c267cfba5"
+  },
+  "before_fix": {
+    "log": "/tmp/fvid-arbitrary-permutations-before.log",
+    "passed": 0,
+    "failed": 3,
+    "error": "LD-MPS arbitrary-tree layout/grid change requires stream reconfiguration"
+  },
+  "component_static_programmes": 42,
+  "component_changing_programmes": 42,
+  "component_comparisons": 957312,
+  "component_max_error": 4.4335261017991456e-08,
+  "reset_control_difference": 0.2537881310044837,
+  "static_reference_prefix_sha256": "2d96af68ca6176b96ecf747cf20b68bea0f90d07d7f804eb4377e4b9096f0b0c",
+  "playback_changing_programmes": 48,
+  "playback_static_programmes": 48,
+  "domains": [
+    "plain32",
+    "plain64",
+    "shared32",
+    "shared64",
+    "sbr-pcm64",
+    "sbr-pcm128"
+  ],
+  "decorrelation_modes": 2,
+  "containers": [
+    "MP4",
+    "Matroska"
+  ],
+  "device_runs": 12,
+  "device_drain_phases": 48,
+  "authored_generation": {
+    "files": 305,
+    "deterministic": true,
+    "process_and_network_forbidden": true
+  },
+  "open": [
+    "partial-band/LFE arbitrary trees",
+    "sparse positions",
+    "topology/grid/extension-index changes",
+    "nonzero EBQ with active arbitrary trees",
+    "active unequal-grid HRTF",
+    "arbitrary inherited-fragment prefix loss"
+  ]
+}

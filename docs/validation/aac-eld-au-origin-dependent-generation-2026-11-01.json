@@ -1,0 +1,410 @@
+{
+  "complete": true,
+  "generators": [
+    {
+      "name": "generate_aac_eld_cldfb_fixtures",
+      "sha256": "3c9c5f825b4f5f7e0b119d179f98b18c080634c9aa1c965edc87deeea92ce1c6"
+    },
+    {
+      "name": "generate_aac_eld_fixtures",
+      "sha256": "2a02c0167d4b186fe9e3e0c63cb9e5e0bbe280a406b83cc737a50bdef452a805"
+    },
+    {
+      "name": "generate_aac_eld_mps128_stp_fixtures",
+      "sha256": "c835186961d99d2d80d14c2852c891c31a47e2faf00c36b8b7e39b9fbd9a4812"
+    },
+    {
+      "name": "generate_aac_eld_residual64_geometries_fixtures",
+      "sha256": "ba166eee60301c3e570b71dcdc863366de5b23f26488656deb014ea3fec5ec1a"
+    },
+    {
+      "name": "generate_aac_ep_interleave_fixtures",
+      "sha256": "472c589bfabe48d430a779eb97c645e7c147bad17974211136a5b79696af50ed"
+    },
+    {
+      "name": "generate_aac_ep_rs_fixtures",
+      "sha256": "24a7c77061fafdad06d47cac61eaa12d2574c4a118b358e5e806f4ba356825a6"
+    },
+    {
+      "name": "generate_aac_ld_mps_entropy_fixtures",
+      "sha256": "f74d18b6a1f99adb8472d430760a7ba7dd80ba5c6b204fbef02b32f236e08677"
+    },
+    {
+      "name": "generate_aac_eld_au_origin_fixtures",
+      "sha256": "80f60b032cbd1654e59009233ba806011b67bd3469d7a6fd7d81320224e8303a"
+    },
+    {
+      "name": "generate_aac_eld_cldfb_downscaled_fixtures",
+      "sha256": "9a69323aac2c8c64e237ea79fa547a972d9ff507b9f61d1c1fbe43708410e99b"
+    },
+    {
+      "name": "generate_aac_eld_sbr_fixtures",
+      "sha256": "11e5c32862cc1888279560e658d47993dff272c4a787aa47f2f2c5ca6977b658"
+    },
+    {
+      "name": "generate_aac_ep_srcpc_fixtures",
+      "sha256": "e86619498ea3001a2851a46d9b1b21bc86c6c1b8ae8e47a7cf6451c2b89f0111"
+    },
+    {
+      "name": "generate_aac_ld_mps_config_fixtures",
+      "sha256": "c79e2d64ad150d6c46f799cdaa1e0abf5bf47804bb5e69db410a33d50a953b1a"
+    },
+    {
+      "name": "generate_aac_ld_mps_parameter_fixtures",
+      "sha256": "7e3f4d3f7f434b5c10158357ee3e61e7f5d7c464dd0822c83802778a13a38709"
+    },
+    {
+      "name": "generate_aac_ld_sbr_silent_harmonics_fixtures",
+      "sha256": "8449da980343506d324d3269148bd8ee8aaa257dbdc92bc2c06b86af0ae7ffb4"
+    },
+    {
+      "name": "generate_aac_eld_cldfb_phase_fixtures",
+      "sha256": "1a4802a59360675e7960fca1bf25d055e689baac4dcca6fb19f0e452c2ddf390"
+    },
+    {
+      "name": "generate_aac_eld_sbr_noise_range_fixtures",
+      "sha256": "e90990461a0355187b5e6e5030f5ba10020e618702693df17a07063d874bc841"
+    },
+    {
+      "name": "generate_aac_ep_class_codes_fixtures",
+      "sha256": "f8c8002435189be1066b3d57d999f89040c781633441a33df5a10ea093a0c6d9"
+    },
+    {
+      "name": "generate_aac_ep_playback_fixtures",
+      "sha256": "0d6b3f6a07040e15276b24d3818143e7c26ca96db1d6193523cc85b3ec864676"
+    },
+    {
+      "name": "generate_aac_ld_mps_assemble_fixtures",
+      "sha256": "ca81d65f14fc2b521ede22b157993492a4faf9f7d675bdd09e9e942274acd538"
+    },
+    {
+      "name": "generate_aac_ld_mps_frame_fixtures",
+      "sha256": "27c2352f2165b1e89a424bb0ea893ab5c13f6e9e71eb93ad5a504dbf490b6ab2"
+    },
+    {
+      "name": "generate_aac_ld_sbr_q31_fixtures",
+      "sha256": "256de97cdc710a8dfd71a65733361c8aefa89f7df21f552d4c1d57aad6d97d65"
+    },
+    {
+      "name": "generate_aac_ep_class_boundaries",
+      "sha256": "ec9033234316a1d44c83f834581803255393478fb28552732a1c349ac53fdae8"
+    },
+    {
+      "name": "generate_aac_ep_rs_playback_fixtures",
+      "sha256": "c33483bb21128d0e27e2c6c0070ccbda270b0dbb85730df71503bd910034c8e5"
+    },
+    {
+      "name": "generate_aac_ep_sets_fixtures",
+      "sha256": "8eb1d925e65c085779ba1035d204234bdbf28e7aac38dd5709a4359075e08187"
+    },
+    {
+      "name": "generate_aac_ld_mps_prepare_fixtures",
+      "sha256": "f23ebfa76dfb2528d60c2ad8bd101b1cb85c9ff50a5e3b14ae7808a9cd501d66"
+    },
+    {
+      "name": "generate_aac_ld_mps_transport_fixtures",
+      "sha256": "cc7e7a04b59bb2abb5c007ba357f94b4dd0ed157c49481e01d9dde662a88ff03"
+    },
+    {
+      "name": "generate_aac_eld_mps_core_fixtures",
+      "sha256": "49c3d9e4f1ba46c93531e8b63194405f2ba6531db36510d243676a6f754c5c5c"
+    },
+    {
+      "name": "generate_aac_eld_spatial_sbr_fixtures",
+      "sha256": "60019ef039f449bccdfa000cd046759e1586f6980a1dadea08f46d3ee6bd973e"
+    },
+    {
+      "name": "generate_aac_ep_interleave_playback_fixtures",
+      "sha256": "09e6a308ed4eaebaabd5a9d8e83a463900b8be18f76fced7e42588079e3ca148"
+    },
+    {
+      "name": "generate_aac_ep_multiclass_fixtures",
+      "sha256": "3c68f2cb3e523656d8ad5888a81249daf98a3cbee40f55a08587ca036ffadd08"
+    },
+    {
+      "name": "generate_aac_ld_mps_matrix_apply_fixtures",
+      "sha256": "6084237523f2334c4d137d329c7c5d4820c68e4e59cb5e076f9523d610e85093"
+    },
+    {
+      "name": "generate_aac_ld_mps_route_fixtures",
+      "sha256": "7fe41645eba34394799274dc63777c582381b74e916cea24f8379fd52869f9d4"
+    },
+    {
+      "name": "generate_aac_ld_mps_ttt_fixtures",
+      "sha256": "750419e0105a058f51ae53ed2b851df13d421d0d35588aee5db6d7f11137f955"
+    },
+    {
+      "name": "generate_aac_ld_mps_upmix_fixtures",
+      "sha256": "20d9b399c546cced6816a378f9e28a70f7f4c54ac5cc07c1cb09fbbb9e041234"
+    },
+    {
+      "name": "generate_aac_eld_mps_native_fixtures",
+      "sha256": "f31047c6ebbbcac48c7ae257da548ce8ae6eaa4df3ec20b95f63e45fbdc33070"
+    },
+    {
+      "name": "generate_aac_eld_spatial_tail_fixtures",
+      "sha256": "953831d49144757cb1f80063131a74d37528e5650c02ab310cd7b9de3f663a76"
+    },
+    {
+      "name": "generate_aac_ep_optional_fixtures",
+      "sha256": "6eba4481b983686616d522fda34c4b3cf5435f909a3325f373da9affbf8b9e84"
+    },
+    {
+      "name": "generate_aac_ep_rs_group_fixtures",
+      "sha256": "8ade5766ccea8b3698614c8452dec2ce4fe76640ce33423bff1b2a25c2fd71ed"
+    },
+    {
+      "name": "generate_aac_ld_mps_inband_fixtures",
+      "sha256": "2d895a1cbac2664840b83d987bebc8cafd0ec994f481d74dd5c8ad991aac225e"
+    },
+    {
+      "name": "generate_aac_ld_mps_session_fixtures",
+      "sha256": "72a7781b20a8d0dc2818f5434cfc01bb7e77c523f4d65e751dfde58c2f9b44a8"
+    },
+    {
+      "name": "generate_aac_eld_esc_fixtures",
+      "sha256": "ca6fbae39cf2214c2df5de6b6c9bf26002b0819196d5ccb69d1aae7b3375cdfb"
+    },
+    {
+      "name": "generate_aac_ld_mps_ges_fixtures",
+      "sha256": "78cac17c3a5f90ff032110472d2fb42ce5645853b4e092fd51bb8639b3fd6770"
+    },
+    {
+      "name": "generate_aac_ld_mps_grid_fixtures",
+      "sha256": "25280c3bf14197dde4460c899e9b822a2ca1f79fc7753ce139c401b558e08434"
+    },
+    {
+      "name": "generate_aac_ld_mps_stp_fixtures",
+      "sha256": "f11549a94f841dc94000b962b348a540c7e1a3da76dd00189d996e575b6ed5d3"
+    },
+    {
+      "name": "generate_aac_eld_mps128_fixtures",
+      "sha256": "47a073552a6930e91ab14ff9f62abd3a7cb81879d44d836eb5c673d9e5310d8f"
+    },
+    {
+      "name": "generate_aac_ld_mps_ges128_component_fixtures",
+      "sha256": "bb01da32d80de1d9d82b5385c477c271ba6b9c80ed194b38ece1164898a8cdad"
+    },
+    {
+      "name": "generate_aac_ld_mps_ld_core_fixtures",
+      "sha256": "644998bc9f3fef20dfa371a2e2d51afee8671d244d1317e4d076d992a901b1da"
+    },
+    {
+      "name": "generate_aac_ld_mps_residual_fixtures",
+      "sha256": "6b2c0905c92a921775ad4d93df326403d6b0b3a16c8afc8e19845af8326cb55f"
+    },
+    {
+      "name": "generate_aac_ld_mps_residual_native_fixtures",
+      "sha256": "90ccd1e094275461d8dea7ba3dfb1e8d5305ad7c2f42461e98451dd663eae688"
+    },
+    {
+      "name": "generate_aac_ld_mps_sbr_rates_fixtures",
+      "sha256": "cc49abab0c1db5c9277e29b70ac6b798b81b97a2e8ec94cd250e39457d956b74"
+    },
+    {
+      "name": "generate_aac_eld_mps128_ges_fixtures",
+      "sha256": "d7eb0f157673994e9aa8b61774e7992cb75def111a4fc22f6f9e76545651d79a"
+    },
+    {
+      "name": "generate_aac_eld_residual64_multicore_fixtures",
+      "sha256": "81535224b693a9b9fa280dbde370ff054bee72ec9076f00400d72569767815e8"
+    },
+    {
+      "name": "generate_aac_ld_mps_matroska_fixtures",
+      "sha256": "046380227b27f17b1e91247483663f7467bf71ae12554575b784149a2bdf96ba"
+    },
+    {
+      "name": "generate_aac_ld_mps_multicore_fixtures",
+      "sha256": "77d0e9fcb3aaabe7c6586b33bf2029e7f6d52cff9ec8d0f14786f29b32d00aa1"
+    },
+    {
+      "name": "generate_aac_ld_mps_residual_bank_repro_fixtures",
+      "sha256": "875f0516b18aa66a1fe4d2eea297422934b0693b726c5670c27048788924648e"
+    },
+    {
+      "name": "generate_aac_ld_mps_shared128_fixtures",
+      "sha256": "165f723517b1db5d23ae4900a6b409098b0dedf1d2e0b8c6b76812e822a783c4"
+    },
+    {
+      "name": "generate_aac_ld_mps_profile_fixtures",
+      "sha256": "b98d21df3c318e5c18ab6238af3a78c3331eb30cdc9562cdd2f517727c7d404a"
+    },
+    {
+      "name": "generate_aac_eld_short_fixtures",
+      "sha256": "5d591475db800bed5f2e1076e1a0ca1f3ee3ba3d41c65ceb5ac0f490b0d7e392"
+    },
+    {
+      "name": "generate_aac_eld_third_fixtures",
+      "sha256": "6bc3568dc230e169116e5c07495b39753b4033546b57dae9b943693bd0424414"
+    },
+    {
+      "name": "generate_aac_eld_esc_sbr_fixtures",
+      "sha256": "11780334c345757b39eace0f7fc8658a3fd771776b0d40b1299db41068b22f08"
+    },
+    {
+      "name": "generate_aac_ep_rs_bits_fixtures",
+      "sha256": "64ffc04d7dff0896ea66f09f593ae0b881698d3f8ae28b36ffe178c5c49ee6e8"
+    },
+    {
+      "name": "generate_aac_esc_extensions_fixtures",
+      "sha256": "4f53c09b4224bf10ae025d269bd791eccc0934a686b5e65ef27fa49d4f071123"
+    },
+    {
+      "name": "generate_aac_ep1_fixtures",
+      "sha256": "0caa6a67ac33abd3e2bb5aeea6c063870eca25eb91e96e85dca754b66905abe5"
+    },
+    {
+      "name": "generate_mp4_ep1_fixtures",
+      "sha256": "6e74b819258113c991c8aa9b5921da88c6dc46390227ee495a3e446f421fc7c5"
+    },
+    {
+      "name": "generate_mp4_ep1_empty_fixtures",
+      "sha256": "744ab9064eff4f9a887a3422cafebf3c10098ba505dfe55fdf76f9872c7c70e4"
+    },
+    {
+      "name": "generate_mp4_ep1_epochs_fixtures",
+      "sha256": "70ecf9623e93e4d81301d3299b93c0020f1e5746b7a12290f278510399cc2eec"
+    },
+    {
+      "name": "generate_mp4_ep1_active_chain_fixtures",
+      "sha256": "c67828804812c2db9390b4cfe20615ca2275658aa48f508c6b5f5fbc525a1a05"
+    },
+    {
+      "name": "generate_mp4_ep1_ps_fixtures",
+      "sha256": "cf3ee2f2865a7befead150eeebe44f4472d59c2eaee20901ff54cdf816865d5e"
+    },
+    {
+      "name": "generate_mp4_ep1_transitions_fixtures",
+      "sha256": "4d3ffde68f641fd072c0e1decf34dc8580410ddcd9da1ea4a19d7f9d85d9c95d"
+    },
+    {
+      "name": "generate_mp4_ep1_grouped_sbr_fixtures",
+      "sha256": "a6d289d1c668e9d139fee2800280b54a40ef6556f8b3d35bcfd49917a6c0da6b"
+    },
+    {
+      "name": "generate_mp4_ep1_od_fixtures",
+      "sha256": "a025fc32cf7f039adca461862d116c4c692a90bfe02d7078dd4810fdd991a960"
+    },
+    {
+      "name": "generate_mp4_ep1_grouped_core_fixtures",
+      "sha256": "6acf455c7602283cbf08b1e80fd20f99efede95847d1b50caedd083da6043e18"
+    },
+    {
+      "name": "generate_mp4_ep1_grouped_er_fixtures",
+      "sha256": "f77446ce6ced971f300cbcce23e3460e315ca975aa8c56d11f95656260eb643e"
+    },
+    {
+      "name": "generate_mp4_ep1_grouped_extensions_fixtures",
+      "sha256": "14c55c2bfd62fd01bbe5601cfd2348ee8ab0c67ed5abe32dbed3424ab836101a"
+    },
+    {
+      "name": "generate_mp4_ep1_grouped_ps_fixtures",
+      "sha256": "1864ee9b42f3a0280997a7c936711cc2618016d930fd47bb59900498021deddd"
+    },
+    {
+      "name": "generate_mp4_ep1_od_edits_fixtures",
+      "sha256": "4cc2e826f26527628872190f27900e802613c64c6421cbf3f3875ff41038bf53"
+    },
+    {
+      "name": "generate_mp4_ep1_sbr_batches_fixtures",
+      "sha256": "2323d540e08aa770c76a7f5c7359cf0702e76896db0fea3bd2aea885fbb1cb6d"
+    },
+    {
+      "name": "generate_aac_eld_downscale_info_fixtures",
+      "sha256": "e0b39fe66e331cedda176a2977f0305458d0293cc16e89fdd2d47dd5bf5091a8"
+    },
+    {
+      "name": "generate_mp4_ep1_od_context_fixtures",
+      "sha256": "5392980afbf34531a627960aeb3a73cbdd9666c13fc97cca7c5fb13bedc6862d"
+    },
+    {
+      "name": "generate_aac_eld_crossover_fixtures",
+      "sha256": "810fa48cdb8ac964924523c7782eaa67a6b874c64186fd8bcf2d52aab6d52663"
+    },
+    {
+      "name": "generate_aac_eld_sbr_downscaled_fixtures",
+      "sha256": "592dac2464045f082ba61f8813a1bc378e51cb7417e40e8f4a635dc3277289b4"
+    },
+    {
+      "name": "generate_aac_eld_third_rate_fixtures",
+      "sha256": "8aeda75782b1c48e456f2a6e3bfc0e0fc294af4ad3f7724cebe01f52e0ac7ec2"
+    },
+    {
+      "name": "generate_aac_ld_mps_downscaled_fixtures",
+      "sha256": "0b74027596cf3dbe9063dcdc9facfb3aab491c912aa589dab824a46a0ebe3fe8"
+    },
+    {
+      "name": "generate_aac_eld_crossover_wide_fixtures",
+      "sha256": "602b374bf2acfad4416ba6112974908d08aec62541ae807a772cc84ceb20eccd"
+    },
+    {
+      "name": "generate_aac_eld_sbr_eighth_fixtures",
+      "sha256": "f7f8eb3c864b04a4cb73897e0b795bd7c5873f6424522b7dd9ca388b347f2977"
+    },
+    {
+      "name": "generate_aac_ld_mps_sbr_pcm_fixtures",
+      "sha256": "2d93865f08aaab74bdd217679343bfed597b5aae97ac1caa484c502cabd0b495"
+    },
+    {
+      "name": "generate_aac_alignment_fixtures",
+      "sha256": "c088c853d37a76244f374a20f4a50e540ad193aa182d098967abe090b1d5cc9c"
+    },
+    {
+      "name": "generate_aac_ld_mps_3d_fixtures",
+      "sha256": "e21bf7bb737d558b1c19dd9337449f9031c3833705b003a7283a1969a8268d30"
+    },
+    {
+      "name": "generate_aac_ld_mps_arbdmx_fixtures",
+      "sha256": "ddc42c7dd69d4990683b7169fb4cc66c263d2ca9af2987af8bf9b95f05de6d16"
+    },
+    {
+      "name": "generate_aac_ld_mps_arbdmx_ttt_fixtures",
+      "sha256": "0337396d71a2ac2c83870e8dbbf4876f81928d19940dec64382c2c024bfe8c72"
+    },
+    {
+      "name": "generate_aac_ld_mps_frame_length_fixtures",
+      "sha256": "6c9c4a64211d5df1c257bf88496ac9d85575eba9ab94156ec1c0fa41b66e1f3a"
+    },
+    {
+      "name": "generate_aac_ep_concatenated_fixtures",
+      "sha256": "71de508f7c1df95c53e75131aa969a9126ab1b671ac89142f3892c57b2bc06cc"
+    },
+    {
+      "name": "generate_aac_ld_mps_arbdmx_switch_fixtures",
+      "sha256": "0bc3e0ef69ea26e3a7339acd9e6ff244c165436fd928b67ba31afcb8008db1f6"
+    },
+    {
+      "name": "generate_aac_ld_mps_empty_groups_fixtures",
+      "sha256": "0461997a609942243125ba2a234fe9714db0e8ca8777e98d21e6113b0950fa42"
+    },
+    {
+      "name": "generate_aac_ld_mps_source_slices_fixtures",
+      "sha256": "128e45b770119adf4cebb906bc054e31bad463df52194024e3ccdc0de91c7ffb"
+    },
+    {
+      "name": "generate_aac_eld_esc_multi_history_fixtures",
+      "sha256": "b8d3314bd7ce51deffd0fb9233ed40e9b5c3665c91fd19dc5fe4421cb3829c36"
+    },
+    {
+      "name": "generate_aac_ep_ps_fixtures",
+      "sha256": "2acc74993c3d85b82a7c787fbd1016b445e421e1bc10f59d6922e7ad4c12f870"
+    },
+    {
+      "name": "generate_aac_ep_rs_group_concatenated_fixtures",
+      "sha256": "c0f0b9e40097b863ddcbb73731874e8b943dee32a44e91680de62aa4ba2c3708"
+    },
+    {
+      "name": "generate_aac_ld_mps_discard_fixtures",
+      "sha256": "71db9f7ff69a945f0e1a109a5b953ed03b8dde77a3e0c32b3398dd17e927cc39"
+    },
+    {
+      "name": "generate_aac_esc_sbr_fixtures",
+      "sha256": "1f9968009d3f6194492dc726d7c9b55cefcd0c7c781ab0d0e948b81285cc938b"
+    }
+  ],
+  "network_and_external_processes_disabled": true,
+  "passes": 1,
+  "new_origin_corpus_deterministic_runs": 2,
+  "notes": "Ordered independent generation. Conservative import cycles use pure packet/window/ASC helpers; no late helper supplies saved core PCM. Original C component oracles are untouched. No native or foreign decoded PCM supplies regenerated gold.",
+  "metadata_note": "Prepare manifest changes only its previously stale parent-manifest checksum; all physical/matrix cases and compressed configs/packets are identical."
+}

@@ -1,0 +1,429 @@
+{
+  "scope": "Renderer-choice diagnosis and explicit native API verification, not full LD-MPS conformance.",
+  "iso_reference_archive_sha256": "b6b27e2f9af6ee8f950af8d7074afc467e66d93372328c0ec55282fff71d1f83",
+  "iso_frontend_source_sha256": "03322c8bd0b0c67c9ec1f9a1781fa19e239986569608b4b6eacd2244b9c81fde",
+  "iso_frontend_default": "decType=0 (real coefficients); command line accepts0/1",
+  "diagnostic": {
+    "diagnostic_only": true,
+    "source_sha256_before": "0a0da8d9ae0135d3340b1d7063a2af590c510d13dde9352a1e853fa833ffc0e7",
+    "source_sha256_restored": "0a0da8d9ae0135d3340b1d7063a2af590c510d13dde9352a1e853fa833ffc0e7",
+    "runs": [
+      {
+        "name": "er_ad_ldmps_tree_5151",
+        "status": 0,
+        "stdout": "codec=mp4a rate=48000 channels=6\npackets=2820 decoded=2820 frames=1443840\nstamped=30.080s\naudio=30.080s first=0ns last=30.069333333s\n",
+        "stderr": ""
+      },
+      {
+        "name": "er_eld_ldmps_ldqmf_1",
+        "status": 0,
+        "stdout": "codec=mp4a rate=48000 channels=2\npackets=47 decoded=47 frames=48128\nstamped=1.003s\naudio=1.003s first=0ns last=981.333333ms\n",
+        "stderr": ""
+      },
+      {
+        "name": "er_eld_ldmps_ldqmf_2",
+        "status": 0,
+        "stdout": "codec=mp4a rate=24000 channels=2\npackets=47 decoded=47 frames=24064\nstamped=1.003s\naudio=1.003s first=0ns last=981.333333ms\n",
+        "stderr": ""
+      },
+      {
+        "name": "er_eld_ldmps_tree_5151",
+        "status": 0,
+        "stdout": "codec=mp4a rate=48000 channels=6\npackets=1410 decoded=1410 frames=1443840\nstamped=30.080s\naudio=30.080s first=0ns last=30.058666666s\n",
+        "stderr": ""
+      }
+    ]
+  },
+  "real_pcm_observations": [
+    {
+      "name": "er_ad_ldmps_tree_5151",
+      "diagnostic_mode": "Real",
+      "lag": 0,
+      "scalars": 8663040,
+      "rmse": 9.232648940154201e-06,
+      "snr_db": 68.90391765365004,
+      "max_abs": 5.7945260778069496e-05
+    },
+    {
+      "name": "er_eld_ldmps_tree_5151",
+      "diagnostic_mode": "Real",
+      "lag": 256,
+      "scalars": 8661504,
+      "rmse": 0.0016416517149393372,
+      "snr_db": 23.848505871631648,
+      "max_abs": 0.12390199303627014
+    }
+  ],
+  "delay_observations": [
+    {
+      "name": "er_ad_ldmps_tree_5151",
+      "lag": 0,
+      "channels": [
+        {
+          "channel": 0,
+          "rmse": 0.018238289252043047,
+          "snr_db": 5.321792018996985,
+          "max_abs": 0.22832447290420532,
+          "first_1e4_difference": 298616
+        },
+        {
+          "channel": 1,
+          "rmse": 0.018081953371161922,
+          "snr_db": 3.21653897767229,
+          "max_abs": 0.18083186447620392,
+          "first_1e4_difference": 298678
+        },
+        {
+          "channel": 2,
+          "rmse": 0.012384389221015106,
+          "snr_db": 3.8030829043146035,
+          "max_abs": 0.13993991166353226,
+          "first_1e4_difference": 298633
+        },
+        {
+          "channel": 3,
+          "rmse": 2.065523670660801e-06,
+          "snr_db": 79.76224376829904,
+          "max_abs": 3.9550475776195526e-05,
+          "first_1e4_difference": null
+        },
+        {
+          "channel": 4,
+          "rmse": 0.023157173827417773,
+          "snr_db": -0.07101423666592933,
+          "max_abs": 0.2504065930843353,
+          "first_1e4_difference": 298563
+        },
+        {
+          "channel": 5,
+          "rmse": 0.02529385057948976,
+          "snr_db": 1.2622002819767455,
+          "max_abs": 0.2563506346195936,
+          "first_1e4_difference": 298392
+        }
+      ]
+    },
+    {
+      "name": "er_ad_ldmps_tree_5151",
+      "lag": 256,
+      "channels": [
+        {
+          "channel": 0,
+          "rmse": 0.05305934976960659,
+          "snr_db": -3.9529947097163736,
+          "max_abs": 0.436302587389946,
+          "first_1e4_difference": 519
+        },
+        {
+          "channel": 1,
+          "rmse": 0.041924618821108636,
+          "snr_db": -4.087166684834529,
+          "max_abs": 0.287163570523262,
+          "first_1e4_difference": 48969
+        },
+        {
+          "channel": 2,
+          "rmse": 0.028896085791566994,
+          "snr_db": -3.555436652595392,
+          "max_abs": 0.3246222734451294,
+          "first_1e4_difference": 94869
+        },
+        {
+          "channel": 3,
+          "rmse": 0.03996047928990734,
+          "snr_db": -5.968996382760325,
+          "max_abs": 0.31604917347431183,
+          "first_1e4_difference": 232728
+        },
+        {
+          "channel": 4,
+          "rmse": 0.033279191116640426,
+          "snr_db": -3.219988267888799,
+          "max_abs": 0.32134146988391876,
+          "first_1e4_difference": 137830
+        },
+        {
+          "channel": 5,
+          "rmse": 0.04350895391770733,
+          "snr_db": -3.448303491697186,
+          "max_abs": 0.3822728842496872,
+          "first_1e4_difference": 186441
+        }
+      ]
+    },
+    {
+      "name": "er_eld_ldmps_tree_5151",
+      "lag": 0,
+      "channels": [
+        {
+          "channel": 0,
+          "rmse": 0.05387524390037107,
+          "snr_db": -4.057282600341001,
+          "max_abs": 0.4310675859451294,
+          "first_1e4_difference": 864
+        },
+        {
+          "channel": 1,
+          "rmse": 0.041857505962079794,
+          "snr_db": -4.193584281717956,
+          "max_abs": 0.3354312628507614,
+          "first_1e4_difference": 48488
+        },
+        {
+          "channel": 2,
+          "rmse": 0.028917132941559388,
+          "snr_db": -3.647042503359474,
+          "max_abs": 0.2980998158454895,
+          "first_1e4_difference": 95168
+        },
+        {
+          "channel": 3,
+          "rmse": 0.03994255574399421,
+          "snr_db": -5.968980096739557,
+          "max_abs": 0.31657202541828156,
+          "first_1e4_difference": 233043
+        },
+        {
+          "channel": 4,
+          "rmse": 0.032344442692872385,
+          "snr_db": -3.2190176516038687,
+          "max_abs": 0.32739418745040894,
+          "first_1e4_difference": 138141
+        },
+        {
+          "channel": 5,
+          "rmse": 0.04401646150128203,
+          "snr_db": -3.5725215599753746,
+          "max_abs": 0.3417008966207504,
+          "first_1e4_difference": 186757
+        }
+      ]
+    },
+    {
+      "name": "er_eld_ldmps_tree_5151",
+      "lag": 256,
+      "channels": [
+        {
+          "channel": 0,
+          "rmse": 0.018726665607454618,
+          "snr_db": 5.122063069847319,
+          "max_abs": 0.2268546149134636,
+          "first_1e4_difference": 850
+        },
+        {
+          "channel": 1,
+          "rmse": 0.01852475641116929,
+          "snr_db": 2.887602436837832,
+          "max_abs": 0.19697270542383194,
+          "first_1e4_difference": 48232
+        },
+        {
+          "channel": 2,
+          "rmse": 0.01274426590480778,
+          "snr_db": 3.4705346314747656,
+          "max_abs": 0.13830465078353882,
+          "first_1e4_difference": 95266
+        },
+        {
+          "channel": 3,
+          "rmse": 1.6682709802131499e-06,
+          "snr_db": 81.61517509150313,
+          "max_abs": 3.053253037244019e-05,
+          "first_1e4_difference": null
+        },
+        {
+          "channel": 4,
+          "rmse": 0.023741970105199867,
+          "snr_db": -0.5325891860912321,
+          "max_abs": 0.24815599620342255,
+          "first_1e4_difference": 138194
+        },
+        {
+          "channel": 5,
+          "rmse": 0.026124998525611284,
+          "snr_db": 0.9594255583545024,
+          "max_abs": 0.25321244448423386,
+          "first_1e4_difference": 186946
+        }
+      ]
+    },
+    {
+      "name": "er_eld_ldmps_ldqmf_2",
+      "lag": 0,
+      "channels": [
+        {
+          "channel": 0,
+          "rmse": 0.09650983603591594,
+          "snr_db": -3.3563319995968195,
+          "max_abs": 0.29806426260620356,
+          "first_1e4_difference": 62
+        },
+        {
+          "channel": 1,
+          "rmse": 0.09650983603591594,
+          "snr_db": -3.3563319995968195,
+          "max_abs": 0.29806426260620356,
+          "first_1e4_difference": 62
+        }
+      ]
+    },
+    {
+      "name": "er_eld_ldmps_ldqmf_2",
+      "lag": 256,
+      "channels": [
+        {
+          "channel": 0,
+          "rmse": 0.09675377226812182,
+          "snr_db": -3.379194688978689,
+          "max_abs": 0.2979409145191312,
+          "first_1e4_difference": 0
+        },
+        {
+          "channel": 1,
+          "rmse": 0.09675377226812182,
+          "snr_db": -3.379194688978689,
+          "max_abs": 0.2979409145191312,
+          "first_1e4_difference": 0
+        }
+      ]
+    }
+  ],
+  "public_api": [
+    {
+      "name": "er_ad_ldmps_tree_5151",
+      "mode": "real",
+      "bytes": 34652160,
+      "sha256": "c057cf1ab2a87e771a4cac34c48c0e03c21e94f377c2eca3e7580f6614591ca5",
+      "status": 0,
+      "stdout": "mode=Real packets=2820 rate=48000 channels=6 scalars=8663040\n",
+      "stderr": "",
+      "identical_to_prior_diagnostic": true
+    },
+    {
+      "name": "er_ad_ldmps_tree_5151",
+      "mode": "complex",
+      "bytes": 34652160,
+      "sha256": "9f83aab620ee5fa2d5b3d8181dda2fb7ee13cc0061000dfbfe71a703647195aa",
+      "status": 0,
+      "stdout": "mode=Complex packets=2820 rate=48000 channels=6 scalars=8663040\n",
+      "stderr": "",
+      "identical_to_prior_diagnostic": true
+    },
+    {
+      "name": "er_eld_ldmps_ldqmf_1",
+      "mode": "real",
+      "bytes": 385024,
+      "sha256": "8f5fde2e9c49fce1295e04a039050f5eb05a9a8768f8c52770a5647aa8f81bf4",
+      "status": 0,
+      "stdout": "mode=Real packets=47 rate=48000 channels=2 scalars=96256\n",
+      "stderr": "",
+      "identical_to_prior_diagnostic": true
+    },
+    {
+      "name": "er_eld_ldmps_ldqmf_1",
+      "mode": "complex",
+      "bytes": 385024,
+      "sha256": "8f5fde2e9c49fce1295e04a039050f5eb05a9a8768f8c52770a5647aa8f81bf4",
+      "status": 0,
+      "stdout": "mode=Complex packets=47 rate=48000 channels=2 scalars=96256\n",
+      "stderr": "",
+      "identical_to_prior_diagnostic": true
+    },
+    {
+      "name": "er_eld_ldmps_ldqmf_2",
+      "mode": "real",
+      "bytes": 192512,
+      "sha256": "d63f5aac74427a9a697604e2212eef13d60747e909e9d134cd6f3e0017c5d1d4",
+      "status": 0,
+      "stdout": "mode=Real packets=47 rate=24000 channels=2 scalars=48128\n",
+      "stderr": "",
+      "identical_to_prior_diagnostic": true
+    },
+    {
+      "name": "er_eld_ldmps_ldqmf_2",
+      "mode": "complex",
+      "bytes": 192512,
+      "sha256": "d63f5aac74427a9a697604e2212eef13d60747e909e9d134cd6f3e0017c5d1d4",
+      "status": 0,
+      "stdout": "mode=Complex packets=47 rate=24000 channels=2 scalars=48128\n",
+      "stderr": "",
+      "identical_to_prior_diagnostic": true
+    },
+    {
+      "name": "er_eld_ldmps_tree_5151",
+      "mode": "real",
+      "bytes": 34652160,
+      "sha256": "1639854251754b5fbd33daf98993cf6a538b0458f2168cde145b871164a68104",
+      "status": 0,
+      "stdout": "mode=Real packets=1410 rate=48000 channels=6 scalars=8663040\n",
+      "stderr": "",
+      "identical_to_prior_diagnostic": true
+    },
+    {
+      "name": "er_eld_ldmps_tree_5151",
+      "mode": "complex",
+      "bytes": 34652160,
+      "sha256": "ab74487270121d93dc9fd8dba4140945e46d167b635aa09192e3adca345d632a",
+      "status": 0,
+      "stdout": "mode=Complex packets=1410 rate=48000 channels=6 scalars=8663040\n",
+      "stderr": "",
+      "identical_to_prior_diagnostic": true
+    }
+  ],
+  "limitations": [
+    "Native default remains Complex. Choosing Real is explicit renderer policy, not a change to coded syntax.",
+    "Real-coefficient LD tree5151 has small PCM16-reference differences; no accuracy-category conformance verdict is made.",
+    "The ELD256-sample comparison lag is diagnostic, not established normative delay compensation.",
+    "ELD and single-rate LD-QMF32 remain open reference timing/waveform investigations.",
+    "No public reference media or codec parameter sets are copied into synthetic fixtures."
+  ],
+  "base": "911b98c245e6ff54eea95ce8b52c8a4d33225a59",
+  "explicit_pcm_comparison": {
+    "conformance_verdict": null,
+    "reference_sha256": "a2732ae529d50f0ce7e6e6258911bf2985846e02df19ce67939b3131252c2e9f",
+    "actual_sha256": "c057cf1ab2a87e771a4cac34c48c0e03c21e94f377c2eca3e7580f6614591ca5",
+    "rate": 48000,
+    "channels": 6,
+    "input_frames": 1443840,
+    "compared_frames": 1443840,
+    "explicit_lag": 0,
+    "per_channel": [
+      {
+        "channel": 0,
+        "rmse": 1.0175145228963104e-05,
+        "max_abs_error": 4.8114183300640434e-05,
+        "snr_db": 70.39066167053056
+      },
+      {
+        "channel": 1,
+        "rmse": 9.439929813470502e-06,
+        "max_abs_error": 4.124641418457031e-05,
+        "snr_db": 68.8620705710976
+      },
+      {
+        "channel": 2,
+        "rmse": 1.087456454798295e-05,
+        "max_abs_error": 4.054605960845947e-05,
+        "snr_db": 64.9323372496703
+      },
+      {
+        "channel": 3,
+        "rmse": 2.065523670660801e-06,
+        "max_abs_error": 3.9550475776195526e-05,
+        "snr_db": 79.76224376829904
+      },
+      {
+        "channel": 4,
+        "rmse": 9.33863218545499e-06,
+        "max_abs_error": 4.5575026888400316e-05,
+        "snr_db": 67.81703146711169
+      },
+      {
+        "channel": 5,
+        "rmse": 1.0443772793631091e-05,
+        "max_abs_error": 5.7945260778069496e-05,
+        "snr_db": 68.94535095387607
+      }
+    ]
+  }
+}

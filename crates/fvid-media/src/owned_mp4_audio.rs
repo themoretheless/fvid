@@ -9,6 +9,7 @@ use crate::owned_mp4_audio_normalization::{
     coefficients as mp4_normalization_coefficients, opaque_positions as mp4_opaque_positions,
 };
 use crate::owned_mp4_audio_packet_frames::frames as mp4_coded_packet_frames;
+use crate::owned_mp4_ep1::Group as Mp4Ep1Group;
 use crate::owned_mp4_audio_schedule::AudioTimeline as Mp4AudioSchedule;
 use crate::owned_mp4_clock_runs::{mp4_packet_clock_runs, mp4_tick_matches};
 use crate::owned_mp4_edit_clock::{
@@ -71,8 +72,13 @@ pub trait Mp4SampleDecoder: Sized {
     fn normalization_mask(&self) -> u32;
     fn checkpoint(&self) -> Option<Mp4AacCheckpoint>;
     fn restore_checkpoint(&mut self, state: &Mp4AacCheckpoint) -> Result<bool>;
+    fn spatial(&self) -> bool;
     fn delayed(&self) -> bool;
     fn finish_delayed(&mut self) -> Result<Option<Vec<Self::Sample>>>;
+    fn decode_esc(
+        &mut self,
+        units: &[crate::owned_aac::aac_ep1::AccessUnit<'_>],
+    ) -> Result<Option<Vec<Self::Sample>>>;
     fn decode_timed(
         &mut self,
         bytes: &[u8],
@@ -230,7 +236,6 @@ impl Mp4TimelineDecoder {
             _ => None,
         }
     }
-
     pub fn channel_mask(&self) -> u32 {
         self.channel_mask_opt().unwrap_or_else(|| {
             crate::owned_pcm_channels::standard_mask(self.channels()).unwrap_or(0) as u32
@@ -241,8 +246,12 @@ impl Mp4TimelineDecoder {
         self.channel_mask()
     }
 
+    pub fn spatial(&self) -> bool {
+        matches!(self, Self::Aac(d) if d.has_spatial())
+    }
+
     pub fn delayed(&self) -> bool {
-        matches!(self, Self::Ps(_)) || matches!(self, Self::Aac(d) if d.delayed())
+        matches!(self, Self::Ps(_)) || matches!(self, Self::Aac(d) if d.has_spatial() || d.delayed())
     }
 
     pub fn finish_delayed(&mut self) -> Result<Option<Vec<f32>>> {
@@ -250,6 +259,17 @@ impl Mp4TimelineDecoder {
             Self::Ps(d) => Ok(d.finish()?.map(|f| f.pcm)),
             Self::Aac(d) => Ok(d.finish()?.map(|f| f.samples)),
             _ => Ok(None),
+        }
+    }
+
+    pub fn decode_esc(
+        &mut self,
+        units: &[crate::owned_aac::aac_ep1::AccessUnit<'_>],
+    ) -> Result<Option<Vec<f32>>> {
+        match self {
+            Self::Aac(d) => Ok(d.decode_esc(units)?.map(|f| f.samples)),
+            Self::Ps(d) => Ok(d.decode_esc(units)?.map(|f| f.pcm)),
+            _ => Err(invalid("EP1 source requires an AAC decoder")),
         }
     }
 
@@ -331,11 +351,20 @@ impl Mp4SampleDecoder for Mp4TimelineDecoder {
     fn restore_checkpoint(&mut self, state: &Mp4AacCheckpoint) -> Result<bool> {
         self.restore_checkpoint(state)
     }
+    fn spatial(&self) -> bool {
+        self.spatial()
+    }
     fn delayed(&self) -> bool {
         self.delayed()
     }
     fn finish_delayed(&mut self) -> Result<Option<Vec<f32>>> {
         self.finish_delayed()
+    }
+    fn decode_esc(
+        &mut self,
+        units: &[crate::owned_aac::aac_ep1::AccessUnit<'_>],
+    ) -> Result<Option<Vec<f32>>> {
+        self.decode_esc(units)
     }
     fn decode_timed(
         &mut self,
@@ -352,7 +381,7 @@ pub fn mp4_audio_index<R: Read + Seek>(
     selected: Option<usize>,
 ) -> Result<usize> {
     let indices: Vec<_> = if selected.is_none() {
-        reader.automatic_track_indices(&[*b"soun"])
+        Mp4Ep1Group::automatic_audio_tracks(reader)?
     } else {
         reader
             .tracks()
@@ -537,6 +566,7 @@ pub(crate) fn admit_audio_reader_with_interval<R: Read + Seek>(
         Ok(())
     };
     add(decoder)?;
+    add(Mp4Ep1Group::admission_upper_bound(reader.tracks(),index)?)?;
     add(track.sample_descriptions.len())?; // per-description in-band PS flags
     add(configuration.checked_mul(2).ok_or_else(overflow)?)?; // initial and replacement decoder headers
     if target.is_some()
@@ -933,6 +963,36 @@ pub fn decode_mp4_audio_reader_targeted<R: Read + Seek, C: AudioDecodeControl>(
     )
 }
 
+fn mp4_decode_source_packet<R: Read + Seek, C: AudioDecodeControl, D: Mp4SampleDecoder>(
+    reader: &mut Mp4TimelineReader<R>,
+    index: usize,
+    sample: usize,
+    decoder: &mut D,
+    group: Option<&Mp4Ep1Group>,
+    packet: &mut Vec<u8>,
+    pts: u64,
+    duration: u64,
+    edit: Option<usize>,
+    control: &C,
+) -> Result<(Option<Vec<D::Sample>>, usize)> {
+    control.check()?;
+    if let Some(group) = group
+        && group.requires_esc(reader.tracks(), sample)?
+    {
+        let units = group.read_frame_in_edit_checked(reader, sample, edit, || control.check())?;
+        let bytes = units.iter().try_fold(0usize, |n, u| {
+            n.checked_add(u.data.len())
+                .ok_or_else(|| invalid("EP1 MP4 group byte count overflow"))
+        })?;
+        let input: Vec<_> = units.iter().map(|u| u.borrowed()).collect();
+        control.check()?;
+        Ok((decoder.decode_esc(&input)?, bytes))
+    } else {
+        reader.read_packet(index, sample, packet)?;
+        Ok((decoder.decode_timed(packet, pts, duration)?, packet.len()))
+    }
+}
+
 pub fn decode_mp4_audio_reader_generic<
     R: Read + Seek,
     C: AudioDecodeControl,
@@ -1004,7 +1064,8 @@ pub fn decode_mp4_audio_reader_generic<
     let mut normalize = target.is_some()
         || track.timescale % rate != 0
         || fractional_extent
-        || track.has_declared_gaps();
+        || track.has_declared_gaps()
+        || (0..track.samples.len()).any(|i| track.samples.get(i).is_some_and(|s| s.pts < 0));
     for i in 0..active_samples {
         control.check()?;
         let id = track
@@ -1040,6 +1101,7 @@ pub fn decode_mp4_audio_reader_generic<
             control,
         );
     }
+    let ep1_group = Mp4Ep1Group::for_root(reader.tracks(), index)?;
     let sample_position = |ticks: u64| -> Result<u64> {
         let numerator = u128::from(ticks) * u128::from(rate);
         let denominator = u128::from(track.timescale);
@@ -1106,8 +1168,11 @@ pub fn decode_mp4_audio_reader_generic<
         Option<u64>,
         Mp4AacCheckpoint,
         std::collections::VecDeque<(u64, u64)>,
+        Option<usize>,
     )> = None;
-    for segment in segments {
+    let contextual_od = reader.has_object_descriptor(track.id);
+    for (edit_index, segment) in segments.into_iter().enumerate() {
+        let root_edit = (!track.edits.is_empty()).then_some(edit_index);
         control.check()?;
         if control.packet_limit_reached() {
             break;
@@ -1146,8 +1211,9 @@ pub fn decode_mp4_audio_reader_generic<
         let mut first_sample = 0;
         let mut expected = None;
         let mut pending_window = std::collections::VecDeque::new();
-        if let Some((index, description, start, previous, state, pending)) = &checkpoint
+        if let Some((index, description, start, previous, state, pending, saved_edit)) = &checkpoint
             && *start <= from
+            && (!contextual_od || *saved_edit == root_edit)
         {
             decoder = make_decoder(*description)?;
             if decoder.restore_checkpoint(state)? {
@@ -1220,6 +1286,7 @@ pub fn decode_mp4_audio_reader_generic<
                             expected,
                             state,
                             pending_window.clone(),
+                            root_edit,
                         ));
                     }
                     captured = true;
@@ -1229,13 +1296,26 @@ pub fn decode_mp4_audio_reader_generic<
                         .checked_add(duration)
                         .ok_or_else(|| invalid("audio timestamp overflow"))?,
                 );
-                reader.read_packet(index, sample_index, &mut packet)?;
-                let samples = decoder.decode_timed(&packet, start, duration)?;
-                control.packet(packet.len())?;
+                let (samples, bytes) = mp4_decode_source_packet(
+                    &mut reader,
+                    index,
+                    sample_index,
+                    &mut decoder,
+                    ep1_group.as_ref(),
+                    &mut packet,
+                    start,
+                    duration,
+                    root_edit,
+                    control,
+                )?;
+                control.packet(bytes)?;
                 sample_index += 1;
                 if decoder.delayed() {
+                    pending_window
+                        .try_reserve(1)
+                        .map_err(|_| invalid("MP4 source window allocation failed"))?;
                     pending_window.push_back((start, duration));
-                    if pending_window.len() > 3 {
+                    if !decoder.spatial() && pending_window.len() > 3 {
                         return Err(invalid("delayed MP4 source lookahead exceeded"));
                     }
                     let Some(samples) = samples else {
@@ -1355,6 +1435,12 @@ fn negotiate_mp4_description_ps_with_interval<R: Read + Seek>(
     let Ok(mut probe) = InBandPsProbe::new(asc, setup.sample_rate) else {
         return Ok(false);
     };
+    // Losing an initial protected SBR header can hide PS forever.
+    // Preserve its error if no later PS discovery establishes dispatch.
+    let ep1_group = Mp4Ep1Group::for_root(reader.tracks(), index)?;
+    let retain_probe_error =
+        probe.requires_in_band_ps() && (setup.channels == 2 || probe.requires_ep_recovery());
+    let mut first_error = None;
     let active_samples = mp4_active_samples(
         &reader.tracks()[index],
         reader.movie_timescale(),
@@ -1372,14 +1458,35 @@ fn negotiate_mp4_description_ps_with_interval<R: Read + Seek>(
             probe.reset();
             continue;
         }
-        reader.read_packet(index, sample, &mut packet)?;
-        if probe.read(&packet).is_err() {
+        let result = if let Some(group) = &ep1_group
+            && group.requires_esc(reader.tracks(), sample)?
+        {
+            let units = group.read_frame_in_edit_checked(
+                reader,
+                sample,
+                reader.tracks()[index]
+                    .edits
+                    .iter()
+                    .position(|e| e.media_time >= 0),
+                || check(),
+            )?;
+            let input: Vec<_> = units.iter().map(|u| u.borrowed()).collect();
+            probe.read_esc(&input)
+        } else {
+            reader.read_packet(index, sample, &mut packet)?;
+            probe.read(&packet)
+        };
+        if let Err(error) = result {
+            first_error.get_or_insert_with(|| error.to_string());
             probe.reset();
             continue;
         }
         if probe.ps_detected() {
             return Ok(true);
         }
+    }
+    if retain_probe_error && let Some(error) = first_error {
+        return Err(invalid(&error));
     }
     Ok(false)
 }
@@ -1691,9 +1798,11 @@ fn decode_mp4_audio_normalized<
         sample_rate: rate,
         channels,
     };
+    let ep1_group = Mp4Ep1Group::for_root(reader.tracks(), index)?;
     let mut opening_decoder = Some(decoder);
     let mut packet = Vec::new();
-    for segment in timeline.segments {
+    for (edit_index, segment) in timeline.segments.into_iter().enumerate() {
+        let root_edit = (!track.edits.is_empty()).then_some(edit_index);
         control.check()?;
         if control.packet_limit_reached() {
             break;
@@ -1847,7 +1956,9 @@ fn decode_mp4_audio_normalized<
                         break;
                     }
                 }
-                reader.read_packet(index, sample_index, &mut packet)?;
+                if ep1_group.is_none() {
+                    reader.read_packet(index, sample_index, &mut packet)?;
+                }
                 let (start, duration, frames) = if clock.quantized {
                     let setup = track
                         .description_for_sample(sample_index)
@@ -1858,7 +1969,7 @@ fn decode_mp4_audio_normalized<
                         decoder.sample_rate(),
                         setup.channels,
                         setup.bit_depth,
-                        packet.len(),
+                        sample.size as usize,
                         Some(&packet),
                     )
                     .map_err(|e| invalid(&e))?;
@@ -1885,18 +1996,39 @@ fn decode_mp4_audio_normalized<
                             .map_err(|_| invalid("MP4 native frame count overflow"))?,
                     )
                 };
-                let samples = decoder.decode_timed(&packet, native_cursor, frames)?;
+                let (samples, bytes) = if ep1_group.is_some() {
+                    mp4_decode_source_packet(
+                        &mut reader,
+                        index,
+                        sample_index,
+                        &mut decoder,
+                        ep1_group.as_ref(),
+                        &mut packet,
+                        native_cursor,
+                        frames,
+                        root_edit,
+                        control,
+                    )?
+                } else {
+                    (
+                        decoder.decode_timed(&packet, native_cursor, frames)?,
+                        packet.len(),
+                    )
+                };
                 native_cursor = native_cursor
                     .checked_add(frames)
                     .ok_or_else(|| invalid("MP4 native clock overflow"))?;
                 clock_native_cursor = clock_native_cursor
                     .checked_add(frames)
                     .ok_or_else(|| invalid("MP4 run native clock overflow"))?;
-                control.packet(packet.len())?;
+                control.packet(bytes)?;
                 sample_index += 1;
                 if decoder.delayed() {
+                    pending
+                        .try_reserve(1)
+                        .map_err(|_| invalid("MP4 source window allocation failed"))?;
                     pending.push_back((start, duration));
-                    if pending.len() > 3 {
+                    if !decoder.spatial() && pending.len() > 3 {
                         return Err(invalid("delayed MP4 source lookahead exceeded"));
                     }
                     let Some(samples) = samples else {
@@ -2248,11 +2380,20 @@ mod precise {
         fn restore_checkpoint(&mut self, _: &Mp4AacCheckpoint) -> Result<bool> {
             Ok(false)
         }
+        fn spatial(&self) -> bool {
+            false
+        }
         fn delayed(&self) -> bool {
             false
         }
         fn finish_delayed(&mut self) -> Result<Option<Vec<f64>>> {
             Ok(None)
+        }
+        fn decode_esc(
+            &mut self,
+            _: &[crate::owned_aac::aac_ep1::AccessUnit<'_>],
+        ) -> Result<Option<Vec<f64>>> {
+            Err(invalid("precise PCM decoder cannot accept EP1 AAC"))
         }
         fn decode_timed(
             &mut self,

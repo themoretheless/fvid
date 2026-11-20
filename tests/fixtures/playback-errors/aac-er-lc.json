@@ -3361,7 +3361,7 @@
       }
     }
   ],
-  "rejected": [
+  "ep1_controls": [
     {
       "asc": "8b0d04",
       "video": {
@@ -3372,43 +3372,10 @@
         "pcm_offset": 0,
         "samples": 11520
       },
-      "error": "ER AAC LC epConfig is not yet implemented"
-    },
-    {
-      "asc": "8b0d08",
-      "video": {
-        "file": "aac-er-lc-rejected-960-0-2-0-synthetic.mp4",
-        "sha256": "b80cb5711d7e51ad4ef249c4157541a00eb1e2f515afeef715623d228ca1df92",
-        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
-        "asc": "8b0d08",
-        "pcm_offset": 0,
-        "samples": 11520
-      },
-      "error": "ER AAC LC epConfig is not yet implemented"
-    },
-    {
-      "asc": "8b0d0c",
-      "video": {
-        "file": "aac-er-lc-rejected-960-0-3-0-synthetic.mp4",
-        "sha256": "97aff8740b60b6150ac822e15a45bdd5adf16247b1c2d60d4d7e55e9acaed248",
-        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
-        "asc": "8b0d0c",
-        "pcm_offset": 0,
-        "samples": 11520
-      },
-      "error": "ER AAC LC epConfig is not yet implemented"
-    },
-    {
-      "asc": "8b0d10",
-      "video": {
-        "file": "aac-er-lc-rejected-960-0-0-1-synthetic.mp4",
-        "sha256": "9c27aa04f2dd67626ecf2fc66b5d337250f7ee6abbfa3c03c11165496bc36773",
-        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
-        "asc": "8b0d10",
-        "pcm_offset": 0,
-        "samples": 11520
-      },
-      "error": "AAC extensionFlag3 must be zero"
+      "control": "aac-er-lc-960-1-0-0-synthetic.mp4",
+      "n": 960,
+      "reference_offset": 0,
+      "reference_bytes": 46080
     },
     {
       "asc": "8b0904",
@@ -3420,31 +3387,24 @@
         "pcm_offset": 0,
         "samples": 12288
       },
-      "error": "ER AAC LC epConfig is not yet implemented"
-    },
+      "control": "aac-er-lc-1024-1-0-0-synthetic.mp4",
+      "n": 1024,
+      "reference_offset": 1566720,
+      "reference_bytes": 49152
+    }
+  ],
+  "rejected": [
     {
-      "asc": "8b0908",
+      "asc": "8b0d10",
       "video": {
-        "file": "aac-er-lc-rejected-1024-0-2-0-synthetic.mp4",
-        "sha256": "38f60c253640abd0cf632a187b339f7082bae48f6505eb1cd317b66dae78ae6a",
+        "file": "aac-er-lc-rejected-960-0-0-1-synthetic.mp4",
+        "sha256": "9c27aa04f2dd67626ecf2fc66b5d337250f7ee6abbfa3c03c11165496bc36773",
         "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
-        "asc": "8b0908",
+        "asc": "8b0d10",
         "pcm_offset": 0,
-        "samples": 12288
+        "samples": 11520
       },
-      "error": "ER AAC LC epConfig is not yet implemented"
-    },
-    {
-      "asc": "8b090c",
-      "video": {
-        "file": "aac-er-lc-rejected-1024-0-3-0-synthetic.mp4",
-        "sha256": "a54aada349759434c23ef520ee10f3ad09ec4301cc39ff52941544dc254928b3",
-        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
-        "asc": "8b090c",
-        "pcm_offset": 0,
-        "samples": 12288
-      },
-      "error": "ER AAC LC epConfig is not yet implemented"
+      "error": "AAC extensionFlag3 must be zero"
     },
     {
       "asc": "8b0910",
@@ -3459,7 +3419,56 @@
       "error": "AAC extensionFlag3 must be zero"
     }
   ],
-  "malformed": [],
+  "malformed": [
+    {
+      "asc": "8b0d08",
+      "video": {
+        "file": "aac-er-lc-rejected-960-0-2-0-synthetic.mp4",
+        "sha256": "b80cb5711d7e51ad4ef249c4157541a00eb1e2f515afeef715623d228ca1df92",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "8b0d08",
+        "pcm_offset": 0,
+        "samples": 11520
+      },
+      "error": "truncated or oversized bit field"
+    },
+    {
+      "asc": "8b0d0c",
+      "video": {
+        "file": "aac-er-lc-rejected-960-0-3-0-synthetic.mp4",
+        "sha256": "97aff8740b60b6150ac822e15a45bdd5adf16247b1c2d60d4d7e55e9acaed248",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "8b0d0c",
+        "pcm_offset": 0,
+        "samples": 11520
+      },
+      "error": "truncated or oversized bit field"
+    },
+    {
+      "asc": "8b0908",
+      "video": {
+        "file": "aac-er-lc-rejected-1024-0-2-0-synthetic.mp4",
+        "sha256": "38f60c253640abd0cf632a187b339f7082bae48f6505eb1cd317b66dae78ae6a",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "8b0908",
+        "pcm_offset": 0,
+        "samples": 12288
+      },
+      "error": "truncated or oversized bit field"
+    },
+    {
+      "asc": "8b090c",
+      "video": {
+        "file": "aac-er-lc-rejected-1024-0-3-0-synthetic.mp4",
+        "sha256": "a54aada349759434c23ef520ee10f3ad09ec4301cc39ff52941544dc254928b3",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "8b090c",
+        "pcm_offset": 0,
+        "samples": 12288
+      },
+      "error": "truncated or oversized bit field"
+    }
+  ],
   "alignment": [
     {
       "video": {

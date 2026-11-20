@@ -458,28 +458,138 @@ pub(crate) fn read_er_extensions(
     read_extension_bytes(bits, bits.remaining()/8, true, sbr)
 }
 
+/// ELD's explicit LD-SBR prefix is already consumed by the core owner. Parse
+/// the remaining ER records, collecting spatial messages and preserving bounded
+/// children and following ordinary records. Implicit SBR in this ELD tail is
+/// opaque, as ELD signals SBR explicitly. Final AAC byte alignment belongs here;
+/// these transport padding bits have no prescribed value (ISO 14496-3, 4.4.2.9).
+/// Any error retains both the input cursor and ancillary assembly history.
+pub fn read_eld_spatial_extensions(
+    bits: &mut BitReader<'_>,
+    assembler: &mut super::aac_ld_mps_transport::Assembler,
+) -> Result<Vec<super::aac_ld_mps_transport::Message>> {
+    read_eld_spatial_extensions_scoped(bits, assembler).map(|(messages, _)| messages)
+}
+
+/// Whether a replacement discarded a fragment inherited from before this
+/// bounded extension tail. Completed inherited messages clear that provenance;
+/// subsequent fragments are local to this tail and own no older source window.
+pub(crate) fn read_eld_spatial_extensions_scoped(
+    bits: &mut BitReader<'_>,
+    assembler: &mut super::aac_ld_mps_transport::Assembler,
+) -> Result<(Vec<super::aac_ld_mps_transport::Message>, bool)> {
+    let mut input = bits.clone();
+    let mut spatial = SpatialExtensions {
+        assembler: assembler.clone(),
+        messages: Vec::new(),
+        inherited_fragment: assembler.has_pending(),
+        replaced_inherited: false,
+    };
+    let count = input.remaining() / 8;
+    read_extension_bytes_dispatch(
+        &mut input,
+        count,
+        true,
+        &mut |_, _, _| {
+            Err(unsupported(
+                "unexpected implicit SBR synthesis in ELD spatial tail",
+            ))
+        },
+        Some(&mut spatial),
+    )?;
+    input.skip(input.remaining())?;
+    *bits = input;
+    *assembler = spatial.assembler;
+    Ok((spatial.messages, spatial.replaced_inherited))
+}
+struct SpatialExtensions {
+    assembler: super::aac_ld_mps_transport::Assembler,
+    messages: Vec<super::aac_ld_mps_transport::Message>,
+    inherited_fragment: bool,
+    replaced_inherited: bool,
+}
+
+/// Shared DRC syntax; evaluation is optional and default decoding preserves
+/// original dynamics. Both logical and separated ESC payloads use these fields.
+pub(crate) fn read_dynamic_range(mut read: impl FnMut(u8) -> Result<u32>) -> Result<()> {
+    if read(1)? != 0 {
+        read(4)?;
+        read(4)?;
+    }
+    if read(1)? != 0 {
+        loop {
+            read(7)?;
+            if read(1)? == 0 {
+                break;
+            }
+        }
+    }
+    let bands = if read(1)? != 0 {
+        let bands = read(4)? as usize + 1;
+        read(4)?;
+        for _ in 0..bands {
+            read(8)?;
+        }
+        bands
+    } else {
+        1
+    };
+    if read(1)? != 0 {
+        read(7)?;
+        read(1)?;
+    }
+    for _ in 0..bands {
+        read(8)?;
+    }
+    Ok(())
+}
 fn read_extension_bytes(
     bits: &mut super::bits::BitReader<'_>,
     count: usize,
     er: bool,
     mut sbr: impl FnMut(&mut super::bits::BitReader<'_>, usize, bool) -> Result<()>,
 ) -> Result<()> {
+    read_extension_bytes_dispatch(bits, count, er, &mut sbr, None)
+}
+fn read_extension_bytes_dispatch(
+    bits: &mut BitReader<'_>,
+    count: usize,
+    er: bool,
+    sbr: &mut dyn FnMut(&mut BitReader<'_>, usize, bool) -> Result<()>,
+    mut spatial: Option<&mut SpatialExtensions>,
+) -> Result<()> {
     let mut input = bits.clone();
-    let end = input.position() + count * 8;
-    if count * 8 > input.remaining() {
+    let payload_bits = count
+        .checked_mul(8)
+        .ok_or_else(|| invalid("AAC extension size overflow"))?;
+    if payload_bits > input.remaining() {
         return Err(invalid("truncated AAC fill payload"));
     }
-    let mut sbr_started=false;
-    while input.position() < end {
+    let parent_end = input
+        .position()
+        .checked_add(payload_bits)
+        .ok_or_else(|| invalid("AAC extension bound overflow"))?;
+    let mut child_end = None;
+    let mut sbr_started = false;
+    while input.position() < parent_end {
+        if child_end == Some(input.position()) {
+            child_end = None;
+        }
+        let end = child_end.unwrap_or(parent_end);
+        let tag_start = input.clone();
         let read = |input: &mut super::bits::BitReader<'_>, width: u8| -> Result<u32> {
             if usize::from(width) > end - input.position() {
                 return Err(invalid("AAC extension exceeds fill payload"));
             }
             input.read(width)
         };
-        let kind=read(&mut input, 4)?;
-        if er && kind==14 {return Err(invalid("ER AAC SBR CRC is forbidden"));}
-        if er && sbr_started && kind!=13 {return Err(invalid("ER AAC extensions must precede SBR"));}
+        let kind = read(&mut input, 4)?;
+        if er && kind == 14 && spatial.is_none() {
+            return Err(invalid("ER AAC SBR CRC is forbidden"));
+        }
+        if er && sbr_started && kind != 13 && spatial.is_none() {
+            return Err(invalid("ER AAC extensions must precede SBR"));
+        }
         match kind {
             0 => input.skip(end - input.position())?,
             1 => {
@@ -512,33 +622,59 @@ fn read_extension_bytes(
                 }
                 input.skip(length * 8)?;
             }
-            11 => {
-                // ISO 14496-3 tables 4.58/4.59. DRC evaluation is optional
-                // (4.5.2.7.2); default decoding preserves original dynamics.
-                if read(&mut input, 1)? != 0 {
-                    read(&mut input, 4)?; // PCE instance tag
-                    read(&mut input, 4)?; // reserved
+            3 if spatial.is_some() => {
+                if child_end.is_some() {
+                    return Err(invalid("nested AAC EXT_DATA_LENGTH is forbidden"));
                 }
-                if read(&mut input, 1)? != 0 {
-                    loop {
-                        read(&mut input, 7)?; // excluded channel mask
-                        if read(&mut input, 1)? == 0 { break; }
+                let mut length = read(&mut input, 4)? as usize;
+                if length == 15 {
+                    let add = read(&mut input, 8)? as usize;
+                    length += add;
+                    if add == 255 {
+                        length += read(&mut input, 16)? as usize;
                     }
                 }
-                let bands = if read(&mut input, 1)? != 0 {
-                    let bands = read(&mut input, 4)? as usize + 1;
-                    read(&mut input, 4)?; // interpolation scheme
-                    for _ in 0..bands { read(&mut input, 8)?; }
-                    bands
-                } else { 1 };
-                if read(&mut input, 1)? != 0 {
-                    read(&mut input, 7)?; // program reference level
-                    read(&mut input, 1)?; // reserved
+                let limit = input
+                    .position()
+                    .checked_add(length * 8)
+                    .ok_or_else(|| invalid("AAC spatial child bound overflow"))?;
+                if length == 0 || limit > end {
+                    return Err(invalid("AAC spatial child exceeds parent extension"));
                 }
-                for _ in 0..bands { read(&mut input, 8)?; } // sign + gain
+                let mut peek = input.clone();
+                if peek.read(4)? == 3 {
+                    return Err(invalid("nested AAC EXT_DATA_LENGTH is forbidden"));
+                }
+                child_end = Some(limit);
             }
+            9 | 12 if spatial.is_some() => {
+                let owner = spatial.as_deref_mut().unwrap();
+                let prefix_losses = owner.assembler.prefix_losses();
+                let (message, position) = owner.assembler.read_bytes(
+                    tag_start.source_bytes(),
+                    tag_start.position(),
+                    end,
+                )?;
+                if owner.assembler.prefix_losses() != prefix_losses && owner.inherited_fragment {
+                    owner.replaced_inherited = true;
+                }
+                if !owner.assembler.has_pending() {
+                    owner.inherited_fragment = false;
+                }
+                if let Some(message) = message {
+                    owner
+                        .messages
+                        .try_reserve(1)
+                        .map_err(|_| invalid("AAC spatial message queue allocation failed"))?;
+                    owner.messages.push(message);
+                }
+                input = tag_start;
+                input.skip(position - input.position())?;
+            }
+            11 => read_dynamic_range(|width| read(&mut input, width))?,
+            13 | 14 if spatial.is_some() => input.skip(end - input.position())?,
             kind @ (13 | 14) => {
-                sbr_started=true;
+                sbr_started = true;
                 let start = input.position();
                 sbr(&mut input, end, kind == 14)?;
                 if input.position() <= start || input.position() > end {
@@ -657,4 +793,29 @@ mod fill_tests {
             }
         }
     }
+}
+
+/// MPEG configuration13 (22.2) elements in coded order. LFE elements occur
+/// inside the sequence, before the top/bottom layers.
+pub const CONFIGURATION_13_ELEMENTS: [u8; 16] = [
+    0, 1, 1, 1, 1, 0, 3, 3, 0, 1, 1, 0, 1, 0, 0, 1,
+];
+/// Coded channel -> explicit PCM order: normal/top/bottom, then front/side/
+/// back/LFE, center before pairs. WAVE's 32-bit mask cannot name all24 roles.
+pub const CONFIGURATION_13_MAPPING: [usize; 24] = [
+    0, 1, 2, 3, 4, 5, 6, 8, 9, 7, 10, 11,
+    12, 13, 14, 16, 17, 15, 19, 20, 18, 21, 22, 23,
+];
+/// Explicit positions in configuration13 emitted PCM order. The top-side
+/// center is the overhead speaker; both LFEs are preserved independently.
+pub fn configuration_13_positions() -> Vec<ChannelPosition> {
+    use HeightLayer::{Normal, Top, Bottom};
+    use Position::{Front, Side, Back, Lfe};
+    [(Normal, Front, 5), (Normal, Side, 2), (Normal, Back, 3),
+     (Normal, Lfe, 2), (Top, Front, 3), (Top, Side, 3),
+     (Top, Back, 3), (Bottom, Front, 3)]
+        .into_iter().flat_map(|(height, position, group_channels)|
+            (0..group_channels).map(move |index| ChannelPosition {
+                height, position, index, group_channels,
+            })).collect()
 }

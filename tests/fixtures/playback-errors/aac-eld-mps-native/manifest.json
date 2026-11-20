@@ -1,0 +1,619 @@
+{
+  "scope": "Native 32/64-bin spatial playback, independent core controls, fragment replacement rollback and strict unmatched-PCM EOF.",
+  "cases": [
+    {
+      "name": "replacement",
+      "asc": "f8e620243397000000",
+      "channels": 1,
+      "frames": [
+        {
+          "offset": 0,
+          "bytes": 35,
+          "core_bits": 51
+        },
+        {
+          "offset": 35,
+          "bytes": 64,
+          "core_bits": 51
+        },
+        {
+          "offset": 99,
+          "bytes": 15,
+          "core_bits": 53
+        }
+      ],
+      "slots": 8,
+      "bands": 64,
+      "container_rate": 48000,
+      "container_frame_samples": 512,
+      "pcm_offset": 0,
+      "samples": 1536
+    },
+    {
+      "name": "recovery",
+      "asc": "f8e620243397000000",
+      "channels": 1,
+      "frames": [
+        {
+          "offset": 114,
+          "bytes": 35,
+          "core_bits": 51
+        },
+        {
+          "offset": 149,
+          "bytes": 35,
+          "core_bits": 51
+        },
+        {
+          "offset": 184,
+          "bytes": 72,
+          "core_bits": 53
+        }
+      ],
+      "slots": 8,
+      "bands": 64,
+      "container_rate": 48000,
+      "container_frame_samples": 512,
+      "pcm_offset": 0,
+      "samples": 1536
+    },
+    {
+      "name": "unfinished",
+      "asc": "f8e620243397000000",
+      "channels": 1,
+      "frames": [
+        {
+          "offset": 256,
+          "bytes": 60,
+          "core_bits": 51
+        },
+        {
+          "offset": 316,
+          "bytes": 7,
+          "core_bits": 51
+        },
+        {
+          "offset": 323,
+          "bytes": 7,
+          "core_bits": 53
+        }
+      ],
+      "slots": 8,
+      "bands": 64,
+      "container_rate": 48000,
+      "container_frame_samples": 512,
+      "pcm_offset": 0,
+      "samples": 1536
+    },
+    {
+      "name": "clock90000",
+      "asc": "f8e620243397000000",
+      "channels": 1,
+      "frames": [
+        {
+          "offset": 330,
+          "bytes": 7,
+          "core_bits": 51
+        },
+        {
+          "offset": 337,
+          "bytes": 7,
+          "core_bits": 51
+        },
+        {
+          "offset": 344,
+          "bytes": 125,
+          "core_bits": 53
+        }
+      ],
+      "slots": 8,
+      "bands": 64,
+      "container_rate": 90000,
+      "sample_entry_rate": 48000,
+      "container_frame_samples": 960,
+      "durations": [
+        960,
+        960,
+        960
+      ],
+      "pcm_offset": 0,
+      "samples": 1536
+    },
+    {
+      "name": "n480-r24000-tree0",
+      "tree": 0,
+      "core_pcm": "core-n480-c1.f32le",
+      "core_asc": "f8ec3000",
+      "asc": "f8ec3025671020040b00",
+      "channels": 1,
+      "frames": [
+        {
+          "offset": 469,
+          "bytes": 164,
+          "core_bits": 51
+        },
+        {
+          "offset": 633,
+          "bytes": 169,
+          "core_bits": 51
+        },
+        {
+          "offset": 802,
+          "bytes": 17,
+          "core_bits": 53
+        }
+      ],
+      "slots": 15,
+      "bands": 32,
+      "container_rate": 24000,
+      "container_frame_samples": 480,
+      "pcm_offset": 0,
+      "samples": 1440
+    },
+    {
+      "name": "n480-r24000-tree1",
+      "tree": 1,
+      "core_pcm": "core-n480-c1.f32le",
+      "core_asc": "f8ec3000",
+      "asc": "f8ec3025671120040b00",
+      "channels": 1,
+      "frames": [
+        {
+          "offset": 819,
+          "bytes": 164,
+          "core_bits": 51
+        },
+        {
+          "offset": 983,
+          "bytes": 169,
+          "core_bits": 51
+        },
+        {
+          "offset": 1152,
+          "bytes": 17,
+          "core_bits": 53
+        }
+      ],
+      "slots": 15,
+      "bands": 32,
+      "container_rate": 24000,
+      "container_frame_samples": 480,
+      "pcm_offset": 0,
+      "samples": 1440
+    },
+    {
+      "name": "n480-r24000-tree2",
+      "tree": 2,
+      "core_pcm": "core-n480-c2.f32le",
+      "core_asc": "f8ec5000",
+      "asc": "f8ec5027671220040ba6b000",
+      "channels": 2,
+      "frames": [
+        {
+          "offset": 1169,
+          "bytes": 173,
+          "core_bits": 98
+        },
+        {
+          "offset": 1342,
+          "bytes": 177,
+          "core_bits": 100
+        },
+        {
+          "offset": 1519,
+          "bytes": 24,
+          "core_bits": 100
+        }
+      ],
+      "slots": 15,
+      "bands": 32,
+      "container_rate": 24000,
+      "container_frame_samples": 480,
+      "pcm_offset": 0,
+      "samples": 1440
+    },
+    {
+      "name": "n480-r24000-tree3",
+      "tree": 3,
+      "core_pcm": "core-n480-c2.f32le",
+      "core_asc": "f8ec5000",
+      "asc": "f8ec5027671320040ba6b000",
+      "channels": 2,
+      "frames": [
+        {
+          "offset": 1543,
+          "bytes": 232,
+          "core_bits": 98
+        },
+        {
+          "offset": 1775,
+          "bytes": 237,
+          "core_bits": 100
+        },
+        {
+          "offset": 2012,
+          "bytes": 25,
+          "core_bits": 100
+        }
+      ],
+      "slots": 15,
+      "bands": 32,
+      "container_rate": 24000,
+      "container_frame_samples": 480,
+      "pcm_offset": 0,
+      "samples": 1440
+    },
+    {
+      "name": "n480-r24000-tree4",
+      "tree": 4,
+      "core_pcm": "core-n480-c2.f32le",
+      "core_asc": "f8ec5000",
+      "asc": "f8ec5027671420040ba6b000",
+      "channels": 2,
+      "frames": [
+        {
+          "offset": 2037,
+          "bytes": 232,
+          "core_bits": 98
+        },
+        {
+          "offset": 2269,
+          "bytes": 237,
+          "core_bits": 100
+        },
+        {
+          "offset": 2506,
+          "bytes": 25,
+          "core_bits": 100
+        }
+      ],
+      "slots": 15,
+      "bands": 32,
+      "container_rate": 24000,
+      "container_frame_samples": 480,
+      "pcm_offset": 0,
+      "samples": 1440
+    },
+    {
+      "name": "n480-r24000-tree5",
+      "tree": 5,
+      "core_pcm": "core-n480-c6.f32le",
+      "core_asc": "f8ecd000",
+      "asc": "f8ecd025671520040000",
+      "channels": 6,
+      "frames": [
+        {
+          "offset": 2531,
+          "bytes": 119,
+          "core_bits": 283
+        },
+        {
+          "offset": 2650,
+          "bytes": 123,
+          "core_bits": 285
+        },
+        {
+          "offset": 2773,
+          "bytes": 44,
+          "core_bits": 283
+        }
+      ],
+      "slots": 15,
+      "bands": 32,
+      "container_rate": 24000,
+      "container_frame_samples": 480,
+      "pcm_offset": 0,
+      "samples": 1440
+    },
+    {
+      "name": "n480-r24000-tree6",
+      "tree": 6,
+      "core_pcm": "core-n480-c6.f32le",
+      "core_asc": "f8ecd000",
+      "asc": "f8ecd025671620040000",
+      "channels": 6,
+      "frames": [
+        {
+          "offset": 2817,
+          "bytes": 119,
+          "core_bits": 283
+        },
+        {
+          "offset": 2936,
+          "bytes": 123,
+          "core_bits": 285
+        },
+        {
+          "offset": 3059,
+          "bytes": 44,
+          "core_bits": 283
+        }
+      ],
+      "slots": 15,
+      "bands": 32,
+      "container_rate": 24000,
+      "container_frame_samples": 480,
+      "pcm_offset": 0,
+      "samples": 1440
+    },
+    {
+      "name": "n480-r24000-tree7",
+      "tree": 7,
+      "core_pcm": "core-n480-c1.f32le",
+      "core_asc": "f8ec3000",
+      "asc": "f8ec30246717000000",
+      "channels": 1,
+      "frames": [
+        {
+          "offset": 3103,
+          "bytes": 60,
+          "core_bits": 51
+        },
+        {
+          "offset": 3163,
+          "bytes": 64,
+          "core_bits": 51
+        },
+        {
+          "offset": 3227,
+          "bytes": 15,
+          "core_bits": 53
+        }
+      ],
+      "slots": 15,
+      "bands": 32,
+      "container_rate": 24000,
+      "container_frame_samples": 480,
+      "pcm_offset": 0,
+      "samples": 1440
+    },
+    {
+      "name": "n512-r24000-tree0",
+      "tree": 0,
+      "core_pcm": "core-n512-c1.f32le",
+      "core_asc": "f8ec2000",
+      "asc": "f8ec2025679020040b00",
+      "channels": 1,
+      "frames": [
+        {
+          "offset": 3242,
+          "bytes": 164,
+          "core_bits": 51
+        },
+        {
+          "offset": 3406,
+          "bytes": 169,
+          "core_bits": 51
+        },
+        {
+          "offset": 3575,
+          "bytes": 17,
+          "core_bits": 53
+        }
+      ],
+      "slots": 16,
+      "bands": 32,
+      "container_rate": 24000,
+      "container_frame_samples": 512,
+      "pcm_offset": 0,
+      "samples": 1536
+    },
+    {
+      "name": "n512-r24000-tree1",
+      "tree": 1,
+      "core_pcm": "core-n512-c1.f32le",
+      "core_asc": "f8ec2000",
+      "asc": "f8ec2025679120040b00",
+      "channels": 1,
+      "frames": [
+        {
+          "offset": 3592,
+          "bytes": 164,
+          "core_bits": 51
+        },
+        {
+          "offset": 3756,
+          "bytes": 169,
+          "core_bits": 51
+        },
+        {
+          "offset": 3925,
+          "bytes": 17,
+          "core_bits": 53
+        }
+      ],
+      "slots": 16,
+      "bands": 32,
+      "container_rate": 24000,
+      "container_frame_samples": 512,
+      "pcm_offset": 0,
+      "samples": 1536
+    },
+    {
+      "name": "n512-r24000-tree2",
+      "tree": 2,
+      "core_pcm": "core-n512-c2.f32le",
+      "core_asc": "f8ec4000",
+      "asc": "f8ec4027679220040ba6b000",
+      "channels": 2,
+      "frames": [
+        {
+          "offset": 3942,
+          "bytes": 173,
+          "core_bits": 98
+        },
+        {
+          "offset": 4115,
+          "bytes": 177,
+          "core_bits": 100
+        },
+        {
+          "offset": 4292,
+          "bytes": 24,
+          "core_bits": 100
+        }
+      ],
+      "slots": 16,
+      "bands": 32,
+      "container_rate": 24000,
+      "container_frame_samples": 512,
+      "pcm_offset": 0,
+      "samples": 1536
+    },
+    {
+      "name": "n512-r24000-tree3",
+      "tree": 3,
+      "core_pcm": "core-n512-c2.f32le",
+      "core_asc": "f8ec4000",
+      "asc": "f8ec4027679320040ba6b000",
+      "channels": 2,
+      "frames": [
+        {
+          "offset": 4316,
+          "bytes": 232,
+          "core_bits": 98
+        },
+        {
+          "offset": 4548,
+          "bytes": 237,
+          "core_bits": 100
+        },
+        {
+          "offset": 4785,
+          "bytes": 25,
+          "core_bits": 100
+        }
+      ],
+      "slots": 16,
+      "bands": 32,
+      "container_rate": 24000,
+      "container_frame_samples": 512,
+      "pcm_offset": 0,
+      "samples": 1536
+    },
+    {
+      "name": "n512-r24000-tree4",
+      "tree": 4,
+      "core_pcm": "core-n512-c2.f32le",
+      "core_asc": "f8ec4000",
+      "asc": "f8ec4027679420040ba6b000",
+      "channels": 2,
+      "frames": [
+        {
+          "offset": 4810,
+          "bytes": 232,
+          "core_bits": 98
+        },
+        {
+          "offset": 5042,
+          "bytes": 237,
+          "core_bits": 100
+        },
+        {
+          "offset": 5279,
+          "bytes": 25,
+          "core_bits": 100
+        }
+      ],
+      "slots": 16,
+      "bands": 32,
+      "container_rate": 24000,
+      "container_frame_samples": 512,
+      "pcm_offset": 0,
+      "samples": 1536
+    },
+    {
+      "name": "n512-r24000-tree5",
+      "tree": 5,
+      "core_pcm": "core-n512-c6.f32le",
+      "core_asc": "f8ecc000",
+      "asc": "f8ecc025679520040000",
+      "channels": 6,
+      "frames": [
+        {
+          "offset": 5304,
+          "bytes": 119,
+          "core_bits": 283
+        },
+        {
+          "offset": 5423,
+          "bytes": 123,
+          "core_bits": 285
+        },
+        {
+          "offset": 5546,
+          "bytes": 44,
+          "core_bits": 283
+        }
+      ],
+      "slots": 16,
+      "bands": 32,
+      "container_rate": 24000,
+      "container_frame_samples": 512,
+      "pcm_offset": 0,
+      "samples": 1536
+    },
+    {
+      "name": "n512-r24000-tree6",
+      "tree": 6,
+      "core_pcm": "core-n512-c6.f32le",
+      "core_asc": "f8ecc000",
+      "asc": "f8ecc025679620040000",
+      "channels": 6,
+      "frames": [
+        {
+          "offset": 5590,
+          "bytes": 119,
+          "core_bits": 283
+        },
+        {
+          "offset": 5709,
+          "bytes": 123,
+          "core_bits": 285
+        },
+        {
+          "offset": 5832,
+          "bytes": 44,
+          "core_bits": 283
+        }
+      ],
+      "slots": 16,
+      "bands": 32,
+      "container_rate": 24000,
+      "container_frame_samples": 512,
+      "pcm_offset": 0,
+      "samples": 1536
+    },
+    {
+      "name": "n512-r24000-tree7",
+      "tree": 7,
+      "core_pcm": "core-n512-c1.f32le",
+      "core_asc": "f8ec2000",
+      "asc": "f8ec20246797000000",
+      "channels": 1,
+      "frames": [
+        {
+          "offset": 5876,
+          "bytes": 60,
+          "core_bits": 51
+        },
+        {
+          "offset": 5936,
+          "bytes": 64,
+          "core_bits": 51
+        },
+        {
+          "offset": 6000,
+          "bytes": 15,
+          "core_bits": 53
+        }
+      ],
+      "slots": 16,
+      "bands": 32,
+      "container_rate": 24000,
+      "container_frame_samples": 512,
+      "pcm_offset": 0,
+      "samples": 1536
+    }
+  ]
+}

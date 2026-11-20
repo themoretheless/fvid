@@ -1,0 +1,70 @@
+{
+  "binary": "/Users/themoretheless/.codex/worktrees/aac-eld-extension-gaps/target/debug/examples/audio_probe",
+  "linkage": "/Users/themoretheless/.codex/worktrees/aac-eld-extension-gaps/target/debug/examples/audio_probe:\n\t/System/Library/Frameworks/AppKit.framework/Versions/C/AppKit (compatibility version 45.0.0, current version 2775.10.103)\n\t/System/Library/Frameworks/VideoToolbox.framework/Versions/A/VideoToolbox (compatibility version 1.0.0, current version 3350.77.5)\n\t/System/Library/Frameworks/CoreFoundation.framework/Versions/A/CoreFoundation (compatibility version 150.0.0, current version 5027.0.69)\n\t/System/Library/Frameworks/CoreMedia.framework/Versions/A/CoreMedia (compatibility version 1.0.0, current version 3350.77.5)\n\t/System/Library/Frameworks/CoreVideo.framework/Versions/A/CoreVideo (compatibility version 1.2.0, current version 758.27.0)\n\t/System/Library/Frameworks/ApplicationServices.framework/Versions/A/ApplicationServices (compatibility version 1.0.0, current version 66.0.0)\n\t/System/Library/Frameworks/CoreGraphics.framework/Versions/A/CoreGraphics (compatibility version 64.0.0, current version 2050.0.0)\n\t/System/Library/Frameworks/Carbon.framework/Versions/A/Carbon (compatibility version 2.0.0, current version 170.0.0)\n\t/System/Library/Frameworks/Foundation.framework/Versions/C/Foundation (compatibility version 300.0.0, current version 5027.0.69)\n\t/usr/lib/libSystem.B.dylib (compatibility version 1.0.0, current version 1359.0.0)\n\t/usr/lib/libobjc.A.dylib (compatibility version 1.0.0, current version 228.0.0)\n\t/System/Library/Frameworks/QuartzCore.framework/Versions/A/QuartzCore (compatibility version 1.2.0, current version 1223.2.2)\n\t/System/Library/Frameworks/Metal.framework/Versions/A/Metal (compatibility version 1.0.0, current version 382.5.3)\n\t/usr/lib/libiconv.2.dylib (compatibility version 7.0.0, current version 7.0.0)\n\t/System/Library/Frameworks/AudioUnit.framework/Versions/A/AudioUnit (compatibility version 1.0.0, current version 1.0.0)\n\t/System/Library/Frameworks/CoreAudio.framework/Versions/A/CoreAudio (compatibility version 1.0.0, current version 1.0.0)\n\t/System/Library/Frameworks/ColorSync.framework/Versions/A/ColorSync (compatibility version 1.0.0, current version 3929.0.0)\n\t/System/Library/Frameworks/CoreServices.framework/Versions/A/CoreServices (compatibility version 1.0.0, current version 1226.0.0)\n",
+  "results": [
+    {
+      "file": "tests/fixtures/playback-errors/aac-ld-downscaled/n480-r22050-c1-ds2.mp4",
+      "sha256": "7939090e460349fd8e491317d82e6782b59326eb0a8f255567ebc04f1c6ce291",
+      "exit": 0,
+      "seconds": 1.7043197079910897,
+      "stdout": "platform_device=started source_channels=1 rate=11025 duration=0.174150\nphase=full generation=0 from=0.000000 position=0.174150 wall=0.207014 device_drain=complete\nphase=seek-quarter generation=1 from=0.043537 position=0.174150 wall=0.158693 device_drain=complete\nphase=seek-60-percent generation=2 from=0.104490 position=0.174150 wall=0.086945 device_drain=complete\nphase=rewind generation=3 from=0.000000 position=0.174150 wall=0.193154 device_drain=complete\n",
+      "stderr": ""
+    },
+    {
+      "file": "tests/fixtures/playback-errors/aac-ld-downscaled/ep1-n480-r22050-c1-ds2.mp4",
+      "sha256": "89278f62dddc6b1ac4705ca09566cb82b7a13939eb16371a30080b661432af70",
+      "exit": 0,
+      "seconds": 0.8703533330117352,
+      "stdout": "platform_device=started source_channels=1 rate=11025 duration=0.174150\nphase=full generation=0 from=0.000000 position=0.174150 wall=0.195514 device_drain=complete\nphase=seek-quarter generation=1 from=0.043537 position=0.174150 wall=0.153697 device_drain=complete\nphase=seek-60-percent generation=2 from=0.104490 position=0.174150 wall=0.090507 device_drain=complete\nphase=rewind generation=3 from=0.000000 position=0.174150 wall=0.198789 device_drain=complete\n",
+      "stderr": ""
+    },
+    {
+      "file": "tests/fixtures/playback-errors/aac-ld-downscaled/n480-r24000-c2-ds3.mp4",
+      "sha256": "465b6363a7329c1271c25f51e370761375f412139569bceb005a2f18d836d71b",
+      "exit": 0,
+      "seconds": 0.7996956659771968,
+      "stdout": "platform_device=started source_channels=2 rate=8000 duration=0.160000\nphase=full generation=0 from=0.000000 position=0.160000 wall=0.180171 device_drain=complete\nphase=seek-quarter generation=1 from=0.040000 position=0.160000 wall=0.145046 device_drain=complete\nphase=seek-60-percent generation=2 from=0.096000 position=0.160000 wall=0.090435 device_drain=complete\nphase=rewind generation=3 from=0.000000 position=0.160000 wall=0.178859 device_drain=complete\n",
+      "stderr": ""
+    },
+    {
+      "file": "tests/fixtures/playback-errors/aac-ld-downscaled/ep1-n480-r24000-c2-ds3.mp4",
+      "sha256": "d6db8c9f28a1246fd89d8700d6a7e22dc48a18aa905466453c0da03d1a06b2f0",
+      "exit": 0,
+      "seconds": 0.8547659160103649,
+      "stdout": "platform_device=started source_channels=2 rate=8000 duration=0.160000\nphase=full generation=0 from=0.000000 position=0.160000 wall=0.188153 device_drain=complete\nphase=seek-quarter generation=1 from=0.040000 position=0.160000 wall=0.142097 device_drain=complete\nphase=seek-60-percent generation=2 from=0.096000 position=0.160000 wall=0.085481 device_drain=complete\nphase=rewind generation=3 from=0.000000 position=0.160000 wall=0.180355 device_drain=complete\n",
+      "stderr": ""
+    },
+    {
+      "file": "tests/fixtures/playback-errors/aac-ld-downscaled/n480-r44100-c2-ds4.mp4",
+      "sha256": "2b60679ad28394e97079813bc28c9c5b447579c1a59ff036f11bcfb0f68311da",
+      "exit": 0,
+      "seconds": 0.5392431670043152,
+      "stdout": "platform_device=started source_channels=2 rate=11025 duration=0.087075\nphase=full generation=0 from=0.000000 position=0.087075 wall=0.108846 device_drain=complete\nphase=seek-quarter generation=1 from=0.021769 position=0.087075 wall=0.091146 device_drain=complete\nphase=seek-60-percent generation=2 from=0.052245 position=0.087075 wall=0.059590 device_drain=complete\nphase=rewind generation=3 from=0.000000 position=0.087075 wall=0.103423 device_drain=complete\n",
+      "stderr": ""
+    },
+    {
+      "file": "tests/fixtures/playback-errors/aac-ld-downscaled/ep1-n480-r44100-c2-ds4.mp4",
+      "sha256": "9871a5944bfecb641f79feb0a92aaa02a9971ca2d59156ec29b958587f4e7858",
+      "exit": 0,
+      "seconds": 0.5423546670062933,
+      "stdout": "platform_device=started source_channels=2 rate=11025 duration=0.087075\nphase=full generation=0 from=0.000000 position=0.087075 wall=0.108850 device_drain=complete\nphase=seek-quarter generation=1 from=0.021769 position=0.087075 wall=0.083732 device_drain=complete\nphase=seek-60-percent generation=2 from=0.052245 position=0.087075 wall=0.055630 device_drain=complete\nphase=rewind generation=3 from=0.000000 position=0.087075 wall=0.105656 device_drain=complete\n",
+      "stderr": ""
+    },
+    {
+      "file": "tests/fixtures/playback-errors/aac-ld-downscaled/n480-r48000-c7-ds8.mp4",
+      "sha256": "133d8049e97ce98cc4725d18fa231f57585fdd03b57277e743a9c6361b162695",
+      "exit": 0,
+      "seconds": 0.5278349999862257,
+      "stdout": "platform_device=started source_channels=8 rate=6000 duration=0.080000\nphase=full generation=0 from=0.000000 position=0.080000 wall=0.101924 device_drain=complete\nphase=seek-quarter generation=1 from=0.020000 position=0.080000 wall=0.088166 device_drain=complete\nphase=seek-60-percent generation=2 from=0.048000 position=0.080000 wall=0.062596 device_drain=complete\nphase=rewind generation=3 from=0.000000 position=0.080000 wall=0.100325 device_drain=complete\n",
+      "stderr": ""
+    },
+    {
+      "file": "tests/fixtures/playback-errors/aac-ld-downscaled/ep1-n480-r48000-c7-ds8.mp4",
+      "sha256": "a46962fedec7a5d3e3ba0d5ffa4c7cb7dc77b3b7eb14cacd9e258e20fbb9029c",
+      "exit": 0,
+      "seconds": 0.5104537500010338,
+      "stdout": "platform_device=started source_channels=8 rate=6000 duration=0.080000\nphase=full generation=0 from=0.000000 position=0.080000 wall=0.101781 device_drain=complete\nphase=seek-quarter generation=1 from=0.020000 position=0.080000 wall=0.084773 device_drain=complete\nphase=seek-60-percent generation=2 from=0.048000 position=0.080000 wall=0.056665 device_drain=complete\nphase=rewind generation=3 from=0.000000 position=0.080000 wall=0.100453 device_drain=complete\n",
+      "stderr": ""
+    }
+  ]
+}

@@ -1,0 +1,2405 @@
+{
+  "cases": [
+    {
+      "name": "n480-c1-x1-crc0-all",
+      "video": "n480-c1-x1-crc0-all.mp4",
+      "control": "n480-c1-x1-crc0-control.mp4",
+      "golden": "n480-c1-x1-crc0.f32le",
+      "rate": 24000,
+      "channels": 1,
+      "n": 480,
+      "streams": 3,
+      "original_streams": 4,
+      "groups": 1,
+      "mode": "all",
+      "malformed": [
+        {
+          "video": "n480-c1-x1-crc0-all-truncate.mp4",
+          "error": "missing AAC ESC instance"
+        },
+        {
+          "video": "n480-c1-x1-crc0-all-extra.mp4",
+          "error": "unconsumed AAC ESC information bits"
+        }
+      ]
+    },
+    {
+      "name": "n480-c1-x1-crc1-all",
+      "video": "n480-c1-x1-crc1-all.mp4",
+      "control": "n480-c1-x1-crc1-control.mp4",
+      "golden": "n480-c1-x1-crc1.f32le",
+      "rate": 24000,
+      "channels": 1,
+      "n": 480,
+      "streams": 3,
+      "original_streams": 4,
+      "groups": 1,
+      "mode": "all",
+      "malformed": [
+        {
+          "video": "n480-c1-x1-crc1-all-truncate.mp4",
+          "error": "missing AAC ESC instance"
+        },
+        {
+          "video": "n480-c1-x1-crc1-all-extra.mp4",
+          "error": "unconsumed AAC ESC information bits"
+        },
+        {
+          "video": "n480-c1-x1-crc1-all-crc.mp4",
+          "error": "low-delay SBR CRC mismatch"
+        }
+      ]
+    },
+    {
+      "name": "n480-c1-x2-crc0-all",
+      "video": "n480-c1-x2-crc0-all.mp4",
+      "control": "n480-c1-x2-crc0-control.mp4",
+      "golden": "n480-c1-x2-crc0.f32le",
+      "rate": 48000,
+      "channels": 1,
+      "n": 480,
+      "streams": 3,
+      "original_streams": 4,
+      "groups": 1,
+      "mode": "all",
+      "malformed": [
+        {
+          "video": "n480-c1-x2-crc0-all-truncate.mp4",
+          "error": "missing AAC ESC instance"
+        },
+        {
+          "video": "n480-c1-x2-crc0-all-extra.mp4",
+          "error": "unconsumed AAC ESC information bits"
+        }
+      ]
+    },
+    {
+      "name": "n480-c1-x2-crc1-all",
+      "video": "n480-c1-x2-crc1-all.mp4",
+      "control": "n480-c1-x2-crc1-control.mp4",
+      "golden": "n480-c1-x2-crc1.f32le",
+      "rate": 48000,
+      "channels": 1,
+      "n": 480,
+      "streams": 3,
+      "original_streams": 4,
+      "groups": 1,
+      "mode": "all",
+      "malformed": [
+        {
+          "video": "n480-c1-x2-crc1-all-truncate.mp4",
+          "error": "missing AAC ESC instance"
+        },
+        {
+          "video": "n480-c1-x2-crc1-all-extra.mp4",
+          "error": "unconsumed AAC ESC information bits"
+        },
+        {
+          "video": "n480-c1-x2-crc1-all-crc.mp4",
+          "error": "low-delay SBR CRC mismatch"
+        }
+      ]
+    },
+    {
+      "name": "n480-c2-x1-crc0-all",
+      "video": "n480-c2-x1-crc0-all.mp4",
+      "control": "n480-c2-x1-crc0-control.mp4",
+      "golden": "n480-c2-x1-crc0.f32le",
+      "rate": 24000,
+      "channels": 2,
+      "n": 480,
+      "streams": 6,
+      "original_streams": 7,
+      "groups": 1,
+      "mode": "all",
+      "malformed": [
+        {
+          "video": "n480-c2-x1-crc0-all-truncate.mp4",
+          "error": "missing AAC ESC instance"
+        },
+        {
+          "video": "n480-c2-x1-crc0-all-extra.mp4",
+          "error": "unconsumed AAC ESC information bits"
+        }
+      ]
+    },
+    {
+      "name": "n480-c2-x1-crc1-all",
+      "video": "n480-c2-x1-crc1-all.mp4",
+      "control": "n480-c2-x1-crc1-control.mp4",
+      "golden": "n480-c2-x1-crc1.f32le",
+      "rate": 24000,
+      "channels": 2,
+      "n": 480,
+      "streams": 6,
+      "original_streams": 7,
+      "groups": 1,
+      "mode": "all",
+      "malformed": [
+        {
+          "video": "n480-c2-x1-crc1-all-truncate.mp4",
+          "error": "missing AAC ESC instance"
+        },
+        {
+          "video": "n480-c2-x1-crc1-all-extra.mp4",
+          "error": "unconsumed AAC ESC information bits"
+        },
+        {
+          "video": "n480-c2-x1-crc1-all-crc.mp4",
+          "error": "low-delay SBR CRC mismatch"
+        }
+      ]
+    },
+    {
+      "name": "n480-c2-x2-crc0-all",
+      "video": "n480-c2-x2-crc0-all.mp4",
+      "control": "n480-c2-x2-crc0-control.mp4",
+      "golden": "n480-c2-x2-crc0.f32le",
+      "rate": 48000,
+      "channels": 2,
+      "n": 480,
+      "streams": 6,
+      "original_streams": 7,
+      "groups": 1,
+      "mode": "all",
+      "malformed": [
+        {
+          "video": "n480-c2-x2-crc0-all-truncate.mp4",
+          "error": "missing AAC ESC instance"
+        },
+        {
+          "video": "n480-c2-x2-crc0-all-extra.mp4",
+          "error": "unconsumed AAC ESC information bits"
+        }
+      ]
+    },
+    {
+      "name": "n480-c2-x2-crc1-all",
+      "video": "n480-c2-x2-crc1-all.mp4",
+      "control": "n480-c2-x2-crc1-control.mp4",
+      "golden": "n480-c2-x2-crc1.f32le",
+      "rate": 48000,
+      "channels": 2,
+      "n": 480,
+      "streams": 6,
+      "original_streams": 7,
+      "groups": 1,
+      "mode": "all",
+      "malformed": [
+        {
+          "video": "n480-c2-x2-crc1-all-truncate.mp4",
+          "error": "missing AAC ESC instance"
+        },
+        {
+          "video": "n480-c2-x2-crc1-all-extra.mp4",
+          "error": "unconsumed AAC ESC information bits"
+        },
+        {
+          "video": "n480-c2-x2-crc1-all-crc.mp4",
+          "error": "low-delay SBR CRC mismatch"
+        }
+      ]
+    },
+    {
+      "name": "n480-c3-x1-crc0-all",
+      "video": "n480-c3-x1-crc0-all.mp4",
+      "control": "n480-c3-x1-crc0-control.mp4",
+      "golden": "n480-c3-x1-crc0.f32le",
+      "rate": 24000,
+      "channels": 3,
+      "n": 480,
+      "streams": 9,
+      "original_streams": 11,
+      "groups": 2,
+      "mode": "all",
+      "malformed": [
+        {
+          "video": "n480-c3-x1-crc0-all-truncate.mp4",
+          "error": "missing AAC ESC instance"
+        },
+        {
+          "video": "n480-c3-x1-crc0-all-extra.mp4",
+          "error": "unconsumed AAC ESC information bits"
+        }
+      ]
+    },
+    {
+      "name": "n480-c3-x1-crc0-last",
+      "video": "n480-c3-x1-crc0-last.mp4",
+      "control": "n480-c3-x1-crc0-control.mp4",
+      "golden": "n480-c3-x1-crc0.f32le",
+      "rate": 24000,
+      "channels": 3,
+      "n": 480,
+      "streams": 10,
+      "original_streams": 11,
+      "groups": 2,
+      "mode": "last",
+      "malformed": [
+        {
+          "video": "n480-c3-x1-crc0-last-truncate.mp4",
+          "error": "missing AAC ESC instance"
+        },
+        {
+          "video": "n480-c3-x1-crc0-last-extra.mp4",
+          "error": "unconsumed AAC ESC information bits"
+        }
+      ]
+    },
+    {
+      "name": "n480-c3-x1-crc1-all",
+      "video": "n480-c3-x1-crc1-all.mp4",
+      "control": "n480-c3-x1-crc1-control.mp4",
+      "golden": "n480-c3-x1-crc1.f32le",
+      "rate": 24000,
+      "channels": 3,
+      "n": 480,
+      "streams": 9,
+      "original_streams": 11,
+      "groups": 2,
+      "mode": "all",
+      "malformed": [
+        {
+          "video": "n480-c3-x1-crc1-all-truncate.mp4",
+          "error": "missing AAC ESC instance"
+        },
+        {
+          "video": "n480-c3-x1-crc1-all-extra.mp4",
+          "error": "unconsumed AAC ESC information bits"
+        },
+        {
+          "video": "n480-c3-x1-crc1-all-crc.mp4",
+          "error": "low-delay SBR CRC mismatch"
+        }
+      ]
+    },
+    {
+      "name": "n480-c3-x1-crc1-last",
+      "video": "n480-c3-x1-crc1-last.mp4",
+      "control": "n480-c3-x1-crc1-control.mp4",
+      "golden": "n480-c3-x1-crc1.f32le",
+      "rate": 24000,
+      "channels": 3,
+      "n": 480,
+      "streams": 10,
+      "original_streams": 11,
+      "groups": 2,
+      "mode": "last",
+      "malformed": [
+        {
+          "video": "n480-c3-x1-crc1-last-truncate.mp4",
+          "error": "missing AAC ESC instance"
+        },
+        {
+          "video": "n480-c3-x1-crc1-last-extra.mp4",
+          "error": "unconsumed AAC ESC information bits"
+        },
+        {
+          "video": "n480-c3-x1-crc1-last-crc.mp4",
+          "error": "low-delay SBR CRC mismatch"
+        }
+      ]
+    },
+    {
+      "name": "n480-c3-x2-crc0-all",
+      "video": "n480-c3-x2-crc0-all.mp4",
+      "control": "n480-c3-x2-crc0-control.mp4",
+      "golden": "n480-c3-x2-crc0.f32le",
+      "rate": 48000,
+      "channels": 3,
+      "n": 480,
+      "streams": 9,
+      "original_streams": 11,
+      "groups": 2,
+      "mode": "all",
+      "malformed": [
+        {
+          "video": "n480-c3-x2-crc0-all-truncate.mp4",
+          "error": "missing AAC ESC instance"
+        },
+        {
+          "video": "n480-c3-x2-crc0-all-extra.mp4",
+          "error": "unconsumed AAC ESC information bits"
+        }
+      ]
+    },
+    {
+      "name": "n480-c3-x2-crc0-last",
+      "video": "n480-c3-x2-crc0-last.mp4",
+      "control": "n480-c3-x2-crc0-control.mp4",
+      "golden": "n480-c3-x2-crc0.f32le",
+      "rate": 48000,
+      "channels": 3,
+      "n": 480,
+      "streams": 10,
+      "original_streams": 11,
+      "groups": 2,
+      "mode": "last",
+      "malformed": [
+        {
+          "video": "n480-c3-x2-crc0-last-truncate.mp4",
+          "error": "missing AAC ESC instance"
+        },
+        {
+          "video": "n480-c3-x2-crc0-last-extra.mp4",
+          "error": "unconsumed AAC ESC information bits"
+        }
+      ]
+    },
+    {
+      "name": "n480-c3-x2-crc1-all",
+      "video": "n480-c3-x2-crc1-all.mp4",
+      "control": "n480-c3-x2-crc1-control.mp4",
+      "golden": "n480-c3-x2-crc1.f32le",
+      "rate": 48000,
+      "channels": 3,
+      "n": 480,
+      "streams": 9,
+      "original_streams": 11,
+      "groups": 2,
+      "mode": "all",
+      "malformed": [
+        {
+          "video": "n480-c3-x2-crc1-all-truncate.mp4",
+          "error": "missing AAC ESC instance"
+        },
+        {
+          "video": "n480-c3-x2-crc1-all-extra.mp4",
+          "error": "unconsumed AAC ESC information bits"
+        },
+        {
+          "video": "n480-c3-x2-crc1-all-crc.mp4",
+          "error": "low-delay SBR CRC mismatch"
+        }
+      ]
+    },
+    {
+      "name": "n480-c3-x2-crc1-last",
+      "video": "n480-c3-x2-crc1-last.mp4",
+      "control": "n480-c3-x2-crc1-control.mp4",
+      "golden": "n480-c3-x2-crc1.f32le",
+      "rate": 48000,
+      "channels": 3,
+      "n": 480,
+      "streams": 10,
+      "original_streams": 11,
+      "groups": 2,
+      "mode": "last",
+      "malformed": [
+        {
+          "video": "n480-c3-x2-crc1-last-truncate.mp4",
+          "error": "missing AAC ESC instance"
+        },
+        {
+          "video": "n480-c3-x2-crc1-last-extra.mp4",
+          "error": "unconsumed AAC ESC information bits"
+        },
+        {
+          "video": "n480-c3-x2-crc1-last-crc.mp4",
+          "error": "low-delay SBR CRC mismatch"
+        }
+      ]
+    },
+    {
+      "name": "n480-c4-x1-crc0-all",
+      "video": "n480-c4-x1-crc0-all.mp4",
+      "control": "n480-c4-x1-crc0-control.mp4",
+      "golden": "n480-c4-x1-crc0.f32le",
+      "rate": 24000,
+      "channels": 4,
+      "n": 480,
+      "streams": 12,
+      "original_streams": 15,
+      "groups": 3,
+      "mode": "all",
+      "malformed": [
+        {
+          "video": "n480-c4-x1-crc0-all-truncate.mp4",
+          "error": "missing AAC ESC instance"
+        },
+        {
+          "video": "n480-c4-x1-crc0-all-extra.mp4",
+          "error": "unconsumed AAC ESC information bits"
+        }
+      ]
+    },
+    {
+      "name": "n480-c4-x1-crc0-last",
+      "video": "n480-c4-x1-crc0-last.mp4",
+      "control": "n480-c4-x1-crc0-control.mp4",
+      "golden": "n480-c4-x1-crc0.f32le",
+      "rate": 24000,
+      "channels": 4,
+      "n": 480,
+      "streams": 14,
+      "original_streams": 15,
+      "groups": 3,
+      "mode": "last",
+      "malformed": [
+        {
+          "video": "n480-c4-x1-crc0-last-truncate.mp4",
+          "error": "missing AAC ESC instance"
+        },
+        {
+          "video": "n480-c4-x1-crc0-last-extra.mp4",
+          "error": "unconsumed AAC ESC information bits"
+        }
+      ]
+    },
+    {
+      "name": "n480-c4-x1-crc1-all",
+      "video": "n480-c4-x1-crc1-all.mp4",
+      "control": "n480-c4-x1-crc1-control.mp4",
+      "golden": "n480-c4-x1-crc1.f32le",
+      "rate": 24000,
+      "channels": 4,
+      "n": 480,
+      "streams": 12,
+      "original_streams": 15,
+      "groups": 3,
+      "mode": "all",
+      "malformed": [
+        {
+          "video": "n480-c4-x1-crc1-all-truncate.mp4",
+          "error": "missing AAC ESC instance"
+        },
+        {
+          "video": "n480-c4-x1-crc1-all-extra.mp4",
+          "error": "unconsumed AAC ESC information bits"
+        },
+        {
+          "video": "n480-c4-x1-crc1-all-crc.mp4",
+          "error": "low-delay SBR CRC mismatch"
+        }
+      ]
+    },
+    {
+      "name": "n480-c4-x1-crc1-last",
+      "video": "n480-c4-x1-crc1-last.mp4",
+      "control": "n480-c4-x1-crc1-control.mp4",
+      "golden": "n480-c4-x1-crc1.f32le",
+      "rate": 24000,
+      "channels": 4,
+      "n": 480,
+      "streams": 14,
+      "original_streams": 15,
+      "groups": 3,
+      "mode": "last",
+      "malformed": [
+        {
+          "video": "n480-c4-x1-crc1-last-truncate.mp4",
+          "error": "missing AAC ESC instance"
+        },
+        {
+          "video": "n480-c4-x1-crc1-last-extra.mp4",
+          "error": "unconsumed AAC ESC information bits"
+        },
+        {
+          "video": "n480-c4-x1-crc1-last-crc.mp4",
+          "error": "low-delay SBR CRC mismatch"
+        }
+      ]
+    },
+    {
+      "name": "n480-c4-x2-crc0-all",
+      "video": "n480-c4-x2-crc0-all.mp4",
+      "control": "n480-c4-x2-crc0-control.mp4",
+      "golden": "n480-c4-x2-crc0.f32le",
+      "rate": 48000,
+      "channels": 4,
+      "n": 480,
+      "streams": 12,
+      "original_streams": 15,
+      "groups": 3,
+      "mode": "all",
+      "malformed": [
+        {
+          "video": "n480-c4-x2-crc0-all-truncate.mp4",
+          "error": "missing AAC ESC instance"
+        },
+        {
+          "video": "n480-c4-x2-crc0-all-extra.mp4",
+          "error": "unconsumed AAC ESC information bits"
+        }
+      ]
+    },
+    {
+      "name": "n480-c4-x2-crc0-last",
+      "video": "n480-c4-x2-crc0-last.mp4",
+      "control": "n480-c4-x2-crc0-control.mp4",
+      "golden": "n480-c4-x2-crc0.f32le",
+      "rate": 48000,
+      "channels": 4,
+      "n": 480,
+      "streams": 14,
+      "original_streams": 15,
+      "groups": 3,
+      "mode": "last",
+      "malformed": [
+        {
+          "video": "n480-c4-x2-crc0-last-truncate.mp4",
+          "error": "missing AAC ESC instance"
+        },
+        {
+          "video": "n480-c4-x2-crc0-last-extra.mp4",
+          "error": "unconsumed AAC ESC information bits"
+        }
+      ]
+    },
+    {
+      "name": "n480-c4-x2-crc1-all",
+      "video": "n480-c4-x2-crc1-all.mp4",
+      "control": "n480-c4-x2-crc1-control.mp4",
+      "golden": "n480-c4-x2-crc1.f32le",
+      "rate": 48000,
+      "channels": 4,
+      "n": 480,
+      "streams": 12,
+      "original_streams": 15,
+      "groups": 3,
+      "mode": "all",
+      "malformed": [
+        {
+          "video": "n480-c4-x2-crc1-all-truncate.mp4",
+          "error": "missing AAC ESC instance"
+        },
+        {
+          "video": "n480-c4-x2-crc1-all-extra.mp4",
+          "error": "unconsumed AAC ESC information bits"
+        },
+        {
+          "video": "n480-c4-x2-crc1-all-crc.mp4",
+          "error": "low-delay SBR CRC mismatch"
+        }
+      ]
+    },
+    {
+      "name": "n480-c4-x2-crc1-last",
+      "video": "n480-c4-x2-crc1-last.mp4",
+      "control": "n480-c4-x2-crc1-control.mp4",
+      "golden": "n480-c4-x2-crc1.f32le",
+      "rate": 48000,
+      "channels": 4,
+      "n": 480,
+      "streams": 14,
+      "original_streams": 15,
+      "groups": 3,
+      "mode": "last",
+      "malformed": [
+        {
+          "video": "n480-c4-x2-crc1-last-truncate.mp4",
+          "error": "missing AAC ESC instance"
+        },
+        {
+          "video": "n480-c4-x2-crc1-last-extra.mp4",
+          "error": "unconsumed AAC ESC information bits"
+        },
+        {
+          "video": "n480-c4-x2-crc1-last-crc.mp4",
+          "error": "low-delay SBR CRC mismatch"
+        }
+      ]
+    },
+    {
+      "name": "n480-c5-x1-crc0-all",
+      "video": "n480-c5-x1-crc0-all.mp4",
+      "control": "n480-c5-x1-crc0-control.mp4",
+      "golden": "n480-c5-x1-crc0.f32le",
+      "rate": 24000,
+      "channels": 5,
+      "n": 480,
+      "streams": 15,
+      "original_streams": 18,
+      "groups": 3,
+      "mode": "all",
+      "malformed": [
+        {
+          "video": "n480-c5-x1-crc0-all-truncate.mp4",
+          "error": "missing AAC ESC instance"
+        },
+        {
+          "video": "n480-c5-x1-crc0-all-extra.mp4",
+          "error": "unconsumed AAC ESC information bits"
+        }
+      ]
+    },
+    {
+      "name": "n480-c5-x1-crc0-last",
+      "video": "n480-c5-x1-crc0-last.mp4",
+      "control": "n480-c5-x1-crc0-control.mp4",
+      "golden": "n480-c5-x1-crc0.f32le",
+      "rate": 24000,
+      "channels": 5,
+      "n": 480,
+      "streams": 17,
+      "original_streams": 18,
+      "groups": 3,
+      "mode": "last",
+      "malformed": [
+        {
+          "video": "n480-c5-x1-crc0-last-truncate.mp4",
+          "error": "missing AAC ESC instance"
+        },
+        {
+          "video": "n480-c5-x1-crc0-last-extra.mp4",
+          "error": "unconsumed AAC ESC information bits"
+        }
+      ]
+    },
+    {
+      "name": "n480-c5-x1-crc1-all",
+      "video": "n480-c5-x1-crc1-all.mp4",
+      "control": "n480-c5-x1-crc1-control.mp4",
+      "golden": "n480-c5-x1-crc1.f32le",
+      "rate": 24000,
+      "channels": 5,
+      "n": 480,
+      "streams": 15,
+      "original_streams": 18,
+      "groups": 3,
+      "mode": "all",
+      "malformed": [
+        {
+          "video": "n480-c5-x1-crc1-all-truncate.mp4",
+          "error": "missing AAC ESC instance"
+        },
+        {
+          "video": "n480-c5-x1-crc1-all-extra.mp4",
+          "error": "unconsumed AAC ESC information bits"
+        },
+        {
+          "video": "n480-c5-x1-crc1-all-crc.mp4",
+          "error": "low-delay SBR CRC mismatch"
+        }
+      ]
+    },
+    {
+      "name": "n480-c5-x1-crc1-last",
+      "video": "n480-c5-x1-crc1-last.mp4",
+      "control": "n480-c5-x1-crc1-control.mp4",
+      "golden": "n480-c5-x1-crc1.f32le",
+      "rate": 24000,
+      "channels": 5,
+      "n": 480,
+      "streams": 17,
+      "original_streams": 18,
+      "groups": 3,
+      "mode": "last",
+      "malformed": [
+        {
+          "video": "n480-c5-x1-crc1-last-truncate.mp4",
+          "error": "missing AAC ESC instance"
+        },
+        {
+          "video": "n480-c5-x1-crc1-last-extra.mp4",
+          "error": "unconsumed AAC ESC information bits"
+        },
+        {
+          "video": "n480-c5-x1-crc1-last-crc.mp4",
+          "error": "low-delay SBR CRC mismatch"
+        }
+      ]
+    },
+    {
+      "name": "n480-c5-x2-crc0-all",
+      "video": "n480-c5-x2-crc0-all.mp4",
+      "control": "n480-c5-x2-crc0-control.mp4",
+      "golden": "n480-c5-x2-crc0.f32le",
+      "rate": 48000,
+      "channels": 5,
+      "n": 480,
+      "streams": 15,
+      "original_streams": 18,
+      "groups": 3,
+      "mode": "all",
+      "malformed": [
+        {
+          "video": "n480-c5-x2-crc0-all-truncate.mp4",
+          "error": "missing AAC ESC instance"
+        },
+        {
+          "video": "n480-c5-x2-crc0-all-extra.mp4",
+          "error": "unconsumed AAC ESC information bits"
+        }
+      ]
+    },
+    {
+      "name": "n480-c5-x2-crc0-last",
+      "video": "n480-c5-x2-crc0-last.mp4",
+      "control": "n480-c5-x2-crc0-control.mp4",
+      "golden": "n480-c5-x2-crc0.f32le",
+      "rate": 48000,
+      "channels": 5,
+      "n": 480,
+      "streams": 17,
+      "original_streams": 18,
+      "groups": 3,
+      "mode": "last",
+      "malformed": [
+        {
+          "video": "n480-c5-x2-crc0-last-truncate.mp4",
+          "error": "missing AAC ESC instance"
+        },
+        {
+          "video": "n480-c5-x2-crc0-last-extra.mp4",
+          "error": "unconsumed AAC ESC information bits"
+        }
+      ]
+    },
+    {
+      "name": "n480-c5-x2-crc1-all",
+      "video": "n480-c5-x2-crc1-all.mp4",
+      "control": "n480-c5-x2-crc1-control.mp4",
+      "golden": "n480-c5-x2-crc1.f32le",
+      "rate": 48000,
+      "channels": 5,
+      "n": 480,
+      "streams": 15,
+      "original_streams": 18,
+      "groups": 3,
+      "mode": "all",
+      "malformed": [
+        {
+          "video": "n480-c5-x2-crc1-all-truncate.mp4",
+          "error": "missing AAC ESC instance"
+        },
+        {
+          "video": "n480-c5-x2-crc1-all-extra.mp4",
+          "error": "unconsumed AAC ESC information bits"
+        },
+        {
+          "video": "n480-c5-x2-crc1-all-crc.mp4",
+          "error": "low-delay SBR CRC mismatch"
+        }
+      ]
+    },
+    {
+      "name": "n480-c5-x2-crc1-last",
+      "video": "n480-c5-x2-crc1-last.mp4",
+      "control": "n480-c5-x2-crc1-control.mp4",
+      "golden": "n480-c5-x2-crc1.f32le",
+      "rate": 48000,
+      "channels": 5,
+      "n": 480,
+      "streams": 17,
+      "original_streams": 18,
+      "groups": 3,
+      "mode": "last",
+      "malformed": [
+        {
+          "video": "n480-c5-x2-crc1-last-truncate.mp4",
+          "error": "missing AAC ESC instance"
+        },
+        {
+          "video": "n480-c5-x2-crc1-last-extra.mp4",
+          "error": "unconsumed AAC ESC information bits"
+        },
+        {
+          "video": "n480-c5-x2-crc1-last-crc.mp4",
+          "error": "low-delay SBR CRC mismatch"
+        }
+      ]
+    },
+    {
+      "name": "n480-c6-x1-crc0-all",
+      "video": "n480-c6-x1-crc0-all.mp4",
+      "control": "n480-c6-x1-crc0-control.mp4",
+      "golden": "n480-c6-x1-crc0.f32le",
+      "rate": 24000,
+      "channels": 6,
+      "n": 480,
+      "streams": 17,
+      "original_streams": 20,
+      "groups": 3,
+      "mode": "all",
+      "malformed": [
+        {
+          "video": "n480-c6-x1-crc0-all-truncate.mp4",
+          "error": "missing AAC ESC instance"
+        },
+        {
+          "video": "n480-c6-x1-crc0-all-extra.mp4",
+          "error": "unconsumed AAC ESC information bits"
+        }
+      ]
+    },
+    {
+      "name": "n480-c6-x1-crc0-last",
+      "video": "n480-c6-x1-crc0-last.mp4",
+      "control": "n480-c6-x1-crc0-control.mp4",
+      "golden": "n480-c6-x1-crc0.f32le",
+      "rate": 24000,
+      "channels": 6,
+      "n": 480,
+      "streams": 19,
+      "original_streams": 20,
+      "groups": 3,
+      "mode": "last",
+      "malformed": [
+        {
+          "video": "n480-c6-x1-crc0-last-truncate.mp4",
+          "error": "missing AAC ESC instance"
+        },
+        {
+          "video": "n480-c6-x1-crc0-last-extra.mp4",
+          "error": "unconsumed AAC ESC information bits"
+        }
+      ]
+    },
+    {
+      "name": "n480-c6-x1-crc1-all",
+      "video": "n480-c6-x1-crc1-all.mp4",
+      "control": "n480-c6-x1-crc1-control.mp4",
+      "golden": "n480-c6-x1-crc1.f32le",
+      "rate": 24000,
+      "channels": 6,
+      "n": 480,
+      "streams": 17,
+      "original_streams": 20,
+      "groups": 3,
+      "mode": "all",
+      "malformed": [
+        {
+          "video": "n480-c6-x1-crc1-all-truncate.mp4",
+          "error": "missing AAC ESC instance"
+        },
+        {
+          "video": "n480-c6-x1-crc1-all-extra.mp4",
+          "error": "unconsumed AAC ESC information bits"
+        },
+        {
+          "video": "n480-c6-x1-crc1-all-crc.mp4",
+          "error": "low-delay SBR CRC mismatch"
+        }
+      ]
+    },
+    {
+      "name": "n480-c6-x1-crc1-last",
+      "video": "n480-c6-x1-crc1-last.mp4",
+      "control": "n480-c6-x1-crc1-control.mp4",
+      "golden": "n480-c6-x1-crc1.f32le",
+      "rate": 24000,
+      "channels": 6,
+      "n": 480,
+      "streams": 19,
+      "original_streams": 20,
+      "groups": 3,
+      "mode": "last",
+      "malformed": [
+        {
+          "video": "n480-c6-x1-crc1-last-truncate.mp4",
+          "error": "missing AAC ESC instance"
+        },
+        {
+          "video": "n480-c6-x1-crc1-last-extra.mp4",
+          "error": "unconsumed AAC ESC information bits"
+        },
+        {
+          "video": "n480-c6-x1-crc1-last-crc.mp4",
+          "error": "low-delay SBR CRC mismatch"
+        }
+      ]
+    },
+    {
+      "name": "n480-c6-x2-crc0-all",
+      "video": "n480-c6-x2-crc0-all.mp4",
+      "control": "n480-c6-x2-crc0-control.mp4",
+      "golden": "n480-c6-x2-crc0.f32le",
+      "rate": 48000,
+      "channels": 6,
+      "n": 480,
+      "streams": 17,
+      "original_streams": 20,
+      "groups": 3,
+      "mode": "all",
+      "malformed": [
+        {
+          "video": "n480-c6-x2-crc0-all-truncate.mp4",
+          "error": "missing AAC ESC instance"
+        },
+        {
+          "video": "n480-c6-x2-crc0-all-extra.mp4",
+          "error": "unconsumed AAC ESC information bits"
+        }
+      ]
+    },
+    {
+      "name": "n480-c6-x2-crc0-last",
+      "video": "n480-c6-x2-crc0-last.mp4",
+      "control": "n480-c6-x2-crc0-control.mp4",
+      "golden": "n480-c6-x2-crc0.f32le",
+      "rate": 48000,
+      "channels": 6,
+      "n": 480,
+      "streams": 19,
+      "original_streams": 20,
+      "groups": 3,
+      "mode": "last",
+      "malformed": [
+        {
+          "video": "n480-c6-x2-crc0-last-truncate.mp4",
+          "error": "missing AAC ESC instance"
+        },
+        {
+          "video": "n480-c6-x2-crc0-last-extra.mp4",
+          "error": "unconsumed AAC ESC information bits"
+        }
+      ]
+    },
+    {
+      "name": "n480-c6-x2-crc1-all",
+      "video": "n480-c6-x2-crc1-all.mp4",
+      "control": "n480-c6-x2-crc1-control.mp4",
+      "golden": "n480-c6-x2-crc1.f32le",
+      "rate": 48000,
+      "channels": 6,
+      "n": 480,
+      "streams": 17,
+      "original_streams": 20,
+      "groups": 3,
+      "mode": "all",
+      "malformed": [
+        {
+          "video": "n480-c6-x2-crc1-all-truncate.mp4",
+          "error": "missing AAC ESC instance"
+        },
+        {
+          "video": "n480-c6-x2-crc1-all-extra.mp4",
+          "error": "unconsumed AAC ESC information bits"
+        },
+        {
+          "video": "n480-c6-x2-crc1-all-crc.mp4",
+          "error": "low-delay SBR CRC mismatch"
+        }
+      ]
+    },
+    {
+      "name": "n480-c6-x2-crc1-last",
+      "video": "n480-c6-x2-crc1-last.mp4",
+      "control": "n480-c6-x2-crc1-control.mp4",
+      "golden": "n480-c6-x2-crc1.f32le",
+      "rate": 48000,
+      "channels": 6,
+      "n": 480,
+      "streams": 19,
+      "original_streams": 20,
+      "groups": 3,
+      "mode": "last",
+      "malformed": [
+        {
+          "video": "n480-c6-x2-crc1-last-truncate.mp4",
+          "error": "missing AAC ESC instance"
+        },
+        {
+          "video": "n480-c6-x2-crc1-last-extra.mp4",
+          "error": "unconsumed AAC ESC information bits"
+        },
+        {
+          "video": "n480-c6-x2-crc1-last-crc.mp4",
+          "error": "low-delay SBR CRC mismatch"
+        }
+      ]
+    },
+    {
+      "name": "n480-c7-x1-crc0-all",
+      "video": "n480-c7-x1-crc0-all.mp4",
+      "control": "n480-c7-x1-crc0-control.mp4",
+      "golden": "n480-c7-x1-crc0.f32le",
+      "rate": 24000,
+      "channels": 8,
+      "n": 480,
+      "streams": 23,
+      "original_streams": 27,
+      "groups": 4,
+      "mode": "all",
+      "malformed": [
+        {
+          "video": "n480-c7-x1-crc0-all-truncate.mp4",
+          "error": "missing AAC ESC instance"
+        },
+        {
+          "video": "n480-c7-x1-crc0-all-extra.mp4",
+          "error": "unconsumed AAC ESC information bits"
+        }
+      ]
+    },
+    {
+      "name": "n480-c7-x1-crc0-last",
+      "video": "n480-c7-x1-crc0-last.mp4",
+      "control": "n480-c7-x1-crc0-control.mp4",
+      "golden": "n480-c7-x1-crc0.f32le",
+      "rate": 24000,
+      "channels": 8,
+      "n": 480,
+      "streams": 26,
+      "original_streams": 27,
+      "groups": 4,
+      "mode": "last",
+      "malformed": [
+        {
+          "video": "n480-c7-x1-crc0-last-truncate.mp4",
+          "error": "missing AAC ESC instance"
+        },
+        {
+          "video": "n480-c7-x1-crc0-last-extra.mp4",
+          "error": "unconsumed AAC ESC information bits"
+        }
+      ]
+    },
+    {
+      "name": "n480-c7-x1-crc1-all",
+      "video": "n480-c7-x1-crc1-all.mp4",
+      "control": "n480-c7-x1-crc1-control.mp4",
+      "golden": "n480-c7-x1-crc1.f32le",
+      "rate": 24000,
+      "channels": 8,
+      "n": 480,
+      "streams": 23,
+      "original_streams": 27,
+      "groups": 4,
+      "mode": "all",
+      "malformed": [
+        {
+          "video": "n480-c7-x1-crc1-all-truncate.mp4",
+          "error": "missing AAC ESC instance"
+        },
+        {
+          "video": "n480-c7-x1-crc1-all-extra.mp4",
+          "error": "unconsumed AAC ESC information bits"
+        },
+        {
+          "video": "n480-c7-x1-crc1-all-crc.mp4",
+          "error": "low-delay SBR CRC mismatch"
+        }
+      ]
+    },
+    {
+      "name": "n480-c7-x1-crc1-last",
+      "video": "n480-c7-x1-crc1-last.mp4",
+      "control": "n480-c7-x1-crc1-control.mp4",
+      "golden": "n480-c7-x1-crc1.f32le",
+      "rate": 24000,
+      "channels": 8,
+      "n": 480,
+      "streams": 26,
+      "original_streams": 27,
+      "groups": 4,
+      "mode": "last",
+      "malformed": [
+        {
+          "video": "n480-c7-x1-crc1-last-truncate.mp4",
+          "error": "missing AAC ESC instance"
+        },
+        {
+          "video": "n480-c7-x1-crc1-last-extra.mp4",
+          "error": "unconsumed AAC ESC information bits"
+        },
+        {
+          "video": "n480-c7-x1-crc1-last-crc.mp4",
+          "error": "low-delay SBR CRC mismatch"
+        }
+      ]
+    },
+    {
+      "name": "n480-c7-x2-crc0-all",
+      "video": "n480-c7-x2-crc0-all.mp4",
+      "control": "n480-c7-x2-crc0-control.mp4",
+      "golden": "n480-c7-x2-crc0.f32le",
+      "rate": 48000,
+      "channels": 8,
+      "n": 480,
+      "streams": 23,
+      "original_streams": 27,
+      "groups": 4,
+      "mode": "all",
+      "malformed": [
+        {
+          "video": "n480-c7-x2-crc0-all-truncate.mp4",
+          "error": "missing AAC ESC instance"
+        },
+        {
+          "video": "n480-c7-x2-crc0-all-extra.mp4",
+          "error": "unconsumed AAC ESC information bits"
+        }
+      ]
+    },
+    {
+      "name": "n480-c7-x2-crc0-last",
+      "video": "n480-c7-x2-crc0-last.mp4",
+      "control": "n480-c7-x2-crc0-control.mp4",
+      "golden": "n480-c7-x2-crc0.f32le",
+      "rate": 48000,
+      "channels": 8,
+      "n": 480,
+      "streams": 26,
+      "original_streams": 27,
+      "groups": 4,
+      "mode": "last",
+      "malformed": [
+        {
+          "video": "n480-c7-x2-crc0-last-truncate.mp4",
+          "error": "missing AAC ESC instance"
+        },
+        {
+          "video": "n480-c7-x2-crc0-last-extra.mp4",
+          "error": "unconsumed AAC ESC information bits"
+        }
+      ]
+    },
+    {
+      "name": "n480-c7-x2-crc1-all",
+      "video": "n480-c7-x2-crc1-all.mp4",
+      "control": "n480-c7-x2-crc1-control.mp4",
+      "golden": "n480-c7-x2-crc1.f32le",
+      "rate": 48000,
+      "channels": 8,
+      "n": 480,
+      "streams": 23,
+      "original_streams": 27,
+      "groups": 4,
+      "mode": "all",
+      "malformed": [
+        {
+          "video": "n480-c7-x2-crc1-all-truncate.mp4",
+          "error": "missing AAC ESC instance"
+        },
+        {
+          "video": "n480-c7-x2-crc1-all-extra.mp4",
+          "error": "unconsumed AAC ESC information bits"
+        },
+        {
+          "video": "n480-c7-x2-crc1-all-crc.mp4",
+          "error": "low-delay SBR CRC mismatch"
+        }
+      ]
+    },
+    {
+      "name": "n480-c7-x2-crc1-last",
+      "video": "n480-c7-x2-crc1-last.mp4",
+      "control": "n480-c7-x2-crc1-control.mp4",
+      "golden": "n480-c7-x2-crc1.f32le",
+      "rate": 48000,
+      "channels": 8,
+      "n": 480,
+      "streams": 26,
+      "original_streams": 27,
+      "groups": 4,
+      "mode": "last",
+      "malformed": [
+        {
+          "video": "n480-c7-x2-crc1-last-truncate.mp4",
+          "error": "missing AAC ESC instance"
+        },
+        {
+          "video": "n480-c7-x2-crc1-last-extra.mp4",
+          "error": "unconsumed AAC ESC information bits"
+        },
+        {
+          "video": "n480-c7-x2-crc1-last-crc.mp4",
+          "error": "low-delay SBR CRC mismatch"
+        }
+      ]
+    },
+    {
+      "name": "n512-c1-x1-crc0-all",
+      "video": "n512-c1-x1-crc0-all.mp4",
+      "control": "n512-c1-x1-crc0-control.mp4",
+      "golden": "n512-c1-x1-crc0.f32le",
+      "rate": 24000,
+      "channels": 1,
+      "n": 512,
+      "streams": 3,
+      "original_streams": 4,
+      "groups": 1,
+      "mode": "all",
+      "malformed": [
+        {
+          "video": "n512-c1-x1-crc0-all-truncate.mp4",
+          "error": "missing AAC ESC instance"
+        },
+        {
+          "video": "n512-c1-x1-crc0-all-extra.mp4",
+          "error": "unconsumed AAC ESC information bits"
+        }
+      ]
+    },
+    {
+      "name": "n512-c1-x1-crc1-all",
+      "video": "n512-c1-x1-crc1-all.mp4",
+      "control": "n512-c1-x1-crc1-control.mp4",
+      "golden": "n512-c1-x1-crc1.f32le",
+      "rate": 24000,
+      "channels": 1,
+      "n": 512,
+      "streams": 3,
+      "original_streams": 4,
+      "groups": 1,
+      "mode": "all",
+      "malformed": [
+        {
+          "video": "n512-c1-x1-crc1-all-truncate.mp4",
+          "error": "missing AAC ESC instance"
+        },
+        {
+          "video": "n512-c1-x1-crc1-all-extra.mp4",
+          "error": "unconsumed AAC ESC information bits"
+        },
+        {
+          "video": "n512-c1-x1-crc1-all-crc.mp4",
+          "error": "low-delay SBR CRC mismatch"
+        }
+      ]
+    },
+    {
+      "name": "n512-c1-x2-crc0-all",
+      "video": "n512-c1-x2-crc0-all.mp4",
+      "control": "n512-c1-x2-crc0-control.mp4",
+      "golden": "n512-c1-x2-crc0.f32le",
+      "rate": 48000,
+      "channels": 1,
+      "n": 512,
+      "streams": 3,
+      "original_streams": 4,
+      "groups": 1,
+      "mode": "all",
+      "malformed": [
+        {
+          "video": "n512-c1-x2-crc0-all-truncate.mp4",
+          "error": "missing AAC ESC instance"
+        },
+        {
+          "video": "n512-c1-x2-crc0-all-extra.mp4",
+          "error": "unconsumed AAC ESC information bits"
+        }
+      ]
+    },
+    {
+      "name": "n512-c1-x2-crc1-all",
+      "video": "n512-c1-x2-crc1-all.mp4",
+      "control": "n512-c1-x2-crc1-control.mp4",
+      "golden": "n512-c1-x2-crc1.f32le",
+      "rate": 48000,
+      "channels": 1,
+      "n": 512,
+      "streams": 3,
+      "original_streams": 4,
+      "groups": 1,
+      "mode": "all",
+      "malformed": [
+        {
+          "video": "n512-c1-x2-crc1-all-truncate.mp4",
+          "error": "missing AAC ESC instance"
+        },
+        {
+          "video": "n512-c1-x2-crc1-all-extra.mp4",
+          "error": "unconsumed AAC ESC information bits"
+        },
+        {
+          "video": "n512-c1-x2-crc1-all-crc.mp4",
+          "error": "low-delay SBR CRC mismatch"
+        }
+      ]
+    },
+    {
+      "name": "n512-c2-x1-crc0-all",
+      "video": "n512-c2-x1-crc0-all.mp4",
+      "control": "n512-c2-x1-crc0-control.mp4",
+      "golden": "n512-c2-x1-crc0.f32le",
+      "rate": 24000,
+      "channels": 2,
+      "n": 512,
+      "streams": 6,
+      "original_streams": 7,
+      "groups": 1,
+      "mode": "all",
+      "malformed": [
+        {
+          "video": "n512-c2-x1-crc0-all-truncate.mp4",
+          "error": "missing AAC ESC instance"
+        },
+        {
+          "video": "n512-c2-x1-crc0-all-extra.mp4",
+          "error": "unconsumed AAC ESC information bits"
+        }
+      ]
+    },
+    {
+      "name": "n512-c2-x1-crc1-all",
+      "video": "n512-c2-x1-crc1-all.mp4",
+      "control": "n512-c2-x1-crc1-control.mp4",
+      "golden": "n512-c2-x1-crc1.f32le",
+      "rate": 24000,
+      "channels": 2,
+      "n": 512,
+      "streams": 6,
+      "original_streams": 7,
+      "groups": 1,
+      "mode": "all",
+      "malformed": [
+        {
+          "video": "n512-c2-x1-crc1-all-truncate.mp4",
+          "error": "missing AAC ESC instance"
+        },
+        {
+          "video": "n512-c2-x1-crc1-all-extra.mp4",
+          "error": "unconsumed AAC ESC information bits"
+        },
+        {
+          "video": "n512-c2-x1-crc1-all-crc.mp4",
+          "error": "low-delay SBR CRC mismatch"
+        }
+      ]
+    },
+    {
+      "name": "n512-c2-x2-crc0-all",
+      "video": "n512-c2-x2-crc0-all.mp4",
+      "control": "n512-c2-x2-crc0-control.mp4",
+      "golden": "n512-c2-x2-crc0.f32le",
+      "rate": 48000,
+      "channels": 2,
+      "n": 512,
+      "streams": 6,
+      "original_streams": 7,
+      "groups": 1,
+      "mode": "all",
+      "malformed": [
+        {
+          "video": "n512-c2-x2-crc0-all-truncate.mp4",
+          "error": "missing AAC ESC instance"
+        },
+        {
+          "video": "n512-c2-x2-crc0-all-extra.mp4",
+          "error": "unconsumed AAC ESC information bits"
+        }
+      ]
+    },
+    {
+      "name": "n512-c2-x2-crc1-all",
+      "video": "n512-c2-x2-crc1-all.mp4",
+      "control": "n512-c2-x2-crc1-control.mp4",
+      "golden": "n512-c2-x2-crc1.f32le",
+      "rate": 48000,
+      "channels": 2,
+      "n": 512,
+      "streams": 6,
+      "original_streams": 7,
+      "groups": 1,
+      "mode": "all",
+      "malformed": [
+        {
+          "video": "n512-c2-x2-crc1-all-truncate.mp4",
+          "error": "missing AAC ESC instance"
+        },
+        {
+          "video": "n512-c2-x2-crc1-all-extra.mp4",
+          "error": "unconsumed AAC ESC information bits"
+        },
+        {
+          "video": "n512-c2-x2-crc1-all-crc.mp4",
+          "error": "low-delay SBR CRC mismatch"
+        }
+      ]
+    },
+    {
+      "name": "n512-c3-x1-crc0-all",
+      "video": "n512-c3-x1-crc0-all.mp4",
+      "control": "n512-c3-x1-crc0-control.mp4",
+      "golden": "n512-c3-x1-crc0.f32le",
+      "rate": 24000,
+      "channels": 3,
+      "n": 512,
+      "streams": 9,
+      "original_streams": 11,
+      "groups": 2,
+      "mode": "all",
+      "malformed": [
+        {
+          "video": "n512-c3-x1-crc0-all-truncate.mp4",
+          "error": "missing AAC ESC instance"
+        },
+        {
+          "video": "n512-c3-x1-crc0-all-extra.mp4",
+          "error": "unconsumed AAC ESC information bits"
+        }
+      ]
+    },
+    {
+      "name": "n512-c3-x1-crc0-last",
+      "video": "n512-c3-x1-crc0-last.mp4",
+      "control": "n512-c3-x1-crc0-control.mp4",
+      "golden": "n512-c3-x1-crc0.f32le",
+      "rate": 24000,
+      "channels": 3,
+      "n": 512,
+      "streams": 10,
+      "original_streams": 11,
+      "groups": 2,
+      "mode": "last",
+      "malformed": [
+        {
+          "video": "n512-c3-x1-crc0-last-truncate.mp4",
+          "error": "missing AAC ESC instance"
+        },
+        {
+          "video": "n512-c3-x1-crc0-last-extra.mp4",
+          "error": "unconsumed AAC ESC information bits"
+        }
+      ]
+    },
+    {
+      "name": "n512-c3-x1-crc1-all",
+      "video": "n512-c3-x1-crc1-all.mp4",
+      "control": "n512-c3-x1-crc1-control.mp4",
+      "golden": "n512-c3-x1-crc1.f32le",
+      "rate": 24000,
+      "channels": 3,
+      "n": 512,
+      "streams": 9,
+      "original_streams": 11,
+      "groups": 2,
+      "mode": "all",
+      "malformed": [
+        {
+          "video": "n512-c3-x1-crc1-all-truncate.mp4",
+          "error": "missing AAC ESC instance"
+        },
+        {
+          "video": "n512-c3-x1-crc1-all-extra.mp4",
+          "error": "unconsumed AAC ESC information bits"
+        },
+        {
+          "video": "n512-c3-x1-crc1-all-crc.mp4",
+          "error": "low-delay SBR CRC mismatch"
+        }
+      ]
+    },
+    {
+      "name": "n512-c3-x1-crc1-last",
+      "video": "n512-c3-x1-crc1-last.mp4",
+      "control": "n512-c3-x1-crc1-control.mp4",
+      "golden": "n512-c3-x1-crc1.f32le",
+      "rate": 24000,
+      "channels": 3,
+      "n": 512,
+      "streams": 10,
+      "original_streams": 11,
+      "groups": 2,
+      "mode": "last",
+      "malformed": [
+        {
+          "video": "n512-c3-x1-crc1-last-truncate.mp4",
+          "error": "missing AAC ESC instance"
+        },
+        {
+          "video": "n512-c3-x1-crc1-last-extra.mp4",
+          "error": "unconsumed AAC ESC information bits"
+        },
+        {
+          "video": "n512-c3-x1-crc1-last-crc.mp4",
+          "error": "low-delay SBR CRC mismatch"
+        }
+      ]
+    },
+    {
+      "name": "n512-c3-x2-crc0-all",
+      "video": "n512-c3-x2-crc0-all.mp4",
+      "control": "n512-c3-x2-crc0-control.mp4",
+      "golden": "n512-c3-x2-crc0.f32le",
+      "rate": 48000,
+      "channels": 3,
+      "n": 512,
+      "streams": 9,
+      "original_streams": 11,
+      "groups": 2,
+      "mode": "all",
+      "malformed": [
+        {
+          "video": "n512-c3-x2-crc0-all-truncate.mp4",
+          "error": "missing AAC ESC instance"
+        },
+        {
+          "video": "n512-c3-x2-crc0-all-extra.mp4",
+          "error": "unconsumed AAC ESC information bits"
+        }
+      ]
+    },
+    {
+      "name": "n512-c3-x2-crc0-last",
+      "video": "n512-c3-x2-crc0-last.mp4",
+      "control": "n512-c3-x2-crc0-control.mp4",
+      "golden": "n512-c3-x2-crc0.f32le",
+      "rate": 48000,
+      "channels": 3,
+      "n": 512,
+      "streams": 10,
+      "original_streams": 11,
+      "groups": 2,
+      "mode": "last",
+      "malformed": [
+        {
+          "video": "n512-c3-x2-crc0-last-truncate.mp4",
+          "error": "missing AAC ESC instance"
+        },
+        {
+          "video": "n512-c3-x2-crc0-last-extra.mp4",
+          "error": "unconsumed AAC ESC information bits"
+        }
+      ]
+    },
+    {
+      "name": "n512-c3-x2-crc1-all",
+      "video": "n512-c3-x2-crc1-all.mp4",
+      "control": "n512-c3-x2-crc1-control.mp4",
+      "golden": "n512-c3-x2-crc1.f32le",
+      "rate": 48000,
+      "channels": 3,
+      "n": 512,
+      "streams": 9,
+      "original_streams": 11,
+      "groups": 2,
+      "mode": "all",
+      "malformed": [
+        {
+          "video": "n512-c3-x2-crc1-all-truncate.mp4",
+          "error": "missing AAC ESC instance"
+        },
+        {
+          "video": "n512-c3-x2-crc1-all-extra.mp4",
+          "error": "unconsumed AAC ESC information bits"
+        },
+        {
+          "video": "n512-c3-x2-crc1-all-crc.mp4",
+          "error": "low-delay SBR CRC mismatch"
+        }
+      ]
+    },
+    {
+      "name": "n512-c3-x2-crc1-last",
+      "video": "n512-c3-x2-crc1-last.mp4",
+      "control": "n512-c3-x2-crc1-control.mp4",
+      "golden": "n512-c3-x2-crc1.f32le",
+      "rate": 48000,
+      "channels": 3,
+      "n": 512,
+      "streams": 10,
+      "original_streams": 11,
+      "groups": 2,
+      "mode": "last",
+      "malformed": [
+        {
+          "video": "n512-c3-x2-crc1-last-truncate.mp4",
+          "error": "missing AAC ESC instance"
+        },
+        {
+          "video": "n512-c3-x2-crc1-last-extra.mp4",
+          "error": "unconsumed AAC ESC information bits"
+        },
+        {
+          "video": "n512-c3-x2-crc1-last-crc.mp4",
+          "error": "low-delay SBR CRC mismatch"
+        }
+      ]
+    },
+    {
+      "name": "n512-c4-x1-crc0-all",
+      "video": "n512-c4-x1-crc0-all.mp4",
+      "control": "n512-c4-x1-crc0-control.mp4",
+      "golden": "n512-c4-x1-crc0.f32le",
+      "rate": 24000,
+      "channels": 4,
+      "n": 512,
+      "streams": 12,
+      "original_streams": 15,
+      "groups": 3,
+      "mode": "all",
+      "malformed": [
+        {
+          "video": "n512-c4-x1-crc0-all-truncate.mp4",
+          "error": "missing AAC ESC instance"
+        },
+        {
+          "video": "n512-c4-x1-crc0-all-extra.mp4",
+          "error": "unconsumed AAC ESC information bits"
+        }
+      ]
+    },
+    {
+      "name": "n512-c4-x1-crc0-last",
+      "video": "n512-c4-x1-crc0-last.mp4",
+      "control": "n512-c4-x1-crc0-control.mp4",
+      "golden": "n512-c4-x1-crc0.f32le",
+      "rate": 24000,
+      "channels": 4,
+      "n": 512,
+      "streams": 14,
+      "original_streams": 15,
+      "groups": 3,
+      "mode": "last",
+      "malformed": [
+        {
+          "video": "n512-c4-x1-crc0-last-truncate.mp4",
+          "error": "missing AAC ESC instance"
+        },
+        {
+          "video": "n512-c4-x1-crc0-last-extra.mp4",
+          "error": "unconsumed AAC ESC information bits"
+        }
+      ]
+    },
+    {
+      "name": "n512-c4-x1-crc1-all",
+      "video": "n512-c4-x1-crc1-all.mp4",
+      "control": "n512-c4-x1-crc1-control.mp4",
+      "golden": "n512-c4-x1-crc1.f32le",
+      "rate": 24000,
+      "channels": 4,
+      "n": 512,
+      "streams": 12,
+      "original_streams": 15,
+      "groups": 3,
+      "mode": "all",
+      "malformed": [
+        {
+          "video": "n512-c4-x1-crc1-all-truncate.mp4",
+          "error": "missing AAC ESC instance"
+        },
+        {
+          "video": "n512-c4-x1-crc1-all-extra.mp4",
+          "error": "unconsumed AAC ESC information bits"
+        },
+        {
+          "video": "n512-c4-x1-crc1-all-crc.mp4",
+          "error": "low-delay SBR CRC mismatch"
+        }
+      ]
+    },
+    {
+      "name": "n512-c4-x1-crc1-last",
+      "video": "n512-c4-x1-crc1-last.mp4",
+      "control": "n512-c4-x1-crc1-control.mp4",
+      "golden": "n512-c4-x1-crc1.f32le",
+      "rate": 24000,
+      "channels": 4,
+      "n": 512,
+      "streams": 14,
+      "original_streams": 15,
+      "groups": 3,
+      "mode": "last",
+      "malformed": [
+        {
+          "video": "n512-c4-x1-crc1-last-truncate.mp4",
+          "error": "missing AAC ESC instance"
+        },
+        {
+          "video": "n512-c4-x1-crc1-last-extra.mp4",
+          "error": "unconsumed AAC ESC information bits"
+        },
+        {
+          "video": "n512-c4-x1-crc1-last-crc.mp4",
+          "error": "low-delay SBR CRC mismatch"
+        }
+      ]
+    },
+    {
+      "name": "n512-c4-x2-crc0-all",
+      "video": "n512-c4-x2-crc0-all.mp4",
+      "control": "n512-c4-x2-crc0-control.mp4",
+      "golden": "n512-c4-x2-crc0.f32le",
+      "rate": 48000,
+      "channels": 4,
+      "n": 512,
+      "streams": 12,
+      "original_streams": 15,
+      "groups": 3,
+      "mode": "all",
+      "malformed": [
+        {
+          "video": "n512-c4-x2-crc0-all-truncate.mp4",
+          "error": "missing AAC ESC instance"
+        },
+        {
+          "video": "n512-c4-x2-crc0-all-extra.mp4",
+          "error": "unconsumed AAC ESC information bits"
+        }
+      ]
+    },
+    {
+      "name": "n512-c4-x2-crc0-last",
+      "video": "n512-c4-x2-crc0-last.mp4",
+      "control": "n512-c4-x2-crc0-control.mp4",
+      "golden": "n512-c4-x2-crc0.f32le",
+      "rate": 48000,
+      "channels": 4,
+      "n": 512,
+      "streams": 14,
+      "original_streams": 15,
+      "groups": 3,
+      "mode": "last",
+      "malformed": [
+        {
+          "video": "n512-c4-x2-crc0-last-truncate.mp4",
+          "error": "missing AAC ESC instance"
+        },
+        {
+          "video": "n512-c4-x2-crc0-last-extra.mp4",
+          "error": "unconsumed AAC ESC information bits"
+        }
+      ]
+    },
+    {
+      "name": "n512-c4-x2-crc1-all",
+      "video": "n512-c4-x2-crc1-all.mp4",
+      "control": "n512-c4-x2-crc1-control.mp4",
+      "golden": "n512-c4-x2-crc1.f32le",
+      "rate": 48000,
+      "channels": 4,
+      "n": 512,
+      "streams": 12,
+      "original_streams": 15,
+      "groups": 3,
+      "mode": "all",
+      "malformed": [
+        {
+          "video": "n512-c4-x2-crc1-all-truncate.mp4",
+          "error": "missing AAC ESC instance"
+        },
+        {
+          "video": "n512-c4-x2-crc1-all-extra.mp4",
+          "error": "unconsumed AAC ESC information bits"
+        },
+        {
+          "video": "n512-c4-x2-crc1-all-crc.mp4",
+          "error": "low-delay SBR CRC mismatch"
+        }
+      ]
+    },
+    {
+      "name": "n512-c4-x2-crc1-last",
+      "video": "n512-c4-x2-crc1-last.mp4",
+      "control": "n512-c4-x2-crc1-control.mp4",
+      "golden": "n512-c4-x2-crc1.f32le",
+      "rate": 48000,
+      "channels": 4,
+      "n": 512,
+      "streams": 14,
+      "original_streams": 15,
+      "groups": 3,
+      "mode": "last",
+      "malformed": [
+        {
+          "video": "n512-c4-x2-crc1-last-truncate.mp4",
+          "error": "missing AAC ESC instance"
+        },
+        {
+          "video": "n512-c4-x2-crc1-last-extra.mp4",
+          "error": "unconsumed AAC ESC information bits"
+        },
+        {
+          "video": "n512-c4-x2-crc1-last-crc.mp4",
+          "error": "low-delay SBR CRC mismatch"
+        }
+      ]
+    },
+    {
+      "name": "n512-c5-x1-crc0-all",
+      "video": "n512-c5-x1-crc0-all.mp4",
+      "control": "n512-c5-x1-crc0-control.mp4",
+      "golden": "n512-c5-x1-crc0.f32le",
+      "rate": 24000,
+      "channels": 5,
+      "n": 512,
+      "streams": 15,
+      "original_streams": 18,
+      "groups": 3,
+      "mode": "all",
+      "malformed": [
+        {
+          "video": "n512-c5-x1-crc0-all-truncate.mp4",
+          "error": "missing AAC ESC instance"
+        },
+        {
+          "video": "n512-c5-x1-crc0-all-extra.mp4",
+          "error": "unconsumed AAC ESC information bits"
+        }
+      ]
+    },
+    {
+      "name": "n512-c5-x1-crc0-last",
+      "video": "n512-c5-x1-crc0-last.mp4",
+      "control": "n512-c5-x1-crc0-control.mp4",
+      "golden": "n512-c5-x1-crc0.f32le",
+      "rate": 24000,
+      "channels": 5,
+      "n": 512,
+      "streams": 17,
+      "original_streams": 18,
+      "groups": 3,
+      "mode": "last",
+      "malformed": [
+        {
+          "video": "n512-c5-x1-crc0-last-truncate.mp4",
+          "error": "missing AAC ESC instance"
+        },
+        {
+          "video": "n512-c5-x1-crc0-last-extra.mp4",
+          "error": "unconsumed AAC ESC information bits"
+        }
+      ]
+    },
+    {
+      "name": "n512-c5-x1-crc1-all",
+      "video": "n512-c5-x1-crc1-all.mp4",
+      "control": "n512-c5-x1-crc1-control.mp4",
+      "golden": "n512-c5-x1-crc1.f32le",
+      "rate": 24000,
+      "channels": 5,
+      "n": 512,
+      "streams": 15,
+      "original_streams": 18,
+      "groups": 3,
+      "mode": "all",
+      "malformed": [
+        {
+          "video": "n512-c5-x1-crc1-all-truncate.mp4",
+          "error": "missing AAC ESC instance"
+        },
+        {
+          "video": "n512-c5-x1-crc1-all-extra.mp4",
+          "error": "unconsumed AAC ESC information bits"
+        },
+        {
+          "video": "n512-c5-x1-crc1-all-crc.mp4",
+          "error": "low-delay SBR CRC mismatch"
+        }
+      ]
+    },
+    {
+      "name": "n512-c5-x1-crc1-last",
+      "video": "n512-c5-x1-crc1-last.mp4",
+      "control": "n512-c5-x1-crc1-control.mp4",
+      "golden": "n512-c5-x1-crc1.f32le",
+      "rate": 24000,
+      "channels": 5,
+      "n": 512,
+      "streams": 17,
+      "original_streams": 18,
+      "groups": 3,
+      "mode": "last",
+      "malformed": [
+        {
+          "video": "n512-c5-x1-crc1-last-truncate.mp4",
+          "error": "missing AAC ESC instance"
+        },
+        {
+          "video": "n512-c5-x1-crc1-last-extra.mp4",
+          "error": "unconsumed AAC ESC information bits"
+        },
+        {
+          "video": "n512-c5-x1-crc1-last-crc.mp4",
+          "error": "low-delay SBR CRC mismatch"
+        }
+      ]
+    },
+    {
+      "name": "n512-c5-x2-crc0-all",
+      "video": "n512-c5-x2-crc0-all.mp4",
+      "control": "n512-c5-x2-crc0-control.mp4",
+      "golden": "n512-c5-x2-crc0.f32le",
+      "rate": 48000,
+      "channels": 5,
+      "n": 512,
+      "streams": 15,
+      "original_streams": 18,
+      "groups": 3,
+      "mode": "all",
+      "malformed": [
+        {
+          "video": "n512-c5-x2-crc0-all-truncate.mp4",
+          "error": "missing AAC ESC instance"
+        },
+        {
+          "video": "n512-c5-x2-crc0-all-extra.mp4",
+          "error": "unconsumed AAC ESC information bits"
+        }
+      ]
+    },
+    {
+      "name": "n512-c5-x2-crc0-last",
+      "video": "n512-c5-x2-crc0-last.mp4",
+      "control": "n512-c5-x2-crc0-control.mp4",
+      "golden": "n512-c5-x2-crc0.f32le",
+      "rate": 48000,
+      "channels": 5,
+      "n": 512,
+      "streams": 17,
+      "original_streams": 18,
+      "groups": 3,
+      "mode": "last",
+      "malformed": [
+        {
+          "video": "n512-c5-x2-crc0-last-truncate.mp4",
+          "error": "missing AAC ESC instance"
+        },
+        {
+          "video": "n512-c5-x2-crc0-last-extra.mp4",
+          "error": "unconsumed AAC ESC information bits"
+        }
+      ]
+    },
+    {
+      "name": "n512-c5-x2-crc1-all",
+      "video": "n512-c5-x2-crc1-all.mp4",
+      "control": "n512-c5-x2-crc1-control.mp4",
+      "golden": "n512-c5-x2-crc1.f32le",
+      "rate": 48000,
+      "channels": 5,
+      "n": 512,
+      "streams": 15,
+      "original_streams": 18,
+      "groups": 3,
+      "mode": "all",
+      "malformed": [
+        {
+          "video": "n512-c5-x2-crc1-all-truncate.mp4",
+          "error": "missing AAC ESC instance"
+        },
+        {
+          "video": "n512-c5-x2-crc1-all-extra.mp4",
+          "error": "unconsumed AAC ESC information bits"
+        },
+        {
+          "video": "n512-c5-x2-crc1-all-crc.mp4",
+          "error": "low-delay SBR CRC mismatch"
+        }
+      ]
+    },
+    {
+      "name": "n512-c5-x2-crc1-last",
+      "video": "n512-c5-x2-crc1-last.mp4",
+      "control": "n512-c5-x2-crc1-control.mp4",
+      "golden": "n512-c5-x2-crc1.f32le",
+      "rate": 48000,
+      "channels": 5,
+      "n": 512,
+      "streams": 17,
+      "original_streams": 18,
+      "groups": 3,
+      "mode": "last",
+      "malformed": [
+        {
+          "video": "n512-c5-x2-crc1-last-truncate.mp4",
+          "error": "missing AAC ESC instance"
+        },
+        {
+          "video": "n512-c5-x2-crc1-last-extra.mp4",
+          "error": "unconsumed AAC ESC information bits"
+        },
+        {
+          "video": "n512-c5-x2-crc1-last-crc.mp4",
+          "error": "low-delay SBR CRC mismatch"
+        }
+      ]
+    },
+    {
+      "name": "n512-c6-x1-crc0-all",
+      "video": "n512-c6-x1-crc0-all.mp4",
+      "control": "n512-c6-x1-crc0-control.mp4",
+      "golden": "n512-c6-x1-crc0.f32le",
+      "rate": 24000,
+      "channels": 6,
+      "n": 512,
+      "streams": 17,
+      "original_streams": 20,
+      "groups": 3,
+      "mode": "all",
+      "malformed": [
+        {
+          "video": "n512-c6-x1-crc0-all-truncate.mp4",
+          "error": "missing AAC ESC instance"
+        },
+        {
+          "video": "n512-c6-x1-crc0-all-extra.mp4",
+          "error": "unconsumed AAC ESC information bits"
+        }
+      ]
+    },
+    {
+      "name": "n512-c6-x1-crc0-last",
+      "video": "n512-c6-x1-crc0-last.mp4",
+      "control": "n512-c6-x1-crc0-control.mp4",
+      "golden": "n512-c6-x1-crc0.f32le",
+      "rate": 24000,
+      "channels": 6,
+      "n": 512,
+      "streams": 19,
+      "original_streams": 20,
+      "groups": 3,
+      "mode": "last",
+      "malformed": [
+        {
+          "video": "n512-c6-x1-crc0-last-truncate.mp4",
+          "error": "missing AAC ESC instance"
+        },
+        {
+          "video": "n512-c6-x1-crc0-last-extra.mp4",
+          "error": "unconsumed AAC ESC information bits"
+        }
+      ]
+    },
+    {
+      "name": "n512-c6-x1-crc1-all",
+      "video": "n512-c6-x1-crc1-all.mp4",
+      "control": "n512-c6-x1-crc1-control.mp4",
+      "golden": "n512-c6-x1-crc1.f32le",
+      "rate": 24000,
+      "channels": 6,
+      "n": 512,
+      "streams": 17,
+      "original_streams": 20,
+      "groups": 3,
+      "mode": "all",
+      "malformed": [
+        {
+          "video": "n512-c6-x1-crc1-all-truncate.mp4",
+          "error": "missing AAC ESC instance"
+        },
+        {
+          "video": "n512-c6-x1-crc1-all-extra.mp4",
+          "error": "unconsumed AAC ESC information bits"
+        },
+        {
+          "video": "n512-c6-x1-crc1-all-crc.mp4",
+          "error": "low-delay SBR CRC mismatch"
+        }
+      ]
+    },
+    {
+      "name": "n512-c6-x1-crc1-last",
+      "video": "n512-c6-x1-crc1-last.mp4",
+      "control": "n512-c6-x1-crc1-control.mp4",
+      "golden": "n512-c6-x1-crc1.f32le",
+      "rate": 24000,
+      "channels": 6,
+      "n": 512,
+      "streams": 19,
+      "original_streams": 20,
+      "groups": 3,
+      "mode": "last",
+      "malformed": [
+        {
+          "video": "n512-c6-x1-crc1-last-truncate.mp4",
+          "error": "missing AAC ESC instance"
+        },
+        {
+          "video": "n512-c6-x1-crc1-last-extra.mp4",
+          "error": "unconsumed AAC ESC information bits"
+        },
+        {
+          "video": "n512-c6-x1-crc1-last-crc.mp4",
+          "error": "low-delay SBR CRC mismatch"
+        }
+      ]
+    },
+    {
+      "name": "n512-c6-x2-crc0-all",
+      "video": "n512-c6-x2-crc0-all.mp4",
+      "control": "n512-c6-x2-crc0-control.mp4",
+      "golden": "n512-c6-x2-crc0.f32le",
+      "rate": 48000,
+      "channels": 6,
+      "n": 512,
+      "streams": 17,
+      "original_streams": 20,
+      "groups": 3,
+      "mode": "all",
+      "malformed": [
+        {
+          "video": "n512-c6-x2-crc0-all-truncate.mp4",
+          "error": "missing AAC ESC instance"
+        },
+        {
+          "video": "n512-c6-x2-crc0-all-extra.mp4",
+          "error": "unconsumed AAC ESC information bits"
+        }
+      ]
+    },
+    {
+      "name": "n512-c6-x2-crc0-last",
+      "video": "n512-c6-x2-crc0-last.mp4",
+      "control": "n512-c6-x2-crc0-control.mp4",
+      "golden": "n512-c6-x2-crc0.f32le",
+      "rate": 48000,
+      "channels": 6,
+      "n": 512,
+      "streams": 19,
+      "original_streams": 20,
+      "groups": 3,
+      "mode": "last",
+      "malformed": [
+        {
+          "video": "n512-c6-x2-crc0-last-truncate.mp4",
+          "error": "missing AAC ESC instance"
+        },
+        {
+          "video": "n512-c6-x2-crc0-last-extra.mp4",
+          "error": "unconsumed AAC ESC information bits"
+        }
+      ]
+    },
+    {
+      "name": "n512-c6-x2-crc1-all",
+      "video": "n512-c6-x2-crc1-all.mp4",
+      "control": "n512-c6-x2-crc1-control.mp4",
+      "golden": "n512-c6-x2-crc1.f32le",
+      "rate": 48000,
+      "channels": 6,
+      "n": 512,
+      "streams": 17,
+      "original_streams": 20,
+      "groups": 3,
+      "mode": "all",
+      "malformed": [
+        {
+          "video": "n512-c6-x2-crc1-all-truncate.mp4",
+          "error": "missing AAC ESC instance"
+        },
+        {
+          "video": "n512-c6-x2-crc1-all-extra.mp4",
+          "error": "unconsumed AAC ESC information bits"
+        },
+        {
+          "video": "n512-c6-x2-crc1-all-crc.mp4",
+          "error": "low-delay SBR CRC mismatch"
+        }
+      ]
+    },
+    {
+      "name": "n512-c6-x2-crc1-last",
+      "video": "n512-c6-x2-crc1-last.mp4",
+      "control": "n512-c6-x2-crc1-control.mp4",
+      "golden": "n512-c6-x2-crc1.f32le",
+      "rate": 48000,
+      "channels": 6,
+      "n": 512,
+      "streams": 19,
+      "original_streams": 20,
+      "groups": 3,
+      "mode": "last",
+      "malformed": [
+        {
+          "video": "n512-c6-x2-crc1-last-truncate.mp4",
+          "error": "missing AAC ESC instance"
+        },
+        {
+          "video": "n512-c6-x2-crc1-last-extra.mp4",
+          "error": "unconsumed AAC ESC information bits"
+        },
+        {
+          "video": "n512-c6-x2-crc1-last-crc.mp4",
+          "error": "low-delay SBR CRC mismatch"
+        }
+      ]
+    },
+    {
+      "name": "n512-c7-x1-crc0-all",
+      "video": "n512-c7-x1-crc0-all.mp4",
+      "control": "n512-c7-x1-crc0-control.mp4",
+      "golden": "n512-c7-x1-crc0.f32le",
+      "rate": 24000,
+      "channels": 8,
+      "n": 512,
+      "streams": 23,
+      "original_streams": 27,
+      "groups": 4,
+      "mode": "all",
+      "malformed": [
+        {
+          "video": "n512-c7-x1-crc0-all-truncate.mp4",
+          "error": "missing AAC ESC instance"
+        },
+        {
+          "video": "n512-c7-x1-crc0-all-extra.mp4",
+          "error": "unconsumed AAC ESC information bits"
+        }
+      ]
+    },
+    {
+      "name": "n512-c7-x1-crc0-last",
+      "video": "n512-c7-x1-crc0-last.mp4",
+      "control": "n512-c7-x1-crc0-control.mp4",
+      "golden": "n512-c7-x1-crc0.f32le",
+      "rate": 24000,
+      "channels": 8,
+      "n": 512,
+      "streams": 26,
+      "original_streams": 27,
+      "groups": 4,
+      "mode": "last",
+      "malformed": [
+        {
+          "video": "n512-c7-x1-crc0-last-truncate.mp4",
+          "error": "missing AAC ESC instance"
+        },
+        {
+          "video": "n512-c7-x1-crc0-last-extra.mp4",
+          "error": "unconsumed AAC ESC information bits"
+        }
+      ]
+    },
+    {
+      "name": "n512-c7-x1-crc1-all",
+      "video": "n512-c7-x1-crc1-all.mp4",
+      "control": "n512-c7-x1-crc1-control.mp4",
+      "golden": "n512-c7-x1-crc1.f32le",
+      "rate": 24000,
+      "channels": 8,
+      "n": 512,
+      "streams": 23,
+      "original_streams": 27,
+      "groups": 4,
+      "mode": "all",
+      "malformed": [
+        {
+          "video": "n512-c7-x1-crc1-all-truncate.mp4",
+          "error": "missing AAC ESC instance"
+        },
+        {
+          "video": "n512-c7-x1-crc1-all-extra.mp4",
+          "error": "unconsumed AAC ESC information bits"
+        },
+        {
+          "video": "n512-c7-x1-crc1-all-crc.mp4",
+          "error": "low-delay SBR CRC mismatch"
+        }
+      ]
+    },
+    {
+      "name": "n512-c7-x1-crc1-last",
+      "video": "n512-c7-x1-crc1-last.mp4",
+      "control": "n512-c7-x1-crc1-control.mp4",
+      "golden": "n512-c7-x1-crc1.f32le",
+      "rate": 24000,
+      "channels": 8,
+      "n": 512,
+      "streams": 26,
+      "original_streams": 27,
+      "groups": 4,
+      "mode": "last",
+      "malformed": [
+        {
+          "video": "n512-c7-x1-crc1-last-truncate.mp4",
+          "error": "missing AAC ESC instance"
+        },
+        {
+          "video": "n512-c7-x1-crc1-last-extra.mp4",
+          "error": "unconsumed AAC ESC information bits"
+        },
+        {
+          "video": "n512-c7-x1-crc1-last-crc.mp4",
+          "error": "low-delay SBR CRC mismatch"
+        }
+      ]
+    },
+    {
+      "name": "n512-c7-x2-crc0-all",
+      "video": "n512-c7-x2-crc0-all.mp4",
+      "control": "n512-c7-x2-crc0-control.mp4",
+      "golden": "n512-c7-x2-crc0.f32le",
+      "rate": 48000,
+      "channels": 8,
+      "n": 512,
+      "streams": 23,
+      "original_streams": 27,
+      "groups": 4,
+      "mode": "all",
+      "malformed": [
+        {
+          "video": "n512-c7-x2-crc0-all-truncate.mp4",
+          "error": "missing AAC ESC instance"
+        },
+        {
+          "video": "n512-c7-x2-crc0-all-extra.mp4",
+          "error": "unconsumed AAC ESC information bits"
+        }
+      ]
+    },
+    {
+      "name": "n512-c7-x2-crc0-last",
+      "video": "n512-c7-x2-crc0-last.mp4",
+      "control": "n512-c7-x2-crc0-control.mp4",
+      "golden": "n512-c7-x2-crc0.f32le",
+      "rate": 48000,
+      "channels": 8,
+      "n": 512,
+      "streams": 26,
+      "original_streams": 27,
+      "groups": 4,
+      "mode": "last",
+      "malformed": [
+        {
+          "video": "n512-c7-x2-crc0-last-truncate.mp4",
+          "error": "missing AAC ESC instance"
+        },
+        {
+          "video": "n512-c7-x2-crc0-last-extra.mp4",
+          "error": "unconsumed AAC ESC information bits"
+        }
+      ]
+    },
+    {
+      "name": "n512-c7-x2-crc1-all",
+      "video": "n512-c7-x2-crc1-all.mp4",
+      "control": "n512-c7-x2-crc1-control.mp4",
+      "golden": "n512-c7-x2-crc1.f32le",
+      "rate": 48000,
+      "channels": 8,
+      "n": 512,
+      "streams": 23,
+      "original_streams": 27,
+      "groups": 4,
+      "mode": "all",
+      "malformed": [
+        {
+          "video": "n512-c7-x2-crc1-all-truncate.mp4",
+          "error": "missing AAC ESC instance"
+        },
+        {
+          "video": "n512-c7-x2-crc1-all-extra.mp4",
+          "error": "unconsumed AAC ESC information bits"
+        },
+        {
+          "video": "n512-c7-x2-crc1-all-crc.mp4",
+          "error": "low-delay SBR CRC mismatch"
+        }
+      ]
+    },
+    {
+      "name": "n512-c7-x2-crc1-last",
+      "video": "n512-c7-x2-crc1-last.mp4",
+      "control": "n512-c7-x2-crc1-control.mp4",
+      "golden": "n512-c7-x2-crc1.f32le",
+      "rate": 48000,
+      "channels": 8,
+      "n": 512,
+      "streams": 26,
+      "original_streams": 27,
+      "groups": 4,
+      "mode": "last",
+      "malformed": [
+        {
+          "video": "n512-c7-x2-crc1-last-truncate.mp4",
+          "error": "missing AAC ESC instance"
+        },
+        {
+          "video": "n512-c7-x2-crc1-last-extra.mp4",
+          "error": "unconsumed AAC ESC information bits"
+        },
+        {
+          "video": "n512-c7-x2-crc1-last-crc.mp4",
+          "error": "low-delay SBR CRC mismatch"
+        }
+      ]
+    }
+  ],
+  "provenance": "Own AOT39 EP1 LD-SBR instances 9 and 10 packed into one AU per SBR element, or only the final element. 480/512, configurations 1..7, core/double rates and CRC off/on. Independent scalar native PCM. Canonical dpnd, exact bits and rational clocks. No private media, external codec, process or network."
+}

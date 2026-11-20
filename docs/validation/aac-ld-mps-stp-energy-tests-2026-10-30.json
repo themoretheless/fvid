@@ -1,0 +1,34 @@
+{
+  "scope": "Scalar STP energy/gain component qualification only. Native STP PCM refusal remains; no new playback/seek claim.",
+  "media_unit_tests": {
+    "passed": 585,
+    "failed": 0,
+    "preexisting_ignored": 1,
+    "log": "/tmp/fvid-stp-energy-media-test.log"
+  },
+  "independent_scalar_reference": {
+    "programmes": 20,
+    "slots": 2000,
+    "gains": 13600,
+    "maximum_absolute_error": 2.9134913503980897e-07,
+    "tolerance": 2e-06,
+    "gains_more_than_0_01_from_identity": 10289,
+    "log": "/tmp/fvid-stp-energy-reference-test.log"
+  },
+  "lifecycle_tests": [
+    "Closed-form lower/upper clamp convergence over 96 slots",
+    "Refresh-before-update at slot33",
+    "Errors including numeric overflow at refresh boundary leave complete state unchanged",
+    "Checkpoint replay across slots33,65,97 exactly reproduces owned outputs",
+    "Reset restores initial state",
+    "Retained payload accounting is bounded"
+  ],
+  "fixture_generation": "Separate explicit ISO archive extraction; repeated regeneration produced identical output SHA256 858455b6ae045d6421cfa37350982c3c7a9c0b7e1e090c0996b9f3c8c34e92a8; tests use frozen JSON only.",
+  "sha256": {
+    "crates/fvid-media/src/owned_aac/aac_ld_mps_stp_energy.rs": "89e361deade7ef53198fe962ff416e83da5a550b684ce07183dacbc5824f50b6",
+    "crates/fvid-media/src/owned_aac/mod.rs": "bbf4cee8e6bd5f13153f2cef2203a930809a091f775e51b883cc6744e82bc675",
+    "tests/aac_ld_mps_stp_energy.rs": "83affb54a5c83323ae81fb7be232d0eb5554989a944382531e8e6d94bbadd203",
+    "scripts/generate_aac_ld_mps_stp_energy_reference.py": "c886951c1b2b797145deab44d289327a5ad0e64ce9757cf99d3687cf76762ceb",
+    "tests/fixtures/playback-errors/aac-ld-mps-stp-energy/reference.json": "858455b6ae045d6421cfa37350982c3c7a9c0b7e1e090c0996b9f3c8c34e92a8"
+  }
+}

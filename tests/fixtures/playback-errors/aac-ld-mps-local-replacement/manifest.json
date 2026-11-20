@@ -1,0 +1,6177 @@
+{
+  "cases": [
+    {
+      "asc": "f8e62025339000000000",
+      "tree": 0,
+      "n": 512,
+      "rate": 48000,
+      "slots": 8,
+      "bands": 64,
+      "channels": 1,
+      "qmf": null,
+      "name": "plain-tree0-same-local",
+      "mode": "same",
+      "configs": [
+        "3390000000",
+        "3390000800"
+      ],
+      "body": "7f1014ec74ebae08895c257cf826435f4b6fa32a9919e34011d2e856fcf13e23429f1b63a029d8e9d75c1112b84af9f04c86be96df46553233c68023fc4cb6ca99d846853e36c74053b1d3aeb822257095f3e0990d7d2dbe8caaf8a5d0adf9e2196d9533b08d0a7c6d8e80a763a75d70444ae12be7c1321bf1f8f99d50b0b9c2f99d50b0b9c2f99d50b0b9df15ce17ccea8585ce17ccea8585ce17ccea87e3542c2e70be67542c2e70be67542c2e70be7c45f33aa1617385f33aa1617385f33aa1617240",
+      "phase": [
+        0,
+        0,
+        0
+      ],
+      "frames": [
+        {
+          "offset": 0,
+          "bytes": 216,
+          "prefix_bits": 51
+        },
+        {
+          "offset": 216,
+          "bytes": 210,
+          "prefix_bits": 51
+        },
+        {
+          "offset": 426,
+          "bytes": 210,
+          "prefix_bits": 53
+        }
+      ],
+      "container_rate": 48000,
+      "container_frame_samples": 512,
+      "samples": 1536,
+      "pcm_offset": 0,
+      "control": "plain-tree0-same.mp4",
+      "empty": false,
+      "output_channels": 6,
+      "inherited_completes_first": false
+    },
+    {
+      "asc": "f8e62025339000000000",
+      "tree": 0,
+      "n": 512,
+      "rate": 48000,
+      "slots": 8,
+      "bands": 64,
+      "channels": 1,
+      "qmf": null,
+      "name": "plain-tree0-same-local-empty",
+      "mode": "same",
+      "configs": [
+        "3390000000",
+        "3390000800"
+      ],
+      "body": "7f1014ec74ebae08895c257cf826435f4b6fa32a9919e34011d2e856fcf13e23429f1b63a029d8e9d75c1112b84af9f04c86be96df46553233c68023fc4cb6ca99d846853e36c74053b1d3aeb822257095f3e0990d7d2dbe8caaf8a5d0adf9e2196d9533b08d0a7c6d8e80a763a75d70444ae12be7c1321bf1f8f99d50b0b9c2f99d50b0b9c2f99d50b0b9df15ce17ccea8585ce17ccea8585ce17ccea87e3542c2e70be67542c2e70be67542c2e70be7c45f33aa1617385f33aa1617385f33aa1617240",
+      "phase": [
+        0,
+        0,
+        0
+      ],
+      "frames": [
+        {
+          "offset": 636,
+          "bytes": 214,
+          "prefix_bits": 51
+        },
+        {
+          "offset": 850,
+          "bytes": 208,
+          "prefix_bits": 51
+        },
+        {
+          "offset": 1058,
+          "bytes": 208,
+          "prefix_bits": 53
+        }
+      ],
+      "container_rate": 48000,
+      "container_frame_samples": 512,
+      "samples": 1536,
+      "pcm_offset": 0,
+      "control": "plain-tree0-same.mp4",
+      "empty": true,
+      "output_channels": 6,
+      "inherited_completes_first": false
+    },
+    {
+      "asc": "f8e62025339000000000",
+      "tree": 0,
+      "n": 512,
+      "rate": 48000,
+      "slots": 8,
+      "bands": 64,
+      "channels": 1,
+      "qmf": null,
+      "name": "plain-tree0-fragmented-gain-local",
+      "mode": "fragmented-gain",
+      "configs": [
+        "3390000000",
+        "3390000800"
+      ],
+      "body": "7f1014ec74ebae08895c257cf826435f4b6fa32a9919e34011d2e856fcf13e23429f1b63a029d8e9d75c1112b84af9f04c86be96df46553233c68023fc4cb6ca99d846853e36c74053b1d3aeb822257095f3e0990d7d2dbe8caaf8a5d0adf9e2196d9533b08d0a7c6d8e80a763a75d70444ae12be7c1321bf1f8f99d50b0b9c2f99d50b0b9c2f99d50b0b9df15ce17ccea8585ce17ccea8585ce17ccea87e3542c2e70be67542c2e70be67542c2e70be7c45f33aa1617385f33aa1617385f33aa1617240",
+      "phase": [
+        0,
+        1,
+        0
+      ],
+      "frames": [
+        {
+          "offset": 1266,
+          "bytes": 111,
+          "prefix_bits": 51
+        },
+        {
+          "offset": 1377,
+          "bytes": 320,
+          "prefix_bits": 51
+        },
+        {
+          "offset": 1697,
+          "bytes": 216,
+          "prefix_bits": 53
+        }
+      ],
+      "container_rate": 48000,
+      "container_frame_samples": 512,
+      "samples": 1536,
+      "pcm_offset": 0,
+      "control": "plain-tree0-fragmented-gain.mp4",
+      "empty": false,
+      "output_channels": 6,
+      "inherited_completes_first": true
+    },
+    {
+      "asc": "f8e62025339100000000",
+      "tree": 1,
+      "n": 512,
+      "rate": 48000,
+      "slots": 8,
+      "bands": 64,
+      "channels": 1,
+      "qmf": null,
+      "name": "plain-tree1-same-local",
+      "mode": "same",
+      "configs": [
+        "3391000000",
+        "3391000800"
+      ],
+      "body": "7f1014ec74ebae08895c257cf826435f4b6fa32a9919e34011d2e856fcf13e23429f1b63a029d8e9d75c1112b84af9f04c86be96df46553233c68023fc7e29742b7e78865b654cec23429f1b63a029d8e9d75c1112b84af9f04c86fc5919e34011d2e856fcf10cb6ca99d846853e36c74053b1d3aeb8222570f8f99d50b0b9c2f99d50b0b9c2f99d50b0b9df15ce17ccea8585ce17ccea8585ce17ccea87e3542c2e70be67542c2e70be67542c2e70be7c45f33aa1617385f33aa1617385f33aa1617240",
+      "phase": [
+        0,
+        0,
+        0
+      ],
+      "frames": [
+        {
+          "offset": 1913,
+          "bytes": 216,
+          "prefix_bits": 51
+        },
+        {
+          "offset": 2129,
+          "bytes": 210,
+          "prefix_bits": 51
+        },
+        {
+          "offset": 2339,
+          "bytes": 210,
+          "prefix_bits": 53
+        }
+      ],
+      "container_rate": 48000,
+      "container_frame_samples": 512,
+      "samples": 1536,
+      "pcm_offset": 0,
+      "control": "plain-tree1-same.mp4",
+      "empty": false,
+      "output_channels": 6,
+      "inherited_completes_first": false
+    },
+    {
+      "asc": "f8e62025339100000000",
+      "tree": 1,
+      "n": 512,
+      "rate": 48000,
+      "slots": 8,
+      "bands": 64,
+      "channels": 1,
+      "qmf": null,
+      "name": "plain-tree1-same-local-empty",
+      "mode": "same",
+      "configs": [
+        "3391000000",
+        "3391000800"
+      ],
+      "body": "7f1014ec74ebae08895c257cf826435f4b6fa32a9919e34011d2e856fcf13e23429f1b63a029d8e9d75c1112b84af9f04c86be96df46553233c68023fc7e29742b7e78865b654cec23429f1b63a029d8e9d75c1112b84af9f04c86fc5919e34011d2e856fcf10cb6ca99d846853e36c74053b1d3aeb8222570f8f99d50b0b9c2f99d50b0b9c2f99d50b0b9df15ce17ccea8585ce17ccea8585ce17ccea87e3542c2e70be67542c2e70be67542c2e70be7c45f33aa1617385f33aa1617385f33aa1617240",
+      "phase": [
+        0,
+        0,
+        0
+      ],
+      "frames": [
+        {
+          "offset": 2549,
+          "bytes": 214,
+          "prefix_bits": 51
+        },
+        {
+          "offset": 2763,
+          "bytes": 208,
+          "prefix_bits": 51
+        },
+        {
+          "offset": 2971,
+          "bytes": 208,
+          "prefix_bits": 53
+        }
+      ],
+      "container_rate": 48000,
+      "container_frame_samples": 512,
+      "samples": 1536,
+      "pcm_offset": 0,
+      "control": "plain-tree1-same.mp4",
+      "empty": true,
+      "output_channels": 6,
+      "inherited_completes_first": false
+    },
+    {
+      "asc": "f8e62025339100000000",
+      "tree": 1,
+      "n": 512,
+      "rate": 48000,
+      "slots": 8,
+      "bands": 64,
+      "channels": 1,
+      "qmf": null,
+      "name": "plain-tree1-fragmented-gain-local",
+      "mode": "fragmented-gain",
+      "configs": [
+        "3391000000",
+        "3391000800"
+      ],
+      "body": "7f1014ec74ebae08895c257cf826435f4b6fa32a9919e34011d2e856fcf13e23429f1b63a029d8e9d75c1112b84af9f04c86be96df46553233c68023fc7e29742b7e78865b654cec23429f1b63a029d8e9d75c1112b84af9f04c86fc5919e34011d2e856fcf10cb6ca99d846853e36c74053b1d3aeb8222570f8f99d50b0b9c2f99d50b0b9c2f99d50b0b9df15ce17ccea8585ce17ccea8585ce17ccea87e3542c2e70be67542c2e70be67542c2e70be7c45f33aa1617385f33aa1617385f33aa1617240",
+      "phase": [
+        0,
+        1,
+        0
+      ],
+      "frames": [
+        {
+          "offset": 3179,
+          "bytes": 111,
+          "prefix_bits": 51
+        },
+        {
+          "offset": 3290,
+          "bytes": 320,
+          "prefix_bits": 51
+        },
+        {
+          "offset": 3610,
+          "bytes": 216,
+          "prefix_bits": 53
+        }
+      ],
+      "container_rate": 48000,
+      "container_frame_samples": 512,
+      "samples": 1536,
+      "pcm_offset": 0,
+      "control": "plain-tree1-fragmented-gain.mp4",
+      "empty": false,
+      "output_channels": 6,
+      "inherited_completes_first": true
+    },
+    {
+      "asc": "f8e64027339200000082b000",
+      "tree": 2,
+      "n": 512,
+      "rate": 48000,
+      "slots": 8,
+      "bands": 64,
+      "channels": 2,
+      "qmf": null,
+      "name": "plain-tree2-same-local",
+      "mode": "same",
+      "configs": [
+        "339200000082b0",
+        "339200080082b0"
+      ],
+      "body": "7f1f88d0a7c6d8e80a763a75d70444ae12be7c1321afa5b7d1954c8cf1a008ff132db2a67611a14f8db1d014ec74ebae08895c257cf826435f4b6fa32abe270be67542c2e70be67542c2e70be67542c7c61617385f33aa1617385f33aa1617385f33f89f2c3678274d63eb8c64bb7297ede6edf8a55dce848a7d74709c964832fb076789f882526e400949b9003f16381fd3aa1b8122631f2c3678274d63eb8fe2dfca5aa6ce988765e4abb9d0914fae8e13fc4129372004a4dc801289",
+      "phase": [
+        0,
+        0,
+        0
+      ],
+      "frames": [
+        {
+          "offset": 3826,
+          "bytes": 217,
+          "prefix_bits": 98
+        },
+        {
+          "offset": 4043,
+          "bytes": 209,
+          "prefix_bits": 100
+        },
+        {
+          "offset": 4252,
+          "bytes": 209,
+          "prefix_bits": 100
+        }
+      ],
+      "container_rate": 48000,
+      "container_frame_samples": 512,
+      "samples": 1536,
+      "pcm_offset": 0,
+      "control": "plain-tree2-same.mp4",
+      "empty": false,
+      "output_channels": 6,
+      "inherited_completes_first": false
+    },
+    {
+      "asc": "f8e64027339200000082b000",
+      "tree": 2,
+      "n": 512,
+      "rate": 48000,
+      "slots": 8,
+      "bands": 64,
+      "channels": 2,
+      "qmf": null,
+      "name": "plain-tree2-same-local-empty",
+      "mode": "same",
+      "configs": [
+        "339200000082b0",
+        "339200080082b0"
+      ],
+      "body": "7f1f88d0a7c6d8e80a763a75d70444ae12be7c1321afa5b7d1954c8cf1a008ff132db2a67611a14f8db1d014ec74ebae08895c257cf826435f4b6fa32abe270be67542c2e70be67542c2e70be67542c7c61617385f33aa1617385f33aa1617385f33f89f2c3678274d63eb8c64bb7297ede6edf8a55dce848a7d74709c964832fb076789f882526e400949b9003f16381fd3aa1b8122631f2c3678274d63eb8fe2dfca5aa6ce988765e4abb9d0914fae8e13fc4129372004a4dc801289",
+      "phase": [
+        0,
+        0,
+        0
+      ],
+      "frames": [
+        {
+          "offset": 4461,
+          "bytes": 215,
+          "prefix_bits": 98
+        },
+        {
+          "offset": 4676,
+          "bytes": 207,
+          "prefix_bits": 100
+        },
+        {
+          "offset": 4883,
+          "bytes": 207,
+          "prefix_bits": 100
+        }
+      ],
+      "container_rate": 48000,
+      "container_frame_samples": 512,
+      "samples": 1536,
+      "pcm_offset": 0,
+      "control": "plain-tree2-same.mp4",
+      "empty": true,
+      "output_channels": 6,
+      "inherited_completes_first": false
+    },
+    {
+      "asc": "f8e64027339200000082b000",
+      "tree": 2,
+      "n": 512,
+      "rate": 48000,
+      "slots": 8,
+      "bands": 64,
+      "channels": 2,
+      "qmf": null,
+      "name": "plain-tree2-fragmented-gain-local",
+      "mode": "fragmented-gain",
+      "configs": [
+        "339200000082b0",
+        "339200080082b0"
+      ],
+      "body": "7f1f88d0a7c6d8e80a763a75d70444ae12be7c1321afa5b7d1954c8cf1a008ff132db2a67611a14f8db1d014ec74ebae08895c257cf826435f4b6fa32abe270be67542c2e70be67542c2e70be67542c7c61617385f33aa1617385f33aa1617385f33f89f2c3678274d63eb8c64bb7297ede6edf8a55dce848a7d74709c964832fb076789f882526e400949b9003f16381fd3aa1b8122631f2c3678274d63eb8fe2dfca5aa6ce988765e4abb9d0914fae8e13fc4129372004a4dc801289",
+      "phase": [
+        0,
+        1,
+        0
+      ],
+      "frames": [
+        {
+          "offset": 5090,
+          "bytes": 114,
+          "prefix_bits": 98
+        },
+        {
+          "offset": 5204,
+          "bytes": 319,
+          "prefix_bits": 100
+        },
+        {
+          "offset": 5523,
+          "bytes": 217,
+          "prefix_bits": 100
+        }
+      ],
+      "container_rate": 48000,
+      "container_frame_samples": 512,
+      "samples": 1536,
+      "pcm_offset": 0,
+      "control": "plain-tree2-fragmented-gain.mp4",
+      "empty": false,
+      "output_channels": 6,
+      "inherited_completes_first": true
+    },
+    {
+      "asc": "f8e64027339300000082b000",
+      "tree": 3,
+      "n": 512,
+      "rate": 48000,
+      "slots": 8,
+      "bands": 64,
+      "channels": 2,
+      "qmf": null,
+      "name": "plain-tree3-same-local",
+      "mode": "same",
+      "configs": [
+        "339300000082b0",
+        "339300080082b0"
+      ],
+      "body": "7f1f88d0a7c6d8e80a763a75d70444ae12be7c1321afa5b7d1954c8cf1a008ff132db2a67611a14f8db1d014ec74ebae08895c257cf826435f4b6fa32abe29742b7e78865b654cec23429f1b63a029d8e9d75c1112b84af9f04c86fc5919e34011d2e856fcf10cb6ca99d846853e36c74053b1d3aeb8222570f8f99d50b0b9c2f99d50b0b9c2f99d50b0b9df15ce17ccea8585ce17ccea8585ce17ccea87e3542c2e70be67542c2e70be67542c2e70be7c45f33aa1617385f33aa1617385f33aa1617f8b7f296a9b3a621d9792aee742453e92af8be242eb602843a9fd95c7b34876d69c6f882526e400949b9003f1950ebd95791cd859337f296a9b3a621d97be342e30c22aa7213cbe7c485d6c0508753fb7c4129372004a4dc8012890",
+      "phase": [
+        0,
+        0,
+        0
+      ],
+      "frames": [
+        {
+          "offset": 5740,
+          "bytes": 316,
+          "prefix_bits": 98
+        },
+        {
+          "offset": 6056,
+          "bytes": 308,
+          "prefix_bits": 100
+        },
+        {
+          "offset": 6364,
+          "bytes": 308,
+          "prefix_bits": 100
+        }
+      ],
+      "container_rate": 48000,
+      "container_frame_samples": 512,
+      "samples": 1536,
+      "pcm_offset": 0,
+      "control": "plain-tree3-same.mp4",
+      "empty": false,
+      "output_channels": 8,
+      "inherited_completes_first": false
+    },
+    {
+      "asc": "f8e64027339300000082b000",
+      "tree": 3,
+      "n": 512,
+      "rate": 48000,
+      "slots": 8,
+      "bands": 64,
+      "channels": 2,
+      "qmf": null,
+      "name": "plain-tree3-same-local-empty",
+      "mode": "same",
+      "configs": [
+        "339300000082b0",
+        "339300080082b0"
+      ],
+      "body": "7f1f88d0a7c6d8e80a763a75d70444ae12be7c1321afa5b7d1954c8cf1a008ff132db2a67611a14f8db1d014ec74ebae08895c257cf826435f4b6fa32abe29742b7e78865b654cec23429f1b63a029d8e9d75c1112b84af9f04c86fc5919e34011d2e856fcf10cb6ca99d846853e36c74053b1d3aeb8222570f8f99d50b0b9c2f99d50b0b9c2f99d50b0b9df15ce17ccea8585ce17ccea8585ce17ccea87e3542c2e70be67542c2e70be67542c2e70be7c45f33aa1617385f33aa1617385f33aa1617f8b7f296a9b3a621d9792aee742453e92af8be242eb602843a9fd95c7b34876d69c6f882526e400949b9003f1950ebd95791cd859337f296a9b3a621d97be342e30c22aa7213cbe7c485d6c0508753fb7c4129372004a4dc8012890",
+      "phase": [
+        0,
+        0,
+        0
+      ],
+      "frames": [
+        {
+          "offset": 6672,
+          "bytes": 314,
+          "prefix_bits": 98
+        },
+        {
+          "offset": 6986,
+          "bytes": 306,
+          "prefix_bits": 100
+        },
+        {
+          "offset": 7292,
+          "bytes": 306,
+          "prefix_bits": 100
+        }
+      ],
+      "container_rate": 48000,
+      "container_frame_samples": 512,
+      "samples": 1536,
+      "pcm_offset": 0,
+      "control": "plain-tree3-same.mp4",
+      "empty": true,
+      "output_channels": 8,
+      "inherited_completes_first": false
+    },
+    {
+      "asc": "f8e64027339300000082b000",
+      "tree": 3,
+      "n": 512,
+      "rate": 48000,
+      "slots": 8,
+      "bands": 64,
+      "channels": 2,
+      "qmf": null,
+      "name": "plain-tree3-fragmented-gain-local",
+      "mode": "fragmented-gain",
+      "configs": [
+        "339300000082b0",
+        "339300080082b0"
+      ],
+      "body": "7f1f88d0a7c6d8e80a763a75d70444ae12be7c1321afa5b7d1954c8cf1a008ff132db2a67611a14f8db1d014ec74ebae08895c257cf826435f4b6fa32abe29742b7e78865b654cec23429f1b63a029d8e9d75c1112b84af9f04c86fc5919e34011d2e856fcf10cb6ca99d846853e36c74053b1d3aeb8222570f8f99d50b0b9c2f99d50b0b9c2f99d50b0b9df15ce17ccea8585ce17ccea8585ce17ccea87e3542c2e70be67542c2e70be67542c2e70be7c45f33aa1617385f33aa1617385f33aa1617f8b7f296a9b3a621d9792aee742453e92af8be242eb602843a9fd95c7b34876d69c6f882526e400949b9003f1950ebd95791cd859337f296a9b3a621d97be342e30c22aa7213cbe7c485d6c0508753fb7c4129372004a4dc8012890",
+      "phase": [
+        0,
+        1,
+        0
+      ],
+      "frames": [
+        {
+          "offset": 7598,
+          "bytes": 163,
+          "prefix_bits": 98
+        },
+        {
+          "offset": 7761,
+          "bytes": 466,
+          "prefix_bits": 100
+        },
+        {
+          "offset": 8227,
+          "bytes": 316,
+          "prefix_bits": 100
+        }
+      ],
+      "container_rate": 48000,
+      "container_frame_samples": 512,
+      "samples": 1536,
+      "pcm_offset": 0,
+      "control": "plain-tree3-fragmented-gain.mp4",
+      "empty": false,
+      "output_channels": 8,
+      "inherited_completes_first": true
+    },
+    {
+      "asc": "f8e64027339400000082b000",
+      "tree": 4,
+      "n": 512,
+      "rate": 48000,
+      "slots": 8,
+      "bands": 64,
+      "channels": 2,
+      "qmf": null,
+      "name": "plain-tree4-same-local",
+      "mode": "same",
+      "configs": [
+        "339400000082b0",
+        "339400080082b0"
+      ],
+      "body": "7f1f88d0a7c6d8e80a763a75d70444ae12be7c1321afa5b7d1954c8cf1a008ff132db2a67611a14f8db1d014ec74ebae08895c257cf826435f4b6fa32abe29742b7e78865b654cec23429f1b63a029d8e9d75c1112b84af9f04c86fc5919e34011d2e856fcf10cb6ca99d846853e36c74053b1d3aeb8222570f8f99d50b0b9c2f99d50b0b9c2f99d50b0b9df15ce17ccea8585ce17ccea8585ce17ccea87e3542c2e70be67542c2e70be67542c2e70be7c45f33aa1617385f33aa1617385f33aa1617f8b7f296a9b3a621d9792aee742453e92af8be242eb602843a9fd95c7b34876d69c6f882526e400949b9003f1950ebd95791cd859337f296a9b3a621d97be342e30c22aa7213cbe7c485d6c0508753fb7c4129372004a4dc8012890",
+      "phase": [
+        0,
+        0,
+        0
+      ],
+      "frames": [
+        {
+          "offset": 8543,
+          "bytes": 316,
+          "prefix_bits": 98
+        },
+        {
+          "offset": 8859,
+          "bytes": 308,
+          "prefix_bits": 100
+        },
+        {
+          "offset": 9167,
+          "bytes": 308,
+          "prefix_bits": 100
+        }
+      ],
+      "container_rate": 48000,
+      "container_frame_samples": 512,
+      "samples": 1536,
+      "pcm_offset": 0,
+      "control": "plain-tree4-same.mp4",
+      "empty": false,
+      "output_channels": 8,
+      "inherited_completes_first": false
+    },
+    {
+      "asc": "f8e64027339400000082b000",
+      "tree": 4,
+      "n": 512,
+      "rate": 48000,
+      "slots": 8,
+      "bands": 64,
+      "channels": 2,
+      "qmf": null,
+      "name": "plain-tree4-same-local-empty",
+      "mode": "same",
+      "configs": [
+        "339400000082b0",
+        "339400080082b0"
+      ],
+      "body": "7f1f88d0a7c6d8e80a763a75d70444ae12be7c1321afa5b7d1954c8cf1a008ff132db2a67611a14f8db1d014ec74ebae08895c257cf826435f4b6fa32abe29742b7e78865b654cec23429f1b63a029d8e9d75c1112b84af9f04c86fc5919e34011d2e856fcf10cb6ca99d846853e36c74053b1d3aeb8222570f8f99d50b0b9c2f99d50b0b9c2f99d50b0b9df15ce17ccea8585ce17ccea8585ce17ccea87e3542c2e70be67542c2e70be67542c2e70be7c45f33aa1617385f33aa1617385f33aa1617f8b7f296a9b3a621d9792aee742453e92af8be242eb602843a9fd95c7b34876d69c6f882526e400949b9003f1950ebd95791cd859337f296a9b3a621d97be342e30c22aa7213cbe7c485d6c0508753fb7c4129372004a4dc8012890",
+      "phase": [
+        0,
+        0,
+        0
+      ],
+      "frames": [
+        {
+          "offset": 9475,
+          "bytes": 314,
+          "prefix_bits": 98
+        },
+        {
+          "offset": 9789,
+          "bytes": 306,
+          "prefix_bits": 100
+        },
+        {
+          "offset": 10095,
+          "bytes": 306,
+          "prefix_bits": 100
+        }
+      ],
+      "container_rate": 48000,
+      "container_frame_samples": 512,
+      "samples": 1536,
+      "pcm_offset": 0,
+      "control": "plain-tree4-same.mp4",
+      "empty": true,
+      "output_channels": 8,
+      "inherited_completes_first": false
+    },
+    {
+      "asc": "f8e64027339400000082b000",
+      "tree": 4,
+      "n": 512,
+      "rate": 48000,
+      "slots": 8,
+      "bands": 64,
+      "channels": 2,
+      "qmf": null,
+      "name": "plain-tree4-fragmented-gain-local",
+      "mode": "fragmented-gain",
+      "configs": [
+        "339400000082b0",
+        "339400080082b0"
+      ],
+      "body": "7f1f88d0a7c6d8e80a763a75d70444ae12be7c1321afa5b7d1954c8cf1a008ff132db2a67611a14f8db1d014ec74ebae08895c257cf826435f4b6fa32abe29742b7e78865b654cec23429f1b63a029d8e9d75c1112b84af9f04c86fc5919e34011d2e856fcf10cb6ca99d846853e36c74053b1d3aeb8222570f8f99d50b0b9c2f99d50b0b9c2f99d50b0b9df15ce17ccea8585ce17ccea8585ce17ccea87e3542c2e70be67542c2e70be67542c2e70be7c45f33aa1617385f33aa1617385f33aa1617f8b7f296a9b3a621d9792aee742453e92af8be242eb602843a9fd95c7b34876d69c6f882526e400949b9003f1950ebd95791cd859337f296a9b3a621d97be342e30c22aa7213cbe7c485d6c0508753fb7c4129372004a4dc8012890",
+      "phase": [
+        0,
+        1,
+        0
+      ],
+      "frames": [
+        {
+          "offset": 10401,
+          "bytes": 163,
+          "prefix_bits": 98
+        },
+        {
+          "offset": 10564,
+          "bytes": 466,
+          "prefix_bits": 100
+        },
+        {
+          "offset": 11030,
+          "bytes": 316,
+          "prefix_bits": 100
+        }
+      ],
+      "container_rate": 48000,
+      "container_frame_samples": 512,
+      "samples": 1536,
+      "pcm_offset": 0,
+      "control": "plain-tree4-fragmented-gain.mp4",
+      "empty": false,
+      "output_channels": 8,
+      "inherited_completes_first": true
+    },
+    {
+      "asc": "f8e6c025339500000000",
+      "tree": 5,
+      "n": 512,
+      "rate": 48000,
+      "slots": 8,
+      "bands": 64,
+      "channels": 6,
+      "qmf": null,
+      "name": "plain-tree5-same-local",
+      "mode": "same",
+      "configs": [
+        "3395000000",
+        "3395000800"
+      ],
+      "body": "7f1014ec74ebae08895c257cf826435f4b6fa32a9919e34011d2e856fcf13e23429f1b63a029d8e9d75c1112b84af9f04c86be96df46553233c68023fc73aa1617385f33aa1617385f33aa1617385f89c2f99d50b0b9c2f99d50b0b9c2f99d50b048",
+      "phase": [
+        0,
+        0,
+        0
+      ],
+      "frames": [
+        {
+          "offset": 11346,
+          "bytes": 147,
+          "prefix_bits": 283
+        },
+        {
+          "offset": 11493,
+          "bytes": 141,
+          "prefix_bits": 285
+        },
+        {
+          "offset": 11634,
+          "bytes": 141,
+          "prefix_bits": 283
+        }
+      ],
+      "container_rate": 48000,
+      "container_frame_samples": 512,
+      "samples": 1536,
+      "pcm_offset": 0,
+      "control": "plain-tree5-same.mp4",
+      "empty": false,
+      "output_channels": 8,
+      "inherited_completes_first": false
+    },
+    {
+      "asc": "f8e6c025339500000000",
+      "tree": 5,
+      "n": 512,
+      "rate": 48000,
+      "slots": 8,
+      "bands": 64,
+      "channels": 6,
+      "qmf": null,
+      "name": "plain-tree5-same-local-empty",
+      "mode": "same",
+      "configs": [
+        "3395000000",
+        "3395000800"
+      ],
+      "body": "7f1014ec74ebae08895c257cf826435f4b6fa32a9919e34011d2e856fcf13e23429f1b63a029d8e9d75c1112b84af9f04c86be96df46553233c68023fc73aa1617385f33aa1617385f33aa1617385f89c2f99d50b0b9c2f99d50b0b9c2f99d50b048",
+      "phase": [
+        0,
+        0,
+        0
+      ],
+      "frames": [
+        {
+          "offset": 11775,
+          "bytes": 145,
+          "prefix_bits": 283
+        },
+        {
+          "offset": 11920,
+          "bytes": 139,
+          "prefix_bits": 285
+        },
+        {
+          "offset": 12059,
+          "bytes": 139,
+          "prefix_bits": 283
+        }
+      ],
+      "container_rate": 48000,
+      "container_frame_samples": 512,
+      "samples": 1536,
+      "pcm_offset": 0,
+      "control": "plain-tree5-same.mp4",
+      "empty": true,
+      "output_channels": 8,
+      "inherited_completes_first": false
+    },
+    {
+      "asc": "f8e6c025339500000000",
+      "tree": 5,
+      "n": 512,
+      "rate": 48000,
+      "slots": 8,
+      "bands": 64,
+      "channels": 6,
+      "qmf": null,
+      "name": "plain-tree5-fragmented-gain-local",
+      "mode": "fragmented-gain",
+      "configs": [
+        "3395000000",
+        "3395000800"
+      ],
+      "body": "7f1014ec74ebae08895c257cf826435f4b6fa32a9919e34011d2e856fcf13e23429f1b63a029d8e9d75c1112b84af9f04c86be96df46553233c68023fc73aa1617385f33aa1617385f33aa1617385f89c2f99d50b0b9c2f99d50b0b9c2f99d50b048",
+      "phase": [
+        0,
+        1,
+        0
+      ],
+      "frames": [
+        {
+          "offset": 12198,
+          "bytes": 91,
+          "prefix_bits": 283
+        },
+        {
+          "offset": 12289,
+          "bytes": 202,
+          "prefix_bits": 285
+        },
+        {
+          "offset": 12491,
+          "bytes": 147,
+          "prefix_bits": 283
+        }
+      ],
+      "container_rate": 48000,
+      "container_frame_samples": 512,
+      "samples": 1536,
+      "pcm_offset": 0,
+      "control": "plain-tree5-fragmented-gain.mp4",
+      "empty": false,
+      "output_channels": 8,
+      "inherited_completes_first": true
+    },
+    {
+      "asc": "f8e6c025339600000000",
+      "tree": 6,
+      "n": 512,
+      "rate": 48000,
+      "slots": 8,
+      "bands": 64,
+      "channels": 6,
+      "qmf": null,
+      "name": "plain-tree6-same-local",
+      "mode": "same",
+      "configs": [
+        "3396000000",
+        "3396000800"
+      ],
+      "body": "7f1014ec74ebae08895c257cf826435f4b6fa32a9919e34011d2e856fcf13e23429f1b63a029d8e9d75c1112b84af9f04c86be96df46553233c68023fc73aa1617385f33aa1617385f33aa1617385f89c2f99d50b0b9c2f99d50b0b9c2f99d50b048",
+      "phase": [
+        0,
+        0,
+        0
+      ],
+      "frames": [
+        {
+          "offset": 12638,
+          "bytes": 147,
+          "prefix_bits": 283
+        },
+        {
+          "offset": 12785,
+          "bytes": 141,
+          "prefix_bits": 285
+        },
+        {
+          "offset": 12926,
+          "bytes": 141,
+          "prefix_bits": 283
+        }
+      ],
+      "container_rate": 48000,
+      "container_frame_samples": 512,
+      "samples": 1536,
+      "pcm_offset": 0,
+      "control": "plain-tree6-same.mp4",
+      "empty": false,
+      "output_channels": 8,
+      "inherited_completes_first": false
+    },
+    {
+      "asc": "f8e6c025339600000000",
+      "tree": 6,
+      "n": 512,
+      "rate": 48000,
+      "slots": 8,
+      "bands": 64,
+      "channels": 6,
+      "qmf": null,
+      "name": "plain-tree6-same-local-empty",
+      "mode": "same",
+      "configs": [
+        "3396000000",
+        "3396000800"
+      ],
+      "body": "7f1014ec74ebae08895c257cf826435f4b6fa32a9919e34011d2e856fcf13e23429f1b63a029d8e9d75c1112b84af9f04c86be96df46553233c68023fc73aa1617385f33aa1617385f33aa1617385f89c2f99d50b0b9c2f99d50b0b9c2f99d50b048",
+      "phase": [
+        0,
+        0,
+        0
+      ],
+      "frames": [
+        {
+          "offset": 13067,
+          "bytes": 145,
+          "prefix_bits": 283
+        },
+        {
+          "offset": 13212,
+          "bytes": 139,
+          "prefix_bits": 285
+        },
+        {
+          "offset": 13351,
+          "bytes": 139,
+          "prefix_bits": 283
+        }
+      ],
+      "container_rate": 48000,
+      "container_frame_samples": 512,
+      "samples": 1536,
+      "pcm_offset": 0,
+      "control": "plain-tree6-same.mp4",
+      "empty": true,
+      "output_channels": 8,
+      "inherited_completes_first": false
+    },
+    {
+      "asc": "f8e6c025339600000000",
+      "tree": 6,
+      "n": 512,
+      "rate": 48000,
+      "slots": 8,
+      "bands": 64,
+      "channels": 6,
+      "qmf": null,
+      "name": "plain-tree6-fragmented-gain-local",
+      "mode": "fragmented-gain",
+      "configs": [
+        "3396000000",
+        "3396000800"
+      ],
+      "body": "7f1014ec74ebae08895c257cf826435f4b6fa32a9919e34011d2e856fcf13e23429f1b63a029d8e9d75c1112b84af9f04c86be96df46553233c68023fc73aa1617385f33aa1617385f33aa1617385f89c2f99d50b0b9c2f99d50b0b9c2f99d50b048",
+      "phase": [
+        0,
+        1,
+        0
+      ],
+      "frames": [
+        {
+          "offset": 13490,
+          "bytes": 91,
+          "prefix_bits": 283
+        },
+        {
+          "offset": 13581,
+          "bytes": 202,
+          "prefix_bits": 285
+        },
+        {
+          "offset": 13783,
+          "bytes": 147,
+          "prefix_bits": 283
+        }
+      ],
+      "container_rate": 48000,
+      "container_frame_samples": 512,
+      "samples": 1536,
+      "pcm_offset": 0,
+      "control": "plain-tree6-fragmented-gain.mp4",
+      "empty": false,
+      "output_channels": 8,
+      "inherited_completes_first": true
+    },
+    {
+      "asc": "f8e620243397000000",
+      "tree": 7,
+      "n": 512,
+      "rate": 48000,
+      "slots": 8,
+      "bands": 64,
+      "channels": 1,
+      "qmf": null,
+      "name": "plain-tree7-same-local",
+      "mode": "same",
+      "configs": [
+        "33970000",
+        "33970400"
+      ],
+      "body": "7f1014ec74ebae08895c257cf826435f4b6fa32a9919e34011d2e856fcf13e2c2e70be67542c2e70be67542c2e70be675120",
+      "phase": [
+        0,
+        0,
+        0
+      ],
+      "frames": [
+        {
+          "offset": 13930,
+          "bytes": 69,
+          "prefix_bits": 51
+        },
+        {
+          "offset": 13999,
+          "bytes": 64,
+          "prefix_bits": 51
+        },
+        {
+          "offset": 14063,
+          "bytes": 64,
+          "prefix_bits": 53
+        }
+      ],
+      "container_rate": 48000,
+      "container_frame_samples": 512,
+      "samples": 1536,
+      "pcm_offset": 0,
+      "control": "plain-tree7-same.mp4",
+      "empty": false,
+      "output_channels": 2,
+      "inherited_completes_first": false
+    },
+    {
+      "asc": "f8e620243397000000",
+      "tree": 7,
+      "n": 512,
+      "rate": 48000,
+      "slots": 8,
+      "bands": 64,
+      "channels": 1,
+      "qmf": null,
+      "name": "plain-tree7-same-local-empty",
+      "mode": "same",
+      "configs": [
+        "33970000",
+        "33970400"
+      ],
+      "body": "7f1014ec74ebae08895c257cf826435f4b6fa32a9919e34011d2e856fcf13e2c2e70be67542c2e70be67542c2e70be675120",
+      "phase": [
+        0,
+        0,
+        0
+      ],
+      "frames": [
+        {
+          "offset": 14127,
+          "bytes": 67,
+          "prefix_bits": 51
+        },
+        {
+          "offset": 14194,
+          "bytes": 62,
+          "prefix_bits": 51
+        },
+        {
+          "offset": 14256,
+          "bytes": 62,
+          "prefix_bits": 53
+        }
+      ],
+      "container_rate": 48000,
+      "container_frame_samples": 512,
+      "samples": 1536,
+      "pcm_offset": 0,
+      "control": "plain-tree7-same.mp4",
+      "empty": true,
+      "output_channels": 2,
+      "inherited_completes_first": false
+    },
+    {
+      "asc": "f8e620243397000000",
+      "tree": 7,
+      "n": 512,
+      "rate": 48000,
+      "slots": 8,
+      "bands": 64,
+      "channels": 1,
+      "qmf": null,
+      "name": "plain-tree7-fragmented-gain-local",
+      "mode": "fragmented-gain",
+      "configs": [
+        "33970000",
+        "33970400"
+      ],
+      "body": "7f1014ec74ebae08895c257cf826435f4b6fa32a9919e34011d2e856fcf13e2c2e70be67542c2e70be67542c2e70be675120",
+      "phase": [
+        0,
+        1,
+        0
+      ],
+      "frames": [
+        {
+          "offset": 14318,
+          "bytes": 37,
+          "prefix_bits": 51
+        },
+        {
+          "offset": 14355,
+          "bytes": 100,
+          "prefix_bits": 51
+        },
+        {
+          "offset": 14455,
+          "bytes": 69,
+          "prefix_bits": 53
+        }
+      ],
+      "container_rate": 48000,
+      "container_frame_samples": 512,
+      "samples": 1536,
+      "pcm_offset": 0,
+      "control": "plain-tree7-fragmented-gain.mp4",
+      "empty": false,
+      "output_channels": 2,
+      "inherited_completes_first": true
+    },
+    {
+      "asc": "f8ec314460c0592338b8000000",
+      "tree": 7,
+      "n": 480,
+      "rate": 24000,
+      "slots": 15,
+      "bands": 32,
+      "channels": 1,
+      "qmf": {
+        "expected_offset": 0,
+        "expected_bands": 32
+      },
+      "name": "n480-c1-base-x1-crc1-same-local",
+      "mode": "same",
+      "configs": [
+        "67170000",
+        "67170400"
+      ],
+      "body": "7f10990d7d2dbe8caa64678d00474ba15bf3c432db2a67611a14f8db1d017e30b0b9c2f99d50b0b9c2f99d50b0b9c2f99920",
+      "phase": [
+        0,
+        0,
+        0
+      ],
+      "frames": [
+        {
+          "offset": 14752,
+          "bytes": 77,
+          "prefix_bits": 116
+        },
+        {
+          "offset": 14829,
+          "bytes": 71,
+          "prefix_bits": 107
+        },
+        {
+          "offset": 14900,
+          "bytes": 71,
+          "prefix_bits": 109
+        }
+      ],
+      "container_rate": 24000,
+      "container_frame_samples": 480,
+      "samples": 1440,
+      "pcm_offset": 0,
+      "control": "n480-c1-base-x1-crc1-same.mp4",
+      "empty": false,
+      "output_channels": 2,
+      "inherited_completes_first": false
+    },
+    {
+      "asc": "f8ec314460c0592338b8000000",
+      "tree": 7,
+      "n": 480,
+      "rate": 24000,
+      "slots": 15,
+      "bands": 32,
+      "channels": 1,
+      "qmf": {
+        "expected_offset": 0,
+        "expected_bands": 32
+      },
+      "name": "n480-c1-base-x1-crc1-same-local-empty",
+      "mode": "same",
+      "configs": [
+        "67170000",
+        "67170400"
+      ],
+      "body": "7f10990d7d2dbe8caa64678d00474ba15bf3c432db2a67611a14f8db1d017e30b0b9c2f99d50b0b9c2f99d50b0b9c2f99920",
+      "phase": [
+        0,
+        0,
+        0
+      ],
+      "frames": [
+        {
+          "offset": 14971,
+          "bytes": 75,
+          "prefix_bits": 116
+        },
+        {
+          "offset": 15046,
+          "bytes": 69,
+          "prefix_bits": 107
+        },
+        {
+          "offset": 15115,
+          "bytes": 69,
+          "prefix_bits": 109
+        }
+      ],
+      "container_rate": 24000,
+      "container_frame_samples": 480,
+      "samples": 1440,
+      "pcm_offset": 0,
+      "control": "n480-c1-base-x1-crc1-same.mp4",
+      "empty": true,
+      "output_channels": 2,
+      "inherited_completes_first": false
+    },
+    {
+      "asc": "f8ec314460c0592338b8000000",
+      "tree": 7,
+      "n": 480,
+      "rate": 24000,
+      "slots": 15,
+      "bands": 32,
+      "channels": 1,
+      "qmf": {
+        "expected_offset": 0,
+        "expected_bands": 32
+      },
+      "name": "n480-c1-base-x1-crc1-fragmented-gain-local",
+      "mode": "fragmented-gain",
+      "configs": [
+        "67170000",
+        "67170400"
+      ],
+      "body": "7f10990d7d2dbe8caa64678d00474ba15bf3c432db2a67611a14f8db1d017e30b0b9c2f99d50b0b9c2f99d50b0b9c2f99920",
+      "phase": [
+        0,
+        1,
+        0
+      ],
+      "frames": [
+        {
+          "offset": 15184,
+          "bytes": 45,
+          "prefix_bits": 116
+        },
+        {
+          "offset": 15229,
+          "bytes": 107,
+          "prefix_bits": 107
+        },
+        {
+          "offset": 15336,
+          "bytes": 76,
+          "prefix_bits": 109
+        }
+      ],
+      "container_rate": 24000,
+      "container_frame_samples": 480,
+      "samples": 1440,
+      "pcm_offset": 0,
+      "control": "n480-c1-base-x1-crc1-fragmented-gain.mp4",
+      "empty": false,
+      "output_channels": 2,
+      "inherited_completes_first": true
+    },
+    {
+      "asc": "f8ec31c460c05921b8b8000000",
+      "tree": 7,
+      "n": 480,
+      "rate": 48000,
+      "slots": 15,
+      "bands": 64,
+      "channels": 1,
+      "qmf": {
+        "expected_offset": 0,
+        "expected_bands": 32
+      },
+      "name": "n480-c1-base-x2-crc1-same-local",
+      "mode": "same",
+      "configs": [
+        "37170000",
+        "37170400"
+      ],
+      "body": "7f10990d7d2dbe8caa64678d00474ba15bf3c432db2a67611a14f8db1d017e30b0b9c2f99d50b0b9c2f99d50b0b9c2f99920",
+      "phase": [
+        0,
+        0,
+        0
+      ],
+      "frames": [
+        {
+          "offset": 15662,
+          "bytes": 77,
+          "prefix_bits": 116
+        },
+        {
+          "offset": 15739,
+          "bytes": 71,
+          "prefix_bits": 107
+        },
+        {
+          "offset": 15810,
+          "bytes": 71,
+          "prefix_bits": 109
+        }
+      ],
+      "container_rate": 48000,
+      "container_frame_samples": 960,
+      "samples": 2880,
+      "pcm_offset": 0,
+      "control": "n480-c1-base-x2-crc1-same.mp4",
+      "empty": false,
+      "output_channels": 2,
+      "inherited_completes_first": false
+    },
+    {
+      "asc": "f8ec31c460c05921b8b8000000",
+      "tree": 7,
+      "n": 480,
+      "rate": 48000,
+      "slots": 15,
+      "bands": 64,
+      "channels": 1,
+      "qmf": {
+        "expected_offset": 0,
+        "expected_bands": 32
+      },
+      "name": "n480-c1-base-x2-crc1-same-local-empty",
+      "mode": "same",
+      "configs": [
+        "37170000",
+        "37170400"
+      ],
+      "body": "7f10990d7d2dbe8caa64678d00474ba15bf3c432db2a67611a14f8db1d017e30b0b9c2f99d50b0b9c2f99d50b0b9c2f99920",
+      "phase": [
+        0,
+        0,
+        0
+      ],
+      "frames": [
+        {
+          "offset": 15881,
+          "bytes": 75,
+          "prefix_bits": 116
+        },
+        {
+          "offset": 15956,
+          "bytes": 69,
+          "prefix_bits": 107
+        },
+        {
+          "offset": 16025,
+          "bytes": 69,
+          "prefix_bits": 109
+        }
+      ],
+      "container_rate": 48000,
+      "container_frame_samples": 960,
+      "samples": 2880,
+      "pcm_offset": 0,
+      "control": "n480-c1-base-x2-crc1-same.mp4",
+      "empty": true,
+      "output_channels": 2,
+      "inherited_completes_first": false
+    },
+    {
+      "asc": "f8ec31c460c05921b8b8000000",
+      "tree": 7,
+      "n": 480,
+      "rate": 48000,
+      "slots": 15,
+      "bands": 64,
+      "channels": 1,
+      "qmf": {
+        "expected_offset": 0,
+        "expected_bands": 32
+      },
+      "name": "n480-c1-base-x2-crc1-fragmented-gain-local",
+      "mode": "fragmented-gain",
+      "configs": [
+        "37170000",
+        "37170400"
+      ],
+      "body": "7f10990d7d2dbe8caa64678d00474ba15bf3c432db2a67611a14f8db1d017e30b0b9c2f99d50b0b9c2f99d50b0b9c2f99920",
+      "phase": [
+        0,
+        1,
+        0
+      ],
+      "frames": [
+        {
+          "offset": 16094,
+          "bytes": 45,
+          "prefix_bits": 116
+        },
+        {
+          "offset": 16139,
+          "bytes": 107,
+          "prefix_bits": 107
+        },
+        {
+          "offset": 16246,
+          "bytes": 76,
+          "prefix_bits": 109
+        }
+      ],
+      "container_rate": 48000,
+      "container_frame_samples": 960,
+      "samples": 2880,
+      "pcm_offset": 0,
+      "control": "n480-c1-base-x2-crc1-fragmented-gain.mp4",
+      "empty": false,
+      "output_channels": 2,
+      "inherited_completes_first": true
+    },
+    {
+      "asc": "f8ec514460c0593b389100205d358000",
+      "tree": 2,
+      "n": 480,
+      "rate": 24000,
+      "slots": 15,
+      "bands": 32,
+      "channels": 2,
+      "qmf": {
+        "expected_offset": 1235520,
+        "expected_bands": 32
+      },
+      "name": "n480-c2-base-x1-crc1-same-local",
+      "mode": "same",
+      "configs": [
+        "671220040ba6b0",
+        "6712200c0ba6b0"
+      ],
+      "body": "7f10990d7d2dbe8caa64678d00474bbe244ae12be7c1321afa5b7d1954c8cf1a008e9742b7e78865b654cec2347c4ec74ebae08895c257cf826435f4b6fa32a9919e34011d2e856fcf10cbf8ae70be67542c2e70be67542c2e70be67543f16ca99d846853e36c74053b1d3aebe30adf9e2196d9533b08d0a7c6d8efc678d00474ba15bf3c432db2a67611a3e36df46553233c68023a5d0adf9e2196480",
+      "phase": [
+        0,
+        0,
+        0
+      ],
+      "frames": [
+        {
+          "offset": 16572,
+          "bytes": 199,
+          "prefix_bits": 216
+        },
+        {
+          "offset": 16771,
+          "bytes": 189,
+          "prefix_bits": 200
+        },
+        {
+          "offset": 16960,
+          "bytes": 189,
+          "prefix_bits": 200
+        }
+      ],
+      "container_rate": 24000,
+      "container_frame_samples": 480,
+      "samples": 1440,
+      "pcm_offset": 0,
+      "control": "n480-c2-base-x1-crc1-same.mp4",
+      "empty": false,
+      "output_channels": 6,
+      "inherited_completes_first": false
+    },
+    {
+      "asc": "f8ec514460c0593b389100205d358000",
+      "tree": 2,
+      "n": 480,
+      "rate": 24000,
+      "slots": 15,
+      "bands": 32,
+      "channels": 2,
+      "qmf": {
+        "expected_offset": 1235520,
+        "expected_bands": 32
+      },
+      "name": "n480-c2-base-x1-crc1-same-local-empty",
+      "mode": "same",
+      "configs": [
+        "671220040ba6b0",
+        "6712200c0ba6b0"
+      ],
+      "body": "7f10990d7d2dbe8caa64678d00474bbe244ae12be7c1321afa5b7d1954c8cf1a008e9742b7e78865b654cec2347c4ec74ebae08895c257cf826435f4b6fa32a9919e34011d2e856fcf10cbf8ae70be67542c2e70be67542c2e70be67543f16ca99d846853e36c74053b1d3aebe30adf9e2196d9533b08d0a7c6d8efc678d00474ba15bf3c432db2a67611a3e36df46553233c68023a5d0adf9e2196480",
+      "phase": [
+        0,
+        0,
+        0
+      ],
+      "frames": [
+        {
+          "offset": 17149,
+          "bytes": 197,
+          "prefix_bits": 216
+        },
+        {
+          "offset": 17346,
+          "bytes": 187,
+          "prefix_bits": 200
+        },
+        {
+          "offset": 17533,
+          "bytes": 187,
+          "prefix_bits": 200
+        }
+      ],
+      "container_rate": 24000,
+      "container_frame_samples": 480,
+      "samples": 1440,
+      "pcm_offset": 0,
+      "control": "n480-c2-base-x1-crc1-same.mp4",
+      "empty": true,
+      "output_channels": 6,
+      "inherited_completes_first": false
+    },
+    {
+      "asc": "f8ec514460c0593b389100205d358000",
+      "tree": 2,
+      "n": 480,
+      "rate": 24000,
+      "slots": 15,
+      "bands": 32,
+      "channels": 2,
+      "qmf": {
+        "expected_offset": 1235520,
+        "expected_bands": 32
+      },
+      "name": "n480-c2-base-x1-crc1-fragmented-gain-local",
+      "mode": "fragmented-gain",
+      "configs": [
+        "671220040ba6b0",
+        "6712200c0ba6b0"
+      ],
+      "body": "7f10990d7d2dbe8caa64678d00474bbe244ae12be7c1321afa5b7d1954c8cf1a008e9742b7e78865b654cec2347c4ec74ebae08895c257cf826435f4b6fa32a9919e34011d2e856fcf10cbf8ae70be67542c2e70be67542c2e70be67543f16ca99d846853e36c74053b1d3aebe30adf9e2196d9533b08d0a7c6d8efc678d00474ba15bf3c432db2a67611a3e36df46553233c68023a5d0adf9e2196480",
+      "phase": [
+        0,
+        1,
+        0
+      ],
+      "frames": [
+        {
+          "offset": 17720,
+          "bytes": 112,
+          "prefix_bits": 216
+        },
+        {
+          "offset": 17832,
+          "bytes": 283,
+          "prefix_bits": 200
+        },
+        {
+          "offset": 18115,
+          "bytes": 197,
+          "prefix_bits": 200
+        }
+      ],
+      "container_rate": 24000,
+      "container_frame_samples": 480,
+      "samples": 1440,
+      "pcm_offset": 0,
+      "control": "n480-c2-base-x1-crc1-fragmented-gain.mp4",
+      "empty": false,
+      "output_channels": 6,
+      "inherited_completes_first": true
+    },
+    {
+      "asc": "f8ec51c460c05939b89100205d358000",
+      "tree": 2,
+      "n": 480,
+      "rate": 48000,
+      "slots": 15,
+      "bands": 64,
+      "channels": 2,
+      "qmf": {
+        "expected_offset": 1235520,
+        "expected_bands": 32
+      },
+      "name": "n480-c2-base-x2-crc1-same-local",
+      "mode": "same",
+      "configs": [
+        "371220040ba6b0",
+        "3712200c0ba6b0"
+      ],
+      "body": "7f10990d7d2dbe8caa64678d00474bbe244ae12be7c1321afa5b7d1954c8cf1a008e9742b7e78865b654cec2347c4ec74ebae08895c257cf826435f4b6fa32a9919e34011d2e856fcf10cbf8ae70be67542c2e70be67542c2e70be67543f16ca99d846853e36c74053b1d3aebe30adf9e2196d9533b08d0a7c6d8efc678d00474ba15bf3c432db2a67611a3e36df46553233c68023a5d0adf9e2196480",
+      "phase": [
+        0,
+        0,
+        0
+      ],
+      "frames": [
+        {
+          "offset": 18312,
+          "bytes": 199,
+          "prefix_bits": 216
+        },
+        {
+          "offset": 18511,
+          "bytes": 189,
+          "prefix_bits": 200
+        },
+        {
+          "offset": 18700,
+          "bytes": 189,
+          "prefix_bits": 200
+        }
+      ],
+      "container_rate": 48000,
+      "container_frame_samples": 960,
+      "samples": 2880,
+      "pcm_offset": 0,
+      "control": "n480-c2-base-x2-crc1-same.mp4",
+      "empty": false,
+      "output_channels": 6,
+      "inherited_completes_first": false
+    },
+    {
+      "asc": "f8ec51c460c05939b89100205d358000",
+      "tree": 2,
+      "n": 480,
+      "rate": 48000,
+      "slots": 15,
+      "bands": 64,
+      "channels": 2,
+      "qmf": {
+        "expected_offset": 1235520,
+        "expected_bands": 32
+      },
+      "name": "n480-c2-base-x2-crc1-same-local-empty",
+      "mode": "same",
+      "configs": [
+        "371220040ba6b0",
+        "3712200c0ba6b0"
+      ],
+      "body": "7f10990d7d2dbe8caa64678d00474bbe244ae12be7c1321afa5b7d1954c8cf1a008e9742b7e78865b654cec2347c4ec74ebae08895c257cf826435f4b6fa32a9919e34011d2e856fcf10cbf8ae70be67542c2e70be67542c2e70be67543f16ca99d846853e36c74053b1d3aebe30adf9e2196d9533b08d0a7c6d8efc678d00474ba15bf3c432db2a67611a3e36df46553233c68023a5d0adf9e2196480",
+      "phase": [
+        0,
+        0,
+        0
+      ],
+      "frames": [
+        {
+          "offset": 18889,
+          "bytes": 197,
+          "prefix_bits": 216
+        },
+        {
+          "offset": 19086,
+          "bytes": 187,
+          "prefix_bits": 200
+        },
+        {
+          "offset": 19273,
+          "bytes": 187,
+          "prefix_bits": 200
+        }
+      ],
+      "container_rate": 48000,
+      "container_frame_samples": 960,
+      "samples": 2880,
+      "pcm_offset": 0,
+      "control": "n480-c2-base-x2-crc1-same.mp4",
+      "empty": true,
+      "output_channels": 6,
+      "inherited_completes_first": false
+    },
+    {
+      "asc": "f8ec51c460c05939b89100205d358000",
+      "tree": 2,
+      "n": 480,
+      "rate": 48000,
+      "slots": 15,
+      "bands": 64,
+      "channels": 2,
+      "qmf": {
+        "expected_offset": 1235520,
+        "expected_bands": 32
+      },
+      "name": "n480-c2-base-x2-crc1-fragmented-gain-local",
+      "mode": "fragmented-gain",
+      "configs": [
+        "371220040ba6b0",
+        "3712200c0ba6b0"
+      ],
+      "body": "7f10990d7d2dbe8caa64678d00474bbe244ae12be7c1321afa5b7d1954c8cf1a008e9742b7e78865b654cec2347c4ec74ebae08895c257cf826435f4b6fa32a9919e34011d2e856fcf10cbf8ae70be67542c2e70be67542c2e70be67543f16ca99d846853e36c74053b1d3aebe30adf9e2196d9533b08d0a7c6d8efc678d00474ba15bf3c432db2a67611a3e36df46553233c68023a5d0adf9e2196480",
+      "phase": [
+        0,
+        1,
+        0
+      ],
+      "frames": [
+        {
+          "offset": 19460,
+          "bytes": 112,
+          "prefix_bits": 216
+        },
+        {
+          "offset": 19572,
+          "bytes": 283,
+          "prefix_bits": 200
+        },
+        {
+          "offset": 19855,
+          "bytes": 197,
+          "prefix_bits": 200
+        }
+      ],
+      "container_rate": 48000,
+      "container_frame_samples": 960,
+      "samples": 2880,
+      "pcm_offset": 0,
+      "control": "n480-c2-base-x2-crc1-fragmented-gain.mp4",
+      "empty": false,
+      "output_channels": 6,
+      "inherited_completes_first": true
+    },
+    {
+      "asc": "f8ecd14460c0588c180b11830164ace2a400800000",
+      "tree": 5,
+      "n": 480,
+      "rate": 24000,
+      "slots": 15,
+      "bands": 32,
+      "channels": 6,
+      "qmf": {
+        "expected_offset": 4075200,
+        "expected_bands": 32
+      },
+      "name": "n480-c6-base-x1-crc1-same-local",
+      "mode": "same",
+      "configs": [
+        "6715200400",
+        "6715200c00"
+      ],
+      "body": "7f10990d7d2dbe8caa64678d00474ba15bf3c432db2a67611a14f8db1d017e244ae12be7c1321afa5b7d1954c8cf1a008e9742b7e78865b654cec2347c7ccea8585ce17ccea8585ce17ccea8585ce240",
+      "phase": [
+        0,
+        0,
+        0
+      ],
+      "frames": [
+        {
+          "offset": 20052,
+          "bytes": 166,
+          "prefix_bits": 584
+        },
+        {
+          "offset": 20218,
+          "bytes": 155,
+          "prefix_bits": 541
+        },
+        {
+          "offset": 20373,
+          "bytes": 155,
+          "prefix_bits": 539
+        }
+      ],
+      "container_rate": 24000,
+      "container_frame_samples": 480,
+      "samples": 1440,
+      "pcm_offset": 0,
+      "control": "n480-c6-base-x1-crc1-same.mp4",
+      "empty": false,
+      "output_channels": 8,
+      "inherited_completes_first": false
+    },
+    {
+      "asc": "f8ecd14460c0588c180b11830164ace2a400800000",
+      "tree": 5,
+      "n": 480,
+      "rate": 24000,
+      "slots": 15,
+      "bands": 32,
+      "channels": 6,
+      "qmf": {
+        "expected_offset": 4075200,
+        "expected_bands": 32
+      },
+      "name": "n480-c6-base-x1-crc1-same-local-empty",
+      "mode": "same",
+      "configs": [
+        "6715200400",
+        "6715200c00"
+      ],
+      "body": "7f10990d7d2dbe8caa64678d00474ba15bf3c432db2a67611a14f8db1d017e244ae12be7c1321afa5b7d1954c8cf1a008e9742b7e78865b654cec2347c7ccea8585ce17ccea8585ce17ccea8585ce240",
+      "phase": [
+        0,
+        0,
+        0
+      ],
+      "frames": [
+        {
+          "offset": 20528,
+          "bytes": 164,
+          "prefix_bits": 584
+        },
+        {
+          "offset": 20692,
+          "bytes": 153,
+          "prefix_bits": 541
+        },
+        {
+          "offset": 20845,
+          "bytes": 153,
+          "prefix_bits": 539
+        }
+      ],
+      "container_rate": 24000,
+      "container_frame_samples": 480,
+      "samples": 1440,
+      "pcm_offset": 0,
+      "control": "n480-c6-base-x1-crc1-same.mp4",
+      "empty": true,
+      "output_channels": 8,
+      "inherited_completes_first": false
+    },
+    {
+      "asc": "f8ecd14460c0588c180b11830164ace2a400800000",
+      "tree": 5,
+      "n": 480,
+      "rate": 24000,
+      "slots": 15,
+      "bands": 32,
+      "channels": 6,
+      "qmf": {
+        "expected_offset": 4075200,
+        "expected_bands": 32
+      },
+      "name": "n480-c6-base-x1-crc1-fragmented-gain-local",
+      "mode": "fragmented-gain",
+      "configs": [
+        "6715200400",
+        "6715200c00"
+      ],
+      "body": "7f10990d7d2dbe8caa64678d00474ba15bf3c432db2a67611a14f8db1d017e244ae12be7c1321afa5b7d1954c8cf1a008e9742b7e78865b654cec2347c7ccea8585ce17ccea8585ce17ccea8585ce240",
+      "phase": [
+        0,
+        1,
+        0
+      ],
+      "frames": [
+        {
+          "offset": 20998,
+          "bytes": 119,
+          "prefix_bits": 584
+        },
+        {
+          "offset": 21117,
+          "bytes": 207,
+          "prefix_bits": 541
+        },
+        {
+          "offset": 21324,
+          "bytes": 161,
+          "prefix_bits": 539
+        }
+      ],
+      "container_rate": 24000,
+      "container_frame_samples": 480,
+      "samples": 1440,
+      "pcm_offset": 0,
+      "control": "n480-c6-base-x1-crc1-fragmented-gain.mp4",
+      "empty": false,
+      "output_channels": 8,
+      "inherited_completes_first": true
+    },
+    {
+      "asc": "f8ecd1c460c0588c180b11830164a6e2a400800000",
+      "tree": 5,
+      "n": 480,
+      "rate": 48000,
+      "slots": 15,
+      "bands": 64,
+      "channels": 6,
+      "qmf": {
+        "expected_offset": 4075200,
+        "expected_bands": 32
+      },
+      "name": "n480-c6-base-x2-crc1-same-local",
+      "mode": "same",
+      "configs": [
+        "3715200400",
+        "3715200c00"
+      ],
+      "body": "7f10990d7d2dbe8caa64678d00474ba15bf3c432db2a67611a14f8db1d017e244ae12be7c1321afa5b7d1954c8cf1a008e9742b7e78865b654cec2347c7ccea8585ce17ccea8585ce17ccea8585ce240",
+      "phase": [
+        0,
+        0,
+        0
+      ],
+      "frames": [
+        {
+          "offset": 21485,
+          "bytes": 166,
+          "prefix_bits": 584
+        },
+        {
+          "offset": 21651,
+          "bytes": 155,
+          "prefix_bits": 541
+        },
+        {
+          "offset": 21806,
+          "bytes": 155,
+          "prefix_bits": 539
+        }
+      ],
+      "container_rate": 48000,
+      "container_frame_samples": 960,
+      "samples": 2880,
+      "pcm_offset": 0,
+      "control": "n480-c6-base-x2-crc1-same.mp4",
+      "empty": false,
+      "output_channels": 8,
+      "inherited_completes_first": false
+    },
+    {
+      "asc": "f8ecd1c460c0588c180b11830164a6e2a400800000",
+      "tree": 5,
+      "n": 480,
+      "rate": 48000,
+      "slots": 15,
+      "bands": 64,
+      "channels": 6,
+      "qmf": {
+        "expected_offset": 4075200,
+        "expected_bands": 32
+      },
+      "name": "n480-c6-base-x2-crc1-same-local-empty",
+      "mode": "same",
+      "configs": [
+        "3715200400",
+        "3715200c00"
+      ],
+      "body": "7f10990d7d2dbe8caa64678d00474ba15bf3c432db2a67611a14f8db1d017e244ae12be7c1321afa5b7d1954c8cf1a008e9742b7e78865b654cec2347c7ccea8585ce17ccea8585ce17ccea8585ce240",
+      "phase": [
+        0,
+        0,
+        0
+      ],
+      "frames": [
+        {
+          "offset": 21961,
+          "bytes": 164,
+          "prefix_bits": 584
+        },
+        {
+          "offset": 22125,
+          "bytes": 153,
+          "prefix_bits": 541
+        },
+        {
+          "offset": 22278,
+          "bytes": 153,
+          "prefix_bits": 539
+        }
+      ],
+      "container_rate": 48000,
+      "container_frame_samples": 960,
+      "samples": 2880,
+      "pcm_offset": 0,
+      "control": "n480-c6-base-x2-crc1-same.mp4",
+      "empty": true,
+      "output_channels": 8,
+      "inherited_completes_first": false
+    },
+    {
+      "asc": "f8ecd1c460c0588c180b11830164a6e2a400800000",
+      "tree": 5,
+      "n": 480,
+      "rate": 48000,
+      "slots": 15,
+      "bands": 64,
+      "channels": 6,
+      "qmf": {
+        "expected_offset": 4075200,
+        "expected_bands": 32
+      },
+      "name": "n480-c6-base-x2-crc1-fragmented-gain-local",
+      "mode": "fragmented-gain",
+      "configs": [
+        "3715200400",
+        "3715200c00"
+      ],
+      "body": "7f10990d7d2dbe8caa64678d00474ba15bf3c432db2a67611a14f8db1d017e244ae12be7c1321afa5b7d1954c8cf1a008e9742b7e78865b654cec2347c7ccea8585ce17ccea8585ce17ccea8585ce240",
+      "phase": [
+        0,
+        1,
+        0
+      ],
+      "frames": [
+        {
+          "offset": 22431,
+          "bytes": 119,
+          "prefix_bits": 584
+        },
+        {
+          "offset": 22550,
+          "bytes": 207,
+          "prefix_bits": 541
+        },
+        {
+          "offset": 22757,
+          "bytes": 161,
+          "prefix_bits": 539
+        }
+      ],
+      "container_rate": 48000,
+      "container_frame_samples": 960,
+      "samples": 2880,
+      "pcm_offset": 0,
+      "control": "n480-c6-base-x2-crc1-fragmented-gain.mp4",
+      "empty": false,
+      "output_channels": 8,
+      "inherited_completes_first": true
+    },
+    {
+      "asc": "f8ec214460c059233cb8000000",
+      "tree": 7,
+      "n": 512,
+      "rate": 24000,
+      "slots": 16,
+      "bands": 32,
+      "channels": 1,
+      "qmf": {
+        "expected_offset": 5405760,
+        "expected_bands": 32
+      },
+      "name": "n512-c1-base-x1-crc1-same-local",
+      "mode": "same",
+      "configs": [
+        "67970000",
+        "67970400"
+      ],
+      "body": "7f10990d7d2dbe8caa64678d00474ba15bf3c432db2a67611a14f8db1d017e30b0b9c2f99d50b0b9c2f99d50b0b9c2f99920",
+      "phase": [
+        0,
+        0,
+        0
+      ],
+      "frames": [
+        {
+          "offset": 22918,
+          "bytes": 77,
+          "prefix_bits": 116
+        },
+        {
+          "offset": 22995,
+          "bytes": 71,
+          "prefix_bits": 107
+        },
+        {
+          "offset": 23066,
+          "bytes": 71,
+          "prefix_bits": 109
+        }
+      ],
+      "container_rate": 24000,
+      "container_frame_samples": 512,
+      "samples": 1536,
+      "pcm_offset": 0,
+      "control": "n512-c1-base-x1-crc1-same.mp4",
+      "empty": false,
+      "output_channels": 2,
+      "inherited_completes_first": false
+    },
+    {
+      "asc": "f8ec214460c059233cb8000000",
+      "tree": 7,
+      "n": 512,
+      "rate": 24000,
+      "slots": 16,
+      "bands": 32,
+      "channels": 1,
+      "qmf": {
+        "expected_offset": 5405760,
+        "expected_bands": 32
+      },
+      "name": "n512-c1-base-x1-crc1-same-local-empty",
+      "mode": "same",
+      "configs": [
+        "67970000",
+        "67970400"
+      ],
+      "body": "7f10990d7d2dbe8caa64678d00474ba15bf3c432db2a67611a14f8db1d017e30b0b9c2f99d50b0b9c2f99d50b0b9c2f99920",
+      "phase": [
+        0,
+        0,
+        0
+      ],
+      "frames": [
+        {
+          "offset": 23137,
+          "bytes": 75,
+          "prefix_bits": 116
+        },
+        {
+          "offset": 23212,
+          "bytes": 69,
+          "prefix_bits": 107
+        },
+        {
+          "offset": 23281,
+          "bytes": 69,
+          "prefix_bits": 109
+        }
+      ],
+      "container_rate": 24000,
+      "container_frame_samples": 512,
+      "samples": 1536,
+      "pcm_offset": 0,
+      "control": "n512-c1-base-x1-crc1-same.mp4",
+      "empty": true,
+      "output_channels": 2,
+      "inherited_completes_first": false
+    },
+    {
+      "asc": "f8ec214460c059233cb8000000",
+      "tree": 7,
+      "n": 512,
+      "rate": 24000,
+      "slots": 16,
+      "bands": 32,
+      "channels": 1,
+      "qmf": {
+        "expected_offset": 5405760,
+        "expected_bands": 32
+      },
+      "name": "n512-c1-base-x1-crc1-fragmented-gain-local",
+      "mode": "fragmented-gain",
+      "configs": [
+        "67970000",
+        "67970400"
+      ],
+      "body": "7f10990d7d2dbe8caa64678d00474ba15bf3c432db2a67611a14f8db1d017e30b0b9c2f99d50b0b9c2f99d50b0b9c2f99920",
+      "phase": [
+        0,
+        1,
+        0
+      ],
+      "frames": [
+        {
+          "offset": 23350,
+          "bytes": 45,
+          "prefix_bits": 116
+        },
+        {
+          "offset": 23395,
+          "bytes": 107,
+          "prefix_bits": 107
+        },
+        {
+          "offset": 23502,
+          "bytes": 76,
+          "prefix_bits": 109
+        }
+      ],
+      "container_rate": 24000,
+      "container_frame_samples": 512,
+      "samples": 1536,
+      "pcm_offset": 0,
+      "control": "n512-c1-base-x1-crc1-fragmented-gain.mp4",
+      "empty": false,
+      "output_channels": 2,
+      "inherited_completes_first": true
+    },
+    {
+      "asc": "f8ec21c460c05921bcb8000000",
+      "tree": 7,
+      "n": 512,
+      "rate": 48000,
+      "slots": 16,
+      "bands": 64,
+      "channels": 1,
+      "qmf": {
+        "expected_offset": 5405760,
+        "expected_bands": 32
+      },
+      "name": "n512-c1-base-x2-crc1-same-local",
+      "mode": "same",
+      "configs": [
+        "37970000",
+        "37970400"
+      ],
+      "body": "7f10990d7d2dbe8caa64678d00474ba15bf3c432db2a67611a14f8db1d017e30b0b9c2f99d50b0b9c2f99d50b0b9c2f99920",
+      "phase": [
+        0,
+        0,
+        0
+      ],
+      "frames": [
+        {
+          "offset": 23828,
+          "bytes": 77,
+          "prefix_bits": 116
+        },
+        {
+          "offset": 23905,
+          "bytes": 71,
+          "prefix_bits": 107
+        },
+        {
+          "offset": 23976,
+          "bytes": 71,
+          "prefix_bits": 109
+        }
+      ],
+      "container_rate": 48000,
+      "container_frame_samples": 1024,
+      "samples": 3072,
+      "pcm_offset": 0,
+      "control": "n512-c1-base-x2-crc1-same.mp4",
+      "empty": false,
+      "output_channels": 2,
+      "inherited_completes_first": false
+    },
+    {
+      "asc": "f8ec21c460c05921bcb8000000",
+      "tree": 7,
+      "n": 512,
+      "rate": 48000,
+      "slots": 16,
+      "bands": 64,
+      "channels": 1,
+      "qmf": {
+        "expected_offset": 5405760,
+        "expected_bands": 32
+      },
+      "name": "n512-c1-base-x2-crc1-same-local-empty",
+      "mode": "same",
+      "configs": [
+        "37970000",
+        "37970400"
+      ],
+      "body": "7f10990d7d2dbe8caa64678d00474ba15bf3c432db2a67611a14f8db1d017e30b0b9c2f99d50b0b9c2f99d50b0b9c2f99920",
+      "phase": [
+        0,
+        0,
+        0
+      ],
+      "frames": [
+        {
+          "offset": 24047,
+          "bytes": 75,
+          "prefix_bits": 116
+        },
+        {
+          "offset": 24122,
+          "bytes": 69,
+          "prefix_bits": 107
+        },
+        {
+          "offset": 24191,
+          "bytes": 69,
+          "prefix_bits": 109
+        }
+      ],
+      "container_rate": 48000,
+      "container_frame_samples": 1024,
+      "samples": 3072,
+      "pcm_offset": 0,
+      "control": "n512-c1-base-x2-crc1-same.mp4",
+      "empty": true,
+      "output_channels": 2,
+      "inherited_completes_first": false
+    },
+    {
+      "asc": "f8ec21c460c05921bcb8000000",
+      "tree": 7,
+      "n": 512,
+      "rate": 48000,
+      "slots": 16,
+      "bands": 64,
+      "channels": 1,
+      "qmf": {
+        "expected_offset": 5405760,
+        "expected_bands": 32
+      },
+      "name": "n512-c1-base-x2-crc1-fragmented-gain-local",
+      "mode": "fragmented-gain",
+      "configs": [
+        "37970000",
+        "37970400"
+      ],
+      "body": "7f10990d7d2dbe8caa64678d00474ba15bf3c432db2a67611a14f8db1d017e30b0b9c2f99d50b0b9c2f99d50b0b9c2f99920",
+      "phase": [
+        0,
+        1,
+        0
+      ],
+      "frames": [
+        {
+          "offset": 24260,
+          "bytes": 45,
+          "prefix_bits": 116
+        },
+        {
+          "offset": 24305,
+          "bytes": 107,
+          "prefix_bits": 107
+        },
+        {
+          "offset": 24412,
+          "bytes": 76,
+          "prefix_bits": 109
+        }
+      ],
+      "container_rate": 48000,
+      "container_frame_samples": 1024,
+      "samples": 3072,
+      "pcm_offset": 0,
+      "control": "n512-c1-base-x2-crc1-fragmented-gain.mp4",
+      "empty": false,
+      "output_channels": 2,
+      "inherited_completes_first": true
+    },
+    {
+      "asc": "f8ec414460c0593b3c9100205d358000",
+      "tree": 2,
+      "n": 512,
+      "rate": 24000,
+      "slots": 16,
+      "bands": 32,
+      "channels": 2,
+      "qmf": {
+        "expected_offset": 6723648,
+        "expected_bands": 32
+      },
+      "name": "n512-c2-base-x1-crc1-same-local",
+      "mode": "same",
+      "configs": [
+        "679220040ba6b0",
+        "6792200c0ba6b0"
+      ],
+      "body": "7f10990d7d2dbe8caa64678d00474bbe244ae12be7c1321afa5b7d1954c8cf1a008e9742b7e78865b654cec2347c4ec74ebae08895c257cf826435f4b6fa32a9919e34011d2e856fcf10cbf8ae70be67542c2e70be67542c2e70be67543f16ca99d846853e36c74053b1d3aebe30adf9e2196d9533b08d0a7c6d8efc678d00474ba15bf3c432db2a67611a3e36df46553233c68023a5d0adf9e2196480",
+      "phase": [
+        0,
+        0,
+        0
+      ],
+      "frames": [
+        {
+          "offset": 24738,
+          "bytes": 199,
+          "prefix_bits": 216
+        },
+        {
+          "offset": 24937,
+          "bytes": 189,
+          "prefix_bits": 200
+        },
+        {
+          "offset": 25126,
+          "bytes": 189,
+          "prefix_bits": 200
+        }
+      ],
+      "container_rate": 24000,
+      "container_frame_samples": 512,
+      "samples": 1536,
+      "pcm_offset": 0,
+      "control": "n512-c2-base-x1-crc1-same.mp4",
+      "empty": false,
+      "output_channels": 6,
+      "inherited_completes_first": false
+    },
+    {
+      "asc": "f8ec414460c0593b3c9100205d358000",
+      "tree": 2,
+      "n": 512,
+      "rate": 24000,
+      "slots": 16,
+      "bands": 32,
+      "channels": 2,
+      "qmf": {
+        "expected_offset": 6723648,
+        "expected_bands": 32
+      },
+      "name": "n512-c2-base-x1-crc1-same-local-empty",
+      "mode": "same",
+      "configs": [
+        "679220040ba6b0",
+        "6792200c0ba6b0"
+      ],
+      "body": "7f10990d7d2dbe8caa64678d00474bbe244ae12be7c1321afa5b7d1954c8cf1a008e9742b7e78865b654cec2347c4ec74ebae08895c257cf826435f4b6fa32a9919e34011d2e856fcf10cbf8ae70be67542c2e70be67542c2e70be67543f16ca99d846853e36c74053b1d3aebe30adf9e2196d9533b08d0a7c6d8efc678d00474ba15bf3c432db2a67611a3e36df46553233c68023a5d0adf9e2196480",
+      "phase": [
+        0,
+        0,
+        0
+      ],
+      "frames": [
+        {
+          "offset": 25315,
+          "bytes": 197,
+          "prefix_bits": 216
+        },
+        {
+          "offset": 25512,
+          "bytes": 187,
+          "prefix_bits": 200
+        },
+        {
+          "offset": 25699,
+          "bytes": 187,
+          "prefix_bits": 200
+        }
+      ],
+      "container_rate": 24000,
+      "container_frame_samples": 512,
+      "samples": 1536,
+      "pcm_offset": 0,
+      "control": "n512-c2-base-x1-crc1-same.mp4",
+      "empty": true,
+      "output_channels": 6,
+      "inherited_completes_first": false
+    },
+    {
+      "asc": "f8ec414460c0593b3c9100205d358000",
+      "tree": 2,
+      "n": 512,
+      "rate": 24000,
+      "slots": 16,
+      "bands": 32,
+      "channels": 2,
+      "qmf": {
+        "expected_offset": 6723648,
+        "expected_bands": 32
+      },
+      "name": "n512-c2-base-x1-crc1-fragmented-gain-local",
+      "mode": "fragmented-gain",
+      "configs": [
+        "679220040ba6b0",
+        "6792200c0ba6b0"
+      ],
+      "body": "7f10990d7d2dbe8caa64678d00474bbe244ae12be7c1321afa5b7d1954c8cf1a008e9742b7e78865b654cec2347c4ec74ebae08895c257cf826435f4b6fa32a9919e34011d2e856fcf10cbf8ae70be67542c2e70be67542c2e70be67543f16ca99d846853e36c74053b1d3aebe30adf9e2196d9533b08d0a7c6d8efc678d00474ba15bf3c432db2a67611a3e36df46553233c68023a5d0adf9e2196480",
+      "phase": [
+        0,
+        1,
+        0
+      ],
+      "frames": [
+        {
+          "offset": 25886,
+          "bytes": 112,
+          "prefix_bits": 216
+        },
+        {
+          "offset": 25998,
+          "bytes": 283,
+          "prefix_bits": 200
+        },
+        {
+          "offset": 26281,
+          "bytes": 197,
+          "prefix_bits": 200
+        }
+      ],
+      "container_rate": 24000,
+      "container_frame_samples": 512,
+      "samples": 1536,
+      "pcm_offset": 0,
+      "control": "n512-c2-base-x1-crc1-fragmented-gain.mp4",
+      "empty": false,
+      "output_channels": 6,
+      "inherited_completes_first": true
+    },
+    {
+      "asc": "f8ec41c460c05939bc9100205d358000",
+      "tree": 2,
+      "n": 512,
+      "rate": 48000,
+      "slots": 16,
+      "bands": 64,
+      "channels": 2,
+      "qmf": {
+        "expected_offset": 6723648,
+        "expected_bands": 32
+      },
+      "name": "n512-c2-base-x2-crc1-same-local",
+      "mode": "same",
+      "configs": [
+        "379220040ba6b0",
+        "3792200c0ba6b0"
+      ],
+      "body": "7f10990d7d2dbe8caa64678d00474bbe244ae12be7c1321afa5b7d1954c8cf1a008e9742b7e78865b654cec2347c4ec74ebae08895c257cf826435f4b6fa32a9919e34011d2e856fcf10cbf8ae70be67542c2e70be67542c2e70be67543f16ca99d846853e36c74053b1d3aebe30adf9e2196d9533b08d0a7c6d8efc678d00474ba15bf3c432db2a67611a3e36df46553233c68023a5d0adf9e2196480",
+      "phase": [
+        0,
+        0,
+        0
+      ],
+      "frames": [
+        {
+          "offset": 26478,
+          "bytes": 199,
+          "prefix_bits": 216
+        },
+        {
+          "offset": 26677,
+          "bytes": 189,
+          "prefix_bits": 200
+        },
+        {
+          "offset": 26866,
+          "bytes": 189,
+          "prefix_bits": 200
+        }
+      ],
+      "container_rate": 48000,
+      "container_frame_samples": 1024,
+      "samples": 3072,
+      "pcm_offset": 0,
+      "control": "n512-c2-base-x2-crc1-same.mp4",
+      "empty": false,
+      "output_channels": 6,
+      "inherited_completes_first": false
+    },
+    {
+      "asc": "f8ec41c460c05939bc9100205d358000",
+      "tree": 2,
+      "n": 512,
+      "rate": 48000,
+      "slots": 16,
+      "bands": 64,
+      "channels": 2,
+      "qmf": {
+        "expected_offset": 6723648,
+        "expected_bands": 32
+      },
+      "name": "n512-c2-base-x2-crc1-same-local-empty",
+      "mode": "same",
+      "configs": [
+        "379220040ba6b0",
+        "3792200c0ba6b0"
+      ],
+      "body": "7f10990d7d2dbe8caa64678d00474bbe244ae12be7c1321afa5b7d1954c8cf1a008e9742b7e78865b654cec2347c4ec74ebae08895c257cf826435f4b6fa32a9919e34011d2e856fcf10cbf8ae70be67542c2e70be67542c2e70be67543f16ca99d846853e36c74053b1d3aebe30adf9e2196d9533b08d0a7c6d8efc678d00474ba15bf3c432db2a67611a3e36df46553233c68023a5d0adf9e2196480",
+      "phase": [
+        0,
+        0,
+        0
+      ],
+      "frames": [
+        {
+          "offset": 27055,
+          "bytes": 197,
+          "prefix_bits": 216
+        },
+        {
+          "offset": 27252,
+          "bytes": 187,
+          "prefix_bits": 200
+        },
+        {
+          "offset": 27439,
+          "bytes": 187,
+          "prefix_bits": 200
+        }
+      ],
+      "container_rate": 48000,
+      "container_frame_samples": 1024,
+      "samples": 3072,
+      "pcm_offset": 0,
+      "control": "n512-c2-base-x2-crc1-same.mp4",
+      "empty": true,
+      "output_channels": 6,
+      "inherited_completes_first": false
+    },
+    {
+      "asc": "f8ec41c460c05939bc9100205d358000",
+      "tree": 2,
+      "n": 512,
+      "rate": 48000,
+      "slots": 16,
+      "bands": 64,
+      "channels": 2,
+      "qmf": {
+        "expected_offset": 6723648,
+        "expected_bands": 32
+      },
+      "name": "n512-c2-base-x2-crc1-fragmented-gain-local",
+      "mode": "fragmented-gain",
+      "configs": [
+        "379220040ba6b0",
+        "3792200c0ba6b0"
+      ],
+      "body": "7f10990d7d2dbe8caa64678d00474bbe244ae12be7c1321afa5b7d1954c8cf1a008e9742b7e78865b654cec2347c4ec74ebae08895c257cf826435f4b6fa32a9919e34011d2e856fcf10cbf8ae70be67542c2e70be67542c2e70be67543f16ca99d846853e36c74053b1d3aebe30adf9e2196d9533b08d0a7c6d8efc678d00474ba15bf3c432db2a67611a3e36df46553233c68023a5d0adf9e2196480",
+      "phase": [
+        0,
+        1,
+        0
+      ],
+      "frames": [
+        {
+          "offset": 27626,
+          "bytes": 112,
+          "prefix_bits": 216
+        },
+        {
+          "offset": 27738,
+          "bytes": 283,
+          "prefix_bits": 200
+        },
+        {
+          "offset": 28021,
+          "bytes": 197,
+          "prefix_bits": 200
+        }
+      ],
+      "container_rate": 48000,
+      "container_frame_samples": 1024,
+      "samples": 3072,
+      "pcm_offset": 0,
+      "control": "n512-c2-base-x2-crc1-fragmented-gain.mp4",
+      "empty": false,
+      "output_channels": 6,
+      "inherited_completes_first": true
+    },
+    {
+      "asc": "f8ecc14460c0588c180b11830164acf2a400800000",
+      "tree": 5,
+      "n": 512,
+      "rate": 24000,
+      "slots": 16,
+      "bands": 32,
+      "channels": 6,
+      "qmf": {
+        "expected_offset": 9752640,
+        "expected_bands": 32
+      },
+      "name": "n512-c6-base-x1-crc1-same-local",
+      "mode": "same",
+      "configs": [
+        "6795200400",
+        "6795200c00"
+      ],
+      "body": "7f10990d7d2dbe8caa64678d00474ba15bf3c432db2a67611a14f8db1d017e244ae12be7c1321afa5b7d1954c8cf1a008e9742b7e78865b654cec2347c7ccea8585ce17ccea8585ce17ccea8585ce240",
+      "phase": [
+        0,
+        0,
+        0
+      ],
+      "frames": [
+        {
+          "offset": 28218,
+          "bytes": 166,
+          "prefix_bits": 584
+        },
+        {
+          "offset": 28384,
+          "bytes": 155,
+          "prefix_bits": 541
+        },
+        {
+          "offset": 28539,
+          "bytes": 155,
+          "prefix_bits": 539
+        }
+      ],
+      "container_rate": 24000,
+      "container_frame_samples": 512,
+      "samples": 1536,
+      "pcm_offset": 0,
+      "control": "n512-c6-base-x1-crc1-same.mp4",
+      "empty": false,
+      "output_channels": 8,
+      "inherited_completes_first": false
+    },
+    {
+      "asc": "f8ecc14460c0588c180b11830164acf2a400800000",
+      "tree": 5,
+      "n": 512,
+      "rate": 24000,
+      "slots": 16,
+      "bands": 32,
+      "channels": 6,
+      "qmf": {
+        "expected_offset": 9752640,
+        "expected_bands": 32
+      },
+      "name": "n512-c6-base-x1-crc1-same-local-empty",
+      "mode": "same",
+      "configs": [
+        "6795200400",
+        "6795200c00"
+      ],
+      "body": "7f10990d7d2dbe8caa64678d00474ba15bf3c432db2a67611a14f8db1d017e244ae12be7c1321afa5b7d1954c8cf1a008e9742b7e78865b654cec2347c7ccea8585ce17ccea8585ce17ccea8585ce240",
+      "phase": [
+        0,
+        0,
+        0
+      ],
+      "frames": [
+        {
+          "offset": 28694,
+          "bytes": 164,
+          "prefix_bits": 584
+        },
+        {
+          "offset": 28858,
+          "bytes": 153,
+          "prefix_bits": 541
+        },
+        {
+          "offset": 29011,
+          "bytes": 153,
+          "prefix_bits": 539
+        }
+      ],
+      "container_rate": 24000,
+      "container_frame_samples": 512,
+      "samples": 1536,
+      "pcm_offset": 0,
+      "control": "n512-c6-base-x1-crc1-same.mp4",
+      "empty": true,
+      "output_channels": 8,
+      "inherited_completes_first": false
+    },
+    {
+      "asc": "f8ecc14460c0588c180b11830164acf2a400800000",
+      "tree": 5,
+      "n": 512,
+      "rate": 24000,
+      "slots": 16,
+      "bands": 32,
+      "channels": 6,
+      "qmf": {
+        "expected_offset": 9752640,
+        "expected_bands": 32
+      },
+      "name": "n512-c6-base-x1-crc1-fragmented-gain-local",
+      "mode": "fragmented-gain",
+      "configs": [
+        "6795200400",
+        "6795200c00"
+      ],
+      "body": "7f10990d7d2dbe8caa64678d00474ba15bf3c432db2a67611a14f8db1d017e244ae12be7c1321afa5b7d1954c8cf1a008e9742b7e78865b654cec2347c7ccea8585ce17ccea8585ce17ccea8585ce240",
+      "phase": [
+        0,
+        1,
+        0
+      ],
+      "frames": [
+        {
+          "offset": 29164,
+          "bytes": 119,
+          "prefix_bits": 584
+        },
+        {
+          "offset": 29283,
+          "bytes": 207,
+          "prefix_bits": 541
+        },
+        {
+          "offset": 29490,
+          "bytes": 161,
+          "prefix_bits": 539
+        }
+      ],
+      "container_rate": 24000,
+      "container_frame_samples": 512,
+      "samples": 1536,
+      "pcm_offset": 0,
+      "control": "n512-c6-base-x1-crc1-fragmented-gain.mp4",
+      "empty": false,
+      "output_channels": 8,
+      "inherited_completes_first": true
+    },
+    {
+      "asc": "f8ecc1c460c0588c180b11830164a6f2a400800000",
+      "tree": 5,
+      "n": 512,
+      "rate": 48000,
+      "slots": 16,
+      "bands": 64,
+      "channels": 6,
+      "qmf": {
+        "expected_offset": 9752640,
+        "expected_bands": 32
+      },
+      "name": "n512-c6-base-x2-crc1-same-local",
+      "mode": "same",
+      "configs": [
+        "3795200400",
+        "3795200c00"
+      ],
+      "body": "7f10990d7d2dbe8caa64678d00474ba15bf3c432db2a67611a14f8db1d017e244ae12be7c1321afa5b7d1954c8cf1a008e9742b7e78865b654cec2347c7ccea8585ce17ccea8585ce17ccea8585ce240",
+      "phase": [
+        0,
+        0,
+        0
+      ],
+      "frames": [
+        {
+          "offset": 29651,
+          "bytes": 166,
+          "prefix_bits": 584
+        },
+        {
+          "offset": 29817,
+          "bytes": 155,
+          "prefix_bits": 541
+        },
+        {
+          "offset": 29972,
+          "bytes": 155,
+          "prefix_bits": 539
+        }
+      ],
+      "container_rate": 48000,
+      "container_frame_samples": 1024,
+      "samples": 3072,
+      "pcm_offset": 0,
+      "control": "n512-c6-base-x2-crc1-same.mp4",
+      "empty": false,
+      "output_channels": 8,
+      "inherited_completes_first": false
+    },
+    {
+      "asc": "f8ecc1c460c0588c180b11830164a6f2a400800000",
+      "tree": 5,
+      "n": 512,
+      "rate": 48000,
+      "slots": 16,
+      "bands": 64,
+      "channels": 6,
+      "qmf": {
+        "expected_offset": 9752640,
+        "expected_bands": 32
+      },
+      "name": "n512-c6-base-x2-crc1-same-local-empty",
+      "mode": "same",
+      "configs": [
+        "3795200400",
+        "3795200c00"
+      ],
+      "body": "7f10990d7d2dbe8caa64678d00474ba15bf3c432db2a67611a14f8db1d017e244ae12be7c1321afa5b7d1954c8cf1a008e9742b7e78865b654cec2347c7ccea8585ce17ccea8585ce17ccea8585ce240",
+      "phase": [
+        0,
+        0,
+        0
+      ],
+      "frames": [
+        {
+          "offset": 30127,
+          "bytes": 164,
+          "prefix_bits": 584
+        },
+        {
+          "offset": 30291,
+          "bytes": 153,
+          "prefix_bits": 541
+        },
+        {
+          "offset": 30444,
+          "bytes": 153,
+          "prefix_bits": 539
+        }
+      ],
+      "container_rate": 48000,
+      "container_frame_samples": 1024,
+      "samples": 3072,
+      "pcm_offset": 0,
+      "control": "n512-c6-base-x2-crc1-same.mp4",
+      "empty": true,
+      "output_channels": 8,
+      "inherited_completes_first": false
+    },
+    {
+      "asc": "f8ecc1c460c0588c180b11830164a6f2a400800000",
+      "tree": 5,
+      "n": 512,
+      "rate": 48000,
+      "slots": 16,
+      "bands": 64,
+      "channels": 6,
+      "qmf": {
+        "expected_offset": 9752640,
+        "expected_bands": 32
+      },
+      "name": "n512-c6-base-x2-crc1-fragmented-gain-local",
+      "mode": "fragmented-gain",
+      "configs": [
+        "3795200400",
+        "3795200c00"
+      ],
+      "body": "7f10990d7d2dbe8caa64678d00474ba15bf3c432db2a67611a14f8db1d017e244ae12be7c1321afa5b7d1954c8cf1a008e9742b7e78865b654cec2347c7ccea8585ce17ccea8585ce17ccea8585ce240",
+      "phase": [
+        0,
+        1,
+        0
+      ],
+      "frames": [
+        {
+          "offset": 30597,
+          "bytes": 119,
+          "prefix_bits": 584
+        },
+        {
+          "offset": 30716,
+          "bytes": 207,
+          "prefix_bits": 541
+        },
+        {
+          "offset": 30923,
+          "bytes": 161,
+          "prefix_bits": 539
+        }
+      ],
+      "container_rate": 48000,
+      "container_frame_samples": 1024,
+      "samples": 3072,
+      "pcm_offset": 0,
+      "control": "n512-c6-base-x2-crc1-fragmented-gain.mp4",
+      "empty": false,
+      "output_channels": 8,
+      "inherited_completes_first": true
+    },
+    {
+      "asc": "f8ec314460c0592b388100205800",
+      "tree": 0,
+      "n": 480,
+      "rate": 24000,
+      "slots": 15,
+      "bands": 32,
+      "channels": 1,
+      "qmf": {
+        "expected_offset": 0,
+        "expected_bands": 32
+      },
+      "name": "n480-c1-base-x1-crc1-tree0-same-local",
+      "mode": "same",
+      "configs": [
+        "671020040b",
+        "6710200c0b"
+      ],
+      "body": "7f10990d7d2dbe8caa64678d00474ba15bf3c432db2a67611a14f8db1d017e244ae12be7c1321afa5b7d1954c8cf1a008e9742b7e78865b654cec2347c4ec74ebae08895c257cf826435f4b6fa32a9919e34011d2e856fcf10cbf8a9f1b63a029d8e9d75c1112b84af9f04c86be96df46553233c68023a5df16ca99d846853e36c74053b1d3aebe22f99d50b0b9c2f99d50b0b9c2f99d50b0b92",
+      "phase": [
+        0,
+        0,
+        0
+      ],
+      "frames": [
+        {
+          "offset": 31084,
+          "bytes": 182,
+          "prefix_bits": 116
+        },
+        {
+          "offset": 31266,
+          "bytes": 175,
+          "prefix_bits": 107
+        },
+        {
+          "offset": 31441,
+          "bytes": 175,
+          "prefix_bits": 109
+        }
+      ],
+      "container_rate": 24000,
+      "container_frame_samples": 480,
+      "samples": 1440,
+      "pcm_offset": 0,
+      "control": "n480-c1-base-x1-crc1-tree0-same.mp4",
+      "empty": false,
+      "output_channels": 6,
+      "inherited_completes_first": false
+    },
+    {
+      "asc": "f8ec314460c0592b388100205800",
+      "tree": 0,
+      "n": 480,
+      "rate": 24000,
+      "slots": 15,
+      "bands": 32,
+      "channels": 1,
+      "qmf": {
+        "expected_offset": 0,
+        "expected_bands": 32
+      },
+      "name": "n480-c1-base-x1-crc1-tree0-same-local-empty",
+      "mode": "same",
+      "configs": [
+        "671020040b",
+        "6710200c0b"
+      ],
+      "body": "7f10990d7d2dbe8caa64678d00474ba15bf3c432db2a67611a14f8db1d017e244ae12be7c1321afa5b7d1954c8cf1a008e9742b7e78865b654cec2347c4ec74ebae08895c257cf826435f4b6fa32a9919e34011d2e856fcf10cbf8a9f1b63a029d8e9d75c1112b84af9f04c86be96df46553233c68023a5df16ca99d846853e36c74053b1d3aebe22f99d50b0b9c2f99d50b0b9c2f99d50b0b92",
+      "phase": [
+        0,
+        0,
+        0
+      ],
+      "frames": [
+        {
+          "offset": 31616,
+          "bytes": 180,
+          "prefix_bits": 116
+        },
+        {
+          "offset": 31796,
+          "bytes": 173,
+          "prefix_bits": 107
+        },
+        {
+          "offset": 31969,
+          "bytes": 173,
+          "prefix_bits": 109
+        }
+      ],
+      "container_rate": 24000,
+      "container_frame_samples": 480,
+      "samples": 1440,
+      "pcm_offset": 0,
+      "control": "n480-c1-base-x1-crc1-tree0-same.mp4",
+      "empty": true,
+      "output_channels": 6,
+      "inherited_completes_first": false
+    },
+    {
+      "asc": "f8ec314460c0592b388100205800",
+      "tree": 0,
+      "n": 480,
+      "rate": 24000,
+      "slots": 15,
+      "bands": 32,
+      "channels": 1,
+      "qmf": {
+        "expected_offset": 0,
+        "expected_bands": 32
+      },
+      "name": "n480-c1-base-x1-crc1-tree0-fragmented-gain-local",
+      "mode": "fragmented-gain",
+      "configs": [
+        "671020040b",
+        "6710200c0b"
+      ],
+      "body": "7f10990d7d2dbe8caa64678d00474ba15bf3c432db2a67611a14f8db1d017e244ae12be7c1321afa5b7d1954c8cf1a008e9742b7e78865b654cec2347c4ec74ebae08895c257cf826435f4b6fa32a9919e34011d2e856fcf10cbf8a9f1b63a029d8e9d75c1112b84af9f04c86be96df46553233c68023a5df16ca99d846853e36c74053b1d3aebe22f99d50b0b9c2f99d50b0b9c2f99d50b0b92",
+      "phase": [
+        0,
+        1,
+        0
+      ],
+      "frames": [
+        {
+          "offset": 32142,
+          "bytes": 98,
+          "prefix_bits": 116
+        },
+        {
+          "offset": 32240,
+          "bytes": 264,
+          "prefix_bits": 107
+        },
+        {
+          "offset": 32504,
+          "bytes": 181,
+          "prefix_bits": 109
+        }
+      ],
+      "container_rate": 24000,
+      "container_frame_samples": 480,
+      "samples": 1440,
+      "pcm_offset": 0,
+      "control": "n480-c1-base-x1-crc1-tree0-fragmented-gain.mp4",
+      "empty": false,
+      "output_channels": 6,
+      "inherited_completes_first": true
+    },
+    {
+      "asc": "f8ec31c460c05929b88100205800",
+      "tree": 0,
+      "n": 480,
+      "rate": 48000,
+      "slots": 15,
+      "bands": 64,
+      "channels": 1,
+      "qmf": {
+        "expected_offset": 0,
+        "expected_bands": 32
+      },
+      "name": "n480-c1-base-x2-crc1-tree0-same-local",
+      "mode": "same",
+      "configs": [
+        "371020040b",
+        "3710200c0b"
+      ],
+      "body": "7f10990d7d2dbe8caa64678d00474ba15bf3c432db2a67611a14f8db1d017e244ae12be7c1321afa5b7d1954c8cf1a008e9742b7e78865b654cec2347c4ec74ebae08895c257cf826435f4b6fa32a9919e34011d2e856fcf10cbf8a9f1b63a029d8e9d75c1112b84af9f04c86be96df46553233c68023a5df16ca99d846853e36c74053b1d3aebe22f99d50b0b9c2f99d50b0b9c2f99d50b0b92",
+      "phase": [
+        0,
+        0,
+        0
+      ],
+      "frames": [
+        {
+          "offset": 32685,
+          "bytes": 182,
+          "prefix_bits": 116
+        },
+        {
+          "offset": 32867,
+          "bytes": 175,
+          "prefix_bits": 107
+        },
+        {
+          "offset": 33042,
+          "bytes": 175,
+          "prefix_bits": 109
+        }
+      ],
+      "container_rate": 48000,
+      "container_frame_samples": 960,
+      "samples": 2880,
+      "pcm_offset": 0,
+      "control": "n480-c1-base-x2-crc1-tree0-same.mp4",
+      "empty": false,
+      "output_channels": 6,
+      "inherited_completes_first": false
+    },
+    {
+      "asc": "f8ec31c460c05929b88100205800",
+      "tree": 0,
+      "n": 480,
+      "rate": 48000,
+      "slots": 15,
+      "bands": 64,
+      "channels": 1,
+      "qmf": {
+        "expected_offset": 0,
+        "expected_bands": 32
+      },
+      "name": "n480-c1-base-x2-crc1-tree0-same-local-empty",
+      "mode": "same",
+      "configs": [
+        "371020040b",
+        "3710200c0b"
+      ],
+      "body": "7f10990d7d2dbe8caa64678d00474ba15bf3c432db2a67611a14f8db1d017e244ae12be7c1321afa5b7d1954c8cf1a008e9742b7e78865b654cec2347c4ec74ebae08895c257cf826435f4b6fa32a9919e34011d2e856fcf10cbf8a9f1b63a029d8e9d75c1112b84af9f04c86be96df46553233c68023a5df16ca99d846853e36c74053b1d3aebe22f99d50b0b9c2f99d50b0b9c2f99d50b0b92",
+      "phase": [
+        0,
+        0,
+        0
+      ],
+      "frames": [
+        {
+          "offset": 33217,
+          "bytes": 180,
+          "prefix_bits": 116
+        },
+        {
+          "offset": 33397,
+          "bytes": 173,
+          "prefix_bits": 107
+        },
+        {
+          "offset": 33570,
+          "bytes": 173,
+          "prefix_bits": 109
+        }
+      ],
+      "container_rate": 48000,
+      "container_frame_samples": 960,
+      "samples": 2880,
+      "pcm_offset": 0,
+      "control": "n480-c1-base-x2-crc1-tree0-same.mp4",
+      "empty": true,
+      "output_channels": 6,
+      "inherited_completes_first": false
+    },
+    {
+      "asc": "f8ec31c460c05929b88100205800",
+      "tree": 0,
+      "n": 480,
+      "rate": 48000,
+      "slots": 15,
+      "bands": 64,
+      "channels": 1,
+      "qmf": {
+        "expected_offset": 0,
+        "expected_bands": 32
+      },
+      "name": "n480-c1-base-x2-crc1-tree0-fragmented-gain-local",
+      "mode": "fragmented-gain",
+      "configs": [
+        "371020040b",
+        "3710200c0b"
+      ],
+      "body": "7f10990d7d2dbe8caa64678d00474ba15bf3c432db2a67611a14f8db1d017e244ae12be7c1321afa5b7d1954c8cf1a008e9742b7e78865b654cec2347c4ec74ebae08895c257cf826435f4b6fa32a9919e34011d2e856fcf10cbf8a9f1b63a029d8e9d75c1112b84af9f04c86be96df46553233c68023a5df16ca99d846853e36c74053b1d3aebe22f99d50b0b9c2f99d50b0b9c2f99d50b0b92",
+      "phase": [
+        0,
+        1,
+        0
+      ],
+      "frames": [
+        {
+          "offset": 33743,
+          "bytes": 98,
+          "prefix_bits": 116
+        },
+        {
+          "offset": 33841,
+          "bytes": 264,
+          "prefix_bits": 107
+        },
+        {
+          "offset": 34105,
+          "bytes": 181,
+          "prefix_bits": 109
+        }
+      ],
+      "container_rate": 48000,
+      "container_frame_samples": 960,
+      "samples": 2880,
+      "pcm_offset": 0,
+      "control": "n480-c1-base-x2-crc1-tree0-fragmented-gain.mp4",
+      "empty": false,
+      "output_channels": 6,
+      "inherited_completes_first": true
+    },
+    {
+      "asc": "f8ec214460c0592b3c8100205800",
+      "tree": 0,
+      "n": 512,
+      "rate": 24000,
+      "slots": 16,
+      "bands": 32,
+      "channels": 1,
+      "qmf": {
+        "expected_offset": 5405760,
+        "expected_bands": 32
+      },
+      "name": "n512-c1-base-x1-crc1-tree0-same-local",
+      "mode": "same",
+      "configs": [
+        "679020040b",
+        "6790200c0b"
+      ],
+      "body": "7f10990d7d2dbe8caa64678d00474ba15bf3c432db2a67611a14f8db1d017e244ae12be7c1321afa5b7d1954c8cf1a008e9742b7e78865b654cec2347c4ec74ebae08895c257cf826435f4b6fa32a9919e34011d2e856fcf10cbf8a9f1b63a029d8e9d75c1112b84af9f04c86be96df46553233c68023a5df16ca99d846853e36c74053b1d3aebe22f99d50b0b9c2f99d50b0b9c2f99d50b0b92",
+      "phase": [
+        0,
+        0,
+        0
+      ],
+      "frames": [
+        {
+          "offset": 34286,
+          "bytes": 182,
+          "prefix_bits": 116
+        },
+        {
+          "offset": 34468,
+          "bytes": 175,
+          "prefix_bits": 107
+        },
+        {
+          "offset": 34643,
+          "bytes": 175,
+          "prefix_bits": 109
+        }
+      ],
+      "container_rate": 24000,
+      "container_frame_samples": 512,
+      "samples": 1536,
+      "pcm_offset": 0,
+      "control": "n512-c1-base-x1-crc1-tree0-same.mp4",
+      "empty": false,
+      "output_channels": 6,
+      "inherited_completes_first": false
+    },
+    {
+      "asc": "f8ec214460c0592b3c8100205800",
+      "tree": 0,
+      "n": 512,
+      "rate": 24000,
+      "slots": 16,
+      "bands": 32,
+      "channels": 1,
+      "qmf": {
+        "expected_offset": 5405760,
+        "expected_bands": 32
+      },
+      "name": "n512-c1-base-x1-crc1-tree0-same-local-empty",
+      "mode": "same",
+      "configs": [
+        "679020040b",
+        "6790200c0b"
+      ],
+      "body": "7f10990d7d2dbe8caa64678d00474ba15bf3c432db2a67611a14f8db1d017e244ae12be7c1321afa5b7d1954c8cf1a008e9742b7e78865b654cec2347c4ec74ebae08895c257cf826435f4b6fa32a9919e34011d2e856fcf10cbf8a9f1b63a029d8e9d75c1112b84af9f04c86be96df46553233c68023a5df16ca99d846853e36c74053b1d3aebe22f99d50b0b9c2f99d50b0b9c2f99d50b0b92",
+      "phase": [
+        0,
+        0,
+        0
+      ],
+      "frames": [
+        {
+          "offset": 34818,
+          "bytes": 180,
+          "prefix_bits": 116
+        },
+        {
+          "offset": 34998,
+          "bytes": 173,
+          "prefix_bits": 107
+        },
+        {
+          "offset": 35171,
+          "bytes": 173,
+          "prefix_bits": 109
+        }
+      ],
+      "container_rate": 24000,
+      "container_frame_samples": 512,
+      "samples": 1536,
+      "pcm_offset": 0,
+      "control": "n512-c1-base-x1-crc1-tree0-same.mp4",
+      "empty": true,
+      "output_channels": 6,
+      "inherited_completes_first": false
+    },
+    {
+      "asc": "f8ec214460c0592b3c8100205800",
+      "tree": 0,
+      "n": 512,
+      "rate": 24000,
+      "slots": 16,
+      "bands": 32,
+      "channels": 1,
+      "qmf": {
+        "expected_offset": 5405760,
+        "expected_bands": 32
+      },
+      "name": "n512-c1-base-x1-crc1-tree0-fragmented-gain-local",
+      "mode": "fragmented-gain",
+      "configs": [
+        "679020040b",
+        "6790200c0b"
+      ],
+      "body": "7f10990d7d2dbe8caa64678d00474ba15bf3c432db2a67611a14f8db1d017e244ae12be7c1321afa5b7d1954c8cf1a008e9742b7e78865b654cec2347c4ec74ebae08895c257cf826435f4b6fa32a9919e34011d2e856fcf10cbf8a9f1b63a029d8e9d75c1112b84af9f04c86be96df46553233c68023a5df16ca99d846853e36c74053b1d3aebe22f99d50b0b9c2f99d50b0b9c2f99d50b0b92",
+      "phase": [
+        0,
+        1,
+        0
+      ],
+      "frames": [
+        {
+          "offset": 35344,
+          "bytes": 98,
+          "prefix_bits": 116
+        },
+        {
+          "offset": 35442,
+          "bytes": 264,
+          "prefix_bits": 107
+        },
+        {
+          "offset": 35706,
+          "bytes": 181,
+          "prefix_bits": 109
+        }
+      ],
+      "container_rate": 24000,
+      "container_frame_samples": 512,
+      "samples": 1536,
+      "pcm_offset": 0,
+      "control": "n512-c1-base-x1-crc1-tree0-fragmented-gain.mp4",
+      "empty": false,
+      "output_channels": 6,
+      "inherited_completes_first": true
+    },
+    {
+      "asc": "f8ec21c460c05929bc8100205800",
+      "tree": 0,
+      "n": 512,
+      "rate": 48000,
+      "slots": 16,
+      "bands": 64,
+      "channels": 1,
+      "qmf": {
+        "expected_offset": 5405760,
+        "expected_bands": 32
+      },
+      "name": "n512-c1-base-x2-crc1-tree0-same-local",
+      "mode": "same",
+      "configs": [
+        "379020040b",
+        "3790200c0b"
+      ],
+      "body": "7f10990d7d2dbe8caa64678d00474ba15bf3c432db2a67611a14f8db1d017e244ae12be7c1321afa5b7d1954c8cf1a008e9742b7e78865b654cec2347c4ec74ebae08895c257cf826435f4b6fa32a9919e34011d2e856fcf10cbf8a9f1b63a029d8e9d75c1112b84af9f04c86be96df46553233c68023a5df16ca99d846853e36c74053b1d3aebe22f99d50b0b9c2f99d50b0b9c2f99d50b0b92",
+      "phase": [
+        0,
+        0,
+        0
+      ],
+      "frames": [
+        {
+          "offset": 35887,
+          "bytes": 182,
+          "prefix_bits": 116
+        },
+        {
+          "offset": 36069,
+          "bytes": 175,
+          "prefix_bits": 107
+        },
+        {
+          "offset": 36244,
+          "bytes": 175,
+          "prefix_bits": 109
+        }
+      ],
+      "container_rate": 48000,
+      "container_frame_samples": 1024,
+      "samples": 3072,
+      "pcm_offset": 0,
+      "control": "n512-c1-base-x2-crc1-tree0-same.mp4",
+      "empty": false,
+      "output_channels": 6,
+      "inherited_completes_first": false
+    },
+    {
+      "asc": "f8ec21c460c05929bc8100205800",
+      "tree": 0,
+      "n": 512,
+      "rate": 48000,
+      "slots": 16,
+      "bands": 64,
+      "channels": 1,
+      "qmf": {
+        "expected_offset": 5405760,
+        "expected_bands": 32
+      },
+      "name": "n512-c1-base-x2-crc1-tree0-same-local-empty",
+      "mode": "same",
+      "configs": [
+        "379020040b",
+        "3790200c0b"
+      ],
+      "body": "7f10990d7d2dbe8caa64678d00474ba15bf3c432db2a67611a14f8db1d017e244ae12be7c1321afa5b7d1954c8cf1a008e9742b7e78865b654cec2347c4ec74ebae08895c257cf826435f4b6fa32a9919e34011d2e856fcf10cbf8a9f1b63a029d8e9d75c1112b84af9f04c86be96df46553233c68023a5df16ca99d846853e36c74053b1d3aebe22f99d50b0b9c2f99d50b0b9c2f99d50b0b92",
+      "phase": [
+        0,
+        0,
+        0
+      ],
+      "frames": [
+        {
+          "offset": 36419,
+          "bytes": 180,
+          "prefix_bits": 116
+        },
+        {
+          "offset": 36599,
+          "bytes": 173,
+          "prefix_bits": 107
+        },
+        {
+          "offset": 36772,
+          "bytes": 173,
+          "prefix_bits": 109
+        }
+      ],
+      "container_rate": 48000,
+      "container_frame_samples": 1024,
+      "samples": 3072,
+      "pcm_offset": 0,
+      "control": "n512-c1-base-x2-crc1-tree0-same.mp4",
+      "empty": true,
+      "output_channels": 6,
+      "inherited_completes_first": false
+    },
+    {
+      "asc": "f8ec21c460c05929bc8100205800",
+      "tree": 0,
+      "n": 512,
+      "rate": 48000,
+      "slots": 16,
+      "bands": 64,
+      "channels": 1,
+      "qmf": {
+        "expected_offset": 5405760,
+        "expected_bands": 32
+      },
+      "name": "n512-c1-base-x2-crc1-tree0-fragmented-gain-local",
+      "mode": "fragmented-gain",
+      "configs": [
+        "379020040b",
+        "3790200c0b"
+      ],
+      "body": "7f10990d7d2dbe8caa64678d00474ba15bf3c432db2a67611a14f8db1d017e244ae12be7c1321afa5b7d1954c8cf1a008e9742b7e78865b654cec2347c4ec74ebae08895c257cf826435f4b6fa32a9919e34011d2e856fcf10cbf8a9f1b63a029d8e9d75c1112b84af9f04c86be96df46553233c68023a5df16ca99d846853e36c74053b1d3aebe22f99d50b0b9c2f99d50b0b9c2f99d50b0b92",
+      "phase": [
+        0,
+        1,
+        0
+      ],
+      "frames": [
+        {
+          "offset": 36945,
+          "bytes": 98,
+          "prefix_bits": 116
+        },
+        {
+          "offset": 37043,
+          "bytes": 264,
+          "prefix_bits": 107
+        },
+        {
+          "offset": 37307,
+          "bytes": 181,
+          "prefix_bits": 109
+        }
+      ],
+      "container_rate": 48000,
+      "container_frame_samples": 1024,
+      "samples": 3072,
+      "pcm_offset": 0,
+      "control": "n512-c1-base-x2-crc1-tree0-fragmented-gain.mp4",
+      "empty": false,
+      "output_channels": 6,
+      "inherited_completes_first": true
+    },
+    {
+      "asc": "f8ec314460c0592b388900205800",
+      "tree": 1,
+      "n": 480,
+      "rate": 24000,
+      "slots": 15,
+      "bands": 32,
+      "channels": 1,
+      "qmf": {
+        "expected_offset": 0,
+        "expected_bands": 32
+      },
+      "name": "n480-c1-base-x1-crc1-tree1-same-local",
+      "mode": "same",
+      "configs": [
+        "671120040b",
+        "6711200c0b"
+      ],
+      "body": "7f10990d7d2dbe8caa64678d00474ba15bf3c432db2a67611a14f8db1d017e244ae12be7c1321afa5b7d1954c8cf1a008e9742b7e78865b654cec2347c4ec74ebae08895c257cf826435f4f8a9f1b63a029d8e9d75c1112b84af9f04c86be96df46553233c68023a5df16ca99d846853e36c74053b1d3aeb822257095f3e0990d7d2dbe8caa647e22f99d50b0b9c2f99d50b0b9c2f99d50b0b92",
+      "phase": [
+        0,
+        0,
+        0
+      ],
+      "frames": [
+        {
+          "offset": 37488,
+          "bytes": 182,
+          "prefix_bits": 116
+        },
+        {
+          "offset": 37670,
+          "bytes": 175,
+          "prefix_bits": 107
+        },
+        {
+          "offset": 37845,
+          "bytes": 175,
+          "prefix_bits": 109
+        }
+      ],
+      "container_rate": 24000,
+      "container_frame_samples": 480,
+      "samples": 1440,
+      "pcm_offset": 0,
+      "control": "n480-c1-base-x1-crc1-tree1-same.mp4",
+      "empty": false,
+      "output_channels": 6,
+      "inherited_completes_first": false
+    },
+    {
+      "asc": "f8ec314460c0592b388900205800",
+      "tree": 1,
+      "n": 480,
+      "rate": 24000,
+      "slots": 15,
+      "bands": 32,
+      "channels": 1,
+      "qmf": {
+        "expected_offset": 0,
+        "expected_bands": 32
+      },
+      "name": "n480-c1-base-x1-crc1-tree1-same-local-empty",
+      "mode": "same",
+      "configs": [
+        "671120040b",
+        "6711200c0b"
+      ],
+      "body": "7f10990d7d2dbe8caa64678d00474ba15bf3c432db2a67611a14f8db1d017e244ae12be7c1321afa5b7d1954c8cf1a008e9742b7e78865b654cec2347c4ec74ebae08895c257cf826435f4f8a9f1b63a029d8e9d75c1112b84af9f04c86be96df46553233c68023a5df16ca99d846853e36c74053b1d3aeb822257095f3e0990d7d2dbe8caa647e22f99d50b0b9c2f99d50b0b9c2f99d50b0b92",
+      "phase": [
+        0,
+        0,
+        0
+      ],
+      "frames": [
+        {
+          "offset": 38020,
+          "bytes": 180,
+          "prefix_bits": 116
+        },
+        {
+          "offset": 38200,
+          "bytes": 173,
+          "prefix_bits": 107
+        },
+        {
+          "offset": 38373,
+          "bytes": 173,
+          "prefix_bits": 109
+        }
+      ],
+      "container_rate": 24000,
+      "container_frame_samples": 480,
+      "samples": 1440,
+      "pcm_offset": 0,
+      "control": "n480-c1-base-x1-crc1-tree1-same.mp4",
+      "empty": true,
+      "output_channels": 6,
+      "inherited_completes_first": false
+    },
+    {
+      "asc": "f8ec314460c0592b388900205800",
+      "tree": 1,
+      "n": 480,
+      "rate": 24000,
+      "slots": 15,
+      "bands": 32,
+      "channels": 1,
+      "qmf": {
+        "expected_offset": 0,
+        "expected_bands": 32
+      },
+      "name": "n480-c1-base-x1-crc1-tree1-fragmented-gain-local",
+      "mode": "fragmented-gain",
+      "configs": [
+        "671120040b",
+        "6711200c0b"
+      ],
+      "body": "7f10990d7d2dbe8caa64678d00474ba15bf3c432db2a67611a14f8db1d017e244ae12be7c1321afa5b7d1954c8cf1a008e9742b7e78865b654cec2347c4ec74ebae08895c257cf826435f4f8a9f1b63a029d8e9d75c1112b84af9f04c86be96df46553233c68023a5df16ca99d846853e36c74053b1d3aeb822257095f3e0990d7d2dbe8caa647e22f99d50b0b9c2f99d50b0b9c2f99d50b0b92",
+      "phase": [
+        0,
+        1,
+        0
+      ],
+      "frames": [
+        {
+          "offset": 38546,
+          "bytes": 98,
+          "prefix_bits": 116
+        },
+        {
+          "offset": 38644,
+          "bytes": 264,
+          "prefix_bits": 107
+        },
+        {
+          "offset": 38908,
+          "bytes": 181,
+          "prefix_bits": 109
+        }
+      ],
+      "container_rate": 24000,
+      "container_frame_samples": 480,
+      "samples": 1440,
+      "pcm_offset": 0,
+      "control": "n480-c1-base-x1-crc1-tree1-fragmented-gain.mp4",
+      "empty": false,
+      "output_channels": 6,
+      "inherited_completes_first": true
+    },
+    {
+      "asc": "f8ec31c460c05929b88900205800",
+      "tree": 1,
+      "n": 480,
+      "rate": 48000,
+      "slots": 15,
+      "bands": 64,
+      "channels": 1,
+      "qmf": {
+        "expected_offset": 0,
+        "expected_bands": 32
+      },
+      "name": "n480-c1-base-x2-crc1-tree1-same-local",
+      "mode": "same",
+      "configs": [
+        "371120040b",
+        "3711200c0b"
+      ],
+      "body": "7f10990d7d2dbe8caa64678d00474ba15bf3c432db2a67611a14f8db1d017e244ae12be7c1321afa5b7d1954c8cf1a008e9742b7e78865b654cec2347c4ec74ebae08895c257cf826435f4f8a9f1b63a029d8e9d75c1112b84af9f04c86be96df46553233c68023a5df16ca99d846853e36c74053b1d3aeb822257095f3e0990d7d2dbe8caa647e22f99d50b0b9c2f99d50b0b9c2f99d50b0b92",
+      "phase": [
+        0,
+        0,
+        0
+      ],
+      "frames": [
+        {
+          "offset": 39089,
+          "bytes": 182,
+          "prefix_bits": 116
+        },
+        {
+          "offset": 39271,
+          "bytes": 175,
+          "prefix_bits": 107
+        },
+        {
+          "offset": 39446,
+          "bytes": 175,
+          "prefix_bits": 109
+        }
+      ],
+      "container_rate": 48000,
+      "container_frame_samples": 960,
+      "samples": 2880,
+      "pcm_offset": 0,
+      "control": "n480-c1-base-x2-crc1-tree1-same.mp4",
+      "empty": false,
+      "output_channels": 6,
+      "inherited_completes_first": false
+    },
+    {
+      "asc": "f8ec31c460c05929b88900205800",
+      "tree": 1,
+      "n": 480,
+      "rate": 48000,
+      "slots": 15,
+      "bands": 64,
+      "channels": 1,
+      "qmf": {
+        "expected_offset": 0,
+        "expected_bands": 32
+      },
+      "name": "n480-c1-base-x2-crc1-tree1-same-local-empty",
+      "mode": "same",
+      "configs": [
+        "371120040b",
+        "3711200c0b"
+      ],
+      "body": "7f10990d7d2dbe8caa64678d00474ba15bf3c432db2a67611a14f8db1d017e244ae12be7c1321afa5b7d1954c8cf1a008e9742b7e78865b654cec2347c4ec74ebae08895c257cf826435f4f8a9f1b63a029d8e9d75c1112b84af9f04c86be96df46553233c68023a5df16ca99d846853e36c74053b1d3aeb822257095f3e0990d7d2dbe8caa647e22f99d50b0b9c2f99d50b0b9c2f99d50b0b92",
+      "phase": [
+        0,
+        0,
+        0
+      ],
+      "frames": [
+        {
+          "offset": 39621,
+          "bytes": 180,
+          "prefix_bits": 116
+        },
+        {
+          "offset": 39801,
+          "bytes": 173,
+          "prefix_bits": 107
+        },
+        {
+          "offset": 39974,
+          "bytes": 173,
+          "prefix_bits": 109
+        }
+      ],
+      "container_rate": 48000,
+      "container_frame_samples": 960,
+      "samples": 2880,
+      "pcm_offset": 0,
+      "control": "n480-c1-base-x2-crc1-tree1-same.mp4",
+      "empty": true,
+      "output_channels": 6,
+      "inherited_completes_first": false
+    },
+    {
+      "asc": "f8ec31c460c05929b88900205800",
+      "tree": 1,
+      "n": 480,
+      "rate": 48000,
+      "slots": 15,
+      "bands": 64,
+      "channels": 1,
+      "qmf": {
+        "expected_offset": 0,
+        "expected_bands": 32
+      },
+      "name": "n480-c1-base-x2-crc1-tree1-fragmented-gain-local",
+      "mode": "fragmented-gain",
+      "configs": [
+        "371120040b",
+        "3711200c0b"
+      ],
+      "body": "7f10990d7d2dbe8caa64678d00474ba15bf3c432db2a67611a14f8db1d017e244ae12be7c1321afa5b7d1954c8cf1a008e9742b7e78865b654cec2347c4ec74ebae08895c257cf826435f4f8a9f1b63a029d8e9d75c1112b84af9f04c86be96df46553233c68023a5df16ca99d846853e36c74053b1d3aeb822257095f3e0990d7d2dbe8caa647e22f99d50b0b9c2f99d50b0b9c2f99d50b0b92",
+      "phase": [
+        0,
+        1,
+        0
+      ],
+      "frames": [
+        {
+          "offset": 40147,
+          "bytes": 98,
+          "prefix_bits": 116
+        },
+        {
+          "offset": 40245,
+          "bytes": 264,
+          "prefix_bits": 107
+        },
+        {
+          "offset": 40509,
+          "bytes": 181,
+          "prefix_bits": 109
+        }
+      ],
+      "container_rate": 48000,
+      "container_frame_samples": 960,
+      "samples": 2880,
+      "pcm_offset": 0,
+      "control": "n480-c1-base-x2-crc1-tree1-fragmented-gain.mp4",
+      "empty": false,
+      "output_channels": 6,
+      "inherited_completes_first": true
+    },
+    {
+      "asc": "f8ec214460c0592b3c8900205800",
+      "tree": 1,
+      "n": 512,
+      "rate": 24000,
+      "slots": 16,
+      "bands": 32,
+      "channels": 1,
+      "qmf": {
+        "expected_offset": 5405760,
+        "expected_bands": 32
+      },
+      "name": "n512-c1-base-x1-crc1-tree1-same-local",
+      "mode": "same",
+      "configs": [
+        "679120040b",
+        "6791200c0b"
+      ],
+      "body": "7f10990d7d2dbe8caa64678d00474ba15bf3c432db2a67611a14f8db1d017e244ae12be7c1321afa5b7d1954c8cf1a008e9742b7e78865b654cec2347c4ec74ebae08895c257cf826435f4f8a9f1b63a029d8e9d75c1112b84af9f04c86be96df46553233c68023a5df16ca99d846853e36c74053b1d3aeb822257095f3e0990d7d2dbe8caa647e22f99d50b0b9c2f99d50b0b9c2f99d50b0b92",
+      "phase": [
+        0,
+        0,
+        0
+      ],
+      "frames": [
+        {
+          "offset": 40690,
+          "bytes": 182,
+          "prefix_bits": 116
+        },
+        {
+          "offset": 40872,
+          "bytes": 175,
+          "prefix_bits": 107
+        },
+        {
+          "offset": 41047,
+          "bytes": 175,
+          "prefix_bits": 109
+        }
+      ],
+      "container_rate": 24000,
+      "container_frame_samples": 512,
+      "samples": 1536,
+      "pcm_offset": 0,
+      "control": "n512-c1-base-x1-crc1-tree1-same.mp4",
+      "empty": false,
+      "output_channels": 6,
+      "inherited_completes_first": false
+    },
+    {
+      "asc": "f8ec214460c0592b3c8900205800",
+      "tree": 1,
+      "n": 512,
+      "rate": 24000,
+      "slots": 16,
+      "bands": 32,
+      "channels": 1,
+      "qmf": {
+        "expected_offset": 5405760,
+        "expected_bands": 32
+      },
+      "name": "n512-c1-base-x1-crc1-tree1-same-local-empty",
+      "mode": "same",
+      "configs": [
+        "679120040b",
+        "6791200c0b"
+      ],
+      "body": "7f10990d7d2dbe8caa64678d00474ba15bf3c432db2a67611a14f8db1d017e244ae12be7c1321afa5b7d1954c8cf1a008e9742b7e78865b654cec2347c4ec74ebae08895c257cf826435f4f8a9f1b63a029d8e9d75c1112b84af9f04c86be96df46553233c68023a5df16ca99d846853e36c74053b1d3aeb822257095f3e0990d7d2dbe8caa647e22f99d50b0b9c2f99d50b0b9c2f99d50b0b92",
+      "phase": [
+        0,
+        0,
+        0
+      ],
+      "frames": [
+        {
+          "offset": 41222,
+          "bytes": 180,
+          "prefix_bits": 116
+        },
+        {
+          "offset": 41402,
+          "bytes": 173,
+          "prefix_bits": 107
+        },
+        {
+          "offset": 41575,
+          "bytes": 173,
+          "prefix_bits": 109
+        }
+      ],
+      "container_rate": 24000,
+      "container_frame_samples": 512,
+      "samples": 1536,
+      "pcm_offset": 0,
+      "control": "n512-c1-base-x1-crc1-tree1-same.mp4",
+      "empty": true,
+      "output_channels": 6,
+      "inherited_completes_first": false
+    },
+    {
+      "asc": "f8ec214460c0592b3c8900205800",
+      "tree": 1,
+      "n": 512,
+      "rate": 24000,
+      "slots": 16,
+      "bands": 32,
+      "channels": 1,
+      "qmf": {
+        "expected_offset": 5405760,
+        "expected_bands": 32
+      },
+      "name": "n512-c1-base-x1-crc1-tree1-fragmented-gain-local",
+      "mode": "fragmented-gain",
+      "configs": [
+        "679120040b",
+        "6791200c0b"
+      ],
+      "body": "7f10990d7d2dbe8caa64678d00474ba15bf3c432db2a67611a14f8db1d017e244ae12be7c1321afa5b7d1954c8cf1a008e9742b7e78865b654cec2347c4ec74ebae08895c257cf826435f4f8a9f1b63a029d8e9d75c1112b84af9f04c86be96df46553233c68023a5df16ca99d846853e36c74053b1d3aeb822257095f3e0990d7d2dbe8caa647e22f99d50b0b9c2f99d50b0b9c2f99d50b0b92",
+      "phase": [
+        0,
+        1,
+        0
+      ],
+      "frames": [
+        {
+          "offset": 41748,
+          "bytes": 98,
+          "prefix_bits": 116
+        },
+        {
+          "offset": 41846,
+          "bytes": 264,
+          "prefix_bits": 107
+        },
+        {
+          "offset": 42110,
+          "bytes": 181,
+          "prefix_bits": 109
+        }
+      ],
+      "container_rate": 24000,
+      "container_frame_samples": 512,
+      "samples": 1536,
+      "pcm_offset": 0,
+      "control": "n512-c1-base-x1-crc1-tree1-fragmented-gain.mp4",
+      "empty": false,
+      "output_channels": 6,
+      "inherited_completes_first": true
+    },
+    {
+      "asc": "f8ec21c460c05929bc8900205800",
+      "tree": 1,
+      "n": 512,
+      "rate": 48000,
+      "slots": 16,
+      "bands": 64,
+      "channels": 1,
+      "qmf": {
+        "expected_offset": 5405760,
+        "expected_bands": 32
+      },
+      "name": "n512-c1-base-x2-crc1-tree1-same-local",
+      "mode": "same",
+      "configs": [
+        "379120040b",
+        "3791200c0b"
+      ],
+      "body": "7f10990d7d2dbe8caa64678d00474ba15bf3c432db2a67611a14f8db1d017e244ae12be7c1321afa5b7d1954c8cf1a008e9742b7e78865b654cec2347c4ec74ebae08895c257cf826435f4f8a9f1b63a029d8e9d75c1112b84af9f04c86be96df46553233c68023a5df16ca99d846853e36c74053b1d3aeb822257095f3e0990d7d2dbe8caa647e22f99d50b0b9c2f99d50b0b9c2f99d50b0b92",
+      "phase": [
+        0,
+        0,
+        0
+      ],
+      "frames": [
+        {
+          "offset": 42291,
+          "bytes": 182,
+          "prefix_bits": 116
+        },
+        {
+          "offset": 42473,
+          "bytes": 175,
+          "prefix_bits": 107
+        },
+        {
+          "offset": 42648,
+          "bytes": 175,
+          "prefix_bits": 109
+        }
+      ],
+      "container_rate": 48000,
+      "container_frame_samples": 1024,
+      "samples": 3072,
+      "pcm_offset": 0,
+      "control": "n512-c1-base-x2-crc1-tree1-same.mp4",
+      "empty": false,
+      "output_channels": 6,
+      "inherited_completes_first": false
+    },
+    {
+      "asc": "f8ec21c460c05929bc8900205800",
+      "tree": 1,
+      "n": 512,
+      "rate": 48000,
+      "slots": 16,
+      "bands": 64,
+      "channels": 1,
+      "qmf": {
+        "expected_offset": 5405760,
+        "expected_bands": 32
+      },
+      "name": "n512-c1-base-x2-crc1-tree1-same-local-empty",
+      "mode": "same",
+      "configs": [
+        "379120040b",
+        "3791200c0b"
+      ],
+      "body": "7f10990d7d2dbe8caa64678d00474ba15bf3c432db2a67611a14f8db1d017e244ae12be7c1321afa5b7d1954c8cf1a008e9742b7e78865b654cec2347c4ec74ebae08895c257cf826435f4f8a9f1b63a029d8e9d75c1112b84af9f04c86be96df46553233c68023a5df16ca99d846853e36c74053b1d3aeb822257095f3e0990d7d2dbe8caa647e22f99d50b0b9c2f99d50b0b9c2f99d50b0b92",
+      "phase": [
+        0,
+        0,
+        0
+      ],
+      "frames": [
+        {
+          "offset": 42823,
+          "bytes": 180,
+          "prefix_bits": 116
+        },
+        {
+          "offset": 43003,
+          "bytes": 173,
+          "prefix_bits": 107
+        },
+        {
+          "offset": 43176,
+          "bytes": 173,
+          "prefix_bits": 109
+        }
+      ],
+      "container_rate": 48000,
+      "container_frame_samples": 1024,
+      "samples": 3072,
+      "pcm_offset": 0,
+      "control": "n512-c1-base-x2-crc1-tree1-same.mp4",
+      "empty": true,
+      "output_channels": 6,
+      "inherited_completes_first": false
+    },
+    {
+      "asc": "f8ec21c460c05929bc8900205800",
+      "tree": 1,
+      "n": 512,
+      "rate": 48000,
+      "slots": 16,
+      "bands": 64,
+      "channels": 1,
+      "qmf": {
+        "expected_offset": 5405760,
+        "expected_bands": 32
+      },
+      "name": "n512-c1-base-x2-crc1-tree1-fragmented-gain-local",
+      "mode": "fragmented-gain",
+      "configs": [
+        "379120040b",
+        "3791200c0b"
+      ],
+      "body": "7f10990d7d2dbe8caa64678d00474ba15bf3c432db2a67611a14f8db1d017e244ae12be7c1321afa5b7d1954c8cf1a008e9742b7e78865b654cec2347c4ec74ebae08895c257cf826435f4f8a9f1b63a029d8e9d75c1112b84af9f04c86be96df46553233c68023a5df16ca99d846853e36c74053b1d3aeb822257095f3e0990d7d2dbe8caa647e22f99d50b0b9c2f99d50b0b9c2f99d50b0b92",
+      "phase": [
+        0,
+        1,
+        0
+      ],
+      "frames": [
+        {
+          "offset": 43349,
+          "bytes": 98,
+          "prefix_bits": 116
+        },
+        {
+          "offset": 43447,
+          "bytes": 264,
+          "prefix_bits": 107
+        },
+        {
+          "offset": 43711,
+          "bytes": 181,
+          "prefix_bits": 109
+        }
+      ],
+      "container_rate": 48000,
+      "container_frame_samples": 1024,
+      "samples": 3072,
+      "pcm_offset": 0,
+      "control": "n512-c1-base-x2-crc1-tree1-fragmented-gain.mp4",
+      "empty": false,
+      "output_channels": 6,
+      "inherited_completes_first": true
+    },
+    {
+      "asc": "f8ec514460c0593b389900205d358000",
+      "tree": 3,
+      "n": 480,
+      "rate": 24000,
+      "slots": 15,
+      "bands": 32,
+      "channels": 2,
+      "qmf": {
+        "expected_offset": 1235520,
+        "expected_bands": 32
+      },
+      "name": "n480-c2-base-x1-crc1-tree3-same-local",
+      "mode": "same",
+      "configs": [
+        "671320040ba6b0",
+        "6713200c0ba6b0"
+      ],
+      "body": "7f10990d7d2dbe8caa64678d00474bbe244ae12be7c1321afa5b7d1954c8cf1a008e9742b7e78865b654cec2347c4ec74ebae08895c257cf826435f4b6fa32a9919e34011d2e856fcf10cbf8a9f1b63a029d8e9d75c1112b84af9f04c86be96df46553233c68023a5df16ca99d846853e36c74053b1d3aeb822257095f3e0990d7d2dbe8caa647e22f99d50b0b9c2f99d50b0b9c2f99d50b0bfc678d00474ba15bf3c432db2a6761f8db7d1954c8cf1a008e9742b7e789f1cf826435f4b6fa32a9919e34011d2ef8f0444ae12be7c1321afa5b7d1954c892",
+      "phase": [
+        0,
+        0,
+        0
+      ],
+      "frames": [
+        {
+          "offset": 43892,
+          "bytes": 258,
+          "prefix_bits": 216
+        },
+        {
+          "offset": 44150,
+          "bytes": 248,
+          "prefix_bits": 200
+        },
+        {
+          "offset": 44398,
+          "bytes": 248,
+          "prefix_bits": 200
+        }
+      ],
+      "container_rate": 24000,
+      "container_frame_samples": 480,
+      "samples": 1440,
+      "pcm_offset": 0,
+      "control": "n480-c2-base-x1-crc1-tree3-same.mp4",
+      "empty": false,
+      "output_channels": 8,
+      "inherited_completes_first": false
+    },
+    {
+      "asc": "f8ec514460c0593b389900205d358000",
+      "tree": 3,
+      "n": 480,
+      "rate": 24000,
+      "slots": 15,
+      "bands": 32,
+      "channels": 2,
+      "qmf": {
+        "expected_offset": 1235520,
+        "expected_bands": 32
+      },
+      "name": "n480-c2-base-x1-crc1-tree3-same-local-empty",
+      "mode": "same",
+      "configs": [
+        "671320040ba6b0",
+        "6713200c0ba6b0"
+      ],
+      "body": "7f10990d7d2dbe8caa64678d00474bbe244ae12be7c1321afa5b7d1954c8cf1a008e9742b7e78865b654cec2347c4ec74ebae08895c257cf826435f4b6fa32a9919e34011d2e856fcf10cbf8a9f1b63a029d8e9d75c1112b84af9f04c86be96df46553233c68023a5df16ca99d846853e36c74053b1d3aeb822257095f3e0990d7d2dbe8caa647e22f99d50b0b9c2f99d50b0b9c2f99d50b0bfc678d00474ba15bf3c432db2a6761f8db7d1954c8cf1a008e9742b7e789f1cf826435f4b6fa32a9919e34011d2ef8f0444ae12be7c1321afa5b7d1954c892",
+      "phase": [
+        0,
+        0,
+        0
+      ],
+      "frames": [
+        {
+          "offset": 44646,
+          "bytes": 256,
+          "prefix_bits": 216
+        },
+        {
+          "offset": 44902,
+          "bytes": 246,
+          "prefix_bits": 200
+        },
+        {
+          "offset": 45148,
+          "bytes": 246,
+          "prefix_bits": 200
+        }
+      ],
+      "container_rate": 24000,
+      "container_frame_samples": 480,
+      "samples": 1440,
+      "pcm_offset": 0,
+      "control": "n480-c2-base-x1-crc1-tree3-same.mp4",
+      "empty": true,
+      "output_channels": 8,
+      "inherited_completes_first": false
+    },
+    {
+      "asc": "f8ec514460c0593b389900205d358000",
+      "tree": 3,
+      "n": 480,
+      "rate": 24000,
+      "slots": 15,
+      "bands": 32,
+      "channels": 2,
+      "qmf": {
+        "expected_offset": 1235520,
+        "expected_bands": 32
+      },
+      "name": "n480-c2-base-x1-crc1-tree3-fragmented-gain-local",
+      "mode": "fragmented-gain",
+      "configs": [
+        "671320040ba6b0",
+        "6713200c0ba6b0"
+      ],
+      "body": "7f10990d7d2dbe8caa64678d00474bbe244ae12be7c1321afa5b7d1954c8cf1a008e9742b7e78865b654cec2347c4ec74ebae08895c257cf826435f4b6fa32a9919e34011d2e856fcf10cbf8a9f1b63a029d8e9d75c1112b84af9f04c86be96df46553233c68023a5df16ca99d846853e36c74053b1d3aeb822257095f3e0990d7d2dbe8caa647e22f99d50b0b9c2f99d50b0b9c2f99d50b0bfc678d00474ba15bf3c432db2a6761f8db7d1954c8cf1a008e9742b7e789f1cf826435f4b6fa32a9919e34011d2ef8f0444ae12be7c1321afa5b7d1954c892",
+      "phase": [
+        0,
+        1,
+        0
+      ],
+      "frames": [
+        {
+          "offset": 45394,
+          "bytes": 142,
+          "prefix_bits": 216
+        },
+        {
+          "offset": 45536,
+          "bytes": 371,
+          "prefix_bits": 200
+        },
+        {
+          "offset": 45907,
+          "bytes": 256,
+          "prefix_bits": 200
+        }
+      ],
+      "container_rate": 24000,
+      "container_frame_samples": 480,
+      "samples": 1440,
+      "pcm_offset": 0,
+      "control": "n480-c2-base-x1-crc1-tree3-fragmented-gain.mp4",
+      "empty": false,
+      "output_channels": 8,
+      "inherited_completes_first": true
+    },
+    {
+      "asc": "f8ec51c460c05939b89900205d358000",
+      "tree": 3,
+      "n": 480,
+      "rate": 48000,
+      "slots": 15,
+      "bands": 64,
+      "channels": 2,
+      "qmf": {
+        "expected_offset": 1235520,
+        "expected_bands": 32
+      },
+      "name": "n480-c2-base-x2-crc1-tree3-same-local",
+      "mode": "same",
+      "configs": [
+        "371320040ba6b0",
+        "3713200c0ba6b0"
+      ],
+      "body": "7f10990d7d2dbe8caa64678d00474bbe244ae12be7c1321afa5b7d1954c8cf1a008e9742b7e78865b654cec2347c4ec74ebae08895c257cf826435f4b6fa32a9919e34011d2e856fcf10cbf8a9f1b63a029d8e9d75c1112b84af9f04c86be96df46553233c68023a5df16ca99d846853e36c74053b1d3aeb822257095f3e0990d7d2dbe8caa647e22f99d50b0b9c2f99d50b0b9c2f99d50b0bfc678d00474ba15bf3c432db2a6761f8db7d1954c8cf1a008e9742b7e789f1cf826435f4b6fa32a9919e34011d2ef8f0444ae12be7c1321afa5b7d1954c892",
+      "phase": [
+        0,
+        0,
+        0
+      ],
+      "frames": [
+        {
+          "offset": 46163,
+          "bytes": 258,
+          "prefix_bits": 216
+        },
+        {
+          "offset": 46421,
+          "bytes": 248,
+          "prefix_bits": 200
+        },
+        {
+          "offset": 46669,
+          "bytes": 248,
+          "prefix_bits": 200
+        }
+      ],
+      "container_rate": 48000,
+      "container_frame_samples": 960,
+      "samples": 2880,
+      "pcm_offset": 0,
+      "control": "n480-c2-base-x2-crc1-tree3-same.mp4",
+      "empty": false,
+      "output_channels": 8,
+      "inherited_completes_first": false
+    },
+    {
+      "asc": "f8ec51c460c05939b89900205d358000",
+      "tree": 3,
+      "n": 480,
+      "rate": 48000,
+      "slots": 15,
+      "bands": 64,
+      "channels": 2,
+      "qmf": {
+        "expected_offset": 1235520,
+        "expected_bands": 32
+      },
+      "name": "n480-c2-base-x2-crc1-tree3-same-local-empty",
+      "mode": "same",
+      "configs": [
+        "371320040ba6b0",
+        "3713200c0ba6b0"
+      ],
+      "body": "7f10990d7d2dbe8caa64678d00474bbe244ae12be7c1321afa5b7d1954c8cf1a008e9742b7e78865b654cec2347c4ec74ebae08895c257cf826435f4b6fa32a9919e34011d2e856fcf10cbf8a9f1b63a029d8e9d75c1112b84af9f04c86be96df46553233c68023a5df16ca99d846853e36c74053b1d3aeb822257095f3e0990d7d2dbe8caa647e22f99d50b0b9c2f99d50b0b9c2f99d50b0bfc678d00474ba15bf3c432db2a6761f8db7d1954c8cf1a008e9742b7e789f1cf826435f4b6fa32a9919e34011d2ef8f0444ae12be7c1321afa5b7d1954c892",
+      "phase": [
+        0,
+        0,
+        0
+      ],
+      "frames": [
+        {
+          "offset": 46917,
+          "bytes": 256,
+          "prefix_bits": 216
+        },
+        {
+          "offset": 47173,
+          "bytes": 246,
+          "prefix_bits": 200
+        },
+        {
+          "offset": 47419,
+          "bytes": 246,
+          "prefix_bits": 200
+        }
+      ],
+      "container_rate": 48000,
+      "container_frame_samples": 960,
+      "samples": 2880,
+      "pcm_offset": 0,
+      "control": "n480-c2-base-x2-crc1-tree3-same.mp4",
+      "empty": true,
+      "output_channels": 8,
+      "inherited_completes_first": false
+    },
+    {
+      "asc": "f8ec51c460c05939b89900205d358000",
+      "tree": 3,
+      "n": 480,
+      "rate": 48000,
+      "slots": 15,
+      "bands": 64,
+      "channels": 2,
+      "qmf": {
+        "expected_offset": 1235520,
+        "expected_bands": 32
+      },
+      "name": "n480-c2-base-x2-crc1-tree3-fragmented-gain-local",
+      "mode": "fragmented-gain",
+      "configs": [
+        "371320040ba6b0",
+        "3713200c0ba6b0"
+      ],
+      "body": "7f10990d7d2dbe8caa64678d00474bbe244ae12be7c1321afa5b7d1954c8cf1a008e9742b7e78865b654cec2347c4ec74ebae08895c257cf826435f4b6fa32a9919e34011d2e856fcf10cbf8a9f1b63a029d8e9d75c1112b84af9f04c86be96df46553233c68023a5df16ca99d846853e36c74053b1d3aeb822257095f3e0990d7d2dbe8caa647e22f99d50b0b9c2f99d50b0b9c2f99d50b0bfc678d00474ba15bf3c432db2a6761f8db7d1954c8cf1a008e9742b7e789f1cf826435f4b6fa32a9919e34011d2ef8f0444ae12be7c1321afa5b7d1954c892",
+      "phase": [
+        0,
+        1,
+        0
+      ],
+      "frames": [
+        {
+          "offset": 47665,
+          "bytes": 142,
+          "prefix_bits": 216
+        },
+        {
+          "offset": 47807,
+          "bytes": 371,
+          "prefix_bits": 200
+        },
+        {
+          "offset": 48178,
+          "bytes": 256,
+          "prefix_bits": 200
+        }
+      ],
+      "container_rate": 48000,
+      "container_frame_samples": 960,
+      "samples": 2880,
+      "pcm_offset": 0,
+      "control": "n480-c2-base-x2-crc1-tree3-fragmented-gain.mp4",
+      "empty": false,
+      "output_channels": 8,
+      "inherited_completes_first": true
+    },
+    {
+      "asc": "f8ec414460c0593b3c9900205d358000",
+      "tree": 3,
+      "n": 512,
+      "rate": 24000,
+      "slots": 16,
+      "bands": 32,
+      "channels": 2,
+      "qmf": {
+        "expected_offset": 6723648,
+        "expected_bands": 32
+      },
+      "name": "n512-c2-base-x1-crc1-tree3-same-local",
+      "mode": "same",
+      "configs": [
+        "679320040ba6b0",
+        "6793200c0ba6b0"
+      ],
+      "body": "7f10990d7d2dbe8caa64678d00474bbe244ae12be7c1321afa5b7d1954c8cf1a008e9742b7e78865b654cec2347c4ec74ebae08895c257cf826435f4b6fa32a9919e34011d2e856fcf10cbf8a9f1b63a029d8e9d75c1112b84af9f04c86be96df46553233c68023a5df16ca99d846853e36c74053b1d3aeb822257095f3e0990d7d2dbe8caa647e22f99d50b0b9c2f99d50b0b9c2f99d50b0bfc678d00474ba15bf3c432db2a6761f8db7d1954c8cf1a008e9742b7e789f1cf826435f4b6fa32a9919e34011d2ef8f0444ae12be7c1321afa5b7d1954c892",
+      "phase": [
+        0,
+        0,
+        0
+      ],
+      "frames": [
+        {
+          "offset": 48434,
+          "bytes": 258,
+          "prefix_bits": 216
+        },
+        {
+          "offset": 48692,
+          "bytes": 248,
+          "prefix_bits": 200
+        },
+        {
+          "offset": 48940,
+          "bytes": 248,
+          "prefix_bits": 200
+        }
+      ],
+      "container_rate": 24000,
+      "container_frame_samples": 512,
+      "samples": 1536,
+      "pcm_offset": 0,
+      "control": "n512-c2-base-x1-crc1-tree3-same.mp4",
+      "empty": false,
+      "output_channels": 8,
+      "inherited_completes_first": false
+    },
+    {
+      "asc": "f8ec414460c0593b3c9900205d358000",
+      "tree": 3,
+      "n": 512,
+      "rate": 24000,
+      "slots": 16,
+      "bands": 32,
+      "channels": 2,
+      "qmf": {
+        "expected_offset": 6723648,
+        "expected_bands": 32
+      },
+      "name": "n512-c2-base-x1-crc1-tree3-same-local-empty",
+      "mode": "same",
+      "configs": [
+        "679320040ba6b0",
+        "6793200c0ba6b0"
+      ],
+      "body": "7f10990d7d2dbe8caa64678d00474bbe244ae12be7c1321afa5b7d1954c8cf1a008e9742b7e78865b654cec2347c4ec74ebae08895c257cf826435f4b6fa32a9919e34011d2e856fcf10cbf8a9f1b63a029d8e9d75c1112b84af9f04c86be96df46553233c68023a5df16ca99d846853e36c74053b1d3aeb822257095f3e0990d7d2dbe8caa647e22f99d50b0b9c2f99d50b0b9c2f99d50b0bfc678d00474ba15bf3c432db2a6761f8db7d1954c8cf1a008e9742b7e789f1cf826435f4b6fa32a9919e34011d2ef8f0444ae12be7c1321afa5b7d1954c892",
+      "phase": [
+        0,
+        0,
+        0
+      ],
+      "frames": [
+        {
+          "offset": 49188,
+          "bytes": 256,
+          "prefix_bits": 216
+        },
+        {
+          "offset": 49444,
+          "bytes": 246,
+          "prefix_bits": 200
+        },
+        {
+          "offset": 49690,
+          "bytes": 246,
+          "prefix_bits": 200
+        }
+      ],
+      "container_rate": 24000,
+      "container_frame_samples": 512,
+      "samples": 1536,
+      "pcm_offset": 0,
+      "control": "n512-c2-base-x1-crc1-tree3-same.mp4",
+      "empty": true,
+      "output_channels": 8,
+      "inherited_completes_first": false
+    },
+    {
+      "asc": "f8ec414460c0593b3c9900205d358000",
+      "tree": 3,
+      "n": 512,
+      "rate": 24000,
+      "slots": 16,
+      "bands": 32,
+      "channels": 2,
+      "qmf": {
+        "expected_offset": 6723648,
+        "expected_bands": 32
+      },
+      "name": "n512-c2-base-x1-crc1-tree3-fragmented-gain-local",
+      "mode": "fragmented-gain",
+      "configs": [
+        "679320040ba6b0",
+        "6793200c0ba6b0"
+      ],
+      "body": "7f10990d7d2dbe8caa64678d00474bbe244ae12be7c1321afa5b7d1954c8cf1a008e9742b7e78865b654cec2347c4ec74ebae08895c257cf826435f4b6fa32a9919e34011d2e856fcf10cbf8a9f1b63a029d8e9d75c1112b84af9f04c86be96df46553233c68023a5df16ca99d846853e36c74053b1d3aeb822257095f3e0990d7d2dbe8caa647e22f99d50b0b9c2f99d50b0b9c2f99d50b0bfc678d00474ba15bf3c432db2a6761f8db7d1954c8cf1a008e9742b7e789f1cf826435f4b6fa32a9919e34011d2ef8f0444ae12be7c1321afa5b7d1954c892",
+      "phase": [
+        0,
+        1,
+        0
+      ],
+      "frames": [
+        {
+          "offset": 49936,
+          "bytes": 142,
+          "prefix_bits": 216
+        },
+        {
+          "offset": 50078,
+          "bytes": 371,
+          "prefix_bits": 200
+        },
+        {
+          "offset": 50449,
+          "bytes": 256,
+          "prefix_bits": 200
+        }
+      ],
+      "container_rate": 24000,
+      "container_frame_samples": 512,
+      "samples": 1536,
+      "pcm_offset": 0,
+      "control": "n512-c2-base-x1-crc1-tree3-fragmented-gain.mp4",
+      "empty": false,
+      "output_channels": 8,
+      "inherited_completes_first": true
+    },
+    {
+      "asc": "f8ec41c460c05939bc9900205d358000",
+      "tree": 3,
+      "n": 512,
+      "rate": 48000,
+      "slots": 16,
+      "bands": 64,
+      "channels": 2,
+      "qmf": {
+        "expected_offset": 6723648,
+        "expected_bands": 32
+      },
+      "name": "n512-c2-base-x2-crc1-tree3-same-local",
+      "mode": "same",
+      "configs": [
+        "379320040ba6b0",
+        "3793200c0ba6b0"
+      ],
+      "body": "7f10990d7d2dbe8caa64678d00474bbe244ae12be7c1321afa5b7d1954c8cf1a008e9742b7e78865b654cec2347c4ec74ebae08895c257cf826435f4b6fa32a9919e34011d2e856fcf10cbf8a9f1b63a029d8e9d75c1112b84af9f04c86be96df46553233c68023a5df16ca99d846853e36c74053b1d3aeb822257095f3e0990d7d2dbe8caa647e22f99d50b0b9c2f99d50b0b9c2f99d50b0bfc678d00474ba15bf3c432db2a6761f8db7d1954c8cf1a008e9742b7e789f1cf826435f4b6fa32a9919e34011d2ef8f0444ae12be7c1321afa5b7d1954c892",
+      "phase": [
+        0,
+        0,
+        0
+      ],
+      "frames": [
+        {
+          "offset": 50705,
+          "bytes": 258,
+          "prefix_bits": 216
+        },
+        {
+          "offset": 50963,
+          "bytes": 248,
+          "prefix_bits": 200
+        },
+        {
+          "offset": 51211,
+          "bytes": 248,
+          "prefix_bits": 200
+        }
+      ],
+      "container_rate": 48000,
+      "container_frame_samples": 1024,
+      "samples": 3072,
+      "pcm_offset": 0,
+      "control": "n512-c2-base-x2-crc1-tree3-same.mp4",
+      "empty": false,
+      "output_channels": 8,
+      "inherited_completes_first": false
+    },
+    {
+      "asc": "f8ec41c460c05939bc9900205d358000",
+      "tree": 3,
+      "n": 512,
+      "rate": 48000,
+      "slots": 16,
+      "bands": 64,
+      "channels": 2,
+      "qmf": {
+        "expected_offset": 6723648,
+        "expected_bands": 32
+      },
+      "name": "n512-c2-base-x2-crc1-tree3-same-local-empty",
+      "mode": "same",
+      "configs": [
+        "379320040ba6b0",
+        "3793200c0ba6b0"
+      ],
+      "body": "7f10990d7d2dbe8caa64678d00474bbe244ae12be7c1321afa5b7d1954c8cf1a008e9742b7e78865b654cec2347c4ec74ebae08895c257cf826435f4b6fa32a9919e34011d2e856fcf10cbf8a9f1b63a029d8e9d75c1112b84af9f04c86be96df46553233c68023a5df16ca99d846853e36c74053b1d3aeb822257095f3e0990d7d2dbe8caa647e22f99d50b0b9c2f99d50b0b9c2f99d50b0bfc678d00474ba15bf3c432db2a6761f8db7d1954c8cf1a008e9742b7e789f1cf826435f4b6fa32a9919e34011d2ef8f0444ae12be7c1321afa5b7d1954c892",
+      "phase": [
+        0,
+        0,
+        0
+      ],
+      "frames": [
+        {
+          "offset": 51459,
+          "bytes": 256,
+          "prefix_bits": 216
+        },
+        {
+          "offset": 51715,
+          "bytes": 246,
+          "prefix_bits": 200
+        },
+        {
+          "offset": 51961,
+          "bytes": 246,
+          "prefix_bits": 200
+        }
+      ],
+      "container_rate": 48000,
+      "container_frame_samples": 1024,
+      "samples": 3072,
+      "pcm_offset": 0,
+      "control": "n512-c2-base-x2-crc1-tree3-same.mp4",
+      "empty": true,
+      "output_channels": 8,
+      "inherited_completes_first": false
+    },
+    {
+      "asc": "f8ec41c460c05939bc9900205d358000",
+      "tree": 3,
+      "n": 512,
+      "rate": 48000,
+      "slots": 16,
+      "bands": 64,
+      "channels": 2,
+      "qmf": {
+        "expected_offset": 6723648,
+        "expected_bands": 32
+      },
+      "name": "n512-c2-base-x2-crc1-tree3-fragmented-gain-local",
+      "mode": "fragmented-gain",
+      "configs": [
+        "379320040ba6b0",
+        "3793200c0ba6b0"
+      ],
+      "body": "7f10990d7d2dbe8caa64678d00474bbe244ae12be7c1321afa5b7d1954c8cf1a008e9742b7e78865b654cec2347c4ec74ebae08895c257cf826435f4b6fa32a9919e34011d2e856fcf10cbf8a9f1b63a029d8e9d75c1112b84af9f04c86be96df46553233c68023a5df16ca99d846853e36c74053b1d3aeb822257095f3e0990d7d2dbe8caa647e22f99d50b0b9c2f99d50b0b9c2f99d50b0bfc678d00474ba15bf3c432db2a6761f8db7d1954c8cf1a008e9742b7e789f1cf826435f4b6fa32a9919e34011d2ef8f0444ae12be7c1321afa5b7d1954c892",
+      "phase": [
+        0,
+        1,
+        0
+      ],
+      "frames": [
+        {
+          "offset": 52207,
+          "bytes": 142,
+          "prefix_bits": 216
+        },
+        {
+          "offset": 52349,
+          "bytes": 371,
+          "prefix_bits": 200
+        },
+        {
+          "offset": 52720,
+          "bytes": 256,
+          "prefix_bits": 200
+        }
+      ],
+      "container_rate": 48000,
+      "container_frame_samples": 1024,
+      "samples": 3072,
+      "pcm_offset": 0,
+      "control": "n512-c2-base-x2-crc1-tree3-fragmented-gain.mp4",
+      "empty": false,
+      "output_channels": 8,
+      "inherited_completes_first": true
+    },
+    {
+      "asc": "f8ec514460c0593b38a100205d358000",
+      "tree": 4,
+      "n": 480,
+      "rate": 24000,
+      "slots": 15,
+      "bands": 32,
+      "channels": 2,
+      "qmf": {
+        "expected_offset": 1235520,
+        "expected_bands": 32
+      },
+      "name": "n480-c2-base-x1-crc1-tree4-same-local",
+      "mode": "same",
+      "configs": [
+        "671420040ba6b0",
+        "6714200c0ba6b0"
+      ],
+      "body": "7f10990d7d2dbe8caa64678d00474bbe244ae12be7c1321afa5b7d1954c8cf1a008e9742b7e78865b654cec2347c4ec74ebae08895c257cf826435f4b6fa32a9919e34011d2e856fcf10cbf8a9f1b63a029d8e9d75c1112b84af9f04c86be96df46553233c68023a5df16ca99d846853e36c74053b1d3aeb822257095f3e0990d7d2dbe8caa647e22f99d50b0b9c2f99d50b0b9c2f99d50b0bfc678d00474ba15bf3c432db2a6761f8db7d1954c8cf1a008e9742b7e789f1cf826435f4b6fa32a9919e34011d2ef8f0444ae12be7c1321afa5b7d1954c892",
+      "phase": [
+        0,
+        0,
+        0
+      ],
+      "frames": [
+        {
+          "offset": 52976,
+          "bytes": 258,
+          "prefix_bits": 216
+        },
+        {
+          "offset": 53234,
+          "bytes": 248,
+          "prefix_bits": 200
+        },
+        {
+          "offset": 53482,
+          "bytes": 248,
+          "prefix_bits": 200
+        }
+      ],
+      "container_rate": 24000,
+      "container_frame_samples": 480,
+      "samples": 1440,
+      "pcm_offset": 0,
+      "control": "n480-c2-base-x1-crc1-tree4-same.mp4",
+      "empty": false,
+      "output_channels": 8,
+      "inherited_completes_first": false
+    },
+    {
+      "asc": "f8ec514460c0593b38a100205d358000",
+      "tree": 4,
+      "n": 480,
+      "rate": 24000,
+      "slots": 15,
+      "bands": 32,
+      "channels": 2,
+      "qmf": {
+        "expected_offset": 1235520,
+        "expected_bands": 32
+      },
+      "name": "n480-c2-base-x1-crc1-tree4-same-local-empty",
+      "mode": "same",
+      "configs": [
+        "671420040ba6b0",
+        "6714200c0ba6b0"
+      ],
+      "body": "7f10990d7d2dbe8caa64678d00474bbe244ae12be7c1321afa5b7d1954c8cf1a008e9742b7e78865b654cec2347c4ec74ebae08895c257cf826435f4b6fa32a9919e34011d2e856fcf10cbf8a9f1b63a029d8e9d75c1112b84af9f04c86be96df46553233c68023a5df16ca99d846853e36c74053b1d3aeb822257095f3e0990d7d2dbe8caa647e22f99d50b0b9c2f99d50b0b9c2f99d50b0bfc678d00474ba15bf3c432db2a6761f8db7d1954c8cf1a008e9742b7e789f1cf826435f4b6fa32a9919e34011d2ef8f0444ae12be7c1321afa5b7d1954c892",
+      "phase": [
+        0,
+        0,
+        0
+      ],
+      "frames": [
+        {
+          "offset": 53730,
+          "bytes": 256,
+          "prefix_bits": 216
+        },
+        {
+          "offset": 53986,
+          "bytes": 246,
+          "prefix_bits": 200
+        },
+        {
+          "offset": 54232,
+          "bytes": 246,
+          "prefix_bits": 200
+        }
+      ],
+      "container_rate": 24000,
+      "container_frame_samples": 480,
+      "samples": 1440,
+      "pcm_offset": 0,
+      "control": "n480-c2-base-x1-crc1-tree4-same.mp4",
+      "empty": true,
+      "output_channels": 8,
+      "inherited_completes_first": false
+    },
+    {
+      "asc": "f8ec514460c0593b38a100205d358000",
+      "tree": 4,
+      "n": 480,
+      "rate": 24000,
+      "slots": 15,
+      "bands": 32,
+      "channels": 2,
+      "qmf": {
+        "expected_offset": 1235520,
+        "expected_bands": 32
+      },
+      "name": "n480-c2-base-x1-crc1-tree4-fragmented-gain-local",
+      "mode": "fragmented-gain",
+      "configs": [
+        "671420040ba6b0",
+        "6714200c0ba6b0"
+      ],
+      "body": "7f10990d7d2dbe8caa64678d00474bbe244ae12be7c1321afa5b7d1954c8cf1a008e9742b7e78865b654cec2347c4ec74ebae08895c257cf826435f4b6fa32a9919e34011d2e856fcf10cbf8a9f1b63a029d8e9d75c1112b84af9f04c86be96df46553233c68023a5df16ca99d846853e36c74053b1d3aeb822257095f3e0990d7d2dbe8caa647e22f99d50b0b9c2f99d50b0b9c2f99d50b0bfc678d00474ba15bf3c432db2a6761f8db7d1954c8cf1a008e9742b7e789f1cf826435f4b6fa32a9919e34011d2ef8f0444ae12be7c1321afa5b7d1954c892",
+      "phase": [
+        0,
+        1,
+        0
+      ],
+      "frames": [
+        {
+          "offset": 54478,
+          "bytes": 142,
+          "prefix_bits": 216
+        },
+        {
+          "offset": 54620,
+          "bytes": 371,
+          "prefix_bits": 200
+        },
+        {
+          "offset": 54991,
+          "bytes": 256,
+          "prefix_bits": 200
+        }
+      ],
+      "container_rate": 24000,
+      "container_frame_samples": 480,
+      "samples": 1440,
+      "pcm_offset": 0,
+      "control": "n480-c2-base-x1-crc1-tree4-fragmented-gain.mp4",
+      "empty": false,
+      "output_channels": 8,
+      "inherited_completes_first": true
+    },
+    {
+      "asc": "f8ec51c460c05939b8a100205d358000",
+      "tree": 4,
+      "n": 480,
+      "rate": 48000,
+      "slots": 15,
+      "bands": 64,
+      "channels": 2,
+      "qmf": {
+        "expected_offset": 1235520,
+        "expected_bands": 32
+      },
+      "name": "n480-c2-base-x2-crc1-tree4-same-local",
+      "mode": "same",
+      "configs": [
+        "371420040ba6b0",
+        "3714200c0ba6b0"
+      ],
+      "body": "7f10990d7d2dbe8caa64678d00474bbe244ae12be7c1321afa5b7d1954c8cf1a008e9742b7e78865b654cec2347c4ec74ebae08895c257cf826435f4b6fa32a9919e34011d2e856fcf10cbf8a9f1b63a029d8e9d75c1112b84af9f04c86be96df46553233c68023a5df16ca99d846853e36c74053b1d3aeb822257095f3e0990d7d2dbe8caa647e22f99d50b0b9c2f99d50b0b9c2f99d50b0bfc678d00474ba15bf3c432db2a6761f8db7d1954c8cf1a008e9742b7e789f1cf826435f4b6fa32a9919e34011d2ef8f0444ae12be7c1321afa5b7d1954c892",
+      "phase": [
+        0,
+        0,
+        0
+      ],
+      "frames": [
+        {
+          "offset": 55247,
+          "bytes": 258,
+          "prefix_bits": 216
+        },
+        {
+          "offset": 55505,
+          "bytes": 248,
+          "prefix_bits": 200
+        },
+        {
+          "offset": 55753,
+          "bytes": 248,
+          "prefix_bits": 200
+        }
+      ],
+      "container_rate": 48000,
+      "container_frame_samples": 960,
+      "samples": 2880,
+      "pcm_offset": 0,
+      "control": "n480-c2-base-x2-crc1-tree4-same.mp4",
+      "empty": false,
+      "output_channels": 8,
+      "inherited_completes_first": false
+    },
+    {
+      "asc": "f8ec51c460c05939b8a100205d358000",
+      "tree": 4,
+      "n": 480,
+      "rate": 48000,
+      "slots": 15,
+      "bands": 64,
+      "channels": 2,
+      "qmf": {
+        "expected_offset": 1235520,
+        "expected_bands": 32
+      },
+      "name": "n480-c2-base-x2-crc1-tree4-same-local-empty",
+      "mode": "same",
+      "configs": [
+        "371420040ba6b0",
+        "3714200c0ba6b0"
+      ],
+      "body": "7f10990d7d2dbe8caa64678d00474bbe244ae12be7c1321afa5b7d1954c8cf1a008e9742b7e78865b654cec2347c4ec74ebae08895c257cf826435f4b6fa32a9919e34011d2e856fcf10cbf8a9f1b63a029d8e9d75c1112b84af9f04c86be96df46553233c68023a5df16ca99d846853e36c74053b1d3aeb822257095f3e0990d7d2dbe8caa647e22f99d50b0b9c2f99d50b0b9c2f99d50b0bfc678d00474ba15bf3c432db2a6761f8db7d1954c8cf1a008e9742b7e789f1cf826435f4b6fa32a9919e34011d2ef8f0444ae12be7c1321afa5b7d1954c892",
+      "phase": [
+        0,
+        0,
+        0
+      ],
+      "frames": [
+        {
+          "offset": 56001,
+          "bytes": 256,
+          "prefix_bits": 216
+        },
+        {
+          "offset": 56257,
+          "bytes": 246,
+          "prefix_bits": 200
+        },
+        {
+          "offset": 56503,
+          "bytes": 246,
+          "prefix_bits": 200
+        }
+      ],
+      "container_rate": 48000,
+      "container_frame_samples": 960,
+      "samples": 2880,
+      "pcm_offset": 0,
+      "control": "n480-c2-base-x2-crc1-tree4-same.mp4",
+      "empty": true,
+      "output_channels": 8,
+      "inherited_completes_first": false
+    },
+    {
+      "asc": "f8ec51c460c05939b8a100205d358000",
+      "tree": 4,
+      "n": 480,
+      "rate": 48000,
+      "slots": 15,
+      "bands": 64,
+      "channels": 2,
+      "qmf": {
+        "expected_offset": 1235520,
+        "expected_bands": 32
+      },
+      "name": "n480-c2-base-x2-crc1-tree4-fragmented-gain-local",
+      "mode": "fragmented-gain",
+      "configs": [
+        "371420040ba6b0",
+        "3714200c0ba6b0"
+      ],
+      "body": "7f10990d7d2dbe8caa64678d00474bbe244ae12be7c1321afa5b7d1954c8cf1a008e9742b7e78865b654cec2347c4ec74ebae08895c257cf826435f4b6fa32a9919e34011d2e856fcf10cbf8a9f1b63a029d8e9d75c1112b84af9f04c86be96df46553233c68023a5df16ca99d846853e36c74053b1d3aeb822257095f3e0990d7d2dbe8caa647e22f99d50b0b9c2f99d50b0b9c2f99d50b0bfc678d00474ba15bf3c432db2a6761f8db7d1954c8cf1a008e9742b7e789f1cf826435f4b6fa32a9919e34011d2ef8f0444ae12be7c1321afa5b7d1954c892",
+      "phase": [
+        0,
+        1,
+        0
+      ],
+      "frames": [
+        {
+          "offset": 56749,
+          "bytes": 142,
+          "prefix_bits": 216
+        },
+        {
+          "offset": 56891,
+          "bytes": 371,
+          "prefix_bits": 200
+        },
+        {
+          "offset": 57262,
+          "bytes": 256,
+          "prefix_bits": 200
+        }
+      ],
+      "container_rate": 48000,
+      "container_frame_samples": 960,
+      "samples": 2880,
+      "pcm_offset": 0,
+      "control": "n480-c2-base-x2-crc1-tree4-fragmented-gain.mp4",
+      "empty": false,
+      "output_channels": 8,
+      "inherited_completes_first": true
+    },
+    {
+      "asc": "f8ec414460c0593b3ca100205d358000",
+      "tree": 4,
+      "n": 512,
+      "rate": 24000,
+      "slots": 16,
+      "bands": 32,
+      "channels": 2,
+      "qmf": {
+        "expected_offset": 6723648,
+        "expected_bands": 32
+      },
+      "name": "n512-c2-base-x1-crc1-tree4-same-local",
+      "mode": "same",
+      "configs": [
+        "679420040ba6b0",
+        "6794200c0ba6b0"
+      ],
+      "body": "7f10990d7d2dbe8caa64678d00474bbe244ae12be7c1321afa5b7d1954c8cf1a008e9742b7e78865b654cec2347c4ec74ebae08895c257cf826435f4b6fa32a9919e34011d2e856fcf10cbf8a9f1b63a029d8e9d75c1112b84af9f04c86be96df46553233c68023a5df16ca99d846853e36c74053b1d3aeb822257095f3e0990d7d2dbe8caa647e22f99d50b0b9c2f99d50b0b9c2f99d50b0bfc678d00474ba15bf3c432db2a6761f8db7d1954c8cf1a008e9742b7e789f1cf826435f4b6fa32a9919e34011d2ef8f0444ae12be7c1321afa5b7d1954c892",
+      "phase": [
+        0,
+        0,
+        0
+      ],
+      "frames": [
+        {
+          "offset": 57518,
+          "bytes": 258,
+          "prefix_bits": 216
+        },
+        {
+          "offset": 57776,
+          "bytes": 248,
+          "prefix_bits": 200
+        },
+        {
+          "offset": 58024,
+          "bytes": 248,
+          "prefix_bits": 200
+        }
+      ],
+      "container_rate": 24000,
+      "container_frame_samples": 512,
+      "samples": 1536,
+      "pcm_offset": 0,
+      "control": "n512-c2-base-x1-crc1-tree4-same.mp4",
+      "empty": false,
+      "output_channels": 8,
+      "inherited_completes_first": false
+    },
+    {
+      "asc": "f8ec414460c0593b3ca100205d358000",
+      "tree": 4,
+      "n": 512,
+      "rate": 24000,
+      "slots": 16,
+      "bands": 32,
+      "channels": 2,
+      "qmf": {
+        "expected_offset": 6723648,
+        "expected_bands": 32
+      },
+      "name": "n512-c2-base-x1-crc1-tree4-same-local-empty",
+      "mode": "same",
+      "configs": [
+        "679420040ba6b0",
+        "6794200c0ba6b0"
+      ],
+      "body": "7f10990d7d2dbe8caa64678d00474bbe244ae12be7c1321afa5b7d1954c8cf1a008e9742b7e78865b654cec2347c4ec74ebae08895c257cf826435f4b6fa32a9919e34011d2e856fcf10cbf8a9f1b63a029d8e9d75c1112b84af9f04c86be96df46553233c68023a5df16ca99d846853e36c74053b1d3aeb822257095f3e0990d7d2dbe8caa647e22f99d50b0b9c2f99d50b0b9c2f99d50b0bfc678d00474ba15bf3c432db2a6761f8db7d1954c8cf1a008e9742b7e789f1cf826435f4b6fa32a9919e34011d2ef8f0444ae12be7c1321afa5b7d1954c892",
+      "phase": [
+        0,
+        0,
+        0
+      ],
+      "frames": [
+        {
+          "offset": 58272,
+          "bytes": 256,
+          "prefix_bits": 216
+        },
+        {
+          "offset": 58528,
+          "bytes": 246,
+          "prefix_bits": 200
+        },
+        {
+          "offset": 58774,
+          "bytes": 246,
+          "prefix_bits": 200
+        }
+      ],
+      "container_rate": 24000,
+      "container_frame_samples": 512,
+      "samples": 1536,
+      "pcm_offset": 0,
+      "control": "n512-c2-base-x1-crc1-tree4-same.mp4",
+      "empty": true,
+      "output_channels": 8,
+      "inherited_completes_first": false
+    },
+    {
+      "asc": "f8ec414460c0593b3ca100205d358000",
+      "tree": 4,
+      "n": 512,
+      "rate": 24000,
+      "slots": 16,
+      "bands": 32,
+      "channels": 2,
+      "qmf": {
+        "expected_offset": 6723648,
+        "expected_bands": 32
+      },
+      "name": "n512-c2-base-x1-crc1-tree4-fragmented-gain-local",
+      "mode": "fragmented-gain",
+      "configs": [
+        "679420040ba6b0",
+        "6794200c0ba6b0"
+      ],
+      "body": "7f10990d7d2dbe8caa64678d00474bbe244ae12be7c1321afa5b7d1954c8cf1a008e9742b7e78865b654cec2347c4ec74ebae08895c257cf826435f4b6fa32a9919e34011d2e856fcf10cbf8a9f1b63a029d8e9d75c1112b84af9f04c86be96df46553233c68023a5df16ca99d846853e36c74053b1d3aeb822257095f3e0990d7d2dbe8caa647e22f99d50b0b9c2f99d50b0b9c2f99d50b0bfc678d00474ba15bf3c432db2a6761f8db7d1954c8cf1a008e9742b7e789f1cf826435f4b6fa32a9919e34011d2ef8f0444ae12be7c1321afa5b7d1954c892",
+      "phase": [
+        0,
+        1,
+        0
+      ],
+      "frames": [
+        {
+          "offset": 59020,
+          "bytes": 142,
+          "prefix_bits": 216
+        },
+        {
+          "offset": 59162,
+          "bytes": 371,
+          "prefix_bits": 200
+        },
+        {
+          "offset": 59533,
+          "bytes": 256,
+          "prefix_bits": 200
+        }
+      ],
+      "container_rate": 24000,
+      "container_frame_samples": 512,
+      "samples": 1536,
+      "pcm_offset": 0,
+      "control": "n512-c2-base-x1-crc1-tree4-fragmented-gain.mp4",
+      "empty": false,
+      "output_channels": 8,
+      "inherited_completes_first": true
+    },
+    {
+      "asc": "f8ec41c460c05939bca100205d358000",
+      "tree": 4,
+      "n": 512,
+      "rate": 48000,
+      "slots": 16,
+      "bands": 64,
+      "channels": 2,
+      "qmf": {
+        "expected_offset": 6723648,
+        "expected_bands": 32
+      },
+      "name": "n512-c2-base-x2-crc1-tree4-same-local",
+      "mode": "same",
+      "configs": [
+        "379420040ba6b0",
+        "3794200c0ba6b0"
+      ],
+      "body": "7f10990d7d2dbe8caa64678d00474bbe244ae12be7c1321afa5b7d1954c8cf1a008e9742b7e78865b654cec2347c4ec74ebae08895c257cf826435f4b6fa32a9919e34011d2e856fcf10cbf8a9f1b63a029d8e9d75c1112b84af9f04c86be96df46553233c68023a5df16ca99d846853e36c74053b1d3aeb822257095f3e0990d7d2dbe8caa647e22f99d50b0b9c2f99d50b0b9c2f99d50b0bfc678d00474ba15bf3c432db2a6761f8db7d1954c8cf1a008e9742b7e789f1cf826435f4b6fa32a9919e34011d2ef8f0444ae12be7c1321afa5b7d1954c892",
+      "phase": [
+        0,
+        0,
+        0
+      ],
+      "frames": [
+        {
+          "offset": 59789,
+          "bytes": 258,
+          "prefix_bits": 216
+        },
+        {
+          "offset": 60047,
+          "bytes": 248,
+          "prefix_bits": 200
+        },
+        {
+          "offset": 60295,
+          "bytes": 248,
+          "prefix_bits": 200
+        }
+      ],
+      "container_rate": 48000,
+      "container_frame_samples": 1024,
+      "samples": 3072,
+      "pcm_offset": 0,
+      "control": "n512-c2-base-x2-crc1-tree4-same.mp4",
+      "empty": false,
+      "output_channels": 8,
+      "inherited_completes_first": false
+    },
+    {
+      "asc": "f8ec41c460c05939bca100205d358000",
+      "tree": 4,
+      "n": 512,
+      "rate": 48000,
+      "slots": 16,
+      "bands": 64,
+      "channels": 2,
+      "qmf": {
+        "expected_offset": 6723648,
+        "expected_bands": 32
+      },
+      "name": "n512-c2-base-x2-crc1-tree4-same-local-empty",
+      "mode": "same",
+      "configs": [
+        "379420040ba6b0",
+        "3794200c0ba6b0"
+      ],
+      "body": "7f10990d7d2dbe8caa64678d00474bbe244ae12be7c1321afa5b7d1954c8cf1a008e9742b7e78865b654cec2347c4ec74ebae08895c257cf826435f4b6fa32a9919e34011d2e856fcf10cbf8a9f1b63a029d8e9d75c1112b84af9f04c86be96df46553233c68023a5df16ca99d846853e36c74053b1d3aeb822257095f3e0990d7d2dbe8caa647e22f99d50b0b9c2f99d50b0b9c2f99d50b0bfc678d00474ba15bf3c432db2a6761f8db7d1954c8cf1a008e9742b7e789f1cf826435f4b6fa32a9919e34011d2ef8f0444ae12be7c1321afa5b7d1954c892",
+      "phase": [
+        0,
+        0,
+        0
+      ],
+      "frames": [
+        {
+          "offset": 60543,
+          "bytes": 256,
+          "prefix_bits": 216
+        },
+        {
+          "offset": 60799,
+          "bytes": 246,
+          "prefix_bits": 200
+        },
+        {
+          "offset": 61045,
+          "bytes": 246,
+          "prefix_bits": 200
+        }
+      ],
+      "container_rate": 48000,
+      "container_frame_samples": 1024,
+      "samples": 3072,
+      "pcm_offset": 0,
+      "control": "n512-c2-base-x2-crc1-tree4-same.mp4",
+      "empty": true,
+      "output_channels": 8,
+      "inherited_completes_first": false
+    },
+    {
+      "asc": "f8ec41c460c05939bca100205d358000",
+      "tree": 4,
+      "n": 512,
+      "rate": 48000,
+      "slots": 16,
+      "bands": 64,
+      "channels": 2,
+      "qmf": {
+        "expected_offset": 6723648,
+        "expected_bands": 32
+      },
+      "name": "n512-c2-base-x2-crc1-tree4-fragmented-gain-local",
+      "mode": "fragmented-gain",
+      "configs": [
+        "379420040ba6b0",
+        "3794200c0ba6b0"
+      ],
+      "body": "7f10990d7d2dbe8caa64678d00474bbe244ae12be7c1321afa5b7d1954c8cf1a008e9742b7e78865b654cec2347c4ec74ebae08895c257cf826435f4b6fa32a9919e34011d2e856fcf10cbf8a9f1b63a029d8e9d75c1112b84af9f04c86be96df46553233c68023a5df16ca99d846853e36c74053b1d3aeb822257095f3e0990d7d2dbe8caa647e22f99d50b0b9c2f99d50b0b9c2f99d50b0bfc678d00474ba15bf3c432db2a6761f8db7d1954c8cf1a008e9742b7e789f1cf826435f4b6fa32a9919e34011d2ef8f0444ae12be7c1321afa5b7d1954c892",
+      "phase": [
+        0,
+        1,
+        0
+      ],
+      "frames": [
+        {
+          "offset": 61291,
+          "bytes": 142,
+          "prefix_bits": 216
+        },
+        {
+          "offset": 61433,
+          "bytes": 371,
+          "prefix_bits": 200
+        },
+        {
+          "offset": 61804,
+          "bytes": 256,
+          "prefix_bits": 200
+        }
+      ],
+      "container_rate": 48000,
+      "container_frame_samples": 1024,
+      "samples": 3072,
+      "pcm_offset": 0,
+      "control": "n512-c2-base-x2-crc1-tree4-fragmented-gain.mp4",
+      "empty": false,
+      "output_channels": 8,
+      "inherited_completes_first": true
+    },
+    {
+      "asc": "f8ecd14460c0588c180b11830164ace2c400800000",
+      "tree": 6,
+      "n": 480,
+      "rate": 24000,
+      "slots": 15,
+      "bands": 32,
+      "channels": 6,
+      "qmf": {
+        "expected_offset": 4075200,
+        "expected_bands": 32
+      },
+      "name": "n480-c6-base-x1-crc1-tree6-same-local",
+      "mode": "same",
+      "configs": [
+        "6716200400",
+        "6716200c00"
+      ],
+      "body": "7f10990d7d2dbe8caa64678d00474ba15bf3c432db2a67611a14f8db1d017e244ae12be7c1321afa5b7d1954c8cf1a008e9742b7e78865b654cec2347c7ccea8585ce17ccea8585ce17ccea8585ce240",
+      "phase": [
+        0,
+        0,
+        0
+      ],
+      "frames": [
+        {
+          "offset": 62060,
+          "bytes": 166,
+          "prefix_bits": 584
+        },
+        {
+          "offset": 62226,
+          "bytes": 155,
+          "prefix_bits": 541
+        },
+        {
+          "offset": 62381,
+          "bytes": 155,
+          "prefix_bits": 539
+        }
+      ],
+      "container_rate": 24000,
+      "container_frame_samples": 480,
+      "samples": 1440,
+      "pcm_offset": 0,
+      "control": "n480-c6-base-x1-crc1-tree6-same.mp4",
+      "empty": false,
+      "output_channels": 8,
+      "inherited_completes_first": false
+    },
+    {
+      "asc": "f8ecd14460c0588c180b11830164ace2c400800000",
+      "tree": 6,
+      "n": 480,
+      "rate": 24000,
+      "slots": 15,
+      "bands": 32,
+      "channels": 6,
+      "qmf": {
+        "expected_offset": 4075200,
+        "expected_bands": 32
+      },
+      "name": "n480-c6-base-x1-crc1-tree6-same-local-empty",
+      "mode": "same",
+      "configs": [
+        "6716200400",
+        "6716200c00"
+      ],
+      "body": "7f10990d7d2dbe8caa64678d00474ba15bf3c432db2a67611a14f8db1d017e244ae12be7c1321afa5b7d1954c8cf1a008e9742b7e78865b654cec2347c7ccea8585ce17ccea8585ce17ccea8585ce240",
+      "phase": [
+        0,
+        0,
+        0
+      ],
+      "frames": [
+        {
+          "offset": 62536,
+          "bytes": 164,
+          "prefix_bits": 584
+        },
+        {
+          "offset": 62700,
+          "bytes": 153,
+          "prefix_bits": 541
+        },
+        {
+          "offset": 62853,
+          "bytes": 153,
+          "prefix_bits": 539
+        }
+      ],
+      "container_rate": 24000,
+      "container_frame_samples": 480,
+      "samples": 1440,
+      "pcm_offset": 0,
+      "control": "n480-c6-base-x1-crc1-tree6-same.mp4",
+      "empty": true,
+      "output_channels": 8,
+      "inherited_completes_first": false
+    },
+    {
+      "asc": "f8ecd14460c0588c180b11830164ace2c400800000",
+      "tree": 6,
+      "n": 480,
+      "rate": 24000,
+      "slots": 15,
+      "bands": 32,
+      "channels": 6,
+      "qmf": {
+        "expected_offset": 4075200,
+        "expected_bands": 32
+      },
+      "name": "n480-c6-base-x1-crc1-tree6-fragmented-gain-local",
+      "mode": "fragmented-gain",
+      "configs": [
+        "6716200400",
+        "6716200c00"
+      ],
+      "body": "7f10990d7d2dbe8caa64678d00474ba15bf3c432db2a67611a14f8db1d017e244ae12be7c1321afa5b7d1954c8cf1a008e9742b7e78865b654cec2347c7ccea8585ce17ccea8585ce17ccea8585ce240",
+      "phase": [
+        0,
+        1,
+        0
+      ],
+      "frames": [
+        {
+          "offset": 63006,
+          "bytes": 119,
+          "prefix_bits": 584
+        },
+        {
+          "offset": 63125,
+          "bytes": 207,
+          "prefix_bits": 541
+        },
+        {
+          "offset": 63332,
+          "bytes": 161,
+          "prefix_bits": 539
+        }
+      ],
+      "container_rate": 24000,
+      "container_frame_samples": 480,
+      "samples": 1440,
+      "pcm_offset": 0,
+      "control": "n480-c6-base-x1-crc1-tree6-fragmented-gain.mp4",
+      "empty": false,
+      "output_channels": 8,
+      "inherited_completes_first": true
+    },
+    {
+      "asc": "f8ecd1c460c0588c180b11830164a6e2c400800000",
+      "tree": 6,
+      "n": 480,
+      "rate": 48000,
+      "slots": 15,
+      "bands": 64,
+      "channels": 6,
+      "qmf": {
+        "expected_offset": 4075200,
+        "expected_bands": 32
+      },
+      "name": "n480-c6-base-x2-crc1-tree6-same-local",
+      "mode": "same",
+      "configs": [
+        "3716200400",
+        "3716200c00"
+      ],
+      "body": "7f10990d7d2dbe8caa64678d00474ba15bf3c432db2a67611a14f8db1d017e244ae12be7c1321afa5b7d1954c8cf1a008e9742b7e78865b654cec2347c7ccea8585ce17ccea8585ce17ccea8585ce240",
+      "phase": [
+        0,
+        0,
+        0
+      ],
+      "frames": [
+        {
+          "offset": 63493,
+          "bytes": 166,
+          "prefix_bits": 584
+        },
+        {
+          "offset": 63659,
+          "bytes": 155,
+          "prefix_bits": 541
+        },
+        {
+          "offset": 63814,
+          "bytes": 155,
+          "prefix_bits": 539
+        }
+      ],
+      "container_rate": 48000,
+      "container_frame_samples": 960,
+      "samples": 2880,
+      "pcm_offset": 0,
+      "control": "n480-c6-base-x2-crc1-tree6-same.mp4",
+      "empty": false,
+      "output_channels": 8,
+      "inherited_completes_first": false
+    },
+    {
+      "asc": "f8ecd1c460c0588c180b11830164a6e2c400800000",
+      "tree": 6,
+      "n": 480,
+      "rate": 48000,
+      "slots": 15,
+      "bands": 64,
+      "channels": 6,
+      "qmf": {
+        "expected_offset": 4075200,
+        "expected_bands": 32
+      },
+      "name": "n480-c6-base-x2-crc1-tree6-same-local-empty",
+      "mode": "same",
+      "configs": [
+        "3716200400",
+        "3716200c00"
+      ],
+      "body": "7f10990d7d2dbe8caa64678d00474ba15bf3c432db2a67611a14f8db1d017e244ae12be7c1321afa5b7d1954c8cf1a008e9742b7e78865b654cec2347c7ccea8585ce17ccea8585ce17ccea8585ce240",
+      "phase": [
+        0,
+        0,
+        0
+      ],
+      "frames": [
+        {
+          "offset": 63969,
+          "bytes": 164,
+          "prefix_bits": 584
+        },
+        {
+          "offset": 64133,
+          "bytes": 153,
+          "prefix_bits": 541
+        },
+        {
+          "offset": 64286,
+          "bytes": 153,
+          "prefix_bits": 539
+        }
+      ],
+      "container_rate": 48000,
+      "container_frame_samples": 960,
+      "samples": 2880,
+      "pcm_offset": 0,
+      "control": "n480-c6-base-x2-crc1-tree6-same.mp4",
+      "empty": true,
+      "output_channels": 8,
+      "inherited_completes_first": false
+    },
+    {
+      "asc": "f8ecd1c460c0588c180b11830164a6e2c400800000",
+      "tree": 6,
+      "n": 480,
+      "rate": 48000,
+      "slots": 15,
+      "bands": 64,
+      "channels": 6,
+      "qmf": {
+        "expected_offset": 4075200,
+        "expected_bands": 32
+      },
+      "name": "n480-c6-base-x2-crc1-tree6-fragmented-gain-local",
+      "mode": "fragmented-gain",
+      "configs": [
+        "3716200400",
+        "3716200c00"
+      ],
+      "body": "7f10990d7d2dbe8caa64678d00474ba15bf3c432db2a67611a14f8db1d017e244ae12be7c1321afa5b7d1954c8cf1a008e9742b7e78865b654cec2347c7ccea8585ce17ccea8585ce17ccea8585ce240",
+      "phase": [
+        0,
+        1,
+        0
+      ],
+      "frames": [
+        {
+          "offset": 64439,
+          "bytes": 119,
+          "prefix_bits": 584
+        },
+        {
+          "offset": 64558,
+          "bytes": 207,
+          "prefix_bits": 541
+        },
+        {
+          "offset": 64765,
+          "bytes": 161,
+          "prefix_bits": 539
+        }
+      ],
+      "container_rate": 48000,
+      "container_frame_samples": 960,
+      "samples": 2880,
+      "pcm_offset": 0,
+      "control": "n480-c6-base-x2-crc1-tree6-fragmented-gain.mp4",
+      "empty": false,
+      "output_channels": 8,
+      "inherited_completes_first": true
+    },
+    {
+      "asc": "f8ecc14460c0588c180b11830164acf2c400800000",
+      "tree": 6,
+      "n": 512,
+      "rate": 24000,
+      "slots": 16,
+      "bands": 32,
+      "channels": 6,
+      "qmf": {
+        "expected_offset": 9752640,
+        "expected_bands": 32
+      },
+      "name": "n512-c6-base-x1-crc1-tree6-same-local",
+      "mode": "same",
+      "configs": [
+        "6796200400",
+        "6796200c00"
+      ],
+      "body": "7f10990d7d2dbe8caa64678d00474ba15bf3c432db2a67611a14f8db1d017e244ae12be7c1321afa5b7d1954c8cf1a008e9742b7e78865b654cec2347c7ccea8585ce17ccea8585ce17ccea8585ce240",
+      "phase": [
+        0,
+        0,
+        0
+      ],
+      "frames": [
+        {
+          "offset": 64926,
+          "bytes": 166,
+          "prefix_bits": 584
+        },
+        {
+          "offset": 65092,
+          "bytes": 155,
+          "prefix_bits": 541
+        },
+        {
+          "offset": 65247,
+          "bytes": 155,
+          "prefix_bits": 539
+        }
+      ],
+      "container_rate": 24000,
+      "container_frame_samples": 512,
+      "samples": 1536,
+      "pcm_offset": 0,
+      "control": "n512-c6-base-x1-crc1-tree6-same.mp4",
+      "empty": false,
+      "output_channels": 8,
+      "inherited_completes_first": false
+    },
+    {
+      "asc": "f8ecc14460c0588c180b11830164acf2c400800000",
+      "tree": 6,
+      "n": 512,
+      "rate": 24000,
+      "slots": 16,
+      "bands": 32,
+      "channels": 6,
+      "qmf": {
+        "expected_offset": 9752640,
+        "expected_bands": 32
+      },
+      "name": "n512-c6-base-x1-crc1-tree6-same-local-empty",
+      "mode": "same",
+      "configs": [
+        "6796200400",
+        "6796200c00"
+      ],
+      "body": "7f10990d7d2dbe8caa64678d00474ba15bf3c432db2a67611a14f8db1d017e244ae12be7c1321afa5b7d1954c8cf1a008e9742b7e78865b654cec2347c7ccea8585ce17ccea8585ce17ccea8585ce240",
+      "phase": [
+        0,
+        0,
+        0
+      ],
+      "frames": [
+        {
+          "offset": 65402,
+          "bytes": 164,
+          "prefix_bits": 584
+        },
+        {
+          "offset": 65566,
+          "bytes": 153,
+          "prefix_bits": 541
+        },
+        {
+          "offset": 65719,
+          "bytes": 153,
+          "prefix_bits": 539
+        }
+      ],
+      "container_rate": 24000,
+      "container_frame_samples": 512,
+      "samples": 1536,
+      "pcm_offset": 0,
+      "control": "n512-c6-base-x1-crc1-tree6-same.mp4",
+      "empty": true,
+      "output_channels": 8,
+      "inherited_completes_first": false
+    },
+    {
+      "asc": "f8ecc14460c0588c180b11830164acf2c400800000",
+      "tree": 6,
+      "n": 512,
+      "rate": 24000,
+      "slots": 16,
+      "bands": 32,
+      "channels": 6,
+      "qmf": {
+        "expected_offset": 9752640,
+        "expected_bands": 32
+      },
+      "name": "n512-c6-base-x1-crc1-tree6-fragmented-gain-local",
+      "mode": "fragmented-gain",
+      "configs": [
+        "6796200400",
+        "6796200c00"
+      ],
+      "body": "7f10990d7d2dbe8caa64678d00474ba15bf3c432db2a67611a14f8db1d017e244ae12be7c1321afa5b7d1954c8cf1a008e9742b7e78865b654cec2347c7ccea8585ce17ccea8585ce17ccea8585ce240",
+      "phase": [
+        0,
+        1,
+        0
+      ],
+      "frames": [
+        {
+          "offset": 65872,
+          "bytes": 119,
+          "prefix_bits": 584
+        },
+        {
+          "offset": 65991,
+          "bytes": 207,
+          "prefix_bits": 541
+        },
+        {
+          "offset": 66198,
+          "bytes": 161,
+          "prefix_bits": 539
+        }
+      ],
+      "container_rate": 24000,
+      "container_frame_samples": 512,
+      "samples": 1536,
+      "pcm_offset": 0,
+      "control": "n512-c6-base-x1-crc1-tree6-fragmented-gain.mp4",
+      "empty": false,
+      "output_channels": 8,
+      "inherited_completes_first": true
+    },
+    {
+      "asc": "f8ecc1c460c0588c180b11830164a6f2c400800000",
+      "tree": 6,
+      "n": 512,
+      "rate": 48000,
+      "slots": 16,
+      "bands": 64,
+      "channels": 6,
+      "qmf": {
+        "expected_offset": 9752640,
+        "expected_bands": 32
+      },
+      "name": "n512-c6-base-x2-crc1-tree6-same-local",
+      "mode": "same",
+      "configs": [
+        "3796200400",
+        "3796200c00"
+      ],
+      "body": "7f10990d7d2dbe8caa64678d00474ba15bf3c432db2a67611a14f8db1d017e244ae12be7c1321afa5b7d1954c8cf1a008e9742b7e78865b654cec2347c7ccea8585ce17ccea8585ce17ccea8585ce240",
+      "phase": [
+        0,
+        0,
+        0
+      ],
+      "frames": [
+        {
+          "offset": 66359,
+          "bytes": 166,
+          "prefix_bits": 584
+        },
+        {
+          "offset": 66525,
+          "bytes": 155,
+          "prefix_bits": 541
+        },
+        {
+          "offset": 66680,
+          "bytes": 155,
+          "prefix_bits": 539
+        }
+      ],
+      "container_rate": 48000,
+      "container_frame_samples": 1024,
+      "samples": 3072,
+      "pcm_offset": 0,
+      "control": "n512-c6-base-x2-crc1-tree6-same.mp4",
+      "empty": false,
+      "output_channels": 8,
+      "inherited_completes_first": false
+    },
+    {
+      "asc": "f8ecc1c460c0588c180b11830164a6f2c400800000",
+      "tree": 6,
+      "n": 512,
+      "rate": 48000,
+      "slots": 16,
+      "bands": 64,
+      "channels": 6,
+      "qmf": {
+        "expected_offset": 9752640,
+        "expected_bands": 32
+      },
+      "name": "n512-c6-base-x2-crc1-tree6-same-local-empty",
+      "mode": "same",
+      "configs": [
+        "3796200400",
+        "3796200c00"
+      ],
+      "body": "7f10990d7d2dbe8caa64678d00474ba15bf3c432db2a67611a14f8db1d017e244ae12be7c1321afa5b7d1954c8cf1a008e9742b7e78865b654cec2347c7ccea8585ce17ccea8585ce17ccea8585ce240",
+      "phase": [
+        0,
+        0,
+        0
+      ],
+      "frames": [
+        {
+          "offset": 66835,
+          "bytes": 164,
+          "prefix_bits": 584
+        },
+        {
+          "offset": 66999,
+          "bytes": 153,
+          "prefix_bits": 541
+        },
+        {
+          "offset": 67152,
+          "bytes": 153,
+          "prefix_bits": 539
+        }
+      ],
+      "container_rate": 48000,
+      "container_frame_samples": 1024,
+      "samples": 3072,
+      "pcm_offset": 0,
+      "control": "n512-c6-base-x2-crc1-tree6-same.mp4",
+      "empty": true,
+      "output_channels": 8,
+      "inherited_completes_first": false
+    },
+    {
+      "asc": "f8ecc1c460c0588c180b11830164a6f2c400800000",
+      "tree": 6,
+      "n": 512,
+      "rate": 48000,
+      "slots": 16,
+      "bands": 64,
+      "channels": 6,
+      "qmf": {
+        "expected_offset": 9752640,
+        "expected_bands": 32
+      },
+      "name": "n512-c6-base-x2-crc1-tree6-fragmented-gain-local",
+      "mode": "fragmented-gain",
+      "configs": [
+        "3796200400",
+        "3796200c00"
+      ],
+      "body": "7f10990d7d2dbe8caa64678d00474ba15bf3c432db2a67611a14f8db1d017e244ae12be7c1321afa5b7d1954c8cf1a008e9742b7e78865b654cec2347c7ccea8585ce17ccea8585ce17ccea8585ce240",
+      "phase": [
+        0,
+        1,
+        0
+      ],
+      "frames": [
+        {
+          "offset": 67305,
+          "bytes": 119,
+          "prefix_bits": 584
+        },
+        {
+          "offset": 67424,
+          "bytes": 207,
+          "prefix_bits": 541
+        },
+        {
+          "offset": 67631,
+          "bytes": 161,
+          "prefix_bits": 539
+        }
+      ],
+      "container_rate": 48000,
+      "container_frame_samples": 1024,
+      "samples": 3072,
+      "pcm_offset": 0,
+      "control": "n512-c6-base-x2-crc1-tree6-fragmented-gain.mp4",
+      "empty": false,
+      "output_channels": 8,
+      "inherited_completes_first": true
+    }
+  ],
+  "errors": [
+    {
+      "asc": "f8e620243397000000",
+      "tree": 7,
+      "n": 512,
+      "rate": 48000,
+      "slots": 8,
+      "bands": 64,
+      "channels": 1,
+      "qmf": null,
+      "name": "plain-tree7-fragmented-gain-inherited-refusal",
+      "mode": "fragmented-gain",
+      "configs": [
+        "33970000",
+        "33970400"
+      ],
+      "body": "7f1014ec74ebae08895c257cf826435f4b6fa32a9919e34011d2e856fcf13e2c2e70be67542c2e70be67542c2e70be675120",
+      "phase": [
+        0,
+        1,
+        0
+      ],
+      "frames": [
+        {
+          "offset": 14524,
+          "bytes": 37,
+          "prefix_bits": 51
+        },
+        {
+          "offset": 14561,
+          "bytes": 126,
+          "prefix_bits": 51
+        },
+        {
+          "offset": 14687,
+          "bytes": 65,
+          "prefix_bits": 53
+        }
+      ],
+      "container_rate": 48000,
+      "container_frame_samples": 512,
+      "samples": 1536,
+      "pcm_offset": 0,
+      "control": "plain-tree7-fragmented-gain.mp4",
+      "output_channels": 2,
+      "local_replacement_after_inherited": true
+    },
+    {
+      "asc": "f8ec314460c0592338b8000000",
+      "tree": 7,
+      "n": 480,
+      "rate": 24000,
+      "slots": 15,
+      "bands": 32,
+      "channels": 1,
+      "qmf": {
+        "expected_offset": 0,
+        "expected_bands": 32
+      },
+      "name": "n480-c1-base-x1-crc1-fragmented-gain-inherited-refusal",
+      "mode": "fragmented-gain",
+      "configs": [
+        "67170000",
+        "67170400"
+      ],
+      "body": "7f10990d7d2dbe8caa64678d00474ba15bf3c432db2a67611a14f8db1d017e30b0b9c2f99d50b0b9c2f99d50b0b9c2f99920",
+      "phase": [
+        0,
+        1,
+        0
+      ],
+      "frames": [
+        {
+          "offset": 15412,
+          "bytes": 45,
+          "prefix_bits": 116
+        },
+        {
+          "offset": 15457,
+          "bytes": 133,
+          "prefix_bits": 107
+        },
+        {
+          "offset": 15590,
+          "bytes": 72,
+          "prefix_bits": 109
+        }
+      ],
+      "container_rate": 24000,
+      "container_frame_samples": 480,
+      "samples": 1440,
+      "pcm_offset": 0,
+      "control": "n480-c1-base-x1-crc1-fragmented-gain.mp4",
+      "output_channels": 2,
+      "local_replacement_after_inherited": true
+    },
+    {
+      "asc": "f8ec31c460c05921b8b8000000",
+      "tree": 7,
+      "n": 480,
+      "rate": 48000,
+      "slots": 15,
+      "bands": 64,
+      "channels": 1,
+      "qmf": {
+        "expected_offset": 0,
+        "expected_bands": 32
+      },
+      "name": "n480-c1-base-x2-crc1-fragmented-gain-inherited-refusal",
+      "mode": "fragmented-gain",
+      "configs": [
+        "37170000",
+        "37170400"
+      ],
+      "body": "7f10990d7d2dbe8caa64678d00474ba15bf3c432db2a67611a14f8db1d017e30b0b9c2f99d50b0b9c2f99d50b0b9c2f99920",
+      "phase": [
+        0,
+        1,
+        0
+      ],
+      "frames": [
+        {
+          "offset": 16322,
+          "bytes": 45,
+          "prefix_bits": 116
+        },
+        {
+          "offset": 16367,
+          "bytes": 133,
+          "prefix_bits": 107
+        },
+        {
+          "offset": 16500,
+          "bytes": 72,
+          "prefix_bits": 109
+        }
+      ],
+      "container_rate": 48000,
+      "container_frame_samples": 960,
+      "samples": 2880,
+      "pcm_offset": 0,
+      "control": "n480-c1-base-x2-crc1-fragmented-gain.mp4",
+      "output_channels": 2,
+      "local_replacement_after_inherited": true
+    },
+    {
+      "asc": "f8ec214460c059233cb8000000",
+      "tree": 7,
+      "n": 512,
+      "rate": 24000,
+      "slots": 16,
+      "bands": 32,
+      "channels": 1,
+      "qmf": {
+        "expected_offset": 5405760,
+        "expected_bands": 32
+      },
+      "name": "n512-c1-base-x1-crc1-fragmented-gain-inherited-refusal",
+      "mode": "fragmented-gain",
+      "configs": [
+        "67970000",
+        "67970400"
+      ],
+      "body": "7f10990d7d2dbe8caa64678d00474ba15bf3c432db2a67611a14f8db1d017e30b0b9c2f99d50b0b9c2f99d50b0b9c2f99920",
+      "phase": [
+        0,
+        1,
+        0
+      ],
+      "frames": [
+        {
+          "offset": 23578,
+          "bytes": 45,
+          "prefix_bits": 116
+        },
+        {
+          "offset": 23623,
+          "bytes": 133,
+          "prefix_bits": 107
+        },
+        {
+          "offset": 23756,
+          "bytes": 72,
+          "prefix_bits": 109
+        }
+      ],
+      "container_rate": 24000,
+      "container_frame_samples": 512,
+      "samples": 1536,
+      "pcm_offset": 0,
+      "control": "n512-c1-base-x1-crc1-fragmented-gain.mp4",
+      "output_channels": 2,
+      "local_replacement_after_inherited": true
+    },
+    {
+      "asc": "f8ec21c460c05921bcb8000000",
+      "tree": 7,
+      "n": 512,
+      "rate": 48000,
+      "slots": 16,
+      "bands": 64,
+      "channels": 1,
+      "qmf": {
+        "expected_offset": 5405760,
+        "expected_bands": 32
+      },
+      "name": "n512-c1-base-x2-crc1-fragmented-gain-inherited-refusal",
+      "mode": "fragmented-gain",
+      "configs": [
+        "37970000",
+        "37970400"
+      ],
+      "body": "7f10990d7d2dbe8caa64678d00474ba15bf3c432db2a67611a14f8db1d017e30b0b9c2f99d50b0b9c2f99d50b0b9c2f99920",
+      "phase": [
+        0,
+        1,
+        0
+      ],
+      "frames": [
+        {
+          "offset": 24488,
+          "bytes": 45,
+          "prefix_bits": 116
+        },
+        {
+          "offset": 24533,
+          "bytes": 133,
+          "prefix_bits": 107
+        },
+        {
+          "offset": 24666,
+          "bytes": 72,
+          "prefix_bits": 109
+        }
+      ],
+      "container_rate": 48000,
+      "container_frame_samples": 1024,
+      "samples": 3072,
+      "pcm_offset": 0,
+      "control": "n512-c1-base-x2-crc1-fragmented-gain.mp4",
+      "output_channels": 2,
+      "local_replacement_after_inherited": true
+    }
+  ],
+  "scope": "Authored AAC core/LD-SBR prefixes and spatial messages from the existing own in-band corpus. Local incomplete fragments replaced in one extension tail, including after completing an inherited fragment. Inherited replacement remains a distinct refusal, not acceptance. No private media, external decoder, FFmpeg, process or network."
+}

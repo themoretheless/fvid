@@ -1,0 +1,51 @@
+{
+  "runs": [
+    {
+      "name": "before-fix",
+      "passed": 0,
+      "failed": 1,
+      "ignored": 0,
+      "log_sha256": "28ae89a7cb9f1f7dfc735ed8cde7ad4ba1e50b61eff8499fb02db0c051c7c640"
+    },
+    {
+      "name": "media",
+      "passed": 589,
+      "failed": 0,
+      "ignored": 1,
+      "log_sha256": "9cc37967b5421fc349274ca903ceb7ef5abcbacd7d27d7018d3dad763d7bcf3d"
+    },
+    {
+      "name": "integration",
+      "passed": 28,
+      "failed": 0,
+      "ignored": 0,
+      "log_sha256": "3178f664dceb13ee8a166be86c45e9830528fb1174c8a8cc25f5b3f54ff03654"
+    },
+    {
+      "name": "q31-options-expanded",
+      "passed": 4,
+      "failed": 0,
+      "ignored": 0,
+      "log_sha256": "ec0f270be09922677f35cc9a78ec2caef0a2f3caf5e43f5397e79a1eb11c10de"
+    },
+    {
+      "name": "worker",
+      "passed": 1,
+      "failed": 0,
+      "ignored": 0,
+      "log_sha256": "3db6526ab3749a7e2a9bcd9ad35bfa67d410e6d426a4d7375f08aa6a2cc84c7f"
+    }
+  ],
+  "unique_after_fix_passed": 618,
+  "unique_after_fix_failed": 0,
+  "preexisting_ignored": 1,
+  "options_run_repeats_four_integration_tests": true,
+  "authored_acceptance_programmes": 18,
+  "acceptance_movies": 36,
+  "q32_counterexamples": 6,
+  "q32_movies": 12,
+  "original_q31_movies_unchanged": true,
+  "fixture_manifest_sha256": "9a440d4eaed0a07c135a56795763d8a58daacdc040e2f38b9945a0ac692ed322",
+  "fixture_packets_sha256": "f4b1d7cf4f52918f5f8ca4d2f870df7ac40188e1e124199e29e6c7ba32e0ebf5",
+  "offline_deterministic_runs": 2
+}

@@ -1,0 +1,6 @@
+{
+  "scope": "Negative control: replace all STP shaping with an identity dry+wet sum.",
+  "values": 1038336,
+  "maximum_identity_gap": 0.015287994407117367,
+  "changed_more_than_1e_8": 170872
+}

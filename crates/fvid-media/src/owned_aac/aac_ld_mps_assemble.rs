@@ -1,0 +1,436 @@
+//! Transactional ordinary spatial-frame matrix assembly. This prepares QMF
+//! matrices; it neither decodes residual audio nor accepts spatial PCM playback.
+use super::{
+    Result,
+    aac_ld_mps_config::{Config, ExtensionValue},
+    aac_ld_mps_frame::ParameterId,
+    aac_ld_mps_matrix_time::{Layout, MatrixFrame, MatrixTime},
+    aac_ld_mps_prepare::{self, Prepared},
+    aac_ld_mps_route::Router,
+    aac_ld_mps_tree_matrix::{self, Band},
+    aac_ld_mps_ttt_tree::{self, Ttt},
+    bits::BitReader,
+    invalid, unsupported,
+};
+#[derive(Clone, Debug, PartialEq)]
+pub struct Assembled {
+    pub prepared: Prepared,
+    pub m1_layout: Layout,
+    pub m2_layout: Layout,
+    pub m1: MatrixFrame,
+    pub dry: MatrixFrame,
+    pub wet: MatrixFrame,
+    pub router: Router,
+    /// Per-native-band TTT modes; empty for OTT-only trees.
+    pub ttt_modes: Vec<u8>,
+    /// OTT cutoffs followed by TTT cutoff, also needed for the M1 input basis.
+    pub residual_cutoffs: Vec<u8>,
+}
+#[derive(Clone, Debug, PartialEq)]
+pub struct Decoder {
+    config: Config,
+    physical: aac_ld_mps_prepare::Decoder,
+    cutoffs: Vec<u8>,
+    modes: Vec<u8>,
+    m1: MatrixTime,
+    dry: MatrixTime,
+    wet: MatrixTime,
+}
+fn layouts(tree: u8) -> (Layout, Layout) {
+    let (rows, inputs, outputs) = match tree {
+        0 | 1 => (5, 1, 6),
+        2 => (6, 3, 6),
+        3 | 4 => (8, 3, 8),
+        5 | 6 => (8, 6, 8),
+        7 => (2, 1, 2),
+        _ => unreachable!(),
+    };
+    (
+        Layout {
+            planes: 2,
+            rows,
+            columns: inputs,
+        },
+        Layout {
+            planes: 1,
+            rows: outputs,
+            columns: rows,
+        },
+    )
+}
+fn value(p: &Prepared, id: ParameterId, set: usize, band: u8) -> Result<f64> {
+    let region = p
+        .parameters
+        .iter()
+        .find(|r| r.id == id)
+        .ok_or_else(|| invalid("missing LD-MPS matrix parameter region"))?;
+    let index = band
+        .checked_sub(region.start_band)
+        .ok_or_else(|| invalid("LD-MPS matrix parameter before region"))?;
+    region
+        .values
+        .get(set)
+        .and_then(|row| row.get(usize::from(index)))
+        .copied()
+        .filter(|v| v.is_finite())
+        .ok_or_else(|| invalid("invalid LD-MPS matrix parameter geometry"))
+}
+impl Decoder {
+    pub fn new(config: &Config) -> Result<Self> {
+        let physical = aac_ld_mps_prepare::Decoder::new(config)?;
+        if config.hrtf.is_some() && config.tree.code == 7
+            || config
+                .extensions
+                .iter()
+                .any(|e| matches!(&e.value, ExtensionValue::DownmixResidual { .. }))
+        {
+            return Err(unsupported(
+                "LD-MPS arbitrary-downmix/HRTF matrix composition is not yet implemented",
+            ));
+        }
+        let _arbitrary = super::aac_ld_mps_arbitrary_tree::Stage::new(config)?;
+        let boxes = config.tree.ott_lfe.len() + usize::from(config.tree.ttt_boxes);
+        let mut cutoffs = vec![0; boxes];
+        let mut seen = false;
+        for e in &config.extensions {
+            if let ExtensionValue::Residual { bands, .. } = &e.value {
+                if seen || bands.len() != boxes {
+                    return Err(invalid("ambiguous LD-MPS residual matrix configuration"));
+                }
+                seen = true;
+                cutoffs = bands.iter().map(|b| b.unwrap_or(0)).collect();
+            }
+        }
+        let modes = if let Some(t) = config.ttt.first() {
+            (0..config.parameter_bands)
+                .map(|b| match t.high {
+                    Some((mode, split)) if b >= split => mode,
+                    _ => t.low_mode,
+                })
+                .collect()
+        } else {
+            vec![]
+        };
+        if let Some(hrtf) = &config.hrtf {
+            // Full-output OTT-only paths do not use stereo HRTF projection.
+            // Standard inversion can also supersede it in TTT paths. Validate
+            // the metadata itself; matching spatial grids are needed only if used.
+            let standard_priority = config.matrix_mode == Some(true)
+                && !modes.is_empty()
+                && modes.iter().all(|m| matches!(m, 0 | 1 | 2 | 4));
+            super::aac_ld_mps_3d::validate(
+                hrtf,
+                if config.tree.ttt_boxes == 0 || standard_priority {
+                    hrtf.bands
+                } else {
+                    config.parameter_bands
+                },
+            )?;
+        }
+        let qmf = if config.sample_rate < 27713 {
+            32
+        } else if config.sample_rate >= 55426 {
+            128
+        } else {
+            64
+        };
+        Router::new(
+            config.tree.code,
+            config.parameter_bands,
+            qmf,
+            cutoffs.clone(),
+            modes.clone(),
+        )?;
+        let (a, b) = layouts(config.tree.code);
+        Ok(Self {
+            config: config.clone(),
+            physical,
+            cutoffs,
+            modes,
+            m1: MatrixTime::new(config.parameter_bands, a)?,
+            dry: MatrixTime::new(config.parameter_bands, b)?,
+            wet: MatrixTime::new(config.parameter_bands, b)?,
+        })
+    }
+    /// Apply a same-format SSC while retaining matrix interpolation history.
+    /// Entropy and smoothing contexts restart; base input/output geometry must match.
+    pub fn reconfigure(&mut self, config: &Config) -> Result<()> {
+        if config == &self.config {
+            return Ok(());
+        }
+        if config.sample_rate != self.config.sample_rate || config.tree != self.config.tree {
+            return Err(unsupported(
+                "LD-MPS in-band matrix layout change requires stream reconfiguration",
+            ));
+        }
+        let mut next = Self::new(config)?;
+        // A new SSC clears parameter/entropy/smoothing contexts, not the
+        // unchanged M1/M2 interpolation histories.
+        next.m1 = self.m1.clone();
+        next.dry = self.dry.clone();
+        next.wet = self.wet.clone();
+        next.m1.reconfigure_bands(config.parameter_bands)?;
+        next.dry.reconfigure_bands(config.parameter_bands)?;
+        next.wet.reconfigure_bands(config.parameter_bands)?;
+        *self = next;
+        Ok(())
+    }
+    pub fn reset(&mut self) {
+        self.physical.reset();
+        self.m1.reset();
+        self.dry.reset();
+        self.wet.reset();
+    }
+    /// A later matrix error retains parameter/entropy/smoothing histories, all
+    /// three matrix histories and the reader position. Clone is a full checkpoint.
+    pub fn decode(&mut self, bits: &mut BitReader<'_>) -> Result<Assembled> {
+        let mut next = self.clone();
+        let mut reader = bits.clone();
+        let prepared = next.physical.decode(&mut reader)?;
+        let output = next.assemble(prepared)?;
+        *self = next;
+        *bits = reader;
+        Ok(output)
+    }
+    /// Assemble with already decoded residual ICC data in one transaction.
+    /// This does not decode residual AAC or supply residual QMF samples.
+    pub fn decode_residual_icc(
+        &mut self,
+        bits: &mut BitReader<'_>,
+        extension: &ExtensionValue,
+        residual: &super::aac_ld_mps_residual::Frame,
+    ) -> Result<Assembled> {
+        let mut next = self.clone();
+        let mut reader = bits.clone();
+        let prepared = next.physical.decode(&mut reader)?;
+        let corrected =
+            super::aac_ld_mps_residual_icc::apply(&next.config, extension, &prepared, residual)?;
+        let output = next.assemble(corrected)?;
+        *self = next;
+        *bits = reader;
+        Ok(output)
+    }
+    /// Parse compressed residual extension and apply ICC before building M1/M2.
+    /// The spectral/QMF owner advances overlap only after this succeeds.
+    pub(crate) fn decode_compressed_residual(
+        &mut self,
+        bits: &mut BitReader<'_>,
+        extension: &ExtensionValue,
+    ) -> Result<(Assembled, super::aac_ld_mps_residual::Frame)> {
+        let mut next = self.clone();
+        let mut reader = bits.clone();
+        let prepared = next.physical.decode(&mut reader)?;
+        let at = next
+            .config
+            .extensions
+            .iter()
+            .position(|e| &e.value == extension)
+            .ok_or_else(|| invalid("missing native residual AAC configuration"))?;
+        let payload = &prepared.syntax.extensions[at].payload;
+        let mut data = BitReader::new(payload);
+        let residual = super::aac_ld_mps_residual::read(
+            &mut data,
+            &next.config,
+            extension,
+            prepared.syntax.slots.len(),
+        )?;
+        // SpatialDecParseExtensionFrame bounds the payload by sacExtLen and
+        // skips every remaining fill bit, including complete bytes. Their
+        // values are unconstrained; residual::read already rejects truncation.
+        let corrected =
+            super::aac_ld_mps_residual_icc::apply(&next.config, extension, &prepared, &residual)?;
+        let result = next.assemble(corrected)?;
+        *self = next;
+        *bits = reader;
+        Ok((result, residual))
+    }
+    fn assemble(&mut self, p: Prepared) -> Result<Assembled> {
+        let config = &self.config;
+        let tree = config.tree.code;
+        let (m1_layout, m2_layout) = layouts(tree);
+        let mut m1_raw = Vec::new();
+        let mut dry_raw = Vec::new();
+        let mut wet_raw = Vec::new();
+        for set in 0..p.slots.len() {
+            let mut m1 = Vec::new();
+            let mut dry = Vec::new();
+            let mut wet = Vec::new();
+            for band in 0..config.parameter_bands {
+                let mut boxes = Vec::new();
+                for (b, &lfe) in config.tree.ott_lfe.iter().enumerate() {
+                    let active = band < config.ott_bands[b];
+                    let cld = if active {
+                        value(&p, ParameterId::OttCld(b as u8), set, band)?
+                    } else {
+                        0.0
+                    };
+                    let coherence = if lfe {
+                        1.0
+                    } else {
+                        value(
+                            &p,
+                            ParameterId::OttIcc(
+                                if config.one_icc == Some(true)
+                                    && !p
+                                        .parameters
+                                        .iter()
+                                        .any(|r| r.id == ParameterId::OttIcc(Some(b as u8)))
+                                {
+                                    None
+                                } else {
+                                    Some(b as u8)
+                                },
+                            ),
+                            set,
+                            band,
+                        )?
+                    };
+                    boxes.push(Band {
+                        cld_db: cld,
+                        coherence,
+                        residual: band < self.cutoffs[b],
+                    });
+                }
+                let lfe_active = config
+                    .tree
+                    .ott_lfe
+                    .iter()
+                    .position(|&v| v)
+                    .is_some_and(|b| band < config.ott_bands[b]);
+                if config.tree.ttt_boxes == 0 {
+                    let a = aac_ld_mps_tree_matrix::build(tree, &boxes, lfe_active)?;
+                    // ADG compensates each input column before matrix-time
+                    // smoothing/interpolation. It never scales M2 or PCM.
+                    let mut gains = [1.0; 6];
+                    if config.arbitrary_downmix {
+                        for (input, gain) in gains
+                            .iter_mut()
+                            .take(usize::from(m1_layout.columns))
+                            .enumerate()
+                        {
+                            *gain = 10.0f64.powf(
+                                value(&p, ParameterId::DownmixGain(input as u8), set, band)? / 20.0,
+                            );
+                        }
+                    }
+                    m1.extend(a.m1.iter().flat_map(|row| {
+                        row.iter()
+                            .zip(&gains)
+                            .map(|(coefficient, gain)| coefficient * gain)
+                    }));
+                    m1.extend(std::iter::repeat_n(
+                        0.0,
+                        usize::from(m1_layout.rows) * usize::from(m1_layout.columns),
+                    ));
+                    dry.extend(a.dry.iter().flatten().copied());
+                    wet.extend(a.wet.iter().flatten().copied());
+                } else {
+                    let t = &config.ttt[0];
+                    let high = t.high.is_some_and(|(_, split)| band >= split);
+                    let mode = self.modes[usize::from(band)];
+                    let id = |component| {
+                        if mode < 2 {
+                            ParameterId::TttCpc {
+                                box_index: 0,
+                                high,
+                                component,
+                            }
+                        } else {
+                            ParameterId::TttCld {
+                                box_index: 0,
+                                high,
+                                component,
+                            }
+                        }
+                    };
+                    let parameters = [value(&p, id(0), set, band)?, value(&p, id(1), set, band)?];
+                    let coherence = if mode < 2 {
+                        value(&p, ParameterId::TttIcc { box_index: 0, high }, set, band)?
+                    } else {
+                        1.0
+                    };
+                    let downmix = if config.arbitrary_downmix {
+                        [
+                            10.0f64.powf(value(&p, ParameterId::DownmixGain(0), set, band)? / 20.0),
+                            10.0f64.powf(value(&p, ParameterId::DownmixGain(1), set, band)? / 20.0),
+                        ]
+                    } else {
+                        [1.0, 1.0]
+                    };
+                    let a = aac_ld_mps_ttt_tree::build_with_spatial(
+                        tree,
+                        &boxes,
+                        Ttt {
+                            mode,
+                            parameters,
+                            coherence,
+                            residual: band < self.cutoffs[boxes.len()],
+                            inversion: config.matrix_mode == Some(true),
+                        },
+                        lfe_active,
+                        downmix,
+                        config
+                            .hrtf
+                            .as_ref()
+                            .map(|hrtf| aac_ld_mps_ttt_tree::ThreeD {
+                                hrtf,
+                                band: usize::from(band),
+                                surround_gain: p.surround_gain,
+                            }),
+                    )?;
+                    m1.extend(a.m1.iter().flatten().map(|z| z.re));
+                    m1.extend(a.m1.iter().flatten().map(|z| z.im));
+                    dry.extend(a.dry.iter().flatten().copied());
+                    wet.extend(a.wet.iter().flatten().copied());
+                }
+            }
+            m1_raw.push(m1);
+            dry_raw.push(dry);
+            wet_raw.push(wet);
+        }
+        let slots = config.frame_slots;
+        let m1 = self
+            .m1
+            .process(slots, &p.slots, &p.smoothing, &m1_raw, p.residual_cutoff)?;
+        let dry = self
+            .dry
+            .process(slots, &p.slots, &p.smoothing, &dry_raw, p.residual_cutoff)?;
+        let wet = self
+            .wet
+            .process(slots, &p.slots, &p.smoothing, &wet_raw, p.residual_cutoff)?;
+        let router = Router::new(
+            tree,
+            config.parameter_bands,
+            p.qmf_bands,
+            self.cutoffs.clone(),
+            self.modes.clone(),
+        )?;
+        Ok(Assembled {
+            prepared: p,
+            m1_layout,
+            m2_layout,
+            m1,
+            dry,
+            wet,
+            router,
+            ttt_modes: self.modes.clone(),
+            residual_cutoffs: self.cutoffs.clone(),
+        })
+    }
+}
+
+impl Decoder {
+    pub(crate) fn visit_retained(
+        &self,
+        f: &mut super::memory::Footprint,
+    ) -> std::result::Result<(), String> {
+        self.config.visit_retained(f)?;
+        self.physical.visit_retained(f)?;
+        f.vector(&self.cutoffs)?;
+        f.vector(&self.modes)?;
+        self.m1.visit_retained(f)?;
+        self.dry.visit_retained(f)?;
+        self.wet.visit_retained(f)?;
+        Ok(())
+    }
+}

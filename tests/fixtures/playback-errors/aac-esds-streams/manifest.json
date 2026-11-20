@@ -1,0 +1,138 @@
+{
+  "cases": [
+    {
+      "name": "flags-0",
+      "es_id": 0,
+      "depends_on": null,
+      "ocr_es_id": null,
+      "url": null,
+      "priority": 0,
+      "sl_config": "00ff050400",
+      "asc": "8b0c00"
+    },
+    {
+      "name": "flags-31",
+      "es_id": 6553,
+      "depends_on": null,
+      "ocr_es_id": null,
+      "url": null,
+      "priority": 31,
+      "sl_config": "02",
+      "asc": "8b0c00"
+    },
+    {
+      "name": "flags-128",
+      "es_id": 13106,
+      "depends_on": 17,
+      "ocr_es_id": null,
+      "url": null,
+      "priority": 0,
+      "sl_config": "02",
+      "asc": "8b0c00"
+    },
+    {
+      "name": "flags-159",
+      "es_id": 19659,
+      "depends_on": 17,
+      "ocr_es_id": null,
+      "url": null,
+      "priority": 31,
+      "sl_config": "00ff050400",
+      "asc": "8b0c00"
+    },
+    {
+      "name": "flags-64",
+      "es_id": 26212,
+      "depends_on": null,
+      "ocr_es_id": null,
+      "url": "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f202122232425262728292a2b2c2d2e2f303132333435363738393a3b3c3d3e3f404142434445464748494a4b4c4d4e4f505152535455565758595a5b5c5d5e5f606162636465666768696a6b6c6d6e6f707172737475767778797a7b7c7d7e7f808182838485868788898a8b8c8d8e8f909192939495969798999a9b9c9d9e9fa0a1a2a3a4a5a6a7a8a9aaabacadaeafb0b1b2b3b4b5b6b7b8b9babbbcbdbebfc0c1c2c3c4c5c6c7c8c9cacbcccdcecfd0d1d2d3d4d5d6d7d8d9dadbdcdddedfe0e1e2e3e4e5e6e7e8e9eaebecedeeeff0f1f2f3f4f5f6f7f8f9fafbfcfdfe",
+      "priority": 0,
+      "sl_config": "02",
+      "asc": "8b0c00"
+    },
+    {
+      "name": "flags-95",
+      "es_id": 32765,
+      "depends_on": null,
+      "ocr_es_id": null,
+      "url": "0502ff0073747265616d",
+      "priority": 31,
+      "sl_config": "02",
+      "asc": "8b0c00"
+    },
+    {
+      "name": "flags-32",
+      "es_id": 39318,
+      "depends_on": null,
+      "ocr_es_id": 65535,
+      "url": null,
+      "priority": 0,
+      "sl_config": "00ff050400",
+      "asc": "8b0c00"
+    },
+    {
+      "name": "flags-63",
+      "es_id": 45871,
+      "depends_on": null,
+      "ocr_es_id": 65535,
+      "url": null,
+      "priority": 31,
+      "sl_config": "02",
+      "asc": "8b0c00"
+    },
+    {
+      "name": "flags-224",
+      "es_id": 52424,
+      "depends_on": 17,
+      "ocr_es_id": 65535,
+      "url": "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f202122232425262728292a2b2c2d2e2f303132333435363738393a3b3c3d3e3f404142434445464748494a4b4c4d4e4f505152535455565758595a5b5c5d5e5f606162636465666768696a6b6c6d6e6f707172737475767778797a7b7c7d7e7f808182838485868788898a8b8c8d8e8f909192939495969798999a9b9c9d9e9fa0a1a2a3a4a5a6a7a8a9aaabacadaeafb0b1b2b3b4b5b6b7b8b9babbbcbdbebfc0c1c2c3c4c5c6c7c8c9cacbcccdcecfd0d1d2d3d4d5d6d7d8d9dadbdcdddedfe0e1e2e3e4e5e6e7e8e9eaebecedeeeff0f1f2f3f4f5f6f7f8f9fafbfcfdfe",
+      "priority": 0,
+      "sl_config": "02",
+      "asc": "8b0c00"
+    },
+    {
+      "name": "flags-255",
+      "es_id": 58977,
+      "depends_on": 17,
+      "ocr_es_id": 65535,
+      "url": "0502ff0073747265616d",
+      "priority": 31,
+      "sl_config": "00ff050400",
+      "asc": "8b0c00"
+    },
+    {
+      "name": "without-sl",
+      "es_id": 0,
+      "depends_on": null,
+      "ocr_es_id": null,
+      "url": null,
+      "priority": 0,
+      "sl_config": null,
+      "asc": "8b0c00"
+    }
+  ],
+  "movies": [
+    {
+      "name": "root-0",
+      "video": "root-0.mp4",
+      "es_id": 0,
+      "priority": 0
+    },
+    {
+      "name": "root-65535",
+      "video": "root-65535.mp4",
+      "es_id": 65535,
+      "priority": 31
+    }
+  ],
+  "malformed": [
+    {
+      "name": "duplicate-sl",
+      "video": "duplicate-sl.mp4",
+      "error": "duplicate SL configuration"
+    }
+  ],
+  "asc": "8b0c00",
+  "golden": "reference.f32le",
+  "provenance": "Own ES descriptors around owned synthetic sparse ER-LC audio and AVC video. Metadata-only dependent descriptors are not EP1 container-playback acceptance. No foreign codec, process, network or private media."
+}

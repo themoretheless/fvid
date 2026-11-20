@@ -1,0 +1,8 @@
+{
+  "complete": true,
+  "tracked_compressed_inputs_checked": 62878,
+  "changed_inputs": [],
+  "baseline_map_sha256": "8ceca998e84be291d8603e238267152335fb54e7a7bf80bc6380688466bab5e1",
+  "scope": "Previously tracked AAC/EP1 compressed input bytes unchanged by CLDFB phase/oracle regeneration",
+  "checked_after_ep1_rs_regeneration": true
+}

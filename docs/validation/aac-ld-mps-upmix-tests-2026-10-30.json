@@ -1,0 +1,52 @@
+{
+  "base_commit": "0c2f3154a3",
+  "scope": "OTT and decorrelator component qualification only. No spatial movie playback or actual player seek acceptance; native spatial refusal remains enabled.",
+  "media_units": {
+    "passed": 575,
+    "failed": 0,
+    "ignored_existing": 1
+  },
+  "ld_mps_integrations": {
+    "passed": 27,
+    "failed": 0,
+    "new_upmix_tests": 4
+  },
+  "offline_all_test_check": "passed; no-default-features, features player, --tests",
+  "corpus": {
+    "matrices": 496,
+    "signal_sequences": 120,
+    "complex_outputs": 552960,
+    "filter_design_checks": 3840
+  },
+  "state_checks": [
+    "bit-exact chunk partitions",
+    "checkpoint replay",
+    "reset replay",
+    "transactional invalid/overflow rejection"
+  ],
+  "unqualified": [
+    "128-band decorrelation",
+    "whole-tree matrix routing",
+    "residual AAC",
+    "HRTF and arbitrary-tree composition",
+    "STP/GES processing",
+    "LD-SBR PCM integration",
+    "spatial movie playback/seek/rewind"
+  ],
+  "runtime_sources_and_fixtures_sha256": {
+    "crates/fvid-media/src/owned_aac/aac_ld_mps_ott.rs": "0b9fce96ccab004773d1af7ae4167a76e4d1e0dd74be88012f30ab31884fa37f",
+    "crates/fvid-media/src/owned_aac/aac_ld_mps_decor.rs": "32f9548a66c8e307db8343e5ac7929817c6e14967ad56acd58dd6df1f0e904e1",
+    "crates/fvid-media/src/owned_aac/aac_ld_mps_decor_facts.rs": "9005aac039e457ceabaeedbb4154f607b6eea77a6c488e4e52927ed1b32a3072",
+    "tests/aac_ld_mps_upmix.rs": "881a73240bf4bbb5467c1f0216d40b54f9bbcdbe634873f91d0fa25f2e0faa25",
+    "tests/fixtures/playback-errors/aac-ld-mps-upmix/manifest.json": "1c2583c5273e27d76364c9aa70c0e0a88c491959bf7bcd08004fd69b74796d25",
+    "tests/fixtures/playback-errors/aac-ld-mps-upmix/signals.bin": "9925d1b7fc48d13258b6bbd8ee56a8cc88526251d6ed7018633d23eefaab6b89"
+  },
+  "validation_logs_sha256": {
+    "/tmp/fvid-ld-mps-upmix-all-final.log": "26e01300ccbe7310580efda840144ea8384ab165542d78fe87c752ae226adc2b",
+    "/tmp/fvid-ld-mps-upmix-media-tests.log": "b8a1064b951dfb5532da847310fd8329bfaa748b58862877474e825202a37b97",
+    "/tmp/fvid-ld-mps-upmix-all-check.log": "2129d3808789fadd07c961763ab4c9e76a3c88d45552685e176363cac0465a53"
+  },
+  "ordinary_tests": "Saved fixtures only; no FFmpeg, network, fixture generation or reference compilation.",
+  "reference_report": "aac-ld-mps-upmix-reference-2026-10-30.json",
+  "generation_report": "aac-ld-mps-upmix-generation-2026-10-30.json"
+}

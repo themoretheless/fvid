@@ -89,6 +89,41 @@ impl Data {
         channel_count: usize,
         low_delay: bool,
     ) -> Result<Self> {
+        let mut trial = bits.clone();
+        let prefix = Self::read_prefix(
+            &mut trial,
+            end,
+            header,
+            sbr_rate,
+            slots,
+            channel_count,
+            low_delay,
+        )?;
+        let result = prefix.finish(&mut trial, end)?;
+        *bits = trial;
+        Ok(result)
+    }
+    /// Category 9 of LD-SBR ends after grids and delta flags; category 10
+    /// contains inverse filtering, coefficients, harmonics and extension data.
+    pub fn read_low_delay_prefix(
+        bits: &mut BitReader<'_>,
+        end: usize,
+        header: &Header,
+        sbr_rate: u32,
+        slots: u8,
+        channel_count: usize,
+    ) -> Result<Prefix> {
+        Self::read_prefix(bits, end, header, sbr_rate, slots, channel_count, true)
+    }
+    fn read_prefix(
+        bits: &mut BitReader<'_>,
+        end: usize,
+        header: &Header,
+        sbr_rate: u32,
+        slots: u8,
+        channel_count: usize,
+        low_delay: bool,
+    ) -> Result<Prefix> {
         if !(1..=2).contains(&channel_count) || !matches!(slots, 15 | 16) {
             return Err(invalid("invalid non-scalable SBR element dimensions"));
         }
@@ -124,6 +159,36 @@ impl Data {
                 harmonics: vec![],
             });
         }
+        *bits = trial;
+        Ok(Prefix {
+            frequency,
+            coupled,
+            channels,
+            header: header.clone(),
+            slots,
+        })
+    }
+}
+/// Validated SBR controls shared by logical and category-separated parsing.
+#[derive(Clone, Debug)]
+pub struct Prefix {
+    frequency: FrequencyTables,
+    coupled: bool,
+    channels: Vec<Channel>,
+    header: Header,
+    slots: u8,
+}
+impl Prefix {
+    pub fn finish(self, bits: &mut BitReader<'_>, end: usize) -> Result<Data> {
+        let Self {
+            frequency,
+            coupled,
+            mut channels,
+            header,
+            slots,
+        } = self;
+        let channel_count = channels.len();
+        let mut trial = bits.clone();
         let noise_bands = frequency.noise.len() - 1;
         for channel in channels
             .iter_mut()
@@ -198,7 +263,7 @@ impl Data {
             None
         };
         *bits = trial;
-        Ok(Self {
+        Ok(Data {
             frequency,
             coupled,
             channels,

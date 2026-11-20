@@ -1,0 +1,53 @@
+{
+  "scope": "Compositional default-phase domain selection using pinned ISO formulas and previously independently qualified converter and LD analysis/synthesis components. Not a new independent whole-decoder oracle.",
+  "source_archive_url": "https://standards.iso.org/iso-iec/23003/-2/ed-2/en/SAOC_IS7_ReferenceSoftware__20160603.zip",
+  "archive_sha256": "b6b27e2f9af6ee8f950af8d7074afc467e66d93372328c0ec55282fff71d1f83",
+  "sources": {
+    "sac_polyphase.c": "7d5c4f41ebfb9c9ed789af3ec3cb8892f1ee6ec89037fc31fb3077a73d3b30df",
+    "sac_mdct2qmf.c": "b85d0482c8e2f5913db334d905e2572fa1b7a21db583a79c98f3420b7ee3ecf8",
+    "sac_bitdec.c": "d9a8655b4e5efa1329d629f88bde962b640efe9d1a5c22f24f84df56eadfa64e",
+    "sac_process.c": "548ed21a04e9a2c0e11c8fc426322cefd2b9ab92f3df2a3269a5204c34c8f928"
+  },
+  "full_complex": true,
+  "ld_mps": true,
+  "twiddleExtern": "NULL",
+  "bins": 64,
+  "analysis": {
+    "phase": "pi/(2*B)*(k+0.5)*(2*l+(2*B+1))",
+    "gain": "64/B"
+  },
+  "synthesis": {
+    "phase": "pi/(2*B)*(k+0.5)*(2*l-(4*B-1))",
+    "gain": "1/64"
+  },
+  "mdct_post_rotation": "exp(-i*(258*k+385)*pi/256)",
+  "normalization": "residual raw AAC spectral units converted to normalized QMF by /32768, same normalized domain as core LD-SBR; dry and wet are summed once before LD synthesis",
+  "component_evidence": [
+    "aac-mps-mdct-qmf-reference-2026-10-30.json",
+    "aac-ld-mps-pcm-tests-2026-10-30.json",
+    "aac-eld-spatial-sbr-tests-2026-10-30.json"
+  ],
+  "boundaries": [
+    "32/128-bin native residual domains unqualified",
+    "update8 missing source frequency window",
+    "active residual LFE routing unqualified",
+    "nonzero sacTimeAlign still refused",
+    "not all-tool or all-profile AAC conformance"
+  ],
+  "extension_fill_policy": "SpatialDecParseExtensionFrame skips all nFillBits=8*sacExtLen-bitsRead, including complete bytes, without zero-value checks.",
+  "fill_regression_before": {
+    "log_sha256": "896067b7eba6dfa8bfe1377506b2f2993a500308374010cd84b7a54ecaa11664",
+    "exit_code": 101,
+    "error": "trailing bytes after residual AAC extension",
+    "description": "Same final own fill movie run against the pre-fix native executable; not an unrelated parser refusal.",
+    "movie": "tests/fixtures/playback-errors/aac-ld-mps-residual-native/n512-c1-base-x2-crc1-v1-bands23-fill.mp4",
+    "movie_sha256": "da011980073d355fb7497341478ee6f4d84e3d733d9269cd3894a3e46d43bea0"
+  },
+  "independent_whole_chain_boundary": "The cached LD_MPS SpatialDecHybridQMFAnalysis branch copies input QMF only; residual hybrid preparation is inside the non-LD branch. Therefore this archive supplies component formulas but not a usable complete native LD residual routing oracle. Full LD residual conformance remains open.",
+  "fill_regression_after": {
+    "log_sha256": "d2eb96091edbd0fe032e57e8cdb9aea43dc33f22e4e32530cd4c427f45c19c0f",
+    "passed": 1,
+    "failed": 0,
+    "description": "The same movie passes owned native PCM, direct Session and separately encoded fine-control composition; parser explicitly proves more than16 remaining nonzero fill bits in frame1."
+  }
+}

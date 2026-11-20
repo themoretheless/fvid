@@ -1659,6 +1659,8 @@ mod tests {
     fn edit_window_preserves_track_units_and_rounds_fractional_end_up() {
         use crate::container::mp4::{Edit, SampleIndex, Track};
         let mut track = Track {
+            od_references: Vec::new(),
+            dependencies: Vec::new(),
             sample_descriptions: Vec::new(),
             id: 1,
             handler: *b"vide",

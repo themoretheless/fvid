@@ -1,0 +1,32 @@
+{
+  "date": "2026-11-02",
+  "scope": "Reference API defect reproduction and precise explicit refusal regressions; no new nonzero-EBQ playback acceptance",
+  "runtime_changes": false,
+  "corpus": {
+    "playback_controls": 18,
+    "explicit_refusals": 36,
+    "deterministic_files": 128,
+    "subprocess_and_network_forbidden_during_generation": true
+  },
+  "tests": {
+    "command": "CARGO_TARGET_DIR=/Users/themoretheless/.codex/worktrees/aac-eld-extension-gaps/target CARGO_BUILD_JOBS=2 cargo --config profile.dev.package.fvid-media.opt-level=2 test --offline --no-default-features --features player --test aac_ld_mps_arbitrary_ebq",
+    "passed": 4,
+    "failed": 0,
+    "ignored": 0,
+    "log_sha256": "167af137aff478c6b60a1cb3bf1bf4673f37169643e35717456f23b5d707934c"
+  },
+  "reference_report": "aac-ld-mps-arbitrary-ebq-reference-2026-11-02.json",
+  "normative_candidates": [
+    {
+      "url": "https://www.ieclist.ink/iso/ISO%20IEC%2023003-2-2010%20PDF.pdf",
+      "http_status": 404,
+      "usable_pdf": false
+    },
+    {
+      "url": "https://iso.ieclist.ink/iec/ISO%20IEC%2023003-2-2018%20PDF.pdf",
+      "http_status": 404,
+      "usable_pdf": false
+    }
+  ],
+  "whole_codec_goal_complete": false
+}

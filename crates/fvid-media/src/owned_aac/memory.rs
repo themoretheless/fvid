@@ -32,6 +32,14 @@ impl Footprint {
                 .ok_or("AAC allocation accounting overflow")?,
         )
     }
+    pub(crate) fn deque<T>(&mut self, deque: &std::collections::VecDeque<T>) -> Result<(), String> {
+        self.add(
+            deque
+                .capacity()
+                .checked_mul(size_of::<T>())
+                .ok_or("AAC allocation accounting overflow")?,
+        )
+    }
     pub(crate) fn shared<T>(&mut self, value: &Arc<T>) -> Result<bool, String> {
         let address = Arc::as_ptr(value) as usize;
         if self.seen[..self.used].contains(&address) {

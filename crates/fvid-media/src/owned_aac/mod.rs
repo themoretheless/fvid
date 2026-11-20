@@ -3,7 +3,11 @@
 pub mod aac_gain_control;
 pub mod aac_ep_srcpc;
 pub mod aac_ep_crc;
+pub mod aac_ep_rs;
 pub mod aac_ep;
+pub mod aac_ep1;
+pub mod aac_esc;
+pub mod aac_ep_interleave;
 pub mod speaker_routing;
 pub mod aac_main_predictor;
 pub mod aac_ssr_ipqf;
@@ -31,6 +35,7 @@ pub mod aac_coupling;
 pub mod aac_imdct;
 pub mod aac_ld_synthesis;
 pub mod aac_eld_synthesis;
+pub mod aac_eld_downscale_window;
 mod aac_eld_windows;
 pub mod aac_ld_bands;
 pub mod aac_ld_ltp;
@@ -110,7 +115,7 @@ pub mod aac_native;
 
 pub mod aac_huffman_tables;
 
-pub use aac_native::{AacCheckpoint, NativeAacDecoder};
+pub use aac_native::{AacCheckpoint, AacDecodeOptions, NativeAacDecoder};
 #[cfg(test)]
 mod decoder_tests;
 
@@ -129,3 +134,42 @@ mod aac_sbr_timing;
 mod aac_eld_sbr_dsp;
 
 pub mod aac_eld_sbr;
+
+pub mod aac_ld_qmf;
+mod aac_ld_qmf_window;
+
+pub mod aac_ld_mps_config;
+
+pub mod aac_ld_mps_entropy;
+pub mod aac_ld_mps_parameters;
+pub mod aac_ld_mps_frame;
+mod aac_ld_mps_frame_facts;
+pub mod aac_ld_mps_prepare;
+pub mod aac_ld_mps_matrix_time;
+pub mod aac_ld_mps_matrix_apply;
+pub mod aac_ld_mps_tree_matrix;
+pub mod aac_ld_mps_3d;
+pub mod aac_ld_mps_ttt;
+pub mod aac_ld_mps_ttt_tree;
+pub mod aac_ld_mps_route;
+pub mod aac_ld_mps_assemble;
+pub mod aac_ld_mps_arbitrary_tree;
+pub mod aac_ld_mps_qmf;
+pub mod aac_ld_mps_ges;
+pub mod aac_ld_mps_stp_energy;
+pub mod aac_ld_mps_stp;
+pub mod aac_ld_mps_residual;
+pub mod aac_ld_mps_residual_icc;
+pub(crate) mod aac_ld_mps_residual_native;
+pub mod aac_mps_mdct_qmf;
+pub mod aac_ld_mps_pcm;
+pub mod aac_ld_mps_transport;
+pub mod aac_ld_mps_ott;
+pub mod aac_ld_mps_decor;
+mod aac_ld_mps_decor_facts;
+mod aac_ld_mps_prepare_facts;
+mod aac_ld_mps_huffman_facts;
+
+pub mod aac_ld_mps_session;
+
+pub mod aac_ld_mps_native;

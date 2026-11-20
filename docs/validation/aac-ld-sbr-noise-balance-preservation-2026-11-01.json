@@ -1,0 +1,39 @@
+{
+  "checked": 257093,
+  "changed": [],
+  "missing": [],
+  "all_preserved": true,
+  "generators": 100,
+  "external_processes_disabled": true,
+  "network_disabled": true,
+  "numeric_changed": [
+    "tests/fixtures/playback-errors/aac-eld-esc-sbr/n480-c2-coupled-pan.f32le",
+    "tests/fixtures/playback-errors/aac-eld-esc-sbr/n512-c2-coupled-pan.f32le",
+    "tests/fixtures/playback-errors/aac-eld-sbr-downscaled/n480-c2-coupled-pan-ds2.f32le",
+    "tests/fixtures/playback-errors/aac-eld-sbr-downscaled/n480-c2-coupled-pan-ds4.f32le",
+    "tests/fixtures/playback-errors/aac-eld-sbr-downscaled/n512-c2-coupled-pan-ds2.f32le",
+    "tests/fixtures/playback-errors/aac-eld-sbr-downscaled/n512-c2-coupled-pan-ds4.f32le",
+    "tests/fixtures/playback-errors/aac-eld-sbr/n480-c2-coupled-pan.f32le",
+    "tests/fixtures/playback-errors/aac-eld-sbr/n512-c2-coupled-pan.f32le",
+    "tests/fixtures/playback-errors/aac-eld-spatial-sbr/expected.f64le",
+    "tests/fixtures/playback-errors/aac-ld-mps-sbr-pcm/n480-ds2-x1-c2-coupled-pan-crc1-control.f32le",
+    "tests/fixtures/playback-errors/aac-ld-mps-sbr-pcm/n480-ds2-x2-c2-coupled-pan-crc1-control.f32le",
+    "tests/fixtures/playback-errors/aac-ld-mps-sbr-pcm/n480-ds4-x2-c2-coupled-pan-crc1-control.f32le",
+    "tests/fixtures/playback-errors/aac-ld-mps-sbr-pcm/n512-ds2-x1-c2-coupled-pan-crc1-control.f32le",
+    "tests/fixtures/playback-errors/aac-ld-mps-sbr-pcm/n512-ds2-x2-c2-coupled-pan-crc1-control.f32le",
+    "tests/fixtures/playback-errors/aac-ld-mps-sbr-pcm/n512-ds4-x2-c2-coupled-pan-crc1-control.f32le",
+    "tests/fixtures/playback-errors/aac-ld-sbr-q31/n480-coupled-pan-q30.f32le",
+    "tests/fixtures/playback-errors/aac-ld-sbr-q31/n480-coupled-pan-q31.f32le",
+    "tests/fixtures/playback-errors/aac-ld-sbr-q31/n480-coupled-pan-q7.f32le",
+    "tests/fixtures/playback-errors/aac-ld-sbr-q31/n512-coupled-pan-q30.f32le",
+    "tests/fixtures/playback-errors/aac-ld-sbr-q31/n512-coupled-pan-q31.f32le",
+    "tests/fixtures/playback-errors/aac-ld-sbr-q31/n512-coupled-pan-q7.f32le",
+    "tests/fixtures/playback-errors/aac-sbr-dequant-oracles.json",
+    "tests/fixtures/playback-errors/aac-sbr-history-decimal.json"
+  ],
+  "numeric_extensions": {
+    ".f32le": 20,
+    ".f64le": 1,
+    ".json": 2
+  }
+}

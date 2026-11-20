@@ -1,0 +1,205 @@
+{
+  "cases": [
+    {
+      "name": "type0-extension0",
+      "kind": 0,
+      "extended": false,
+      "insertions": 11,
+      "packet_bytes": [
+        182,
+        80,
+        72
+      ],
+      "sha256": "974077419763e97cd891461e7470190b1c3209c99d6618dbd1c03eb257317bc3"
+    },
+    {
+      "name": "type0-extension1",
+      "kind": 0,
+      "extended": true,
+      "insertions": 11,
+      "packet_bytes": [
+        187,
+        83,
+        75
+      ],
+      "sha256": "cddb9a3cd30108fd532e927f1c4f053b4efcde3aa2c89e438ec209f30f796c73"
+    },
+    {
+      "name": "type9-extension0",
+      "kind": 9,
+      "extended": false,
+      "insertions": 11,
+      "packet_bytes": [
+        182,
+        80,
+        72
+      ],
+      "sha256": "0056d83ec937032537414673aeb96cea5d2061b3d4c7aae2fd24a042b6eebd55"
+    },
+    {
+      "name": "type9-extension1",
+      "kind": 9,
+      "extended": true,
+      "insertions": 11,
+      "packet_bytes": [
+        187,
+        83,
+        75
+      ],
+      "sha256": "b68b026d185044efec57e180b8ed9c7ce7fe2cf89ff469f5e732bb7636f71875"
+    },
+    {
+      "name": "type10-extension0",
+      "kind": 10,
+      "extended": false,
+      "insertions": 11,
+      "packet_bytes": [
+        182,
+        80,
+        72
+      ],
+      "sha256": "8ad13c8fadd35a838ce219de90bcb8fa08dba483cf69c23641bdc4602701e75f"
+    },
+    {
+      "name": "type10-extension1",
+      "kind": 10,
+      "extended": true,
+      "insertions": 11,
+      "packet_bytes": [
+        187,
+        83,
+        75
+      ],
+      "sha256": "ce5a22662043875311fc2332a5b78aa7b964e8ea742e52c0a078d4e392a4644d"
+    },
+    {
+      "name": "type11-extension0",
+      "kind": 11,
+      "extended": false,
+      "insertions": 11,
+      "packet_bytes": [
+        182,
+        80,
+        72
+      ],
+      "sha256": "42e65d8d4f14ec8c44655a2c744b4db8b3277089dde374cb1f3db1b888f8acfa"
+    },
+    {
+      "name": "type11-extension1",
+      "kind": 11,
+      "extended": true,
+      "insertions": 11,
+      "packet_bytes": [
+        187,
+        83,
+        75
+      ],
+      "sha256": "55a9154b41c2d3590e1b143a401a4b0b0ca313b1d046d0214ec7b785dc6173ed"
+    },
+    {
+      "name": "type12-extension0",
+      "kind": 12,
+      "extended": false,
+      "insertions": 11,
+      "packet_bytes": [
+        182,
+        80,
+        72
+      ],
+      "sha256": "5b34039c84d264ae8bbb9ec1cffd3e667d9126768464128a835723d92dc012b5"
+    },
+    {
+      "name": "type12-extension1",
+      "kind": 12,
+      "extended": true,
+      "insertions": 11,
+      "packet_bytes": [
+        187,
+        83,
+        75
+      ],
+      "sha256": "e8f37f585dbae060d69397087a56d622872d30d8bd8e8a99f57db2a8be274f10"
+    },
+    {
+      "name": "type13-extension0",
+      "kind": 13,
+      "extended": false,
+      "insertions": 11,
+      "packet_bytes": [
+        182,
+        80,
+        72
+      ],
+      "sha256": "c3dfb23e23efe2fe9ede578c479e64970e8143f9eefcd32d24d879b07c54c6f5"
+    },
+    {
+      "name": "type13-extension1",
+      "kind": 13,
+      "extended": true,
+      "insertions": 11,
+      "packet_bytes": [
+        187,
+        83,
+        75
+      ],
+      "sha256": "833d4e28ee012a9b5f78608eadb4766c173c2f8abea721d29e2ea375f238c821"
+    },
+    {
+      "name": "type14-extension0",
+      "kind": 14,
+      "extended": false,
+      "insertions": 11,
+      "packet_bytes": [
+        182,
+        80,
+        72
+      ],
+      "sha256": "61d1bcce5204f4c7c0f5a1408982fc9dddcec048bd748f49e0a30a4d85ff518d"
+    },
+    {
+      "name": "type14-extension1",
+      "kind": 14,
+      "extended": true,
+      "insertions": 11,
+      "packet_bytes": [
+        187,
+        83,
+        75
+      ],
+      "sha256": "2b53e344a6ca9244240fd890a75c48542b40b6815fe182422a406bc1758d4126"
+    },
+    {
+      "name": "type15-extension0",
+      "kind": 15,
+      "extended": false,
+      "insertions": 11,
+      "packet_bytes": [
+        182,
+        80,
+        72
+      ],
+      "sha256": "ef43c6bb488fa7127e529b82115c6b8d79cdd0354ff89c81c7fda030d20cd0f0"
+    },
+    {
+      "name": "type15-extension1",
+      "kind": 15,
+      "extended": true,
+      "insertions": 11,
+      "packet_bytes": [
+        187,
+        83,
+        75
+      ],
+      "sha256": "b2410e9f125742fe4fca2a8becae15fa325374de7a98655c1c2d9c47bc950f09"
+    }
+  ],
+  "control_packet_bytes": [
+    127,
+    47,
+    39
+  ],
+  "source": "av1-separate-frame-case0-ref1-adapt0-redundant0.obu",
+  "source_sha256": "fd7052a327eff196d80475cfb331591cc49acdc8953f65b20de0ea941da1a4ec",
+  "reference": "av1-separate-frame-case0-ref1-adapt0-redundant0.yuv",
+  "scope": "Sixteen authored three-frame programmes; reserved types0/9..14 and padding15, with/without extension header. Inserted before every known OBU and after each packet; includes pending separate-frame state, hidden reference, inter frames and HDR CLL. Own synthetic parent and saved independent pixels; no private/ISO media, process, FFmpeg or network. Containers preserve all inserted OBUs."
+}

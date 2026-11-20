@@ -1,0 +1,3491 @@
+{
+  "rejected_harness_setup": {
+    "case": "tree0-res1-v0:first frame",
+    "cause": "Initial probe omitted implicit bsSmoothControl=1 set by SpatialDecParseFrame.",
+    "actual_time": 0,
+    "expected_time": 256,
+    "correction": "Set the implicit frame control before decodeAndMapFrameSmg; no reference source change."
+  },
+  "archive_sha256": "b6b27e2f9af6ee8f950af8d7074afc467e66d93372328c0ec55282fff71d1f83",
+  "reference_members": {
+    "mp4spatialdec/include/sac_dec_interface.h": "e336a7aa66afa61b05f567853603882c542cbbbed0da60ac8fce8e3f485cd7a9",
+    "mp4spatialdec/src/sac_arbitraryTree.c": "9b73935063f3b188a010b0a8da69f114648f4c3a7b6769878071b641e107f2e7",
+    "mp4spatialdec/src/sac_bitdec.c": "d9a8655b4e5efa1329d629f88bde962b640efe9d1a5c22f24f84df56eadfa64e",
+    "mp4spatialdec/src/sac_bitdec.h": "9b42d75738aea33123069b2caa05ed6dab4f59b138c7fb9bdfc6ff771a9069cd",
+    "mp4spatialdec/src/sac_bitinput.c": "723b4d288b43aca8b50f7151c1e4efdb8e2e0502e473002f5c8b7d294ef3039d",
+    "mp4spatialdec/src/sac_bitinput.h": "48c62fde8841eeb9530d492cb62668d070d65c8b1290865b5d9e87af67b1a7be",
+    "mp4spatialdec/src/sac_bitstream.h": "bbd7f0e75e330351b9e392f548c3d5eb16bc3f2c9e9e5d3164f62c2a365fb9d5",
+    "mp4spatialdec/src/sac_blind.c": "e17ba7bee6b7914cdc2395886888a65638ef8c5a79808baa25eaf27ca5a8f3d3",
+    "mp4spatialdec/src/sac_blind.h": "56afa949e83afa46093ae8833d949e5a8ec25d823c29ebec1aa4c6808dbefdef",
+    "mp4spatialdec/src/sac_calcM1andM2.c": "ebdb752a1d74a5f7e5638366867b3b477918aa9f4d94169ee3b2e30bfbce6153",
+    "mp4spatialdec/src/sac_calcM1andM2.h": "13302d76d80a2f307cbe6c24342c83a7007c5f0caeae43506ebcee26d117ef6a",
+    "mp4spatialdec/src/sac_chandefs.h": "c659b5e1cbcf8fdd5d95d6d6a78aff5a2a75ee6b25bbd93f006fb65ac74922fc",
+    "mp4spatialdec/src/sac_config.c": "0e0c1d9c1c1307141c4ee417da5d821b844c7852442cf45e6ce8de5ed83855f1",
+    "mp4spatialdec/src/sac_config.h": "98cafcd214c0e0199382a213baa58e33a9bfc72cbaf881a39373b23633f6f49f",
+    "mp4spatialdec/src/sac_dec.c": "06b308c62ee31705d47a37d779e2ac8ba6ce7acad9c668624ae14c242a36438b",
+    "mp4spatialdec/src/sac_dec.h": "6843210a6a157963f22440393fd9e57ef1accbd44abb98d81d5ecddd7218c620",
+    "mp4spatialdec/src/sac_decor.c": "640a0e5d3a4cdf9f344f48c84c937d11f5086bc646d32fdc741c8f630f0f3f65",
+    "mp4spatialdec/src/sac_decor.h": "b164c23df214a1b315d1452aaebba77df962dac3aa281ff5a9267e3788ad0c60",
+    "mp4spatialdec/src/sac_hrtf.c": "e2a6a4f93d162719c6d84481ab2bcd84dd35d8bbe45b7dd48f177e37f17f4673",
+    "mp4spatialdec/src/sac_hrtf.h": "aaeeeb97daf1658fb1b88418e8ae3ecf3ae0609cf31ce9f1508e5abef1e5f15c",
+    "mp4spatialdec/src/sac_hrtffilter.c": "7b403c4edf90b11bda78deb392fedcc17496ff16736ec87062c7f948cebed9f6",
+    "mp4spatialdec/src/sac_huff_nodes.h": "30a891ae0628351eca1393c1d457fe85c4a3126c2bf95158edc9c0fc0be106d7",
+    "mp4spatialdec/src/sac_hybfilter.c": "3783733c9376b173c5eabd0e06838deba359eb579648ca10595f7fd13332d7a2",
+    "mp4spatialdec/src/sac_hybfilter.h": "3b1dd764146cf2baecddf81aa64d788e5c50cae39a7bb99bfdd020a3a47f7d94",
+    "mp4spatialdec/src/sac_interface.h": "c74e5f79788c095c67a8ea7aea4c7dcf3590c746f98928bd766ef1bbcfff3fd6",
+    "mp4spatialdec/src/sac_intrins.h": "df02c408033f72696b1fd4256a196879172cf95b05eca24b37895c921de620ad",
+    "mp4spatialdec/src/sac_mdct2qmf.c": "b85d0482c8e2f5913db334d905e2572fa1b7a21db583a79c98f3420b7ee3ecf8",
+    "mp4spatialdec/src/sac_mdct2qmf.h": "def0677f937c16933398bb4e46bc0ca96eac543764131eb4ea2bd5d469d5a896",
+    "mp4spatialdec/src/sac_mdct2qmf_wf_tables.c": "24d9245c46c8e138968d69634052eeabc953975dae7b3ea8e91257d29104d88a",
+    "mp4spatialdec/src/sac_mdct2qmf_wf_tables.h": "329a0a874c16b8b0eac248ac2524ffc36463a93724ed80b61bc806b990a8bbac",
+    "mp4spatialdec/src/sac_nlc_dec.c": "e67dcb400cf52e0d4ad1058ba2484ead2ae47754af4e56e02c339663e92466f8",
+    "mp4spatialdec/src/sac_nlc_dec.h": "a6efdaf3de5a443d19a18337a011fae38209ba655497cf81277089c23418228d",
+    "mp4spatialdec/src/sac_nodes_cld.c": "cee880909c6012c6e5cfa26117616460a17d2f6b4f3d59062edac5e963f8676b",
+    "mp4spatialdec/src/sac_nodes_cpc.c": "39a20c7f78777ab868b12c638781437aeb08e388ea319c6e8aa2cb166b9fc73b",
+    "mp4spatialdec/src/sac_nodes_icc.c": "cf6252944f76916900d543fa833e9627d2d758f2c016a4f5d52c7cc5cfcacbbb",
+    "mp4spatialdec/src/sac_nodes_pt0.c": "a57206780aa20ad600fc1687ad9ff8e3d812c2de09ef762faa59dbeb90abe7ff",
+    "mp4spatialdec/src/sac_nodes_reshape.c": "605b9b2710c73e8254df90f6c9d80bf36f08c0ad17b3518ab71b5282faec0e0a",
+    "mp4spatialdec/src/sac_parallelReverb.c": "db08156f6c7039ea204a0e3f7706ab760cb8bcc28026adfc87b85917444c9f9b",
+    "mp4spatialdec/src/sac_parallelReverb.h": "7b4c31be04ce47082f3055b8070f0e3637434466f36578b7e04962f593be6709",
+    "mp4spatialdec/src/sac_partiallyComplex.c": "07540fc511c5d80070c2b507cdbcf04bc6401c791530c63899d380f102812441",
+    "mp4spatialdec/src/sac_polyphase.c": "7d5c4f41ebfb9c9ed789af3ec3cb8892f1ee6ec89037fc31fb3077a73d3b30df",
+    "mp4spatialdec/src/sac_polyphase.h": "72389c5e037ce65468433399f6ca731561e2d39393f01d52d7eb55e449928ba7",
+    "mp4spatialdec/src/sac_process.c": "548ed21a04e9a2c0e11c8fc426322cefd2b9ab92f3df2a3269a5204c34c8f928",
+    "mp4spatialdec/src/sac_process.h": "5a56055e1bbef73e72d403758dce370dc6abdae07dad750efe891c7e7ca81afb",
+    "mp4spatialdec/src/sac_resdecode.c": "59874d2419b6b76b8e473acc8d36027f6658b19b3ed17cb849d36bb159dbcfc4",
+    "mp4spatialdec/src/sac_resdecode.h": "4cb0c729410bf769dfb7a5790b5a64ed68c79050c61f5251482cfc70be241117",
+    "mp4spatialdec/src/sac_resdefs.h": "6f7190d146ff21a295479b98c1974ec95196a1702b94a4df5e6235bfc1761ecc",
+    "mp4spatialdec/src/sac_reshapeBBEnv.c": "d81fec8970a18fd8445531dbcf64a84d79132c214815c0a347b62160af66f857",
+    "mp4spatialdec/src/sac_reshapeBBEnv.h": "8da9b98fa8cd2f53184bc2010648d77dee5695521adaeccf549d38a7fa071515",
+    "mp4spatialdec/src/sac_reshuffdec.h": "cccf91b21ad32b81392266422dee78f3d99ec0ae0e9bdc621cf2945f2ec85dfa",
+    "mp4spatialdec/src/sac_reshuffdec1.c": "4b89c31e26743cace5ed55b4b5bfb9df4b8013d46ddeeba65c29a19acff5cffc",
+    "mp4spatialdec/src/sac_reshuffdec2.c": "407b9f932331dd12d98d4cd797bf0f2547fe1bad09e5fc5b4db3149e686e6033",
+    "mp4spatialdec/src/sac_reshuffdec3.c": "32ed24a4b5910576b9a03d7d88d3918d46a9dc56de931ec35e8502e4fb110ae2",
+    "mp4spatialdec/src/sac_reshuffdec_intern.h": "01f40d3122b52be9beda3911ed40e5e691e81fd1b4c8e864ed79d7ef820ba607",
+    "mp4spatialdec/src/sac_reshuffinit.c": "690c2bd14f15c87bf5a788e9c3ef42e3aff79fb194b464d435a601ad4314dd46",
+    "mp4spatialdec/src/sac_reshuffinit.h": "46453abe23df59705d65d4e171e69fa1d6cc95a28582cff4c8c080fca458a9ab",
+    "mp4spatialdec/src/sac_reshufftables.c": "bff84536772d2e76d25c5193be5efc097c4d57fbf77a299ee75ed73dee693bc8",
+    "mp4spatialdec/src/sac_reshufftables.h": "21ec60d1c247080c1a49f3b4d1e5f44c893c3931b5b347c6356b36f60367c93a",
+    "mp4spatialdec/src/sac_resintrins.c": "77f2b8092b581a7dd745d770b54fe499fcb5be315ff7d7ceb03b9e8f3b95a7d0",
+    "mp4spatialdec/src/sac_resintrins.h": "f765eb0ee5dc0d7f3979d64fbb2833469d9dbaae5b649fccdadf75c0a09bb824",
+    "mp4spatialdec/src/sac_restns.c": "fea054604f7a44c9affb9797764f79a613015770d89f17bb76ccdbe81d9b1914",
+    "mp4spatialdec/src/sac_restns.h": "b53cb63ee8c5a1fcd63157299347ca308d7ea00dbcca8b3de8ee4932b68c02c0",
+    "mp4spatialdec/src/sac_sbrconst.h": "bc3338fbd3800bac6e0187c9b415b832ffb32a415d502c354b69318d8e5d5d6e",
+    "mp4spatialdec/src/sac_smoothing.c": "44bc5636f29e72156de99b14a8756c49611cb427b4f98860507b926be9ba1bfa",
+    "mp4spatialdec/src/sac_smoothing.h": "a4b2b5dbc8e3842364239415db4d2b4d49e375ba5efbb4607acc8efb3157c5fe",
+    "mp4spatialdec/src/sac_stream.h": "f870b62be2196e3a83f1a0b1c71d082dbc94b1a7b94092411b55376e45ba9555",
+    "mp4spatialdec/src/sac_tonality.c": "f302f748b2a634ce9ff33859a64ab1b19caa33dd1f3cd720241733b12afc1637",
+    "mp4spatialdec/src/sac_tonality.h": "f50baeb5f092289c71190fdeb0465c4d43e6e207ab89a4522ee69cbd9fb5c226",
+    "mp4spatialdec/src/sac_TPprocess.c": "fc18e7e5851122c24d2c1317e39cf5269343f367bfe5446bd9833e06d772c9fe",
+    "mp4spatialdec/src/sac_TPprocess.h": "e3518bfccb1e56fd177f1fa72f1cd20be4bf1e7616877c047cd798dd7a65f370",
+    "mp4spatialdec/src/sac_types.h": "32a9631784683cb08c41b0bf78962249f52d1b2f3077f46c8575826db7e8e59d",
+    "mp4spatialdec/src/spatial_bdreader.c": "ca37659407abb1f0d57d844e3e5f37f5683cbd83ce4bfeda6980c3e1fe4e4d13",
+    "mp4spatialdec/src/spatial_bdreader.h": "aee41adeed777f733b27673752a3dbcbc08680fd752933cc530d44469dd4d660",
+    "mp4spatialdec/src/spatial_filereader.c": "dd6748832fca89779096350face97a190823d9fd28276ccebd852c516ef281c5",
+    "mp4spatialdec/src/spatial_filereader.h": "ab412f8afa5e74f698451ae2a33912087c644be89275ccadbe1339ec3dc4732b",
+    "mp4spatialdec/src/spatial_frontend.c": "03322c8bd0b0c67c9ec1f9a1781fa19e239986569608b4b6eacd2244b9c81fde",
+    "mp4spatialdec/src/spatial_hrtfreader.c": "5837ba5c5219e9ab327ee82abb0ea587835279d3bbf700ddec2b99dbf8b57b62",
+    "mp4spatialdec/src/spatial_hrtfreader.h": "7580430be6f3f24b183d584d21160d4368fa973c843fe8432698b54d9c6b5739"
+  },
+  "driver_sha256": "13732a6107c20cef6522169688791fdfc73af422095671658d808076a61c9b98",
+  "interpolation_wrapper_sha256": "4e12eab537d64daa85f1eac74e150593b4f7c01d18e6d82f2d34977ee9cefad2",
+  "input_sha256": "0c43c82fbfcfad1897ab167068bca1dfc326a241e175ea1eb08d8a5b64936acc",
+  "original_sha256": "d9a8655b4e5efa1329d629f88bde962b640efe9d1a5c22f24f84df56eadfa64e",
+  "control_sha256": "a882c2e99a49b11b7bdae8f3b3f07542fc1e2e176ab4bf3b8884a7c998285e22",
+  "precision_control": [
+    {
+      "original_sha256": "5c93ed3ebbc6b854d66b05843c4db08228be81889c97e87b49bec9bc64786524",
+      "control_sha256": "9fe20f35b3ca0a448b40f74359b966ea687ace42115bd758018898e7ed77eb2c",
+      "declaration": "static float\nfactorFunct(float ottVsTotDb,\n            int quantMode)"
+    },
+    {
+      "original_sha256": "5953b873867c758071b9f620a52e953b8b70606ec332545e9b06b78f4496df74",
+      "control_sha256": "ea4776e58edbfeae92885a3531842963dbc04555487714d70c95a1277a7fdfb3",
+      "declaration": "static float\nfactorFunct(float ottVsTotDb,\n            int quantMode)"
+    },
+    {
+      "original_sha256": "3e1fd99864c56ccb6836ce9631eee77106c44f7405ade069a2d78b7b09fdec27",
+      "control_sha256": "c29535cf1a0b838f983f6c910cd505c40c04e4421a5745819ac182c3d78ae5cf",
+      "declaration": "static void\nfactorCLD(float *cldDb,\n          float ottVsTotDb,\n          float *ottVsTotDb1,\n          float *ottVsTotDb2,\n          int quantMode)"
+    },
+    {
+      "original_sha256": "9ea784ddaef7e9ffb87eff0a3281ada6dd9a26984188defe48c60d0992e31035",
+      "control_sha256": "d9fd68d1e11148fcc40e855551c43fbe65d6c53f3ca15e2bdb50f50bb5c342e5",
+      "declaration": "static void\nfactorCLD(int *idx,\n          float ottVsTotDb,\n          float *ottVsTotDb1,\n          float *ottVsTotDb2,\n          int quantMode)"
+    }
+  ],
+  "results": [
+    {
+      "control": "original-float",
+      "energy_cases": 1116,
+      "index_mismatches": [],
+      "nonfinite_energy": [
+        {
+          "case": 341,
+          "field": "left",
+          "expected": {
+            "mode": 0,
+            "index": -15,
+            "input": -1000.0,
+            "adjusted": -15,
+            "left": -1150.0,
+            "right": -1000.0
+          },
+          "actual": {
+            "type": 1,
+            "index": -15,
+            "left": null,
+            "right": null
+          }
+        },
+        {
+          "case": 341,
+          "field": "right",
+          "expected": {
+            "mode": 0,
+            "index": -15,
+            "input": -1000.0,
+            "adjusted": -15,
+            "left": -1150.0,
+            "right": -1000.0
+          },
+          "actual": {
+            "type": 1,
+            "index": -15,
+            "left": null,
+            "right": null
+          }
+        },
+        {
+          "case": 342,
+          "field": "left",
+          "expected": {
+            "mode": 0,
+            "index": -14,
+            "input": -1000.0,
+            "adjusted": -14,
+            "left": -1045.0001373338023,
+            "right": -1000.0001373338024
+          },
+          "actual": {
+            "type": 1,
+            "index": -14,
+            "left": null,
+            "right": null
+          }
+        },
+        {
+          "case": 342,
+          "field": "right",
+          "expected": {
+            "mode": 0,
+            "index": -14,
+            "input": -1000.0,
+            "adjusted": -14,
+            "left": -1045.0001373338023,
+            "right": -1000.0001373338024
+          },
+          "actual": {
+            "type": 1,
+            "index": -14,
+            "left": null,
+            "right": null
+          }
+        },
+        {
+          "case": 343,
+          "field": "left",
+          "expected": {
+            "mode": 0,
+            "index": -13,
+            "input": -1000.0,
+            "adjusted": -13,
+            "left": -1040.0004342727686,
+            "right": -1000.0004342727686
+          },
+          "actual": {
+            "type": 1,
+            "index": -13,
+            "left": null,
+            "right": null
+          }
+        },
+        {
+          "case": 343,
+          "field": "right",
+          "expected": {
+            "mode": 0,
+            "index": -13,
+            "input": -1000.0,
+            "adjusted": -13,
+            "left": -1040.0004342727686,
+            "right": -1000.0004342727686
+          },
+          "actual": {
+            "type": 1,
+            "index": -13,
+            "left": null,
+            "right": null
+          }
+        },
+        {
+          "case": 344,
+          "field": "left",
+          "expected": {
+            "mode": 0,
+            "index": -12,
+            "input": -1000.0,
+            "adjusted": -12,
+            "left": -1035.0013731426366,
+            "right": -1000.0013731426366
+          },
+          "actual": {
+            "type": 1,
+            "index": -12,
+            "left": null,
+            "right": null
+          }
+        },
+        {
+          "case": 344,
+          "field": "right",
+          "expected": {
+            "mode": 0,
+            "index": -12,
+            "input": -1000.0,
+            "adjusted": -12,
+            "left": -1035.0013731426366,
+            "right": -1000.0013731426366
+          },
+          "actual": {
+            "type": 1,
+            "index": -12,
+            "left": null,
+            "right": null
+          }
+        },
+        {
+          "case": 345,
+          "field": "left",
+          "expected": {
+            "mode": 0,
+            "index": -11,
+            "input": -1000.0,
+            "adjusted": -11,
+            "left": -1030.0043407747933,
+            "right": -1000.0043407747931
+          },
+          "actual": {
+            "type": 1,
+            "index": -11,
+            "left": null,
+            "right": null
+          }
+        },
+        {
+          "case": 345,
+          "field": "right",
+          "expected": {
+            "mode": 0,
+            "index": -11,
+            "input": -1000.0,
+            "adjusted": -11,
+            "left": -1030.0043407747933,
+            "right": -1000.0043407747931
+          },
+          "actual": {
+            "type": 1,
+            "index": -11,
+            "left": null,
+            "right": null
+          }
+        },
+        {
+          "case": 346,
+          "field": "left",
+          "expected": {
+            "mode": 0,
+            "index": -10,
+            "input": -1000.0,
+            "adjusted": -10,
+            "left": -1025.0137119283268,
+            "right": -1000.0137119283269
+          },
+          "actual": {
+            "type": 1,
+            "index": -10,
+            "left": null,
+            "right": null
+          }
+        },
+        {
+          "case": 346,
+          "field": "right",
+          "expected": {
+            "mode": 0,
+            "index": -10,
+            "input": -1000.0,
+            "adjusted": -10,
+            "left": -1025.0137119283268,
+            "right": -1000.0137119283269
+          },
+          "actual": {
+            "type": 1,
+            "index": -10,
+            "left": null,
+            "right": null
+          }
+        },
+        {
+          "case": 347,
+          "field": "left",
+          "expected": {
+            "mode": 0,
+            "index": -9,
+            "input": -1000.0,
+            "adjusted": -9,
+            "left": -1022.0273160433494,
+            "right": -1000.0273160433494
+          },
+          "actual": {
+            "type": 1,
+            "index": -9,
+            "left": null,
+            "right": null
+          }
+        },
+        {
+          "case": 347,
+          "field": "right",
+          "expected": {
+            "mode": 0,
+            "index": -9,
+            "input": -1000.0,
+            "adjusted": -9,
+            "left": -1022.0273160433494,
+            "right": -1000.0273160433494
+          },
+          "actual": {
+            "type": 1,
+            "index": -9,
+            "left": null,
+            "right": null
+          }
+        },
+        {
+          "case": 348,
+          "field": "left",
+          "expected": {
+            "mode": 0,
+            "index": -8,
+            "input": -1000.0,
+            "adjusted": -8,
+            "left": -1019.0543331422004,
+            "right": -1000.0543331422004
+          },
+          "actual": {
+            "type": 1,
+            "index": -8,
+            "left": null,
+            "right": null
+          }
+        },
+        {
+          "case": 348,
+          "field": "right",
+          "expected": {
+            "mode": 0,
+            "index": -8,
+            "input": -1000.0,
+            "adjusted": -8,
+            "left": -1019.0543331422004,
+            "right": -1000.0543331422004
+          },
+          "actual": {
+            "type": 1,
+            "index": -8,
+            "left": null,
+            "right": null
+          }
+        },
+        {
+          "case": 349,
+          "field": "left",
+          "expected": {
+            "mode": 0,
+            "index": -7,
+            "input": -1000.0,
+            "adjusted": -7,
+            "left": -1016.1077422551195,
+            "right": -1000.1077422551195
+          },
+          "actual": {
+            "type": 1,
+            "index": -7,
+            "left": null,
+            "right": null
+          }
+        },
+        {
+          "case": 349,
+          "field": "right",
+          "expected": {
+            "mode": 0,
+            "index": -7,
+            "input": -1000.0,
+            "adjusted": -7,
+            "left": -1016.1077422551195,
+            "right": -1000.1077422551195
+          },
+          "actual": {
+            "type": 1,
+            "index": -7,
+            "left": null,
+            "right": null
+          }
+        },
+        {
+          "case": 350,
+          "field": "left",
+          "expected": {
+            "mode": 0,
+            "index": -6,
+            "input": -1000.0,
+            "adjusted": -6,
+            "left": -1013.2123840191425,
+            "right": -1000.2123840191425
+          },
+          "actual": {
+            "type": 1,
+            "index": -6,
+            "left": null,
+            "right": null
+          }
+        },
+        {
+          "case": 350,
+          "field": "right",
+          "expected": {
+            "mode": 0,
+            "index": -6,
+            "input": -1000.0,
+            "adjusted": -6,
+            "left": -1013.2123840191425,
+            "right": -1000.2123840191425
+          },
+          "actual": {
+            "type": 1,
+            "index": -6,
+            "left": null,
+            "right": null
+          }
+        },
+        {
+          "case": 351,
+          "field": "left",
+          "expected": {
+            "mode": 0,
+            "index": -5,
+            "input": -1000.0,
+            "adjusted": -5,
+            "left": -1010.4139268515822,
+            "right": -1000.4139268515822
+          },
+          "actual": {
+            "type": 1,
+            "index": -5,
+            "left": null,
+            "right": null
+          }
+        },
+        {
+          "case": 351,
+          "field": "right",
+          "expected": {
+            "mode": 0,
+            "index": -5,
+            "input": -1000.0,
+            "adjusted": -5,
+            "left": -1010.4139268515822,
+            "right": -1000.4139268515822
+          },
+          "actual": {
+            "type": 1,
+            "index": -5,
+            "left": null,
+            "right": null
+          }
+        },
+        {
+          "case": 352,
+          "field": "left",
+          "expected": {
+            "mode": 0,
+            "index": -4,
+            "input": -1000.0,
+            "adjusted": -4,
+            "left": -1008.6389203414338,
+            "right": -1000.6389203414338
+          },
+          "actual": {
+            "type": 1,
+            "index": -4,
+            "left": null,
+            "right": null
+          }
+        },
+        {
+          "case": 352,
+          "field": "right",
+          "expected": {
+            "mode": 0,
+            "index": -4,
+            "input": -1000.0,
+            "adjusted": -4,
+            "left": -1008.6389203414338,
+            "right": -1000.6389203414338
+          },
+          "actual": {
+            "type": 1,
+            "index": -4,
+            "left": null,
+            "right": null
+          }
+        },
+        {
+          "case": 353,
+          "field": "left",
+          "expected": {
+            "mode": 0,
+            "index": -3,
+            "input": -1000.0,
+            "adjusted": -3,
+            "left": -1006.9732279370869,
+            "right": -1000.9732279370869
+          },
+          "actual": {
+            "type": 1,
+            "index": -3,
+            "left": null,
+            "right": null
+          }
+        },
+        {
+          "case": 353,
+          "field": "right",
+          "expected": {
+            "mode": 0,
+            "index": -3,
+            "input": -1000.0,
+            "adjusted": -3,
+            "left": -1006.9732279370869,
+            "right": -1000.9732279370869
+          },
+          "actual": {
+            "type": 1,
+            "index": -3,
+            "left": null,
+            "right": null
+          }
+        },
+        {
+          "case": 354,
+          "field": "left",
+          "expected": {
+            "mode": 0,
+            "index": -2,
+            "input": -1000.0,
+            "adjusted": -2,
+            "left": -1005.455404631093,
+            "right": -1001.455404631093
+          },
+          "actual": {
+            "type": 1,
+            "index": -2,
+            "left": null,
+            "right": null
+          }
+        },
+        {
+          "case": 354,
+          "field": "right",
+          "expected": {
+            "mode": 0,
+            "index": -2,
+            "input": -1000.0,
+            "adjusted": -2,
+            "left": -1005.455404631093,
+            "right": -1001.455404631093
+          },
+          "actual": {
+            "type": 1,
+            "index": -2,
+            "left": null,
+            "right": null
+          }
+        },
+        {
+          "case": 355,
+          "field": "left",
+          "expected": {
+            "mode": 0,
+            "index": -1,
+            "input": -1000.0,
+            "adjusted": -1,
+            "left": -1004.1244260279434,
+            "right": -1002.1244260279434
+          },
+          "actual": {
+            "type": 1,
+            "index": -1,
+            "left": null,
+            "right": null
+          }
+        },
+        {
+          "case": 355,
+          "field": "right",
+          "expected": {
+            "mode": 0,
+            "index": -1,
+            "input": -1000.0,
+            "adjusted": -1,
+            "left": -1004.1244260279434,
+            "right": -1002.1244260279434
+          },
+          "actual": {
+            "type": 1,
+            "index": -1,
+            "left": null,
+            "right": null
+          }
+        },
+        {
+          "case": 356,
+          "field": "left",
+          "expected": {
+            "mode": 0,
+            "index": 0,
+            "input": -1000.0,
+            "adjusted": 0,
+            "left": -1003.0102999566398,
+            "right": -1003.0102999566398
+          },
+          "actual": {
+            "type": 1,
+            "index": 0,
+            "left": null,
+            "right": null
+          }
+        },
+        {
+          "case": 356,
+          "field": "right",
+          "expected": {
+            "mode": 0,
+            "index": 0,
+            "input": -1000.0,
+            "adjusted": 0,
+            "left": -1003.0102999566398,
+            "right": -1003.0102999566398
+          },
+          "actual": {
+            "type": 1,
+            "index": 0,
+            "left": null,
+            "right": null
+          }
+        },
+        {
+          "case": 357,
+          "field": "left",
+          "expected": {
+            "mode": 0,
+            "index": 1,
+            "input": -1000.0,
+            "adjusted": 1,
+            "left": -1002.1244260279434,
+            "right": -1004.1244260279434
+          },
+          "actual": {
+            "type": 1,
+            "index": 1,
+            "left": null,
+            "right": null
+          }
+        },
+        {
+          "case": 357,
+          "field": "right",
+          "expected": {
+            "mode": 0,
+            "index": 1,
+            "input": -1000.0,
+            "adjusted": 1,
+            "left": -1002.1244260279434,
+            "right": -1004.1244260279434
+          },
+          "actual": {
+            "type": 1,
+            "index": 1,
+            "left": null,
+            "right": null
+          }
+        },
+        {
+          "case": 358,
+          "field": "left",
+          "expected": {
+            "mode": 0,
+            "index": 2,
+            "input": -1000.0,
+            "adjusted": 2,
+            "left": -1001.455404631093,
+            "right": -1005.455404631093
+          },
+          "actual": {
+            "type": 1,
+            "index": 2,
+            "left": null,
+            "right": null
+          }
+        },
+        {
+          "case": 358,
+          "field": "right",
+          "expected": {
+            "mode": 0,
+            "index": 2,
+            "input": -1000.0,
+            "adjusted": 2,
+            "left": -1001.455404631093,
+            "right": -1005.455404631093
+          },
+          "actual": {
+            "type": 1,
+            "index": 2,
+            "left": null,
+            "right": null
+          }
+        },
+        {
+          "case": 359,
+          "field": "left",
+          "expected": {
+            "mode": 0,
+            "index": 3,
+            "input": -1000.0,
+            "adjusted": 3,
+            "left": -1000.9732279370869,
+            "right": -1006.9732279370869
+          },
+          "actual": {
+            "type": 1,
+            "index": 3,
+            "left": null,
+            "right": null
+          }
+        },
+        {
+          "case": 359,
+          "field": "right",
+          "expected": {
+            "mode": 0,
+            "index": 3,
+            "input": -1000.0,
+            "adjusted": 3,
+            "left": -1000.9732279370869,
+            "right": -1006.9732279370869
+          },
+          "actual": {
+            "type": 1,
+            "index": 3,
+            "left": null,
+            "right": null
+          }
+        },
+        {
+          "case": 360,
+          "field": "left",
+          "expected": {
+            "mode": 0,
+            "index": 4,
+            "input": -1000.0,
+            "adjusted": 4,
+            "left": -1000.6389203414338,
+            "right": -1008.6389203414338
+          },
+          "actual": {
+            "type": 1,
+            "index": 4,
+            "left": null,
+            "right": null
+          }
+        },
+        {
+          "case": 360,
+          "field": "right",
+          "expected": {
+            "mode": 0,
+            "index": 4,
+            "input": -1000.0,
+            "adjusted": 4,
+            "left": -1000.6389203414338,
+            "right": -1008.6389203414338
+          },
+          "actual": {
+            "type": 1,
+            "index": 4,
+            "left": null,
+            "right": null
+          }
+        },
+        {
+          "case": 361,
+          "field": "left",
+          "expected": {
+            "mode": 0,
+            "index": 5,
+            "input": -1000.0,
+            "adjusted": 5,
+            "left": -1000.4139268515822,
+            "right": -1010.4139268515822
+          },
+          "actual": {
+            "type": 1,
+            "index": 5,
+            "left": null,
+            "right": null
+          }
+        },
+        {
+          "case": 361,
+          "field": "right",
+          "expected": {
+            "mode": 0,
+            "index": 5,
+            "input": -1000.0,
+            "adjusted": 5,
+            "left": -1000.4139268515822,
+            "right": -1010.4139268515822
+          },
+          "actual": {
+            "type": 1,
+            "index": 5,
+            "left": null,
+            "right": null
+          }
+        },
+        {
+          "case": 362,
+          "field": "left",
+          "expected": {
+            "mode": 0,
+            "index": 6,
+            "input": -1000.0,
+            "adjusted": 6,
+            "left": -1000.2123840191425,
+            "right": -1013.2123840191425
+          },
+          "actual": {
+            "type": 1,
+            "index": 6,
+            "left": null,
+            "right": null
+          }
+        },
+        {
+          "case": 362,
+          "field": "right",
+          "expected": {
+            "mode": 0,
+            "index": 6,
+            "input": -1000.0,
+            "adjusted": 6,
+            "left": -1000.2123840191425,
+            "right": -1013.2123840191425
+          },
+          "actual": {
+            "type": 1,
+            "index": 6,
+            "left": null,
+            "right": null
+          }
+        },
+        {
+          "case": 363,
+          "field": "left",
+          "expected": {
+            "mode": 0,
+            "index": 7,
+            "input": -1000.0,
+            "adjusted": 7,
+            "left": -1000.1077422551195,
+            "right": -1016.1077422551195
+          },
+          "actual": {
+            "type": 1,
+            "index": 7,
+            "left": null,
+            "right": null
+          }
+        },
+        {
+          "case": 363,
+          "field": "right",
+          "expected": {
+            "mode": 0,
+            "index": 7,
+            "input": -1000.0,
+            "adjusted": 7,
+            "left": -1000.1077422551195,
+            "right": -1016.1077422551195
+          },
+          "actual": {
+            "type": 1,
+            "index": 7,
+            "left": null,
+            "right": null
+          }
+        },
+        {
+          "case": 364,
+          "field": "left",
+          "expected": {
+            "mode": 0,
+            "index": 8,
+            "input": -1000.0,
+            "adjusted": 8,
+            "left": -1000.0543331422004,
+            "right": -1019.0543331422004
+          },
+          "actual": {
+            "type": 1,
+            "index": 8,
+            "left": null,
+            "right": null
+          }
+        },
+        {
+          "case": 364,
+          "field": "right",
+          "expected": {
+            "mode": 0,
+            "index": 8,
+            "input": -1000.0,
+            "adjusted": 8,
+            "left": -1000.0543331422004,
+            "right": -1019.0543331422004
+          },
+          "actual": {
+            "type": 1,
+            "index": 8,
+            "left": null,
+            "right": null
+          }
+        },
+        {
+          "case": 365,
+          "field": "left",
+          "expected": {
+            "mode": 0,
+            "index": 9,
+            "input": -1000.0,
+            "adjusted": 9,
+            "left": -1000.0273160433494,
+            "right": -1022.0273160433494
+          },
+          "actual": {
+            "type": 1,
+            "index": 9,
+            "left": null,
+            "right": null
+          }
+        },
+        {
+          "case": 365,
+          "field": "right",
+          "expected": {
+            "mode": 0,
+            "index": 9,
+            "input": -1000.0,
+            "adjusted": 9,
+            "left": -1000.0273160433494,
+            "right": -1022.0273160433494
+          },
+          "actual": {
+            "type": 1,
+            "index": 9,
+            "left": null,
+            "right": null
+          }
+        },
+        {
+          "case": 366,
+          "field": "left",
+          "expected": {
+            "mode": 0,
+            "index": 10,
+            "input": -1000.0,
+            "adjusted": 10,
+            "left": -1000.0137119283269,
+            "right": -1025.0137119283268
+          },
+          "actual": {
+            "type": 1,
+            "index": 10,
+            "left": null,
+            "right": null
+          }
+        },
+        {
+          "case": 366,
+          "field": "right",
+          "expected": {
+            "mode": 0,
+            "index": 10,
+            "input": -1000.0,
+            "adjusted": 10,
+            "left": -1000.0137119283269,
+            "right": -1025.0137119283268
+          },
+          "actual": {
+            "type": 1,
+            "index": 10,
+            "left": null,
+            "right": null
+          }
+        },
+        {
+          "case": 367,
+          "field": "left",
+          "expected": {
+            "mode": 0,
+            "index": 11,
+            "input": -1000.0,
+            "adjusted": 11,
+            "left": -1000.0043407747931,
+            "right": -1030.0043407747933
+          },
+          "actual": {
+            "type": 1,
+            "index": 11,
+            "left": null,
+            "right": null
+          }
+        },
+        {
+          "case": 367,
+          "field": "right",
+          "expected": {
+            "mode": 0,
+            "index": 11,
+            "input": -1000.0,
+            "adjusted": 11,
+            "left": -1000.0043407747931,
+            "right": -1030.0043407747933
+          },
+          "actual": {
+            "type": 1,
+            "index": 11,
+            "left": null,
+            "right": null
+          }
+        },
+        {
+          "case": 368,
+          "field": "left",
+          "expected": {
+            "mode": 0,
+            "index": 12,
+            "input": -1000.0,
+            "adjusted": 12,
+            "left": -1000.0013731426366,
+            "right": -1035.0013731426366
+          },
+          "actual": {
+            "type": 1,
+            "index": 12,
+            "left": null,
+            "right": null
+          }
+        },
+        {
+          "case": 368,
+          "field": "right",
+          "expected": {
+            "mode": 0,
+            "index": 12,
+            "input": -1000.0,
+            "adjusted": 12,
+            "left": -1000.0013731426366,
+            "right": -1035.0013731426366
+          },
+          "actual": {
+            "type": 1,
+            "index": 12,
+            "left": null,
+            "right": null
+          }
+        },
+        {
+          "case": 369,
+          "field": "left",
+          "expected": {
+            "mode": 0,
+            "index": 13,
+            "input": -1000.0,
+            "adjusted": 13,
+            "left": -1000.0004342727686,
+            "right": -1040.0004342727686
+          },
+          "actual": {
+            "type": 1,
+            "index": 13,
+            "left": null,
+            "right": null
+          }
+        },
+        {
+          "case": 369,
+          "field": "right",
+          "expected": {
+            "mode": 0,
+            "index": 13,
+            "input": -1000.0,
+            "adjusted": 13,
+            "left": -1000.0004342727686,
+            "right": -1040.0004342727686
+          },
+          "actual": {
+            "type": 1,
+            "index": 13,
+            "left": null,
+            "right": null
+          }
+        },
+        {
+          "case": 370,
+          "field": "left",
+          "expected": {
+            "mode": 0,
+            "index": 14,
+            "input": -1000.0,
+            "adjusted": 14,
+            "left": -1000.0001373338024,
+            "right": -1045.0001373338023
+          },
+          "actual": {
+            "type": 1,
+            "index": 14,
+            "left": null,
+            "right": null
+          }
+        },
+        {
+          "case": 370,
+          "field": "right",
+          "expected": {
+            "mode": 0,
+            "index": 14,
+            "input": -1000.0,
+            "adjusted": 14,
+            "left": -1000.0001373338024,
+            "right": -1045.0001373338023
+          },
+          "actual": {
+            "type": 1,
+            "index": 14,
+            "left": null,
+            "right": null
+          }
+        },
+        {
+          "case": 371,
+          "field": "left",
+          "expected": {
+            "mode": 0,
+            "index": 15,
+            "input": -1000.0,
+            "adjusted": 15,
+            "left": -1000.0,
+            "right": -1150.0
+          },
+          "actual": {
+            "type": 1,
+            "index": 15,
+            "left": null,
+            "right": null
+          }
+        },
+        {
+          "case": 371,
+          "field": "right",
+          "expected": {
+            "mode": 0,
+            "index": 15,
+            "input": -1000.0,
+            "adjusted": 15,
+            "left": -1000.0,
+            "right": -1150.0
+          },
+          "actual": {
+            "type": 1,
+            "index": 15,
+            "left": null,
+            "right": null
+          }
+        },
+        {
+          "case": 713,
+          "field": "left",
+          "expected": {
+            "mode": 1,
+            "index": -15,
+            "input": -1000.0,
+            "adjusted": -15,
+            "left": -1150.0,
+            "right": -1000.0
+          },
+          "actual": {
+            "type": 1,
+            "index": -15,
+            "left": null,
+            "right": null
+          }
+        },
+        {
+          "case": 713,
+          "field": "right",
+          "expected": {
+            "mode": 1,
+            "index": -15,
+            "input": -1000.0,
+            "adjusted": -15,
+            "left": -1150.0,
+            "right": -1000.0
+          },
+          "actual": {
+            "type": 1,
+            "index": -15,
+            "left": null,
+            "right": null
+          }
+        },
+        {
+          "case": 714,
+          "field": "left",
+          "expected": {
+            "mode": 1,
+            "index": -14,
+            "input": -1000.0,
+            "adjusted": -15,
+            "left": -1150.0,
+            "right": -1000.0
+          },
+          "actual": {
+            "type": 1,
+            "index": -15,
+            "left": null,
+            "right": null
+          }
+        },
+        {
+          "case": 714,
+          "field": "right",
+          "expected": {
+            "mode": 1,
+            "index": -14,
+            "input": -1000.0,
+            "adjusted": -15,
+            "left": -1150.0,
+            "right": -1000.0
+          },
+          "actual": {
+            "type": 1,
+            "index": -15,
+            "left": null,
+            "right": null
+          }
+        },
+        {
+          "case": 715,
+          "field": "left",
+          "expected": {
+            "mode": 1,
+            "index": -13,
+            "input": -1000.0,
+            "adjusted": -15,
+            "left": -1150.0,
+            "right": -1000.0
+          },
+          "actual": {
+            "type": 1,
+            "index": -15,
+            "left": null,
+            "right": null
+          }
+        },
+        {
+          "case": 715,
+          "field": "right",
+          "expected": {
+            "mode": 1,
+            "index": -13,
+            "input": -1000.0,
+            "adjusted": -15,
+            "left": -1150.0,
+            "right": -1000.0
+          },
+          "actual": {
+            "type": 1,
+            "index": -15,
+            "left": null,
+            "right": null
+          }
+        },
+        {
+          "case": 716,
+          "field": "left",
+          "expected": {
+            "mode": 1,
+            "index": -12,
+            "input": -1000.0,
+            "adjusted": -15,
+            "left": -1150.0,
+            "right": -1000.0
+          },
+          "actual": {
+            "type": 1,
+            "index": -15,
+            "left": null,
+            "right": null
+          }
+        },
+        {
+          "case": 716,
+          "field": "right",
+          "expected": {
+            "mode": 1,
+            "index": -12,
+            "input": -1000.0,
+            "adjusted": -15,
+            "left": -1150.0,
+            "right": -1000.0
+          },
+          "actual": {
+            "type": 1,
+            "index": -15,
+            "left": null,
+            "right": null
+          }
+        },
+        {
+          "case": 717,
+          "field": "left",
+          "expected": {
+            "mode": 1,
+            "index": -11,
+            "input": -1000.0,
+            "adjusted": -15,
+            "left": -1150.0,
+            "right": -1000.0
+          },
+          "actual": {
+            "type": 1,
+            "index": -15,
+            "left": null,
+            "right": null
+          }
+        },
+        {
+          "case": 717,
+          "field": "right",
+          "expected": {
+            "mode": 1,
+            "index": -11,
+            "input": -1000.0,
+            "adjusted": -15,
+            "left": -1150.0,
+            "right": -1000.0
+          },
+          "actual": {
+            "type": 1,
+            "index": -15,
+            "left": null,
+            "right": null
+          }
+        },
+        {
+          "case": 718,
+          "field": "left",
+          "expected": {
+            "mode": 1,
+            "index": -10,
+            "input": -1000.0,
+            "adjusted": -15,
+            "left": -1150.0,
+            "right": -1000.0
+          },
+          "actual": {
+            "type": 1,
+            "index": -15,
+            "left": null,
+            "right": null
+          }
+        },
+        {
+          "case": 718,
+          "field": "right",
+          "expected": {
+            "mode": 1,
+            "index": -10,
+            "input": -1000.0,
+            "adjusted": -15,
+            "left": -1150.0,
+            "right": -1000.0
+          },
+          "actual": {
+            "type": 1,
+            "index": -15,
+            "left": null,
+            "right": null
+          }
+        },
+        {
+          "case": 719,
+          "field": "left",
+          "expected": {
+            "mode": 1,
+            "index": -9,
+            "input": -1000.0,
+            "adjusted": -15,
+            "left": -1150.0,
+            "right": -1000.0
+          },
+          "actual": {
+            "type": 1,
+            "index": -15,
+            "left": null,
+            "right": null
+          }
+        },
+        {
+          "case": 719,
+          "field": "right",
+          "expected": {
+            "mode": 1,
+            "index": -9,
+            "input": -1000.0,
+            "adjusted": -15,
+            "left": -1150.0,
+            "right": -1000.0
+          },
+          "actual": {
+            "type": 1,
+            "index": -15,
+            "left": null,
+            "right": null
+          }
+        },
+        {
+          "case": 720,
+          "field": "left",
+          "expected": {
+            "mode": 1,
+            "index": -8,
+            "input": -1000.0,
+            "adjusted": -15,
+            "left": -1150.0,
+            "right": -1000.0
+          },
+          "actual": {
+            "type": 1,
+            "index": -15,
+            "left": null,
+            "right": null
+          }
+        },
+        {
+          "case": 720,
+          "field": "right",
+          "expected": {
+            "mode": 1,
+            "index": -8,
+            "input": -1000.0,
+            "adjusted": -15,
+            "left": -1150.0,
+            "right": -1000.0
+          },
+          "actual": {
+            "type": 1,
+            "index": -15,
+            "left": null,
+            "right": null
+          }
+        },
+        {
+          "case": 721,
+          "field": "left",
+          "expected": {
+            "mode": 1,
+            "index": -7,
+            "input": -1000.0,
+            "adjusted": -15,
+            "left": -1150.0,
+            "right": -1000.0
+          },
+          "actual": {
+            "type": 1,
+            "index": -15,
+            "left": null,
+            "right": null
+          }
+        },
+        {
+          "case": 721,
+          "field": "right",
+          "expected": {
+            "mode": 1,
+            "index": -7,
+            "input": -1000.0,
+            "adjusted": -15,
+            "left": -1150.0,
+            "right": -1000.0
+          },
+          "actual": {
+            "type": 1,
+            "index": -15,
+            "left": null,
+            "right": null
+          }
+        },
+        {
+          "case": 722,
+          "field": "left",
+          "expected": {
+            "mode": 1,
+            "index": -6,
+            "input": -1000.0,
+            "adjusted": -15,
+            "left": -1150.0,
+            "right": -1000.0
+          },
+          "actual": {
+            "type": 1,
+            "index": -15,
+            "left": null,
+            "right": null
+          }
+        },
+        {
+          "case": 722,
+          "field": "right",
+          "expected": {
+            "mode": 1,
+            "index": -6,
+            "input": -1000.0,
+            "adjusted": -15,
+            "left": -1150.0,
+            "right": -1000.0
+          },
+          "actual": {
+            "type": 1,
+            "index": -15,
+            "left": null,
+            "right": null
+          }
+        },
+        {
+          "case": 723,
+          "field": "left",
+          "expected": {
+            "mode": 1,
+            "index": -5,
+            "input": -1000.0,
+            "adjusted": -15,
+            "left": -1150.0,
+            "right": -1000.0
+          },
+          "actual": {
+            "type": 1,
+            "index": -15,
+            "left": null,
+            "right": null
+          }
+        },
+        {
+          "case": 723,
+          "field": "right",
+          "expected": {
+            "mode": 1,
+            "index": -5,
+            "input": -1000.0,
+            "adjusted": -15,
+            "left": -1150.0,
+            "right": -1000.0
+          },
+          "actual": {
+            "type": 1,
+            "index": -15,
+            "left": null,
+            "right": null
+          }
+        },
+        {
+          "case": 724,
+          "field": "left",
+          "expected": {
+            "mode": 1,
+            "index": -4,
+            "input": -1000.0,
+            "adjusted": -15,
+            "left": -1150.0,
+            "right": -1000.0
+          },
+          "actual": {
+            "type": 1,
+            "index": -15,
+            "left": null,
+            "right": null
+          }
+        },
+        {
+          "case": 724,
+          "field": "right",
+          "expected": {
+            "mode": 1,
+            "index": -4,
+            "input": -1000.0,
+            "adjusted": -15,
+            "left": -1150.0,
+            "right": -1000.0
+          },
+          "actual": {
+            "type": 1,
+            "index": -15,
+            "left": null,
+            "right": null
+          }
+        },
+        {
+          "case": 725,
+          "field": "left",
+          "expected": {
+            "mode": 1,
+            "index": -3,
+            "input": -1000.0,
+            "adjusted": -15,
+            "left": -1150.0,
+            "right": -1000.0
+          },
+          "actual": {
+            "type": 1,
+            "index": -15,
+            "left": null,
+            "right": null
+          }
+        },
+        {
+          "case": 725,
+          "field": "right",
+          "expected": {
+            "mode": 1,
+            "index": -3,
+            "input": -1000.0,
+            "adjusted": -15,
+            "left": -1150.0,
+            "right": -1000.0
+          },
+          "actual": {
+            "type": 1,
+            "index": -15,
+            "left": null,
+            "right": null
+          }
+        },
+        {
+          "case": 726,
+          "field": "left",
+          "expected": {
+            "mode": 1,
+            "index": -2,
+            "input": -1000.0,
+            "adjusted": -10,
+            "left": -1025.0137119283268,
+            "right": -1000.0137119283269
+          },
+          "actual": {
+            "type": 1,
+            "index": -10,
+            "left": null,
+            "right": null
+          }
+        },
+        {
+          "case": 726,
+          "field": "right",
+          "expected": {
+            "mode": 1,
+            "index": -2,
+            "input": -1000.0,
+            "adjusted": -10,
+            "left": -1025.0137119283268,
+            "right": -1000.0137119283269
+          },
+          "actual": {
+            "type": 1,
+            "index": -10,
+            "left": null,
+            "right": null
+          }
+        },
+        {
+          "case": 727,
+          "field": "left",
+          "expected": {
+            "mode": 1,
+            "index": -1,
+            "input": -1000.0,
+            "adjusted": -5,
+            "left": -1010.4139268515822,
+            "right": -1000.4139268515822
+          },
+          "actual": {
+            "type": 1,
+            "index": -5,
+            "left": null,
+            "right": null
+          }
+        },
+        {
+          "case": 727,
+          "field": "right",
+          "expected": {
+            "mode": 1,
+            "index": -1,
+            "input": -1000.0,
+            "adjusted": -5,
+            "left": -1010.4139268515822,
+            "right": -1000.4139268515822
+          },
+          "actual": {
+            "type": 1,
+            "index": -5,
+            "left": null,
+            "right": null
+          }
+        },
+        {
+          "case": 728,
+          "field": "left",
+          "expected": {
+            "mode": 1,
+            "index": 0,
+            "input": -1000.0,
+            "adjusted": 0,
+            "left": -1003.0102999566398,
+            "right": -1003.0102999566398
+          },
+          "actual": {
+            "type": 1,
+            "index": 0,
+            "left": null,
+            "right": null
+          }
+        },
+        {
+          "case": 728,
+          "field": "right",
+          "expected": {
+            "mode": 1,
+            "index": 0,
+            "input": -1000.0,
+            "adjusted": 0,
+            "left": -1003.0102999566398,
+            "right": -1003.0102999566398
+          },
+          "actual": {
+            "type": 1,
+            "index": 0,
+            "left": null,
+            "right": null
+          }
+        },
+        {
+          "case": 729,
+          "field": "left",
+          "expected": {
+            "mode": 1,
+            "index": 1,
+            "input": -1000.0,
+            "adjusted": 5,
+            "left": -1000.4139268515822,
+            "right": -1010.4139268515822
+          },
+          "actual": {
+            "type": 1,
+            "index": 5,
+            "left": null,
+            "right": null
+          }
+        },
+        {
+          "case": 729,
+          "field": "right",
+          "expected": {
+            "mode": 1,
+            "index": 1,
+            "input": -1000.0,
+            "adjusted": 5,
+            "left": -1000.4139268515822,
+            "right": -1010.4139268515822
+          },
+          "actual": {
+            "type": 1,
+            "index": 5,
+            "left": null,
+            "right": null
+          }
+        },
+        {
+          "case": 730,
+          "field": "left",
+          "expected": {
+            "mode": 1,
+            "index": 2,
+            "input": -1000.0,
+            "adjusted": 10,
+            "left": -1000.0137119283269,
+            "right": -1025.0137119283268
+          },
+          "actual": {
+            "type": 1,
+            "index": 10,
+            "left": null,
+            "right": null
+          }
+        },
+        {
+          "case": 730,
+          "field": "right",
+          "expected": {
+            "mode": 1,
+            "index": 2,
+            "input": -1000.0,
+            "adjusted": 10,
+            "left": -1000.0137119283269,
+            "right": -1025.0137119283268
+          },
+          "actual": {
+            "type": 1,
+            "index": 10,
+            "left": null,
+            "right": null
+          }
+        },
+        {
+          "case": 731,
+          "field": "left",
+          "expected": {
+            "mode": 1,
+            "index": 3,
+            "input": -1000.0,
+            "adjusted": 15,
+            "left": -1000.0,
+            "right": -1150.0
+          },
+          "actual": {
+            "type": 1,
+            "index": 15,
+            "left": null,
+            "right": null
+          }
+        },
+        {
+          "case": 731,
+          "field": "right",
+          "expected": {
+            "mode": 1,
+            "index": 3,
+            "input": -1000.0,
+            "adjusted": 15,
+            "left": -1000.0,
+            "right": -1150.0
+          },
+          "actual": {
+            "type": 1,
+            "index": 15,
+            "left": null,
+            "right": null
+          }
+        },
+        {
+          "case": 732,
+          "field": "left",
+          "expected": {
+            "mode": 1,
+            "index": 4,
+            "input": -1000.0,
+            "adjusted": 15,
+            "left": -1000.0,
+            "right": -1150.0
+          },
+          "actual": {
+            "type": 1,
+            "index": 15,
+            "left": null,
+            "right": null
+          }
+        },
+        {
+          "case": 732,
+          "field": "right",
+          "expected": {
+            "mode": 1,
+            "index": 4,
+            "input": -1000.0,
+            "adjusted": 15,
+            "left": -1000.0,
+            "right": -1150.0
+          },
+          "actual": {
+            "type": 1,
+            "index": 15,
+            "left": null,
+            "right": null
+          }
+        },
+        {
+          "case": 733,
+          "field": "left",
+          "expected": {
+            "mode": 1,
+            "index": 5,
+            "input": -1000.0,
+            "adjusted": 15,
+            "left": -1000.0,
+            "right": -1150.0
+          },
+          "actual": {
+            "type": 1,
+            "index": 15,
+            "left": null,
+            "right": null
+          }
+        },
+        {
+          "case": 733,
+          "field": "right",
+          "expected": {
+            "mode": 1,
+            "index": 5,
+            "input": -1000.0,
+            "adjusted": 15,
+            "left": -1000.0,
+            "right": -1150.0
+          },
+          "actual": {
+            "type": 1,
+            "index": 15,
+            "left": null,
+            "right": null
+          }
+        },
+        {
+          "case": 734,
+          "field": "left",
+          "expected": {
+            "mode": 1,
+            "index": 6,
+            "input": -1000.0,
+            "adjusted": 15,
+            "left": -1000.0,
+            "right": -1150.0
+          },
+          "actual": {
+            "type": 1,
+            "index": 15,
+            "left": null,
+            "right": null
+          }
+        },
+        {
+          "case": 734,
+          "field": "right",
+          "expected": {
+            "mode": 1,
+            "index": 6,
+            "input": -1000.0,
+            "adjusted": 15,
+            "left": -1000.0,
+            "right": -1150.0
+          },
+          "actual": {
+            "type": 1,
+            "index": 15,
+            "left": null,
+            "right": null
+          }
+        },
+        {
+          "case": 735,
+          "field": "left",
+          "expected": {
+            "mode": 1,
+            "index": 7,
+            "input": -1000.0,
+            "adjusted": 15,
+            "left": -1000.0,
+            "right": -1150.0
+          },
+          "actual": {
+            "type": 1,
+            "index": 15,
+            "left": null,
+            "right": null
+          }
+        },
+        {
+          "case": 735,
+          "field": "right",
+          "expected": {
+            "mode": 1,
+            "index": 7,
+            "input": -1000.0,
+            "adjusted": 15,
+            "left": -1000.0,
+            "right": -1150.0
+          },
+          "actual": {
+            "type": 1,
+            "index": 15,
+            "left": null,
+            "right": null
+          }
+        },
+        {
+          "case": 736,
+          "field": "left",
+          "expected": {
+            "mode": 1,
+            "index": 8,
+            "input": -1000.0,
+            "adjusted": 15,
+            "left": -1000.0,
+            "right": -1150.0
+          },
+          "actual": {
+            "type": 1,
+            "index": 15,
+            "left": null,
+            "right": null
+          }
+        },
+        {
+          "case": 736,
+          "field": "right",
+          "expected": {
+            "mode": 1,
+            "index": 8,
+            "input": -1000.0,
+            "adjusted": 15,
+            "left": -1000.0,
+            "right": -1150.0
+          },
+          "actual": {
+            "type": 1,
+            "index": 15,
+            "left": null,
+            "right": null
+          }
+        },
+        {
+          "case": 737,
+          "field": "left",
+          "expected": {
+            "mode": 1,
+            "index": 9,
+            "input": -1000.0,
+            "adjusted": 15,
+            "left": -1000.0,
+            "right": -1150.0
+          },
+          "actual": {
+            "type": 1,
+            "index": 15,
+            "left": null,
+            "right": null
+          }
+        },
+        {
+          "case": 737,
+          "field": "right",
+          "expected": {
+            "mode": 1,
+            "index": 9,
+            "input": -1000.0,
+            "adjusted": 15,
+            "left": -1000.0,
+            "right": -1150.0
+          },
+          "actual": {
+            "type": 1,
+            "index": 15,
+            "left": null,
+            "right": null
+          }
+        },
+        {
+          "case": 738,
+          "field": "left",
+          "expected": {
+            "mode": 1,
+            "index": 10,
+            "input": -1000.0,
+            "adjusted": 15,
+            "left": -1000.0,
+            "right": -1150.0
+          },
+          "actual": {
+            "type": 1,
+            "index": 15,
+            "left": null,
+            "right": null
+          }
+        },
+        {
+          "case": 738,
+          "field": "right",
+          "expected": {
+            "mode": 1,
+            "index": 10,
+            "input": -1000.0,
+            "adjusted": 15,
+            "left": -1000.0,
+            "right": -1150.0
+          },
+          "actual": {
+            "type": 1,
+            "index": 15,
+            "left": null,
+            "right": null
+          }
+        },
+        {
+          "case": 739,
+          "field": "left",
+          "expected": {
+            "mode": 1,
+            "index": 11,
+            "input": -1000.0,
+            "adjusted": 15,
+            "left": -1000.0,
+            "right": -1150.0
+          },
+          "actual": {
+            "type": 1,
+            "index": 15,
+            "left": null,
+            "right": null
+          }
+        },
+        {
+          "case": 739,
+          "field": "right",
+          "expected": {
+            "mode": 1,
+            "index": 11,
+            "input": -1000.0,
+            "adjusted": 15,
+            "left": -1000.0,
+            "right": -1150.0
+          },
+          "actual": {
+            "type": 1,
+            "index": 15,
+            "left": null,
+            "right": null
+          }
+        },
+        {
+          "case": 740,
+          "field": "left",
+          "expected": {
+            "mode": 1,
+            "index": 12,
+            "input": -1000.0,
+            "adjusted": 15,
+            "left": -1000.0,
+            "right": -1150.0
+          },
+          "actual": {
+            "type": 1,
+            "index": 15,
+            "left": null,
+            "right": null
+          }
+        },
+        {
+          "case": 740,
+          "field": "right",
+          "expected": {
+            "mode": 1,
+            "index": 12,
+            "input": -1000.0,
+            "adjusted": 15,
+            "left": -1000.0,
+            "right": -1150.0
+          },
+          "actual": {
+            "type": 1,
+            "index": 15,
+            "left": null,
+            "right": null
+          }
+        },
+        {
+          "case": 741,
+          "field": "left",
+          "expected": {
+            "mode": 1,
+            "index": 13,
+            "input": -1000.0,
+            "adjusted": 15,
+            "left": -1000.0,
+            "right": -1150.0
+          },
+          "actual": {
+            "type": 1,
+            "index": 15,
+            "left": null,
+            "right": null
+          }
+        },
+        {
+          "case": 741,
+          "field": "right",
+          "expected": {
+            "mode": 1,
+            "index": 13,
+            "input": -1000.0,
+            "adjusted": 15,
+            "left": -1000.0,
+            "right": -1150.0
+          },
+          "actual": {
+            "type": 1,
+            "index": 15,
+            "left": null,
+            "right": null
+          }
+        },
+        {
+          "case": 742,
+          "field": "left",
+          "expected": {
+            "mode": 1,
+            "index": 14,
+            "input": -1000.0,
+            "adjusted": 15,
+            "left": -1000.0,
+            "right": -1150.0
+          },
+          "actual": {
+            "type": 1,
+            "index": 15,
+            "left": null,
+            "right": null
+          }
+        },
+        {
+          "case": 742,
+          "field": "right",
+          "expected": {
+            "mode": 1,
+            "index": 14,
+            "input": -1000.0,
+            "adjusted": 15,
+            "left": -1000.0,
+            "right": -1150.0
+          },
+          "actual": {
+            "type": 1,
+            "index": 15,
+            "left": null,
+            "right": null
+          }
+        },
+        {
+          "case": 743,
+          "field": "left",
+          "expected": {
+            "mode": 1,
+            "index": 15,
+            "input": -1000.0,
+            "adjusted": 15,
+            "left": -1000.0,
+            "right": -1150.0
+          },
+          "actual": {
+            "type": 1,
+            "index": 15,
+            "left": null,
+            "right": null
+          }
+        },
+        {
+          "case": 743,
+          "field": "right",
+          "expected": {
+            "mode": 1,
+            "index": 15,
+            "input": -1000.0,
+            "adjusted": 15,
+            "left": -1000.0,
+            "right": -1150.0
+          },
+          "actual": {
+            "type": 1,
+            "index": 15,
+            "left": null,
+            "right": null
+          }
+        },
+        {
+          "case": 1085,
+          "field": "left",
+          "expected": {
+            "mode": 2,
+            "index": -15,
+            "input": -1000.0,
+            "adjusted": -15,
+            "left": -1150.0,
+            "right": -1000.0
+          },
+          "actual": {
+            "type": 1,
+            "index": -15,
+            "left": null,
+            "right": null
+          }
+        },
+        {
+          "case": 1085,
+          "field": "right",
+          "expected": {
+            "mode": 2,
+            "index": -15,
+            "input": -1000.0,
+            "adjusted": -15,
+            "left": -1150.0,
+            "right": -1000.0
+          },
+          "actual": {
+            "type": 1,
+            "index": -15,
+            "left": null,
+            "right": null
+          }
+        },
+        {
+          "case": 1086,
+          "field": "left",
+          "expected": {
+            "mode": 2,
+            "index": -14,
+            "input": -1000.0,
+            "adjusted": -15,
+            "left": -1150.0,
+            "right": -1000.0
+          },
+          "actual": {
+            "type": 1,
+            "index": -15,
+            "left": null,
+            "right": null
+          }
+        },
+        {
+          "case": 1086,
+          "field": "right",
+          "expected": {
+            "mode": 2,
+            "index": -14,
+            "input": -1000.0,
+            "adjusted": -15,
+            "left": -1150.0,
+            "right": -1000.0
+          },
+          "actual": {
+            "type": 1,
+            "index": -15,
+            "left": null,
+            "right": null
+          }
+        },
+        {
+          "case": 1087,
+          "field": "left",
+          "expected": {
+            "mode": 2,
+            "index": -13,
+            "input": -1000.0,
+            "adjusted": -15,
+            "left": -1150.0,
+            "right": -1000.0
+          },
+          "actual": {
+            "type": 1,
+            "index": -15,
+            "left": null,
+            "right": null
+          }
+        },
+        {
+          "case": 1087,
+          "field": "right",
+          "expected": {
+            "mode": 2,
+            "index": -13,
+            "input": -1000.0,
+            "adjusted": -15,
+            "left": -1150.0,
+            "right": -1000.0
+          },
+          "actual": {
+            "type": 1,
+            "index": -15,
+            "left": null,
+            "right": null
+          }
+        },
+        {
+          "case": 1088,
+          "field": "left",
+          "expected": {
+            "mode": 2,
+            "index": -12,
+            "input": -1000.0,
+            "adjusted": -15,
+            "left": -1150.0,
+            "right": -1000.0
+          },
+          "actual": {
+            "type": 1,
+            "index": -15,
+            "left": null,
+            "right": null
+          }
+        },
+        {
+          "case": 1088,
+          "field": "right",
+          "expected": {
+            "mode": 2,
+            "index": -12,
+            "input": -1000.0,
+            "adjusted": -15,
+            "left": -1150.0,
+            "right": -1000.0
+          },
+          "actual": {
+            "type": 1,
+            "index": -15,
+            "left": null,
+            "right": null
+          }
+        },
+        {
+          "case": 1089,
+          "field": "left",
+          "expected": {
+            "mode": 2,
+            "index": -11,
+            "input": -1000.0,
+            "adjusted": -15,
+            "left": -1150.0,
+            "right": -1000.0
+          },
+          "actual": {
+            "type": 1,
+            "index": -15,
+            "left": null,
+            "right": null
+          }
+        },
+        {
+          "case": 1089,
+          "field": "right",
+          "expected": {
+            "mode": 2,
+            "index": -11,
+            "input": -1000.0,
+            "adjusted": -15,
+            "left": -1150.0,
+            "right": -1000.0
+          },
+          "actual": {
+            "type": 1,
+            "index": -15,
+            "left": null,
+            "right": null
+          }
+        },
+        {
+          "case": 1090,
+          "field": "left",
+          "expected": {
+            "mode": 2,
+            "index": -10,
+            "input": -1000.0,
+            "adjusted": -15,
+            "left": -1150.0,
+            "right": -1000.0
+          },
+          "actual": {
+            "type": 1,
+            "index": -15,
+            "left": null,
+            "right": null
+          }
+        },
+        {
+          "case": 1090,
+          "field": "right",
+          "expected": {
+            "mode": 2,
+            "index": -10,
+            "input": -1000.0,
+            "adjusted": -15,
+            "left": -1150.0,
+            "right": -1000.0
+          },
+          "actual": {
+            "type": 1,
+            "index": -15,
+            "left": null,
+            "right": null
+          }
+        },
+        {
+          "case": 1091,
+          "field": "left",
+          "expected": {
+            "mode": 2,
+            "index": -9,
+            "input": -1000.0,
+            "adjusted": -15,
+            "left": -1150.0,
+            "right": -1000.0
+          },
+          "actual": {
+            "type": 1,
+            "index": -15,
+            "left": null,
+            "right": null
+          }
+        },
+        {
+          "case": 1091,
+          "field": "right",
+          "expected": {
+            "mode": 2,
+            "index": -9,
+            "input": -1000.0,
+            "adjusted": -15,
+            "left": -1150.0,
+            "right": -1000.0
+          },
+          "actual": {
+            "type": 1,
+            "index": -15,
+            "left": null,
+            "right": null
+          }
+        },
+        {
+          "case": 1092,
+          "field": "left",
+          "expected": {
+            "mode": 2,
+            "index": -8,
+            "input": -1000.0,
+            "adjusted": -15,
+            "left": -1150.0,
+            "right": -1000.0
+          },
+          "actual": {
+            "type": 1,
+            "index": -15,
+            "left": null,
+            "right": null
+          }
+        },
+        {
+          "case": 1092,
+          "field": "right",
+          "expected": {
+            "mode": 2,
+            "index": -8,
+            "input": -1000.0,
+            "adjusted": -15,
+            "left": -1150.0,
+            "right": -1000.0
+          },
+          "actual": {
+            "type": 1,
+            "index": -15,
+            "left": null,
+            "right": null
+          }
+        },
+        {
+          "case": 1093,
+          "field": "left",
+          "expected": {
+            "mode": 2,
+            "index": -7,
+            "input": -1000.0,
+            "adjusted": -15,
+            "left": -1150.0,
+            "right": -1000.0
+          },
+          "actual": {
+            "type": 1,
+            "index": -15,
+            "left": null,
+            "right": null
+          }
+        },
+        {
+          "case": 1093,
+          "field": "right",
+          "expected": {
+            "mode": 2,
+            "index": -7,
+            "input": -1000.0,
+            "adjusted": -15,
+            "left": -1150.0,
+            "right": -1000.0
+          },
+          "actual": {
+            "type": 1,
+            "index": -15,
+            "left": null,
+            "right": null
+          }
+        },
+        {
+          "case": 1094,
+          "field": "left",
+          "expected": {
+            "mode": 2,
+            "index": -6,
+            "input": -1000.0,
+            "adjusted": -15,
+            "left": -1150.0,
+            "right": -1000.0
+          },
+          "actual": {
+            "type": 1,
+            "index": -15,
+            "left": null,
+            "right": null
+          }
+        },
+        {
+          "case": 1094,
+          "field": "right",
+          "expected": {
+            "mode": 2,
+            "index": -6,
+            "input": -1000.0,
+            "adjusted": -15,
+            "left": -1150.0,
+            "right": -1000.0
+          },
+          "actual": {
+            "type": 1,
+            "index": -15,
+            "left": null,
+            "right": null
+          }
+        },
+        {
+          "case": 1095,
+          "field": "left",
+          "expected": {
+            "mode": 2,
+            "index": -5,
+            "input": -1000.0,
+            "adjusted": -15,
+            "left": -1150.0,
+            "right": -1000.0
+          },
+          "actual": {
+            "type": 1,
+            "index": -15,
+            "left": null,
+            "right": null
+          }
+        },
+        {
+          "case": 1095,
+          "field": "right",
+          "expected": {
+            "mode": 2,
+            "index": -5,
+            "input": -1000.0,
+            "adjusted": -15,
+            "left": -1150.0,
+            "right": -1000.0
+          },
+          "actual": {
+            "type": 1,
+            "index": -15,
+            "left": null,
+            "right": null
+          }
+        },
+        {
+          "case": 1096,
+          "field": "left",
+          "expected": {
+            "mode": 2,
+            "index": -4,
+            "input": -1000.0,
+            "adjusted": -15,
+            "left": -1150.0,
+            "right": -1000.0
+          },
+          "actual": {
+            "type": 1,
+            "index": -15,
+            "left": null,
+            "right": null
+          }
+        },
+        {
+          "case": 1096,
+          "field": "right",
+          "expected": {
+            "mode": 2,
+            "index": -4,
+            "input": -1000.0,
+            "adjusted": -15,
+            "left": -1150.0,
+            "right": -1000.0
+          },
+          "actual": {
+            "type": 1,
+            "index": -15,
+            "left": null,
+            "right": null
+          }
+        },
+        {
+          "case": 1097,
+          "field": "left",
+          "expected": {
+            "mode": 2,
+            "index": -3,
+            "input": -1000.0,
+            "adjusted": -15,
+            "left": -1150.0,
+            "right": -1000.0
+          },
+          "actual": {
+            "type": 1,
+            "index": -15,
+            "left": null,
+            "right": null
+          }
+        },
+        {
+          "case": 1097,
+          "field": "right",
+          "expected": {
+            "mode": 2,
+            "index": -3,
+            "input": -1000.0,
+            "adjusted": -15,
+            "left": -1150.0,
+            "right": -1000.0
+          },
+          "actual": {
+            "type": 1,
+            "index": -15,
+            "left": null,
+            "right": null
+          }
+        },
+        {
+          "case": 1098,
+          "field": "left",
+          "expected": {
+            "mode": 2,
+            "index": -2,
+            "input": -1000.0,
+            "adjusted": -15,
+            "left": -1150.0,
+            "right": -1000.0
+          },
+          "actual": {
+            "type": 1,
+            "index": -15,
+            "left": null,
+            "right": null
+          }
+        },
+        {
+          "case": 1098,
+          "field": "right",
+          "expected": {
+            "mode": 2,
+            "index": -2,
+            "input": -1000.0,
+            "adjusted": -15,
+            "left": -1150.0,
+            "right": -1000.0
+          },
+          "actual": {
+            "type": 1,
+            "index": -15,
+            "left": null,
+            "right": null
+          }
+        },
+        {
+          "case": 1099,
+          "field": "left",
+          "expected": {
+            "mode": 2,
+            "index": -1,
+            "input": -1000.0,
+            "adjusted": -8,
+            "left": -1019.0543331422004,
+            "right": -1000.0543331422004
+          },
+          "actual": {
+            "type": 1,
+            "index": -8,
+            "left": null,
+            "right": null
+          }
+        },
+        {
+          "case": 1099,
+          "field": "right",
+          "expected": {
+            "mode": 2,
+            "index": -1,
+            "input": -1000.0,
+            "adjusted": -8,
+            "left": -1019.0543331422004,
+            "right": -1000.0543331422004
+          },
+          "actual": {
+            "type": 1,
+            "index": -8,
+            "left": null,
+            "right": null
+          }
+        },
+        {
+          "case": 1100,
+          "field": "left",
+          "expected": {
+            "mode": 2,
+            "index": 0,
+            "input": -1000.0,
+            "adjusted": 0,
+            "left": -1003.0102999566398,
+            "right": -1003.0102999566398
+          },
+          "actual": {
+            "type": 1,
+            "index": 0,
+            "left": null,
+            "right": null
+          }
+        },
+        {
+          "case": 1100,
+          "field": "right",
+          "expected": {
+            "mode": 2,
+            "index": 0,
+            "input": -1000.0,
+            "adjusted": 0,
+            "left": -1003.0102999566398,
+            "right": -1003.0102999566398
+          },
+          "actual": {
+            "type": 1,
+            "index": 0,
+            "left": null,
+            "right": null
+          }
+        },
+        {
+          "case": 1101,
+          "field": "left",
+          "expected": {
+            "mode": 2,
+            "index": 1,
+            "input": -1000.0,
+            "adjusted": 8,
+            "left": -1000.0543331422004,
+            "right": -1019.0543331422004
+          },
+          "actual": {
+            "type": 1,
+            "index": 8,
+            "left": null,
+            "right": null
+          }
+        },
+        {
+          "case": 1101,
+          "field": "right",
+          "expected": {
+            "mode": 2,
+            "index": 1,
+            "input": -1000.0,
+            "adjusted": 8,
+            "left": -1000.0543331422004,
+            "right": -1019.0543331422004
+          },
+          "actual": {
+            "type": 1,
+            "index": 8,
+            "left": null,
+            "right": null
+          }
+        },
+        {
+          "case": 1102,
+          "field": "left",
+          "expected": {
+            "mode": 2,
+            "index": 2,
+            "input": -1000.0,
+            "adjusted": 15,
+            "left": -1000.0,
+            "right": -1150.0
+          },
+          "actual": {
+            "type": 1,
+            "index": 15,
+            "left": null,
+            "right": null
+          }
+        },
+        {
+          "case": 1102,
+          "field": "right",
+          "expected": {
+            "mode": 2,
+            "index": 2,
+            "input": -1000.0,
+            "adjusted": 15,
+            "left": -1000.0,
+            "right": -1150.0
+          },
+          "actual": {
+            "type": 1,
+            "index": 15,
+            "left": null,
+            "right": null
+          }
+        },
+        {
+          "case": 1103,
+          "field": "left",
+          "expected": {
+            "mode": 2,
+            "index": 3,
+            "input": -1000.0,
+            "adjusted": 15,
+            "left": -1000.0,
+            "right": -1150.0
+          },
+          "actual": {
+            "type": 1,
+            "index": 15,
+            "left": null,
+            "right": null
+          }
+        },
+        {
+          "case": 1103,
+          "field": "right",
+          "expected": {
+            "mode": 2,
+            "index": 3,
+            "input": -1000.0,
+            "adjusted": 15,
+            "left": -1000.0,
+            "right": -1150.0
+          },
+          "actual": {
+            "type": 1,
+            "index": 15,
+            "left": null,
+            "right": null
+          }
+        },
+        {
+          "case": 1104,
+          "field": "left",
+          "expected": {
+            "mode": 2,
+            "index": 4,
+            "input": -1000.0,
+            "adjusted": 15,
+            "left": -1000.0,
+            "right": -1150.0
+          },
+          "actual": {
+            "type": 1,
+            "index": 15,
+            "left": null,
+            "right": null
+          }
+        },
+        {
+          "case": 1104,
+          "field": "right",
+          "expected": {
+            "mode": 2,
+            "index": 4,
+            "input": -1000.0,
+            "adjusted": 15,
+            "left": -1000.0,
+            "right": -1150.0
+          },
+          "actual": {
+            "type": 1,
+            "index": 15,
+            "left": null,
+            "right": null
+          }
+        },
+        {
+          "case": 1105,
+          "field": "left",
+          "expected": {
+            "mode": 2,
+            "index": 5,
+            "input": -1000.0,
+            "adjusted": 15,
+            "left": -1000.0,
+            "right": -1150.0
+          },
+          "actual": {
+            "type": 1,
+            "index": 15,
+            "left": null,
+            "right": null
+          }
+        },
+        {
+          "case": 1105,
+          "field": "right",
+          "expected": {
+            "mode": 2,
+            "index": 5,
+            "input": -1000.0,
+            "adjusted": 15,
+            "left": -1000.0,
+            "right": -1150.0
+          },
+          "actual": {
+            "type": 1,
+            "index": 15,
+            "left": null,
+            "right": null
+          }
+        },
+        {
+          "case": 1106,
+          "field": "left",
+          "expected": {
+            "mode": 2,
+            "index": 6,
+            "input": -1000.0,
+            "adjusted": 15,
+            "left": -1000.0,
+            "right": -1150.0
+          },
+          "actual": {
+            "type": 1,
+            "index": 15,
+            "left": null,
+            "right": null
+          }
+        },
+        {
+          "case": 1106,
+          "field": "right",
+          "expected": {
+            "mode": 2,
+            "index": 6,
+            "input": -1000.0,
+            "adjusted": 15,
+            "left": -1000.0,
+            "right": -1150.0
+          },
+          "actual": {
+            "type": 1,
+            "index": 15,
+            "left": null,
+            "right": null
+          }
+        },
+        {
+          "case": 1107,
+          "field": "left",
+          "expected": {
+            "mode": 2,
+            "index": 7,
+            "input": -1000.0,
+            "adjusted": 15,
+            "left": -1000.0,
+            "right": -1150.0
+          },
+          "actual": {
+            "type": 1,
+            "index": 15,
+            "left": null,
+            "right": null
+          }
+        },
+        {
+          "case": 1107,
+          "field": "right",
+          "expected": {
+            "mode": 2,
+            "index": 7,
+            "input": -1000.0,
+            "adjusted": 15,
+            "left": -1000.0,
+            "right": -1150.0
+          },
+          "actual": {
+            "type": 1,
+            "index": 15,
+            "left": null,
+            "right": null
+          }
+        },
+        {
+          "case": 1108,
+          "field": "left",
+          "expected": {
+            "mode": 2,
+            "index": 8,
+            "input": -1000.0,
+            "adjusted": 15,
+            "left": -1000.0,
+            "right": -1150.0
+          },
+          "actual": {
+            "type": 1,
+            "index": 15,
+            "left": null,
+            "right": null
+          }
+        },
+        {
+          "case": 1108,
+          "field": "right",
+          "expected": {
+            "mode": 2,
+            "index": 8,
+            "input": -1000.0,
+            "adjusted": 15,
+            "left": -1000.0,
+            "right": -1150.0
+          },
+          "actual": {
+            "type": 1,
+            "index": 15,
+            "left": null,
+            "right": null
+          }
+        },
+        {
+          "case": 1109,
+          "field": "left",
+          "expected": {
+            "mode": 2,
+            "index": 9,
+            "input": -1000.0,
+            "adjusted": 15,
+            "left": -1000.0,
+            "right": -1150.0
+          },
+          "actual": {
+            "type": 1,
+            "index": 15,
+            "left": null,
+            "right": null
+          }
+        },
+        {
+          "case": 1109,
+          "field": "right",
+          "expected": {
+            "mode": 2,
+            "index": 9,
+            "input": -1000.0,
+            "adjusted": 15,
+            "left": -1000.0,
+            "right": -1150.0
+          },
+          "actual": {
+            "type": 1,
+            "index": 15,
+            "left": null,
+            "right": null
+          }
+        },
+        {
+          "case": 1110,
+          "field": "left",
+          "expected": {
+            "mode": 2,
+            "index": 10,
+            "input": -1000.0,
+            "adjusted": 15,
+            "left": -1000.0,
+            "right": -1150.0
+          },
+          "actual": {
+            "type": 1,
+            "index": 15,
+            "left": null,
+            "right": null
+          }
+        },
+        {
+          "case": 1110,
+          "field": "right",
+          "expected": {
+            "mode": 2,
+            "index": 10,
+            "input": -1000.0,
+            "adjusted": 15,
+            "left": -1000.0,
+            "right": -1150.0
+          },
+          "actual": {
+            "type": 1,
+            "index": 15,
+            "left": null,
+            "right": null
+          }
+        },
+        {
+          "case": 1111,
+          "field": "left",
+          "expected": {
+            "mode": 2,
+            "index": 11,
+            "input": -1000.0,
+            "adjusted": 15,
+            "left": -1000.0,
+            "right": -1150.0
+          },
+          "actual": {
+            "type": 1,
+            "index": 15,
+            "left": null,
+            "right": null
+          }
+        },
+        {
+          "case": 1111,
+          "field": "right",
+          "expected": {
+            "mode": 2,
+            "index": 11,
+            "input": -1000.0,
+            "adjusted": 15,
+            "left": -1000.0,
+            "right": -1150.0
+          },
+          "actual": {
+            "type": 1,
+            "index": 15,
+            "left": null,
+            "right": null
+          }
+        },
+        {
+          "case": 1112,
+          "field": "left",
+          "expected": {
+            "mode": 2,
+            "index": 12,
+            "input": -1000.0,
+            "adjusted": 15,
+            "left": -1000.0,
+            "right": -1150.0
+          },
+          "actual": {
+            "type": 1,
+            "index": 15,
+            "left": null,
+            "right": null
+          }
+        },
+        {
+          "case": 1112,
+          "field": "right",
+          "expected": {
+            "mode": 2,
+            "index": 12,
+            "input": -1000.0,
+            "adjusted": 15,
+            "left": -1000.0,
+            "right": -1150.0
+          },
+          "actual": {
+            "type": 1,
+            "index": 15,
+            "left": null,
+            "right": null
+          }
+        },
+        {
+          "case": 1113,
+          "field": "left",
+          "expected": {
+            "mode": 2,
+            "index": 13,
+            "input": -1000.0,
+            "adjusted": 15,
+            "left": -1000.0,
+            "right": -1150.0
+          },
+          "actual": {
+            "type": 1,
+            "index": 15,
+            "left": null,
+            "right": null
+          }
+        },
+        {
+          "case": 1113,
+          "field": "right",
+          "expected": {
+            "mode": 2,
+            "index": 13,
+            "input": -1000.0,
+            "adjusted": 15,
+            "left": -1000.0,
+            "right": -1150.0
+          },
+          "actual": {
+            "type": 1,
+            "index": 15,
+            "left": null,
+            "right": null
+          }
+        },
+        {
+          "case": 1114,
+          "field": "left",
+          "expected": {
+            "mode": 2,
+            "index": 14,
+            "input": -1000.0,
+            "adjusted": 15,
+            "left": -1000.0,
+            "right": -1150.0
+          },
+          "actual": {
+            "type": 1,
+            "index": 15,
+            "left": null,
+            "right": null
+          }
+        },
+        {
+          "case": 1114,
+          "field": "right",
+          "expected": {
+            "mode": 2,
+            "index": 14,
+            "input": -1000.0,
+            "adjusted": 15,
+            "left": -1000.0,
+            "right": -1150.0
+          },
+          "actual": {
+            "type": 1,
+            "index": 15,
+            "left": null,
+            "right": null
+          }
+        },
+        {
+          "case": 1115,
+          "field": "left",
+          "expected": {
+            "mode": 2,
+            "index": 15,
+            "input": -1000.0,
+            "adjusted": 15,
+            "left": -1000.0,
+            "right": -1150.0
+          },
+          "actual": {
+            "type": 1,
+            "index": 15,
+            "left": null,
+            "right": null
+          }
+        },
+        {
+          "case": 1115,
+          "field": "right",
+          "expected": {
+            "mode": 2,
+            "index": 15,
+            "input": -1000.0,
+            "adjusted": 15,
+            "left": -1000.0,
+            "right": -1150.0
+          },
+          "actual": {
+            "type": 1,
+            "index": 15,
+            "left": null,
+            "right": null
+          }
+        }
+      ],
+      "max_finite_energy_abs_error": 1.46533203125,
+      "smoothing_cases": 1008,
+      "matrix_cases": 112,
+      "max_matrix_abs_error": 2.384185791015625e-07,
+      "stdout_sha256": "687d68bd3f3443187afeafb295dcfceeaabead82b9f45295e45072c67fce17b6"
+    },
+    {
+      "control": "energy-double-control",
+      "energy_cases": 1116,
+      "index_mismatches": [],
+      "nonfinite_energy": [],
+      "max_finite_energy_abs_error": 1.1368683772161603e-13,
+      "smoothing_cases": 1008,
+      "matrix_cases": 112,
+      "max_matrix_abs_error": 2.384185791015625e-07,
+      "stdout_sha256": "d2e703212fae1cdf576f843b48638fd717a6ffabe43668e92ed1e699300326eb"
+    }
+  ],
+  "scope": "Physical scalar energy, smoothing controls and matrix temporal components only. Original float nonfinite outcomes retained. Decimal/Fraction oracles independently qualify the Rust f64 path. No spatial PCM/playback/seek acceptance or reference code in production."
+}

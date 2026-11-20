@@ -1,0 +1,1068 @@
+{
+  "complete": true,
+  "scope": "101 AAC/ELD/LD-MPS/EP1 integration targets after independent phase oracle and alignment expectation corrections;not waveform conformance",
+  "features": [
+    "player"
+  ],
+  "offline": true,
+  "default_features": false,
+  "media_opt_level": 2,
+  "parallel_target_processes": 4,
+  "test_threads_per_process": 2,
+  "cases": [
+    {
+      "name": "aac_alignment",
+      "status": "ok",
+      "passed": 2,
+      "failed": 0,
+      "ignored": 0,
+      "source": "sequential cargo gate"
+    },
+    {
+      "name": "aac_eld",
+      "status": "ok",
+      "passed": 5,
+      "failed": 0,
+      "ignored": 0,
+      "source": "sequential cargo gate"
+    },
+    {
+      "name": "aac_eld_cldfb",
+      "status": "ok",
+      "passed": 2,
+      "failed": 0,
+      "ignored": 0,
+      "source": "sequential cargo gate"
+    },
+    {
+      "name": "aac_eld_cldfb_downscaled",
+      "status": "ok",
+      "passed": 1,
+      "failed": 0,
+      "ignored": 0,
+      "source": "sequential cargo gate"
+    },
+    {
+      "name": "aac_eld_cldfb_eighth",
+      "status": "ok",
+      "passed": 1,
+      "failed": 0,
+      "ignored": 0,
+      "source": "sequential cargo gate"
+    },
+    {
+      "name": "aac_eld_cldfb_phase",
+      "status": "ok",
+      "passed": 2,
+      "failed": 0,
+      "ignored": 0,
+      "source": "sequential cargo gate"
+    },
+    {
+      "name": "aac_eld_crossover",
+      "status": "ok",
+      "passed": 5,
+      "failed": 0,
+      "ignored": 0,
+      "source": "sequential cargo gate"
+    },
+    {
+      "name": "aac_eld_crossover_wide",
+      "status": "ok",
+      "passed": 5,
+      "failed": 0,
+      "ignored": 0,
+      "source": "sequential cargo gate"
+    },
+    {
+      "name": "aac_eld_downscale_info",
+      "status": "ok",
+      "passed": 6,
+      "failed": 0,
+      "ignored": 0,
+      "source": "sequential cargo gate"
+    },
+    {
+      "name": "aac_eld_esc",
+      "status": "ok",
+      "passed": 9,
+      "failed": 0,
+      "ignored": 0,
+      "source": "sequential cargo gate"
+    },
+    {
+      "name": "aac_eld_esc_multi_history",
+      "status": "ok",
+      "passed": 10,
+      "failed": 0,
+      "ignored": 0,
+      "source": "sequential cargo gate"
+    },
+    {
+      "name": "aac_eld_esc_sbr",
+      "status": "ok",
+      "passed": 10,
+      "failed": 0,
+      "ignored": 0,
+      "source": "sequential cargo gate"
+    },
+    {
+      "name": "aac_eld_mps128",
+      "status": "ok",
+      "passed": 6,
+      "failed": 0,
+      "ignored": 0,
+      "source": "sequential cargo gate"
+    },
+    {
+      "name": "aac_eld_mps128_ges",
+      "status": "ok",
+      "passed": 7,
+      "failed": 0,
+      "ignored": 0,
+      "source": "sequential cargo gate"
+    },
+    {
+      "name": "aac_eld_mps128_stp",
+      "status": "ok",
+      "passed": 7,
+      "failed": 0,
+      "ignored": 0,
+      "source": "sequential cargo gate"
+    },
+    {
+      "name": "aac_eld_mps_core",
+      "status": "ok",
+      "passed": 3,
+      "failed": 0,
+      "ignored": 0,
+      "source": "sequential cargo gate"
+    },
+    {
+      "name": "aac_eld_mps_native",
+      "status": "ok",
+      "passed": 6,
+      "failed": 0,
+      "ignored": 0,
+      "source": "sequential cargo gate"
+    },
+    {
+      "name": "aac_eld_residual64_geometries",
+      "status": "ok",
+      "passed": 4,
+      "failed": 0,
+      "ignored": 0,
+      "source": "sequential cargo gate"
+    },
+    {
+      "name": "aac_eld_residual64_multicore",
+      "status": "ok",
+      "passed": 3,
+      "failed": 0,
+      "ignored": 0,
+      "source": "sequential cargo gate"
+    },
+    {
+      "name": "aac_eld_sbr",
+      "status": "ok",
+      "passed": 9,
+      "failed": 0,
+      "ignored": 0,
+      "source": "sequential cargo gate"
+    },
+    {
+      "name": "aac_eld_sbr_downscaled",
+      "status": "ok",
+      "passed": 5,
+      "failed": 0,
+      "ignored": 0,
+      "source": "sequential cargo gate"
+    },
+    {
+      "name": "aac_eld_sbr_eighth",
+      "status": "ok",
+      "passed": 6,
+      "failed": 0,
+      "ignored": 0,
+      "exit_code": 0,
+      "executable_sha256": "2513e6cdd660843a46bcd0812ac97d1798808c28fdfba4f14bf40608b7eeabe4",
+      "source": "cargo-built standalone Rust test harness"
+    },
+    {
+      "name": "aac_eld_sbr_noise_range",
+      "status": "ok",
+      "passed": 3,
+      "failed": 0,
+      "ignored": 0,
+      "exit_code": 0,
+      "executable_sha256": "d95f73011070b0d165bc443dd4a37e3c6a74e52882fc89bf1411faf11955e580",
+      "source": "cargo-built standalone Rust test harness"
+    },
+    {
+      "name": "aac_eld_short",
+      "status": "ok",
+      "passed": 6,
+      "failed": 0,
+      "ignored": 0,
+      "exit_code": 0,
+      "executable_sha256": "13698ef48b6a4fc0439635d835969e5b0ba57a8b7dabba9d634a1e74e03fb5f5",
+      "source": "cargo-built standalone Rust test harness"
+    },
+    {
+      "name": "aac_eld_spatial_sbr",
+      "status": "ok",
+      "passed": 7,
+      "failed": 0,
+      "ignored": 0,
+      "exit_code": 0,
+      "executable_sha256": "d98e9a3ab01a9ec6216b512206a17f5864b5d086fc72589655a8e9411d13f68f",
+      "source": "cargo-built standalone Rust test harness"
+    },
+    {
+      "name": "aac_eld_spatial_tail",
+      "status": "ok",
+      "passed": 6,
+      "failed": 0,
+      "ignored": 0,
+      "exit_code": 0,
+      "executable_sha256": "5cdeff20352bf162cae1142ada8994aed52e63a12034ec1b3ac5f5f59842dd5a",
+      "source": "cargo-built standalone Rust test harness"
+    },
+    {
+      "name": "aac_eld_third",
+      "status": "ok",
+      "passed": 8,
+      "failed": 0,
+      "ignored": 0,
+      "exit_code": 0,
+      "executable_sha256": "cff7a6561ba91d8b4996801da3cd9e20d03edc11675691a36144002cbb674b02",
+      "source": "cargo-built standalone Rust test harness"
+    },
+    {
+      "name": "aac_eld_third_rates",
+      "status": "ok",
+      "passed": 6,
+      "failed": 0,
+      "ignored": 0,
+      "exit_code": 0,
+      "executable_sha256": "cc6237a9b08dfb815b417447268cdf66e437e0065c0e235dfc9b51ab15417a69",
+      "source": "cargo-built standalone Rust test harness"
+    },
+    {
+      "name": "aac_ep1",
+      "status": "ok",
+      "passed": 10,
+      "failed": 0,
+      "ignored": 0,
+      "exit_code": 0,
+      "executable_sha256": "765e9128b067269c6566362d3b3020dfb0269de6ae7b30783bcb6aa4616c072d",
+      "source": "freshly rebuilt standalone harness after independent RS oracle/ELD alignment expectation correction"
+    },
+    {
+      "name": "aac_ep_class_boundaries",
+      "status": "ok",
+      "passed": 4,
+      "failed": 0,
+      "ignored": 0,
+      "exit_code": 0,
+      "executable_sha256": "e433ce46227eff8857d533e49c83cb72fea872cbb97b54bc0adab56540776ddf",
+      "source": "cargo-built standalone Rust test harness"
+    },
+    {
+      "name": "aac_ep_concatenated_playback",
+      "status": "ok",
+      "passed": 9,
+      "failed": 0,
+      "ignored": 0,
+      "exit_code": 0,
+      "executable_sha256": "290a3fb4e032aa5b2181e5deea7dbcb0750e510efceb17218cba336e42317a3c",
+      "source": "freshly rebuilt standalone harness after independent RS oracle/ELD alignment expectation correction"
+    },
+    {
+      "name": "aac_ep_interleave_playback",
+      "status": "ok",
+      "passed": 7,
+      "failed": 0,
+      "ignored": 0,
+      "exit_code": 0,
+      "executable_sha256": "a1322802d1cd10d9b80f622c15b3511ec9831c1240d52f0561cf5ed42be6d601",
+      "source": "cargo-built standalone Rust test harness"
+    },
+    {
+      "name": "aac_ep_multiclass_playback",
+      "status": "ok",
+      "passed": 7,
+      "failed": 0,
+      "ignored": 0,
+      "exit_code": 0,
+      "executable_sha256": "1c9b7b0568a60bffbd04c5bb38e2b54cb68863abfb6510a31fb8e0234c9fde5d",
+      "source": "cargo-built standalone Rust test harness"
+    },
+    {
+      "name": "aac_ep_optional_playback",
+      "status": "ok",
+      "passed": 7,
+      "failed": 0,
+      "ignored": 0,
+      "exit_code": 0,
+      "executable_sha256": "52ebcc74a3853d3a01c00833ca0f89224559afabcc72a11694e59533b11e663e",
+      "source": "cargo-built standalone Rust test harness"
+    },
+    {
+      "name": "aac_ep_playback",
+      "status": "ok",
+      "passed": 7,
+      "failed": 0,
+      "ignored": 0,
+      "exit_code": 0,
+      "executable_sha256": "1ad8ffc6d61a35a79502c3a2dfad7f8622d4df9882eeb040738e834216a7f90e",
+      "source": "cargo-built standalone Rust test harness"
+    },
+    {
+      "name": "aac_ep_ps_playback",
+      "status": "ok",
+      "passed": 8,
+      "failed": 0,
+      "ignored": 0,
+      "exit_code": 0,
+      "executable_sha256": "4d580bb58f2ffd9ebb51a2ee2d3d821f7046c72a70ec8f603cc2f8a54b4ac121",
+      "source": "cargo-built standalone Rust test harness"
+    },
+    {
+      "name": "aac_ep_rs_bits",
+      "status": "ok",
+      "passed": 10,
+      "failed": 0,
+      "ignored": 0,
+      "exit_code": 0,
+      "executable_sha256": "60c692bac61416f79ee7fbcbf00b8045254a2d0928c42798f4a668b51389350c",
+      "source": "cargo-built standalone Rust test harness"
+    },
+    {
+      "name": "aac_ep_rs_group_concatenated",
+      "status": "ok",
+      "passed": 9,
+      "failed": 0,
+      "ignored": 0,
+      "exit_code": 0,
+      "executable_sha256": "e38efaf1e71684c383b914197cdb87648403784e71a386462d26e80779092f37",
+      "source": "freshly rebuilt standalone harness after independent RS oracle/ELD alignment expectation correction"
+    },
+    {
+      "name": "aac_ep_rs_group_playback",
+      "status": "ok",
+      "passed": 7,
+      "failed": 0,
+      "ignored": 0,
+      "exit_code": 0,
+      "executable_sha256": "6a963d55fd7f1957525eaf9ea730cda4225149359440cb302a6e6784b75da439",
+      "source": "freshly rebuilt standalone harness after independent RS oracle/ELD alignment expectation correction"
+    },
+    {
+      "name": "aac_ep_rs_playback",
+      "status": "ok",
+      "passed": 7,
+      "failed": 0,
+      "ignored": 0,
+      "exit_code": 0,
+      "executable_sha256": "856bf7ed4ea7989edd3cecb1396793e4c75049ce5e90156a232c0bf038d42a59",
+      "source": "cargo-built standalone Rust test harness"
+    },
+    {
+      "name": "aac_ep_sets_playback",
+      "status": "ok",
+      "passed": 7,
+      "failed": 0,
+      "ignored": 0,
+      "exit_code": 0,
+      "executable_sha256": "fd8d8e3bb9e642eafa665ad1fa1c948cb532a908696a70a5f35fc850f0320074",
+      "source": "cargo-built standalone Rust test harness"
+    },
+    {
+      "name": "aac_esc_extensions",
+      "status": "ok",
+      "passed": 11,
+      "failed": 0,
+      "ignored": 0,
+      "exit_code": 0,
+      "executable_sha256": "7cbe83698956bbc5954445686359a22cdf12a3904ebb052f730922d1820a54ad",
+      "source": "cargo-built standalone Rust test harness"
+    },
+    {
+      "name": "aac_esc_sbr",
+      "status": "ok",
+      "passed": 11,
+      "failed": 0,
+      "ignored": 0,
+      "exit_code": 0,
+      "executable_sha256": "44c43a7048117cc47e3c83b293130f676f8381b56d1329dee15745d0aab040d5",
+      "source": "cargo-built standalone Rust test harness"
+    },
+    {
+      "name": "aac_ld_mps_3d",
+      "status": "ok",
+      "passed": 8,
+      "failed": 0,
+      "ignored": 0,
+      "exit_code": 0,
+      "executable_sha256": "0293a24798de16e032888ad2dd8414c17cecd9fa09536d2f81903f3e9136aab0",
+      "source": "cargo-built standalone Rust test harness"
+    },
+    {
+      "name": "aac_ld_mps_arbdmx",
+      "status": "ok",
+      "passed": 5,
+      "failed": 0,
+      "ignored": 0,
+      "exit_code": 0,
+      "executable_sha256": "235f795b41a994ecce7e015876eba89cab41cbea7f53821585e860c0bfe8f8c7",
+      "source": "cargo-built standalone Rust test harness"
+    },
+    {
+      "name": "aac_ld_mps_arbdmx_switch",
+      "status": "ok",
+      "passed": 8,
+      "failed": 0,
+      "ignored": 0,
+      "exit_code": 0,
+      "executable_sha256": "5ff3158044d670253305e423adf4ada843080566698a7c8995ef192b0d9b99c6",
+      "source": "cargo-built standalone Rust test harness"
+    },
+    {
+      "name": "aac_ld_mps_arbdmx_ttt",
+      "status": "ok",
+      "passed": 7,
+      "failed": 0,
+      "ignored": 0,
+      "exit_code": 0,
+      "executable_sha256": "e02ddeadf2821a16e08ecd79f99acb1f34324ac616cc7d5e8d3bbb46ac256b19",
+      "source": "cargo-built standalone Rust test harness"
+    },
+    {
+      "name": "aac_ld_mps_assemble",
+      "status": "ok",
+      "passed": 3,
+      "failed": 0,
+      "ignored": 0,
+      "exit_code": 0,
+      "executable_sha256": "2af8a1be742d1e2f1552e8bfcdecccef318e4bd46b0226651e2e942a6f039077",
+      "source": "cargo-built standalone Rust test harness"
+    },
+    {
+      "name": "aac_ld_mps_config",
+      "status": "ok",
+      "passed": 4,
+      "failed": 0,
+      "ignored": 0,
+      "exit_code": 0,
+      "executable_sha256": "20e3323d7344cfd79aff5ac58a83b0542d41b4123c409f6b61175e6d20afce76",
+      "source": "cargo-built standalone Rust test harness"
+    },
+    {
+      "name": "aac_ld_mps_discard",
+      "status": "ok",
+      "passed": 6,
+      "failed": 0,
+      "ignored": 0,
+      "exit_code": 0,
+      "executable_sha256": "214f492036bdf3061f923dd7ca2257712794d5b97ebd2f440869961a63308724",
+      "source": "cargo-built standalone Rust test harness"
+    },
+    {
+      "name": "aac_ld_mps_downscaled",
+      "status": "ok",
+      "passed": 5,
+      "failed": 0,
+      "ignored": 0,
+      "exit_code": 0,
+      "executable_sha256": "801b685eab912ae48ec4a5f824d7269b843987332d78eddd970caf2cfd246df8",
+      "source": "cargo-built standalone Rust test harness"
+    },
+    {
+      "name": "aac_ld_mps_empty_groups",
+      "status": "ok",
+      "passed": 7,
+      "failed": 0,
+      "ignored": 0,
+      "exit_code": 0,
+      "executable_sha256": "544ace17f7835fb3b715405589cbc22d87191779c36b7c3bb9124fc07130a434",
+      "source": "cargo-built standalone Rust test harness"
+    },
+    {
+      "name": "aac_ld_mps_entropy",
+      "status": "ok",
+      "passed": 5,
+      "failed": 0,
+      "ignored": 0,
+      "exit_code": 0,
+      "executable_sha256": "f802cc45680f12041e0bd9fe2203eab49013ca0a3f6db3e51b7e95c5819bb7e8",
+      "source": "cargo-built standalone Rust test harness"
+    },
+    {
+      "name": "aac_ld_mps_frame",
+      "status": "ok",
+      "passed": 4,
+      "failed": 0,
+      "ignored": 0,
+      "exit_code": 0,
+      "executable_sha256": "e42fb50d14a031bd622f22009167170a832c2ef6c2db7ad03b7fcedf29dd9e1a",
+      "source": "cargo-built standalone Rust test harness"
+    },
+    {
+      "name": "aac_ld_mps_frame_length",
+      "status": "ok",
+      "passed": 9,
+      "failed": 0,
+      "ignored": 0,
+      "exit_code": 0,
+      "executable_sha256": "8b7b05280191ca387d102a79ad6a3383f239efdef7165f5ff76801a4b3689b9c",
+      "source": "cargo-built standalone Rust test harness"
+    },
+    {
+      "name": "aac_ld_mps_ges",
+      "status": "ok",
+      "passed": 5,
+      "failed": 0,
+      "ignored": 0,
+      "exit_code": 0,
+      "executable_sha256": "803ea45297241083d746d9b1b1b0dbdcdffec53c36ba8a8354ff83cca1312eaa",
+      "source": "cargo-built standalone Rust test harness"
+    },
+    {
+      "name": "aac_ld_mps_ges128",
+      "status": "ok",
+      "passed": 1,
+      "failed": 0,
+      "ignored": 0,
+      "exit_code": 0,
+      "executable_sha256": "55db1922ccfe64c14a85d0f727022653d095a0bdbdd306e16b0385fe8b0da741",
+      "source": "cargo-built standalone Rust test harness"
+    },
+    {
+      "name": "aac_ld_mps_grid",
+      "status": "ok",
+      "passed": 4,
+      "failed": 0,
+      "ignored": 0,
+      "exit_code": 0,
+      "executable_sha256": "21dd2b4216fcdcddf53ddff57e982b98682d492733e82e58914f7d3f88a4a420",
+      "source": "cargo-built standalone Rust test harness"
+    },
+    {
+      "name": "aac_ld_mps_inband",
+      "status": "ok",
+      "passed": 5,
+      "failed": 0,
+      "ignored": 0,
+      "exit_code": 0,
+      "executable_sha256": "89d1e9818f64eed7f6237389ec290d4f74f879ec49e46b46d81ed78d4347861e",
+      "source": "cargo-built standalone Rust test harness"
+    },
+    {
+      "name": "aac_ld_mps_ld_core",
+      "status": "ok",
+      "passed": 5,
+      "failed": 0,
+      "ignored": 0,
+      "exit_code": 0,
+      "executable_sha256": "d56ea0e44ba515365361f000962bb6c49a556639bbbfba1714a9f01454dfc7fa",
+      "source": "cargo-built standalone Rust test harness"
+    },
+    {
+      "name": "aac_ld_mps_matrix_apply",
+      "status": "ok",
+      "passed": 3,
+      "failed": 0,
+      "ignored": 0,
+      "exit_code": 0,
+      "executable_sha256": "4eb387c3446b0a3fcbae39551d81a8f07896879b977ab70b48f35b5c657ab7de",
+      "source": "cargo-built standalone Rust test harness"
+    },
+    {
+      "name": "aac_ld_mps_matroska",
+      "status": "ok",
+      "passed": 5,
+      "failed": 0,
+      "ignored": 0,
+      "exit_code": 0,
+      "executable_sha256": "802707d2d7c4c38fd253f8611925ed05465676d8ef090410f34847f78f475229",
+      "source": "cargo-built standalone Rust test harness"
+    },
+    {
+      "name": "aac_ld_mps_multicore",
+      "status": "ok",
+      "passed": 6,
+      "failed": 0,
+      "ignored": 0,
+      "exit_code": 0,
+      "executable_sha256": "c142ddae6a3f9a6077fae909d7199b0856e0a68c336c0bc4736d037e73593de0",
+      "source": "cargo-built standalone Rust test harness"
+    },
+    {
+      "name": "aac_ld_mps_parameters",
+      "status": "ok",
+      "passed": 4,
+      "failed": 0,
+      "ignored": 0,
+      "exit_code": 0,
+      "executable_sha256": "7e290ec34d261f6d1dd7274211b7a019912c53ca9d122bd6bb0fd3931e623557",
+      "source": "cargo-built standalone Rust test harness"
+    },
+    {
+      "name": "aac_ld_mps_pcm",
+      "status": "ok",
+      "passed": 2,
+      "failed": 0,
+      "ignored": 0,
+      "exit_code": 0,
+      "executable_sha256": "bb07dbb591fdc513f5eb221263d76806c5717a1a9e042e14cdeb6d56d120d7b6",
+      "source": "cargo-built standalone Rust test harness"
+    },
+    {
+      "name": "aac_ld_mps_prepare",
+      "status": "ok",
+      "passed": 6,
+      "failed": 0,
+      "ignored": 0,
+      "exit_code": 0,
+      "executable_sha256": "7a2fb86142f2def445b2af4eeeb4c75c1ca76242f1d254c6a2a7d0b60bfbfa2b",
+      "source": "cargo-built standalone Rust test harness"
+    },
+    {
+      "name": "aac_ld_mps_profile",
+      "status": "ok",
+      "passed": 2,
+      "failed": 0,
+      "ignored": 0,
+      "exit_code": 0,
+      "executable_sha256": "667f954713168736cd1bb6259a6526956c28271bccab67d3563f8823e7652115",
+      "source": "cargo-built standalone Rust test harness"
+    },
+    {
+      "name": "aac_ld_mps_qmf",
+      "status": "ok",
+      "passed": 2,
+      "failed": 0,
+      "ignored": 0,
+      "exit_code": 0,
+      "executable_sha256": "009343327ecf86de66e81d46c3693c837bd52f005eb4faf679fa1ea3f0aaa4c4",
+      "source": "cargo-built standalone Rust test harness"
+    },
+    {
+      "name": "aac_ld_mps_qmf128",
+      "status": "ok",
+      "passed": 2,
+      "failed": 0,
+      "ignored": 0,
+      "exit_code": 0,
+      "executable_sha256": "abac079d3712c406ebdf098bcead6e8debaa79f9fbd112c62938a43971083dcf",
+      "source": "cargo-built standalone Rust test harness"
+    },
+    {
+      "name": "aac_ld_mps_residual",
+      "status": "ok",
+      "passed": 4,
+      "failed": 0,
+      "ignored": 0,
+      "exit_code": 0,
+      "executable_sha256": "54620775fa20097364c6d142ecb4830ed519b1e76373c3f56e37c7d7761f1c45",
+      "source": "cargo-built standalone Rust test harness"
+    },
+    {
+      "name": "aac_ld_mps_residual_bank_repro",
+      "status": "ok",
+      "passed": 3,
+      "failed": 0,
+      "ignored": 0,
+      "exit_code": 0,
+      "executable_sha256": "fce5a52691977167cc3b1f548d7fd6adc081e7d9aeef26f6d7f9f7bf31f59d1d",
+      "source": "cargo-built standalone Rust test harness"
+    },
+    {
+      "name": "aac_ld_mps_residual_native",
+      "status": "ok",
+      "passed": 5,
+      "failed": 0,
+      "ignored": 0,
+      "exit_code": 0,
+      "executable_sha256": "5b99d301a9c331fad5f18b001c06886638c69b86ba6e1d3bd8ac2843523fc496",
+      "source": "cargo-built standalone Rust test harness"
+    },
+    {
+      "name": "aac_ld_mps_route",
+      "status": "ok",
+      "passed": 3,
+      "failed": 0,
+      "ignored": 0,
+      "exit_code": 0,
+      "executable_sha256": "8ac9723de1ae0a13a538f08e9783b592457f1f6f70dd83662caea16e46186748",
+      "source": "cargo-built standalone Rust test harness"
+    },
+    {
+      "name": "aac_ld_mps_sbr_pcm",
+      "status": "ok",
+      "passed": 5,
+      "failed": 0,
+      "ignored": 0,
+      "exit_code": 0,
+      "executable_sha256": "1dc5e4a3f51c28428aae9f0aa9727d578ca42089859dfd37871d48077681b8af",
+      "source": "cargo-built standalone Rust test harness"
+    },
+    {
+      "name": "aac_ld_mps_sbr_rates",
+      "status": "ok",
+      "passed": 4,
+      "failed": 0,
+      "ignored": 0,
+      "exit_code": 0,
+      "executable_sha256": "970b0d621b180bdb8f7bfa3fda98e98ddebffa72f8637e4f02acd520c57aca31",
+      "source": "cargo-built standalone Rust test harness"
+    },
+    {
+      "name": "aac_ld_mps_session",
+      "status": "ok",
+      "passed": 10,
+      "failed": 0,
+      "ignored": 0,
+      "exit_code": 0,
+      "executable_sha256": "8f63e84194acdae9f0b731270ca888609562772b01f914669c15be9740ed843d",
+      "source": "cargo-built standalone Rust test harness"
+    },
+    {
+      "name": "aac_ld_mps_shared128",
+      "status": "ok",
+      "passed": 1,
+      "failed": 0,
+      "ignored": 0,
+      "exit_code": 0,
+      "executable_sha256": "efe86caaea2296b8ddcda30695e401bfa0a1bc342cf18b4a9d578f2eda05dddf",
+      "source": "cargo-built standalone Rust test harness"
+    },
+    {
+      "name": "aac_ld_mps_source_slices",
+      "status": "ok",
+      "passed": 9,
+      "failed": 0,
+      "ignored": 0,
+      "exit_code": 0,
+      "executable_sha256": "123bb30f5f532b76210b6553d86aa144808658cf5fabda33f8b911353fe7aafa",
+      "source": "cargo-built standalone Rust test harness"
+    },
+    {
+      "name": "aac_ld_mps_stp",
+      "status": "ok",
+      "passed": 5,
+      "failed": 0,
+      "ignored": 0,
+      "exit_code": 0,
+      "executable_sha256": "4c87ce3e9edc48caf74da60bd21f107550399747dd752fcc533a7537e2b2415d",
+      "source": "cargo-built standalone Rust test harness"
+    },
+    {
+      "name": "aac_ld_mps_stp128",
+      "status": "ok",
+      "passed": 1,
+      "failed": 0,
+      "ignored": 0,
+      "exit_code": 0,
+      "executable_sha256": "52891a8e16f459baee01bde3a5837142e485c359ecf0fe90805d548fa6f8131d",
+      "source": "cargo-built standalone Rust test harness"
+    },
+    {
+      "name": "aac_ld_mps_stp_energy",
+      "status": "ok",
+      "passed": 1,
+      "failed": 0,
+      "ignored": 0,
+      "exit_code": 0,
+      "executable_sha256": "2df4165b472daef2dde4d54dee8015f8e2767206a6137df3737e90f5d6056876",
+      "source": "cargo-built standalone Rust test harness"
+    },
+    {
+      "name": "aac_ld_mps_transport",
+      "status": "ok",
+      "passed": 3,
+      "failed": 0,
+      "ignored": 0,
+      "exit_code": 0,
+      "executable_sha256": "2489a3526fb6b3a1aae516bf4125033fb5493b3514a83e17e690be2a49f72f0d",
+      "source": "cargo-built standalone Rust test harness"
+    },
+    {
+      "name": "aac_ld_mps_tree_matrix",
+      "status": "ok",
+      "passed": 4,
+      "failed": 0,
+      "ignored": 0,
+      "exit_code": 0,
+      "executable_sha256": "e69b04db39dde845cdb27ae12420a9bc9f5b7f21db01c993eadab12930c775e3",
+      "source": "cargo-built standalone Rust test harness"
+    },
+    {
+      "name": "aac_ld_mps_ttt",
+      "status": "ok",
+      "passed": 4,
+      "failed": 0,
+      "ignored": 0,
+      "exit_code": 0,
+      "executable_sha256": "fd103428a6e0e95d4e62f040e8aaf9e952072fd07a7cad8a46ba23488bdbaf84",
+      "source": "cargo-built standalone Rust test harness"
+    },
+    {
+      "name": "aac_ld_mps_ttt_tree",
+      "status": "ok",
+      "passed": 4,
+      "failed": 0,
+      "ignored": 0,
+      "exit_code": 0,
+      "executable_sha256": "3946067090d05b5f92c86d25517569957d21df576f4971670952ff5b0de5a0a3",
+      "source": "cargo-built standalone Rust test harness"
+    },
+    {
+      "name": "aac_ld_mps_upmix",
+      "status": "ok",
+      "passed": 4,
+      "failed": 0,
+      "ignored": 0,
+      "exit_code": 0,
+      "executable_sha256": "603b852be6cd559ff53125afb5663efc9dc11466e5fe3bc5c84d8ad1ec92f9cd",
+      "source": "cargo-built standalone Rust test harness"
+    },
+    {
+      "name": "aac_ld_sbr_q31",
+      "status": "ok",
+      "passed": 4,
+      "failed": 0,
+      "ignored": 0,
+      "exit_code": 0,
+      "executable_sha256": "b04989049729b7145d4d912cd95368b57f16d94f40ca18a722f50fde82c95747",
+      "source": "cargo-built standalone Rust test harness"
+    },
+    {
+      "name": "aac_spatial_decorrelation",
+      "status": "ok",
+      "passed": 3,
+      "failed": 0,
+      "ignored": 0,
+      "exit_code": 0,
+      "executable_sha256": "44fef6948af3bb0c4dcc2f29f49a03d6f8936fc8cd3198d7cc9bbf18600fdae2",
+      "source": "cargo-built standalone Rust test harness"
+    },
+    {
+      "name": "mp4_ep1",
+      "status": "ok",
+      "passed": 7,
+      "failed": 0,
+      "ignored": 0,
+      "exit_code": 0,
+      "executable_sha256": "d043f05a83868974537f5c3579a20ebea2a75a8873e94ac54e850e0a40ead367",
+      "source": "freshly rebuilt standalone harness after independent RS oracle/ELD alignment expectation correction"
+    },
+    {
+      "name": "mp4_ep1_active_chain",
+      "status": "ok",
+      "passed": 5,
+      "failed": 0,
+      "ignored": 0,
+      "exit_code": 0,
+      "executable_sha256": "e1af45dd4a2a2c207c8e1ac1483609a621faff7ebaad853a27d96d12f6ef0794",
+      "source": "freshly rebuilt standalone harness after independent RS oracle/ELD alignment expectation correction"
+    },
+    {
+      "name": "mp4_ep1_empty",
+      "status": "ok",
+      "passed": 3,
+      "failed": 0,
+      "ignored": 0,
+      "exit_code": 0,
+      "executable_sha256": "438b50614dde6e3f2f5f610a15a66e41dfeeb5a4d05fbe438a63302c63cc9b88",
+      "source": "cargo-built standalone Rust test harness"
+    },
+    {
+      "name": "mp4_ep1_epochs",
+      "status": "ok",
+      "passed": 4,
+      "failed": 0,
+      "ignored": 0,
+      "exit_code": 0,
+      "executable_sha256": "367f199c9f50a7bf25aa613595577134ad3d7422611a85de04e0df501a790f75",
+      "source": "cargo-built standalone Rust test harness"
+    },
+    {
+      "name": "mp4_ep1_grouped_er",
+      "status": "ok",
+      "passed": 9,
+      "failed": 0,
+      "ignored": 0,
+      "exit_code": 0,
+      "executable_sha256": "7028711ad1e7c295e3cc335119401b9ac67cafc059f5ade4574bdb71663b3f88",
+      "source": "cargo-built standalone Rust test harness"
+    },
+    {
+      "name": "mp4_ep1_grouped_extensions",
+      "status": "ok",
+      "passed": 7,
+      "failed": 0,
+      "ignored": 0,
+      "exit_code": 0,
+      "executable_sha256": "717ab3cce9b4fdf3fdbd665a3ea21c6c5d64b06d91d9491fb0f4e693f478f738",
+      "source": "cargo-built standalone Rust test harness"
+    },
+    {
+      "name": "mp4_ep1_grouped_ps",
+      "status": "ok",
+      "passed": 8,
+      "failed": 0,
+      "ignored": 0,
+      "exit_code": 0,
+      "executable_sha256": "79659b8bb360a1254bef38489f8734103cda6ded9afb45f150887a9f51186dbe",
+      "source": "cargo-built standalone Rust test harness"
+    },
+    {
+      "name": "mp4_ep1_grouped_sbr",
+      "status": "ok",
+      "passed": 7,
+      "failed": 0,
+      "ignored": 0,
+      "exit_code": 0,
+      "executable_sha256": "5651eb9f1a95fd83ed799a6e4b0af354c80fc2c469b5fbea3ca8127a5ccd29ee",
+      "source": "freshly rebuilt standalone harness after independent RS oracle/ELD alignment expectation correction"
+    },
+    {
+      "name": "mp4_ep1_od",
+      "status": "ok",
+      "passed": 6,
+      "failed": 0,
+      "ignored": 0,
+      "exit_code": 0,
+      "executable_sha256": "52562ab2a8d9c9c83063f43a986cf879e2684ae8b6a40112ae2e0372b773cee6",
+      "source": "cargo-built standalone Rust test harness"
+    },
+    {
+      "name": "mp4_ep1_od_context",
+      "status": "ok",
+      "passed": 5,
+      "failed": 0,
+      "ignored": 0,
+      "exit_code": 0,
+      "executable_sha256": "65e1b0dc34f769bb67c7700aaaf5e3ce81a9cc7afed559e468faf541d6f0eef5",
+      "source": "freshly rebuilt standalone harness after independent RS oracle/ELD alignment expectation correction"
+    },
+    {
+      "name": "mp4_ep1_od_edits",
+      "status": "ok",
+      "passed": 4,
+      "failed": 0,
+      "ignored": 0,
+      "exit_code": 0,
+      "executable_sha256": "09be4919bfd2f98e3521ad8720c1e24232c2c93a7f5145bdc3175a40798694e8",
+      "source": "cargo-built standalone Rust test harness"
+    },
+    {
+      "name": "mp4_ep1_ps",
+      "status": "ok",
+      "passed": 8,
+      "failed": 0,
+      "ignored": 0,
+      "exit_code": 0,
+      "executable_sha256": "df1e09a4b27396959f5bc5cacfe65d4803f3653f41e765986c4d4460dd4d77fd",
+      "source": "freshly rebuilt standalone harness after independent RS oracle/ELD alignment expectation correction"
+    },
+    {
+      "name": "mp4_ep1_transitions",
+      "status": "ok",
+      "passed": 4,
+      "failed": 0,
+      "ignored": 0,
+      "exit_code": 0,
+      "executable_sha256": "2ce173ab8c150b5b6d4166ccb556321127b9eb4b751becadf7c28116353c579d",
+      "source": "cargo-built standalone Rust test harness"
+    }
+  ],
+  "discovered_then_corrected": [
+    {
+      "name": "aac_ep_concatenated_playback",
+      "status": "FAILED",
+      "passed": 7,
+      "failed": 1,
+      "ignored": 0,
+      "exit_code": 101,
+      "executable_sha256": "cc85773e6fe2327c84f3aa3d1343c81d38593099fff14317c27c2a8e34389b78",
+      "source": "cargo-built standalone Rust test harness"
+    },
+    {
+      "name": "aac_ep_rs_group_concatenated",
+      "status": "FAILED",
+      "passed": 5,
+      "failed": 4,
+      "ignored": 0,
+      "exit_code": 101,
+      "executable_sha256": "f1052c2da8891901e9c302fc5f3452329b069fe073d346045427c594313bf0fb",
+      "source": "cargo-built standalone Rust test harness"
+    },
+    {
+      "name": "aac_ep_rs_group_playback",
+      "status": "FAILED",
+      "passed": 5,
+      "failed": 2,
+      "ignored": 0,
+      "exit_code": 101,
+      "executable_sha256": "6a963d55fd7f1957525eaf9ea730cda4225149359440cb302a6e6784b75da439",
+      "source": "cargo-built standalone Rust test harness"
+    },
+    {
+      "name": "mp4_ep1",
+      "status": "FAILED",
+      "passed": 3,
+      "failed": 4,
+      "ignored": 0,
+      "exit_code": 101,
+      "executable_sha256": "d043f05a83868974537f5c3579a20ebea2a75a8873e94ac54e850e0a40ead367",
+      "source": "cargo-built standalone Rust test harness"
+    },
+    {
+      "name": "mp4_ep1_active_chain",
+      "status": "FAILED",
+      "passed": 3,
+      "failed": 2,
+      "ignored": 0,
+      "exit_code": 101,
+      "executable_sha256": "e1af45dd4a2a2c207c8e1ac1483609a621faff7ebaad853a27d96d12f6ef0794",
+      "source": "cargo-built standalone Rust test harness"
+    },
+    {
+      "name": "mp4_ep1_grouped_sbr",
+      "status": "FAILED",
+      "passed": 6,
+      "failed": 1,
+      "ignored": 0,
+      "exit_code": 101,
+      "executable_sha256": "5651eb9f1a95fd83ed799a6e4b0af354c80fc2c469b5fbea3ca8127a5ccd29ee",
+      "source": "cargo-built standalone Rust test harness"
+    },
+    {
+      "name": "mp4_ep1_od_context",
+      "status": "FAILED",
+      "passed": 4,
+      "failed": 1,
+      "ignored": 0,
+      "exit_code": 101,
+      "executable_sha256": "65e1b0dc34f769bb67c7700aaaf5e3ce81a9cc7afed559e468faf541d6f0eef5",
+      "source": "cargo-built standalone Rust test harness"
+    },
+    {
+      "name": "mp4_ep1_ps",
+      "status": "FAILED",
+      "passed": 7,
+      "failed": 1,
+      "ignored": 0,
+      "exit_code": 101,
+      "executable_sha256": "df1e09a4b27396959f5bc5cacfe65d4803f3653f41e765986c4d4460dd4d77fd",
+      "source": "cargo-built standalone Rust test harness"
+    }
+  ],
+  "recheck_reports": [
+    "aac-cldfb-phase-retries-2026-10-31.json",
+    "aac-cldfb-phase-mp4-retries-2026-10-31.json"
+  ]
+}

@@ -1,0 +1,78 @@
+{
+  "executable": "/Users/themoretheless/.codex/worktrees/aac-eld-extension-gaps/target/debug/examples/audio_probe",
+  "executable_sha256": "1c7e230bcb361a6521bfb20812c27a9a779a3122ceda520c632c834aed9775b5",
+  "runs": [
+    {
+      "file": "tests/fixtures/playback-errors/aac-ld-mps-arbitrary-reindex/plain32-tree7.mp4",
+      "exit_code": 0,
+      "stdout": "platform_device=started source_channels=3 rate=24000 duration=0.032000\nphase=full generation=0 from=0.000000 position=0.032000 wall=0.051813 device_drain=complete\nphase=seek-quarter generation=1 from=0.008000 position=0.032000 wall=0.044711 device_drain=complete\nphase=seek-60-percent generation=2 from=0.019200 position=0.032000 wall=0.031818 device_drain=complete\nphase=rewind generation=3 from=0.000000 position=0.032000 wall=0.049006 device_drain=complete\n",
+      "stderr": ""
+    },
+    {
+      "file": "tests/fixtures/playback-errors/aac-ld-mps-arbitrary-reindex/plain32-tree7.mkv",
+      "exit_code": 0,
+      "stdout": "platform_device=started source_channels=3 rate=24000 duration=0.032000\nphase=full generation=0 from=0.000000 position=0.032000 wall=0.052737 device_drain=complete\nphase=seek-quarter generation=1 from=0.008000 position=0.032000 wall=0.045132 device_drain=complete\nphase=seek-60-percent generation=2 from=0.019200 position=0.031992 wall=0.034503 device_drain=complete\nphase=rewind generation=3 from=0.000000 position=0.032000 wall=0.052168 device_drain=complete\n",
+      "stderr": ""
+    },
+    {
+      "file": "tests/fixtures/playback-errors/aac-ld-mps-arbitrary-reindex/plain64-tree0.mp4",
+      "exit_code": 0,
+      "stdout": "platform_device=started source_channels=7 rate=48000 duration=0.032000\nphase=full generation=0 from=0.000000 position=0.032000 wall=0.055137 device_drain=complete\nphase=seek-quarter generation=1 from=0.008000 position=0.032000 wall=0.045180 device_drain=complete\nphase=seek-60-percent generation=2 from=0.019200 position=0.032000 wall=0.042682 device_drain=complete\nphase=rewind generation=3 from=0.000000 position=0.032000 wall=0.049544 device_drain=complete\n",
+      "stderr": ""
+    },
+    {
+      "file": "tests/fixtures/playback-errors/aac-ld-mps-arbitrary-reindex/plain64-tree0.mkv",
+      "exit_code": 0,
+      "stdout": "platform_device=started source_channels=7 rate=48000 duration=0.032000\nphase=full generation=0 from=0.000000 position=0.032000 wall=0.049868 device_drain=complete\nphase=seek-quarter generation=1 from=0.008000 position=0.032000 wall=0.050254 device_drain=complete\nphase=seek-60-percent generation=2 from=0.019200 position=0.031992 wall=0.042568 device_drain=complete\nphase=rewind generation=3 from=0.000000 position=0.032000 wall=0.062741 device_drain=complete\n",
+      "stderr": ""
+    },
+    {
+      "file": "tests/fixtures/playback-errors/aac-ld-mps-arbitrary-reindex/sbr-pcm64-tree5.mp4",
+      "exit_code": 0,
+      "stdout": "platform_device=started source_channels=9 rate=48000 duration=0.032000\nphase=full generation=0 from=0.000000 position=0.032000 wall=0.052735 device_drain=complete\nphase=seek-quarter generation=1 from=0.008000 position=0.032000 wall=0.044645 device_drain=complete\nphase=seek-60-percent generation=2 from=0.019200 position=0.032000 wall=0.039719 device_drain=complete\nphase=rewind generation=3 from=0.000000 position=0.032000 wall=0.051842 device_drain=complete\n",
+      "stderr": ""
+    },
+    {
+      "file": "tests/fixtures/playback-errors/aac-ld-mps-arbitrary-reindex/sbr-pcm64-tree5.mkv",
+      "exit_code": 0,
+      "stdout": "platform_device=started source_channels=9 rate=48000 duration=0.032000\nphase=full generation=0 from=0.000000 position=0.032000 wall=0.052336 device_drain=complete\nphase=seek-quarter generation=1 from=0.008000 position=0.032000 wall=0.047138 device_drain=complete\nphase=seek-60-percent generation=2 from=0.019200 position=0.031992 wall=0.039343 device_drain=complete\nphase=rewind generation=3 from=0.000000 position=0.032000 wall=0.052775 device_drain=complete\n",
+      "stderr": ""
+    },
+    {
+      "file": "tests/fixtures/playback-errors/aac-ld-mps-arbitrary-reindex/shared32-tree6.mp4",
+      "exit_code": 0,
+      "stdout": "platform_device=started source_channels=9 rate=24000 duration=0.064000\nphase=full generation=0 from=0.000000 position=0.064000 wall=0.084619 device_drain=complete\nphase=seek-quarter generation=1 from=0.016000 position=0.064000 wall=0.069579 device_drain=complete\nphase=seek-60-percent generation=2 from=0.038400 position=0.064000 wall=0.055190 device_drain=complete\nphase=rewind generation=3 from=0.000000 position=0.064000 wall=0.091470 device_drain=complete\n",
+      "stderr": ""
+    },
+    {
+      "file": "tests/fixtures/playback-errors/aac-ld-mps-arbitrary-reindex/shared32-tree6.mkv",
+      "exit_code": 0,
+      "stdout": "platform_device=started source_channels=9 rate=24000 duration=0.064000\nphase=full generation=0 from=0.000000 position=0.064000 wall=0.087250 device_drain=complete\nphase=seek-quarter generation=1 from=0.016000 position=0.064000 wall=0.069492 device_drain=complete\nphase=seek-60-percent generation=2 from=0.038400 position=0.063983 wall=0.049469 device_drain=complete\nphase=rewind generation=3 from=0.000000 position=0.064000 wall=0.082315 device_drain=complete\n",
+      "stderr": ""
+    },
+    {
+      "file": "tests/fixtures/playback-errors/aac-ld-mps-arbitrary-reindex/shared64-tree3.mp4",
+      "exit_code": 0,
+      "stdout": "platform_device=started source_channels=9 rate=48000 duration=0.064000\nphase=full generation=0 from=0.000000 position=0.064000 wall=0.089851 device_drain=complete\nphase=seek-quarter generation=1 from=0.016000 position=0.064000 wall=0.072017 device_drain=complete\nphase=seek-60-percent generation=2 from=0.038400 position=0.064000 wall=0.052421 device_drain=complete\nphase=rewind generation=3 from=0.000000 position=0.064000 wall=0.089352 device_drain=complete\n",
+      "stderr": ""
+    },
+    {
+      "file": "tests/fixtures/playback-errors/aac-ld-mps-arbitrary-reindex/shared64-tree3.mkv",
+      "exit_code": 0,
+      "stdout": "platform_device=started source_channels=9 rate=48000 duration=0.064000\nphase=full generation=0 from=0.000000 position=0.064000 wall=0.084355 device_drain=complete\nphase=seek-quarter generation=1 from=0.016000 position=0.064000 wall=0.072549 device_drain=complete\nphase=seek-60-percent generation=2 from=0.038400 position=0.064004 wall=0.051027 device_drain=complete\nphase=rewind generation=3 from=0.000000 position=0.064000 wall=0.094429 device_drain=complete\n",
+      "stderr": ""
+    },
+    {
+      "file": "tests/fixtures/playback-errors/aac-ld-mps-arbitrary-reindex/sbr-pcm128-tree2.mp4",
+      "exit_code": 0,
+      "stdout": "platform_device=started source_channels=7 rate=96000 duration=0.032000\nphase=full generation=0 from=0.000000 position=0.032000 wall=0.052364 device_drain=complete\nphase=seek-quarter generation=1 from=0.008000 position=0.032000 wall=0.047491 device_drain=complete\nphase=seek-60-percent generation=2 from=0.019200 position=0.032000 wall=0.042671 device_drain=complete\nphase=rewind generation=3 from=0.000000 position=0.032000 wall=0.059765 device_drain=complete\n",
+      "stderr": ""
+    },
+    {
+      "file": "tests/fixtures/playback-errors/aac-ld-mps-arbitrary-reindex/sbr-pcm128-tree2.mkv",
+      "exit_code": 0,
+      "stdout": "platform_device=started source_channels=7 rate=96000 duration=0.032000\nphase=full generation=0 from=0.000000 position=0.032000 wall=0.065510 device_drain=complete\nphase=seek-quarter generation=1 from=0.008000 position=0.032000 wall=0.097722 device_drain=complete\nphase=seek-60-percent generation=2 from=0.019200 position=0.032002 wall=0.074230 device_drain=complete\nphase=rewind generation=3 from=0.000000 position=0.032000 wall=0.066428 device_drain=complete\n",
+      "stderr": ""
+    }
+  ]
+}

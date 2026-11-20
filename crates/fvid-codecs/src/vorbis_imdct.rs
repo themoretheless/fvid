@@ -114,10 +114,10 @@ pub fn inverse_fast(
         let re = fr * c + fi * s;
         let im = fr * s - fi * c;
         let i0 = l - 1 - 2 * k;
-        output[n2 + i0] = -re;
-        output[n - 1 - i0] = -re;
-        output[i0] = im;
-        output[n2 - 1 - i0] = -im;
+        output[n2 + i0] = 0.0 - re;
+        output[n - 1 - i0] = 0.0 - re;
+        output[i0] = im + 0.0;
+        output[n2 - 1 - i0] = 0.0 - im;
     }
     for k in n8..l {
         let (fr, fi) = buf[k];
@@ -125,10 +125,10 @@ pub fn inverse_fast(
         let re = fr * c + fi * s;
         let im = fr * s - fi * c;
         let i1 = 2 * k - l;
-        output[i1] = re;
-        output[n2 - 1 - i1] = -re;
-        output[n2 + i1] = -im;
-        output[n - 1 - i1] = -im;
+        output[i1] = re + 0.0;
+        output[n2 - 1 - i1] = 0.0 - re;
+        output[n2 + i1] = 0.0 - im;
+        output[n - 1 - i1] = 0.0 - im;
     }
     Ok(())
 }
@@ -213,6 +213,7 @@ mod tests {
         coefficients.fill(0.);
         inverse(&coefficients, &mut output, &mut scratch).unwrap();
         assert_eq!(output, [0.; 64]);
+        assert!(output.iter().all(|v| v.to_bits() == 0));
         output.fill(42.);
         assert!(inverse(&coefficients, &mut output, &mut scratch[..127]).is_err());
         assert_eq!(output, [42.; 64]);

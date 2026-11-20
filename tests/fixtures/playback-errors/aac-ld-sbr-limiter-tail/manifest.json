@@ -1,0 +1,1007 @@
+{
+  "cases": [
+    {
+      "name": "n480-lim0",
+      "n": 480,
+      "rate": 48000,
+      "channels": 1,
+      "slots": 15,
+      "bands": 64,
+      "asc": "f8ec31c5c0c05800",
+      "frames": [
+        {
+          "offset": 0,
+          "bytes": 27
+        },
+        {
+          "offset": 27,
+          "bytes": 26
+        },
+        {
+          "offset": 53,
+          "bytes": 26
+        },
+        {
+          "offset": 79,
+          "bytes": 26
+        },
+        {
+          "offset": 105,
+          "bytes": 26
+        },
+        {
+          "offset": 131,
+          "bytes": 26
+        },
+        {
+          "offset": 157,
+          "bytes": 26
+        },
+        {
+          "offset": 183,
+          "bytes": 26
+        }
+      ],
+      "samples": 7680,
+      "out_n": 960,
+      "pcm_offset": 0,
+      "container_rate": 48000,
+      "container_frame_samples": 960,
+      "video": "n480-lim0.mp4",
+      "file": "n480-lim0.mkv",
+      "golden": "n480-lim0.f32le",
+      "limiter_mode": 0,
+      "expected_borders": [
+        10,
+        20
+      ],
+      "edges": [
+        960,
+        2880,
+        6720
+      ]
+    },
+    {
+      "name": "n480-lim1",
+      "n": 480,
+      "rate": 48000,
+      "channels": 1,
+      "slots": 15,
+      "bands": 64,
+      "asc": "f8ec31c5c0c0d800",
+      "frames": [
+        {
+          "offset": 209,
+          "bytes": 27
+        },
+        {
+          "offset": 236,
+          "bytes": 26
+        },
+        {
+          "offset": 262,
+          "bytes": 26
+        },
+        {
+          "offset": 288,
+          "bytes": 26
+        },
+        {
+          "offset": 314,
+          "bytes": 26
+        },
+        {
+          "offset": 340,
+          "bytes": 26
+        },
+        {
+          "offset": 366,
+          "bytes": 26
+        },
+        {
+          "offset": 392,
+          "bytes": 26
+        }
+      ],
+      "samples": 7680,
+      "out_n": 960,
+      "pcm_offset": 0,
+      "container_rate": 48000,
+      "container_frame_samples": 960,
+      "video": "n480-lim1.mp4",
+      "file": "n480-lim1.mkv",
+      "golden": "n480-lim1.f32le",
+      "limiter_mode": 1,
+      "expected_borders": [
+        10,
+        14,
+        20
+      ],
+      "edges": [
+        960,
+        2880,
+        6720
+      ]
+    },
+    {
+      "name": "n480-lim2",
+      "n": 480,
+      "rate": 48000,
+      "channels": 1,
+      "slots": 15,
+      "bands": 64,
+      "asc": "f8ec31c5c0c15800",
+      "frames": [
+        {
+          "offset": 418,
+          "bytes": 27
+        },
+        {
+          "offset": 445,
+          "bytes": 26
+        },
+        {
+          "offset": 471,
+          "bytes": 26
+        },
+        {
+          "offset": 497,
+          "bytes": 26
+        },
+        {
+          "offset": 523,
+          "bytes": 26
+        },
+        {
+          "offset": 549,
+          "bytes": 26
+        },
+        {
+          "offset": 575,
+          "bytes": 26
+        },
+        {
+          "offset": 601,
+          "bytes": 26
+        }
+      ],
+      "samples": 7680,
+      "out_n": 960,
+      "pcm_offset": 0,
+      "container_rate": 48000,
+      "container_frame_samples": 960,
+      "video": "n480-lim2.mp4",
+      "file": "n480-lim2.mkv",
+      "golden": "n480-lim2.f32le",
+      "limiter_mode": 2,
+      "expected_borders": [
+        10,
+        12,
+        16,
+        20
+      ],
+      "edges": [
+        960,
+        2880,
+        6720
+      ]
+    },
+    {
+      "name": "n480-lim3",
+      "n": 480,
+      "rate": 48000,
+      "channels": 1,
+      "slots": 15,
+      "bands": 64,
+      "asc": "f8ec31c5c0c1d800",
+      "frames": [
+        {
+          "offset": 627,
+          "bytes": 27
+        },
+        {
+          "offset": 654,
+          "bytes": 26
+        },
+        {
+          "offset": 680,
+          "bytes": 26
+        },
+        {
+          "offset": 706,
+          "bytes": 26
+        },
+        {
+          "offset": 732,
+          "bytes": 26
+        },
+        {
+          "offset": 758,
+          "bytes": 26
+        },
+        {
+          "offset": 784,
+          "bytes": 26
+        },
+        {
+          "offset": 810,
+          "bytes": 26
+        }
+      ],
+      "samples": 7680,
+      "out_n": 960,
+      "pcm_offset": 0,
+      "container_rate": 48000,
+      "container_frame_samples": 960,
+      "video": "n480-lim3.mp4",
+      "file": "n480-lim3.mkv",
+      "golden": "n480-lim3.f32le",
+      "limiter_mode": 3,
+      "expected_borders": [
+        10,
+        12,
+        14,
+        16,
+        20
+      ],
+      "edges": [
+        960,
+        2880,
+        6720
+      ]
+    },
+    {
+      "name": "n512-lim0",
+      "n": 512,
+      "rate": 48000,
+      "channels": 1,
+      "slots": 16,
+      "bands": 64,
+      "asc": "f8ec21c5c0c05800",
+      "frames": [
+        {
+          "offset": 836,
+          "bytes": 27
+        },
+        {
+          "offset": 863,
+          "bytes": 26
+        },
+        {
+          "offset": 889,
+          "bytes": 26
+        },
+        {
+          "offset": 915,
+          "bytes": 26
+        },
+        {
+          "offset": 941,
+          "bytes": 26
+        },
+        {
+          "offset": 967,
+          "bytes": 26
+        },
+        {
+          "offset": 993,
+          "bytes": 26
+        },
+        {
+          "offset": 1019,
+          "bytes": 26
+        }
+      ],
+      "samples": 8192,
+      "out_n": 1024,
+      "pcm_offset": 0,
+      "container_rate": 48000,
+      "container_frame_samples": 1024,
+      "video": "n512-lim0.mp4",
+      "file": "n512-lim0.mkv",
+      "golden": "n512-lim0.f32le",
+      "limiter_mode": 0,
+      "expected_borders": [
+        10,
+        20
+      ],
+      "edges": [
+        1024,
+        3072,
+        7168
+      ]
+    },
+    {
+      "name": "n512-lim1",
+      "n": 512,
+      "rate": 48000,
+      "channels": 1,
+      "slots": 16,
+      "bands": 64,
+      "asc": "f8ec21c5c0c0d800",
+      "frames": [
+        {
+          "offset": 1045,
+          "bytes": 27
+        },
+        {
+          "offset": 1072,
+          "bytes": 26
+        },
+        {
+          "offset": 1098,
+          "bytes": 26
+        },
+        {
+          "offset": 1124,
+          "bytes": 26
+        },
+        {
+          "offset": 1150,
+          "bytes": 26
+        },
+        {
+          "offset": 1176,
+          "bytes": 26
+        },
+        {
+          "offset": 1202,
+          "bytes": 26
+        },
+        {
+          "offset": 1228,
+          "bytes": 26
+        }
+      ],
+      "samples": 8192,
+      "out_n": 1024,
+      "pcm_offset": 0,
+      "container_rate": 48000,
+      "container_frame_samples": 1024,
+      "video": "n512-lim1.mp4",
+      "file": "n512-lim1.mkv",
+      "golden": "n512-lim1.f32le",
+      "limiter_mode": 1,
+      "expected_borders": [
+        10,
+        14,
+        20
+      ],
+      "edges": [
+        1024,
+        3072,
+        7168
+      ]
+    },
+    {
+      "name": "n512-lim2",
+      "n": 512,
+      "rate": 48000,
+      "channels": 1,
+      "slots": 16,
+      "bands": 64,
+      "asc": "f8ec21c5c0c15800",
+      "frames": [
+        {
+          "offset": 1254,
+          "bytes": 27
+        },
+        {
+          "offset": 1281,
+          "bytes": 26
+        },
+        {
+          "offset": 1307,
+          "bytes": 26
+        },
+        {
+          "offset": 1333,
+          "bytes": 26
+        },
+        {
+          "offset": 1359,
+          "bytes": 26
+        },
+        {
+          "offset": 1385,
+          "bytes": 26
+        },
+        {
+          "offset": 1411,
+          "bytes": 26
+        },
+        {
+          "offset": 1437,
+          "bytes": 26
+        }
+      ],
+      "samples": 8192,
+      "out_n": 1024,
+      "pcm_offset": 0,
+      "container_rate": 48000,
+      "container_frame_samples": 1024,
+      "video": "n512-lim2.mp4",
+      "file": "n512-lim2.mkv",
+      "golden": "n512-lim2.f32le",
+      "limiter_mode": 2,
+      "expected_borders": [
+        10,
+        12,
+        16,
+        20
+      ],
+      "edges": [
+        1024,
+        3072,
+        7168
+      ]
+    },
+    {
+      "name": "n512-lim3",
+      "n": 512,
+      "rate": 48000,
+      "channels": 1,
+      "slots": 16,
+      "bands": 64,
+      "asc": "f8ec21c5c0c1d800",
+      "frames": [
+        {
+          "offset": 1463,
+          "bytes": 27
+        },
+        {
+          "offset": 1490,
+          "bytes": 26
+        },
+        {
+          "offset": 1516,
+          "bytes": 26
+        },
+        {
+          "offset": 1542,
+          "bytes": 26
+        },
+        {
+          "offset": 1568,
+          "bytes": 26
+        },
+        {
+          "offset": 1594,
+          "bytes": 26
+        },
+        {
+          "offset": 1620,
+          "bytes": 26
+        },
+        {
+          "offset": 1646,
+          "bytes": 26
+        }
+      ],
+      "samples": 8192,
+      "out_n": 1024,
+      "pcm_offset": 0,
+      "container_rate": 48000,
+      "container_frame_samples": 1024,
+      "video": "n512-lim3.mp4",
+      "file": "n512-lim3.mkv",
+      "golden": "n512-lim3.f32le",
+      "limiter_mode": 3,
+      "expected_borders": [
+        10,
+        12,
+        14,
+        16,
+        20
+      ],
+      "edges": [
+        1024,
+        3072,
+        7168
+      ]
+    }
+  ],
+  "exports": [
+    {
+      "name": "n480-lim0-matroska",
+      "n": 480,
+      "rate": 48000,
+      "channels": 1,
+      "slots": 15,
+      "bands": 64,
+      "asc": "f8ec31c5c0c05800",
+      "frames": [
+        {
+          "offset": 0,
+          "bytes": 27
+        },
+        {
+          "offset": 27,
+          "bytes": 26
+        },
+        {
+          "offset": 53,
+          "bytes": 26
+        },
+        {
+          "offset": 79,
+          "bytes": 26
+        },
+        {
+          "offset": 105,
+          "bytes": 26
+        },
+        {
+          "offset": 131,
+          "bytes": 26
+        },
+        {
+          "offset": 157,
+          "bytes": 26
+        },
+        {
+          "offset": 183,
+          "bytes": 26
+        }
+      ],
+      "samples": 7680,
+      "out_n": 960,
+      "pcm_offset": 0,
+      "container_rate": 48000,
+      "container_frame_samples": 960,
+      "video": "n480-lim0.mkv",
+      "file": "n480-lim0.mkv",
+      "golden": "n480-lim0.f32le",
+      "limiter_mode": 0,
+      "expected_borders": [
+        10,
+        20
+      ],
+      "edges": [
+        960,
+        2880,
+        6720
+      ]
+    },
+    {
+      "name": "n480-lim1-matroska",
+      "n": 480,
+      "rate": 48000,
+      "channels": 1,
+      "slots": 15,
+      "bands": 64,
+      "asc": "f8ec31c5c0c0d800",
+      "frames": [
+        {
+          "offset": 209,
+          "bytes": 27
+        },
+        {
+          "offset": 236,
+          "bytes": 26
+        },
+        {
+          "offset": 262,
+          "bytes": 26
+        },
+        {
+          "offset": 288,
+          "bytes": 26
+        },
+        {
+          "offset": 314,
+          "bytes": 26
+        },
+        {
+          "offset": 340,
+          "bytes": 26
+        },
+        {
+          "offset": 366,
+          "bytes": 26
+        },
+        {
+          "offset": 392,
+          "bytes": 26
+        }
+      ],
+      "samples": 7680,
+      "out_n": 960,
+      "pcm_offset": 0,
+      "container_rate": 48000,
+      "container_frame_samples": 960,
+      "video": "n480-lim1.mkv",
+      "file": "n480-lim1.mkv",
+      "golden": "n480-lim1.f32le",
+      "limiter_mode": 1,
+      "expected_borders": [
+        10,
+        14,
+        20
+      ],
+      "edges": [
+        960,
+        2880,
+        6720
+      ]
+    },
+    {
+      "name": "n480-lim2-matroska",
+      "n": 480,
+      "rate": 48000,
+      "channels": 1,
+      "slots": 15,
+      "bands": 64,
+      "asc": "f8ec31c5c0c15800",
+      "frames": [
+        {
+          "offset": 418,
+          "bytes": 27
+        },
+        {
+          "offset": 445,
+          "bytes": 26
+        },
+        {
+          "offset": 471,
+          "bytes": 26
+        },
+        {
+          "offset": 497,
+          "bytes": 26
+        },
+        {
+          "offset": 523,
+          "bytes": 26
+        },
+        {
+          "offset": 549,
+          "bytes": 26
+        },
+        {
+          "offset": 575,
+          "bytes": 26
+        },
+        {
+          "offset": 601,
+          "bytes": 26
+        }
+      ],
+      "samples": 7680,
+      "out_n": 960,
+      "pcm_offset": 0,
+      "container_rate": 48000,
+      "container_frame_samples": 960,
+      "video": "n480-lim2.mkv",
+      "file": "n480-lim2.mkv",
+      "golden": "n480-lim2.f32le",
+      "limiter_mode": 2,
+      "expected_borders": [
+        10,
+        12,
+        16,
+        20
+      ],
+      "edges": [
+        960,
+        2880,
+        6720
+      ]
+    },
+    {
+      "name": "n480-lim3-matroska",
+      "n": 480,
+      "rate": 48000,
+      "channels": 1,
+      "slots": 15,
+      "bands": 64,
+      "asc": "f8ec31c5c0c1d800",
+      "frames": [
+        {
+          "offset": 627,
+          "bytes": 27
+        },
+        {
+          "offset": 654,
+          "bytes": 26
+        },
+        {
+          "offset": 680,
+          "bytes": 26
+        },
+        {
+          "offset": 706,
+          "bytes": 26
+        },
+        {
+          "offset": 732,
+          "bytes": 26
+        },
+        {
+          "offset": 758,
+          "bytes": 26
+        },
+        {
+          "offset": 784,
+          "bytes": 26
+        },
+        {
+          "offset": 810,
+          "bytes": 26
+        }
+      ],
+      "samples": 7680,
+      "out_n": 960,
+      "pcm_offset": 0,
+      "container_rate": 48000,
+      "container_frame_samples": 960,
+      "video": "n480-lim3.mkv",
+      "file": "n480-lim3.mkv",
+      "golden": "n480-lim3.f32le",
+      "limiter_mode": 3,
+      "expected_borders": [
+        10,
+        12,
+        14,
+        16,
+        20
+      ],
+      "edges": [
+        960,
+        2880,
+        6720
+      ]
+    },
+    {
+      "name": "n512-lim0-matroska",
+      "n": 512,
+      "rate": 48000,
+      "channels": 1,
+      "slots": 16,
+      "bands": 64,
+      "asc": "f8ec21c5c0c05800",
+      "frames": [
+        {
+          "offset": 836,
+          "bytes": 27
+        },
+        {
+          "offset": 863,
+          "bytes": 26
+        },
+        {
+          "offset": 889,
+          "bytes": 26
+        },
+        {
+          "offset": 915,
+          "bytes": 26
+        },
+        {
+          "offset": 941,
+          "bytes": 26
+        },
+        {
+          "offset": 967,
+          "bytes": 26
+        },
+        {
+          "offset": 993,
+          "bytes": 26
+        },
+        {
+          "offset": 1019,
+          "bytes": 26
+        }
+      ],
+      "samples": 8192,
+      "out_n": 1024,
+      "pcm_offset": 0,
+      "container_rate": 48000,
+      "container_frame_samples": 1024,
+      "video": "n512-lim0.mkv",
+      "file": "n512-lim0.mkv",
+      "golden": "n512-lim0.f32le",
+      "limiter_mode": 0,
+      "expected_borders": [
+        10,
+        20
+      ],
+      "edges": [
+        1024,
+        3072,
+        7168
+      ]
+    },
+    {
+      "name": "n512-lim1-matroska",
+      "n": 512,
+      "rate": 48000,
+      "channels": 1,
+      "slots": 16,
+      "bands": 64,
+      "asc": "f8ec21c5c0c0d800",
+      "frames": [
+        {
+          "offset": 1045,
+          "bytes": 27
+        },
+        {
+          "offset": 1072,
+          "bytes": 26
+        },
+        {
+          "offset": 1098,
+          "bytes": 26
+        },
+        {
+          "offset": 1124,
+          "bytes": 26
+        },
+        {
+          "offset": 1150,
+          "bytes": 26
+        },
+        {
+          "offset": 1176,
+          "bytes": 26
+        },
+        {
+          "offset": 1202,
+          "bytes": 26
+        },
+        {
+          "offset": 1228,
+          "bytes": 26
+        }
+      ],
+      "samples": 8192,
+      "out_n": 1024,
+      "pcm_offset": 0,
+      "container_rate": 48000,
+      "container_frame_samples": 1024,
+      "video": "n512-lim1.mkv",
+      "file": "n512-lim1.mkv",
+      "golden": "n512-lim1.f32le",
+      "limiter_mode": 1,
+      "expected_borders": [
+        10,
+        14,
+        20
+      ],
+      "edges": [
+        1024,
+        3072,
+        7168
+      ]
+    },
+    {
+      "name": "n512-lim2-matroska",
+      "n": 512,
+      "rate": 48000,
+      "channels": 1,
+      "slots": 16,
+      "bands": 64,
+      "asc": "f8ec21c5c0c15800",
+      "frames": [
+        {
+          "offset": 1254,
+          "bytes": 27
+        },
+        {
+          "offset": 1281,
+          "bytes": 26
+        },
+        {
+          "offset": 1307,
+          "bytes": 26
+        },
+        {
+          "offset": 1333,
+          "bytes": 26
+        },
+        {
+          "offset": 1359,
+          "bytes": 26
+        },
+        {
+          "offset": 1385,
+          "bytes": 26
+        },
+        {
+          "offset": 1411,
+          "bytes": 26
+        },
+        {
+          "offset": 1437,
+          "bytes": 26
+        }
+      ],
+      "samples": 8192,
+      "out_n": 1024,
+      "pcm_offset": 0,
+      "container_rate": 48000,
+      "container_frame_samples": 1024,
+      "video": "n512-lim2.mkv",
+      "file": "n512-lim2.mkv",
+      "golden": "n512-lim2.f32le",
+      "limiter_mode": 2,
+      "expected_borders": [
+        10,
+        12,
+        16,
+        20
+      ],
+      "edges": [
+        1024,
+        3072,
+        7168
+      ]
+    },
+    {
+      "name": "n512-lim3-matroska",
+      "n": 512,
+      "rate": 48000,
+      "channels": 1,
+      "slots": 16,
+      "bands": 64,
+      "asc": "f8ec21c5c0c1d800",
+      "frames": [
+        {
+          "offset": 1463,
+          "bytes": 27
+        },
+        {
+          "offset": 1490,
+          "bytes": 26
+        },
+        {
+          "offset": 1516,
+          "bytes": 26
+        },
+        {
+          "offset": 1542,
+          "bytes": 26
+        },
+        {
+          "offset": 1568,
+          "bytes": 26
+        },
+        {
+          "offset": 1594,
+          "bytes": 26
+        },
+        {
+          "offset": 1620,
+          "bytes": 26
+        },
+        {
+          "offset": 1646,
+          "bytes": 26
+        }
+      ],
+      "samples": 8192,
+      "out_n": 1024,
+      "pcm_offset": 0,
+      "container_rate": 48000,
+      "container_frame_samples": 1024,
+      "video": "n512-lim3.mkv",
+      "file": "n512-lim3.mkv",
+      "golden": "n512-lim3.f32le",
+      "limiter_mode": 3,
+      "expected_borders": [
+        10,
+        12,
+        14,
+        16,
+        20
+      ],
+      "edges": [
+        1024,
+        3072,
+        7168
+      ]
+    }
+  ],
+  "scope": "Own480/512 eight-AU mono dual-rate,all4 limiter densities,one retained source2->target10 width8 patch and discarded2-band tail. Independent direct transform/convolution and complete synthesis-range limiter partition. No private/ISO media or parameter sets,native/foreign decoder,process or network."
+}

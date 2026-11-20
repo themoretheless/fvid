@@ -83,6 +83,7 @@ def build_er_pce_asc(
     sync_ps: bool = False,
     pce_profile: int = 1,
     pce_rate: int | None = None,
+    ep_config: int = 0,
 ) -> bytes:
     any_res = any(resilience)
     if outer_aot in (5, 29):
@@ -102,7 +103,7 @@ def build_er_pce_asc(
     tail = ''
     if any_res:
         tail += ''.join(field(int(flag), 1) for flag in resilience) + '0'
-    tail += '00'  # epConfig = 0
+    tail += field(ep_config, 2)
     if sync_sbr:
         tail += field(0x2B7, 11) + field(5, 5) + '1' + frequency(ext_rate or rate * 2)
         if sync_ps:

@@ -35,8 +35,8 @@ pub struct LdSynthesis {
 }
 impl LdSynthesis {
     pub fn new(n: usize) -> Result<Self> {
-        if !matches!(n, 480 | 512) {
-            return Err(invalid("AAC LD filterbank requires 480 or 512 samples"));
+        if !matches!(n, 60 | 64 | 120 | 128 | 160 | 240 | 256 | 480 | 512) {
+            return Err(invalid("unsupported AAC LD filterbank size"));
         }
         let width = 2 * n;
         let sine = (0..width)
@@ -170,13 +170,17 @@ mod tests {
     use super::*;
     #[test]
     fn low_overlap_is_symmetric_power_complementary_and_has_exact_support() {
-        for n in [480, 512] {
+        for n in [60, 64, 120, 128, 160, 240, 256, 480, 512] {
             let s = LdSynthesis::new(n).unwrap();
             let w = &s.windows[1];
             for i in 0..2 * n {
                 assert!((w[i] - w[2 * n - 1 - i]).abs() < 1e-14);
-                assert_eq!(w[i] == 0., i < 3 * n / 8 || i >= 13 * n / 8);
-                if (5 * n / 8..11 * n / 8).contains(&i) {
+                let center = i as f64 + 0.5;
+                assert_eq!(
+                    w[i] == 0.,
+                    center <= 3.0 * n as f64 / 8.0 || center >= 13.0 * n as f64 / 8.0
+                );
+                if center >= 5.0 * n as f64 / 8.0 && center <= 11.0 * n as f64 / 8.0 {
                     assert_eq!(w[i], 1.);
                 }
             }

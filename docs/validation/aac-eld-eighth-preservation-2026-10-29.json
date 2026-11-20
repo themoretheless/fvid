@@ -1,0 +1,8 @@
+{
+  "corpus": "aac-eld-sbr-downscaled",
+  "files": 3146,
+  "bytes": 33802643,
+  "seconds": 221.1977428329992,
+  "guard": "process creation and sockets denied",
+  "unchanged": true
+}

@@ -1,0 +1,2228 @@
+{
+  "cases": [
+    {
+      "asc": "f8e62025339000000000",
+      "tree": 0,
+      "n": 512,
+      "rate": 48000,
+      "slots": 8,
+      "bands": 64,
+      "channels": 1,
+      "qmf": null,
+      "name": "plain-tree0-fragmented-gain-retransmit",
+      "mode": "fragmented-gain",
+      "configs": [
+        "3390000000",
+        "3390000800"
+      ],
+      "body": "7f1014ec74ebae08895c257cf826435f4b6fa32a9919e34011d2e856fcf13e23429f1b63a029d8e9d75c1112b84af9f04c86be96df46553233c68023fc4cb6ca99d846853e36c74053b1d3aeb822257095f3e0990d7d2dbe8caaf8a5d0adf9e2196d9533b08d0a7c6d8e80a763a75d70444ae12be7c1321bf1f8f99d50b0b9c2f99d50b0b9c2f99d50b0b9df15ce17ccea8585ce17ccea8585ce17ccea87e3542c2e70be67542c2e70be67542c2e70be7c45f33aa1617385f33aa1617385f33aa1617240",
+      "phase": [
+        0,
+        1,
+        0
+      ],
+      "frames": [
+        {
+          "offset": 0,
+          "bytes": 111,
+          "prefix_bits": 51
+        },
+        {
+          "offset": 111,
+          "bytes": 417,
+          "prefix_bits": 51
+        },
+        {
+          "offset": 528,
+          "bytes": 212,
+          "prefix_bits": 53
+        }
+      ],
+      "container_rate": 48000,
+      "container_frame_samples": 512,
+      "samples": 1536,
+      "pcm_offset": 0,
+      "control": "plain-tree0-fragmented-gain.mp4",
+      "output_channels": 6,
+      "inherited_prefix": "0533900000007f1014ec74ebae08895c257cf826435f4b6fa32a9919e34011d2e856fcf13e23429f1b63a029d8e9d75c1112b84af9f04c86be96df46553233c68023fc4cb6ca99d846853e36c74053b1d3aeb822257095f3e0990d7d2dbe8caaf8a5d0adf9",
+      "replacement": "0533900000007f1014ec74ebae08895c257cf826435f4b6fa32a9919e34011d2e856fcf13e23429f1b63a029d8e9d75c1112b84af9f04c86be96df46553233c68023fc4cb6ca99d846853e36c74053b1d3aeb822257095f3e0990d7d2dbe8caaf8a5d0adf9e2196d9533b08d0a7c6d8e80a763a75d70444ae12be7c1321bf1f8f99d50b0b9c2f99d50b0b9c2f99d50b0b9df15ce17ccea8585ce17ccea8585ce17ccea87e3542c2e70be67542c2e70be67542c2e70be7c45f33aa1617385f33aa1617385f33aa1617240"
+    },
+    {
+      "asc": "f8e62025339100000000",
+      "tree": 1,
+      "n": 512,
+      "rate": 48000,
+      "slots": 8,
+      "bands": 64,
+      "channels": 1,
+      "qmf": null,
+      "name": "plain-tree1-fragmented-gain-retransmit",
+      "mode": "fragmented-gain",
+      "configs": [
+        "3391000000",
+        "3391000800"
+      ],
+      "body": "7f1014ec74ebae08895c257cf826435f4b6fa32a9919e34011d2e856fcf13e23429f1b63a029d8e9d75c1112b84af9f04c86be96df46553233c68023fc7e29742b7e78865b654cec23429f1b63a029d8e9d75c1112b84af9f04c86fc5919e34011d2e856fcf10cb6ca99d846853e36c74053b1d3aeb8222570f8f99d50b0b9c2f99d50b0b9c2f99d50b0b9df15ce17ccea8585ce17ccea8585ce17ccea87e3542c2e70be67542c2e70be67542c2e70be7c45f33aa1617385f33aa1617385f33aa1617240",
+      "phase": [
+        0,
+        1,
+        0
+      ],
+      "frames": [
+        {
+          "offset": 740,
+          "bytes": 111,
+          "prefix_bits": 51
+        },
+        {
+          "offset": 851,
+          "bytes": 417,
+          "prefix_bits": 51
+        },
+        {
+          "offset": 1268,
+          "bytes": 212,
+          "prefix_bits": 53
+        }
+      ],
+      "container_rate": 48000,
+      "container_frame_samples": 512,
+      "samples": 1536,
+      "pcm_offset": 0,
+      "control": "plain-tree1-fragmented-gain.mp4",
+      "output_channels": 6,
+      "inherited_prefix": "0533910000007f1014ec74ebae08895c257cf826435f4b6fa32a9919e34011d2e856fcf13e23429f1b63a029d8e9d75c1112b84af9f04c86be96df46553233c68023fc7e29742b7e78865b654cec23429f1b63a029d8e9d75c1112b84af9f04c86fc5919e3",
+      "replacement": "0533910000007f1014ec74ebae08895c257cf826435f4b6fa32a9919e34011d2e856fcf13e23429f1b63a029d8e9d75c1112b84af9f04c86be96df46553233c68023fc7e29742b7e78865b654cec23429f1b63a029d8e9d75c1112b84af9f04c86fc5919e34011d2e856fcf10cb6ca99d846853e36c74053b1d3aeb8222570f8f99d50b0b9c2f99d50b0b9c2f99d50b0b9df15ce17ccea8585ce17ccea8585ce17ccea87e3542c2e70be67542c2e70be67542c2e70be7c45f33aa1617385f33aa1617385f33aa1617240"
+    },
+    {
+      "asc": "f8e64027339200000082b000",
+      "tree": 2,
+      "n": 512,
+      "rate": 48000,
+      "slots": 8,
+      "bands": 64,
+      "channels": 2,
+      "qmf": null,
+      "name": "plain-tree2-fragmented-gain-retransmit",
+      "mode": "fragmented-gain",
+      "configs": [
+        "339200000082b0",
+        "339200080082b0"
+      ],
+      "body": "7f1f88d0a7c6d8e80a763a75d70444ae12be7c1321afa5b7d1954c8cf1a008ff132db2a67611a14f8db1d014ec74ebae08895c257cf826435f4b6fa32abe270be67542c2e70be67542c2e70be67542c7c61617385f33aa1617385f33aa1617385f33f89f2c3678274d63eb8c64bb7297ede6edf8a55dce848a7d74709c964832fb076789f882526e400949b9003f16381fd3aa1b8122631f2c3678274d63eb8fe2dfca5aa6ce988765e4abb9d0914fae8e13fc4129372004a4dc801289",
+      "phase": [
+        0,
+        1,
+        0
+      ],
+      "frames": [
+        {
+          "offset": 1480,
+          "bytes": 114,
+          "prefix_bits": 98
+        },
+        {
+          "offset": 1594,
+          "bytes": 413,
+          "prefix_bits": 100
+        },
+        {
+          "offset": 2007,
+          "bytes": 213,
+          "prefix_bits": 100
+        }
+      ],
+      "container_rate": 48000,
+      "container_frame_samples": 512,
+      "samples": 1536,
+      "pcm_offset": 0,
+      "control": "plain-tree2-fragmented-gain.mp4",
+      "output_channels": 6,
+      "inherited_prefix": "07339200000082b07f1f88d0a7c6d8e80a763a75d70444ae12be7c1321afa5b7d1954c8cf1a008ff132db2a67611a14f8db1d014ec74ebae08895c257cf826435f4b6fa32abe270be67542c2e70be67542c2e70be67542c7c61617385f33aa161738",
+      "replacement": "07339200000082b07f1f88d0a7c6d8e80a763a75d70444ae12be7c1321afa5b7d1954c8cf1a008ff132db2a67611a14f8db1d014ec74ebae08895c257cf826435f4b6fa32abe270be67542c2e70be67542c2e70be67542c7c61617385f33aa1617385f33aa1617385f33f89f2c3678274d63eb8c64bb7297ede6edf8a55dce848a7d74709c964832fb076789f882526e400949b9003f16381fd3aa1b8122631f2c3678274d63eb8fe2dfca5aa6ce988765e4abb9d0914fae8e13fc4129372004a4dc801289"
+    },
+    {
+      "asc": "f8e64027339300000082b000",
+      "tree": 3,
+      "n": 512,
+      "rate": 48000,
+      "slots": 8,
+      "bands": 64,
+      "channels": 2,
+      "qmf": null,
+      "name": "plain-tree3-fragmented-gain-retransmit",
+      "mode": "fragmented-gain",
+      "configs": [
+        "339300000082b0",
+        "339300080082b0"
+      ],
+      "body": "7f1f88d0a7c6d8e80a763a75d70444ae12be7c1321afa5b7d1954c8cf1a008ff132db2a67611a14f8db1d014ec74ebae08895c257cf826435f4b6fa32abe29742b7e78865b654cec23429f1b63a029d8e9d75c1112b84af9f04c86fc5919e34011d2e856fcf10cb6ca99d846853e36c74053b1d3aeb8222570f8f99d50b0b9c2f99d50b0b9c2f99d50b0b9df15ce17ccea8585ce17ccea8585ce17ccea87e3542c2e70be67542c2e70be67542c2e70be7c45f33aa1617385f33aa1617385f33aa1617f8b7f296a9b3a621d9792aee742453e92af8be242eb602843a9fd95c7b34876d69c6f882526e400949b9003f1950ebd95791cd859337f296a9b3a621d97be342e30c22aa7213cbe7c485d6c0508753fb7c4129372004a4dc8012890",
+      "phase": [
+        0,
+        1,
+        0
+      ],
+      "frames": [
+        {
+          "offset": 2220,
+          "bytes": 163,
+          "prefix_bits": 98
+        },
+        {
+          "offset": 2383,
+          "bytes": 611,
+          "prefix_bits": 100
+        },
+        {
+          "offset": 2994,
+          "bytes": 312,
+          "prefix_bits": 100
+        }
+      ],
+      "container_rate": 48000,
+      "container_frame_samples": 512,
+      "samples": 1536,
+      "pcm_offset": 0,
+      "control": "plain-tree3-fragmented-gain.mp4",
+      "output_channels": 8,
+      "inherited_prefix": "07339300000082b07f1f88d0a7c6d8e80a763a75d70444ae12be7c1321afa5b7d1954c8cf1a008ff132db2a67611a14f8db1d014ec74ebae08895c257cf826435f4b6fa32abe29742b7e78865b654cec23429f1b63a029d8e9d75c1112b84af9f04c86fc5919e34011d2e856fcf10cb6ca99d846853e36c74053b1d3aeb8222570f8f99d50b0b9c2f99d50b0b9c2f99d50b0b9",
+      "replacement": "07339300000082b07f1f88d0a7c6d8e80a763a75d70444ae12be7c1321afa5b7d1954c8cf1a008ff132db2a67611a14f8db1d014ec74ebae08895c257cf826435f4b6fa32abe29742b7e78865b654cec23429f1b63a029d8e9d75c1112b84af9f04c86fc5919e34011d2e856fcf10cb6ca99d846853e36c74053b1d3aeb8222570f8f99d50b0b9c2f99d50b0b9c2f99d50b0b9df15ce17ccea8585ce17ccea8585ce17ccea87e3542c2e70be67542c2e70be67542c2e70be7c45f33aa1617385f33aa1617385f33aa1617f8b7f296a9b3a621d9792aee742453e92af8be242eb602843a9fd95c7b34876d69c6f882526e400949b9003f1950ebd95791cd859337f296a9b3a621d97be342e30c22aa7213cbe7c485d6c0508753fb7c4129372004a4dc8012890"
+    },
+    {
+      "asc": "f8e64027339400000082b000",
+      "tree": 4,
+      "n": 512,
+      "rate": 48000,
+      "slots": 8,
+      "bands": 64,
+      "channels": 2,
+      "qmf": null,
+      "name": "plain-tree4-fragmented-gain-retransmit",
+      "mode": "fragmented-gain",
+      "configs": [
+        "339400000082b0",
+        "339400080082b0"
+      ],
+      "body": "7f1f88d0a7c6d8e80a763a75d70444ae12be7c1321afa5b7d1954c8cf1a008ff132db2a67611a14f8db1d014ec74ebae08895c257cf826435f4b6fa32abe29742b7e78865b654cec23429f1b63a029d8e9d75c1112b84af9f04c86fc5919e34011d2e856fcf10cb6ca99d846853e36c74053b1d3aeb8222570f8f99d50b0b9c2f99d50b0b9c2f99d50b0b9df15ce17ccea8585ce17ccea8585ce17ccea87e3542c2e70be67542c2e70be67542c2e70be7c45f33aa1617385f33aa1617385f33aa1617f8b7f296a9b3a621d9792aee742453e92af8be242eb602843a9fd95c7b34876d69c6f882526e400949b9003f1950ebd95791cd859337f296a9b3a621d97be342e30c22aa7213cbe7c485d6c0508753fb7c4129372004a4dc8012890",
+      "phase": [
+        0,
+        1,
+        0
+      ],
+      "frames": [
+        {
+          "offset": 3306,
+          "bytes": 163,
+          "prefix_bits": 98
+        },
+        {
+          "offset": 3469,
+          "bytes": 611,
+          "prefix_bits": 100
+        },
+        {
+          "offset": 4080,
+          "bytes": 312,
+          "prefix_bits": 100
+        }
+      ],
+      "container_rate": 48000,
+      "container_frame_samples": 512,
+      "samples": 1536,
+      "pcm_offset": 0,
+      "control": "plain-tree4-fragmented-gain.mp4",
+      "output_channels": 8,
+      "inherited_prefix": "07339400000082b07f1f88d0a7c6d8e80a763a75d70444ae12be7c1321afa5b7d1954c8cf1a008ff132db2a67611a14f8db1d014ec74ebae08895c257cf826435f4b6fa32abe29742b7e78865b654cec23429f1b63a029d8e9d75c1112b84af9f04c86fc5919e34011d2e856fcf10cb6ca99d846853e36c74053b1d3aeb8222570f8f99d50b0b9c2f99d50b0b9c2f99d50b0b9",
+      "replacement": "07339400000082b07f1f88d0a7c6d8e80a763a75d70444ae12be7c1321afa5b7d1954c8cf1a008ff132db2a67611a14f8db1d014ec74ebae08895c257cf826435f4b6fa32abe29742b7e78865b654cec23429f1b63a029d8e9d75c1112b84af9f04c86fc5919e34011d2e856fcf10cb6ca99d846853e36c74053b1d3aeb8222570f8f99d50b0b9c2f99d50b0b9c2f99d50b0b9df15ce17ccea8585ce17ccea8585ce17ccea87e3542c2e70be67542c2e70be67542c2e70be7c45f33aa1617385f33aa1617385f33aa1617f8b7f296a9b3a621d9792aee742453e92af8be242eb602843a9fd95c7b34876d69c6f882526e400949b9003f1950ebd95791cd859337f296a9b3a621d97be342e30c22aa7213cbe7c485d6c0508753fb7c4129372004a4dc8012890"
+    },
+    {
+      "asc": "f8e6c025339500000000",
+      "tree": 5,
+      "n": 512,
+      "rate": 48000,
+      "slots": 8,
+      "bands": 64,
+      "channels": 6,
+      "qmf": null,
+      "name": "plain-tree5-fragmented-gain-retransmit",
+      "mode": "fragmented-gain",
+      "configs": [
+        "3395000000",
+        "3395000800"
+      ],
+      "body": "7f1014ec74ebae08895c257cf826435f4b6fa32a9919e34011d2e856fcf13e23429f1b63a029d8e9d75c1112b84af9f04c86be96df46553233c68023fc73aa1617385f33aa1617385f33aa1617385f89c2f99d50b0b9c2f99d50b0b9c2f99d50b048",
+      "phase": [
+        0,
+        1,
+        0
+      ],
+      "frames": [
+        {
+          "offset": 4392,
+          "bytes": 91,
+          "prefix_bits": 283
+        },
+        {
+          "offset": 4483,
+          "bytes": 250,
+          "prefix_bits": 285
+        },
+        {
+          "offset": 4733,
+          "bytes": 143,
+          "prefix_bits": 283
+        }
+      ],
+      "container_rate": 48000,
+      "container_frame_samples": 512,
+      "samples": 1536,
+      "pcm_offset": 0,
+      "control": "plain-tree5-fragmented-gain.mp4",
+      "output_channels": 8,
+      "inherited_prefix": "0533950000007f1014ec74ebae08895c257cf826435f4b6fa32a9919e34011d2e856fcf13e23429f1b63a029d8e9d75c1112b84a",
+      "replacement": "0533950000007f1014ec74ebae08895c257cf826435f4b6fa32a9919e34011d2e856fcf13e23429f1b63a029d8e9d75c1112b84af9f04c86be96df46553233c68023fc73aa1617385f33aa1617385f33aa1617385f89c2f99d50b0b9c2f99d50b0b9c2f99d50b048"
+    },
+    {
+      "asc": "f8e6c025339600000000",
+      "tree": 6,
+      "n": 512,
+      "rate": 48000,
+      "slots": 8,
+      "bands": 64,
+      "channels": 6,
+      "qmf": null,
+      "name": "plain-tree6-fragmented-gain-retransmit",
+      "mode": "fragmented-gain",
+      "configs": [
+        "3396000000",
+        "3396000800"
+      ],
+      "body": "7f1014ec74ebae08895c257cf826435f4b6fa32a9919e34011d2e856fcf13e23429f1b63a029d8e9d75c1112b84af9f04c86be96df46553233c68023fc73aa1617385f33aa1617385f33aa1617385f89c2f99d50b0b9c2f99d50b0b9c2f99d50b048",
+      "phase": [
+        0,
+        1,
+        0
+      ],
+      "frames": [
+        {
+          "offset": 4876,
+          "bytes": 91,
+          "prefix_bits": 283
+        },
+        {
+          "offset": 4967,
+          "bytes": 250,
+          "prefix_bits": 285
+        },
+        {
+          "offset": 5217,
+          "bytes": 143,
+          "prefix_bits": 283
+        }
+      ],
+      "container_rate": 48000,
+      "container_frame_samples": 512,
+      "samples": 1536,
+      "pcm_offset": 0,
+      "control": "plain-tree6-fragmented-gain.mp4",
+      "output_channels": 8,
+      "inherited_prefix": "0533960000007f1014ec74ebae08895c257cf826435f4b6fa32a9919e34011d2e856fcf13e23429f1b63a029d8e9d75c1112b84a",
+      "replacement": "0533960000007f1014ec74ebae08895c257cf826435f4b6fa32a9919e34011d2e856fcf13e23429f1b63a029d8e9d75c1112b84af9f04c86be96df46553233c68023fc73aa1617385f33aa1617385f33aa1617385f89c2f99d50b0b9c2f99d50b0b9c2f99d50b048"
+    },
+    {
+      "asc": "f8e620243397000000",
+      "tree": 7,
+      "n": 512,
+      "rate": 48000,
+      "slots": 8,
+      "bands": 64,
+      "channels": 1,
+      "qmf": null,
+      "name": "plain-tree7-fragmented-gain-retransmit",
+      "mode": "fragmented-gain",
+      "configs": [
+        "33970000",
+        "33970400"
+      ],
+      "body": "7f1014ec74ebae08895c257cf826435f4b6fa32a9919e34011d2e856fcf13e2c2e70be67542c2e70be67542c2e70be675120",
+      "phase": [
+        0,
+        1,
+        0
+      ],
+      "frames": [
+        {
+          "offset": 5360,
+          "bytes": 37,
+          "prefix_bits": 51
+        },
+        {
+          "offset": 5397,
+          "bytes": 123,
+          "prefix_bits": 51
+        },
+        {
+          "offset": 5520,
+          "bytes": 65,
+          "prefix_bits": 53
+        }
+      ],
+      "container_rate": 48000,
+      "container_frame_samples": 512,
+      "samples": 1536,
+      "pcm_offset": 0,
+      "control": "plain-tree7-fragmented-gain.mp4",
+      "output_channels": 2,
+      "inherited_prefix": "04339700007f1014ec74ebae08895c257cf826435f4b6fa32a9919",
+      "replacement": "04339700007f1014ec74ebae08895c257cf826435f4b6fa32a9919e34011d2e856fcf13e2c2e70be67542c2e70be67542c2e70be675120"
+    },
+    {
+      "asc": "f8e620243397000000",
+      "tree": 7,
+      "n": 512,
+      "rate": 48000,
+      "slots": 8,
+      "bands": 64,
+      "channels": 1,
+      "qmf": null,
+      "name": "plain-tree7-fragmented-gain-retransmit-then-local",
+      "mode": "fragmented-gain",
+      "configs": [
+        "33970000",
+        "33970400"
+      ],
+      "body": "7f1014ec74ebae08895c257cf826435f4b6fa32a9919e34011d2e856fcf13e2c2e70be67542c2e70be67542c2e70be675120",
+      "phase": [
+        0,
+        1,
+        0
+      ],
+      "frames": [
+        {
+          "offset": 5585,
+          "bytes": 37,
+          "prefix_bits": 51
+        },
+        {
+          "offset": 5622,
+          "bytes": 126,
+          "prefix_bits": 51
+        },
+        {
+          "offset": 5748,
+          "bytes": 65,
+          "prefix_bits": 53
+        }
+      ],
+      "container_rate": 48000,
+      "container_frame_samples": 512,
+      "samples": 1536,
+      "pcm_offset": 0,
+      "control": "plain-tree7-fragmented-gain.mp4",
+      "output_channels": 2,
+      "inherited_prefix": "04339700007f1014ec74ebae08895c257cf826435f4b6fa32a9919",
+      "replacement": "04339700007f1014ec74ebae08895c257cf826435f4b6fa32a9919e34011d2e856fcf13e2c2e70be67542c2e70be67542c2e70be675120"
+    },
+    {
+      "asc": "f8ec314460c0592338b8000000",
+      "tree": 7,
+      "n": 480,
+      "rate": 24000,
+      "slots": 15,
+      "bands": 32,
+      "channels": 1,
+      "qmf": {
+        "expected_offset": 0,
+        "expected_bands": 32
+      },
+      "name": "n480-c1-base-x1-crc1-fragmented-gain-retransmit",
+      "mode": "fragmented-gain",
+      "configs": [
+        "67170000",
+        "67170400"
+      ],
+      "body": "7f10990d7d2dbe8caa64678d00474ba15bf3c432db2a67611a14f8db1d017e30b0b9c2f99d50b0b9c2f99d50b0b9c2f99920",
+      "phase": [
+        0,
+        1,
+        0
+      ],
+      "frames": [
+        {
+          "offset": 5813,
+          "bytes": 45,
+          "prefix_bits": 116
+        },
+        {
+          "offset": 5858,
+          "bytes": 130,
+          "prefix_bits": 107
+        },
+        {
+          "offset": 5988,
+          "bytes": 72,
+          "prefix_bits": 109
+        }
+      ],
+      "container_rate": 24000,
+      "container_frame_samples": 480,
+      "samples": 1440,
+      "pcm_offset": 0,
+      "control": "n480-c1-base-x1-crc1-fragmented-gain.mp4",
+      "output_channels": 2,
+      "inherited_prefix": "04671700007f10990d7d2dbe8caa64678d00474ba15bf3c432db2a",
+      "replacement": "04671700007f10990d7d2dbe8caa64678d00474ba15bf3c432db2a67611a14f8db1d017e30b0b9c2f99d50b0b9c2f99d50b0b9c2f99920"
+    },
+    {
+      "asc": "f8ec314460c0592338b8000000",
+      "tree": 7,
+      "n": 480,
+      "rate": 24000,
+      "slots": 15,
+      "bands": 32,
+      "channels": 1,
+      "qmf": {
+        "expected_offset": 0,
+        "expected_bands": 32
+      },
+      "name": "n480-c1-base-x1-crc1-fragmented-gain-retransmit-then-local",
+      "mode": "fragmented-gain",
+      "configs": [
+        "67170000",
+        "67170400"
+      ],
+      "body": "7f10990d7d2dbe8caa64678d00474ba15bf3c432db2a67611a14f8db1d017e30b0b9c2f99d50b0b9c2f99d50b0b9c2f99920",
+      "phase": [
+        0,
+        1,
+        0
+      ],
+      "frames": [
+        {
+          "offset": 6060,
+          "bytes": 45,
+          "prefix_bits": 116
+        },
+        {
+          "offset": 6105,
+          "bytes": 133,
+          "prefix_bits": 107
+        },
+        {
+          "offset": 6238,
+          "bytes": 72,
+          "prefix_bits": 109
+        }
+      ],
+      "container_rate": 24000,
+      "container_frame_samples": 480,
+      "samples": 1440,
+      "pcm_offset": 0,
+      "control": "n480-c1-base-x1-crc1-fragmented-gain.mp4",
+      "output_channels": 2,
+      "inherited_prefix": "04671700007f10990d7d2dbe8caa64678d00474ba15bf3c432db2a",
+      "replacement": "04671700007f10990d7d2dbe8caa64678d00474ba15bf3c432db2a67611a14f8db1d017e30b0b9c2f99d50b0b9c2f99d50b0b9c2f99920"
+    },
+    {
+      "asc": "f8ec31c460c05921b8b8000000",
+      "tree": 7,
+      "n": 480,
+      "rate": 48000,
+      "slots": 15,
+      "bands": 64,
+      "channels": 1,
+      "qmf": {
+        "expected_offset": 0,
+        "expected_bands": 32
+      },
+      "name": "n480-c1-base-x2-crc1-fragmented-gain-retransmit",
+      "mode": "fragmented-gain",
+      "configs": [
+        "37170000",
+        "37170400"
+      ],
+      "body": "7f10990d7d2dbe8caa64678d00474ba15bf3c432db2a67611a14f8db1d017e30b0b9c2f99d50b0b9c2f99d50b0b9c2f99920",
+      "phase": [
+        0,
+        1,
+        0
+      ],
+      "frames": [
+        {
+          "offset": 6310,
+          "bytes": 45,
+          "prefix_bits": 116
+        },
+        {
+          "offset": 6355,
+          "bytes": 130,
+          "prefix_bits": 107
+        },
+        {
+          "offset": 6485,
+          "bytes": 72,
+          "prefix_bits": 109
+        }
+      ],
+      "container_rate": 48000,
+      "container_frame_samples": 960,
+      "samples": 2880,
+      "pcm_offset": 0,
+      "control": "n480-c1-base-x2-crc1-fragmented-gain.mp4",
+      "output_channels": 2,
+      "inherited_prefix": "04371700007f10990d7d2dbe8caa64678d00474ba15bf3c432db2a",
+      "replacement": "04371700007f10990d7d2dbe8caa64678d00474ba15bf3c432db2a67611a14f8db1d017e30b0b9c2f99d50b0b9c2f99d50b0b9c2f99920"
+    },
+    {
+      "asc": "f8ec31c460c05921b8b8000000",
+      "tree": 7,
+      "n": 480,
+      "rate": 48000,
+      "slots": 15,
+      "bands": 64,
+      "channels": 1,
+      "qmf": {
+        "expected_offset": 0,
+        "expected_bands": 32
+      },
+      "name": "n480-c1-base-x2-crc1-fragmented-gain-retransmit-then-local",
+      "mode": "fragmented-gain",
+      "configs": [
+        "37170000",
+        "37170400"
+      ],
+      "body": "7f10990d7d2dbe8caa64678d00474ba15bf3c432db2a67611a14f8db1d017e30b0b9c2f99d50b0b9c2f99d50b0b9c2f99920",
+      "phase": [
+        0,
+        1,
+        0
+      ],
+      "frames": [
+        {
+          "offset": 6557,
+          "bytes": 45,
+          "prefix_bits": 116
+        },
+        {
+          "offset": 6602,
+          "bytes": 133,
+          "prefix_bits": 107
+        },
+        {
+          "offset": 6735,
+          "bytes": 72,
+          "prefix_bits": 109
+        }
+      ],
+      "container_rate": 48000,
+      "container_frame_samples": 960,
+      "samples": 2880,
+      "pcm_offset": 0,
+      "control": "n480-c1-base-x2-crc1-fragmented-gain.mp4",
+      "output_channels": 2,
+      "inherited_prefix": "04371700007f10990d7d2dbe8caa64678d00474ba15bf3c432db2a",
+      "replacement": "04371700007f10990d7d2dbe8caa64678d00474ba15bf3c432db2a67611a14f8db1d017e30b0b9c2f99d50b0b9c2f99d50b0b9c2f99920"
+    },
+    {
+      "asc": "f8ec514460c0593b389100205d358000",
+      "tree": 2,
+      "n": 480,
+      "rate": 24000,
+      "slots": 15,
+      "bands": 32,
+      "channels": 2,
+      "qmf": {
+        "expected_offset": 1235520,
+        "expected_bands": 32
+      },
+      "name": "n480-c2-base-x1-crc1-fragmented-gain-retransmit",
+      "mode": "fragmented-gain",
+      "configs": [
+        "671220040ba6b0",
+        "6712200c0ba6b0"
+      ],
+      "body": "7f10990d7d2dbe8caa64678d00474bbe244ae12be7c1321afa5b7d1954c8cf1a008e9742b7e78865b654cec2347c4ec74ebae08895c257cf826435f4b6fa32a9919e34011d2e856fcf10cbf8ae70be67542c2e70be67542c2e70be67543f16ca99d846853e36c74053b1d3aebe30adf9e2196d9533b08d0a7c6d8efc678d00474ba15bf3c432db2a67611a3e36df46553233c68023a5d0adf9e2196480",
+      "phase": [
+        0,
+        1,
+        0
+      ],
+      "frames": [
+        {
+          "offset": 6807,
+          "bytes": 112,
+          "prefix_bits": 216
+        },
+        {
+          "offset": 6919,
+          "bytes": 361,
+          "prefix_bits": 200
+        },
+        {
+          "offset": 7280,
+          "bytes": 193,
+          "prefix_bits": 200
+        }
+      ],
+      "container_rate": 24000,
+      "container_frame_samples": 480,
+      "samples": 1440,
+      "pcm_offset": 0,
+      "control": "n480-c2-base-x1-crc1-fragmented-gain.mp4",
+      "output_channels": 6,
+      "inherited_prefix": "07671220040ba6b07f10990d7d2dbe8caa64678d00474bbe244ae12be7c1321afa5b7d1954c8cf1a008e9742b7e78865b654cec2347c4ec74ebae08895c257cf826435f4b6fa32a9919e34011d2e856fcf10",
+      "replacement": "07671220040ba6b07f10990d7d2dbe8caa64678d00474bbe244ae12be7c1321afa5b7d1954c8cf1a008e9742b7e78865b654cec2347c4ec74ebae08895c257cf826435f4b6fa32a9919e34011d2e856fcf10cbf8ae70be67542c2e70be67542c2e70be67543f16ca99d846853e36c74053b1d3aebe30adf9e2196d9533b08d0a7c6d8efc678d00474ba15bf3c432db2a67611a3e36df46553233c68023a5d0adf9e2196480"
+    },
+    {
+      "asc": "f8ec51c460c05939b89100205d358000",
+      "tree": 2,
+      "n": 480,
+      "rate": 48000,
+      "slots": 15,
+      "bands": 64,
+      "channels": 2,
+      "qmf": {
+        "expected_offset": 1235520,
+        "expected_bands": 32
+      },
+      "name": "n480-c2-base-x2-crc1-fragmented-gain-retransmit",
+      "mode": "fragmented-gain",
+      "configs": [
+        "371220040ba6b0",
+        "3712200c0ba6b0"
+      ],
+      "body": "7f10990d7d2dbe8caa64678d00474bbe244ae12be7c1321afa5b7d1954c8cf1a008e9742b7e78865b654cec2347c4ec74ebae08895c257cf826435f4b6fa32a9919e34011d2e856fcf10cbf8ae70be67542c2e70be67542c2e70be67543f16ca99d846853e36c74053b1d3aebe30adf9e2196d9533b08d0a7c6d8efc678d00474ba15bf3c432db2a67611a3e36df46553233c68023a5d0adf9e2196480",
+      "phase": [
+        0,
+        1,
+        0
+      ],
+      "frames": [
+        {
+          "offset": 7473,
+          "bytes": 112,
+          "prefix_bits": 216
+        },
+        {
+          "offset": 7585,
+          "bytes": 361,
+          "prefix_bits": 200
+        },
+        {
+          "offset": 7946,
+          "bytes": 193,
+          "prefix_bits": 200
+        }
+      ],
+      "container_rate": 48000,
+      "container_frame_samples": 960,
+      "samples": 2880,
+      "pcm_offset": 0,
+      "control": "n480-c2-base-x2-crc1-fragmented-gain.mp4",
+      "output_channels": 6,
+      "inherited_prefix": "07371220040ba6b07f10990d7d2dbe8caa64678d00474bbe244ae12be7c1321afa5b7d1954c8cf1a008e9742b7e78865b654cec2347c4ec74ebae08895c257cf826435f4b6fa32a9919e34011d2e856fcf10",
+      "replacement": "07371220040ba6b07f10990d7d2dbe8caa64678d00474bbe244ae12be7c1321afa5b7d1954c8cf1a008e9742b7e78865b654cec2347c4ec74ebae08895c257cf826435f4b6fa32a9919e34011d2e856fcf10cbf8ae70be67542c2e70be67542c2e70be67543f16ca99d846853e36c74053b1d3aebe30adf9e2196d9533b08d0a7c6d8efc678d00474ba15bf3c432db2a67611a3e36df46553233c68023a5d0adf9e2196480"
+    },
+    {
+      "asc": "f8ecd14460c0588c180b11830164ace2a400800000",
+      "tree": 5,
+      "n": 480,
+      "rate": 24000,
+      "slots": 15,
+      "bands": 32,
+      "channels": 6,
+      "qmf": {
+        "expected_offset": 4075200,
+        "expected_bands": 32
+      },
+      "name": "n480-c6-base-x1-crc1-fragmented-gain-retransmit",
+      "mode": "fragmented-gain",
+      "configs": [
+        "6715200400",
+        "6715200c00"
+      ],
+      "body": "7f10990d7d2dbe8caa64678d00474ba15bf3c432db2a67611a14f8db1d017e244ae12be7c1321afa5b7d1954c8cf1a008e9742b7e78865b654cec2347c7ccea8585ce17ccea8585ce17ccea8585ce240",
+      "phase": [
+        0,
+        1,
+        0
+      ],
+      "frames": [
+        {
+          "offset": 8139,
+          "bytes": 119,
+          "prefix_bits": 584
+        },
+        {
+          "offset": 8258,
+          "bytes": 246,
+          "prefix_bits": 541
+        },
+        {
+          "offset": 8504,
+          "bytes": 157,
+          "prefix_bits": 539
+        }
+      ],
+      "container_rate": 24000,
+      "container_frame_samples": 480,
+      "samples": 1440,
+      "pcm_offset": 0,
+      "control": "n480-c6-base-x1-crc1-fragmented-gain.mp4",
+      "output_channels": 8,
+      "inherited_prefix": "0567152004007f10990d7d2dbe8caa64678d00474ba15bf3c432db2a67611a14f8db1d017e244ae12be7c1",
+      "replacement": "0567152004007f10990d7d2dbe8caa64678d00474ba15bf3c432db2a67611a14f8db1d017e244ae12be7c1321afa5b7d1954c8cf1a008e9742b7e78865b654cec2347c7ccea8585ce17ccea8585ce17ccea8585ce240"
+    },
+    {
+      "asc": "f8ecd1c460c0588c180b11830164a6e2a400800000",
+      "tree": 5,
+      "n": 480,
+      "rate": 48000,
+      "slots": 15,
+      "bands": 64,
+      "channels": 6,
+      "qmf": {
+        "expected_offset": 4075200,
+        "expected_bands": 32
+      },
+      "name": "n480-c6-base-x2-crc1-fragmented-gain-retransmit",
+      "mode": "fragmented-gain",
+      "configs": [
+        "3715200400",
+        "3715200c00"
+      ],
+      "body": "7f10990d7d2dbe8caa64678d00474ba15bf3c432db2a67611a14f8db1d017e244ae12be7c1321afa5b7d1954c8cf1a008e9742b7e78865b654cec2347c7ccea8585ce17ccea8585ce17ccea8585ce240",
+      "phase": [
+        0,
+        1,
+        0
+      ],
+      "frames": [
+        {
+          "offset": 8661,
+          "bytes": 119,
+          "prefix_bits": 584
+        },
+        {
+          "offset": 8780,
+          "bytes": 246,
+          "prefix_bits": 541
+        },
+        {
+          "offset": 9026,
+          "bytes": 157,
+          "prefix_bits": 539
+        }
+      ],
+      "container_rate": 48000,
+      "container_frame_samples": 960,
+      "samples": 2880,
+      "pcm_offset": 0,
+      "control": "n480-c6-base-x2-crc1-fragmented-gain.mp4",
+      "output_channels": 8,
+      "inherited_prefix": "0537152004007f10990d7d2dbe8caa64678d00474ba15bf3c432db2a67611a14f8db1d017e244ae12be7c1",
+      "replacement": "0537152004007f10990d7d2dbe8caa64678d00474ba15bf3c432db2a67611a14f8db1d017e244ae12be7c1321afa5b7d1954c8cf1a008e9742b7e78865b654cec2347c7ccea8585ce17ccea8585ce17ccea8585ce240"
+    },
+    {
+      "asc": "f8ec214460c059233cb8000000",
+      "tree": 7,
+      "n": 512,
+      "rate": 24000,
+      "slots": 16,
+      "bands": 32,
+      "channels": 1,
+      "qmf": {
+        "expected_offset": 5405760,
+        "expected_bands": 32
+      },
+      "name": "n512-c1-base-x1-crc1-fragmented-gain-retransmit",
+      "mode": "fragmented-gain",
+      "configs": [
+        "67970000",
+        "67970400"
+      ],
+      "body": "7f10990d7d2dbe8caa64678d00474ba15bf3c432db2a67611a14f8db1d017e30b0b9c2f99d50b0b9c2f99d50b0b9c2f99920",
+      "phase": [
+        0,
+        1,
+        0
+      ],
+      "frames": [
+        {
+          "offset": 9183,
+          "bytes": 45,
+          "prefix_bits": 116
+        },
+        {
+          "offset": 9228,
+          "bytes": 130,
+          "prefix_bits": 107
+        },
+        {
+          "offset": 9358,
+          "bytes": 72,
+          "prefix_bits": 109
+        }
+      ],
+      "container_rate": 24000,
+      "container_frame_samples": 512,
+      "samples": 1536,
+      "pcm_offset": 0,
+      "control": "n512-c1-base-x1-crc1-fragmented-gain.mp4",
+      "output_channels": 2,
+      "inherited_prefix": "04679700007f10990d7d2dbe8caa64678d00474ba15bf3c432db2a",
+      "replacement": "04679700007f10990d7d2dbe8caa64678d00474ba15bf3c432db2a67611a14f8db1d017e30b0b9c2f99d50b0b9c2f99d50b0b9c2f99920"
+    },
+    {
+      "asc": "f8ec214460c059233cb8000000",
+      "tree": 7,
+      "n": 512,
+      "rate": 24000,
+      "slots": 16,
+      "bands": 32,
+      "channels": 1,
+      "qmf": {
+        "expected_offset": 5405760,
+        "expected_bands": 32
+      },
+      "name": "n512-c1-base-x1-crc1-fragmented-gain-retransmit-then-local",
+      "mode": "fragmented-gain",
+      "configs": [
+        "67970000",
+        "67970400"
+      ],
+      "body": "7f10990d7d2dbe8caa64678d00474ba15bf3c432db2a67611a14f8db1d017e30b0b9c2f99d50b0b9c2f99d50b0b9c2f99920",
+      "phase": [
+        0,
+        1,
+        0
+      ],
+      "frames": [
+        {
+          "offset": 9430,
+          "bytes": 45,
+          "prefix_bits": 116
+        },
+        {
+          "offset": 9475,
+          "bytes": 133,
+          "prefix_bits": 107
+        },
+        {
+          "offset": 9608,
+          "bytes": 72,
+          "prefix_bits": 109
+        }
+      ],
+      "container_rate": 24000,
+      "container_frame_samples": 512,
+      "samples": 1536,
+      "pcm_offset": 0,
+      "control": "n512-c1-base-x1-crc1-fragmented-gain.mp4",
+      "output_channels": 2,
+      "inherited_prefix": "04679700007f10990d7d2dbe8caa64678d00474ba15bf3c432db2a",
+      "replacement": "04679700007f10990d7d2dbe8caa64678d00474ba15bf3c432db2a67611a14f8db1d017e30b0b9c2f99d50b0b9c2f99d50b0b9c2f99920"
+    },
+    {
+      "asc": "f8ec21c460c05921bcb8000000",
+      "tree": 7,
+      "n": 512,
+      "rate": 48000,
+      "slots": 16,
+      "bands": 64,
+      "channels": 1,
+      "qmf": {
+        "expected_offset": 5405760,
+        "expected_bands": 32
+      },
+      "name": "n512-c1-base-x2-crc1-fragmented-gain-retransmit",
+      "mode": "fragmented-gain",
+      "configs": [
+        "37970000",
+        "37970400"
+      ],
+      "body": "7f10990d7d2dbe8caa64678d00474ba15bf3c432db2a67611a14f8db1d017e30b0b9c2f99d50b0b9c2f99d50b0b9c2f99920",
+      "phase": [
+        0,
+        1,
+        0
+      ],
+      "frames": [
+        {
+          "offset": 9680,
+          "bytes": 45,
+          "prefix_bits": 116
+        },
+        {
+          "offset": 9725,
+          "bytes": 130,
+          "prefix_bits": 107
+        },
+        {
+          "offset": 9855,
+          "bytes": 72,
+          "prefix_bits": 109
+        }
+      ],
+      "container_rate": 48000,
+      "container_frame_samples": 1024,
+      "samples": 3072,
+      "pcm_offset": 0,
+      "control": "n512-c1-base-x2-crc1-fragmented-gain.mp4",
+      "output_channels": 2,
+      "inherited_prefix": "04379700007f10990d7d2dbe8caa64678d00474ba15bf3c432db2a",
+      "replacement": "04379700007f10990d7d2dbe8caa64678d00474ba15bf3c432db2a67611a14f8db1d017e30b0b9c2f99d50b0b9c2f99d50b0b9c2f99920"
+    },
+    {
+      "asc": "f8ec21c460c05921bcb8000000",
+      "tree": 7,
+      "n": 512,
+      "rate": 48000,
+      "slots": 16,
+      "bands": 64,
+      "channels": 1,
+      "qmf": {
+        "expected_offset": 5405760,
+        "expected_bands": 32
+      },
+      "name": "n512-c1-base-x2-crc1-fragmented-gain-retransmit-then-local",
+      "mode": "fragmented-gain",
+      "configs": [
+        "37970000",
+        "37970400"
+      ],
+      "body": "7f10990d7d2dbe8caa64678d00474ba15bf3c432db2a67611a14f8db1d017e30b0b9c2f99d50b0b9c2f99d50b0b9c2f99920",
+      "phase": [
+        0,
+        1,
+        0
+      ],
+      "frames": [
+        {
+          "offset": 9927,
+          "bytes": 45,
+          "prefix_bits": 116
+        },
+        {
+          "offset": 9972,
+          "bytes": 133,
+          "prefix_bits": 107
+        },
+        {
+          "offset": 10105,
+          "bytes": 72,
+          "prefix_bits": 109
+        }
+      ],
+      "container_rate": 48000,
+      "container_frame_samples": 1024,
+      "samples": 3072,
+      "pcm_offset": 0,
+      "control": "n512-c1-base-x2-crc1-fragmented-gain.mp4",
+      "output_channels": 2,
+      "inherited_prefix": "04379700007f10990d7d2dbe8caa64678d00474ba15bf3c432db2a",
+      "replacement": "04379700007f10990d7d2dbe8caa64678d00474ba15bf3c432db2a67611a14f8db1d017e30b0b9c2f99d50b0b9c2f99d50b0b9c2f99920"
+    },
+    {
+      "asc": "f8ec414460c0593b3c9100205d358000",
+      "tree": 2,
+      "n": 512,
+      "rate": 24000,
+      "slots": 16,
+      "bands": 32,
+      "channels": 2,
+      "qmf": {
+        "expected_offset": 6723648,
+        "expected_bands": 32
+      },
+      "name": "n512-c2-base-x1-crc1-fragmented-gain-retransmit",
+      "mode": "fragmented-gain",
+      "configs": [
+        "679220040ba6b0",
+        "6792200c0ba6b0"
+      ],
+      "body": "7f10990d7d2dbe8caa64678d00474bbe244ae12be7c1321afa5b7d1954c8cf1a008e9742b7e78865b654cec2347c4ec74ebae08895c257cf826435f4b6fa32a9919e34011d2e856fcf10cbf8ae70be67542c2e70be67542c2e70be67543f16ca99d846853e36c74053b1d3aebe30adf9e2196d9533b08d0a7c6d8efc678d00474ba15bf3c432db2a67611a3e36df46553233c68023a5d0adf9e2196480",
+      "phase": [
+        0,
+        1,
+        0
+      ],
+      "frames": [
+        {
+          "offset": 10177,
+          "bytes": 112,
+          "prefix_bits": 216
+        },
+        {
+          "offset": 10289,
+          "bytes": 361,
+          "prefix_bits": 200
+        },
+        {
+          "offset": 10650,
+          "bytes": 193,
+          "prefix_bits": 200
+        }
+      ],
+      "container_rate": 24000,
+      "container_frame_samples": 512,
+      "samples": 1536,
+      "pcm_offset": 0,
+      "control": "n512-c2-base-x1-crc1-fragmented-gain.mp4",
+      "output_channels": 6,
+      "inherited_prefix": "07679220040ba6b07f10990d7d2dbe8caa64678d00474bbe244ae12be7c1321afa5b7d1954c8cf1a008e9742b7e78865b654cec2347c4ec74ebae08895c257cf826435f4b6fa32a9919e34011d2e856fcf10",
+      "replacement": "07679220040ba6b07f10990d7d2dbe8caa64678d00474bbe244ae12be7c1321afa5b7d1954c8cf1a008e9742b7e78865b654cec2347c4ec74ebae08895c257cf826435f4b6fa32a9919e34011d2e856fcf10cbf8ae70be67542c2e70be67542c2e70be67543f16ca99d846853e36c74053b1d3aebe30adf9e2196d9533b08d0a7c6d8efc678d00474ba15bf3c432db2a67611a3e36df46553233c68023a5d0adf9e2196480"
+    },
+    {
+      "asc": "f8ec41c460c05939bc9100205d358000",
+      "tree": 2,
+      "n": 512,
+      "rate": 48000,
+      "slots": 16,
+      "bands": 64,
+      "channels": 2,
+      "qmf": {
+        "expected_offset": 6723648,
+        "expected_bands": 32
+      },
+      "name": "n512-c2-base-x2-crc1-fragmented-gain-retransmit",
+      "mode": "fragmented-gain",
+      "configs": [
+        "379220040ba6b0",
+        "3792200c0ba6b0"
+      ],
+      "body": "7f10990d7d2dbe8caa64678d00474bbe244ae12be7c1321afa5b7d1954c8cf1a008e9742b7e78865b654cec2347c4ec74ebae08895c257cf826435f4b6fa32a9919e34011d2e856fcf10cbf8ae70be67542c2e70be67542c2e70be67543f16ca99d846853e36c74053b1d3aebe30adf9e2196d9533b08d0a7c6d8efc678d00474ba15bf3c432db2a67611a3e36df46553233c68023a5d0adf9e2196480",
+      "phase": [
+        0,
+        1,
+        0
+      ],
+      "frames": [
+        {
+          "offset": 10843,
+          "bytes": 112,
+          "prefix_bits": 216
+        },
+        {
+          "offset": 10955,
+          "bytes": 361,
+          "prefix_bits": 200
+        },
+        {
+          "offset": 11316,
+          "bytes": 193,
+          "prefix_bits": 200
+        }
+      ],
+      "container_rate": 48000,
+      "container_frame_samples": 1024,
+      "samples": 3072,
+      "pcm_offset": 0,
+      "control": "n512-c2-base-x2-crc1-fragmented-gain.mp4",
+      "output_channels": 6,
+      "inherited_prefix": "07379220040ba6b07f10990d7d2dbe8caa64678d00474bbe244ae12be7c1321afa5b7d1954c8cf1a008e9742b7e78865b654cec2347c4ec74ebae08895c257cf826435f4b6fa32a9919e34011d2e856fcf10",
+      "replacement": "07379220040ba6b07f10990d7d2dbe8caa64678d00474bbe244ae12be7c1321afa5b7d1954c8cf1a008e9742b7e78865b654cec2347c4ec74ebae08895c257cf826435f4b6fa32a9919e34011d2e856fcf10cbf8ae70be67542c2e70be67542c2e70be67543f16ca99d846853e36c74053b1d3aebe30adf9e2196d9533b08d0a7c6d8efc678d00474ba15bf3c432db2a67611a3e36df46553233c68023a5d0adf9e2196480"
+    },
+    {
+      "asc": "f8ecc14460c0588c180b11830164acf2a400800000",
+      "tree": 5,
+      "n": 512,
+      "rate": 24000,
+      "slots": 16,
+      "bands": 32,
+      "channels": 6,
+      "qmf": {
+        "expected_offset": 9752640,
+        "expected_bands": 32
+      },
+      "name": "n512-c6-base-x1-crc1-fragmented-gain-retransmit",
+      "mode": "fragmented-gain",
+      "configs": [
+        "6795200400",
+        "6795200c00"
+      ],
+      "body": "7f10990d7d2dbe8caa64678d00474ba15bf3c432db2a67611a14f8db1d017e244ae12be7c1321afa5b7d1954c8cf1a008e9742b7e78865b654cec2347c7ccea8585ce17ccea8585ce17ccea8585ce240",
+      "phase": [
+        0,
+        1,
+        0
+      ],
+      "frames": [
+        {
+          "offset": 11509,
+          "bytes": 119,
+          "prefix_bits": 584
+        },
+        {
+          "offset": 11628,
+          "bytes": 246,
+          "prefix_bits": 541
+        },
+        {
+          "offset": 11874,
+          "bytes": 157,
+          "prefix_bits": 539
+        }
+      ],
+      "container_rate": 24000,
+      "container_frame_samples": 512,
+      "samples": 1536,
+      "pcm_offset": 0,
+      "control": "n512-c6-base-x1-crc1-fragmented-gain.mp4",
+      "output_channels": 8,
+      "inherited_prefix": "0567952004007f10990d7d2dbe8caa64678d00474ba15bf3c432db2a67611a14f8db1d017e244ae12be7c1",
+      "replacement": "0567952004007f10990d7d2dbe8caa64678d00474ba15bf3c432db2a67611a14f8db1d017e244ae12be7c1321afa5b7d1954c8cf1a008e9742b7e78865b654cec2347c7ccea8585ce17ccea8585ce17ccea8585ce240"
+    },
+    {
+      "asc": "f8ecc1c460c0588c180b11830164a6f2a400800000",
+      "tree": 5,
+      "n": 512,
+      "rate": 48000,
+      "slots": 16,
+      "bands": 64,
+      "channels": 6,
+      "qmf": {
+        "expected_offset": 9752640,
+        "expected_bands": 32
+      },
+      "name": "n512-c6-base-x2-crc1-fragmented-gain-retransmit",
+      "mode": "fragmented-gain",
+      "configs": [
+        "3795200400",
+        "3795200c00"
+      ],
+      "body": "7f10990d7d2dbe8caa64678d00474ba15bf3c432db2a67611a14f8db1d017e244ae12be7c1321afa5b7d1954c8cf1a008e9742b7e78865b654cec2347c7ccea8585ce17ccea8585ce17ccea8585ce240",
+      "phase": [
+        0,
+        1,
+        0
+      ],
+      "frames": [
+        {
+          "offset": 12031,
+          "bytes": 119,
+          "prefix_bits": 584
+        },
+        {
+          "offset": 12150,
+          "bytes": 246,
+          "prefix_bits": 541
+        },
+        {
+          "offset": 12396,
+          "bytes": 157,
+          "prefix_bits": 539
+        }
+      ],
+      "container_rate": 48000,
+      "container_frame_samples": 1024,
+      "samples": 3072,
+      "pcm_offset": 0,
+      "control": "n512-c6-base-x2-crc1-fragmented-gain.mp4",
+      "output_channels": 8,
+      "inherited_prefix": "0537952004007f10990d7d2dbe8caa64678d00474ba15bf3c432db2a67611a14f8db1d017e244ae12be7c1",
+      "replacement": "0537952004007f10990d7d2dbe8caa64678d00474ba15bf3c432db2a67611a14f8db1d017e244ae12be7c1321afa5b7d1954c8cf1a008e9742b7e78865b654cec2347c7ccea8585ce17ccea8585ce17ccea8585ce240"
+    },
+    {
+      "asc": "f8ec314460c0592b388100205800",
+      "tree": 0,
+      "n": 480,
+      "rate": 24000,
+      "slots": 15,
+      "bands": 32,
+      "channels": 1,
+      "qmf": {
+        "expected_offset": 0,
+        "expected_bands": 32
+      },
+      "name": "n480-c1-base-x1-crc1-tree0-fragmented-gain-retransmit",
+      "mode": "fragmented-gain",
+      "configs": [
+        "671020040b",
+        "6710200c0b"
+      ],
+      "body": "7f10990d7d2dbe8caa64678d00474ba15bf3c432db2a67611a14f8db1d017e244ae12be7c1321afa5b7d1954c8cf1a008e9742b7e78865b654cec2347c4ec74ebae08895c257cf826435f4b6fa32a9919e34011d2e856fcf10cbf8a9f1b63a029d8e9d75c1112b84af9f04c86be96df46553233c68023a5df16ca99d846853e36c74053b1d3aebe22f99d50b0b9c2f99d50b0b9c2f99d50b0b92",
+      "phase": [
+        0,
+        1,
+        0
+      ],
+      "frames": [
+        {
+          "offset": 12553,
+          "bytes": 98,
+          "prefix_bits": 116
+        },
+        {
+          "offset": 12651,
+          "bytes": 340,
+          "prefix_bits": 107
+        },
+        {
+          "offset": 12991,
+          "bytes": 177,
+          "prefix_bits": 109
+        }
+      ],
+      "container_rate": 24000,
+      "container_frame_samples": 480,
+      "samples": 1440,
+      "pcm_offset": 0,
+      "control": "n480-c1-base-x1-crc1-tree0-fragmented-gain.mp4",
+      "output_channels": 6,
+      "inherited_prefix": "05671020040b7f10990d7d2dbe8caa64678d00474ba15bf3c432db2a67611a14f8db1d017e244ae12be7c1321afa5b7d1954c8cf1a008e9742b7e78865b654cec2347c4ec74ebae08895c257cf826435",
+      "replacement": "05671020040b7f10990d7d2dbe8caa64678d00474ba15bf3c432db2a67611a14f8db1d017e244ae12be7c1321afa5b7d1954c8cf1a008e9742b7e78865b654cec2347c4ec74ebae08895c257cf826435f4b6fa32a9919e34011d2e856fcf10cbf8a9f1b63a029d8e9d75c1112b84af9f04c86be96df46553233c68023a5df16ca99d846853e36c74053b1d3aebe22f99d50b0b9c2f99d50b0b9c2f99d50b0b92"
+    },
+    {
+      "asc": "f8ec31c460c05929b88100205800",
+      "tree": 0,
+      "n": 480,
+      "rate": 48000,
+      "slots": 15,
+      "bands": 64,
+      "channels": 1,
+      "qmf": {
+        "expected_offset": 0,
+        "expected_bands": 32
+      },
+      "name": "n480-c1-base-x2-crc1-tree0-fragmented-gain-retransmit",
+      "mode": "fragmented-gain",
+      "configs": [
+        "371020040b",
+        "3710200c0b"
+      ],
+      "body": "7f10990d7d2dbe8caa64678d00474ba15bf3c432db2a67611a14f8db1d017e244ae12be7c1321afa5b7d1954c8cf1a008e9742b7e78865b654cec2347c4ec74ebae08895c257cf826435f4b6fa32a9919e34011d2e856fcf10cbf8a9f1b63a029d8e9d75c1112b84af9f04c86be96df46553233c68023a5df16ca99d846853e36c74053b1d3aebe22f99d50b0b9c2f99d50b0b9c2f99d50b0b92",
+      "phase": [
+        0,
+        1,
+        0
+      ],
+      "frames": [
+        {
+          "offset": 13168,
+          "bytes": 98,
+          "prefix_bits": 116
+        },
+        {
+          "offset": 13266,
+          "bytes": 340,
+          "prefix_bits": 107
+        },
+        {
+          "offset": 13606,
+          "bytes": 177,
+          "prefix_bits": 109
+        }
+      ],
+      "container_rate": 48000,
+      "container_frame_samples": 960,
+      "samples": 2880,
+      "pcm_offset": 0,
+      "control": "n480-c1-base-x2-crc1-tree0-fragmented-gain.mp4",
+      "output_channels": 6,
+      "inherited_prefix": "05371020040b7f10990d7d2dbe8caa64678d00474ba15bf3c432db2a67611a14f8db1d017e244ae12be7c1321afa5b7d1954c8cf1a008e9742b7e78865b654cec2347c4ec74ebae08895c257cf826435",
+      "replacement": "05371020040b7f10990d7d2dbe8caa64678d00474ba15bf3c432db2a67611a14f8db1d017e244ae12be7c1321afa5b7d1954c8cf1a008e9742b7e78865b654cec2347c4ec74ebae08895c257cf826435f4b6fa32a9919e34011d2e856fcf10cbf8a9f1b63a029d8e9d75c1112b84af9f04c86be96df46553233c68023a5df16ca99d846853e36c74053b1d3aebe22f99d50b0b9c2f99d50b0b9c2f99d50b0b92"
+    },
+    {
+      "asc": "f8ec214460c0592b3c8100205800",
+      "tree": 0,
+      "n": 512,
+      "rate": 24000,
+      "slots": 16,
+      "bands": 32,
+      "channels": 1,
+      "qmf": {
+        "expected_offset": 5405760,
+        "expected_bands": 32
+      },
+      "name": "n512-c1-base-x1-crc1-tree0-fragmented-gain-retransmit",
+      "mode": "fragmented-gain",
+      "configs": [
+        "679020040b",
+        "6790200c0b"
+      ],
+      "body": "7f10990d7d2dbe8caa64678d00474ba15bf3c432db2a67611a14f8db1d017e244ae12be7c1321afa5b7d1954c8cf1a008e9742b7e78865b654cec2347c4ec74ebae08895c257cf826435f4b6fa32a9919e34011d2e856fcf10cbf8a9f1b63a029d8e9d75c1112b84af9f04c86be96df46553233c68023a5df16ca99d846853e36c74053b1d3aebe22f99d50b0b9c2f99d50b0b9c2f99d50b0b92",
+      "phase": [
+        0,
+        1,
+        0
+      ],
+      "frames": [
+        {
+          "offset": 13783,
+          "bytes": 98,
+          "prefix_bits": 116
+        },
+        {
+          "offset": 13881,
+          "bytes": 340,
+          "prefix_bits": 107
+        },
+        {
+          "offset": 14221,
+          "bytes": 177,
+          "prefix_bits": 109
+        }
+      ],
+      "container_rate": 24000,
+      "container_frame_samples": 512,
+      "samples": 1536,
+      "pcm_offset": 0,
+      "control": "n512-c1-base-x1-crc1-tree0-fragmented-gain.mp4",
+      "output_channels": 6,
+      "inherited_prefix": "05679020040b7f10990d7d2dbe8caa64678d00474ba15bf3c432db2a67611a14f8db1d017e244ae12be7c1321afa5b7d1954c8cf1a008e9742b7e78865b654cec2347c4ec74ebae08895c257cf826435",
+      "replacement": "05679020040b7f10990d7d2dbe8caa64678d00474ba15bf3c432db2a67611a14f8db1d017e244ae12be7c1321afa5b7d1954c8cf1a008e9742b7e78865b654cec2347c4ec74ebae08895c257cf826435f4b6fa32a9919e34011d2e856fcf10cbf8a9f1b63a029d8e9d75c1112b84af9f04c86be96df46553233c68023a5df16ca99d846853e36c74053b1d3aebe22f99d50b0b9c2f99d50b0b9c2f99d50b0b92"
+    },
+    {
+      "asc": "f8ec21c460c05929bc8100205800",
+      "tree": 0,
+      "n": 512,
+      "rate": 48000,
+      "slots": 16,
+      "bands": 64,
+      "channels": 1,
+      "qmf": {
+        "expected_offset": 5405760,
+        "expected_bands": 32
+      },
+      "name": "n512-c1-base-x2-crc1-tree0-fragmented-gain-retransmit",
+      "mode": "fragmented-gain",
+      "configs": [
+        "379020040b",
+        "3790200c0b"
+      ],
+      "body": "7f10990d7d2dbe8caa64678d00474ba15bf3c432db2a67611a14f8db1d017e244ae12be7c1321afa5b7d1954c8cf1a008e9742b7e78865b654cec2347c4ec74ebae08895c257cf826435f4b6fa32a9919e34011d2e856fcf10cbf8a9f1b63a029d8e9d75c1112b84af9f04c86be96df46553233c68023a5df16ca99d846853e36c74053b1d3aebe22f99d50b0b9c2f99d50b0b9c2f99d50b0b92",
+      "phase": [
+        0,
+        1,
+        0
+      ],
+      "frames": [
+        {
+          "offset": 14398,
+          "bytes": 98,
+          "prefix_bits": 116
+        },
+        {
+          "offset": 14496,
+          "bytes": 340,
+          "prefix_bits": 107
+        },
+        {
+          "offset": 14836,
+          "bytes": 177,
+          "prefix_bits": 109
+        }
+      ],
+      "container_rate": 48000,
+      "container_frame_samples": 1024,
+      "samples": 3072,
+      "pcm_offset": 0,
+      "control": "n512-c1-base-x2-crc1-tree0-fragmented-gain.mp4",
+      "output_channels": 6,
+      "inherited_prefix": "05379020040b7f10990d7d2dbe8caa64678d00474ba15bf3c432db2a67611a14f8db1d017e244ae12be7c1321afa5b7d1954c8cf1a008e9742b7e78865b654cec2347c4ec74ebae08895c257cf826435",
+      "replacement": "05379020040b7f10990d7d2dbe8caa64678d00474ba15bf3c432db2a67611a14f8db1d017e244ae12be7c1321afa5b7d1954c8cf1a008e9742b7e78865b654cec2347c4ec74ebae08895c257cf826435f4b6fa32a9919e34011d2e856fcf10cbf8a9f1b63a029d8e9d75c1112b84af9f04c86be96df46553233c68023a5df16ca99d846853e36c74053b1d3aebe22f99d50b0b9c2f99d50b0b9c2f99d50b0b92"
+    },
+    {
+      "asc": "f8ec314460c0592b388900205800",
+      "tree": 1,
+      "n": 480,
+      "rate": 24000,
+      "slots": 15,
+      "bands": 32,
+      "channels": 1,
+      "qmf": {
+        "expected_offset": 0,
+        "expected_bands": 32
+      },
+      "name": "n480-c1-base-x1-crc1-tree1-fragmented-gain-retransmit",
+      "mode": "fragmented-gain",
+      "configs": [
+        "671120040b",
+        "6711200c0b"
+      ],
+      "body": "7f10990d7d2dbe8caa64678d00474ba15bf3c432db2a67611a14f8db1d017e244ae12be7c1321afa5b7d1954c8cf1a008e9742b7e78865b654cec2347c4ec74ebae08895c257cf826435f4f8a9f1b63a029d8e9d75c1112b84af9f04c86be96df46553233c68023a5df16ca99d846853e36c74053b1d3aeb822257095f3e0990d7d2dbe8caa647e22f99d50b0b9c2f99d50b0b9c2f99d50b0b92",
+      "phase": [
+        0,
+        1,
+        0
+      ],
+      "frames": [
+        {
+          "offset": 15013,
+          "bytes": 98,
+          "prefix_bits": 116
+        },
+        {
+          "offset": 15111,
+          "bytes": 340,
+          "prefix_bits": 107
+        },
+        {
+          "offset": 15451,
+          "bytes": 177,
+          "prefix_bits": 109
+        }
+      ],
+      "container_rate": 24000,
+      "container_frame_samples": 480,
+      "samples": 1440,
+      "pcm_offset": 0,
+      "control": "n480-c1-base-x1-crc1-tree1-fragmented-gain.mp4",
+      "output_channels": 6,
+      "inherited_prefix": "05671120040b7f10990d7d2dbe8caa64678d00474ba15bf3c432db2a67611a14f8db1d017e244ae12be7c1321afa5b7d1954c8cf1a008e9742b7e78865b654cec2347c4ec74ebae08895c257cf826435",
+      "replacement": "05671120040b7f10990d7d2dbe8caa64678d00474ba15bf3c432db2a67611a14f8db1d017e244ae12be7c1321afa5b7d1954c8cf1a008e9742b7e78865b654cec2347c4ec74ebae08895c257cf826435f4f8a9f1b63a029d8e9d75c1112b84af9f04c86be96df46553233c68023a5df16ca99d846853e36c74053b1d3aeb822257095f3e0990d7d2dbe8caa647e22f99d50b0b9c2f99d50b0b9c2f99d50b0b92"
+    },
+    {
+      "asc": "f8ec31c460c05929b88900205800",
+      "tree": 1,
+      "n": 480,
+      "rate": 48000,
+      "slots": 15,
+      "bands": 64,
+      "channels": 1,
+      "qmf": {
+        "expected_offset": 0,
+        "expected_bands": 32
+      },
+      "name": "n480-c1-base-x2-crc1-tree1-fragmented-gain-retransmit",
+      "mode": "fragmented-gain",
+      "configs": [
+        "371120040b",
+        "3711200c0b"
+      ],
+      "body": "7f10990d7d2dbe8caa64678d00474ba15bf3c432db2a67611a14f8db1d017e244ae12be7c1321afa5b7d1954c8cf1a008e9742b7e78865b654cec2347c4ec74ebae08895c257cf826435f4f8a9f1b63a029d8e9d75c1112b84af9f04c86be96df46553233c68023a5df16ca99d846853e36c74053b1d3aeb822257095f3e0990d7d2dbe8caa647e22f99d50b0b9c2f99d50b0b9c2f99d50b0b92",
+      "phase": [
+        0,
+        1,
+        0
+      ],
+      "frames": [
+        {
+          "offset": 15628,
+          "bytes": 98,
+          "prefix_bits": 116
+        },
+        {
+          "offset": 15726,
+          "bytes": 340,
+          "prefix_bits": 107
+        },
+        {
+          "offset": 16066,
+          "bytes": 177,
+          "prefix_bits": 109
+        }
+      ],
+      "container_rate": 48000,
+      "container_frame_samples": 960,
+      "samples": 2880,
+      "pcm_offset": 0,
+      "control": "n480-c1-base-x2-crc1-tree1-fragmented-gain.mp4",
+      "output_channels": 6,
+      "inherited_prefix": "05371120040b7f10990d7d2dbe8caa64678d00474ba15bf3c432db2a67611a14f8db1d017e244ae12be7c1321afa5b7d1954c8cf1a008e9742b7e78865b654cec2347c4ec74ebae08895c257cf826435",
+      "replacement": "05371120040b7f10990d7d2dbe8caa64678d00474ba15bf3c432db2a67611a14f8db1d017e244ae12be7c1321afa5b7d1954c8cf1a008e9742b7e78865b654cec2347c4ec74ebae08895c257cf826435f4f8a9f1b63a029d8e9d75c1112b84af9f04c86be96df46553233c68023a5df16ca99d846853e36c74053b1d3aeb822257095f3e0990d7d2dbe8caa647e22f99d50b0b9c2f99d50b0b9c2f99d50b0b92"
+    },
+    {
+      "asc": "f8ec214460c0592b3c8900205800",
+      "tree": 1,
+      "n": 512,
+      "rate": 24000,
+      "slots": 16,
+      "bands": 32,
+      "channels": 1,
+      "qmf": {
+        "expected_offset": 5405760,
+        "expected_bands": 32
+      },
+      "name": "n512-c1-base-x1-crc1-tree1-fragmented-gain-retransmit",
+      "mode": "fragmented-gain",
+      "configs": [
+        "679120040b",
+        "6791200c0b"
+      ],
+      "body": "7f10990d7d2dbe8caa64678d00474ba15bf3c432db2a67611a14f8db1d017e244ae12be7c1321afa5b7d1954c8cf1a008e9742b7e78865b654cec2347c4ec74ebae08895c257cf826435f4f8a9f1b63a029d8e9d75c1112b84af9f04c86be96df46553233c68023a5df16ca99d846853e36c74053b1d3aeb822257095f3e0990d7d2dbe8caa647e22f99d50b0b9c2f99d50b0b9c2f99d50b0b92",
+      "phase": [
+        0,
+        1,
+        0
+      ],
+      "frames": [
+        {
+          "offset": 16243,
+          "bytes": 98,
+          "prefix_bits": 116
+        },
+        {
+          "offset": 16341,
+          "bytes": 340,
+          "prefix_bits": 107
+        },
+        {
+          "offset": 16681,
+          "bytes": 177,
+          "prefix_bits": 109
+        }
+      ],
+      "container_rate": 24000,
+      "container_frame_samples": 512,
+      "samples": 1536,
+      "pcm_offset": 0,
+      "control": "n512-c1-base-x1-crc1-tree1-fragmented-gain.mp4",
+      "output_channels": 6,
+      "inherited_prefix": "05679120040b7f10990d7d2dbe8caa64678d00474ba15bf3c432db2a67611a14f8db1d017e244ae12be7c1321afa5b7d1954c8cf1a008e9742b7e78865b654cec2347c4ec74ebae08895c257cf826435",
+      "replacement": "05679120040b7f10990d7d2dbe8caa64678d00474ba15bf3c432db2a67611a14f8db1d017e244ae12be7c1321afa5b7d1954c8cf1a008e9742b7e78865b654cec2347c4ec74ebae08895c257cf826435f4f8a9f1b63a029d8e9d75c1112b84af9f04c86be96df46553233c68023a5df16ca99d846853e36c74053b1d3aeb822257095f3e0990d7d2dbe8caa647e22f99d50b0b9c2f99d50b0b9c2f99d50b0b92"
+    },
+    {
+      "asc": "f8ec21c460c05929bc8900205800",
+      "tree": 1,
+      "n": 512,
+      "rate": 48000,
+      "slots": 16,
+      "bands": 64,
+      "channels": 1,
+      "qmf": {
+        "expected_offset": 5405760,
+        "expected_bands": 32
+      },
+      "name": "n512-c1-base-x2-crc1-tree1-fragmented-gain-retransmit",
+      "mode": "fragmented-gain",
+      "configs": [
+        "379120040b",
+        "3791200c0b"
+      ],
+      "body": "7f10990d7d2dbe8caa64678d00474ba15bf3c432db2a67611a14f8db1d017e244ae12be7c1321afa5b7d1954c8cf1a008e9742b7e78865b654cec2347c4ec74ebae08895c257cf826435f4f8a9f1b63a029d8e9d75c1112b84af9f04c86be96df46553233c68023a5df16ca99d846853e36c74053b1d3aeb822257095f3e0990d7d2dbe8caa647e22f99d50b0b9c2f99d50b0b9c2f99d50b0b92",
+      "phase": [
+        0,
+        1,
+        0
+      ],
+      "frames": [
+        {
+          "offset": 16858,
+          "bytes": 98,
+          "prefix_bits": 116
+        },
+        {
+          "offset": 16956,
+          "bytes": 340,
+          "prefix_bits": 107
+        },
+        {
+          "offset": 17296,
+          "bytes": 177,
+          "prefix_bits": 109
+        }
+      ],
+      "container_rate": 48000,
+      "container_frame_samples": 1024,
+      "samples": 3072,
+      "pcm_offset": 0,
+      "control": "n512-c1-base-x2-crc1-tree1-fragmented-gain.mp4",
+      "output_channels": 6,
+      "inherited_prefix": "05379120040b7f10990d7d2dbe8caa64678d00474ba15bf3c432db2a67611a14f8db1d017e244ae12be7c1321afa5b7d1954c8cf1a008e9742b7e78865b654cec2347c4ec74ebae08895c257cf826435",
+      "replacement": "05379120040b7f10990d7d2dbe8caa64678d00474ba15bf3c432db2a67611a14f8db1d017e244ae12be7c1321afa5b7d1954c8cf1a008e9742b7e78865b654cec2347c4ec74ebae08895c257cf826435f4f8a9f1b63a029d8e9d75c1112b84af9f04c86be96df46553233c68023a5df16ca99d846853e36c74053b1d3aeb822257095f3e0990d7d2dbe8caa647e22f99d50b0b9c2f99d50b0b9c2f99d50b0b92"
+    },
+    {
+      "asc": "f8ec514460c0593b389900205d358000",
+      "tree": 3,
+      "n": 480,
+      "rate": 24000,
+      "slots": 15,
+      "bands": 32,
+      "channels": 2,
+      "qmf": {
+        "expected_offset": 1235520,
+        "expected_bands": 32
+      },
+      "name": "n480-c2-base-x1-crc1-tree3-fragmented-gain-retransmit",
+      "mode": "fragmented-gain",
+      "configs": [
+        "671320040ba6b0",
+        "6713200c0ba6b0"
+      ],
+      "body": "7f10990d7d2dbe8caa64678d00474bbe244ae12be7c1321afa5b7d1954c8cf1a008e9742b7e78865b654cec2347c4ec74ebae08895c257cf826435f4b6fa32a9919e34011d2e856fcf10cbf8a9f1b63a029d8e9d75c1112b84af9f04c86be96df46553233c68023a5df16ca99d846853e36c74053b1d3aeb822257095f3e0990d7d2dbe8caa647e22f99d50b0b9c2f99d50b0b9c2f99d50b0bfc678d00474ba15bf3c432db2a6761f8db7d1954c8cf1a008e9742b7e789f1cf826435f4b6fa32a9919e34011d2ef8f0444ae12be7c1321afa5b7d1954c892",
+      "phase": [
+        0,
+        1,
+        0
+      ],
+      "frames": [
+        {
+          "offset": 17473,
+          "bytes": 142,
+          "prefix_bits": 216
+        },
+        {
+          "offset": 17615,
+          "bytes": 479,
+          "prefix_bits": 200
+        },
+        {
+          "offset": 18094,
+          "bytes": 252,
+          "prefix_bits": 200
+        }
+      ],
+      "container_rate": 24000,
+      "container_frame_samples": 480,
+      "samples": 1440,
+      "pcm_offset": 0,
+      "control": "n480-c2-base-x1-crc1-tree3-fragmented-gain.mp4",
+      "output_channels": 8,
+      "inherited_prefix": "07671320040ba6b07f10990d7d2dbe8caa64678d00474bbe244ae12be7c1321afa5b7d1954c8cf1a008e9742b7e78865b654cec2347c4ec74ebae08895c257cf826435f4b6fa32a9919e34011d2e856fcf10cbf8a9f1b63a029d8e9d75c1112b84af9f04c86be96df46553233c68023a",
+      "replacement": "07671320040ba6b07f10990d7d2dbe8caa64678d00474bbe244ae12be7c1321afa5b7d1954c8cf1a008e9742b7e78865b654cec2347c4ec74ebae08895c257cf826435f4b6fa32a9919e34011d2e856fcf10cbf8a9f1b63a029d8e9d75c1112b84af9f04c86be96df46553233c68023a5df16ca99d846853e36c74053b1d3aeb822257095f3e0990d7d2dbe8caa647e22f99d50b0b9c2f99d50b0b9c2f99d50b0bfc678d00474ba15bf3c432db2a6761f8db7d1954c8cf1a008e9742b7e789f1cf826435f4b6fa32a9919e34011d2ef8f0444ae12be7c1321afa5b7d1954c892"
+    },
+    {
+      "asc": "f8ec51c460c05939b89900205d358000",
+      "tree": 3,
+      "n": 480,
+      "rate": 48000,
+      "slots": 15,
+      "bands": 64,
+      "channels": 2,
+      "qmf": {
+        "expected_offset": 1235520,
+        "expected_bands": 32
+      },
+      "name": "n480-c2-base-x2-crc1-tree3-fragmented-gain-retransmit",
+      "mode": "fragmented-gain",
+      "configs": [
+        "371320040ba6b0",
+        "3713200c0ba6b0"
+      ],
+      "body": "7f10990d7d2dbe8caa64678d00474bbe244ae12be7c1321afa5b7d1954c8cf1a008e9742b7e78865b654cec2347c4ec74ebae08895c257cf826435f4b6fa32a9919e34011d2e856fcf10cbf8a9f1b63a029d8e9d75c1112b84af9f04c86be96df46553233c68023a5df16ca99d846853e36c74053b1d3aeb822257095f3e0990d7d2dbe8caa647e22f99d50b0b9c2f99d50b0b9c2f99d50b0bfc678d00474ba15bf3c432db2a6761f8db7d1954c8cf1a008e9742b7e789f1cf826435f4b6fa32a9919e34011d2ef8f0444ae12be7c1321afa5b7d1954c892",
+      "phase": [
+        0,
+        1,
+        0
+      ],
+      "frames": [
+        {
+          "offset": 18346,
+          "bytes": 142,
+          "prefix_bits": 216
+        },
+        {
+          "offset": 18488,
+          "bytes": 479,
+          "prefix_bits": 200
+        },
+        {
+          "offset": 18967,
+          "bytes": 252,
+          "prefix_bits": 200
+        }
+      ],
+      "container_rate": 48000,
+      "container_frame_samples": 960,
+      "samples": 2880,
+      "pcm_offset": 0,
+      "control": "n480-c2-base-x2-crc1-tree3-fragmented-gain.mp4",
+      "output_channels": 8,
+      "inherited_prefix": "07371320040ba6b07f10990d7d2dbe8caa64678d00474bbe244ae12be7c1321afa5b7d1954c8cf1a008e9742b7e78865b654cec2347c4ec74ebae08895c257cf826435f4b6fa32a9919e34011d2e856fcf10cbf8a9f1b63a029d8e9d75c1112b84af9f04c86be96df46553233c68023a",
+      "replacement": "07371320040ba6b07f10990d7d2dbe8caa64678d00474bbe244ae12be7c1321afa5b7d1954c8cf1a008e9742b7e78865b654cec2347c4ec74ebae08895c257cf826435f4b6fa32a9919e34011d2e856fcf10cbf8a9f1b63a029d8e9d75c1112b84af9f04c86be96df46553233c68023a5df16ca99d846853e36c74053b1d3aeb822257095f3e0990d7d2dbe8caa647e22f99d50b0b9c2f99d50b0b9c2f99d50b0bfc678d00474ba15bf3c432db2a6761f8db7d1954c8cf1a008e9742b7e789f1cf826435f4b6fa32a9919e34011d2ef8f0444ae12be7c1321afa5b7d1954c892"
+    },
+    {
+      "asc": "f8ec414460c0593b3c9900205d358000",
+      "tree": 3,
+      "n": 512,
+      "rate": 24000,
+      "slots": 16,
+      "bands": 32,
+      "channels": 2,
+      "qmf": {
+        "expected_offset": 6723648,
+        "expected_bands": 32
+      },
+      "name": "n512-c2-base-x1-crc1-tree3-fragmented-gain-retransmit",
+      "mode": "fragmented-gain",
+      "configs": [
+        "679320040ba6b0",
+        "6793200c0ba6b0"
+      ],
+      "body": "7f10990d7d2dbe8caa64678d00474bbe244ae12be7c1321afa5b7d1954c8cf1a008e9742b7e78865b654cec2347c4ec74ebae08895c257cf826435f4b6fa32a9919e34011d2e856fcf10cbf8a9f1b63a029d8e9d75c1112b84af9f04c86be96df46553233c68023a5df16ca99d846853e36c74053b1d3aeb822257095f3e0990d7d2dbe8caa647e22f99d50b0b9c2f99d50b0b9c2f99d50b0bfc678d00474ba15bf3c432db2a6761f8db7d1954c8cf1a008e9742b7e789f1cf826435f4b6fa32a9919e34011d2ef8f0444ae12be7c1321afa5b7d1954c892",
+      "phase": [
+        0,
+        1,
+        0
+      ],
+      "frames": [
+        {
+          "offset": 19219,
+          "bytes": 142,
+          "prefix_bits": 216
+        },
+        {
+          "offset": 19361,
+          "bytes": 479,
+          "prefix_bits": 200
+        },
+        {
+          "offset": 19840,
+          "bytes": 252,
+          "prefix_bits": 200
+        }
+      ],
+      "container_rate": 24000,
+      "container_frame_samples": 512,
+      "samples": 1536,
+      "pcm_offset": 0,
+      "control": "n512-c2-base-x1-crc1-tree3-fragmented-gain.mp4",
+      "output_channels": 8,
+      "inherited_prefix": "07679320040ba6b07f10990d7d2dbe8caa64678d00474bbe244ae12be7c1321afa5b7d1954c8cf1a008e9742b7e78865b654cec2347c4ec74ebae08895c257cf826435f4b6fa32a9919e34011d2e856fcf10cbf8a9f1b63a029d8e9d75c1112b84af9f04c86be96df46553233c68023a",
+      "replacement": "07679320040ba6b07f10990d7d2dbe8caa64678d00474bbe244ae12be7c1321afa5b7d1954c8cf1a008e9742b7e78865b654cec2347c4ec74ebae08895c257cf826435f4b6fa32a9919e34011d2e856fcf10cbf8a9f1b63a029d8e9d75c1112b84af9f04c86be96df46553233c68023a5df16ca99d846853e36c74053b1d3aeb822257095f3e0990d7d2dbe8caa647e22f99d50b0b9c2f99d50b0b9c2f99d50b0bfc678d00474ba15bf3c432db2a6761f8db7d1954c8cf1a008e9742b7e789f1cf826435f4b6fa32a9919e34011d2ef8f0444ae12be7c1321afa5b7d1954c892"
+    },
+    {
+      "asc": "f8ec41c460c05939bc9900205d358000",
+      "tree": 3,
+      "n": 512,
+      "rate": 48000,
+      "slots": 16,
+      "bands": 64,
+      "channels": 2,
+      "qmf": {
+        "expected_offset": 6723648,
+        "expected_bands": 32
+      },
+      "name": "n512-c2-base-x2-crc1-tree3-fragmented-gain-retransmit",
+      "mode": "fragmented-gain",
+      "configs": [
+        "379320040ba6b0",
+        "3793200c0ba6b0"
+      ],
+      "body": "7f10990d7d2dbe8caa64678d00474bbe244ae12be7c1321afa5b7d1954c8cf1a008e9742b7e78865b654cec2347c4ec74ebae08895c257cf826435f4b6fa32a9919e34011d2e856fcf10cbf8a9f1b63a029d8e9d75c1112b84af9f04c86be96df46553233c68023a5df16ca99d846853e36c74053b1d3aeb822257095f3e0990d7d2dbe8caa647e22f99d50b0b9c2f99d50b0b9c2f99d50b0bfc678d00474ba15bf3c432db2a6761f8db7d1954c8cf1a008e9742b7e789f1cf826435f4b6fa32a9919e34011d2ef8f0444ae12be7c1321afa5b7d1954c892",
+      "phase": [
+        0,
+        1,
+        0
+      ],
+      "frames": [
+        {
+          "offset": 20092,
+          "bytes": 142,
+          "prefix_bits": 216
+        },
+        {
+          "offset": 20234,
+          "bytes": 479,
+          "prefix_bits": 200
+        },
+        {
+          "offset": 20713,
+          "bytes": 252,
+          "prefix_bits": 200
+        }
+      ],
+      "container_rate": 48000,
+      "container_frame_samples": 1024,
+      "samples": 3072,
+      "pcm_offset": 0,
+      "control": "n512-c2-base-x2-crc1-tree3-fragmented-gain.mp4",
+      "output_channels": 8,
+      "inherited_prefix": "07379320040ba6b07f10990d7d2dbe8caa64678d00474bbe244ae12be7c1321afa5b7d1954c8cf1a008e9742b7e78865b654cec2347c4ec74ebae08895c257cf826435f4b6fa32a9919e34011d2e856fcf10cbf8a9f1b63a029d8e9d75c1112b84af9f04c86be96df46553233c68023a",
+      "replacement": "07379320040ba6b07f10990d7d2dbe8caa64678d00474bbe244ae12be7c1321afa5b7d1954c8cf1a008e9742b7e78865b654cec2347c4ec74ebae08895c257cf826435f4b6fa32a9919e34011d2e856fcf10cbf8a9f1b63a029d8e9d75c1112b84af9f04c86be96df46553233c68023a5df16ca99d846853e36c74053b1d3aeb822257095f3e0990d7d2dbe8caa647e22f99d50b0b9c2f99d50b0b9c2f99d50b0bfc678d00474ba15bf3c432db2a6761f8db7d1954c8cf1a008e9742b7e789f1cf826435f4b6fa32a9919e34011d2ef8f0444ae12be7c1321afa5b7d1954c892"
+    },
+    {
+      "asc": "f8ec514460c0593b38a100205d358000",
+      "tree": 4,
+      "n": 480,
+      "rate": 24000,
+      "slots": 15,
+      "bands": 32,
+      "channels": 2,
+      "qmf": {
+        "expected_offset": 1235520,
+        "expected_bands": 32
+      },
+      "name": "n480-c2-base-x1-crc1-tree4-fragmented-gain-retransmit",
+      "mode": "fragmented-gain",
+      "configs": [
+        "671420040ba6b0",
+        "6714200c0ba6b0"
+      ],
+      "body": "7f10990d7d2dbe8caa64678d00474bbe244ae12be7c1321afa5b7d1954c8cf1a008e9742b7e78865b654cec2347c4ec74ebae08895c257cf826435f4b6fa32a9919e34011d2e856fcf10cbf8a9f1b63a029d8e9d75c1112b84af9f04c86be96df46553233c68023a5df16ca99d846853e36c74053b1d3aeb822257095f3e0990d7d2dbe8caa647e22f99d50b0b9c2f99d50b0b9c2f99d50b0bfc678d00474ba15bf3c432db2a6761f8db7d1954c8cf1a008e9742b7e789f1cf826435f4b6fa32a9919e34011d2ef8f0444ae12be7c1321afa5b7d1954c892",
+      "phase": [
+        0,
+        1,
+        0
+      ],
+      "frames": [
+        {
+          "offset": 20965,
+          "bytes": 142,
+          "prefix_bits": 216
+        },
+        {
+          "offset": 21107,
+          "bytes": 479,
+          "prefix_bits": 200
+        },
+        {
+          "offset": 21586,
+          "bytes": 252,
+          "prefix_bits": 200
+        }
+      ],
+      "container_rate": 24000,
+      "container_frame_samples": 480,
+      "samples": 1440,
+      "pcm_offset": 0,
+      "control": "n480-c2-base-x1-crc1-tree4-fragmented-gain.mp4",
+      "output_channels": 8,
+      "inherited_prefix": "07671420040ba6b07f10990d7d2dbe8caa64678d00474bbe244ae12be7c1321afa5b7d1954c8cf1a008e9742b7e78865b654cec2347c4ec74ebae08895c257cf826435f4b6fa32a9919e34011d2e856fcf10cbf8a9f1b63a029d8e9d75c1112b84af9f04c86be96df46553233c68023a",
+      "replacement": "07671420040ba6b07f10990d7d2dbe8caa64678d00474bbe244ae12be7c1321afa5b7d1954c8cf1a008e9742b7e78865b654cec2347c4ec74ebae08895c257cf826435f4b6fa32a9919e34011d2e856fcf10cbf8a9f1b63a029d8e9d75c1112b84af9f04c86be96df46553233c68023a5df16ca99d846853e36c74053b1d3aeb822257095f3e0990d7d2dbe8caa647e22f99d50b0b9c2f99d50b0b9c2f99d50b0bfc678d00474ba15bf3c432db2a6761f8db7d1954c8cf1a008e9742b7e789f1cf826435f4b6fa32a9919e34011d2ef8f0444ae12be7c1321afa5b7d1954c892"
+    },
+    {
+      "asc": "f8ec51c460c05939b8a100205d358000",
+      "tree": 4,
+      "n": 480,
+      "rate": 48000,
+      "slots": 15,
+      "bands": 64,
+      "channels": 2,
+      "qmf": {
+        "expected_offset": 1235520,
+        "expected_bands": 32
+      },
+      "name": "n480-c2-base-x2-crc1-tree4-fragmented-gain-retransmit",
+      "mode": "fragmented-gain",
+      "configs": [
+        "371420040ba6b0",
+        "3714200c0ba6b0"
+      ],
+      "body": "7f10990d7d2dbe8caa64678d00474bbe244ae12be7c1321afa5b7d1954c8cf1a008e9742b7e78865b654cec2347c4ec74ebae08895c257cf826435f4b6fa32a9919e34011d2e856fcf10cbf8a9f1b63a029d8e9d75c1112b84af9f04c86be96df46553233c68023a5df16ca99d846853e36c74053b1d3aeb822257095f3e0990d7d2dbe8caa647e22f99d50b0b9c2f99d50b0b9c2f99d50b0bfc678d00474ba15bf3c432db2a6761f8db7d1954c8cf1a008e9742b7e789f1cf826435f4b6fa32a9919e34011d2ef8f0444ae12be7c1321afa5b7d1954c892",
+      "phase": [
+        0,
+        1,
+        0
+      ],
+      "frames": [
+        {
+          "offset": 21838,
+          "bytes": 142,
+          "prefix_bits": 216
+        },
+        {
+          "offset": 21980,
+          "bytes": 479,
+          "prefix_bits": 200
+        },
+        {
+          "offset": 22459,
+          "bytes": 252,
+          "prefix_bits": 200
+        }
+      ],
+      "container_rate": 48000,
+      "container_frame_samples": 960,
+      "samples": 2880,
+      "pcm_offset": 0,
+      "control": "n480-c2-base-x2-crc1-tree4-fragmented-gain.mp4",
+      "output_channels": 8,
+      "inherited_prefix": "07371420040ba6b07f10990d7d2dbe8caa64678d00474bbe244ae12be7c1321afa5b7d1954c8cf1a008e9742b7e78865b654cec2347c4ec74ebae08895c257cf826435f4b6fa32a9919e34011d2e856fcf10cbf8a9f1b63a029d8e9d75c1112b84af9f04c86be96df46553233c68023a",
+      "replacement": "07371420040ba6b07f10990d7d2dbe8caa64678d00474bbe244ae12be7c1321afa5b7d1954c8cf1a008e9742b7e78865b654cec2347c4ec74ebae08895c257cf826435f4b6fa32a9919e34011d2e856fcf10cbf8a9f1b63a029d8e9d75c1112b84af9f04c86be96df46553233c68023a5df16ca99d846853e36c74053b1d3aeb822257095f3e0990d7d2dbe8caa647e22f99d50b0b9c2f99d50b0b9c2f99d50b0bfc678d00474ba15bf3c432db2a6761f8db7d1954c8cf1a008e9742b7e789f1cf826435f4b6fa32a9919e34011d2ef8f0444ae12be7c1321afa5b7d1954c892"
+    },
+    {
+      "asc": "f8ec414460c0593b3ca100205d358000",
+      "tree": 4,
+      "n": 512,
+      "rate": 24000,
+      "slots": 16,
+      "bands": 32,
+      "channels": 2,
+      "qmf": {
+        "expected_offset": 6723648,
+        "expected_bands": 32
+      },
+      "name": "n512-c2-base-x1-crc1-tree4-fragmented-gain-retransmit",
+      "mode": "fragmented-gain",
+      "configs": [
+        "679420040ba6b0",
+        "6794200c0ba6b0"
+      ],
+      "body": "7f10990d7d2dbe8caa64678d00474bbe244ae12be7c1321afa5b7d1954c8cf1a008e9742b7e78865b654cec2347c4ec74ebae08895c257cf826435f4b6fa32a9919e34011d2e856fcf10cbf8a9f1b63a029d8e9d75c1112b84af9f04c86be96df46553233c68023a5df16ca99d846853e36c74053b1d3aeb822257095f3e0990d7d2dbe8caa647e22f99d50b0b9c2f99d50b0b9c2f99d50b0bfc678d00474ba15bf3c432db2a6761f8db7d1954c8cf1a008e9742b7e789f1cf826435f4b6fa32a9919e34011d2ef8f0444ae12be7c1321afa5b7d1954c892",
+      "phase": [
+        0,
+        1,
+        0
+      ],
+      "frames": [
+        {
+          "offset": 22711,
+          "bytes": 142,
+          "prefix_bits": 216
+        },
+        {
+          "offset": 22853,
+          "bytes": 479,
+          "prefix_bits": 200
+        },
+        {
+          "offset": 23332,
+          "bytes": 252,
+          "prefix_bits": 200
+        }
+      ],
+      "container_rate": 24000,
+      "container_frame_samples": 512,
+      "samples": 1536,
+      "pcm_offset": 0,
+      "control": "n512-c2-base-x1-crc1-tree4-fragmented-gain.mp4",
+      "output_channels": 8,
+      "inherited_prefix": "07679420040ba6b07f10990d7d2dbe8caa64678d00474bbe244ae12be7c1321afa5b7d1954c8cf1a008e9742b7e78865b654cec2347c4ec74ebae08895c257cf826435f4b6fa32a9919e34011d2e856fcf10cbf8a9f1b63a029d8e9d75c1112b84af9f04c86be96df46553233c68023a",
+      "replacement": "07679420040ba6b07f10990d7d2dbe8caa64678d00474bbe244ae12be7c1321afa5b7d1954c8cf1a008e9742b7e78865b654cec2347c4ec74ebae08895c257cf826435f4b6fa32a9919e34011d2e856fcf10cbf8a9f1b63a029d8e9d75c1112b84af9f04c86be96df46553233c68023a5df16ca99d846853e36c74053b1d3aeb822257095f3e0990d7d2dbe8caa647e22f99d50b0b9c2f99d50b0b9c2f99d50b0bfc678d00474ba15bf3c432db2a6761f8db7d1954c8cf1a008e9742b7e789f1cf826435f4b6fa32a9919e34011d2ef8f0444ae12be7c1321afa5b7d1954c892"
+    },
+    {
+      "asc": "f8ec41c460c05939bca100205d358000",
+      "tree": 4,
+      "n": 512,
+      "rate": 48000,
+      "slots": 16,
+      "bands": 64,
+      "channels": 2,
+      "qmf": {
+        "expected_offset": 6723648,
+        "expected_bands": 32
+      },
+      "name": "n512-c2-base-x2-crc1-tree4-fragmented-gain-retransmit",
+      "mode": "fragmented-gain",
+      "configs": [
+        "379420040ba6b0",
+        "3794200c0ba6b0"
+      ],
+      "body": "7f10990d7d2dbe8caa64678d00474bbe244ae12be7c1321afa5b7d1954c8cf1a008e9742b7e78865b654cec2347c4ec74ebae08895c257cf826435f4b6fa32a9919e34011d2e856fcf10cbf8a9f1b63a029d8e9d75c1112b84af9f04c86be96df46553233c68023a5df16ca99d846853e36c74053b1d3aeb822257095f3e0990d7d2dbe8caa647e22f99d50b0b9c2f99d50b0b9c2f99d50b0bfc678d00474ba15bf3c432db2a6761f8db7d1954c8cf1a008e9742b7e789f1cf826435f4b6fa32a9919e34011d2ef8f0444ae12be7c1321afa5b7d1954c892",
+      "phase": [
+        0,
+        1,
+        0
+      ],
+      "frames": [
+        {
+          "offset": 23584,
+          "bytes": 142,
+          "prefix_bits": 216
+        },
+        {
+          "offset": 23726,
+          "bytes": 479,
+          "prefix_bits": 200
+        },
+        {
+          "offset": 24205,
+          "bytes": 252,
+          "prefix_bits": 200
+        }
+      ],
+      "container_rate": 48000,
+      "container_frame_samples": 1024,
+      "samples": 3072,
+      "pcm_offset": 0,
+      "control": "n512-c2-base-x2-crc1-tree4-fragmented-gain.mp4",
+      "output_channels": 8,
+      "inherited_prefix": "07379420040ba6b07f10990d7d2dbe8caa64678d00474bbe244ae12be7c1321afa5b7d1954c8cf1a008e9742b7e78865b654cec2347c4ec74ebae08895c257cf826435f4b6fa32a9919e34011d2e856fcf10cbf8a9f1b63a029d8e9d75c1112b84af9f04c86be96df46553233c68023a",
+      "replacement": "07379420040ba6b07f10990d7d2dbe8caa64678d00474bbe244ae12be7c1321afa5b7d1954c8cf1a008e9742b7e78865b654cec2347c4ec74ebae08895c257cf826435f4b6fa32a9919e34011d2e856fcf10cbf8a9f1b63a029d8e9d75c1112b84af9f04c86be96df46553233c68023a5df16ca99d846853e36c74053b1d3aeb822257095f3e0990d7d2dbe8caa647e22f99d50b0b9c2f99d50b0b9c2f99d50b0bfc678d00474ba15bf3c432db2a6761f8db7d1954c8cf1a008e9742b7e789f1cf826435f4b6fa32a9919e34011d2ef8f0444ae12be7c1321afa5b7d1954c892"
+    },
+    {
+      "asc": "f8ecd14460c0588c180b11830164ace2c400800000",
+      "tree": 6,
+      "n": 480,
+      "rate": 24000,
+      "slots": 15,
+      "bands": 32,
+      "channels": 6,
+      "qmf": {
+        "expected_offset": 4075200,
+        "expected_bands": 32
+      },
+      "name": "n480-c6-base-x1-crc1-tree6-fragmented-gain-retransmit",
+      "mode": "fragmented-gain",
+      "configs": [
+        "6716200400",
+        "6716200c00"
+      ],
+      "body": "7f10990d7d2dbe8caa64678d00474ba15bf3c432db2a67611a14f8db1d017e244ae12be7c1321afa5b7d1954c8cf1a008e9742b7e78865b654cec2347c7ccea8585ce17ccea8585ce17ccea8585ce240",
+      "phase": [
+        0,
+        1,
+        0
+      ],
+      "frames": [
+        {
+          "offset": 24457,
+          "bytes": 119,
+          "prefix_bits": 584
+        },
+        {
+          "offset": 24576,
+          "bytes": 246,
+          "prefix_bits": 541
+        },
+        {
+          "offset": 24822,
+          "bytes": 157,
+          "prefix_bits": 539
+        }
+      ],
+      "container_rate": 24000,
+      "container_frame_samples": 480,
+      "samples": 1440,
+      "pcm_offset": 0,
+      "control": "n480-c6-base-x1-crc1-tree6-fragmented-gain.mp4",
+      "output_channels": 8,
+      "inherited_prefix": "0567162004007f10990d7d2dbe8caa64678d00474ba15bf3c432db2a67611a14f8db1d017e244ae12be7c1",
+      "replacement": "0567162004007f10990d7d2dbe8caa64678d00474ba15bf3c432db2a67611a14f8db1d017e244ae12be7c1321afa5b7d1954c8cf1a008e9742b7e78865b654cec2347c7ccea8585ce17ccea8585ce17ccea8585ce240"
+    },
+    {
+      "asc": "f8ecd1c460c0588c180b11830164a6e2c400800000",
+      "tree": 6,
+      "n": 480,
+      "rate": 48000,
+      "slots": 15,
+      "bands": 64,
+      "channels": 6,
+      "qmf": {
+        "expected_offset": 4075200,
+        "expected_bands": 32
+      },
+      "name": "n480-c6-base-x2-crc1-tree6-fragmented-gain-retransmit",
+      "mode": "fragmented-gain",
+      "configs": [
+        "3716200400",
+        "3716200c00"
+      ],
+      "body": "7f10990d7d2dbe8caa64678d00474ba15bf3c432db2a67611a14f8db1d017e244ae12be7c1321afa5b7d1954c8cf1a008e9742b7e78865b654cec2347c7ccea8585ce17ccea8585ce17ccea8585ce240",
+      "phase": [
+        0,
+        1,
+        0
+      ],
+      "frames": [
+        {
+          "offset": 24979,
+          "bytes": 119,
+          "prefix_bits": 584
+        },
+        {
+          "offset": 25098,
+          "bytes": 246,
+          "prefix_bits": 541
+        },
+        {
+          "offset": 25344,
+          "bytes": 157,
+          "prefix_bits": 539
+        }
+      ],
+      "container_rate": 48000,
+      "container_frame_samples": 960,
+      "samples": 2880,
+      "pcm_offset": 0,
+      "control": "n480-c6-base-x2-crc1-tree6-fragmented-gain.mp4",
+      "output_channels": 8,
+      "inherited_prefix": "0537162004007f10990d7d2dbe8caa64678d00474ba15bf3c432db2a67611a14f8db1d017e244ae12be7c1",
+      "replacement": "0537162004007f10990d7d2dbe8caa64678d00474ba15bf3c432db2a67611a14f8db1d017e244ae12be7c1321afa5b7d1954c8cf1a008e9742b7e78865b654cec2347c7ccea8585ce17ccea8585ce17ccea8585ce240"
+    },
+    {
+      "asc": "f8ecc14460c0588c180b11830164acf2c400800000",
+      "tree": 6,
+      "n": 512,
+      "rate": 24000,
+      "slots": 16,
+      "bands": 32,
+      "channels": 6,
+      "qmf": {
+        "expected_offset": 9752640,
+        "expected_bands": 32
+      },
+      "name": "n512-c6-base-x1-crc1-tree6-fragmented-gain-retransmit",
+      "mode": "fragmented-gain",
+      "configs": [
+        "6796200400",
+        "6796200c00"
+      ],
+      "body": "7f10990d7d2dbe8caa64678d00474ba15bf3c432db2a67611a14f8db1d017e244ae12be7c1321afa5b7d1954c8cf1a008e9742b7e78865b654cec2347c7ccea8585ce17ccea8585ce17ccea8585ce240",
+      "phase": [
+        0,
+        1,
+        0
+      ],
+      "frames": [
+        {
+          "offset": 25501,
+          "bytes": 119,
+          "prefix_bits": 584
+        },
+        {
+          "offset": 25620,
+          "bytes": 246,
+          "prefix_bits": 541
+        },
+        {
+          "offset": 25866,
+          "bytes": 157,
+          "prefix_bits": 539
+        }
+      ],
+      "container_rate": 24000,
+      "container_frame_samples": 512,
+      "samples": 1536,
+      "pcm_offset": 0,
+      "control": "n512-c6-base-x1-crc1-tree6-fragmented-gain.mp4",
+      "output_channels": 8,
+      "inherited_prefix": "0567962004007f10990d7d2dbe8caa64678d00474ba15bf3c432db2a67611a14f8db1d017e244ae12be7c1",
+      "replacement": "0567962004007f10990d7d2dbe8caa64678d00474ba15bf3c432db2a67611a14f8db1d017e244ae12be7c1321afa5b7d1954c8cf1a008e9742b7e78865b654cec2347c7ccea8585ce17ccea8585ce17ccea8585ce240"
+    },
+    {
+      "asc": "f8ecc1c460c0588c180b11830164a6f2c400800000",
+      "tree": 6,
+      "n": 512,
+      "rate": 48000,
+      "slots": 16,
+      "bands": 64,
+      "channels": 6,
+      "qmf": {
+        "expected_offset": 9752640,
+        "expected_bands": 32
+      },
+      "name": "n512-c6-base-x2-crc1-tree6-fragmented-gain-retransmit",
+      "mode": "fragmented-gain",
+      "configs": [
+        "3796200400",
+        "3796200c00"
+      ],
+      "body": "7f10990d7d2dbe8caa64678d00474ba15bf3c432db2a67611a14f8db1d017e244ae12be7c1321afa5b7d1954c8cf1a008e9742b7e78865b654cec2347c7ccea8585ce17ccea8585ce17ccea8585ce240",
+      "phase": [
+        0,
+        1,
+        0
+      ],
+      "frames": [
+        {
+          "offset": 26023,
+          "bytes": 119,
+          "prefix_bits": 584
+        },
+        {
+          "offset": 26142,
+          "bytes": 246,
+          "prefix_bits": 541
+        },
+        {
+          "offset": 26388,
+          "bytes": 157,
+          "prefix_bits": 539
+        }
+      ],
+      "container_rate": 48000,
+      "container_frame_samples": 1024,
+      "samples": 3072,
+      "pcm_offset": 0,
+      "control": "n512-c6-base-x2-crc1-tree6-fragmented-gain.mp4",
+      "output_channels": 8,
+      "inherited_prefix": "0537962004007f10990d7d2dbe8caa64678d00474ba15bf3c432db2a67611a14f8db1d017e244ae12be7c1",
+      "replacement": "0537962004007f10990d7d2dbe8caa64678d00474ba15bf3c432db2a67611a14f8db1d017e244ae12be7c1321afa5b7d1954c8cf1a008e9742b7e78865b654cec2347c7ccea8585ce17ccea8585ce17ccea8585ce240"
+    }
+  ],
+  "scope": "Forty-five authored three-AU programmes. Whole retransmission preserves every byte of the inherited unfinished fragment; assembled message equals normal stop continuation. No claim for arbitrary prefix loss or concealment. Own AAC/LD-SBR and spatial values, no private/ISO media, external decoder, FFmpeg, process or network."
+}

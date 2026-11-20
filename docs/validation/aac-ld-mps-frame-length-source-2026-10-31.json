@@ -1,0 +1,104 @@
+{
+  "date": "2026-10-31",
+  "base_commit": "523cf1330860ee7c493c9b8c3abf2e359817bd7b",
+  "primary_reference": {
+    "archive_sha256": "b6b27e2f9af6ee8f950af8d7074afc467e66d93372328c0ec55282fff71d1f83",
+    "member": "mp4spatialdec/src/sac_bitdec.c",
+    "sha256": "d9a8655b4e5efa1329d629f88bde962b640efe9d1a5c22f24f84df56eadfa64e",
+    "routine": "SpatialDecDecodeHeader",
+    "finding": "timeSlots=bsFrameLength+1;frameLength=timeSlots*qmfBands;LD bank selected from samplingFreq. A frame partition is distinct from frequency/channel layout. This code reference is not a proof of complete normative in-band/profile coverage."
+  },
+  "counterfactual": {
+    "base_commit": "523cf1330860ee7c493c9b8c3abf2e359817bd7b",
+    "command": [
+      "cargo",
+      "--config",
+      "profile.dev.package.fvid-media.opt-level=2",
+      "test",
+      "--offline",
+      "--no-default-features",
+      "--features",
+      "player",
+      "--test",
+      "aac_ld_mps_frame_length",
+      "--",
+      "--nocapture",
+      "--test-threads=2",
+      "--skip",
+      "opaque_packet_windows",
+      "--skip",
+      "late_bad_frame",
+      "--skip",
+      "variable_spatial_frames",
+      "--skip",
+      "resetting_banks",
+      "--skip",
+      "reset_after_a_long",
+      "--skip",
+      "session_bad_batched"
+    ],
+    "status": 101,
+    "old_sources": {
+      "crates/fvid-media/src/owned_aac/aac_ld_mps_native.rs": "7ee47f4cf577cac7484f60c0464d278847c8107a8383e003de07dc43c1ee4b53",
+      "crates/fvid-media/src/owned_aac/aac_ld_mps_pcm.rs": "29ca1f014693927b7fad08de012fe73912bcbfcd07a412175369844440b19d2b",
+      "crates/fvid-media/src/owned_aac/aac_ld_mps_session.rs": "0bf427bc29743a03d11ade9f75956635313a62d109f9cc5dfb4d8b70ebf34e3f"
+    },
+    "restored_sources": {
+      "crates/fvid-media/src/owned_aac/aac_ld_mps_native.rs": "c2302cc14cfa29637cbf1b1415831afeb676443c12eecf0fc6cdc6e4f3f3ed7d",
+      "crates/fvid-media/src/owned_aac/aac_ld_mps_pcm.rs": "cea3111bcfd51276b4ef5fdf76367394413f6e3379d8b0545ff1b6975d095c6f",
+      "crates/fvid-media/src/owned_aac/aac_ld_mps_session.rs": "e365162951f5d42084401f246d529100775070714856e0086d9a4126d7d1bde6"
+    },
+    "restored": true,
+    "test_source_sha256": "58a6d9cc41d8ab7d593f505fad6ac3508629f35e1a8027c3e927968d6276d789",
+    "log_sha256": "dd80bac57052715c29014b39e70a04d9295a1aabffd0cab406c956a61e623752",
+    "qualification": "Final corpus and test source,only the two isolation/waveform tests selected.112 fixed-partition and30 bare controls pass;variable-frame acceptance fails at the precise old same-format SSC refusal. Six extra tests filtered. Original three production owners temporarily restored then restored to the current implementation."
+  },
+  "production_change": "PCM reconfigure accepts frame_slots with unchanged rate/tree,retaining analysis/synthesis and temporal matrix history. Session resolves the head Pending replacement length before readiness and source slicing,updates only that frame,and restores initial length on reset. Native AAC retains whole-core packet grouping and checks replacement lengths against actual selected output samples.",
+  "programmes": 336,
+  "fixed_partition_controls": 112,
+  "bare_controls": 30,
+  "domains": {
+    "PCM": 240,
+    "shared-QMF": 96
+  },
+  "trees": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7
+  ],
+  "banks": [
+    32,
+    64,
+    128
+  ],
+  "frame_slots": [
+    8,
+    15,
+    16,
+    30,
+    32
+  ],
+  "failure_movies": {
+    "malformed_late_trailing": 2,
+    "specific_partial_core_refusals": 2
+  },
+  "negative_control": {
+    "full_bank_reset_pcm_max_difference": 1.1949642e-05,
+    "minimum_required_observable_gap": 1e-06
+  },
+  "qualification": "Partition invariance uses unchanged independently decodable fixed-frame controls,not independent whole-codec PCM truth.30 saved analytical bare-input controls separately qualify ingress.336 MP4/MKV pairs,480/512 cores,all8 trees,early/late/batched headers,opaque stamps,checkpoints,reset and rollback. Ordinary tests read frozen data without FFmpeg/network/generation.",
+  "not_newly_qualified": [
+    "Frequency/channel-layout switches",
+    "Nonzero time alignment",
+    "Fractional-core native AAC spatial frames",
+    "Other quantization modes",
+    "All combined shaping/HRTF configurations",
+    "Complete ISO23003-2 Annex B/profile conformance",
+    "Physical output and realtime performance"
+  ]
+}

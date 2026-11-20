@@ -1,0 +1,152 @@
+{
+  "date": "2026-10-31",
+  "base_commit": "e0864135a83e8c01b2f8bf2e6743c50e83e672d2",
+  "goal_status": "active",
+  "change": "Qualification only;decoder implementation unchanged",
+  "production_changed": false,
+  "production_sources_identical_to_base": {
+    "crates/fvid-media/src/owned_aac/aac_ld_mps_assemble.rs": "8b6606cdd244b37810b9fe9216143b92821607005d744220102102fb08a09bc9",
+    "crates/fvid-media/src/owned_aac/aac_ld_mps_ttt_tree.rs": "174102c480c340207fdc993863f32875bc67b4dff60f783af94116fceaace599",
+    "crates/fvid-media/src/owned_aac/aac_ld_mps_pcm.rs": "29ca1f014693927b7fad08de012fe73912bcbfcd07a412175369844440b19d2b",
+    "crates/fvid-media/src/owned_aac/aac_ld_mps_qmf.rs": "f24e4a6fbf621a98cad5645ef3d852cff126c643788bbcadbc2b14bc5e7e2646",
+    "crates/fvid-media/src/owned_aac/aac_ld_mps_session.rs": "0bf427bc29743a03d11ade9f75956635313a62d109f9cc5dfb4d8b70ebf34e3f",
+    "crates/fvid-media/src/owned_aac/aac_ld_mps_frame.rs": "82199db27ef9178540d5fc0542f308734fef896eefa6c618ec9abef5f81d4ec9",
+    "crates/fvid-media/src/owned_aac/aac_ld_mps_parameters.rs": "863434f4835051e12fca178993b0e3ed7c1833c48655891054f86547332a926e",
+    "crates/fvid-media/src/owned_aac/aac_ld_mps_native.rs": "7ee47f4cf577cac7484f60c0464d278847c8107a8383e003de07dc43c1ee4b53",
+    "crates/fvid-media/src/owned_aac/aac_native_impl.rs": "7af4f1f19b8ad5ea399e4b0aff972ce9ea40991e525b4cb2238dc841df8f8dd6",
+    "crates/fvid-media/src/owned_aac/aac_eld_native_impl.rs": "ab54792d0c34a85cdf0ed075fb9adcacca73313a5151c199c929b2cae81cd662"
+  },
+  "prior_baseline": {
+    "report": "docs/validation/aac-ld-mps-arbdmx-ttt-tests-2026-10-31.json",
+    "sha256": "5efe0a1a699a2b3d00799e95222ab16badacdfe8cbc92b7e13f4baf35d941e79",
+    "counts": {
+      "passed": 1765,
+      "failed": 0,
+      "ignored": 27
+    },
+    "qualification": "Previously completed media/player/27-target gate;not rerun or added to new focused counts."
+  },
+  "new_focused_total": {
+    "passed": 9,
+    "failed": 0,
+    "ignored": 0
+  },
+  "gates": {
+    "gates": [
+      {
+        "gate": "integration",
+        "command": [
+          "cargo",
+          "--config",
+          "profile.dev.package.fvid-media.opt-level=2",
+          "test",
+          "--offline",
+          "--no-default-features",
+          "--features",
+          "player",
+          "--test",
+          "aac_ld_mps_arbdmx_switch",
+          "--",
+          "--nocapture",
+          "--test-threads=2"
+        ],
+        "status": 0,
+        "seconds": 158.70260275001056,
+        "log": "/tmp/fvid-ld-mps-arbdmx-switch-gate-integration.log",
+        "log_sha256": "57eeb71c196603eec27b342cc738be141a9336c12f03aa5594417694368b4ae5",
+        "counts": {
+          "passed": 8,
+          "failed": 0,
+          "ignored": 0
+        },
+        "tested_sources": {
+          "tests/aac_ld_mps_arbdmx_switch.rs": "602fcb40fa7bc83251bb7f80f8fdd04efacd6bce9bfdf490602ec24add120fb7",
+          "src/playback/audio/ep1_worker_tests.rs": "6aa0ada09b0cb90600317181024479cf6ef30b66e6bf0b9e52860600c8336c4c",
+          "tests/support/aac_ld_mps_short_pcm.rs": "d9d4ec9fcfcbd10706cdf035aea9c75ed7fe3b4f1be56ac452ccdb5fcc4dafc9",
+          "scripts/generate_aac_ld_mps_arbdmx_switch_fixtures.py": "0bc3e0ef69ea26e3a7339acd9e6ff244c165436fd928b67ba31afcb8008db1f6",
+          "scripts/generate_aac_ld_mps_arbdmx_switch_reference.py": "59cb1a14763318149513724ae3254b25e8bb644ef882a64632f3a3c794beb556",
+          "scripts/support/aac_ld_mps_arbdmx_switch_reference_probe.c": "7a14c1c49b7801bc0d696b1a44b04823b9d0d62d91d8be6fd774741354c9e5e1"
+        }
+      },
+      {
+        "gate": "worker",
+        "command": [
+          "cargo",
+          "--config",
+          "profile.dev.package.fvid-media.opt-level=2",
+          "test",
+          "--offline",
+          "--no-default-features",
+          "--features",
+          "player",
+          "--lib",
+          "arbitrary_downmix_gain_mode_switch_worker_keeps_live_state_and_navigation_stamps",
+          "--",
+          "--nocapture"
+        ],
+        "status": 0,
+        "seconds": 345.04091125002014,
+        "log": "/tmp/fvid-ld-mps-arbdmx-switch-gate-worker.log",
+        "log_sha256": "4b39b059bff90537c9a27bfa602c13387782e3f2f6af6719ced87a63e1253b01",
+        "counts": {
+          "passed": 1,
+          "failed": 0,
+          "ignored": 0
+        },
+        "tested_sources": {
+          "tests/aac_ld_mps_arbdmx_switch.rs": "602fcb40fa7bc83251bb7f80f8fdd04efacd6bce9bfdf490602ec24add120fb7",
+          "src/playback/audio/ep1_worker_tests.rs": "6aa0ada09b0cb90600317181024479cf6ef30b66e6bf0b9e52860600c8336c4c",
+          "tests/support/aac_ld_mps_short_pcm.rs": "d9d4ec9fcfcbd10706cdf035aea9c75ed7fe3b4f1be56ac452ccdb5fcc4dafc9",
+          "scripts/generate_aac_ld_mps_arbdmx_switch_fixtures.py": "0bc3e0ef69ea26e3a7339acd9e6ff244c165436fd928b67ba31afcb8008db1f6",
+          "scripts/generate_aac_ld_mps_arbdmx_switch_reference.py": "59cb1a14763318149513724ae3254b25e8bb644ef882a64632f3a3c794beb556",
+          "scripts/support/aac_ld_mps_arbdmx_switch_reference_probe.c": "7a14c1c49b7801bc0d696b1a44b04823b9d0d62d91d8be6fd774741354c9e5e1"
+        }
+      }
+    ]
+  },
+  "programmes": 330,
+  "dynamic_transports": 660,
+  "continuous_mp4_controls": 330,
+  "bare_input_controls": 10,
+  "late_bad_frame_movies": 8,
+  "source_packets": 12,
+  "pcm_values_compared": 14376960,
+  "maximum_compositional_pcm_error": 0,
+  "independent_matrix_endpoints": 5253120,
+  "unique_matrix_geometries": 132,
+  "maximum_matrix_error": 2.9541118067299976e-06,
+  "matrix_tolerance": 1e-05,
+  "incorrect_full_reset_negative_control_gap": 0.00030249619045931024,
+  "qualified": [
+    "both initial gain-mode states and repeated enable/disable at3/6/9",
+    "held dependent gains preserve previous values across identical headers",
+    "re-enabled gain contexts use default0dB",
+    "continuous absolute-coded controls avoid reconfiguration and hold syntax",
+    "time/frequency-varying gains with retained filters/matrix history",
+    "all six TTT modes through three configurations,quantization0",
+    "MP4/MKV exports,typed readers,timed/untimed API,seek/rewind/EOF",
+    "checkpoint and late valid-header/truncated-frame retry",
+    "published PCM prefix retained on error",
+    "AudioWorker live-history navigation and queue/source stamps",
+    "isolated byte-identical movie/input and C/Decimal generation"
+  ],
+  "evidence_sha256": {
+    "docs/validation/aac-ld-mps-arbdmx-switch-source-2026-10-31.json": "f01de465e609eeea02a91706b4e5dbeac744166d21c82e1a586f117b7bcee988",
+    "docs/validation/aac-ld-mps-arbdmx-switch-reference-2026-10-31.json": "cafab7ced89065ef60259601d7bb62b0ce46a13dbea13393eb24c4c21eb4e936",
+    "docs/validation/aac-ld-mps-arbdmx-switch-generation-2026-10-31.json": "db73ebd7b2ba9642630c53621d3b411b4f2f54f2c5b7624953209901a647d177"
+  },
+  "ordinary_tests_do_not_require": [
+    "network",
+    "FFmpeg",
+    "fixture generation",
+    "C reference compilation"
+  ],
+  "limitations": [
+    "component evidence,not independent whole-codec/profile conformance",
+    "512-sample ELD/LD-SBR PCM only;480/shared-QMF not newly qualified",
+    "energy-quantization or STP/GES combined transitions not newly qualified",
+    "trees5/6/7,HRTF,arbitrary-tree/downmix-residual interpretations remain open",
+    "full Annex B not obtained",
+    "physical output and realtime performance not qualified"
+  ]
+}

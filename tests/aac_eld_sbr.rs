@@ -176,11 +176,45 @@ fn eld_sbr_player_rewind_and_sample_seek_preserve_pcm_in_both_containers() {
             assert_eq!(play(reader.as_mut()), full, "{name} container {container}");
             reader.rewind();
             assert_eq!(play(reader.as_mut()), full, "{name} rewind {container}");
-            for target in [13, 512, 2500, 7, (full.len() / width) as i64] {
+            // Repeated targets and returning from EOF must rebuild the same
+            // LD-SBR history as an uninterrupted decode, including frame edges.
+            let mut targets = vec![
+                -1,
+                -c["container_frame_samples"].as_i64().unwrap(),
+                0,
+                13,
+                512,
+                2500,
+                7,
+                7,
+                c["container_frame_samples"].as_i64().unwrap() - 1,
+                c["container_frame_samples"].as_i64().unwrap(),
+                c["container_frame_samples"].as_i64().unwrap() + 1,
+                (full.len() / width) as i64,
+                (full.len() / width) as i64 * 2,
+                13,
+                0,
+            ];
+            if name.ends_with("-header-switch") {
+                let frame = c["container_frame_samples"].as_i64().unwrap();
+                // Header epochs change at frames 4 and 8. Seek in reverse
+                // order too: cached synthesis must not retain a later header.
+                for epoch in [8, 4, 8, 4] {
+                    targets.extend([epoch * frame - 1, epoch * frame, epoch * frame + 1]);
+                }
+            }
+            for target in targets {
                 let ticks = (i128::from(target) * i128::from(reader.timescale())
                     / i128::from(reader.sample_rate())) as i64;
                 let landed = reader.seek_to(ticks);
                 assert!(landed >= 0);
+                if target <= (full.len() / width) as i64 {
+                    assert_eq!(
+                        landed,
+                        ticks.max(0),
+                        "{name} seek landed at a different target"
+                    );
+                }
                 assert_eq!(
                     play(reader.as_mut()),
                     full[(((landed as u128 * u128::from(reader.sample_rate()))
@@ -207,6 +241,23 @@ fn eld_sbr_checkpoint_reset_and_malformed_frame_rollback() {
         let config = AudioSpecificConfig::parse(&asc).unwrap();
         assert_eq!(config.sbr_present, Some(true));
         assert_eq!(config.ps_present, Some(false));
+        if let Some(flags) = c["resilience"].as_u64() {
+            assert_eq!(
+                config.core.section_data_resilience,
+                flags & 4 != 0,
+                "{name}"
+            );
+            assert_eq!(
+                config.core.scalefactor_data_resilience,
+                flags & 2 != 0,
+                "{name}"
+            );
+            assert_eq!(
+                config.core.spectral_data_resilience,
+                flags & 1 != 0,
+                "{name}"
+            );
+        }
         assert_eq!(
             config
                 .eld_sbr
@@ -231,9 +282,24 @@ fn eld_sbr_checkpoint_reset_and_malformed_frame_rollback() {
                     "{name} truncated LD-SBR accepted"
                 );
             }
-            let actual = d.decode(raw).unwrap();
+            let pts = -37 + i as i64 * 83;
+            let duration = 31 + i as u64;
+            let actual = d.decode_timed(raw, pts, duration).unwrap().unwrap();
+            assert_eq!(actual.pts, pts, "{name} signed PTS");
+            assert_eq!(actual.duration, duration, "{name} packet duration");
+            assert_eq!(
+                actual.samples.len(),
+                c["container_frame_samples"].as_u64().unwrap() as usize
+                    * config.core.channels as usize
+            );
             d.restore(&checkpoint).unwrap();
-            assert_eq!(actual, d.decode(raw).unwrap(), "{name} checkpoint");
+            let replay = d.decode_timed(raw, pts, duration).unwrap().unwrap();
+            assert_eq!(actual.pts, replay.pts, "{name} checkpoint PTS");
+            assert_eq!(
+                actual.duration, replay.duration,
+                "{name} checkpoint duration"
+            );
+            assert_eq!(actual.samples, replay.samples, "{name} checkpoint PCM");
         }
     }
 }
@@ -282,4 +348,139 @@ fn eld_sbr_own_malformed_videos_fail_at_the_specific_ld_sbr_block() {
             "container: {error}"
         );
     }
+}
+
+#[test]
+fn ld_sbr_header_switch_acceptance_cases_remain_in_the_playback_matrix() {
+    let manifest: serde_json::Value =
+        serde_json::from_slice(&std::fs::read(root().join("manifest.json")).unwrap()).unwrap();
+    for n in [480, 512] {
+        let name = format!("n{n}-c2-header-switch");
+        let case = manifest["cases"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .find(|case| case["name"] == name)
+            .unwrap_or_else(|| panic!("missing independent header-switch acceptance: {name}"));
+        assert!(case["frames"].as_array().unwrap().len() > 8);
+        assert_eq!(case["container_frame_samples"], n * 2);
+        assert!(root().join(case["video"].as_str().unwrap()).is_file());
+        assert!(root().join(case["matroska"].as_str().unwrap()).is_file());
+    }
+}
+
+// Exercise navigation while synthesis histories are live, using the same
+// decoder object and the reader's production reset contract after every jump.
+#[cfg(feature = "player")]
+fn check_live_navigation(fixtures: PathBuf) {
+    use fvid::audio::{AudioDecode, AudioStream};
+    use std::io::Cursor;
+    fn prefix(
+        reader: &mut dyn AudioStream,
+        decoder: &mut Box<dyn AudioDecode>,
+        count: usize,
+    ) -> Vec<u8> {
+        let mut pcm = Vec::new();
+        for _ in 0..count {
+            let Some(packet) = reader.next_packet().unwrap() else {
+                break;
+            };
+            let stamp = reader.decoder_stamp(&packet);
+            if let Some(frame) = decoder
+                .decode_packet(&packet.data, stamp, packet.duration as u64)
+                .unwrap()
+            {
+                if let Some(output) = reader
+                    .present_decoded(frame.packet, frame.source_pts)
+                    .unwrap()
+                {
+                    pcm.extend(output.data);
+                }
+            }
+        }
+        pcm
+    }
+    let manifest: serde_json::Value =
+        serde_json::from_slice(&std::fs::read(fixtures.join("manifest.json")).unwrap()).unwrap();
+    for case in manifest["cases"].as_array().unwrap() {
+        let name = case["name"].as_str().unwrap();
+        let mp4 = std::fs::read(fixtures.join(case["video"].as_str().unwrap())).unwrap();
+        let mkv = std::fs::read(fixtures.join(case["matroska"].as_str().unwrap())).unwrap();
+        let mut full = Vec::new();
+        fvid::native_media::decode_mp4_aac_pcm(&mp4, &mut full).unwrap();
+        let width = case["channels"].as_u64().unwrap() as usize * 4;
+        let frame = case["container_frame_samples"].as_i64().unwrap();
+        let mut readers: Vec<Box<dyn AudioStream>> = vec![
+            Box::new(
+                fvid::playback_mp4_audio::Mp4AudioReader::open(
+                    Cursor::new(mp4),
+                    Default::default(),
+                )
+                .unwrap(),
+            ),
+            Box::new(
+                fvid::playback_webm_audio::WebmAudioReader::open(
+                    Cursor::new(mkv),
+                    Default::default(),
+                )
+                .unwrap(),
+            ),
+        ];
+        for (container, reader) in readers.iter_mut().enumerate() {
+            let mut decoder = reader.make_decoder().unwrap();
+            let initial = prefix(reader.as_mut(), &mut decoder, 6);
+            assert!(!initial.is_empty(), "{name} initial live history");
+            assert_eq!(initial, full[..initial.len()], "{name} initial {container}");
+            // Cross both header epochs in both directions, interrupting each
+            // resumed playback after a bounded prefix. Include repeated and fractional-AU targets.
+            for target in [
+                8 * frame + 1,
+                4 * frame - 1,
+                8 * frame - 1,
+                4 * frame + 1,
+                13,
+                13,
+                0,
+            ] {
+                let ticks = (i128::from(target) * i128::from(reader.timescale())
+                    / i128::from(reader.sample_rate())) as i64;
+                let landed = reader.seek_to(ticks);
+                assert_eq!(landed, ticks, "{name} live seek position {container}");
+                reader.reset_decoder(&mut decoder).unwrap();
+                let actual = prefix(reader.as_mut(), &mut decoder, 10);
+                assert!(
+                    !actual.is_empty(),
+                    "{name} live seek emitted no PCM {container} target {target}"
+                );
+                let begin = (u128::try_from(landed).unwrap() * u128::from(reader.sample_rate()))
+                    .div_ceil(u128::from(reader.timescale())) as usize
+                    * width;
+                assert_eq!(
+                    actual,
+                    full[begin..begin + actual.len()],
+                    "{name} live seek PCM {container} target {target}"
+                );
+            }
+            reader.rewind();
+            reader.reset_decoder(&mut decoder).unwrap();
+            let actual = prefix(reader.as_mut(), &mut decoder, 4);
+            assert_eq!(
+                actual,
+                full[..actual.len()],
+                "{name} live rewind {container}"
+            );
+        }
+    }
+}
+
+#[cfg(feature = "player")]
+#[test]
+fn ld_sbr_mid_playback_navigation_resets_live_history_in_both_containers() {
+    check_live_navigation(root());
+}
+
+#[cfg(feature = "player")]
+#[test]
+fn ep3_ld_sbr_mid_playback_navigation_resets_live_history_in_both_containers() {
+    check_live_navigation(root().with_file_name("aac-eld-esc-sbr"));
 }

@@ -1,0 +1,123 @@
+{
+  "date": "2026-11-01",
+  "base_commit": "8429dc0934",
+  "scope": "Native full-band arbitrary-tree integration, dense output permutations. Focused gate, not whole LD-MPS/current-tree/codec parity",
+  "command": "CARGO_TARGET_DIR=/Users/themoretheless/.codex/worktrees/aac-eld-extension-gaps/target CARGO_BUILD_JOBS=2 cargo --config profile.dev.package.fvid-media.opt-level=2 test --offline --no-default-features --features player --test aac_ld_mps_arbitrary_tree --test aac_ld_mps_arbitrary_playback --test aac_ld_mps_config --test aac_ld_mps_assemble --test aac_ld_mps_pcm --test aac_ld_mps_qmf --test aac_ld_mps_qmf128 --test aac_ld_mps_hrtf_all_grids --test aac_ld_mps_empty_ttt -- --nocapture",
+  "exit_code": 0,
+  "log": "/tmp/fvid-arbitrary-integration-gate.log",
+  "log_sha256": "a9cab799e310591f72504f5d8bb23daa526df22f0a41c2b77d76eb1532739cdb",
+  "targets": [
+    {
+      "name": "aac_ld_mps_arbitrary_playback",
+      "passed": 3,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "name": "aac_ld_mps_arbitrary_tree",
+      "passed": 6,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "name": "aac_ld_mps_assemble",
+      "passed": 3,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "name": "aac_ld_mps_config",
+      "passed": 4,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "name": "aac_ld_mps_empty_ttt",
+      "passed": 4,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "name": "aac_ld_mps_hrtf_all_grids",
+      "passed": 6,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "name": "aac_ld_mps_pcm",
+      "passed": 2,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "name": "aac_ld_mps_qmf",
+      "passed": 2,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "name": "aac_ld_mps_qmf128",
+      "passed": 2,
+      "failed": 0,
+      "ignored": 0
+    }
+  ],
+  "integration_passed": 32,
+  "state_unit": {
+    "command": "CARGO_TARGET_DIR=/Users/themoretheless/.codex/worktrees/aac-eld-extension-gaps/target CARGO_BUILD_JOBS=2 cargo --config profile.dev.package.fvid-media.opt-level=2 test -p fvid-media --offline --no-default-features --lib arbitrary_history_survives_same_layout_headers_and_layout_errors_are_atomic -- --nocapture",
+    "passed": 1,
+    "failed": 0,
+    "ignored": 0,
+    "filtered_out": 591,
+    "exit_code": 0,
+    "log": "/tmp/fvid-arbitrary-integrate-unit-final.log",
+    "log_sha256": "5528f2fdfd2e952efea4d4035507d6da9823a2682794d084ac07d1c679c26411"
+  },
+  "playback_programmes": 49,
+  "new_sweep_programmes": 48,
+  "containers": [
+    "MP4",
+    "Matroska"
+  ],
+  "decorrelation_modes": 2,
+  "banks": [
+    32,
+    64,
+    128
+  ],
+  "domains": [
+    "plain32",
+    "plain64",
+    "shared32",
+    "shared64",
+    "sbr-pcm64",
+    "sbr-pcm128"
+  ],
+  "base_trees": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7
+  ],
+  "pcm_oracle": "Independent saved authored core PCM/QMF plus owned base spatial DSP and independent analytic extra split; not whole foreign decoder",
+  "pcm_tolerance": 1e-06,
+  "physical_device_runs": 12,
+  "physical_device_drain_phases": 48,
+  "authored_generation": {
+    "files": 159,
+    "deterministic": true,
+    "subprocess_and_socket_creation_forbidden": true
+  },
+  "open": [
+    "partial-band/LFE arbitrary splits",
+    "sparse output positions",
+    "arbitrary layout/grid changes",
+    "nonzero EBQ with active arbitrary trees",
+    "general active unequal-grid HRTF",
+    "arbitrary inherited-fragment prefix loss"
+  ]
+}

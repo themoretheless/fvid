@@ -1,0 +1,28 @@
+{
+  "scope": "Source snapshot for native full-complex STP,32/64 QMF bins. All eight tree mappings, plain/coupled AAC-ELD integration.",
+  "sha256": {
+    "crates/fvid-media/src/owned_aac/aac_ld_mps_stp.rs": "7fb346671c523a82706c0c359d37098783dce29f632f0a542897e0f5df780b40",
+    "crates/fvid-media/src/owned_aac/aac_ld_mps_stp_energy.rs": "e286cf8a782dae5e7636ee68764d7a8233d1ff04d466cefda57463efd156f7a0",
+    "crates/fvid-media/src/owned_aac/aac_ld_mps_qmf.rs": "266085b2c8d68e24fca2ef696053155735a25f04393c7469fc68f274296344de",
+    "crates/fvid-media/src/owned_aac/aac_ld_mps_pcm.rs": "fdf03c29d669f07351a331631a04a745a71d1496c660d6884d4b07872b4420d0",
+    "crates/fvid-media/src/owned_aac/mod.rs": "28153d78237f0fca53cd4b53712d7556e7928d9f2bf33081c33a8f7128e1b0a9",
+    "tests/aac_ld_mps_stp.rs": "4b662c89ced55bcdbfad7d27bc6901c09c710efe4ffa7217430a40b841e93d82",
+    "tests/aac_ld_mps_pcm.rs": "af09f491e795e57e4ce3e17f827f8d52bd6e40aba65ccdde638aef3d44f4959f",
+    "scripts/generate_aac_ld_mps_stp_fixtures.py": "f11549a94f841dc94000b962b348a540c7e1a3da76dd00189d996e575b6ed5d3",
+    "scripts/generate_aac_ld_mps_stp_reference.py": "d8b34b91e08b79dede69d358508b3cecb1542bfcb986f7c8a95ec7e40cc9ff93"
+  },
+  "baseline": {
+    "parent": "29fffc3132",
+    "condition": "New acceptance movie with the new standalone component still unconnected to QMF/PCM.",
+    "movie": "plain-tree0-bands23-on",
+    "error": "LD-MPS active STP temporal PCM shaping is not yet implemented",
+    "log": "/tmp/fvid-stp-baseline.log",
+    "log_sha256": "2c7228849a823d8f3babf17d9841ae56fe6a7ef963bd1b9382f2e7967714b2d0"
+  },
+  "linkage": {
+    "binary": "STP integration test, native player features",
+    "libav_or_libsw": "None found by otool -L",
+    "log": "/tmp/fvid-stp-linkage.log"
+  },
+  "reference_boundary": "Explicitly adapted ISO component oracle: skip zero low wet bins in final mix, initialize absent tree7 indices, omit unpopulated tree5/6 dry groups. No independent full Annex B conformance claim."
+}

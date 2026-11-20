@@ -1,0 +1,30 @@
+{
+  "scope": "Byte-exact offline independent Decimal/Fraction fixture regeneration; process/socket creation denied by Python audit hook.",
+  "output": {
+    "file": "manifest.json",
+    "bytes": 6905580,
+    "sha256": "d3118200b57c12b742a41ec5c2648c32e3f5c022b95697260480426268d9833f"
+  },
+  "inputs": [
+    {
+      "file": "scripts/generate_aac_ld_mps_prepare_fixtures.py",
+      "sha256": "f23ebfa76dfb2528d60c2ad8bd101b1cb85c9ff50a5e3b14ae7808a9cd501d66"
+    },
+    {
+      "file": "tests/fixtures/playback-errors/aac-ld-mps-prepare/facts.json",
+      "sha256": "e5a42f5d508ec99004f8f5a495d6ffc7e7e2b8052d793dc5d49a14ed0332f171"
+    },
+    {
+      "file": "tests/fixtures/playback-errors/aac-ld-mps-frame/manifest.json",
+      "sha256": "5680d01b277bca79844f0ffc03e6341ac4738268a1c7e168880adc074d471a63"
+    },
+    {
+      "file": "tests/fixtures/playback-errors/aac-ld-mps-frame/configs.bin",
+      "sha256": "f21e5c6f7c6c780467a81f4e2809dc993534fb1e8ec417758f4637613e039f62"
+    },
+    {
+      "file": "tests/fixtures/playback-errors/aac-ld-mps-frame/packets.bin",
+      "sha256": "adf5aab59c54a2a6f781b9ada841f9b2aacfec75aeac0f81553739cb0cbd034d"
+    }
+  ]
+}

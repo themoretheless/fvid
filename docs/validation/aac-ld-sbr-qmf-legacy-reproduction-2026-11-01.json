@@ -1,0 +1,18 @@
+{
+  "complete": true,
+  "scope": "Exact original FDK output reproduced by explicit auto and Low Power;not an alignment/quality verdict",
+  "cases": [
+    {
+      "name": "er_eld_sbr_twi_1_24.mp4",
+      "legacy_fdk_pcm_sha256": "01387241567d27c177ceb3acbdcf3885b41a6b8ac343c861f0c3e112a8d5547c",
+      "current_auto_pcm_sha256": "01387241567d27c177ceb3acbdcf3885b41a6b8ac343c861f0c3e112a8d5547c",
+      "current_lowpower_pcm_sha256": "01387241567d27c177ceb3acbdcf3885b41a6b8ac343c861f0c3e112a8d5547c"
+    },
+    {
+      "name": "er_eld_sbr_twi_1_48.mp4",
+      "legacy_fdk_pcm_sha256": "7de68a9a284c6d86c0449fd76a1cc2f35b2e63dc2e889b865a1d05c6b66052eb",
+      "current_auto_pcm_sha256": "7de68a9a284c6d86c0449fd76a1cc2f35b2e63dc2e889b865a1d05c6b66052eb",
+      "current_lowpower_pcm_sha256": "7de68a9a284c6d86c0449fd76a1cc2f35b2e63dc2e889b865a1d05c6b66052eb"
+    }
+  ]
+}

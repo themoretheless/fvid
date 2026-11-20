@@ -232,7 +232,7 @@ mod tests {
         let extra = reader.extra_data();
         assert_eq!(&extra[..30], &stream.packets[0].data[..]);
         assert_eq!(&extra[30..], &stream.packets[2].data[..]);
-        assert_eq!(reader.audio_tracks()[0].label(), "2 ch 44100 Hz");
+        assert_eq!(reader.audio_tracks()[0].label(), "Ogg tone · 2 ch 44100 Hz");
     }
 
     #[test]

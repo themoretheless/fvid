@@ -1,0 +1,1191 @@
+{
+  "cases": [
+    {
+      "name": "ps-aot17-960-1024-960-ordinary-ep1-ordinary-indexed",
+      "video": "ps-aot17-960-1024-960-ordinary-ep1-ordinary-indexed.mp4",
+      "mode": "indexed",
+      "control": "ps-aot17-960-1024-960.mp4",
+      "local_control": false,
+      "reverse": false,
+      "channels": 2,
+      "streams": 4,
+      "edges": [
+        11520,
+        23808
+      ],
+      "frames": 18,
+      "signal": "explicit"
+    },
+    {
+      "name": "ps-aot17-960-1024-960-ordinary-ep1-ordinary-fragmented",
+      "video": "ps-aot17-960-1024-960-ordinary-ep1-ordinary-fragmented.mp4",
+      "mode": "fragmented",
+      "control": "ps-aot17-960-1024-960.mp4",
+      "local_control": false,
+      "reverse": false,
+      "channels": 2,
+      "streams": 4,
+      "edges": [
+        11520,
+        23808
+      ],
+      "frames": 18,
+      "signal": "explicit"
+    },
+    {
+      "name": "ps-aot17-960-1024-960-ordinary-ep1-ordinary-hybrid",
+      "video": "ps-aot17-960-1024-960-ordinary-ep1-ordinary-hybrid.mp4",
+      "mode": "hybrid",
+      "control": "ps-aot17-960-1024-960.mp4",
+      "local_control": false,
+      "reverse": false,
+      "channels": 2,
+      "streams": 4,
+      "edges": [
+        11520,
+        23808
+      ],
+      "frames": 18,
+      "signal": "explicit"
+    },
+    {
+      "name": "ps-aot17-960-1024-960-ordinary-ep1-ordinary-sparse-aux",
+      "video": "ps-aot17-960-1024-960-ordinary-ep1-ordinary-sparse-aux.mp4",
+      "mode": "sparse-aux",
+      "control": "ps-aot17-960-1024-960.mp4",
+      "local_control": false,
+      "reverse": false,
+      "channels": 2,
+      "streams": 4,
+      "edges": [
+        11520,
+        23808
+      ],
+      "frames": 18,
+      "signal": "explicit"
+    },
+    {
+      "name": "ps-aot17-960-1024-960-ep1-ordinary-ep1-indexed",
+      "video": "ps-aot17-960-1024-960-ep1-ordinary-ep1-indexed.mp4",
+      "mode": "indexed",
+      "control": "ps-aot17-960-1024-960.mp4",
+      "local_control": false,
+      "reverse": true,
+      "channels": 2,
+      "streams": 4,
+      "edges": [
+        11520,
+        23808
+      ],
+      "frames": 18,
+      "signal": "explicit"
+    },
+    {
+      "name": "ps-aot17-960-1024-960-ep1-ordinary-ep1-fragmented",
+      "video": "ps-aot17-960-1024-960-ep1-ordinary-ep1-fragmented.mp4",
+      "mode": "fragmented",
+      "control": "ps-aot17-960-1024-960.mp4",
+      "local_control": false,
+      "reverse": true,
+      "channels": 2,
+      "streams": 4,
+      "edges": [
+        11520,
+        23808
+      ],
+      "frames": 18,
+      "signal": "explicit"
+    },
+    {
+      "name": "ps-aot17-960-1024-960-ep1-ordinary-ep1-hybrid",
+      "video": "ps-aot17-960-1024-960-ep1-ordinary-ep1-hybrid.mp4",
+      "mode": "hybrid",
+      "control": "ps-aot17-960-1024-960.mp4",
+      "local_control": false,
+      "reverse": true,
+      "channels": 2,
+      "streams": 4,
+      "edges": [
+        11520,
+        23808
+      ],
+      "frames": 18,
+      "signal": "explicit"
+    },
+    {
+      "name": "ps-aot17-960-1024-960-ep1-ordinary-ep1-sparse-aux",
+      "video": "ps-aot17-960-1024-960-ep1-ordinary-ep1-sparse-aux.mp4",
+      "mode": "sparse-aux",
+      "control": "ps-aot17-960-1024-960.mp4",
+      "local_control": false,
+      "reverse": true,
+      "channels": 2,
+      "streams": 4,
+      "edges": [
+        11520,
+        23808
+      ],
+      "frames": 18,
+      "signal": "explicit"
+    },
+    {
+      "name": "ps-aot17-960-1024-960-sync-ordinary-ep1-ordinary-indexed",
+      "video": "ps-aot17-960-1024-960-sync-ordinary-ep1-ordinary-indexed.mp4",
+      "mode": "indexed",
+      "control": "ps-aot17-960-1024-960-sync-all-ep1.mp4",
+      "local_control": true,
+      "reverse": false,
+      "channels": 2,
+      "streams": 4,
+      "edges": [
+        11520,
+        23808
+      ],
+      "frames": 18,
+      "signal": "sync"
+    },
+    {
+      "name": "ps-aot17-960-1024-960-sync-ordinary-ep1-ordinary-fragmented",
+      "video": "ps-aot17-960-1024-960-sync-ordinary-ep1-ordinary-fragmented.mp4",
+      "mode": "fragmented",
+      "control": "ps-aot17-960-1024-960-sync-all-ep1.mp4",
+      "local_control": true,
+      "reverse": false,
+      "channels": 2,
+      "streams": 4,
+      "edges": [
+        11520,
+        23808
+      ],
+      "frames": 18,
+      "signal": "sync"
+    },
+    {
+      "name": "ps-aot17-960-1024-960-sync-ordinary-ep1-ordinary-hybrid",
+      "video": "ps-aot17-960-1024-960-sync-ordinary-ep1-ordinary-hybrid.mp4",
+      "mode": "hybrid",
+      "control": "ps-aot17-960-1024-960-sync-all-ep1.mp4",
+      "local_control": true,
+      "reverse": false,
+      "channels": 2,
+      "streams": 4,
+      "edges": [
+        11520,
+        23808
+      ],
+      "frames": 18,
+      "signal": "sync"
+    },
+    {
+      "name": "ps-aot17-960-1024-960-sync-ordinary-ep1-ordinary-sparse-aux",
+      "video": "ps-aot17-960-1024-960-sync-ordinary-ep1-ordinary-sparse-aux.mp4",
+      "mode": "sparse-aux",
+      "control": "ps-aot17-960-1024-960-sync-all-ep1.mp4",
+      "local_control": true,
+      "reverse": false,
+      "channels": 2,
+      "streams": 4,
+      "edges": [
+        11520,
+        23808
+      ],
+      "frames": 18,
+      "signal": "sync"
+    },
+    {
+      "name": "ps-aot17-960-1024-960-sync-ep1-ordinary-ep1-indexed",
+      "video": "ps-aot17-960-1024-960-sync-ep1-ordinary-ep1-indexed.mp4",
+      "mode": "indexed",
+      "control": "ps-aot17-960-1024-960-sync-all-ep1.mp4",
+      "local_control": true,
+      "reverse": true,
+      "channels": 2,
+      "streams": 4,
+      "edges": [
+        11520,
+        23808
+      ],
+      "frames": 18,
+      "signal": "sync"
+    },
+    {
+      "name": "ps-aot17-960-1024-960-sync-ep1-ordinary-ep1-fragmented",
+      "video": "ps-aot17-960-1024-960-sync-ep1-ordinary-ep1-fragmented.mp4",
+      "mode": "fragmented",
+      "control": "ps-aot17-960-1024-960-sync-all-ep1.mp4",
+      "local_control": true,
+      "reverse": true,
+      "channels": 2,
+      "streams": 4,
+      "edges": [
+        11520,
+        23808
+      ],
+      "frames": 18,
+      "signal": "sync"
+    },
+    {
+      "name": "ps-aot17-960-1024-960-sync-ep1-ordinary-ep1-hybrid",
+      "video": "ps-aot17-960-1024-960-sync-ep1-ordinary-ep1-hybrid.mp4",
+      "mode": "hybrid",
+      "control": "ps-aot17-960-1024-960-sync-all-ep1.mp4",
+      "local_control": true,
+      "reverse": true,
+      "channels": 2,
+      "streams": 4,
+      "edges": [
+        11520,
+        23808
+      ],
+      "frames": 18,
+      "signal": "sync"
+    },
+    {
+      "name": "ps-aot17-960-1024-960-sync-ep1-ordinary-ep1-sparse-aux",
+      "video": "ps-aot17-960-1024-960-sync-ep1-ordinary-ep1-sparse-aux.mp4",
+      "mode": "sparse-aux",
+      "control": "ps-aot17-960-1024-960-sync-all-ep1.mp4",
+      "local_control": true,
+      "reverse": true,
+      "channels": 2,
+      "streams": 4,
+      "edges": [
+        11520,
+        23808
+      ],
+      "frames": 18,
+      "signal": "sync"
+    },
+    {
+      "name": "ps-aot17-960-1024-960-implicit-ordinary-ep1-ordinary-indexed",
+      "video": "ps-aot17-960-1024-960-implicit-ordinary-ep1-ordinary-indexed.mp4",
+      "mode": "indexed",
+      "control": "ps-aot17-960-1024-960-implicit-all-ep1.mp4",
+      "local_control": true,
+      "reverse": false,
+      "channels": 2,
+      "streams": 4,
+      "edges": [
+        11520,
+        23808
+      ],
+      "frames": 18,
+      "signal": "implicit"
+    },
+    {
+      "name": "ps-aot17-960-1024-960-implicit-ordinary-ep1-ordinary-fragmented",
+      "video": "ps-aot17-960-1024-960-implicit-ordinary-ep1-ordinary-fragmented.mp4",
+      "mode": "fragmented",
+      "control": "ps-aot17-960-1024-960-implicit-all-ep1.mp4",
+      "local_control": true,
+      "reverse": false,
+      "channels": 2,
+      "streams": 4,
+      "edges": [
+        11520,
+        23808
+      ],
+      "frames": 18,
+      "signal": "implicit"
+    },
+    {
+      "name": "ps-aot17-960-1024-960-implicit-ordinary-ep1-ordinary-hybrid",
+      "video": "ps-aot17-960-1024-960-implicit-ordinary-ep1-ordinary-hybrid.mp4",
+      "mode": "hybrid",
+      "control": "ps-aot17-960-1024-960-implicit-all-ep1.mp4",
+      "local_control": true,
+      "reverse": false,
+      "channels": 2,
+      "streams": 4,
+      "edges": [
+        11520,
+        23808
+      ],
+      "frames": 18,
+      "signal": "implicit"
+    },
+    {
+      "name": "ps-aot17-960-1024-960-implicit-ordinary-ep1-ordinary-sparse-aux",
+      "video": "ps-aot17-960-1024-960-implicit-ordinary-ep1-ordinary-sparse-aux.mp4",
+      "mode": "sparse-aux",
+      "control": "ps-aot17-960-1024-960-implicit-all-ep1.mp4",
+      "local_control": true,
+      "reverse": false,
+      "channels": 2,
+      "streams": 4,
+      "edges": [
+        11520,
+        23808
+      ],
+      "frames": 18,
+      "signal": "implicit"
+    },
+    {
+      "name": "ps-aot17-960-1024-960-implicit-ep1-ordinary-ep1-indexed",
+      "video": "ps-aot17-960-1024-960-implicit-ep1-ordinary-ep1-indexed.mp4",
+      "mode": "indexed",
+      "control": "ps-aot17-960-1024-960-implicit-all-ep1.mp4",
+      "local_control": true,
+      "reverse": true,
+      "channels": 2,
+      "streams": 4,
+      "edges": [
+        11520,
+        23808
+      ],
+      "frames": 18,
+      "signal": "implicit"
+    },
+    {
+      "name": "ps-aot17-960-1024-960-implicit-ep1-ordinary-ep1-fragmented",
+      "video": "ps-aot17-960-1024-960-implicit-ep1-ordinary-ep1-fragmented.mp4",
+      "mode": "fragmented",
+      "control": "ps-aot17-960-1024-960-implicit-all-ep1.mp4",
+      "local_control": true,
+      "reverse": true,
+      "channels": 2,
+      "streams": 4,
+      "edges": [
+        11520,
+        23808
+      ],
+      "frames": 18,
+      "signal": "implicit"
+    },
+    {
+      "name": "ps-aot17-960-1024-960-implicit-ep1-ordinary-ep1-hybrid",
+      "video": "ps-aot17-960-1024-960-implicit-ep1-ordinary-ep1-hybrid.mp4",
+      "mode": "hybrid",
+      "control": "ps-aot17-960-1024-960-implicit-all-ep1.mp4",
+      "local_control": true,
+      "reverse": true,
+      "channels": 2,
+      "streams": 4,
+      "edges": [
+        11520,
+        23808
+      ],
+      "frames": 18,
+      "signal": "implicit"
+    },
+    {
+      "name": "ps-aot17-960-1024-960-implicit-ep1-ordinary-ep1-sparse-aux",
+      "video": "ps-aot17-960-1024-960-implicit-ep1-ordinary-ep1-sparse-aux.mp4",
+      "mode": "sparse-aux",
+      "control": "ps-aot17-960-1024-960-implicit-all-ep1.mp4",
+      "local_control": true,
+      "reverse": true,
+      "channels": 2,
+      "streams": 4,
+      "edges": [
+        11520,
+        23808
+      ],
+      "frames": 18,
+      "signal": "implicit"
+    },
+    {
+      "name": "ps-aot19-960-1024-960-ordinary-ep1-ordinary-indexed",
+      "video": "ps-aot19-960-1024-960-ordinary-ep1-ordinary-indexed.mp4",
+      "mode": "indexed",
+      "control": "ps-aot19-960-1024-960.mp4",
+      "local_control": false,
+      "reverse": false,
+      "channels": 2,
+      "streams": 4,
+      "edges": [
+        11520,
+        23808
+      ],
+      "frames": 18,
+      "signal": "explicit"
+    },
+    {
+      "name": "ps-aot19-960-1024-960-ordinary-ep1-ordinary-fragmented",
+      "video": "ps-aot19-960-1024-960-ordinary-ep1-ordinary-fragmented.mp4",
+      "mode": "fragmented",
+      "control": "ps-aot19-960-1024-960.mp4",
+      "local_control": false,
+      "reverse": false,
+      "channels": 2,
+      "streams": 4,
+      "edges": [
+        11520,
+        23808
+      ],
+      "frames": 18,
+      "signal": "explicit"
+    },
+    {
+      "name": "ps-aot19-960-1024-960-ordinary-ep1-ordinary-hybrid",
+      "video": "ps-aot19-960-1024-960-ordinary-ep1-ordinary-hybrid.mp4",
+      "mode": "hybrid",
+      "control": "ps-aot19-960-1024-960.mp4",
+      "local_control": false,
+      "reverse": false,
+      "channels": 2,
+      "streams": 4,
+      "edges": [
+        11520,
+        23808
+      ],
+      "frames": 18,
+      "signal": "explicit"
+    },
+    {
+      "name": "ps-aot19-960-1024-960-ordinary-ep1-ordinary-sparse-aux",
+      "video": "ps-aot19-960-1024-960-ordinary-ep1-ordinary-sparse-aux.mp4",
+      "mode": "sparse-aux",
+      "control": "ps-aot19-960-1024-960.mp4",
+      "local_control": false,
+      "reverse": false,
+      "channels": 2,
+      "streams": 4,
+      "edges": [
+        11520,
+        23808
+      ],
+      "frames": 18,
+      "signal": "explicit"
+    },
+    {
+      "name": "ps-aot19-960-1024-960-ep1-ordinary-ep1-indexed",
+      "video": "ps-aot19-960-1024-960-ep1-ordinary-ep1-indexed.mp4",
+      "mode": "indexed",
+      "control": "ps-aot19-960-1024-960.mp4",
+      "local_control": false,
+      "reverse": true,
+      "channels": 2,
+      "streams": 4,
+      "edges": [
+        11520,
+        23808
+      ],
+      "frames": 18,
+      "signal": "explicit"
+    },
+    {
+      "name": "ps-aot19-960-1024-960-ep1-ordinary-ep1-fragmented",
+      "video": "ps-aot19-960-1024-960-ep1-ordinary-ep1-fragmented.mp4",
+      "mode": "fragmented",
+      "control": "ps-aot19-960-1024-960.mp4",
+      "local_control": false,
+      "reverse": true,
+      "channels": 2,
+      "streams": 4,
+      "edges": [
+        11520,
+        23808
+      ],
+      "frames": 18,
+      "signal": "explicit"
+    },
+    {
+      "name": "ps-aot19-960-1024-960-ep1-ordinary-ep1-hybrid",
+      "video": "ps-aot19-960-1024-960-ep1-ordinary-ep1-hybrid.mp4",
+      "mode": "hybrid",
+      "control": "ps-aot19-960-1024-960.mp4",
+      "local_control": false,
+      "reverse": true,
+      "channels": 2,
+      "streams": 4,
+      "edges": [
+        11520,
+        23808
+      ],
+      "frames": 18,
+      "signal": "explicit"
+    },
+    {
+      "name": "ps-aot19-960-1024-960-ep1-ordinary-ep1-sparse-aux",
+      "video": "ps-aot19-960-1024-960-ep1-ordinary-ep1-sparse-aux.mp4",
+      "mode": "sparse-aux",
+      "control": "ps-aot19-960-1024-960.mp4",
+      "local_control": false,
+      "reverse": true,
+      "channels": 2,
+      "streams": 4,
+      "edges": [
+        11520,
+        23808
+      ],
+      "frames": 18,
+      "signal": "explicit"
+    },
+    {
+      "name": "ps-aot19-960-1024-960-sync-ordinary-ep1-ordinary-indexed",
+      "video": "ps-aot19-960-1024-960-sync-ordinary-ep1-ordinary-indexed.mp4",
+      "mode": "indexed",
+      "control": "ps-aot19-960-1024-960-sync-all-ep1.mp4",
+      "local_control": true,
+      "reverse": false,
+      "channels": 2,
+      "streams": 4,
+      "edges": [
+        11520,
+        23808
+      ],
+      "frames": 18,
+      "signal": "sync"
+    },
+    {
+      "name": "ps-aot19-960-1024-960-sync-ordinary-ep1-ordinary-fragmented",
+      "video": "ps-aot19-960-1024-960-sync-ordinary-ep1-ordinary-fragmented.mp4",
+      "mode": "fragmented",
+      "control": "ps-aot19-960-1024-960-sync-all-ep1.mp4",
+      "local_control": true,
+      "reverse": false,
+      "channels": 2,
+      "streams": 4,
+      "edges": [
+        11520,
+        23808
+      ],
+      "frames": 18,
+      "signal": "sync"
+    },
+    {
+      "name": "ps-aot19-960-1024-960-sync-ordinary-ep1-ordinary-hybrid",
+      "video": "ps-aot19-960-1024-960-sync-ordinary-ep1-ordinary-hybrid.mp4",
+      "mode": "hybrid",
+      "control": "ps-aot19-960-1024-960-sync-all-ep1.mp4",
+      "local_control": true,
+      "reverse": false,
+      "channels": 2,
+      "streams": 4,
+      "edges": [
+        11520,
+        23808
+      ],
+      "frames": 18,
+      "signal": "sync"
+    },
+    {
+      "name": "ps-aot19-960-1024-960-sync-ordinary-ep1-ordinary-sparse-aux",
+      "video": "ps-aot19-960-1024-960-sync-ordinary-ep1-ordinary-sparse-aux.mp4",
+      "mode": "sparse-aux",
+      "control": "ps-aot19-960-1024-960-sync-all-ep1.mp4",
+      "local_control": true,
+      "reverse": false,
+      "channels": 2,
+      "streams": 4,
+      "edges": [
+        11520,
+        23808
+      ],
+      "frames": 18,
+      "signal": "sync"
+    },
+    {
+      "name": "ps-aot19-960-1024-960-sync-ep1-ordinary-ep1-indexed",
+      "video": "ps-aot19-960-1024-960-sync-ep1-ordinary-ep1-indexed.mp4",
+      "mode": "indexed",
+      "control": "ps-aot19-960-1024-960-sync-all-ep1.mp4",
+      "local_control": true,
+      "reverse": true,
+      "channels": 2,
+      "streams": 4,
+      "edges": [
+        11520,
+        23808
+      ],
+      "frames": 18,
+      "signal": "sync"
+    },
+    {
+      "name": "ps-aot19-960-1024-960-sync-ep1-ordinary-ep1-fragmented",
+      "video": "ps-aot19-960-1024-960-sync-ep1-ordinary-ep1-fragmented.mp4",
+      "mode": "fragmented",
+      "control": "ps-aot19-960-1024-960-sync-all-ep1.mp4",
+      "local_control": true,
+      "reverse": true,
+      "channels": 2,
+      "streams": 4,
+      "edges": [
+        11520,
+        23808
+      ],
+      "frames": 18,
+      "signal": "sync"
+    },
+    {
+      "name": "ps-aot19-960-1024-960-sync-ep1-ordinary-ep1-hybrid",
+      "video": "ps-aot19-960-1024-960-sync-ep1-ordinary-ep1-hybrid.mp4",
+      "mode": "hybrid",
+      "control": "ps-aot19-960-1024-960-sync-all-ep1.mp4",
+      "local_control": true,
+      "reverse": true,
+      "channels": 2,
+      "streams": 4,
+      "edges": [
+        11520,
+        23808
+      ],
+      "frames": 18,
+      "signal": "sync"
+    },
+    {
+      "name": "ps-aot19-960-1024-960-sync-ep1-ordinary-ep1-sparse-aux",
+      "video": "ps-aot19-960-1024-960-sync-ep1-ordinary-ep1-sparse-aux.mp4",
+      "mode": "sparse-aux",
+      "control": "ps-aot19-960-1024-960-sync-all-ep1.mp4",
+      "local_control": true,
+      "reverse": true,
+      "channels": 2,
+      "streams": 4,
+      "edges": [
+        11520,
+        23808
+      ],
+      "frames": 18,
+      "signal": "sync"
+    },
+    {
+      "name": "ps-aot19-960-1024-960-implicit-ordinary-ep1-ordinary-indexed",
+      "video": "ps-aot19-960-1024-960-implicit-ordinary-ep1-ordinary-indexed.mp4",
+      "mode": "indexed",
+      "control": "ps-aot19-960-1024-960-implicit-all-ep1.mp4",
+      "local_control": true,
+      "reverse": false,
+      "channels": 2,
+      "streams": 4,
+      "edges": [
+        11520,
+        23808
+      ],
+      "frames": 18,
+      "signal": "implicit"
+    },
+    {
+      "name": "ps-aot19-960-1024-960-implicit-ordinary-ep1-ordinary-fragmented",
+      "video": "ps-aot19-960-1024-960-implicit-ordinary-ep1-ordinary-fragmented.mp4",
+      "mode": "fragmented",
+      "control": "ps-aot19-960-1024-960-implicit-all-ep1.mp4",
+      "local_control": true,
+      "reverse": false,
+      "channels": 2,
+      "streams": 4,
+      "edges": [
+        11520,
+        23808
+      ],
+      "frames": 18,
+      "signal": "implicit"
+    },
+    {
+      "name": "ps-aot19-960-1024-960-implicit-ordinary-ep1-ordinary-hybrid",
+      "video": "ps-aot19-960-1024-960-implicit-ordinary-ep1-ordinary-hybrid.mp4",
+      "mode": "hybrid",
+      "control": "ps-aot19-960-1024-960-implicit-all-ep1.mp4",
+      "local_control": true,
+      "reverse": false,
+      "channels": 2,
+      "streams": 4,
+      "edges": [
+        11520,
+        23808
+      ],
+      "frames": 18,
+      "signal": "implicit"
+    },
+    {
+      "name": "ps-aot19-960-1024-960-implicit-ordinary-ep1-ordinary-sparse-aux",
+      "video": "ps-aot19-960-1024-960-implicit-ordinary-ep1-ordinary-sparse-aux.mp4",
+      "mode": "sparse-aux",
+      "control": "ps-aot19-960-1024-960-implicit-all-ep1.mp4",
+      "local_control": true,
+      "reverse": false,
+      "channels": 2,
+      "streams": 4,
+      "edges": [
+        11520,
+        23808
+      ],
+      "frames": 18,
+      "signal": "implicit"
+    },
+    {
+      "name": "ps-aot19-960-1024-960-implicit-ep1-ordinary-ep1-indexed",
+      "video": "ps-aot19-960-1024-960-implicit-ep1-ordinary-ep1-indexed.mp4",
+      "mode": "indexed",
+      "control": "ps-aot19-960-1024-960-implicit-all-ep1.mp4",
+      "local_control": true,
+      "reverse": true,
+      "channels": 2,
+      "streams": 4,
+      "edges": [
+        11520,
+        23808
+      ],
+      "frames": 18,
+      "signal": "implicit"
+    },
+    {
+      "name": "ps-aot19-960-1024-960-implicit-ep1-ordinary-ep1-fragmented",
+      "video": "ps-aot19-960-1024-960-implicit-ep1-ordinary-ep1-fragmented.mp4",
+      "mode": "fragmented",
+      "control": "ps-aot19-960-1024-960-implicit-all-ep1.mp4",
+      "local_control": true,
+      "reverse": true,
+      "channels": 2,
+      "streams": 4,
+      "edges": [
+        11520,
+        23808
+      ],
+      "frames": 18,
+      "signal": "implicit"
+    },
+    {
+      "name": "ps-aot19-960-1024-960-implicit-ep1-ordinary-ep1-hybrid",
+      "video": "ps-aot19-960-1024-960-implicit-ep1-ordinary-ep1-hybrid.mp4",
+      "mode": "hybrid",
+      "control": "ps-aot19-960-1024-960-implicit-all-ep1.mp4",
+      "local_control": true,
+      "reverse": true,
+      "channels": 2,
+      "streams": 4,
+      "edges": [
+        11520,
+        23808
+      ],
+      "frames": 18,
+      "signal": "implicit"
+    },
+    {
+      "name": "ps-aot19-960-1024-960-implicit-ep1-ordinary-ep1-sparse-aux",
+      "video": "ps-aot19-960-1024-960-implicit-ep1-ordinary-ep1-sparse-aux.mp4",
+      "mode": "sparse-aux",
+      "control": "ps-aot19-960-1024-960-implicit-all-ep1.mp4",
+      "local_control": true,
+      "reverse": true,
+      "channels": 2,
+      "streams": 4,
+      "edges": [
+        11520,
+        23808
+      ],
+      "frames": 18,
+      "signal": "implicit"
+    },
+    {
+      "name": "ld-sbr-c1-480-512-480-ordinary-ep1-ordinary-indexed",
+      "video": "ld-sbr-c1-480-512-480-ordinary-ep1-ordinary-indexed.mp4",
+      "mode": "indexed",
+      "control": "ld-sbr-c1-480-512-480.mp4",
+      "local_control": false,
+      "reverse": false,
+      "channels": 1,
+      "streams": 4,
+      "edges": [
+        5760,
+        11904
+      ],
+      "frames": 18,
+      "signal": "ld-sbr"
+    },
+    {
+      "name": "ld-sbr-c1-480-512-480-ordinary-ep1-ordinary-fragmented",
+      "video": "ld-sbr-c1-480-512-480-ordinary-ep1-ordinary-fragmented.mp4",
+      "mode": "fragmented",
+      "control": "ld-sbr-c1-480-512-480.mp4",
+      "local_control": false,
+      "reverse": false,
+      "channels": 1,
+      "streams": 4,
+      "edges": [
+        5760,
+        11904
+      ],
+      "frames": 18,
+      "signal": "ld-sbr"
+    },
+    {
+      "name": "ld-sbr-c1-480-512-480-ordinary-ep1-ordinary-hybrid",
+      "video": "ld-sbr-c1-480-512-480-ordinary-ep1-ordinary-hybrid.mp4",
+      "mode": "hybrid",
+      "control": "ld-sbr-c1-480-512-480.mp4",
+      "local_control": false,
+      "reverse": false,
+      "channels": 1,
+      "streams": 4,
+      "edges": [
+        5760,
+        11904
+      ],
+      "frames": 18,
+      "signal": "ld-sbr"
+    },
+    {
+      "name": "ld-sbr-c1-480-512-480-ordinary-ep1-ordinary-sparse-aux",
+      "video": "ld-sbr-c1-480-512-480-ordinary-ep1-ordinary-sparse-aux.mp4",
+      "mode": "sparse-aux",
+      "control": "ld-sbr-c1-480-512-480.mp4",
+      "local_control": false,
+      "reverse": false,
+      "channels": 1,
+      "streams": 4,
+      "edges": [
+        5760,
+        11904
+      ],
+      "frames": 18,
+      "signal": "ld-sbr"
+    },
+    {
+      "name": "ld-sbr-c1-480-512-480-ep1-ordinary-ep1-indexed",
+      "video": "ld-sbr-c1-480-512-480-ep1-ordinary-ep1-indexed.mp4",
+      "mode": "indexed",
+      "control": "ld-sbr-c1-480-512-480.mp4",
+      "local_control": false,
+      "reverse": true,
+      "channels": 1,
+      "streams": 4,
+      "edges": [
+        5760,
+        11904
+      ],
+      "frames": 18,
+      "signal": "ld-sbr"
+    },
+    {
+      "name": "ld-sbr-c1-480-512-480-ep1-ordinary-ep1-fragmented",
+      "video": "ld-sbr-c1-480-512-480-ep1-ordinary-ep1-fragmented.mp4",
+      "mode": "fragmented",
+      "control": "ld-sbr-c1-480-512-480.mp4",
+      "local_control": false,
+      "reverse": true,
+      "channels": 1,
+      "streams": 4,
+      "edges": [
+        5760,
+        11904
+      ],
+      "frames": 18,
+      "signal": "ld-sbr"
+    },
+    {
+      "name": "ld-sbr-c1-480-512-480-ep1-ordinary-ep1-hybrid",
+      "video": "ld-sbr-c1-480-512-480-ep1-ordinary-ep1-hybrid.mp4",
+      "mode": "hybrid",
+      "control": "ld-sbr-c1-480-512-480.mp4",
+      "local_control": false,
+      "reverse": true,
+      "channels": 1,
+      "streams": 4,
+      "edges": [
+        5760,
+        11904
+      ],
+      "frames": 18,
+      "signal": "ld-sbr"
+    },
+    {
+      "name": "ld-sbr-c1-480-512-480-ep1-ordinary-ep1-sparse-aux",
+      "video": "ld-sbr-c1-480-512-480-ep1-ordinary-ep1-sparse-aux.mp4",
+      "mode": "sparse-aux",
+      "control": "ld-sbr-c1-480-512-480.mp4",
+      "local_control": false,
+      "reverse": true,
+      "channels": 1,
+      "streams": 4,
+      "edges": [
+        5760,
+        11904
+      ],
+      "frames": 18,
+      "signal": "ld-sbr"
+    },
+    {
+      "name": "ld-sbr-c7-480-512-480-ordinary-ep1-ordinary-indexed",
+      "video": "ld-sbr-c7-480-512-480-ordinary-ep1-ordinary-indexed.mp4",
+      "mode": "indexed",
+      "control": "ld-sbr-c7-480-512-480.mp4",
+      "local_control": false,
+      "reverse": false,
+      "channels": 8,
+      "streams": 27,
+      "edges": [
+        5760,
+        11904
+      ],
+      "frames": 18,
+      "signal": "ld-sbr"
+    },
+    {
+      "name": "ld-sbr-c7-480-512-480-ordinary-ep1-ordinary-fragmented",
+      "video": "ld-sbr-c7-480-512-480-ordinary-ep1-ordinary-fragmented.mp4",
+      "mode": "fragmented",
+      "control": "ld-sbr-c7-480-512-480.mp4",
+      "local_control": false,
+      "reverse": false,
+      "channels": 8,
+      "streams": 27,
+      "edges": [
+        5760,
+        11904
+      ],
+      "frames": 18,
+      "signal": "ld-sbr"
+    },
+    {
+      "name": "ld-sbr-c7-480-512-480-ordinary-ep1-ordinary-hybrid",
+      "video": "ld-sbr-c7-480-512-480-ordinary-ep1-ordinary-hybrid.mp4",
+      "mode": "hybrid",
+      "control": "ld-sbr-c7-480-512-480.mp4",
+      "local_control": false,
+      "reverse": false,
+      "channels": 8,
+      "streams": 27,
+      "edges": [
+        5760,
+        11904
+      ],
+      "frames": 18,
+      "signal": "ld-sbr"
+    },
+    {
+      "name": "ld-sbr-c7-480-512-480-ordinary-ep1-ordinary-sparse-aux",
+      "video": "ld-sbr-c7-480-512-480-ordinary-ep1-ordinary-sparse-aux.mp4",
+      "mode": "sparse-aux",
+      "control": "ld-sbr-c7-480-512-480.mp4",
+      "local_control": false,
+      "reverse": false,
+      "channels": 8,
+      "streams": 27,
+      "edges": [
+        5760,
+        11904
+      ],
+      "frames": 18,
+      "signal": "ld-sbr"
+    },
+    {
+      "name": "ld-sbr-c7-480-512-480-ep1-ordinary-ep1-indexed",
+      "video": "ld-sbr-c7-480-512-480-ep1-ordinary-ep1-indexed.mp4",
+      "mode": "indexed",
+      "control": "ld-sbr-c7-480-512-480.mp4",
+      "local_control": false,
+      "reverse": true,
+      "channels": 8,
+      "streams": 27,
+      "edges": [
+        5760,
+        11904
+      ],
+      "frames": 18,
+      "signal": "ld-sbr"
+    },
+    {
+      "name": "ld-sbr-c7-480-512-480-ep1-ordinary-ep1-fragmented",
+      "video": "ld-sbr-c7-480-512-480-ep1-ordinary-ep1-fragmented.mp4",
+      "mode": "fragmented",
+      "control": "ld-sbr-c7-480-512-480.mp4",
+      "local_control": false,
+      "reverse": true,
+      "channels": 8,
+      "streams": 27,
+      "edges": [
+        5760,
+        11904
+      ],
+      "frames": 18,
+      "signal": "ld-sbr"
+    },
+    {
+      "name": "ld-sbr-c7-480-512-480-ep1-ordinary-ep1-hybrid",
+      "video": "ld-sbr-c7-480-512-480-ep1-ordinary-ep1-hybrid.mp4",
+      "mode": "hybrid",
+      "control": "ld-sbr-c7-480-512-480.mp4",
+      "local_control": false,
+      "reverse": true,
+      "channels": 8,
+      "streams": 27,
+      "edges": [
+        5760,
+        11904
+      ],
+      "frames": 18,
+      "signal": "ld-sbr"
+    },
+    {
+      "name": "ld-sbr-c7-480-512-480-ep1-ordinary-ep1-sparse-aux",
+      "video": "ld-sbr-c7-480-512-480-ep1-ordinary-ep1-sparse-aux.mp4",
+      "mode": "sparse-aux",
+      "control": "ld-sbr-c7-480-512-480.mp4",
+      "local_control": false,
+      "reverse": true,
+      "channels": 8,
+      "streams": 27,
+      "edges": [
+        5760,
+        11904
+      ],
+      "frames": 18,
+      "signal": "ld-sbr"
+    }
+  ],
+  "malformed": [
+    {
+      "video": "ps-aot17-960-1024-960-ordinary-ep1-ordinary-missing-active.mp4",
+      "sample": 11,
+      "error": "EP1 MP4 missing simultaneous ESC access unit"
+    },
+    {
+      "video": "ps-aot17-960-1024-960-ordinary-ep1-ordinary-empty-aux.mp4",
+      "parser": true,
+      "error": "MP4 track states no samples"
+    },
+    {
+      "video": "ps-aot17-960-1024-960-ep1-ordinary-ep1-missing-active.mp4",
+      "sample": 5,
+      "error": "EP1 MP4 missing simultaneous ESC access unit"
+    },
+    {
+      "video": "ps-aot17-960-1024-960-ep1-ordinary-ep1-empty-aux.mp4",
+      "parser": true,
+      "error": "MP4 track states no samples"
+    },
+    {
+      "video": "ps-aot17-960-1024-960-sync-ordinary-ep1-ordinary-missing-active.mp4",
+      "sample": 11,
+      "error": "EP1 MP4 missing simultaneous ESC access unit"
+    },
+    {
+      "video": "ps-aot17-960-1024-960-sync-ordinary-ep1-ordinary-empty-aux.mp4",
+      "parser": true,
+      "error": "MP4 track states no samples"
+    },
+    {
+      "video": "ps-aot17-960-1024-960-sync-ep1-ordinary-ep1-missing-active.mp4",
+      "sample": 5,
+      "error": "EP1 MP4 missing simultaneous ESC access unit"
+    },
+    {
+      "video": "ps-aot17-960-1024-960-sync-ep1-ordinary-ep1-empty-aux.mp4",
+      "parser": true,
+      "error": "MP4 track states no samples"
+    },
+    {
+      "video": "ps-aot17-960-1024-960-implicit-ordinary-ep1-ordinary-missing-active.mp4",
+      "sample": 11,
+      "error": "EP1 MP4 missing simultaneous ESC access unit"
+    },
+    {
+      "video": "ps-aot17-960-1024-960-implicit-ordinary-ep1-ordinary-empty-aux.mp4",
+      "parser": true,
+      "error": "MP4 track states no samples"
+    },
+    {
+      "video": "ps-aot17-960-1024-960-implicit-ep1-ordinary-ep1-missing-active.mp4",
+      "sample": 5,
+      "error": "EP1 MP4 missing simultaneous ESC access unit"
+    },
+    {
+      "video": "ps-aot17-960-1024-960-implicit-ep1-ordinary-ep1-empty-aux.mp4",
+      "parser": true,
+      "error": "MP4 track states no samples"
+    },
+    {
+      "video": "ps-aot19-960-1024-960-ordinary-ep1-ordinary-missing-active.mp4",
+      "sample": 11,
+      "error": "EP1 MP4 missing simultaneous ESC access unit"
+    },
+    {
+      "video": "ps-aot19-960-1024-960-ordinary-ep1-ordinary-empty-aux.mp4",
+      "parser": true,
+      "error": "MP4 track states no samples"
+    },
+    {
+      "video": "ps-aot19-960-1024-960-ep1-ordinary-ep1-missing-active.mp4",
+      "sample": 5,
+      "error": "EP1 MP4 missing simultaneous ESC access unit"
+    },
+    {
+      "video": "ps-aot19-960-1024-960-ep1-ordinary-ep1-empty-aux.mp4",
+      "parser": true,
+      "error": "MP4 track states no samples"
+    },
+    {
+      "video": "ps-aot19-960-1024-960-sync-ordinary-ep1-ordinary-missing-active.mp4",
+      "sample": 11,
+      "error": "EP1 MP4 missing simultaneous ESC access unit"
+    },
+    {
+      "video": "ps-aot19-960-1024-960-sync-ordinary-ep1-ordinary-empty-aux.mp4",
+      "parser": true,
+      "error": "MP4 track states no samples"
+    },
+    {
+      "video": "ps-aot19-960-1024-960-sync-ep1-ordinary-ep1-missing-active.mp4",
+      "sample": 5,
+      "error": "EP1 MP4 missing simultaneous ESC access unit"
+    },
+    {
+      "video": "ps-aot19-960-1024-960-sync-ep1-ordinary-ep1-empty-aux.mp4",
+      "parser": true,
+      "error": "MP4 track states no samples"
+    },
+    {
+      "video": "ps-aot19-960-1024-960-implicit-ordinary-ep1-ordinary-missing-active.mp4",
+      "sample": 11,
+      "error": "EP1 MP4 missing simultaneous ESC access unit"
+    },
+    {
+      "video": "ps-aot19-960-1024-960-implicit-ordinary-ep1-ordinary-empty-aux.mp4",
+      "parser": true,
+      "error": "MP4 track states no samples"
+    },
+    {
+      "video": "ps-aot19-960-1024-960-implicit-ep1-ordinary-ep1-missing-active.mp4",
+      "sample": 5,
+      "error": "EP1 MP4 missing simultaneous ESC access unit"
+    },
+    {
+      "video": "ps-aot19-960-1024-960-implicit-ep1-ordinary-ep1-empty-aux.mp4",
+      "parser": true,
+      "error": "MP4 track states no samples"
+    },
+    {
+      "video": "ld-sbr-c1-480-512-480-ordinary-ep1-ordinary-missing-active.mp4",
+      "sample": 11,
+      "error": "EP1 MP4 missing simultaneous ESC access unit"
+    },
+    {
+      "video": "ld-sbr-c1-480-512-480-ordinary-ep1-ordinary-empty-aux.mp4",
+      "parser": true,
+      "error": "MP4 track states no samples"
+    },
+    {
+      "video": "ld-sbr-c1-480-512-480-ep1-ordinary-ep1-missing-active.mp4",
+      "sample": 5,
+      "error": "EP1 MP4 missing simultaneous ESC access unit"
+    },
+    {
+      "video": "ld-sbr-c1-480-512-480-ep1-ordinary-ep1-empty-aux.mp4",
+      "parser": true,
+      "error": "MP4 track states no samples"
+    },
+    {
+      "video": "ld-sbr-c7-480-512-480-ordinary-ep1-ordinary-missing-active.mp4",
+      "sample": 11,
+      "error": "EP1 MP4 missing simultaneous ESC access unit"
+    },
+    {
+      "video": "ld-sbr-c7-480-512-480-ordinary-ep1-ordinary-empty-aux.mp4",
+      "parser": true,
+      "error": "MP4 track states no samples"
+    },
+    {
+      "video": "ld-sbr-c7-480-512-480-ep1-ordinary-ep1-missing-active.mp4",
+      "sample": 5,
+      "error": "EP1 MP4 missing simultaneous ESC access unit"
+    },
+    {
+      "video": "ld-sbr-c7-480-512-480-ep1-ordinary-ep1-empty-aux.mp4",
+      "parser": true,
+      "error": "MP4 track states no samples"
+    }
+  ],
+  "provenance": "Own ordinary/EP1/ordinary and EP1/ordinary/EP1 ASC epochs; complete logical AUs on root in ordinary epochs, separate ESCs otherwise. Canonical dpnd, optional missing inactive auxiliary AUs; missing active AUs refuse. Same independent LD PCM and fresh PS epoch controls. No private media or foreign codec."
+}

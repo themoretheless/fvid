@@ -51,8 +51,11 @@ def video_fixture(cases,blob,channels=1,filename="he-aac-sbr-synthetic.mp4",writ
     packets=[blob[f['offset']:f['offset']+f['bytes']] for f in case['frames']]
     config=bytes.fromhex(case['asc'])
     def descriptor(tag,data):
-        assert len(data)<128
-        return bytes([tag,len(data)])+data
+        size=len(data);digits=[size&127];size>>=7
+        while size:
+            digits.insert(0,(size&127)|128);size>>=7
+        assert len(digits)<=4
+        return bytes([tag])+bytes(digits)+data
     esds=bytes(4)+descriptor(3,b'\x00\x02\x00'+descriptor(4,b'\x40\x15'+bytes(11)+descriptor(5,config))+descriptor(6,b'\x02'))
     original_moov=next(p for t,p in boxes(video) if t==b'moov')
     movie_header=next(p for t,p in boxes(original_moov) if t==b'mvhd')

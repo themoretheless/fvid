@@ -1,0 +1,31 @@
+{
+  "probe_sha256": "a3cb93f97360598bf1edb5b3324f6e218ed89c875e489cddb1cca92c14a2580b",
+  "command": "audio_probe --play-device INPUT.mp4",
+  "scope": "Four authored AAC22.2 programmes; initial playback,25%/60% seek and rewind through actual macOS device drain. Stereo routing smoke, not a physical24-speaker validation or subjective listening certificate.",
+  "cases": [
+    {
+      "name": "aot2-n1024",
+      "exit_code": 0,
+      "stdout": "platform_device=started source_channels=24 rate=48000 duration=0.128000\nphase=full generation=0 from=0.000000 position=0.128000 wall=0.156438 device_drain=complete\nphase=seek-quarter generation=1 from=0.032000 position=0.128000 wall=0.151802 device_drain=complete\nphase=seek-60-percent generation=2 from=0.076800 position=0.128000 wall=0.101370 device_drain=complete\nphase=rewind generation=3 from=0.000000 position=0.128000 wall=0.157662 device_drain=complete\n",
+      "stderr": ""
+    },
+    {
+      "name": "aot23-n480",
+      "exit_code": 0,
+      "stdout": "platform_device=started source_channels=24 rate=48000 duration=0.060000\nphase=full generation=0 from=0.000000 position=0.060000 wall=0.083475 device_drain=complete\nphase=seek-quarter generation=1 from=0.015000 position=0.060000 wall=0.084978 device_drain=complete\nphase=seek-60-percent generation=2 from=0.036000 position=0.060000 wall=0.057728 device_drain=complete\nphase=rewind generation=3 from=0.000000 position=0.060000 wall=0.092232 device_drain=complete\n",
+      "stderr": ""
+    },
+    {
+      "name": "aot39-sbr-n480-crc0",
+      "exit_code": 0,
+      "stdout": "platform_device=started source_channels=24 rate=48000 duration=0.120000\nphase=full generation=0 from=0.000000 position=0.120000 wall=0.145125 device_drain=complete\nphase=seek-quarter generation=1 from=0.030000 position=0.120000 wall=0.131340 device_drain=complete\nphase=seek-60-percent generation=2 from=0.072000 position=0.120000 wall=0.097390 device_drain=complete\nphase=rewind generation=3 from=0.000000 position=0.120000 wall=0.150049 device_drain=complete\n",
+      "stderr": ""
+    },
+    {
+      "name": "aot39-sbr-n512-crc1",
+      "exit_code": 0,
+      "stdout": "platform_device=started source_channels=24 rate=48000 duration=0.128000\nphase=full generation=0 from=0.000000 position=0.128000 wall=0.158446 device_drain=complete\nphase=seek-quarter generation=1 from=0.032000 position=0.128000 wall=0.135602 device_drain=complete\nphase=seek-60-percent generation=2 from=0.076800 position=0.128000 wall=0.109617 device_drain=complete\nphase=rewind generation=3 from=0.000000 position=0.128000 wall=0.160284 device_drain=complete\n",
+      "stderr": ""
+    }
+  ]
+}

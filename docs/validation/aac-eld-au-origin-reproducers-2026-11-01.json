@@ -1,0 +1,226 @@
+{
+  "complete": true,
+  "scope": "Every authored MP4 decodes successfully in both builds; old origin fails PCM acceptance,new origin passes. No regenerated PCM or delay fitting.",
+  "probes": {
+    "before": "31a4adc02fa53ece13f9885ce65ffcc29d432503670cf6f9a0e78c621447bc9b",
+    "after": "5f050a5565b7165a840a6e25dd1ece6c6604b3a24c5c89b76676cee505dbe3fa"
+  },
+  "cases": [
+    {
+      "name": "n480-c1-first",
+      "recipe": "first",
+      "samples": 3840,
+      "input_sha256": "c9819230f8598fb3405a28c43a24f9108c60627c84487f10f32f43e264d8d2fa",
+      "before": {
+        "decoder_exit": 0,
+        "max_abs_error": 0.00039470032788813114,
+        "pcm_sha256": "8b69defbe646c4ec38d763ff6b7e8353cec5888c51699009693869ae7d000294",
+        "passed": false
+      },
+      "after": {
+        "decoder_exit": 0,
+        "max_abs_error": 0.0,
+        "pcm_sha256": "6997a31d0d4ec3425d74d61f6c172b7bf480c5f412baddbaca10faa4c29158df",
+        "passed": true
+      }
+    },
+    {
+      "name": "n480-c1-last",
+      "recipe": "last",
+      "samples": 3840,
+      "input_sha256": "3aed46072efb05d0e4b04919cfe0f14825dee8a6e7e96ac113dd6f5b2a5ada02",
+      "before": {
+        "decoder_exit": 0,
+        "max_abs_error": 0.0003271755122113973,
+        "pcm_sha256": "e085606368612713aed5c2910d6c670f9c37616f4944595f1b58de7d3f4c590e",
+        "passed": false
+      },
+      "after": {
+        "decoder_exit": 0,
+        "max_abs_error": 0.0,
+        "pcm_sha256": "452edecf5fe3fba8e4084b37760d8beb84bddd790754213a14f05938c6d63490",
+        "passed": true
+      }
+    },
+    {
+      "name": "n480-c1-both",
+      "recipe": "both",
+      "samples": 3840,
+      "input_sha256": "42fc985faa69f18ea1953c1566c47dd501f98274708023635821eeb703c099ae",
+      "before": {
+        "decoder_exit": 0,
+        "max_abs_error": 0.00039470032788813114,
+        "pcm_sha256": "8ab65c1317f470c4eb8156782cc662b50a7fd8966d7fd29bde29950927f6d64b",
+        "passed": false
+      },
+      "after": {
+        "decoder_exit": 0,
+        "max_abs_error": 0.0,
+        "pcm_sha256": "73d9386afe624fb9029240cd5828c0de4f5949c15dbcd754e028f0394714cde7",
+        "passed": true
+      }
+    },
+    {
+      "name": "n480-c2-first",
+      "recipe": "first",
+      "samples": 7680,
+      "input_sha256": "5654755a583027817b39c19a5a820efdbb9e28d0e5368ccdd6b831b64d5b662a",
+      "before": {
+        "decoder_exit": 0,
+        "max_abs_error": 0.00039470032788813114,
+        "pcm_sha256": "c142cfeb1328e55d44d78756e9475a98409d6e45f453ea8ddb91ee7da920ab50",
+        "passed": false
+      },
+      "after": {
+        "decoder_exit": 0,
+        "max_abs_error": 0.0,
+        "pcm_sha256": "3be79a74a6147ff052cc9f480af0451075defe5a9c6d0f762da97956b82c78a5",
+        "passed": true
+      }
+    },
+    {
+      "name": "n480-c2-last",
+      "recipe": "last",
+      "samples": 7680,
+      "input_sha256": "4093239a47c8880720fba8b5469cd01c5bef4f12a05b34dee925b9ad2588e9b6",
+      "before": {
+        "decoder_exit": 0,
+        "max_abs_error": 0.0003612586297094822,
+        "pcm_sha256": "287acff6f1451307f829b227a39bf924ee72170bdcdc9ec0ae56e91df0a13700",
+        "passed": false
+      },
+      "after": {
+        "decoder_exit": 0,
+        "max_abs_error": 0.0,
+        "pcm_sha256": "ba9f41790849ccfa1200e6226da4b5da2c9a15996a88248e12fd0d1481c66bf2",
+        "passed": true
+      }
+    },
+    {
+      "name": "n480-c2-both",
+      "recipe": "both",
+      "samples": 7680,
+      "input_sha256": "66a3eeceb4190c96409d489fa25b2f867d5db012527c4c68f0c3c097dd9a384d",
+      "before": {
+        "decoder_exit": 0,
+        "max_abs_error": 0.00039470032788813114,
+        "pcm_sha256": "8b2282560f662a8f26641c6f9138f2ea3ae0ce5861e5d009039ea5958b586c26",
+        "passed": false
+      },
+      "after": {
+        "decoder_exit": 0,
+        "max_abs_error": 0.0,
+        "pcm_sha256": "404263c270407a2293b6d796717c871c066d47a00c13c4228c28d43adf7f19a6",
+        "passed": true
+      }
+    },
+    {
+      "name": "n512-c1-first",
+      "recipe": "first",
+      "samples": 4096,
+      "input_sha256": "4b8ee3669f80886db1b22bb2e53cbf8a484a98f1e87900959a20e7dd10f12305",
+      "before": {
+        "decoder_exit": 0,
+        "max_abs_error": 0.000369988483726047,
+        "pcm_sha256": "4fdaf7c6096a626f9b0d26d9fc478485c06353c23c60dd9d2eeb3e239aa2a54e",
+        "passed": false
+      },
+      "after": {
+        "decoder_exit": 0,
+        "max_abs_error": 0.0,
+        "pcm_sha256": "1fdaf09d255ba3bf9b06a5dd56335398a934dad9193412c6ada7516a460f84cd",
+        "passed": true
+      }
+    },
+    {
+      "name": "n512-c1-last",
+      "recipe": "last",
+      "samples": 4096,
+      "input_sha256": "4ab918911c705b12a540934f61b135764f3aa82d9fded36a0f0d208de201cd5e",
+      "before": {
+        "decoder_exit": 0,
+        "max_abs_error": 0.0003069232770940289,
+        "pcm_sha256": "0c9609864f97b667883d7d5532848a1d8b814d1f37af706215e0305d4415fb93",
+        "passed": false
+      },
+      "after": {
+        "decoder_exit": 0,
+        "max_abs_error": 0.0,
+        "pcm_sha256": "225be30347ddd35f007af51983da701e7cebf0e198565903039e81ae6c47d3c1",
+        "passed": true
+      }
+    },
+    {
+      "name": "n512-c1-both",
+      "recipe": "both",
+      "samples": 4096,
+      "input_sha256": "2dfea3ed677a5983a7e3ad633a9cf22d3ede43e789ddb7c51f4db3b3bf7b5006",
+      "before": {
+        "decoder_exit": 0,
+        "max_abs_error": 0.000369988483726047,
+        "pcm_sha256": "ddfb929f4b84152307e7e4d9a4a0e3e5e13ebb431cd63ca847083f73e5112210",
+        "passed": false
+      },
+      "after": {
+        "decoder_exit": 0,
+        "max_abs_error": 0.0,
+        "pcm_sha256": "5eec0f91f17a1f612f65ac28b1ab4e44ac7ae5a28610dff166fecd0e4418eff2",
+        "passed": true
+      }
+    },
+    {
+      "name": "n512-c2-first",
+      "recipe": "first",
+      "samples": 8192,
+      "input_sha256": "41c66283a177fe0471f6bd8d02f6e28315469408ffb85ca0e89a2ae1e5e68198",
+      "before": {
+        "decoder_exit": 0,
+        "max_abs_error": 0.000369988483726047,
+        "pcm_sha256": "01ead74ad599bb1a96fe7f18f51a7419058cb3c6b7e445b1c1a778e950e73166",
+        "passed": false
+      },
+      "after": {
+        "decoder_exit": 0,
+        "max_abs_error": 0.0,
+        "pcm_sha256": "feea812ca96990d91a01952fc0aec38b712acfc18b27e53c93dfc9876f49f7d5",
+        "passed": true
+      }
+    },
+    {
+      "name": "n512-c2-last",
+      "recipe": "last",
+      "samples": 8192,
+      "input_sha256": "6d02d6023bb0fcf4716b0743190613ac5ca1ce3c50c9e44485506870fd533885",
+      "before": {
+        "decoder_exit": 0,
+        "max_abs_error": 0.00033865273144328967,
+        "pcm_sha256": "dc4ba049918f33dd680c3cba4de79688144e93eb8e6abc452c3940de055f4555",
+        "passed": false
+      },
+      "after": {
+        "decoder_exit": 0,
+        "max_abs_error": 0.0,
+        "pcm_sha256": "48449c9254eab98ca71c8b2b0c385b505fd4eb8a0a130696d4d01c95ecad436f",
+        "passed": true
+      }
+    },
+    {
+      "name": "n512-c2-both",
+      "recipe": "both",
+      "samples": 8192,
+      "input_sha256": "5a362e740c6fadd12c77f583d7814285e14cd7f6ed575fc442cd8c14a69a0544",
+      "before": {
+        "decoder_exit": 0,
+        "max_abs_error": 0.000369988483726047,
+        "pcm_sha256": "3bd8359f04ebb0407ccc4f5ab5fadb6f00c0780349551d3d0b5dfaeee040c0fc",
+        "passed": false
+      },
+      "after": {
+        "decoder_exit": 0,
+        "max_abs_error": 0.0,
+        "pcm_sha256": "cf30882dc2a9e8498d1bd88d28a5c3d4489f7d50e38a30c82590180d4ab2eee0",
+        "passed": true
+      }
+    }
+  ]
+}

@@ -1,0 +1,9 @@
+{
+  "scope": "Reference quality/activity audit: identity shaping must fail the component comparison; disabled/low-bin data remains exact.",
+  "identity_negative_control_gap": 0.06299999915063381,
+  "modified_scalar_values": 132384,
+  "lower_clamp_scalar_values": 24964,
+  "upper_clamp_scalar_values": 57236,
+  "expected_sha256": "a0a45edd06fbfcd1ff44ba037c6e44bb87dbe39e394b13327a0b1639dfa42770",
+  "audit_sha256": "5f107d1af3b43f2a9586ad7f3170829e000edbd300950c76bbaaffcc1fcfcd08"
+}

@@ -1,0 +1,63 @@
+{
+  "base_commit": "eeab92db90",
+  "scope": "W routing component only; no residual audio decoding or spatial movie/PCM/playback acceptance.",
+  "results": [
+    {
+      "log": "/tmp/fvid-ld-mps-route-all-tests.log",
+      "sha256": "02240f47e18d03d17620b29594474dc191dc419cf9326e9419b5e0a59334d3de",
+      "passed": 45,
+      "ignored": 0
+    },
+    {
+      "log": "/tmp/fvid-ld-mps-route-media-tests.log",
+      "sha256": "987bc5491aa5ff38cb46ce16564c0570a43c246303fa8e0f828ed718b8e95c83",
+      "passed": 575,
+      "ignored": 1
+    },
+    {
+      "log": "/tmp/fvid-ld-mps-route-final-tests.log",
+      "sha256": "de8a3f6aa725dfb7932ad0a7807ab3ff9189c21a6b2f58c898e1b09c35e1de6c",
+      "passed": 3,
+      "ignored": 0
+    }
+  ],
+  "cases": 504,
+  "scalar_outputs": 1881600,
+  "dry_oracle": "exact numeric equality",
+  "wet_oracle_absolute_tolerance": 1e-15,
+  "original_C_max_abs_error": 1.6679701486665977e-07,
+  "reference_report": "aac-ld-mps-route-reference-2026-10-30.json",
+  "generation_audit": "aac-ld-mps-route-generation-2026-10-30.json",
+  "rejected_design": "aac-ld-mps-route-rejected-2026-10-30.json",
+  "sha256": {
+    "crates/fvid-media/src/owned_aac/aac_ld_mps_route.rs": "06ce3c093a5351b809c243bd0b8b0df655891f15b5a36451af7a5f4186235d0a",
+    "tests/aac_ld_mps_route.rs": "7173ee9c583cdcfa6458e35953b989e0dad9bf54303fcd0cc8c9ed79476801bd",
+    "scripts/generate_aac_ld_mps_route_fixtures.py": "7fe41645eba34394799274dc63777c582381b74e916cea24f8379fd52869f9d4",
+    "scripts/validate_aac_ld_mps_route_reference.py": "30d97213e56170a907d2f6e90a0228af75c239a8fc5e2a61262054ba603e4bb1",
+    "scripts/support/aac_ld_mps_route_reference_probe.c": "1b3236489fea763d36c038f8bee46068f980092e3eae4b4045bd972955d2c487"
+  },
+  "coverage": [
+    "eight trees and seven parameter resolutions",
+    "32/64/128-bin routing arithmetic",
+    "direct/residual/decorrelated W planes",
+    "original wet channels mixed before OTT residual masks",
+    "TTT residual data/cutoff cannot replace/mute W5",
+    "missing active W residual refusal",
+    "slot partition equivalence",
+    "nonfinite/geometry/overflow refusal",
+    "empty no-op"
+  ],
+  "ordinary_tests": "Saved controls only; no FFmpeg, network, generation, reference software or C compiler.",
+  "accepted_spatial_movies": 0,
+  "remaining": [
+    "frame assembly and low/high TTT mode selection",
+    "decoded residual input to M1",
+    "residual AAC codec",
+    "fixed output gains and temporal shaping",
+    "arbitrary downmix/HRTF",
+    "128-bin QMF and decorrelation DSP",
+    "full LD-SBR spatial PCM",
+    "synthetic movie playback/seek/rewind"
+  ],
+  "native_spatial_refusal": "remains enabled"
+}

@@ -1,0 +1,33 @@
+{
+  "scope": "Refusal reproduction only for unequal HRTF grids, not playback acceptance or a conversion oracle.",
+  "controls": 3,
+  "refusals": 18,
+  "existing_spatial_corpus_changed": false,
+  "files": {
+    "packets.bin": "a9946c36d12b383c7bf0fbef41afbc7f52628f34d09f0359f78d822694b19658",
+    "spatial23-hrtf7.mp4": "1f838d62ac30acc11781277d97f5802c3c0642c264ee857cf6e26fdba721a151",
+    "spatial23-hrtf5.mp4": "cd23c756878de3e028103787d6f08530593ea3e0ef311dca9a70560666aae139",
+    "spatial23-hrtf4.mp4": "d43629b6d06f0c1a8dc666bca851b224ed256b30f1c690343a38aa49c3cf5744",
+    "spatial4-hrtf15.mp4": "4a74e8a35e4390347e21e1e4e134e15dc6e920540745bb8678e3fb6d0fb95f02",
+    "spatial23-hrtf15.mp4": "d5058e9249f707c8c76651006845ca32b0635d79285d5d5842094996403f6c9b",
+    "spatial9-hrtf15.mp4": "405041f8ab5cb6b66dfad3ad165475a836588b56bac9330496034f1007dd157c",
+    "spatial4-hrtf5.mp4": "99b2f85582617c8974a361eb382b47b9e6c99ffaae80e55c2aabfa3654a8cfa7",
+    "spatial4-hrtf12.mp4": "9087b00f9f16d9ed220b188694549b0a8e4aa4776bc939d8e86a11cf9dc15ef8",
+    "spatial4-hrtf4.mp4": "575f4317a3b3720ee0dc6c3b77bebabc3c39aa0219c9aa22f01fd5054dfc91ba",
+    "spatial9-hrtf7.mp4": "accc7a3764ec79ab73646366d8fbca1891c5516a4ea1cad1fbc3a114f8305a30",
+    "spatial9-hrtf5.mp4": "ad7823b2ab5a7f73a907718cdb3e49819ec7552d5103cad81eb18c38c357e878",
+    "spatial9-hrtf12.mp4": "bdd194781b3d1aec6211e8cd642822a02a394d0644c3c3d7719c66dd1709b6b1",
+    "spatial23-hrtf12.mp4": "4ee6229c3f941f1062356b11bccfd90cd7d59562e0447166ba23e348cdb37030",
+    "spatial4-hrtf7.mp4": "a2e384b93ddf6c6678f9f48cd2a946cffe5fcafa03aa296ddbe39cbae8668f4e",
+    "spatial9-hrtf4.mp4": "1f4bd72f0ec657e750ad850384b6a38c643135522fef2f46d413b07a4b4ea0c9",
+    "spatial9-hrtf9.mp4": "3c1d4dee8e57c2080a62f625a178f8a5efa9d2047ec2d4ec3dd0f366f7de097f",
+    "spatial23-hrtf23.mp4": "a755cfb25711ea3229dac36caef17e704ea4a53407b00a9ffb4fe5b159286f10",
+    "spatial9-hrtf23.mp4": "d0ef26fb0d35927b94c4c650d5d1f3a8df848c27c965a03b1fa807182a7ba950",
+    "spatial4-hrtf9.mp4": "ede1ab3056f4e0434e8967c08ba14acd75dfa373d5bebf8076115dc5bc924b31",
+    "spatial4-hrtf23.mp4": "b6f7066f6a81099a955ba345cd5bb12d823ecafd54290a50f1d022267d362ba8",
+    "manifest.json": "f94d97c40cac141e94f57c14f3b6d9cbedc9331db65e3b073eb8b3d31f500235",
+    "spatial23-hrtf9.mp4": "64cd94bb91bb99ec556820ba7754777122c5e8e8f966a42ab33ee6a77793cb57"
+  },
+  "fixture_generation_separate": true,
+  "external_media_used": false
+}

@@ -1,0 +1,23 @@
+{
+  "complete": true,
+  "conformance_verdict": null,
+  "inputs": {
+    "/Users/themoretheless/.cache/fvid-reference/ld-sbr/SAOC_IS7_ReferenceSoftware__20160603.zip": "b6b27e2f9af6ee8f950af8d7074afc467e66d93372328c0ec55282fff71d1f83",
+    "/Users/themoretheless/.cache/fvid-reference/ld-sbr/ld-core-isolation/reproduced.records": "11df174bf1aa8387c583c487c51c4159f5a58b059b1d0dbf3a9009d532cd3053",
+    "/Users/themoretheless/.cache/fvid-reference/ld-sbr/ld-core-isolation/core.f32le": "854d94f542f0ad19714d8dd01a95ff60f9a4fd11bc049bef7e9e04ad6ba03450"
+  },
+  "archive_sha256": "b6b27e2f9af6ee8f950af8d7074afc467e66d93372328c0ec55282fff71d1f83",
+  "adapter_sha256": "86664aad8ba8eff6439ff79ed3439eaf4eb1add1d0e4c21ac604346ca4514c29",
+  "script_sha256": "247da65f9dad537ad8658376ca31efd8734d86480a808b104a7207349f19ba60",
+  "translation_units": 118,
+  "executable_sha256": "e22c30a1c095b5f971361a1575cf7d0e6d08fff68733aae1b241ba4361653e7f",
+  "original_pcm_sha256": "22b01167bf8d8125f6fd27d8943401b923b0bb8f9fecc12c274a6c2d5c0fd0ee",
+  "file_output_unchanged": true,
+  "original_file_sha256": "2f8d249424e902cc4bd27f8b5ce088388c0f3399226131890c4bd8dc88a5243a",
+  "scalars": 1443840,
+  "rmse": 1.503630779377336e-09,
+  "max_abs_error": 2.9802322387695312e-08,
+  "explicit_lag": 0,
+  "gain_fit": false,
+  "scope": "Unmodified ISO AAC-LD core and generic LATM frontend on exact isolated core AUs; mono float capture before original file rounding. No MP4, LPC or parametric decoding in this research build. Numerical control, not whole-profile conformance."
+}

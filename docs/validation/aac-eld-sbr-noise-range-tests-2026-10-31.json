@@ -1,0 +1,36 @@
+{
+  "runs": [
+    {
+      "name": "media",
+      "passed": 588,
+      "failed": 0,
+      "ignored": 1,
+      "log_sha256": "d1c960dcbd1b3d7b9a75f4cf1f51080ed54c38611603937cb181b3ed877d486f"
+    },
+    {
+      "name": "integration",
+      "passed": 12,
+      "failed": 0,
+      "ignored": 0,
+      "log_sha256": "1c6820105f682bebecdb1cac463bf05a77f0fb3c9ba5e3215a6081737b820e1b"
+    },
+    {
+      "name": "worker",
+      "passed": 1,
+      "failed": 0,
+      "ignored": 0,
+      "log_sha256": "5465c75c62b6968cef510007fe5fa1a06591c04d26e156777f2a174d2148e6ed"
+    }
+  ],
+  "passed": 601,
+  "failed": 0,
+  "preexisting_ignored": 1,
+  "strict_refusal_is_not_q31_acceptance": true,
+  "offline_deterministic_runs": 2,
+  "authored_controls": 2,
+  "authored_counterexamples": 2,
+  "containers": [
+    "MP4",
+    "Matroska"
+  ]
+}

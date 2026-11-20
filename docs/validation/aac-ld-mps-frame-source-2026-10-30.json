@@ -1,0 +1,50 @@
+{
+  "iso": "https://standards.iso.org/iso-iec/23003/-2/ed-2/en/SAOC_IS7_ReferenceSoftware__20160603.zip",
+  "later_revision": "c41c3c7516ea8d0d78a53b96b30bed3a29745cc6",
+  "later_sources": [
+    {
+      "path": "cpp/libSACdec/src/sac_rom.cpp",
+      "url": "https://github.com/mstorsjo/fdk-aac/blob/c41c3c7516ea8d0d78a53b96b30bed3a29745cc6/cpp/libSACdec/src/sac_rom.cpp",
+      "sha256": "2329fe6684efeb4818bcd465d4517bcd4e7b7e79f7d267398d018a810f788efe"
+    },
+    {
+      "path": "cpp/libSACdec/src/sac_bitdec.cpp",
+      "url": "https://github.com/mstorsjo/fdk-aac/blob/c41c3c7516ea8d0d78a53b96b30bed3a29745cc6/cpp/libSACdec/src/sac_bitdec.cpp",
+      "sha256": "cf5092c174dfbfb6d027ff0d1a252e94d69a09341520fe593ac48609f89ed60e"
+    },
+    {
+      "path": "cpp/libFDK/src/nlc_dec.cpp",
+      "url": "https://github.com/mstorsjo/fdk-aac/blob/c41c3c7516ea8d0d78a53b96b30bed3a29745cc6/cpp/libFDK/src/nlc_dec.cpp",
+      "sha256": "d42af851703d315386c9741891970f6c1608083e0d9a67efd33925d077314b42"
+    }
+  ],
+  "temporal_channels": [
+    [
+      5,
+      5,
+      4,
+      6,
+      6,
+      4,
+      4,
+      2
+    ],
+    [
+      5,
+      5,
+      5,
+      7,
+      7,
+      4,
+      4,
+      2
+    ]
+  ],
+  "facts": [
+    "Later original-author table has two shaping channels for tree7, absent in old ISO insert table.",
+    "Frame alignment is relative to its syntactic-element start anchor.",
+    "First interpolation anchor is initialized to the first parameter set.",
+    "Later original-author reshape decoder explicitly rejects a run extending beyond remaining frame slots."
+  ],
+  "runtime_scope": "Numeric facts and syntax clarification only; no reference implementation or FDK dependency in production."
+}

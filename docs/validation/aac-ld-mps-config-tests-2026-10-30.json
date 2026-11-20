@@ -1,0 +1,77 @@
+{
+  "base_commit": "54afcc2531",
+  "before": "BitstreamError(\"AAC ELD extension tool is not yet implemented\") on own tree7 ASC",
+  "scope": "LD-MPS configuration metadata acceptance and specific renderer refusal only.",
+  "standalone_configurations": 336,
+  "movie_configuration_controls": 8,
+  "accepted_spatial_programmes": 0,
+  "closed_codec_gaps": 0,
+  "root_unit_passed": 1061,
+  "media_unit_passed": 572,
+  "ignored": 27,
+  "integration_checks": 43,
+  "all_test_compilation": "passed offline, no-default-features, player; final targeted metadata checks rerun after test-only additions",
+  "checks": [
+    {
+      "log": "/tmp/fvid-ld-mps-before.log",
+      "sha256": "901d3612f42a821e225c6c2227f2b04af7eedd09fa61bbe0201a01862588e519",
+      "results": [],
+      "finished": [
+        "    Finished `dev` profile [unoptimized + debuginfo] target(s) in 20.63s"
+      ]
+    },
+    {
+      "log": "/tmp/fvid-ld-mps-config-final.log",
+      "sha256": "f461ba42de71fd0c4d0231de8660638fe7abc9106ce7ca95d88919658b089b94",
+      "results": [
+        "test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.05s"
+      ],
+      "finished": [
+        "    Finished `test` profile [unoptimized + debuginfo] target(s) in 2.02s"
+      ]
+    },
+    {
+      "log": "/tmp/fvid-ld-mps-root-unit.log",
+      "sha256": "b3d89d01bf8146b52c1954fc596251e4b77f17118db3464d6e7c3a6f1b157e5d",
+      "results": [
+        "test result: ok. 1061 passed; 0 failed; 26 ignored; 0 measured; 0 filtered out; finished in 269.99s"
+      ],
+      "finished": [
+        "    Finished `test` profile [unoptimized + debuginfo] target(s) in 15.38s"
+      ]
+    },
+    {
+      "log": "/tmp/fvid-ld-mps-media-unit.log",
+      "sha256": "b6519f5805ff9471f83e682a068d36db4ed918a1180fd9fcf44368e82b82e040",
+      "results": [
+        "test result: ok. 572 passed; 0 failed; 1 ignored; 0 measured; 0 filtered out; finished in 1.76s"
+      ],
+      "finished": [
+        "    Finished `test` profile [unoptimized + debuginfo] target(s) in 44.07s"
+      ]
+    },
+    {
+      "log": "/tmp/fvid-ld-mps-compat.log",
+      "sha256": "dcbf8c6a8d047feb080f3fec79d28ebd7515974c6aa4ce17eefc986e26c74e79",
+      "results": [
+        "test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 2.52s",
+        "test result: ok. 9 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 26.35s",
+        "test result: ok. 10 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 77.57s",
+        "test result: ok. 9 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 58.28s",
+        "test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 18.75s",
+        "test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.07s"
+      ],
+      "finished": [
+        "    Finished `test` profile [unoptimized + debuginfo] target(s) in 45.12s"
+      ]
+    },
+    {
+      "log": "/tmp/fvid-ld-mps-check-tests.log",
+      "sha256": "b089208161efa34a7d0d76233ed2a3e094efb290f173c82b7691422d92503b92",
+      "results": [],
+      "finished": [
+        "    Finished `dev` profile [unoptimized + debuginfo] target(s) in 26.22s"
+      ]
+    }
+  ]
+}

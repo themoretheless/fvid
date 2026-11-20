@@ -1,0 +1,244 @@
+{
+  "scope": "Explicitly configured post-downscale PCM-clock handoff into ordinary LD-MPS without SBR;not nominal-SSC adaptation or whole-codec conformance.",
+  "base_commit": "5b24a2e223",
+  "previous_goal_turn": "Progress:committed LD-MPS profile validation correction,not completion of codec coverage.",
+  "goal_status": "active",
+  "counts": {
+    "passed": 1718,
+    "failed": 0,
+    "ignored": 27
+  },
+  "targets": [
+    "aac_ld_mps_downscaled",
+    "aac_ld_downscaled",
+    "aac_eld_short",
+    "aac_eld_third",
+    "aac_eld_third_rates",
+    "aac_eld_downscale_info",
+    "aac_eld_mps_native",
+    "aac_ld_mps_ld_core",
+    "aac_ld_mps_session",
+    "aac_ld_mps_profile",
+    "aac_ld_mps_shared128"
+  ],
+  "gates": [
+    {
+      "gate": "media",
+      "command": [
+        "cargo",
+        "--config",
+        "profile.dev.package.fvid-media.opt-level=2",
+        "test",
+        "--offline",
+        "-p",
+        "fvid-media",
+        "--lib"
+      ],
+      "status": 0,
+      "seconds": 38.76523962500505,
+      "log": "/tmp/fvid-ld-mps-downscaled-gate-media.log",
+      "log_sha256": "81d3733adb7669017baea794636758b17496f06b90fc7e538a757646faa5d3b8",
+      "counts": [
+        {
+          "passed": 587,
+          "failed": 0,
+          "ignored": 1
+        }
+      ]
+    },
+    {
+      "gate": "integration",
+      "command": [
+        "cargo",
+        "--config",
+        "profile.dev.package.fvid-media.opt-level=2",
+        "test",
+        "--offline",
+        "--no-default-features",
+        "--features",
+        "player",
+        "--test",
+        "aac_ld_mps_downscaled",
+        "--test",
+        "aac_ld_downscaled",
+        "--test",
+        "aac_eld_short",
+        "--test",
+        "aac_eld_third",
+        "--test",
+        "aac_eld_third_rates",
+        "--test",
+        "aac_eld_downscale_info",
+        "--test",
+        "aac_eld_mps_native",
+        "--test",
+        "aac_ld_mps_ld_core",
+        "--test",
+        "aac_ld_mps_session",
+        "--test",
+        "aac_ld_mps_profile",
+        "--test",
+        "aac_ld_mps_shared128",
+        "--",
+        "--nocapture",
+        "--test-threads=2"
+      ],
+      "status": 0,
+      "seconds": 257.62654162500985,
+      "log": "/tmp/fvid-ld-mps-downscaled-gate-integration.log",
+      "log_sha256": "28a62f667091d2af94ba73090393cfbc4250e6186a721207a5d33897927b93d8",
+      "counts": [
+        {
+          "passed": 6,
+          "failed": 0,
+          "ignored": 0
+        },
+        {
+          "passed": 6,
+          "failed": 0,
+          "ignored": 0
+        },
+        {
+          "passed": 6,
+          "failed": 0,
+          "ignored": 0
+        },
+        {
+          "passed": 8,
+          "failed": 0,
+          "ignored": 0
+        },
+        {
+          "passed": 6,
+          "failed": 0,
+          "ignored": 0
+        },
+        {
+          "passed": 6,
+          "failed": 0,
+          "ignored": 0
+        },
+        {
+          "passed": 5,
+          "failed": 0,
+          "ignored": 0
+        },
+        {
+          "passed": 5,
+          "failed": 0,
+          "ignored": 0
+        },
+        {
+          "passed": 2,
+          "failed": 0,
+          "ignored": 0
+        },
+        {
+          "passed": 10,
+          "failed": 0,
+          "ignored": 0
+        },
+        {
+          "passed": 1,
+          "failed": 0,
+          "ignored": 0
+        }
+      ]
+    },
+    {
+      "gate": "root",
+      "command": [
+        "cargo",
+        "--config",
+        "profile.dev.package.fvid-media.opt-level=2",
+        "test",
+        "--offline",
+        "--no-default-features",
+        "--features",
+        "player",
+        "--lib"
+      ],
+      "status": 0,
+      "seconds": 396.7373623329913,
+      "log": "/tmp/fvid-ld-mps-downscaled-gate-root.log",
+      "log_sha256": "5453b5c3e8b8da6f82474869b4db5dbdf4119e89f40578bfd20d0d39cfbf91b6",
+      "counts": [
+        {
+          "passed": 1070,
+          "failed": 0,
+          "ignored": 26
+        }
+      ]
+    }
+  ],
+  "sources": {
+    "crates/fvid-media/src/owned_aac/aac_ld_mps_native.rs": "d84ae4e5a20858d38b764dcf512e271d6cbf1b3166529ea4a00b352c39158fea",
+    "tests/aac_ld_mps_downscaled.rs": "94c9cc194ff8a132e04eebd8ae3f9b22255a422760c2b5f8ecaf90bcc5e5e3dd",
+    "src/playback/audio/ep1_worker_tests.rs": "c830f478dd88ff9987234418ade973386087b47adea4ba601ca7fa71d8a5e883",
+    "scripts/generate_aac_ld_mps_downscaled_fixtures.py": "0b74027596cf3dbe9063dcdc9facfb3aab491c912aa589dab824a46a0ebe3fe8"
+  },
+  "generation_audit": "docs/validation/aac-ld-mps-downscaled-generation-2026-10-31.json",
+  "source_audit": "docs/validation/aac-ld-mps-downscaled-source-2026-10-31.json",
+  "before_fix": {
+    "status": 101,
+    "counts": {
+      "passed": 1,
+      "failed": 2,
+      "ignored": 0
+    },
+    "log": "/tmp/fvid-ld-mps-downscaled-before.log",
+    "log_sha256": "6d8c0b700fc2b2ac6b211cbda4ac14d2ae8293e00c0ee58e09b99ff8f8d99826",
+    "specific_failure": "downscaled spatial filter banks are not yet implemented",
+    "native_source_sha256": "7a5fa51183ad83d36e81ef41304d20abea389c1e4ef8020c7cd64c26fe7b8787",
+    "qualification": "Original three tests only;checkpoint/invalid-mode tests were subsequently added."
+  },
+  "coverage": {
+    "profiles": [
+      23,
+      39
+    ],
+    "nominal_frames": [
+      480,
+      512
+    ],
+    "nominal_rate": 48000,
+    "output_rates": [
+      24000,
+      16000,
+      12000,
+      6000
+    ],
+    "factors": [
+      2,
+      3,
+      4,
+      8
+    ],
+    "geometries_per_profile": 7,
+    "trees": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7
+    ],
+    "programmes": 112,
+    "transport_programmes": 224,
+    "bare_controls": 42,
+    "source_packets": 32,
+    "pcm_compositional_values": 3421184,
+    "max_abs_f32_error": 0,
+    "worker": "Full AudioWorker queue and live-history seek,including all original source-window stamps;MP4 exact clocks and Matroska sub-ns rounding."
+  },
+  "limitations": [
+    "Only SSC explicitly describing adapted PCM clock is supported in this slice. Nominal-rate SSC remapping remains unsupported.",
+    "Downscaled coupled LD-SBR remains explicitly unsupported.",
+    "No full Annex B/all-profile or independent whole-codec conformance claim.",
+    "No new physical output-device or realtime performance qualification.",
+    "Arbitrary-downmix/HRTF composition and other codec gaps remain open."
+  ],
+  "pushed": false
+}

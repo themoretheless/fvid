@@ -3,6 +3,7 @@
 //! Container parsing does not validate codec payloads or implement playback.
 #![forbid(unsafe_code)]
 use crate::owned_file_tags::FileTags;
+use crate::owned_mp4_od as od;
 use crate::owned_matroska::{ColourDescription, HdrMetadata};
 pub use fvid_control::error::{Error, Result};
 pub(crate) use fvid_control::error::{buffer, invalid, unsupported};
@@ -240,6 +241,10 @@ impl SampleDescription {
 }
 #[derive(Clone, Debug)]
 pub struct Track {
+    /// MPEG-4 file dependencies from trak/tref/dpnd (track IDs, not stored ES_ID).
+    pub dependencies: Vec<u32>,
+    /// File reference table used by this OD stream (trak/tref/mpod).
+    pub od_references: Vec<u32>,
     pub sample_descriptions: Vec<SampleDescription>,
     pub id: u32,
     pub handler: [u8; 4],
@@ -361,6 +366,8 @@ impl Track {
             .and_then(|i| self.sample_descriptions.get(i as usize))
             .ok_or_else(|| invalid("MP4 decoder description index is out of range"))?;
         Ok(Self {
+            dependencies: self.dependencies.clone(),
+            od_references: self.od_references.clone(),
             sample_descriptions: Vec::new(), id: self.id, handler: self.handler,
             codec: d.codec, name: String::new(), language: String::new(),
             timescale: self.timescale, duration: self.duration,
@@ -500,11 +507,32 @@ pub struct SkippedTrack {
     /// The fourcc the sample entry calls itself.
     pub codec: [u8; 4],
 }
+#[derive(Clone, Debug)]
+struct SamplePadding {
+    count: usize,
+    packed: Vec<u8>,
+}
+
+impl SamplePadding {
+    fn get(&self, index: usize) -> u8 {
+        if index >= self.count {
+            return 0;
+        }
+        let byte = self.packed[index / 2];
+        if index % 2 == 0 {
+            (byte >> 4) & 7
+        } else {
+            byte & 7
+        }
+    }
+}
+
 pub struct Mp4Reader<R> {
     reader: R,
     tracks: Vec<Track>,
     track_header_flags: Vec<u32>,
     track_header_durations: Vec<Option<u64>>,
+    sample_padding: Vec<Option<SamplePadding>>,
     /// Tracks read all the way to their sample entry and then set aside because
     /// that entry names a coding with no arm here. Kept so a caller can tell a
     /// coding it has to implement apart from a file it failed to read.
@@ -517,6 +545,8 @@ pub struct Mp4Reader<R> {
     encoder: String,
     movie_timescale: u32,
     movie_duration: Option<u64>,
+    initial_object_tracks: Vec<u32>,
+    object_timelines: Vec<od::Timeline>,
     limits: Limits,
     /// Byte position the reader was left at by the last packet read, or
     /// `u64::MAX` when unknown (open, rewind or a failed read).
@@ -896,6 +926,11 @@ impl<R: Read + Seek> Mp4Reader<R> {
                 "fragmented MP4 states no fragments: it is an init segment without media",
             ));
         }
+        let initial_object_tracks = optional(&movie, b"iods")?
+            .map(|data| od::initial_tracks(data, limits.tracks))
+            .transpose()
+            .map_err(|e| invalid(&e))?
+            .unwrap_or_default();
         let movie_header = required(&movie, b"mvhd")?;
         let (movie_timescale, movie_duration) = media_time(movie_header, 100)?;
         let movie_duration_unknown = movie_duration == if version(movie_header, 1)? == 0 {
@@ -907,6 +942,7 @@ impl<R: Read + Seek> Mp4Reader<R> {
         let mut track_ids = Vec::new();
         let mut track_header_flags = Vec::new();
         let mut track_header_durations = Vec::new();
+        let mut sample_padding = Vec::new();
         let mut represented_descriptions = Vec::new();
         let mut refused = Vec::new();
         let mut remaining = limits.samples;
@@ -917,7 +953,7 @@ impl<R: Read + Seek> Mp4Reader<R> {
             if ordinal >= limits.tracks {
                 return Err(invalid("MP4 track limit exceeded"));
             }
-            let Some((track, flags, duration, represented)) = parse_track(atom.data, &mdats, remaining, fragmented, quicktime_brand, &mut track_ids, &mut refused)?
+            let Some((track, flags, duration, represented, padding)) = parse_track(atom.data, &mdats, remaining, fragmented, quicktime_brand, &mut track_ids, &mut refused)?
             else {
                 skipped += 1;
                 continue;
@@ -926,6 +962,7 @@ impl<R: Read + Seek> Mp4Reader<R> {
             tracks.push(track);
             track_header_flags.push(flags);
             track_header_durations.push(duration);
+            sample_padding.push(padding);
             represented_descriptions.push(represented);
         }
         if fragmented {
@@ -934,6 +971,7 @@ impl<R: Read + Seek> Mp4Reader<R> {
                 &fragment_defaults(&movie)?,
                 &mdats,
                 &mut tracks,
+                &mut sample_padding,
                 &mut remaining,
             )?;
         }
@@ -991,6 +1029,8 @@ impl<R: Read + Seek> Mp4Reader<R> {
             track_header_flags.retain(|_| { let retain = keep[index]; index += 1; retain });
             let mut index = 0;
             track_header_durations.retain(|_| { let retain = keep[index]; index += 1; retain });
+            let mut index = 0;
+            sample_padding.retain(|_| { let retain = keep[index]; index += 1; retain });
         }
         if tracks.is_empty() {
             // A file whose every track is a format there is no decoder for is
@@ -1063,20 +1103,25 @@ impl<R: Read + Seek> Mp4Reader<R> {
         let chapters = read_chpl(udta, movie_timescale, chapter_duration);
         let tags = read_tags(udta);
         let encoder = read_encoder(udta);
-        Ok(Self {
+        let mut indexed = Self {
             reader,
             tracks,
             track_header_flags,
             track_header_durations,
+            sample_padding,
             refused,
             chapters,
             tags,
             encoder,
             movie_timescale,
             movie_duration: (movie_duration != 0 && !movie_duration_unknown).then_some(movie_duration),
+            initial_object_tracks,
+            object_timelines: Vec::new(),
             limits,
             position: u64::MAX,
-        })
+        };
+        indexed.index_object_descriptors()?;
+        Ok(indexed)
     }
     /// Known positive movie duration in movie ticks; zero and the unknown
     /// marker do not provide a finite bound for presentation estimation.
@@ -1140,6 +1185,23 @@ impl<R: Read + Seek> Mp4Reader<R> {
             Ok(())
         }
         let mut total = 0;
+        add(&mut total, self.initial_object_tracks.capacity(), 4)?;
+        add(
+            &mut total,
+            self.object_timelines.capacity(),
+            std::mem::size_of::<od::Timeline>(),
+        )?;
+        for timeline in &self.object_timelines {
+            add(&mut total, timeline.heap_bytes().map_err(|e| invalid(&e))?, 1)?;
+        }
+        add(
+            &mut total,
+            self.sample_padding.capacity(),
+            std::mem::size_of::<Option<SamplePadding>>(),
+        )?;
+        for padding in self.sample_padding.iter().flatten() {
+            add(&mut total, padding.packed.capacity(), 1)?;
+        }
         add(&mut total, self.track_header_flags.capacity(), std::mem::size_of::<u32>())?;
         add(&mut total, self.track_header_durations.capacity(), std::mem::size_of::<Option<u64>>())?;
         add(
@@ -1179,6 +1241,8 @@ impl<R: Read + Seek> Mp4Reader<R> {
             add(&mut total, text.capacity(), 1)?;
         }
         for track in &self.tracks {
+            add(&mut total, track.dependencies.capacity(), std::mem::size_of::<u32>())?;
+            add(&mut total, track.od_references.capacity(), std::mem::size_of::<u32>())?;
             add(&mut total, track.name.capacity(), 1)?;
             add(&mut total, track.language.capacity(), 1)?;
             add(&mut total, track.configuration.capacity(), 1)?;
@@ -1204,6 +1268,25 @@ impl<R: Read + Seek> Mp4Reader<R> {
             }
         }
         Ok(total)
+    }
+    /// Exact coded bits in an indexed sample, excluding the trailing padding
+    /// declared by stbl/padb. Raw packet reads preserve all stored octets.
+    pub fn packet_bit_len(&self, track: usize, sample: usize) -> Result<usize> {
+        let size = self
+            .tracks
+            .get(track)
+            .and_then(|t| t.samples.get(sample))
+            .ok_or_else(|| invalid("MP4 packet index out of range"))?
+            .size;
+        let padding = self
+            .sample_padding
+            .get(track)
+            .and_then(|p| p.as_ref())
+            .map_or(0, |p| p.get(sample));
+        (size as usize)
+            .checked_mul(8)
+            .and_then(|bits| bits.checked_sub(usize::from(padding)))
+            .ok_or_else(|| invalid("MP4 sample padding exceeds stored bits"))
     }
     /// Reads exactly one indexed packet; the caller may reuse the buffer.
     pub fn read_packet(&mut self, track: usize, sample: usize, output: &mut Vec<u8>) -> Result<()> {
@@ -1274,6 +1357,394 @@ impl<R: Read + Seek> Mp4Reader<R> {
     pub fn into_inner(self) -> R {
         self.reader
     }
+}
+
+impl<R: Read + Seek> Mp4Reader<R> {
+    fn index_object_descriptors(&mut self) -> Result<()> {
+        if !self.initial_object_tracks.is_empty()
+            && self.refused.iter().any(|t| t.handler == *b"odsm")
+        {
+            return Err(unsupported(
+                "MP4 referenced OD stream codec is not implemented",
+            ));
+        }
+        let indices: Vec<_> = self
+            .tracks
+            .iter()
+            .enumerate()
+            .filter(|(_, t)| t.handler == *b"odsm" && self.initial_object_tracks.contains(&t.id))
+            .map(|(i, _)| i)
+            .collect();
+        let mut retained = 0usize;
+        for index in indices {
+            let track = &self.tracks[index];
+            if track.id > u32::from(u16::MAX) {
+                return Err(invalid(
+                    "MP4 OD elementary track ID exceeds ES identifier range",
+                ));
+            }
+            let mut timeline = od::Timeline {
+                track_id: track.id,
+                timescale: track.timescale,
+                references: track.od_references.clone(),
+                events: Vec::new(),
+            };
+            if timeline
+                .references
+                .iter()
+                .any(|id| !self.tracks.iter().any(|t| t.id == *id))
+            {
+                return Err(invalid("MP4 mpod references unavailable track"));
+            }
+            let count = track.samples.len();
+            let mut state = od::State::default();
+            let mut packet = Vec::new();
+            for sample in 0..count {
+                let stamp = self.tracks[index]
+                    .samples
+                    .get(sample)
+                    .ok_or_else(|| invalid("missing MP4 OD sample"))?;
+                if timeline.events.last().is_some_and(|e| e.pts >= stamp.pts) {
+                    return Err(invalid("MP4 OD event times must increase"));
+                }
+                let setup = self.tracks[index]
+                    .description_for_sample(sample)
+                    .ok_or_else(|| invalid("missing MP4 OD setup"))?;
+                if setup.codec != *b"mp4s" {
+                    return Err(unsupported("unsupported MP4 OD sample entry"));
+                }
+                od::validate_setup(&setup.configuration).map_err(|e| invalid(&e))?;
+                if self.packet_bit_len(index, sample)? != stamp.size as usize * 8 {
+                    return Err(invalid("MP4 OD access unit is not byte aligned"));
+                }
+                let before = retained
+                    .checked_add(timeline.heap_bytes().map_err(|e| invalid(&e))?)
+                    .and_then(|v| {
+                        state
+                            .heap_bytes()
+                            .ok()
+                            .and_then(|h| h.checked_mul(2))
+                            .and_then(|h| v.checked_add(h))
+                    })
+                    .and_then(|v| v.checked_add(stamp.size as usize))
+                    .ok_or_else(|| invalid("MP4 OD index size overflow"))?;
+                if before > self.limits.metadata_bytes {
+                    return Err(invalid("MP4 OD index exceeds metadata budget"));
+                }
+                self.read_packet(index, sample, &mut packet)?;
+                state
+                    .apply(&packet, &timeline.references)
+                    .map_err(|e| invalid(&e))?;
+                let heap = state.heap_bytes().map_err(|e| invalid(&e))?;
+                let next = retained
+                    .checked_add(timeline.heap_bytes().map_err(|e| invalid(&e))?)
+                    .and_then(|v| heap.checked_mul(2).and_then(|h| v.checked_add(h)))
+                    .and_then(|v| v.checked_add(packet.capacity()))
+                    .and_then(|v| v.checked_add(std::mem::size_of::<od::Event>()))
+                    .ok_or_else(|| invalid("MP4 OD index size overflow"))?;
+                if next > self.limits.metadata_bytes {
+                    return Err(invalid("MP4 OD index exceeds metadata budget"));
+                }
+                timeline
+                    .events
+                    .try_reserve_exact(1)
+                    .map_err(|_| invalid("MP4 OD event allocation failed"))?;
+                timeline.events.push(od::Event {
+                    pts: stamp.pts,
+                    state: state.clone(),
+                });
+            }
+            retained = retained
+                .checked_add(timeline.heap_bytes().map_err(|e| invalid(&e))?)
+                .ok_or_else(|| invalid("MP4 OD index size overflow"))?;
+            self.object_timelines
+                .try_reserve_exact(1)
+                .map_err(|_| invalid("MP4 OD timeline allocation failed"))?;
+            self.object_timelines.push(timeline);
+        }
+        Ok(())
+    }
+    /// Explicit OD state only; absent samples and matching ASCs never imply
+    /// dynamic membership on their own. The selected members must be a prefix.
+    pub fn object_descriptor_prefix(
+        &self,
+        chain: &[u32],
+        pts: i64,
+        scale: u32,
+    ) -> Result<Option<usize>> {
+        self.object_descriptor_prefix_context(chain, pts, scale, None)
+    }
+    /// Select the OD state for a specific presentation edit. None names the
+    /// implicit unedited root; it is distinct from omitting presentation context.
+    pub fn object_descriptor_prefix_in_edit(
+        &self,
+        chain: &[u32],
+        pts: i64,
+        scale: u32,
+        edit: Option<usize>,
+    ) -> Result<Option<usize>> {
+        self.object_descriptor_prefix_context(chain, pts, scale, Some(edit))
+    }
+    pub fn has_object_descriptor(&self, root: u32) -> bool {
+        self.object_timelines
+            .iter()
+            .any(|t| t.references.contains(&root))
+    }
+    fn object_descriptor_prefix_context(
+        &self,
+        chain: &[u32],
+        pts: i64,
+        scale: u32,
+        context: Option<Option<usize>>,
+    ) -> Result<Option<usize>> {
+        let Some(root) = chain.first() else {
+            return Err(invalid("empty MP4 OD programme chain"));
+        };
+        let mut timelines = self
+            .object_timelines
+            .iter()
+            .filter(|t| t.references.contains(root));
+        let Some(timeline) = timelines.next() else {
+            return Ok(None);
+        };
+        if timelines.next().is_some() {
+            return Err(invalid("multiple MP4 OD streams control selected root"));
+        }
+        let root = self
+            .tracks
+            .iter()
+            .find(|t| t.id == *root)
+            .ok_or_else(|| invalid("MP4 OD root track is unavailable"))?;
+        let controller = self
+            .tracks
+            .iter()
+            .find(|t| t.id == timeline.track_id)
+            .ok_or_else(|| invalid("MP4 OD controller track is unavailable"))?;
+        if root.edits.is_empty() && context.is_some_and(|edit| edit.is_some()) {
+            return Err(invalid("MP4 OD root edit context is unavailable"));
+        }
+        if root.edits.is_empty() && controller.edits.is_empty() {
+            return timeline
+                .prefix(chain, pts, scale)
+                .map(Some)
+                .map_err(|e| invalid(&e));
+        }
+        if scale == 0 {
+            return Err(invalid("zero MP4 OD edit clock"));
+        }
+        // All coordinates use 1/(root_scale * od_scale * movie_scale).
+        // A constant source-clock relation also applies during decoder preroll.
+        // Incompatible repeated presentations require presentation-context dispatch;
+        // never guess membership from whichever occurrence happens to come first.
+        let offset = if let Some(edit) = context {
+            od_edit_offset_at(root, controller, self.movie_timescale, pts, scale, edit)?
+        } else {
+            od_edit_relation(root, controller, self.movie_timescale)?
+        };
+        let root_unit = i128::from(timeline.timescale) * i128::from(self.movie_timescale);
+        let event_unit = i128::from(scale) * i128::from(self.movie_timescale);
+        let (mut a, mut b) = (root.timescale, scale);
+        while b != 0 {
+            (a, b) = (b, a % b);
+        }
+        let source_factor = i128::from(root.timescale / a);
+        let query_factor = i128::from(scale / a);
+        let at = i128::from(pts)
+            .checked_mul(root_unit)
+            .and_then(|n| n.checked_mul(source_factor))
+            .and_then(|n| {
+                offset
+                    .checked_mul(query_factor)
+                    .and_then(|o| n.checked_add(o))
+            })
+            .ok_or_else(|| invalid("MP4 OD edit clock overflow"))?;
+        let event_unit = event_unit
+            .checked_mul(source_factor)
+            .ok_or_else(|| invalid("MP4 OD edit clock overflow"))?;
+        timeline
+            .prefix_units(chain, at, event_unit)
+            .map(Some)
+            .map_err(|e| invalid(&e))
+    }
+}
+
+/// Compile a single source-clock relation over every presented root window.
+/// Empty root edits have no AU; nonempty root windows require an OD mapping.
+fn od_edit_relation(root: &Track, controller: &Track, movie_scale: u32) -> Result<i128> {
+    let overflow = || invalid("MP4 OD edit clock overflow");
+    let r = i128::from(root.timescale);
+    let o = i128::from(controller.timescale);
+    let m = i128::from(movie_scale);
+    if r == 0 || o == 0 || m == 0 {
+        return Err(invalid("zero MP4 OD edit clock"));
+    }
+    let movie_unit = r * o;
+    let mut controllers = od_edit_spans(controller, r * m, movie_unit);
+    let mut current = controllers.next().transpose()?;
+    let mut relation = None;
+    for root in od_edit_spans(root, o * m, movie_unit) {
+        let root = root?;
+        let Some(root_affine) = root.affine else {
+            continue;
+        };
+        let mut covered = root.start;
+        while covered < root.end {
+            while current.is_some_and(|od| od.end <= covered) {
+                current = controllers.next().transpose()?;
+            }
+            let od = current.ok_or_else(|| invalid("MP4 OD edit leaves active audio uncovered"))?;
+            if od.start > covered {
+                return Err(invalid("MP4 OD edit leaves active audio uncovered"));
+            }
+            let affine = od
+                .affine
+                .ok_or_else(|| invalid("MP4 OD empty edit overlaps active audio"))?;
+            let offset = affine.checked_sub(root_affine).ok_or_else(overflow)?;
+            if relation.is_some_and(|old| old != offset) {
+                return Err(unsupported(
+                    "MP4 OD edits require presentation-dependent membership",
+                ));
+            }
+            relation = Some(offset);
+            covered = root.end.min(od.end);
+        }
+    }
+    relation.ok_or_else(|| invalid("MP4 OD has no active audio edit"))
+}
+
+#[derive(Clone, Copy)]
+struct OdEditSpan {
+    start: i128,
+    end: i128,
+    affine: Option<i128>,
+}
+
+fn od_edit_spans(
+    track: &Track,
+    unit: i128,
+    movie_unit: i128,
+) -> impl Iterator<Item = Result<OdEditSpan>> + '_ {
+    let default = track
+        .edits
+        .is_empty()
+        .then(|| {
+            Ok(OdEditSpan {
+                start: 0,
+                end: i128::from(track.duration)
+                    .checked_mul(unit)
+                    .ok_or_else(|| invalid("MP4 OD edit clock overflow"))?,
+                affine: Some(0),
+            })
+        })
+        .into_iter();
+    let edits = track.edits.iter().scan(0i128, move |start, edit| {
+        Some((|| {
+            let end = i128::from(edit.duration)
+                .checked_mul(movie_unit)
+                .and_then(|n| start.checked_add(n))
+                .ok_or_else(|| invalid("MP4 OD edit clock overflow"))?;
+            if end <= *start {
+                return Err(invalid("empty MP4 OD edit"));
+            }
+            let affine = match edit.media_time {
+                -1 => None,
+                n if n >= 0 => Some(
+                    i128::from(n)
+                        .checked_mul(unit)
+                        .and_then(|n| n.checked_sub(*start))
+                        .ok_or_else(|| invalid("MP4 OD edit clock overflow"))?,
+                ),
+                _ => return Err(invalid("invalid MP4 OD media edit time")),
+            };
+            let span = OdEditSpan {
+                start: *start,
+                end,
+                affine,
+            };
+            *start = end;
+            Ok(span)
+        })())
+    });
+    default.chain(edits)
+}
+
+fn od_edit_offset_at(
+    root: &Track,
+    controller: &Track,
+    movie_scale: u32,
+    pts: i64,
+    scale: u32,
+    edit: Option<usize>,
+) -> Result<i128> {
+    let fail = || invalid("MP4 OD edit clock overflow");
+    let (r, o, m) = (
+        i128::from(root.timescale),
+        i128::from(controller.timescale),
+        i128::from(movie_scale),
+    );
+    if r == 0 || o == 0 || m == 0 || scale == 0 {
+        return Err(invalid("zero MP4 OD edit clock"));
+    }
+    if root.edits.is_empty() != edit.is_none() {
+        return Err(invalid("MP4 OD root edit context is unavailable"));
+    }
+    let mut selected_root = None;
+    for (index, span) in od_edit_spans(root, o * m, r * o).enumerate() {
+        let span = span?;
+        if index == edit.unwrap_or(0) {
+            selected_root = Some(span);
+            break;
+        }
+    }
+    let root = selected_root.ok_or_else(|| invalid("MP4 OD root edit context is unavailable"))?;
+    let affine = root
+        .affine
+        .ok_or_else(|| invalid("MP4 OD root edit is empty"))?;
+    // Coordinates are scaled by the query clock so fractional root ticks
+    // remain exact. Clamp only the *edit selection*, never the OD source time:
+    // decoder preroll/lookahead extrapolates the boundary edit's own mapping.
+    let q = i128::from(scale);
+    let source = i128::from(pts)
+        .checked_mul(o * m)
+        .and_then(|n| n.checked_mul(r))
+        .ok_or_else(fail)?;
+    let movie = source
+        .checked_sub(affine.checked_mul(q).ok_or_else(fail)?)
+        .ok_or_else(fail)?;
+    let first = root.start.checked_mul(q).ok_or_else(fail)?;
+    let last = root.end.checked_mul(q).ok_or_else(fail)?;
+    let after = movie >= last;
+    let anchor = movie.max(first).min(last);
+    let mut covered = root.start;
+    let mut selected = None;
+    for od in od_edit_spans(controller, r * m, r * o) {
+        let od = od?;
+        let begin = od.start.max(root.start);
+        let end = od.end.min(root.end);
+        if begin >= end {
+            continue;
+        }
+        if begin != covered {
+            return Err(invalid("MP4 OD edit leaves active audio uncovered"));
+        }
+        let od_affine = od
+            .affine
+            .ok_or_else(|| invalid("MP4 OD empty edit overlaps active audio"))?;
+        let start = begin.checked_mul(q).ok_or_else(fail)?;
+        let end_scaled = end.checked_mul(q).ok_or_else(fail)?;
+        if if after {
+            start < anchor && anchor <= end_scaled
+        } else {
+            start <= anchor && anchor < end_scaled
+        } {
+            selected = Some(od_affine.checked_sub(affine).ok_or_else(fail)?);
+        }
+        covered = end;
+    }
+    if covered != root.end {
+        return Err(invalid("MP4 OD edit leaves active audio uncovered"));
+    }
+    selected.ok_or_else(|| invalid("MP4 OD edit context has no source mapping"))
 }
 
 /// The uncompressed PCM tags whose sample entry is the whole description.
@@ -1720,7 +2191,7 @@ fn parse_track(
     quicktime: bool,
     track_ids: &mut Vec<u32>,
     refused: &mut Vec<SkippedTrack>,
-) -> Result<Option<(Track, u32, Option<u64>, Vec<bool>)>> {
+) -> Result<Option<(Track, u32, Option<u64>, Vec<bool>, Option<SamplePadding>)>> {
     let track = atoms(data)?;
     let tkhd = required(&track, b"tkhd")?;
     let narrow = version(tkhd, 1)? == 0;
@@ -1801,7 +2272,47 @@ fn parse_track(
         return Err(invalid("invalid sample description count"));
     }
     let entry = entries[0];
+    let mut dependencies = Vec::new();
+    let mut od_references = Vec::new();
+    if let Some(tref) = optional(&track, b"tref")? {
+        let references = atoms(tref)?;
+        if let Some(mpod) = optional(&references, b"mpod")? {
+            if handler != *b"odsm"
+                || !mpod.len().is_multiple_of(4)
+                || mpod.len() / 4 > usize::from(u16::MAX)
+            {
+                return Err(invalid("invalid MP4 mpod reference table"));
+            }
+            od_references
+                .try_reserve_exact(mpod.len() / 4)
+                .map_err(|_| invalid("MP4 OD reference allocation failed"))?;
+            for at in (0..mpod.len()).step_by(4) {
+                let id = u32be(mpod, at)?;
+                if id == 0 {
+                    return Err(invalid("zero MP4 mpod track ID"));
+                }
+                od_references.push(id);
+            }
+        }
+        if let Some(dpnd) = optional(&references, b"dpnd")? {
+            if !dpnd.len().is_multiple_of(4) {
+                return Err(invalid("invalid MP4 dpnd table length"));
+            }
+            dependencies
+                .try_reserve_exact(dpnd.len() / 4)
+                .map_err(|_| invalid("MP4 dependency allocation failed"))?;
+            for at in (0..dpnd.len()).step_by(4) {
+                let id = u32be(dpnd, at)?;
+                if id == 0 {
+                    return Err(invalid("zero MP4 dependency track ID"));
+                }
+                dependencies.push(id);
+            }
+        }
+    }
     let mut result = Track {
+        dependencies,
+        od_references,
         sample_descriptions: Vec::new(),
         id,
         handler,
@@ -1876,6 +2387,7 @@ fn parse_track(
     };
     if nonterminal_zero { return Err(invalid("invalid decode-time run")); }
     result.samples = index;
+    let padding = sample_padding_table(&stbl, &result.samples)?;
     if duration_unknown && !result.samples.is_empty() {
         let last = result.samples.get(result.samples.len() - 1)
             .ok_or_else(|| invalid("MP4 duration sample is unavailable"))?;
@@ -1919,7 +2431,89 @@ fn parse_track(
             });
         }
     }
-    Ok(Some((result, flags, header_duration, represented)))
+    Ok(Some((result, flags, header_duration, represented, padding)))
+}
+
+fn record_padding(slot: &mut Option<SamplePadding>, index: usize, bits: u8) -> Result<()> {
+    if slot.is_none() && bits == 0 {
+        return Ok(());
+    }
+    if slot.is_none() {
+        let mut packed = Vec::new();
+        packed
+            .try_reserve_exact(index.div_ceil(2))
+            .map_err(|_| invalid("MP4 padding allocation failed"))?;
+        packed.resize(index.div_ceil(2), 0);
+        *slot = Some(SamplePadding {
+            count: index,
+            packed,
+        });
+    }
+    let padding = slot.as_mut().unwrap();
+    if padding.count != index {
+        return Err(invalid("MP4 fragment padding index mismatch"));
+    }
+    if index % 2 == 0 {
+        padding
+            .packed
+            .try_reserve(1)
+            .map_err(|_| invalid("MP4 padding allocation failed"))?;
+        padding.packed.push(bits << 4);
+    } else {
+        // A padb with an odd count has an unused low nibble, not a sample.
+        let last = padding.packed.last_mut().unwrap();
+        *last = (*last & 0xf0) | bits;
+    }
+    padding.count += 1;
+    Ok(())
+}
+
+fn sample_padding_table(stbl: &[Atom<'_>], samples: &SampleIndex) -> Result<Option<SamplePadding>> {
+    let Some(data) = optional(stbl, b"padb")? else {
+        return Ok(None);
+    };
+    if u32be(data, 0)? != 0 {
+        return Err(invalid("unsupported MP4 padding version or flags"));
+    }
+    let count = u32be(data, 4)? as usize;
+    let sizes = required(stbl, b"stsz")?;
+    if count != u32be(sizes, 8)? as usize {
+        return Err(invalid(
+            "MP4 padding sample count disagrees with size table",
+        ));
+    }
+    if data.len().checked_sub(8) != Some(count.div_ceil(2)) {
+        return Err(invalid("invalid MP4 padding table length"));
+    }
+    if data[8..].iter().any(|b| b & 0x88 != 0) {
+        return Err(invalid("nonzero MP4 padding reserved bits"));
+    }
+    let mut packed = Vec::new();
+    packed
+        .try_reserve_exact(data.len() - 8)
+        .map_err(|_| invalid("MP4 padding allocation failed"))?;
+    packed.extend_from_slice(&data[8..]);
+    let padding = SamplePadding { count, packed };
+    if samples.len() != count {
+        // Block-indexed legacy PCM/MACE may group original table rows. Zero
+        // padding needs no remapping; nonzero bit spans need coded-unit support.
+        if (0..count).any(|i| padding.get(i) != 0) {
+            return Err(unsupported(
+                "MP4 padding on grouped audio units is not implemented",
+            ));
+        }
+        return Ok(None);
+    }
+    for index in 0..count {
+        let size = samples
+            .get(index)
+            .ok_or_else(|| invalid("MP4 padding sample index out of range"))?
+            .size;
+        if u64::from(padding.get(index)) > u64::from(size) * 8 {
+            return Err(invalid("MP4 sample padding exceeds stored bits"));
+        }
+    }
+    Ok(Some(padding))
 }
 
 fn text_handler(handler: &[u8; 4]) -> bool {
@@ -1978,6 +2572,7 @@ fn parse_sample_entry(entry: Atom<'_>, mut result: Track, refused: &mut Vec<Skip
             let Some(at) = lpcm_v2_entry(entry.data, &mut result)? else { return Ok(None); };
             (at, None)
         }
+        (b"odsm", b"mp4s") => (8, Some(b"esds")),
         (b"soun", b"mp4a") => {
             match u16be(entry.data, 8)? {
                 0 => {
@@ -2180,6 +2775,14 @@ fn parse_sample_entry(entry: Atom<'_>, mut result: Track, refused: &mut Vec<Skip
     Ok(Some(result))
 }
 
+// Separate ESC transport may carry an explicitly empty AU. This is not an
+// omitted sample or an invitation to feed empty byte packets to ordinary AAC.
+fn empty_esc_description(d: &SampleDescription) -> bool {
+    d.codec == *b"mp4a"
+        && mp4_aac_specific_config(&d.configuration)
+            .is_ok_and(|asc| Mp4AudioSpecificConfig::parse(asc).is_ok_and(|c| c.separate_esc))
+}
+
 /// The sample tables of one track collapsed into an index, or `None` when the
 /// track holds more index than the budget allows.
 ///
@@ -2353,7 +2956,7 @@ fn sample_index(
         mace_block(codec, channels)
     };
     let Some((samples_per_unit, bytes_per_unit)) = unit else {
-        return expanded_index(stbl, codec, count, timing, limit, size_at, mdats);
+        return expanded_index(stbl, codec, descriptions, count, timing, limit, size_at, mdats);
     };
     if bytes_per_unit == 0 { return Err(invalid("zero MP4 sample size")); }
     if timing.len() == 1 && optional(stbl, b"ctts")?.is_none() && optional(stbl, b"stss")?.is_none()
@@ -2385,7 +2988,7 @@ fn sample_index(
         }
         return Ok(Some(index));
     }
-    expanded_index(stbl, codec, count, timing, limit, size_at, mdats)
+    expanded_index(stbl, codec, descriptions, count, timing, limit, size_at, mdats)
 }
 
 /// QuickTime MACE counts six decoded samples per encoded block; other entries
@@ -2412,7 +3015,7 @@ fn changing_mace_index(
         } else {
             size_at(raw)?
         };
-        if bytes == 0 {
+        if bytes == 0 && !descriptions.get(d as usize - 1).is_some_and(empty_esc_description) {
             return Err(invalid("zero MP4 sample size"));
         }
         Ok(bytes)
@@ -2559,6 +3162,7 @@ fn changing_mace_index(
 fn expanded_index(
     stbl: &[Atom<'_>],
     codec: &[u8; 4],
+    descriptions: &[SampleDescription],
     count: usize,
     timing: Vec<(usize, u32)>,
     limit: usize,
@@ -2580,9 +3184,10 @@ fn expanded_index(
     samples
         .try_reserve_exact(count)
         .map_err(|_| invalid("sample index allocation failed"))?;
+    let may_have_empty_esc = descriptions.iter().any(empty_esc_description);
     for index in 0..count {
         let size = size_at(index)?;
-        if size == 0 {
+        if size == 0 && !may_have_empty_esc {
             return Err(invalid("zero MP4 sample size"));
         }
         samples.push(Sample {
@@ -2658,7 +3263,13 @@ fn expanded_index(
     let runs = chunk_runs(stbl, count, mdats, 1, chunk_bytes)?;
     for run in runs {
         let mut offset = run.offset;
+        let empty_esc = descriptions
+            .get(run.description_index as usize - 1)
+            .is_some_and(empty_esc_description);
         for s in &mut samples[run.first..run.first + run.frames] {
+            if s.size == 0 && !empty_esc {
+                return Err(invalid("zero MP4 sample size"));
+            }
             s.description_index = run.description_index;
             s.offset = offset;
             offset += u64::from(s.size);
@@ -2836,6 +3447,7 @@ fn index_fragments(
     defaults: &[TrackExtends],
     mdats: &[Range<u64>],
     tracks: &mut [Track],
+    padding: &mut [Option<SamplePadding>],
     limit: &mut usize,
 ) -> Result<()> {
     // An empty-duration traf carries time without a sample-index entry. Keep
@@ -2937,7 +3549,13 @@ fn index_fragments(
             let duration = duration
                 .or_else(|| extends.map(|entry| entry.duration))
                 .unwrap_or(0);
-            let size = size.or_else(|| extends.and_then(|e| (e.size != 0).then_some(e.size)));
+            let empty_esc = description
+                .checked_sub(1)
+                .and_then(|i| tracks[position].sample_descriptions.get(i as usize))
+                .is_some_and(empty_esc_description);
+            let size = size.or_else(|| {
+                extends.and_then(|e| (e.size != 0 || empty_esc).then_some(e.size))
+            });
             let header_flags = header_flags.or_else(|| extends.and_then(|e| e.flags));
             let track = &mut tracks[position];
             let descriptions = track.sample_descriptions.len();
@@ -3055,7 +3673,7 @@ fn index_fragments(
                             invalid("MP4 fragment sample states no size and none is defaulted")
                         })?
                     };
-                    if bytes_of_sample == 0 {
+                    if bytes_of_sample == 0 && !empty_esc {
                         return Err(invalid("zero MP4 fragment sample size"));
                     }
                     let bits = if flags & 0x00_0400 != 0 {
@@ -3067,6 +3685,9 @@ fn index_fragments(
                     } else {
                         header_flags.unwrap_or(0)
                     };
+                    if u64::from((bits >> 17) & 7) > u64::from(bytes_of_sample) * 8 {
+                        return Err(invalid("MP4 sample padding exceeds stored bits"));
+                    }
                     let shift = if flags & 0x00_0800 != 0 {
                         let value = u32be(bytes, at)?;
                         at += 4;
@@ -3089,6 +3710,7 @@ fn index_fragments(
                     // Check the composed value rather than narrowing DTS first.
                     let pts = i64::try_from(i128::from(dts) + i128::from(shift))
                         .map_err(|_| invalid("MP4 PTS overflow"))?;
+                    record_padding(&mut padding[position], list.len(), ((bits >> 17) & 7) as u8)?;
                     list.push(Sample {
                         description_index: description,
                         offset,

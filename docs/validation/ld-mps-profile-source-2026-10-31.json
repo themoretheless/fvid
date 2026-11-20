@@ -1,0 +1,33 @@
+{
+  "primary_url": "https://www.iis.fraunhofer.de/content/dam/iis/de/doc/ame/conference/AES-128-Convention_ANewParametricStereo-AndMultichannelExtension_AES8099.pdf",
+  "pdf_sha256": "a2647072c9db1732409c4b180c8ef8a3f48bb77847b6fe879e4bfa075adf7ade",
+  "section": "3.3,page3",
+  "source_kind": "LD-MPS authors,official Fraunhofer publication",
+  "finding": "LD-MPS excludes residual coding;ordinary MPEG Surround is a distinct mode.",
+  "verification": "Downloaded PDF and visually inspected page3;not just a search snippet.",
+  "full_annex_b_obtained": false,
+  "qualification": "Evidence for this LD residual boundary,not a full-profile or all-codec conformance claim. Historical controlled LD/residual numerical traces are not native-profile acceptance.",
+  "normative_confirmation": {
+    "url": "https://cdn.standards.iteh.ai/samples/62645/53b3f02e4abe4a959b9ddb1e24312b41/ISO-IEC-14496-26-2010-Amd-3-2014.pdf",
+    "pdf_sha256": "8c5df9bd20d46fea1d74977894de60f26d9031038bc70cb505608e4ca622a868",
+    "standard": "ISO/IEC 14496-26:2010/Amd.3:2014",
+    "clauses": [
+      "7.26.1.2.1.5",
+      "7.26.1.2.1.26"
+    ],
+    "finding": "LD-MPS configuration and frame extension types must be 2..15,excluding residual types0/1 regardless of band count.",
+    "scope": "Preview contains these clauses but not full Annex B or the full conformance standard.",
+    "visual_verification": "Rendered and inspected printed page3 (PDF page7)."
+  },
+  "unavailable_full_document_urls": [
+    "https://www.ieclist.ink/iso/ISO%20IEC%2023003-2-2010%20PDF.pdf",
+    "https://iso.ieclist.ink/iec/ISO%20IEC%2023003-2-2018%20PDF.pdf"
+  ],
+  "unavailable_full_document_result": "Search-index hits contain table/annex text,but direct HTTP fetch and web open return404. Not counted as obtained normative annex.",
+  "additional_preview_attempt": {
+    "url": "https://robstandard.com/wp-content/preview/f0cd0721e2b76ab786a73440cb994896.pdf",
+    "sha256": "2115e9c672d62317571b1db555bcb55aec7c8dec4c2a8ec50e06be82007a1003",
+    "pages": 36,
+    "result": "Valid2018 PDF preview;contents lists Annex B but actual annex/table pages are absent. Not counted as obtained Annex B."
+  }
+}

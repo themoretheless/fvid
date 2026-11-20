@@ -1,0 +1,38 @@
+{
+  "scope": "Read-only acquisition/provenance of additional public previews. No full LD-MPS AnnexB recovered; no decoder fix or codec acceptance claim.",
+  "documents": [
+    {
+      "title": "ISO/IEC23003-1:2007 generic MPEG Surround",
+      "public_preview": "https://robstandard.com/wp-content/preview/02596f6e4fd2405c6176050315b0eb11.pdf",
+      "cache_path": "/Users/themoretheless/.cache/fvid-reference/ld-sbr/mpeg-surround-2007-relocated-preview.pdf",
+      "sha256": "aff55560e25eeb8691435f430d8528e46f512ce77bd4b0eaf7ffbb8b1d8ddbab",
+      "bytes": 684536,
+      "pdf_pages": 57,
+      "last_printed_page": 51,
+      "scope": "ParamHRTFset syntax/Table8 and field semantics/Table53 are visible; rendering clauses are beyond this preview."
+    },
+    {
+      "title": "ISO/IEC23003-2:2010 SAOC",
+      "public_preview": "https://robstandard.com/wp-content/preview/f51f8fbbd6b215e263ced3fef0d62013.pdf",
+      "cache_path": "/Users/themoretheless/.cache/fvid-reference/ld-sbr/saoc-2010-robstandard-preview.pdf",
+      "sha256": "a1fbccc569e102be8617ad569c656b4363222a9dd1785348ece9d3a5a2674137",
+      "bytes": 887127,
+      "pdf_pages": 27,
+      "last_printed_page": 21,
+      "scope": "Ends during SAOC syntax; AnnexB starts on printed page109 and is not included."
+    },
+    {
+      "title": "ISO/IEC23003-2:2010/Cor2:2014",
+      "public_preview": "https://robstandard.com/wp-content/preview/bd827759d42794a8b69c32783b64ea19.pdf",
+      "cache_path": "/Users/themoretheless/.cache/fvid-reference/ld-sbr/saoc-cor2-2014-public-alt.pdf",
+      "sha256": "e08246e570bda34781717d95d199534278fd4eed6b78f76fdf8d258cbafda5b2",
+      "bytes": 132937,
+      "pdf_pages": 1,
+      "last_printed_page": null,
+      "scope": "Cover only; contains no corrective technical clauses."
+    }
+  ],
+  "discovery": "Followed the public iframe preview URLs from relocated store pages; no account, checkout, license acceptance or access-control bypass.",
+  "finding": "The generic MPEG Surround syntax distinguishes HRTFnumBands and HRTFnumPhase. The pinned low-delay reference reader uses a different phase/ICC grammar; generic syntax cannot be substituted for LD without its normative AnnexB.",
+  "rag_lookup": "Index-first wiki, wiki lex HRTF and raw lex23003 searches supplied no relevant normative document. This is not a completeness assertion about every possible stored document."
+}

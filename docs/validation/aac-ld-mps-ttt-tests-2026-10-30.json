@@ -1,0 +1,63 @@
+{
+  "base_commit": "87407c4192",
+  "scope": "TTT transform/inversion component qualification; native spatial refusal stays enabled, zero accepted spatial programmes.",
+  "results": [
+    {
+      "log": "/tmp/fvid-ld-mps-ttt-all-tests.log",
+      "sha256": "cb2896bcde01f0e2b0a433841ffe6847d890c17b5d2f98c5190d1409d520522f",
+      "passed": 38,
+      "ignored": 0
+    },
+    {
+      "log": "/tmp/fvid-ld-mps-ttt-media-tests.log",
+      "sha256": "064fdb5183412e225705ed8c05e3307d02cdfe408462cf235ea31277e0e0d7ee",
+      "passed": 575,
+      "ignored": 1
+    }
+  ],
+  "transform_cases": 40937,
+  "inversion_cases": 7688,
+  "oracle_scalars": 445313,
+  "mode_aliases": [
+    [
+      0,
+      1
+    ],
+    [
+      2,
+      3
+    ],
+    [
+      4,
+      5
+    ]
+  ],
+  "singular_nonresidual_cpc_pairs": 2601,
+  "singular_refusal_is_not_playback_acceptance": true,
+  "decimal_absolute_tolerance": 3e-12,
+  "original_reference_report": "aac-ld-mps-ttt-reference-2026-10-30.json",
+  "generation_audit": "aac-ld-mps-ttt-generation-2026-10-30.json",
+  "sha256": {
+    "crates/fvid-media/src/owned_aac/aac_ld_mps_ttt.rs": "b0609ccd7593ae152594a3cc149e1a9cfcda44a06f76de420d5ed03e6ee7ed85",
+    "tests/aac_ld_mps_ttt.rs": "c56c267ac65b61b7b85f912bdcbf92a0fd7747712664f9342e39ad9f131340d1",
+    "scripts/generate_aac_ld_mps_ttt_fixtures.py": "750419e0105a058f51ae53ed2b851df13d421d0d35588aee5db6d7f11137f955",
+    "scripts/validate_aac_ld_mps_ttt_reference.py": "8bd88a93cc5c72066cbc8d15734f0143ccdf92635b0be365b58c883d5eef1a5a",
+    "scripts/support/aac_ld_mps_ttt_reference_probe.c": "fa699a28366bae138bd108ab1409dc8bf31417878b25a96809f498e5f2b8c482"
+  },
+  "rejected_attempt": {
+    "log": "/tmp/fvid-ld-mps-ttt-tests.log",
+    "sha256": "4560fac947ba5ed4a1c8b729a3b78d379ec842228e4eb1054b333e80a0080ab4",
+    "reason": "An analytic sqrt(2)/3 f64 expectation rounded twice and differed by one bit. Replaced with correctly once-rounded 80-digit value. Runtime and tolerances unchanged."
+  },
+  "ordinary_tests": "Saved fixtures; no FFmpeg, network, generation, C compiler or reference software.",
+  "remaining": [
+    "full TTT tree composition",
+    "mode-dependent decorrelation/routing",
+    "complex inversion wiring and real-only alias-lock DSP",
+    "residual AAC decoding",
+    "STP/GES",
+    "arbitrary downmix and HRTF",
+    "LD-SBR/PCM integration",
+    "actual spatial movie playback/seek/rewind"
+  ]
+}

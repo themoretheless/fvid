@@ -1,0 +1,7 @@
+{
+  "archive_sha256": "b6b27e2f9af6ee8f950af8d7074afc467e66d93372328c0ec55282fff71d1f83",
+  "member": "mp4spatialdec/src/sac_nodes_reshape.c",
+  "member_sha256": "605b9b2710c73e8254df90f6c9d80bf36f08c0ad17b3518ab71b5282faec0e0a",
+  "codewords": 40,
+  "scope": "Numeric prefix facts only; no foreign decoder implementation."
+}

@@ -1,0 +1,89 @@
+{
+  "scope": "Raw ASC/AU admission in original FDK,ignores container edits; no PCM conformance comparison",
+  "archive_sha256": "4f41fba1e55dc554ccd0166f550d7c0c83ae0f22d7f2ed76001537f4b62f7325",
+  "fdk_source_commit": "ee76460efbdb147e26d804c798949c23f174460b",
+  "native_probe_sha256": "4329abfc9d4e403fb618e763559edb5fb0553c2bfebd7cfde1265dce0b087411",
+  "fdk_probe_sha256": "f6e2431081dfc058c44f6fa8fb4d0b78a103b5744fbbd880b6a5c3e7e3559371",
+  "own_packet_export_controls": [
+    {
+      "name": "own-edited",
+      "stdout": "packets=7 format=FVIDAAC1 ignored_edits=1\n",
+      "records_sha256": "3624962c4cba6f8020f13ee7c12ccc7d315f28ef629b68c8bcaa23acdcabb8d9"
+    },
+    {
+      "name": "own-unedited",
+      "stdout": "packets=7 format=FVIDAAC1 ignored_edits=0\n",
+      "records_sha256": "3624962c4cba6f8020f13ee7c12ccc7d315f28ef629b68c8bcaa23acdcabb8d9"
+    }
+  ],
+  "own_edited_pcm_still_refuses": "Error: \"reference probe requires an unedited AAC track\"\n",
+  "cases": [
+    {
+      "name": "er_eld_sbr_i_1_32.mp4",
+      "input_sha256": "b6a0d9c65fa4a8d1fb91f765a20c703073a233f06047dde9c8abcaca0ab93e47",
+      "export_stdout": "packets=602 format=FVIDAAC1 ignored_edits=1\n",
+      "records_sha256": "5c4b6048217765d9f4aab86ca1daabf337f9a8d607a481de35c051867204f563",
+      "input_aus": 602,
+      "status": 0,
+      "stdout": "rate=48000 channels=1 frame=1024 outputDelay=64 pcm_bits=16\npackets=602 scalars=616448\n",
+      "stderr": "",
+      "output_bytes": 1232896
+    },
+    {
+      "name": "er_eld_sbr_i_1_44.mp4",
+      "input_sha256": "1589fc6b53f78d14cfb287a0c129ba3d4972e932e185bd38a35be1e73e875fed",
+      "export_stdout": "packets=402 format=FVIDAAC1 ignored_edits=1\n",
+      "records_sha256": "761e0e5c8639dc5cbe206a46f34b1ef7733c8bf2ac48241a5d89080f1a746406",
+      "input_aus": 402,
+      "status": 0,
+      "stdout": "rate=44100 channels=1 frame=1024 outputDelay=64 pcm_bits=16\npackets=402 scalars=411648\n",
+      "stderr": "",
+      "output_bytes": 823296
+    },
+    {
+      "name": "er_eld_sbr_i_1_48.mp4",
+      "input_sha256": "dbb4ea8b4826e31254c927914ddfeb2460ca762334cc7314591f42548842f05f",
+      "export_stdout": "packets=402 format=FVIDAAC1 ignored_edits=1\n",
+      "records_sha256": "a47702c61e44ff4ba553ba47070fcdf3ff1be8d2e30b0f23cbb8a7306a0f8f62",
+      "input_aus": 402,
+      "status": 0,
+      "stdout": "rate=48000 channels=1 frame=1024 outputDelay=64 pcm_bits=16\npackets=402 scalars=411648\n",
+      "stderr": "",
+      "output_bytes": 823296
+    },
+    {
+      "name": "er_eld_sbr_i_2_32.mp4",
+      "input_sha256": "0a31c899240190ce7241c69f5b23d765d207a3e7ab1efa15b9cda24ce252c523",
+      "export_stdout": "packets=602 format=FVIDAAC1 ignored_edits=1\n",
+      "records_sha256": "361c8bea6a776ce61dc38bce55454d8d61443093750120bd985bb45a85eef7a9",
+      "input_aus": 602,
+      "status": 0,
+      "stdout": "rate=48000 channels=2 frame=1024 outputDelay=64 pcm_bits=16\npackets=602 scalars=1232896\n",
+      "stderr": "",
+      "output_bytes": 2465792
+    },
+    {
+      "name": "er_eld_sbr_i_2_44.mp4",
+      "input_sha256": "df33405b0354dfd4ed338d6b13bb79fe8fb6fdb90ec8c44af0dd585297a45963",
+      "export_stdout": "packets=402 format=FVIDAAC1 ignored_edits=1\n",
+      "records_sha256": "37d506417b079fe3ee7a3087627b503ff80ed0772acac73c742a19cdbfb9300a",
+      "input_aus": 402,
+      "status": 0,
+      "stdout": "rate=44100 channels=2 frame=1024 outputDelay=64 pcm_bits=16\npackets=402 scalars=823296\n",
+      "stderr": "",
+      "output_bytes": 1646592
+    },
+    {
+      "name": "er_eld_sbr_i_2_48.mp4",
+      "input_sha256": "17570f8d6bafb94ac1120e2f4f3a124dc7de41bcd4626f6a70151b5b73707f6f",
+      "export_stdout": "packets=402 format=FVIDAAC1 ignored_edits=1\n",
+      "records_sha256": "7534a6897feccee2808dbc3f17c7f40fd2d08c11fa17710d999fe26fec034314",
+      "input_aus": 402,
+      "status": 0,
+      "stdout": "rate=48000 channels=2 frame=1024 outputDelay=64 pcm_bits=16\npackets=402 scalars=823296\n",
+      "stderr": "",
+      "output_bytes": 1646592
+    }
+  ],
+  "multiple_description_packet_export_still_refuses": "Error: Unsupported(\"MP4 sample description changes require decoder reconfiguration\")\n"
+}

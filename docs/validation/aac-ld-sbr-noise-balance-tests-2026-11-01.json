@@ -1,0 +1,157 @@
+{
+  "complete": true,
+  "passed": 661,
+  "failed": 0,
+  "ignored": 1,
+  "media": {
+    "passed": 590,
+    "failed": 0,
+    "ignored": 1,
+    "log_sha256": "7e73b1ae1a03effb433d4ff4243df8e89f240431d05443d3cf4df50dc5b6c5d2"
+  },
+  "worker": {
+    "passed": 1,
+    "failed": 0,
+    "ignored": 0,
+    "log_sha256": "2e45b78c5190edb0af7fcae6d3b52c41d4b9adf2d999e8bc94baa599be937996"
+  },
+  "integration": {
+    "complete": true,
+    "targets": 13,
+    "cases": [
+      {
+        "name": "aac_ld_sbr_noise_balance",
+        "exit_code": 0,
+        "seconds": 1.920453708000423,
+        "passed": 3,
+        "failed": 0,
+        "ignored": 0,
+        "binary_sha256": "e0a3b06bb4ee5d0a55f38837c7994dac129386625f17697c14dd6f0fc93fbe17"
+      },
+      {
+        "name": "aac_ld_sbr_q31",
+        "exit_code": 0,
+        "seconds": 1.242357125000126,
+        "passed": 4,
+        "failed": 0,
+        "ignored": 0,
+        "binary_sha256": "22a3946658a6910a4df371aa62bb74724681e35669dac5bcd8ae53d1202c471e"
+      },
+      {
+        "name": "aac_eld_sbr",
+        "exit_code": 0,
+        "seconds": 70.11969308300104,
+        "passed": 9,
+        "failed": 0,
+        "ignored": 0,
+        "binary_sha256": "567345ee8040dd29db5db81c14dae74b606bbf3a325720f5203488458fc6ea80"
+      },
+      {
+        "name": "aac_eld_esc_sbr",
+        "exit_code": 0,
+        "seconds": 89.71008087500013,
+        "passed": 10,
+        "failed": 0,
+        "ignored": 0,
+        "binary_sha256": "76e687fc257fae80cd7fb688619264850f4eb1d6dfb861673f7e41225dd8e3fa"
+      },
+      {
+        "name": "aac_eld_sbr_downscaled",
+        "exit_code": 0,
+        "seconds": 220.12841049999952,
+        "passed": 5,
+        "failed": 0,
+        "ignored": 0,
+        "binary_sha256": "e369b7f0913bd38cb9b1f01b873809022fbb6a3eafb6441d6092ed32e15ffbcb"
+      },
+      {
+        "name": "aac_eld_sbr_eighth",
+        "exit_code": 0,
+        "seconds": 98.56365724999887,
+        "passed": 6,
+        "failed": 0,
+        "ignored": 0,
+        "binary_sha256": "88d62ac85684cfa36d76f5d252bfa4685f7bc31b1a44a424f65a0bea48d112f0"
+      },
+      {
+        "name": "aac_eld_spatial_sbr",
+        "exit_code": 0,
+        "seconds": 17.63531541699922,
+        "passed": 7,
+        "failed": 0,
+        "ignored": 0,
+        "binary_sha256": "76bb6eadf327bda6324cfe5bf56d557aa3d495c2e36d4cca000b52dfd17ae724"
+      },
+      {
+        "name": "aac_ld_mps_sbr_pcm",
+        "exit_code": 0,
+        "seconds": 69.10867129200051,
+        "passed": 5,
+        "failed": 0,
+        "ignored": 0,
+        "binary_sha256": "189932d61c42d03658efef89b9f0371a3940b935adfcb27c35436f29b341aa9e"
+      },
+      {
+        "name": "aac_ld_mps_sbr_rates",
+        "exit_code": 0,
+        "seconds": 22.91718412500086,
+        "passed": 4,
+        "failed": 0,
+        "ignored": 0,
+        "binary_sha256": "b47cdac4858aa24cd124716c20e18c78326935067a0b3a552a93f7ca837c9475"
+      },
+      {
+        "name": "he_aac_sbr",
+        "exit_code": 0,
+        "seconds": 0.47049499999957334,
+        "passed": 8,
+        "failed": 0,
+        "ignored": 0,
+        "binary_sha256": "7bda381b8787a2c20e687ca70d6a0eb22b08bbf5756a6b9b56ac555c9815c5ae"
+      },
+      {
+        "name": "he_aac_multi_sbr",
+        "exit_code": 0,
+        "seconds": 1.9482793749994016,
+        "passed": 3,
+        "failed": 0,
+        "ignored": 0,
+        "binary_sha256": "4ed553381e275cabd98e5fd737a8335db37bac2d72ef4ac03dd4972e46774c0c"
+      },
+      {
+        "name": "he_aac_sbr_ps",
+        "exit_code": 0,
+        "seconds": 0.564207333000013,
+        "passed": 4,
+        "failed": 0,
+        "ignored": 0,
+        "binary_sha256": "01227fd904705bbf38051bd0ba1f115a8aa2a017ecd22c8642d43cbd10db010d"
+      },
+      {
+        "name": "aac_sbr_reserved",
+        "exit_code": 0,
+        "seconds": 0.6265151660008996,
+        "passed": 2,
+        "failed": 0,
+        "ignored": 0,
+        "binary_sha256": "f16ce988d733caf7f42fcdf7c11c6643948919b79016de847a1fde4f2e8f135e"
+      }
+    ]
+  },
+  "ffmpeg_and_ffprobe_blocked": true,
+  "forbidden_invocations": 0,
+  "network_build": "offline",
+  "features": "no default features;player for integration/worker",
+  "device": [
+    {
+      "name": "n480-coupled-pan",
+      "exit_code": 0,
+      "output": "platform_device=started source_channels=2 rate=48000 duration=0.160000\nphase=full generation=0 from=0.000000 position=0.160000 wall=0.182120 device_drain=complete\nphase=seek-quarter generation=1 from=0.040000 position=0.160000 wall=0.141196 device_drain=complete\nphase=seek-60-percent generation=2 from=0.096000 position=0.160000 wall=0.079164 device_drain=complete\nphase=rewind generation=3 from=0.000000 position=0.160000 wall=0.186413 device_drain=complete\n"
+    },
+    {
+      "name": "n512-coupled-pan",
+      "exit_code": 0,
+      "output": "platform_device=started source_channels=2 rate=48000 duration=0.170667\nphase=full generation=0 from=0.000000 position=0.170667 wall=0.191917 device_drain=complete\nphase=seek-quarter generation=1 from=0.042667 position=0.170667 wall=0.148333 device_drain=complete\nphase=seek-60-percent generation=2 from=0.102400 position=0.170667 wall=0.090569 device_drain=complete\nphase=rewind generation=3 from=0.000000 position=0.170667 wall=0.188985 device_drain=complete\n"
+    }
+  ]
+}

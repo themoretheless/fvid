@@ -21,6 +21,7 @@ pub trait MatroskaSampleDecoder: Sized {
     fn from_matroska(track: &crate::owned_webm::Track) -> Result<Self>;
     fn sample_rate(&self) -> u32;
     fn channels(&self) -> u16;
+    fn spatial(&self) -> bool;
     fn delayed(&self) -> bool;
     fn decode(&mut self, data: &[u8]) -> Result<Option<Vec<Self::Sample>>>;
     fn finish(&mut self) -> Result<Option<Vec<Self::Sample>>>;
@@ -235,9 +236,12 @@ impl MatroskaTimelineDecoder {
             _ => Err(invalid("channel mask requires AAC decoder")),
         }
     }
+    pub fn spatial(&self) -> bool {
+        matches!(self, Self::Aac(d) if d.has_spatial())
+    }
 
     pub fn delayed(&self) -> bool {
-        matches!(self, Self::Ps(_)) || matches!(self, Self::Aac(d) if d.delayed())
+        matches!(self, Self::Ps(_)) || matches!(self, Self::Aac(d) if d.has_spatial() || d.delayed())
     }
 
     pub fn decode(&mut self, data: &[u8]) -> Result<Option<Vec<f32>>> {
@@ -250,7 +254,15 @@ impl MatroskaTimelineDecoder {
             Self::Alac(d) => d.decode_pcm(data)?,
             Self::Aac(d) => {
                 return Ok(d
-                    .decode_timed(data, 0, u64::from(d.core_frame_samples()))?
+                    .decode_timed(
+                        data,
+                        0,
+                        if d.has_spatial() {
+                            0
+                        } else {
+                            u64::from(d.core_packet_samples())
+                        },
+                    )?
                     .map(|f| f.samples));
             }
             Self::Opus(d) => d.decode(data).map_err(|e| invalid(&e))?,
@@ -285,6 +297,9 @@ impl MatroskaSampleDecoder for MatroskaTimelineDecoder {
     }
     fn channels(&self) -> u16 {
         self.channels()
+    }
+    fn spatial(&self) -> bool {
+        self.spatial()
     }
     fn delayed(&self) -> bool {
         self.delayed()
@@ -836,8 +851,11 @@ pub fn decode_matroska_audio_reader_generic<
             control.packet(encoded.len())?;
             index += 1;
             if decoder.delayed() {
+                pending_packet
+                    .try_reserve(1)
+                    .map_err(|_| invalid("Matroska source window allocation failed"))?;
                 pending_packet.push_back((source_index, packet));
-                if pending_packet.len() > 3 {
+                if !decoder.spatial() && pending_packet.len() > 3 {
                     return Err(invalid("delayed Matroska source lookahead exceeded"));
                 }
                 let Some(samples) = samples else {
@@ -1183,6 +1201,9 @@ pub fn negotiate_matroska_ps_with_interval<R: Read + Seek>(
     let Ok(mut probe) = InBandPsProbe::new(&track.codec_private, rate) else {
         return Ok(false);
     };
+    let retain_probe_error =
+        probe.requires_in_band_ps() && (track.channels == 2 || probe.requires_ep_recovery());
+    let mut first_error = None;
     reader.scan_all()?;
     let active_limit = matroska_active_track_packets(reader, index, interval, max_packets);
     let mut track_packets = 0usize;
@@ -1196,13 +1217,17 @@ pub fn negotiate_matroska_ps_with_interval<R: Read + Seek>(
         }
         track_packets += 1;
         let packet = reader.read_packet(packet_index)?;
-        if probe.read(&packet).is_err() {
+        if let Err(error) = probe.read(&packet) {
+            first_error.get_or_insert_with(|| error.to_string());
             probe.reset();
             continue;
         }
         if probe.ps_detected() {
             return Ok(true);
         }
+    }
+    if retain_probe_error && let Some(error) = first_error {
+        return Err(invalid(&error));
     }
     Ok(false)
 }

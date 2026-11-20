@@ -1,0 +1,184 @@
+[
+  {
+    "name": "er_eld_sbr_e_1_32.mp4",
+    "before_rmse": 0.06766425654765693,
+    "after_rmse": 0.0003067458073029895,
+    "improvement": 220.5873884392534,
+    "native_unchanged": false
+  },
+  {
+    "name": "er_eld_sbr_e_1_44.mp4",
+    "before_rmse": 0.1928396324373268,
+    "after_rmse": 5.0647111420059334e-05,
+    "improvement": 3807.5149209980527,
+    "native_unchanged": false
+  },
+  {
+    "name": "er_eld_sbr_e_1_48.mp4",
+    "before_rmse": 0.19222874800944578,
+    "after_rmse": 5.034492103734597e-05,
+    "improvement": 3818.2351674928655,
+    "native_unchanged": false
+  },
+  {
+    "name": "er_eld_sbr_e_2_32.mp4",
+    "before_rmse": 0.07022474411089845,
+    "after_rmse": 0.0005117432966223331,
+    "improvement": 137.22650511380192,
+    "native_unchanged": false
+  },
+  {
+    "name": "er_eld_sbr_e_2_44.mp4",
+    "before_rmse": 0.19333826732308185,
+    "after_rmse": 5.73866858647425e-05,
+    "improvement": 3369.0439587114392,
+    "native_unchanged": false
+  },
+  {
+    "name": "er_eld_sbr_e_2_48.mp4",
+    "before_rmse": 0.19406703705296333,
+    "after_rmse": 5.5612430576855226e-05,
+    "improvement": 3489.6341526516576,
+    "native_unchanged": false
+  },
+  {
+    "name": "er_eld_sbr_gh_1_32.mp4",
+    "before_rmse": 0.06514754512134598,
+    "after_rmse": 3.925819713054924e-05,
+    "improvement": 1659.463497641124,
+    "native_unchanged": false
+  },
+  {
+    "name": "er_eld_sbr_gh_1_44.mp4",
+    "before_rmse": 0.19255632372420356,
+    "after_rmse": 3.426582158486444e-05,
+    "improvement": 5619.486555934723,
+    "native_unchanged": false
+  },
+  {
+    "name": "er_eld_sbr_gh_1_48.mp4",
+    "before_rmse": 0.19250356014968256,
+    "after_rmse": 4.225711919060706e-05,
+    "improvement": 4555.5296678263,
+    "native_unchanged": false
+  },
+  {
+    "name": "er_eld_sbr_gh_2_32.mp4",
+    "before_rmse": 0.06692129416350635,
+    "after_rmse": 3.873071462953136e-05,
+    "improvement": 1727.8610736627168,
+    "native_unchanged": false
+  },
+  {
+    "name": "er_eld_sbr_gh_2_44.mp4",
+    "before_rmse": 0.19256509551902934,
+    "after_rmse": 3.3430702496902606e-05,
+    "improvement": 5760.127102829225,
+    "native_unchanged": false
+  },
+  {
+    "name": "er_eld_sbr_gh_2_48.mp4",
+    "before_rmse": 0.19348541907667524,
+    "after_rmse": 4.207974439619181e-05,
+    "improvement": 4598.065455316443,
+    "native_unchanged": false
+  },
+  {
+    "name": "er_eld_sbr_i_1_32.mp4",
+    "before_rmse": 0.06732857077415699,
+    "after_rmse": 1.1845269554220915e-05,
+    "improvement": 5684.004949483424,
+    "native_unchanged": false
+  },
+  {
+    "name": "er_eld_sbr_i_1_44.mp4",
+    "before_rmse": 0.19168070121295275,
+    "after_rmse": 1.3333107443050043e-05,
+    "improvement": 14376.29615089222,
+    "native_unchanged": false
+  },
+  {
+    "name": "er_eld_sbr_i_1_48.mp4",
+    "before_rmse": 0.19156906555858386,
+    "after_rmse": 1.2580102573396937e-05,
+    "improvement": 15227.941460802851,
+    "native_unchanged": false
+  },
+  {
+    "name": "er_eld_sbr_i_2_32.mp4",
+    "before_rmse": 0.06757975531819244,
+    "after_rmse": 1.1644058459881066e-05,
+    "improvement": 5803.797322989626,
+    "native_unchanged": false
+  },
+  {
+    "name": "er_eld_sbr_i_2_44.mp4",
+    "before_rmse": 0.19184248381415492,
+    "after_rmse": 1.1799199895572058e-05,
+    "improvement": 16258.94005627861,
+    "native_unchanged": false
+  },
+  {
+    "name": "er_eld_sbr_i_2_48.mp4",
+    "before_rmse": 0.19188866674792027,
+    "after_rmse": 1.1823314329454414e-05,
+    "improvement": 16229.684959815744,
+    "native_unchanged": false
+  },
+  {
+    "name": "er_eld_sbr_s_1_32.mp4",
+    "before_rmse": 0.051129320482648864,
+    "after_rmse": 9.855940567347392e-06,
+    "improvement": 5187.665259674928,
+    "native_unchanged": false
+  },
+  {
+    "name": "er_eld_sbr_s_1_44.mp4",
+    "before_rmse": 0.04876987507242794,
+    "after_rmse": 9.893926637283564e-06,
+    "improvement": 4929.273973858573,
+    "native_unchanged": false
+  },
+  {
+    "name": "er_eld_sbr_s_1_48.mp4",
+    "before_rmse": 0.0502152327498071,
+    "after_rmse": 9.857883819548235e-06,
+    "improvement": 5093.916064442758,
+    "native_unchanged": false
+  },
+  {
+    "name": "er_eld_sbr_s_2_32.mp4",
+    "before_rmse": 0.06835272206594041,
+    "after_rmse": 7.097872443320853e-05,
+    "improvement": 963.0029647864523,
+    "native_unchanged": false
+  },
+  {
+    "name": "er_eld_sbr_s_2_44.mp4",
+    "before_rmse": 0.06663957474115444,
+    "after_rmse": 7.894992922280324e-05,
+    "improvement": 844.0739009795948,
+    "native_unchanged": false
+  },
+  {
+    "name": "er_eld_sbr_s_2_48.mp4",
+    "before_rmse": 0.06773032637824036,
+    "after_rmse": 8.327866938492943e-05,
+    "improvement": 813.2974131128135,
+    "native_unchanged": false
+  },
+  {
+    "name": "er_eld_sbr_twi_1_24.mp4",
+    "before_rmse": 8.989427035169565e-06,
+    "after_rmse": 8.989427035169565e-06,
+    "improvement": 1.0,
+    "native_unchanged": true
+  },
+  {
+    "name": "er_eld_sbr_twi_1_48.mp4",
+    "before_rmse": 1.0535002657724e-05,
+    "after_rmse": 1.0535002657724e-05,
+    "improvement": 1.0,
+    "native_unchanged": true
+  }
+]

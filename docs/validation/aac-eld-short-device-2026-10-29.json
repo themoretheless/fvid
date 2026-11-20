@@ -1,0 +1,254 @@
+{
+  "date": "2026-10-29",
+  "platform": "Darwin",
+  "base_commit": "45bef979e5bc96c19dbd145c1a64c6644778af0a",
+  "scope": "Actual default PlatformBackend output, core-only short ELD transform modes; no LD-SBR downscale or subjective listening claim. Full/quarter/60-percent/rewind phases. Eight-channel sources use normal stereo routing.",
+  "cases": [
+    {
+      "input": "tests/fixtures/playback-errors/aac-eld-short/n512-c1-ds2.mp4",
+      "sha256": "9d40c5a5138408a6b07f6a224d04afe1c05767fccb91bf29370c9803c4a1cdc0",
+      "rate": 12000,
+      "source_channels": 1,
+      "duration_seconds": 0.256,
+      "phases": [
+        {
+          "phase": "full",
+          "generation": "0",
+          "from": "0.000000",
+          "position": "0.256000",
+          "wall": "0.276819",
+          "device_drain": "complete"
+        },
+        {
+          "phase": "seek-quarter",
+          "generation": "1",
+          "from": "0.064000",
+          "position": "0.256000",
+          "wall": "0.218077",
+          "device_drain": "complete"
+        },
+        {
+          "phase": "seek-60-percent",
+          "generation": "2",
+          "from": "0.153600",
+          "position": "0.256000",
+          "wall": "0.120824",
+          "device_drain": "complete"
+        },
+        {
+          "phase": "rewind",
+          "generation": "3",
+          "from": "0.000000",
+          "position": "0.256000",
+          "wall": "0.269261",
+          "device_drain": "complete"
+        }
+      ]
+    },
+    {
+      "input": "tests/fixtures/playback-errors/aac-eld-short/n512-r96000-c1-high-f0-ds4.mp4",
+      "sha256": "722562ffea783860003a45e8f7c2d2bd2749fbb6367aad13574ef3f1e5e48a02",
+      "rate": 24000,
+      "source_channels": 1,
+      "duration_seconds": 0.064,
+      "phases": [
+        {
+          "phase": "full",
+          "generation": "0",
+          "from": "0.000000",
+          "position": "0.064000",
+          "wall": "0.084433",
+          "device_drain": "complete"
+        },
+        {
+          "phase": "seek-quarter",
+          "generation": "1",
+          "from": "0.016000",
+          "position": "0.064000",
+          "wall": "0.073523",
+          "device_drain": "complete"
+        },
+        {
+          "phase": "seek-60-percent",
+          "generation": "2",
+          "from": "0.038400",
+          "position": "0.064000",
+          "wall": "0.053926",
+          "device_drain": "complete"
+        },
+        {
+          "phase": "rewind",
+          "generation": "3",
+          "from": "0.000000",
+          "position": "0.064000",
+          "wall": "0.088808",
+          "device_drain": "complete"
+        }
+      ]
+    },
+    {
+      "input": "tests/fixtures/playback-errors/aac-eld-short/n480-c2-ds2.mp4",
+      "sha256": "f5de9ac46627c709fb8de93e29d64c31e0d9ea009b67c6bb97a0c668e511f739",
+      "rate": 12000,
+      "source_channels": 2,
+      "duration_seconds": 0.24,
+      "phases": [
+        {
+          "phase": "full",
+          "generation": "0",
+          "from": "0.000000",
+          "position": "0.240000",
+          "wall": "0.260265",
+          "device_drain": "complete"
+        },
+        {
+          "phase": "seek-quarter",
+          "generation": "1",
+          "from": "0.060000",
+          "position": "0.240000",
+          "wall": "0.198649",
+          "device_drain": "complete"
+        },
+        {
+          "phase": "seek-60-percent",
+          "generation": "2",
+          "from": "0.144000",
+          "position": "0.240000",
+          "wall": "0.116349",
+          "device_drain": "complete"
+        },
+        {
+          "phase": "rewind",
+          "generation": "3",
+          "from": "0.000000",
+          "position": "0.240000",
+          "wall": "0.261196",
+          "device_drain": "complete"
+        }
+      ]
+    },
+    {
+      "input": "tests/fixtures/playback-errors/aac-eld-short/n480-r48000-c7-layout-f0-ds4.mp4",
+      "sha256": "a907a7dceeaece2381845adf7c7c51097730cbac6f4009fe64efb3efe0616fa7",
+      "rate": 12000,
+      "source_channels": 8,
+      "duration_seconds": 0.12,
+      "phases": [
+        {
+          "phase": "full",
+          "generation": "0",
+          "from": "0.000000",
+          "position": "0.120000",
+          "wall": "0.141620",
+          "device_drain": "complete"
+        },
+        {
+          "phase": "seek-quarter",
+          "generation": "1",
+          "from": "0.030000",
+          "position": "0.120000",
+          "wall": "0.109300",
+          "device_drain": "complete"
+        },
+        {
+          "phase": "seek-60-percent",
+          "generation": "2",
+          "from": "0.072000",
+          "position": "0.120000",
+          "wall": "0.065674",
+          "device_drain": "complete"
+        },
+        {
+          "phase": "rewind",
+          "generation": "3",
+          "from": "0.000000",
+          "position": "0.120000",
+          "wall": "0.135927",
+          "device_drain": "complete"
+        }
+      ]
+    },
+    {
+      "input": "tests/fixtures/playback-errors/aac-eld-short/ep3-n512-c1-ds2.mp4",
+      "sha256": "8370424a31bc7927ffc81d811bbe994e1089334f1b1c6d757da7b9b42978f85f",
+      "rate": 12000,
+      "source_channels": 1,
+      "duration_seconds": 0.256,
+      "phases": [
+        {
+          "phase": "full",
+          "generation": "0",
+          "from": "0.000000",
+          "position": "0.256000",
+          "wall": "0.278669",
+          "device_drain": "complete"
+        },
+        {
+          "phase": "seek-quarter",
+          "generation": "1",
+          "from": "0.064000",
+          "position": "0.256000",
+          "wall": "0.211676",
+          "device_drain": "complete"
+        },
+        {
+          "phase": "seek-60-percent",
+          "generation": "2",
+          "from": "0.153600",
+          "position": "0.256000",
+          "wall": "0.124062",
+          "device_drain": "complete"
+        },
+        {
+          "phase": "rewind",
+          "generation": "3",
+          "from": "0.000000",
+          "position": "0.256000",
+          "wall": "0.273338",
+          "device_drain": "complete"
+        }
+      ]
+    },
+    {
+      "input": "tests/fixtures/playback-errors/aac-eld-short/ep1-n480-r48000-c7-layout-f0-ds4.mp4",
+      "sha256": "5d52593d3c78e9098b6858fec151002fc7c36bc0932528cb4d872b9d30b64b50",
+      "rate": 12000,
+      "source_channels": 8,
+      "duration_seconds": 0.12,
+      "phases": [
+        {
+          "phase": "full",
+          "generation": "0",
+          "from": "0.000000",
+          "position": "0.120000",
+          "wall": "0.139727",
+          "device_drain": "complete"
+        },
+        {
+          "phase": "seek-quarter",
+          "generation": "1",
+          "from": "0.030000",
+          "position": "0.120000",
+          "wall": "0.109016",
+          "device_drain": "complete"
+        },
+        {
+          "phase": "seek-60-percent",
+          "generation": "2",
+          "from": "0.072000",
+          "position": "0.120000",
+          "wall": "0.078286",
+          "device_drain": "complete"
+        },
+        {
+          "phase": "rewind",
+          "generation": "3",
+          "from": "0.000000",
+          "position": "0.120000",
+          "wall": "0.144169",
+          "device_drain": "complete"
+        }
+      ]
+    }
+  ]
+}

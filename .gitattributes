@@ -4,6 +4,7 @@
 *.rgb binary
 *.rgba binary
 *.pcm binary
+tests/fixtures/playback-errors/**/*.asc binary
 tests/fixtures/playback-errors/*.packet binary
 tests/fixtures/playback-errors/*.keypacket binary
 tests/fixtures/playback-errors/*.config binary
@@ -12,3 +13,13 @@ tests/fixtures/playback-errors/*.alpha binary
 tests/fixtures/playback-errors/*.color binary
 tests/fixtures/playback-errors/*.expected.txt text eol=lf
 scripts/*.patch whitespace=-blank-at-eol,-blank-at-eof
+
+# Spatial configuration payloads may contain no NUL but remain binary.
+tests/fixtures/playback-errors/aac-ld-mps-config/*.bin binary
+tests/fixtures/playback-errors/aac-ld-mps-config/*.config binary
+tests/fixtures/playback-errors/aac-eld-mps-core/*.au binary
+tests/fixtures/playback-errors/aac-eld-mps-core/*.bits binary
+tests/fixtures/playback-errors/aac-eld-mps-core/*.spatial binary
+tests/fixtures/playback-errors/aac-eld-mps-core/*.ssc binary
+tests/fixtures/playback-errors/aac-eld-mps-native/*.f32le binary
+tests/fixtures/playback-errors/aac-eld-mps-native/*.bin binary

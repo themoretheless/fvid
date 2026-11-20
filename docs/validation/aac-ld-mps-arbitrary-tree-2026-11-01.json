@@ -1,0 +1,34 @@
+{
+  "date": "2026-11-01",
+  "base_commit": "cf6a3ab3ac",
+  "scope": "Owned arbitrary-tree post-shaping component; production playback still specifically refuses",
+  "command": "CARGO_TARGET_DIR=/Users/themoretheless/.codex/worktrees/aac-eld-extension-gaps/target CARGO_BUILD_JOBS=2 cargo --config profile.dev.package.fvid-media.opt-level=2 test --offline --no-default-features --features player --test aac_ld_mps_arbitrary_tree -- --nocapture",
+  "exit_code": 0,
+  "passed": 4,
+  "failed": 0,
+  "ignored": 0,
+  "log": "/tmp/fvid-arbitrary-tree-final.log",
+  "log_sha256": "0b3815edcd498e8cd54f8cc082967cecf4ef36598ae48e4fdc00142732f8b9bf",
+  "programmes": 42,
+  "blocks": 126,
+  "scalar_comparisons": 478656,
+  "max_absolute_error": 4.4335261017991456e-08,
+  "tolerance": "2e-7*(1+abs(reference))",
+  "oracle": "Unmodified ISO sac_arbitraryTree.c, saved output from explicit reference-only harness",
+  "normative_complete_standard_acquired": false,
+  "production_acceptance": false,
+  "authored_generator": {
+    "deterministic": true,
+    "files": 8,
+    "process_and_network_forbidden": true
+  },
+  "open": [
+    "PCM and native playback integration",
+    "memory accounting and epoch state integration",
+    "partial-band/LFE splits",
+    "sparse speaker positions",
+    "nonzero EBQ arbitrary-tree semantics",
+    "general active unequal-grid HRTF",
+    "arbitrary inherited-fragment prefix loss"
+  ]
+}

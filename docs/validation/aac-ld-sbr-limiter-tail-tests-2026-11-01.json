@@ -1,0 +1,99 @@
+{
+  "scope": "Discarded HF tail limiter partition;not whole codec completion",
+  "media_passed": 590,
+  "integration_passed": 15,
+  "worker_passed": 1,
+  "total_passed": 606,
+  "failed": 0,
+  "preexisting_ignored": 1,
+  "geometry_input_cases_unchanged": 1680,
+  "expected_partition_updates": 466,
+  "original_inputs_and_asc_aus_unchanged": 26,
+  "changed_native_iso_outputs": [
+    "er_eld_sbr_gh_1_32.mp4",
+    "er_eld_sbr_gh_1_44.mp4",
+    "er_eld_sbr_gh_1_48.mp4",
+    "er_eld_sbr_gh_2_32.mp4",
+    "er_eld_sbr_gh_2_44.mp4",
+    "er_eld_sbr_gh_2_48.mp4"
+  ],
+  "other_native_iso_outputs_byte_identical": 20,
+  "device_cases": [
+    {
+      "fixture": "n480-lim1.mp4",
+      "sha256": "12bbfbe64ce3834b47e5a60023759c304a460f5068a0396d7833e13ebfd7b90b",
+      "phases": [
+        {
+          "phase": "full",
+          "generation": "0",
+          "from": "0.000000",
+          "position": "0.160000",
+          "wall": "0.183652",
+          "device_drain": "complete"
+        },
+        {
+          "phase": "seek-quarter",
+          "generation": "1",
+          "from": "0.040000",
+          "position": "0.160000",
+          "wall": "0.139073",
+          "device_drain": "complete"
+        },
+        {
+          "phase": "seek-60-percent",
+          "generation": "2",
+          "from": "0.096000",
+          "position": "0.160000",
+          "wall": "0.084096",
+          "device_drain": "complete"
+        },
+        {
+          "phase": "rewind",
+          "generation": "3",
+          "from": "0.000000",
+          "position": "0.160000",
+          "wall": "0.184968",
+          "device_drain": "complete"
+        }
+      ]
+    },
+    {
+      "fixture": "n512-lim3.mp4",
+      "sha256": "7319618f87195b2039c3fde4e1b7ce240e07fab9360c46afcac6af60ce34dbb1",
+      "phases": [
+        {
+          "phase": "full",
+          "generation": "0",
+          "from": "0.000000",
+          "position": "0.170667",
+          "wall": "0.196707",
+          "device_drain": "complete"
+        },
+        {
+          "phase": "seek-quarter",
+          "generation": "1",
+          "from": "0.042667",
+          "position": "0.170667",
+          "wall": "0.146892",
+          "device_drain": "complete"
+        },
+        {
+          "phase": "seek-60-percent",
+          "generation": "2",
+          "from": "0.102400",
+          "position": "0.170667",
+          "wall": "0.088700",
+          "device_drain": "complete"
+        },
+        {
+          "phase": "rewind",
+          "generation": "3",
+          "from": "0.000000",
+          "position": "0.170667",
+          "wall": "0.190606",
+          "device_drain": "complete"
+        }
+      ]
+    }
+  ]
+}

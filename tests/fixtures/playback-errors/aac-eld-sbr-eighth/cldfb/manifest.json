@@ -1,0 +1,29 @@
+{
+  "cases": [
+    {
+      "name": "a4-boundary",
+      "kind": "analysis",
+      "bands": 4,
+      "rows": 37
+    },
+    {
+      "name": "a4-dense",
+      "kind": "analysis",
+      "bands": 4,
+      "rows": 37
+    },
+    {
+      "name": "a4-tones",
+      "kind": "analysis",
+      "bands": 4,
+      "rows": 37
+    },
+    {
+      "name": "s4-complex",
+      "kind": "synthesis",
+      "bands": 4,
+      "rows": 37
+    }
+  ],
+  "provenance": "Own direct time convolution and modulated-column superposition; centered prototype numeric facts. Synthetic signals only; no codec implementation, process or network."
+}

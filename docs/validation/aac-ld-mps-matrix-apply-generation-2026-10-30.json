@@ -1,0 +1,17 @@
+{
+  "scope": "Exact integer complex multiplication, offline generation audit; no movie/playback qualification.",
+  "cases": 63,
+  "process_and_socket_creation": "denied by audit hook",
+  "byte_exact_regeneration": true,
+  "files": {
+    "manifest.json": {
+      "bytes": 10484,
+      "sha256": "6540e34b193912cadfabcb23b666c2056c9bd7ab99f0d656539e9b2018ba4fe3"
+    },
+    "expected.bin": {
+      "bytes": 602112,
+      "sha256": "21691d86a52f04905e2ae2d5c61c3edf9f2ec65b6e5cfc8f740cef2164e5ec16"
+    }
+  },
+  "generator_sha256": "6084237523f2334c4d137d329c7c5d4820c68e4e59cb5e076f9523d610e85093"
+}

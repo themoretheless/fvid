@@ -1,0 +1,311 @@
+{
+  "date": "2026-10-31",
+  "base_commit": "15acdd7ae218ae1dc81cb6b1fe630a44cd1fcdb8",
+  "goal_status": "active; codec-gap objective not complete",
+  "scope": "Downscaled LD-SBR CLDFB PCM into LD-MPS with explicit adapted SSC,not downscaled shared QMF or nominal SSC remapping",
+  "positive_programmes": 152,
+  "transport_programmes": 304,
+  "independent_bare_controls": 55,
+  "negative_crc_movies": 2,
+  "baseline_source_packets": 32,
+  "wide_lf_programmes": 12,
+  "wide_lf_source_packets": 12,
+  "pcm_values_compared": 7147264,
+  "maximum_compositional_pcm_error": 1.5544533e-26,
+  "total": {
+    "passed": 1741,
+    "failed": 0,
+    "ignored": 27
+  },
+  "gates": {
+    "targets": [
+      "aac_ld_mps_downscaled",
+      "aac_ld_mps_sbr_pcm",
+      "aac_ld_downscaled",
+      "aac_eld_short",
+      "aac_eld_third",
+      "aac_eld_third_rates",
+      "aac_eld_downscale_info",
+      "aac_eld_mps_native",
+      "aac_ld_mps_ld_core",
+      "aac_ld_mps_session",
+      "aac_ld_mps_profile",
+      "aac_ld_mps_shared128",
+      "aac_eld_sbr_downscaled",
+      "aac_eld_spatial_sbr",
+      "aac_eld_crossover_wide"
+    ],
+    "gates": [
+      {
+        "gate": "media",
+        "command": [
+          "cargo",
+          "--config",
+          "profile.dev.package.fvid-media.opt-level=2",
+          "test",
+          "--offline",
+          "-p",
+          "fvid-media",
+          "--lib"
+        ],
+        "status": 0,
+        "seconds": 36.17093304201262,
+        "log": "/tmp/fvid-ld-mps-sbr-pcm-gate-media.log",
+        "log_sha256": "935198f3e2501e6a880eabff44a9bc6731c6b9a62dc11bc8dff83907e2ad8604",
+        "counts": [
+          {
+            "passed": 587,
+            "failed": 0,
+            "ignored": 1
+          }
+        ],
+        "tested_sources": {
+          "crates/fvid-media/src/owned_aac/aac_ld_mps_native.rs": "15bdae4c5066f0cbc21e893f0d48c6e7f92bfb4c8bc3d9718ec885713e4a9ab7",
+          "crates/fvid-media/src/owned_aac/aac_native_impl.rs": "7af4f1f19b8ad5ea399e4b0aff972ce9ea40991e525b4cb2238dc841df8f8dd6",
+          "src/playback/audio/ep1_worker_tests.rs": "55e8d94b045d6bbdb60d8e44d554383b19beeec3223000144ff1784268542dd7",
+          "tests/support/aac_ld_mps_short_pcm.rs": "d9d4ec9fcfcbd10706cdf035aea9c75ed7fe3b4f1be56ac452ccdb5fcc4dafc9",
+          "tests/aac_ld_mps_sbr_pcm.rs": "28fd58ea0985e8374be53934c782ae4bffa1e9f15c29f2aa4e1f4154ea18163b",
+          "tests/aac_ld_mps_downscaled.rs": "f1f66692d795a3466d754a6ef6753b1906ea7b653cd90c98b1d1d2a54d399ae0"
+        }
+      },
+      {
+        "gate": "root",
+        "command": [
+          "cargo",
+          "--config",
+          "profile.dev.package.fvid-media.opt-level=2",
+          "test",
+          "--offline",
+          "--no-default-features",
+          "--features",
+          "player",
+          "--lib"
+        ],
+        "status": 0,
+        "seconds": 450.30142758300644,
+        "log": "/tmp/fvid-ld-mps-sbr-pcm-gate-root.log",
+        "log_sha256": "4fdefe9c3163b149bcf772c46a24615bc30350543f411a66a3491b512a898223",
+        "counts": [
+          {
+            "passed": 1071,
+            "failed": 0,
+            "ignored": 26
+          }
+        ],
+        "tested_sources": {
+          "crates/fvid-media/src/owned_aac/aac_ld_mps_native.rs": "15bdae4c5066f0cbc21e893f0d48c6e7f92bfb4c8bc3d9718ec885713e4a9ab7",
+          "crates/fvid-media/src/owned_aac/aac_native_impl.rs": "7af4f1f19b8ad5ea399e4b0aff972ce9ea40991e525b4cb2238dc841df8f8dd6",
+          "src/playback/audio/ep1_worker_tests.rs": "55e8d94b045d6bbdb60d8e44d554383b19beeec3223000144ff1784268542dd7",
+          "tests/support/aac_ld_mps_short_pcm.rs": "d9d4ec9fcfcbd10706cdf035aea9c75ed7fe3b4f1be56ac452ccdb5fcc4dafc9",
+          "tests/aac_ld_mps_sbr_pcm.rs": "28fd58ea0985e8374be53934c782ae4bffa1e9f15c29f2aa4e1f4154ea18163b",
+          "tests/aac_ld_mps_downscaled.rs": "f1f66692d795a3466d754a6ef6753b1906ea7b653cd90c98b1d1d2a54d399ae0"
+        }
+      },
+      {
+        "gate": "integration",
+        "command": [
+          "cargo",
+          "--config",
+          "profile.dev.package.fvid-media.opt-level=2",
+          "test",
+          "--offline",
+          "--no-default-features",
+          "--features",
+          "player",
+          "--test",
+          "aac_ld_mps_downscaled",
+          "--test",
+          "aac_ld_mps_sbr_pcm",
+          "--test",
+          "aac_ld_downscaled",
+          "--test",
+          "aac_eld_short",
+          "--test",
+          "aac_eld_third",
+          "--test",
+          "aac_eld_third_rates",
+          "--test",
+          "aac_eld_downscale_info",
+          "--test",
+          "aac_eld_mps_native",
+          "--test",
+          "aac_ld_mps_ld_core",
+          "--test",
+          "aac_ld_mps_session",
+          "--test",
+          "aac_ld_mps_profile",
+          "--test",
+          "aac_ld_mps_shared128",
+          "--test",
+          "aac_eld_sbr_downscaled",
+          "--test",
+          "aac_eld_spatial_sbr",
+          "--test",
+          "aac_eld_crossover_wide",
+          "--",
+          "--nocapture",
+          "--test-threads=2"
+        ],
+        "status": 0,
+        "seconds": 670.5898758750118,
+        "log": "/tmp/fvid-ld-mps-sbr-pcm-gate-integration.log",
+        "log_sha256": "16596adb950c9d453bd23ef13e20d19df466e68665cf9b6c84755287eb2a11d4",
+        "counts": [
+          {
+            "passed": 5,
+            "failed": 0,
+            "ignored": 0
+          },
+          {
+            "passed": 6,
+            "failed": 0,
+            "ignored": 0
+          },
+          {
+            "passed": 6,
+            "failed": 0,
+            "ignored": 0
+          },
+          {
+            "passed": 5,
+            "failed": 0,
+            "ignored": 0
+          },
+          {
+            "passed": 6,
+            "failed": 0,
+            "ignored": 0
+          },
+          {
+            "passed": 7,
+            "failed": 0,
+            "ignored": 0
+          },
+          {
+            "passed": 8,
+            "failed": 0,
+            "ignored": 0
+          },
+          {
+            "passed": 6,
+            "failed": 0,
+            "ignored": 0
+          },
+          {
+            "passed": 6,
+            "failed": 0,
+            "ignored": 0
+          },
+          {
+            "passed": 5,
+            "failed": 0,
+            "ignored": 0
+          },
+          {
+            "passed": 5,
+            "failed": 0,
+            "ignored": 0
+          },
+          {
+            "passed": 2,
+            "failed": 0,
+            "ignored": 0
+          },
+          {
+            "passed": 5,
+            "failed": 0,
+            "ignored": 0
+          },
+          {
+            "passed": 10,
+            "failed": 0,
+            "ignored": 0
+          },
+          {
+            "passed": 1,
+            "failed": 0,
+            "ignored": 0
+          }
+        ],
+        "tested_sources": {
+          "crates/fvid-media/src/owned_aac/aac_ld_mps_native.rs": "15bdae4c5066f0cbc21e893f0d48c6e7f92bfb4c8bc3d9718ec885713e4a9ab7",
+          "crates/fvid-media/src/owned_aac/aac_native_impl.rs": "7af4f1f19b8ad5ea399e4b0aff972ce9ea40991e525b4cb2238dc841df8f8dd6",
+          "src/playback/audio/ep1_worker_tests.rs": "55e8d94b045d6bbdb60d8e44d554383b19beeec3223000144ff1784268542dd7",
+          "tests/support/aac_ld_mps_short_pcm.rs": "d9d4ec9fcfcbd10706cdf035aea9c75ed7fe3b4f1be56ac452ccdb5fcc4dafc9",
+          "tests/aac_ld_mps_sbr_pcm.rs": "28fd58ea0985e8374be53934c782ae4bffa1e9f15c29f2aa4e1f4154ea18163b",
+          "tests/aac_ld_mps_downscaled.rs": "f1f66692d795a3466d754a6ef6753b1906ea7b653cd90c98b1d1d2a54d399ae0"
+        }
+      }
+    ]
+  },
+  "pre_fix_reproduction": {
+    "command": [
+      "cargo",
+      "--config",
+      "profile.dev.package.fvid-media.opt-level=2",
+      "test",
+      "--offline",
+      "--no-default-features",
+      "--features",
+      "player",
+      "--test",
+      "aac_ld_mps_sbr_pcm",
+      "--",
+      "--nocapture",
+      "--skip",
+      "sbr_crc_failure_before_spatial_input_keeps_both_decoder_histories"
+    ],
+    "status": 101,
+    "counts": {
+      "passed": 1,
+      "failed": 3,
+      "ignored": 0,
+      "filtered": 1
+    },
+    "base_commit": "15acdd7ae2",
+    "source_before": {
+      "crates/fvid-media/src/owned_aac/aac_ld_mps_native.rs": "d84ae4e5a20858d38b764dcf512e271d6cbf1b3166529ea4a00b352c39158fea",
+      "crates/fvid-media/src/owned_aac/aac_native_impl.rs": "bf7129b4452719f4d3b9475de56eb564871acd265707dbd8087b57e2c0ec48fd"
+    },
+    "source_restored": {
+      "crates/fvid-media/src/owned_aac/aac_ld_mps_native.rs": "8a89aeeb937e4d587d7298bca1b24c79366fc68c6ae28070efef38e2b181590e",
+      "crates/fvid-media/src/owned_aac/aac_native_impl.rs": "7af4f1f19b8ad5ea399e4b0aff972ce9ea40991e525b4cb2238dc841df8f8dd6"
+    },
+    "restored": true,
+    "log": "/tmp/fvid-ld-mps-sbr-pcm-before-final.log",
+    "log_sha256": "842af5d92668d9dc707cceca0c4b13f4a49cf18931d97a0ec440a5d5af2913d2",
+    "qualification": "Final152-programme/55-control corpus;CRC-specific test excluded from pre-fix admission reproduction."
+  },
+  "pre_fix_qualification": "Exact old production sources with final corpus: bare controls pass;three spatial acceptance tests fail on the old downscaled admission error. CRC test excluded from this reproduction. Restored source then received doc-comment clarification;final gates pin final sources.",
+  "evidence_sha256": {
+    "docs/validation/aac-ld-mps-sbr-pcm-generation-2026-10-31.json": "5e0dc3fc438fe2a26e033b7d2323e84570aef1e57fce4999121372c4e868f235",
+    "docs/validation/aac-ld-mps-sbr-pcm-source-2026-10-31.json": "419dc608db1bc106f5f0ccfe94186b316198e13dbe24a0561533a02431204183"
+  },
+  "qualified": [
+    "own MP4/MKV export and typed playback readers",
+    "timed and untimed native decode",
+    "packet and spatial boundary seeks,EOF,rewind",
+    "AudioWorker queue/source stamps and live-history navigation",
+    "checkpoint replay and malformed spatial suffix retry",
+    "SBR CRC failure before spatial input followed by valid retry",
+    "isolated twice byte-identical generation under network/process denial"
+  ],
+  "ordinary_tests_require": [
+    "frozen local fixtures",
+    "Rust toolchain and cached dependencies"
+  ],
+  "ordinary_tests_do_not_require": [
+    "FFmpeg",
+    "network",
+    "fixture generation",
+    "external decoder or C reference compilation"
+  ],
+  "limitations": [
+    "component composition is not independent whole-codec conformance",
+    "full ISO23003-2 Annex B not obtained",
+    "nominal SSC remapping unimplemented",
+    "direct downscaled shared-QMF path unimplemented",
+    "factor-three SBR unsupported",
+    "physical audio output and realtime performance not qualified"
+  ]
+}

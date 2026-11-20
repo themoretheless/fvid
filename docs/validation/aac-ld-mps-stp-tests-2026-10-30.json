@@ -1,0 +1,93 @@
+{
+  "scope": "Native full-complex LD-MPS STP,32/64 bins,all8 trees; plain AAC-ELD and matched LD-SBR integration. Not full codec parity or independent normative Annex B conformance.",
+  "gates": [
+    {
+      "gate": "media",
+      "status": 0,
+      "seconds": 50.46345591545105,
+      "log": "/tmp/fvid-stp-gate-media.log",
+      "passed": 586,
+      "failed": 0,
+      "ignored": 1,
+      "log_sha256": "1f9124dc02f18a52bc64a9978fd20fb0cbcc1204ade74602c7eb0a34e189c906"
+    },
+    {
+      "gate": "root",
+      "status": 0,
+      "seconds": 314.65285897254944,
+      "log": "/tmp/fvid-stp-gate-root.log",
+      "passed": 1061,
+      "failed": 0,
+      "ignored": 26,
+      "log_sha256": "52f33c7d8bd38bb7e8d345d98e2a8aad2c7b4f094ecd4695ee409e856f4c5e9d"
+    },
+    {
+      "gate": "integration",
+      "status": 0,
+      "seconds": 295.65256905555725,
+      "log": "/tmp/fvid-stp-gate-integration.log",
+      "passed": 106,
+      "failed": 0,
+      "ignored": 0,
+      "log_sha256": "5fd8e349fac1f6cbbdc17a3b94078d82a665d3ffbec32c3a3083164987cdbf13"
+    }
+  ],
+  "total_passed": 1753,
+  "failed": 0,
+  "preexisting_ignored": 27,
+  "integration_targets": [
+    "aac_eld_mps_core",
+    "aac_eld_mps_native",
+    "aac_eld_spatial_sbr",
+    "aac_eld_spatial_tail",
+    "aac_ld_mps_assemble",
+    "aac_ld_mps_config",
+    "aac_ld_mps_entropy",
+    "aac_ld_mps_frame",
+    "aac_ld_mps_ges",
+    "aac_ld_mps_grid",
+    "aac_ld_mps_inband",
+    "aac_ld_mps_matrix_apply",
+    "aac_ld_mps_parameters",
+    "aac_ld_mps_pcm",
+    "aac_ld_mps_prepare",
+    "aac_ld_mps_qmf",
+    "aac_ld_mps_route",
+    "aac_ld_mps_session",
+    "aac_ld_mps_stp",
+    "aac_ld_mps_stp_energy",
+    "aac_ld_mps_transport",
+    "aac_ld_mps_tree_matrix",
+    "aac_ld_mps_ttt",
+    "aac_ld_mps_ttt_tree",
+    "aac_ld_mps_upmix"
+  ],
+  "synthetic_movies": {
+    "accepted": 400,
+    "malformed_late_trailing_bytes": 2,
+    "baseline_specific_pcm_refusal": "/tmp/fvid-stp-baseline.log"
+  },
+  "component": {
+    "scalars": 1038336,
+    "maximum_difference": 5.874768574387623e-09,
+    "tolerance": 2e-07,
+    "real_components_changed_more_than_1e_8": 85436,
+    "oracle": "Adapted ISO routine; all three UB-removing adaptations are explicit in the reference report."
+  },
+  "whole_chain": {
+    "pcm_samples": 21765120,
+    "maximum_difference": 1.4551897610081549e-11,
+    "tolerance": 2e-07,
+    "oracle": "Separate qualified FVid stages, not an independent full decoder."
+  },
+  "playback_navigation": [
+    "Owned/public PCM equality",
+    "Live AudioStream packet playback and EOF drain",
+    "Rewind/reset after partial decode",
+    "Forward/backward/EOF seek",
+    "Repeated PCM ranges across active/disabled boundaries",
+    "SSC shape transitions",
+    "Late error valid retry and checkpoint restore"
+  ],
+  "ordinary_tests_require": "Frozen fixtures and owned Rust only; no FFmpeg, compiler, reference executable, or network."
+}

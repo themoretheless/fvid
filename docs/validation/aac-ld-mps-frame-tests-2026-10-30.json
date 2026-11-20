@@ -1,0 +1,65 @@
+{
+  "base_head": "8ce46dce8f",
+  "scope": "LD-MPS frame syntax and parameter state only. No spatial PCM/movie/playback/seek/rewind acceptance or closed codec gap.",
+  "results": {
+    "media": {
+      "sha256": "865dc0ccff0b754dcfb3b1937bd3a980630d12a3581fa9e3a8db332160a1e2cb",
+      "expected_markers": [
+        "575 passed; 0 failed; 1 ignored"
+      ]
+    },
+    "integration": {
+      "sha256": "9c59012b25ee7174137a8e10baa600dab1f66de39dda6980a9c28fb82035955f",
+      "expected_markers": [
+        "4 passed; 0 failed",
+        "5 passed; 0 failed",
+        "777384 spatial-frame truncated prefixes checked",
+        "280719 stateful truncated prefixes checked"
+      ]
+    },
+    "all_test_compile": {
+      "sha256": "1c17c00e98b3e55928b37110151960f3bcde3e2e2c54a42252983d1a17cce288",
+      "expected_markers": [
+        "Finished `dev` profile"
+      ]
+    }
+  },
+  "media_passed": 575,
+  "media_ignored": 1,
+  "integration_passed": 17,
+  "configuration_count": 336,
+  "frame_count": 1008,
+  "ordinary_tests_require_ffmpeg": false,
+  "ordinary_tests_require_generation": false,
+  "ordinary_tests_require_network": false,
+  "frame_truncated_prefixes": 777384,
+  "parameter_truncated_prefixes": 280719,
+  "offsets": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7
+  ],
+  "truncated_offsets": [
+    0,
+    3,
+    7
+  ],
+  "reshape_codewords": 40,
+  "saved_error_payloads": 5,
+  "original_reference_checked": 714,
+  "original_reference_matched": 661,
+  "original_reference_mismatches": 53,
+  "controlled_reference_matched": 840,
+  "reference_opaque_residual_exclusions": 168,
+  "open": [
+    "Spatial PCM renderer, dequantization, energy quantization, smoothing application, matrix interpolation, decorrelation/upmix.",
+    "Residual AAC payload parsing/decoding and LD-QMF/LD-SBR routing.",
+    "Normative zero-width grouped coding and empty Huffman acceptance.",
+    "Short synthetic movie acceptance, actual playback, seek and rewind."
+  ]
+}

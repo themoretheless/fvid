@@ -35,11 +35,13 @@ impl AacConfig {
         data: &[u8],
     ) -> Result<(Self, Option<super::aac_pce::ProgramConfig>)> {
         let parsed = AudioSpecificConfig::parse(data)?;
+        if parsed.ld_mps.is_some() {return Err(invalid("AAC LD-MPS requires spatial reconstruction"));}
         if parsed.sbr_present == Some(true) || parsed.ps_present == Some(true) {
             return Err(invalid(
                 "AAC SBR configuration requires the extension-aware decoder",
             ));
         }
+        if parsed.separate_esc {return Err(invalid("AAC separate ESC epConfig requires the extension-aware decoder"));}
         if parsed.protection.is_some() {return Err(invalid("AAC error protection requires the extension-aware decoder"));}
         Ok((parsed.core, parsed.program))
     }
@@ -48,30 +50,49 @@ impl AacConfig {
         object_type: u32,
         sample_rate: u32,
         config: u32,
-    ) -> Result<(Self, Option<super::aac_pce::ProgramConfig>, Option<super::aac_eld_sbr::Config>, Option<super::aac_ep::Config>)> {
+    ) -> Result<(Self, Option<super::aac_pce::ProgramConfig>, Option<super::aac_eld_sbr::Config>, Option<super::aac_ep::Config>, bool, bool, Option<u32>, Option<super::aac_ld_mps_config::Config>)> {
         if object_type == 39 {
-            let channels=match config {1..=6=>config as u8,7|12|14=>8,11=>7,_=>return Err(invalid("unsupported AAC ELD channel configuration"))};
+            let channels=match config {1..=6=>config as u8,7|12|14=>8,11=>7,13=>24,_=>return Err(invalid("unsupported AAC ELD channel configuration"))};
             let frame_samples=if b.bit()?{480}else{512};
             let section_data_resilience=b.bit()?;
             let scalefactor_data_resilience=b.bit()?;
             let spectral_data_resilience=b.bit()?;
             let eld_sbr=if b.bit()? {let (value,used)=super::aac_eld_sbr::Config::read_prefix(b.source_bytes(),b.position(),config as u8)?;b.skip(used)?;Some(value)}else{None};
+            let mut eld_downscale_sample_rate=None;
+            let mut ld_mps=None;
             loop {
                 let kind=b.read(4)?;
                 if kind==0 {break;}
                 let mut bytes=b.read(4)? as usize;
                 if bytes==15 {let add=b.read(8)? as usize;bytes+=add;if add==255 {bytes+=b.read(16)? as usize;}}
-                // Reserved descriptors are length delimited. Known extensions
-                // change the rendering model and require their own decoder.
-                if matches!(kind,1..=3) {return Err(invalid("AAC ELD extension tool is not yet implemented"));}
+                // Reserved descriptors are length delimited. Spatial extensions
+                // require a separate renderer; adaptation metadata is distinct.
+                if kind==1 {return Err(invalid("AAC ELD extension tool is not yet implemented"));}
+                if kind==2 {if bytes>b.remaining()/8 {return Err(invalid("truncated AAC ELD spatial configuration"));}ld_mps=Some(super::aac_ld_mps_config::Config::read_prefix(b.source_bytes(),b.position(),bytes)?.0);}
+                if kind==3 {
+                    // downscaleInfo is adaptation metadata. The default decoder
+                    // retains the signaled full-rate transform/output; expose the
+                    // hint separately rather than silently changing PCM clocks.
+                    let count=bytes.checked_mul(8).ok_or_else(||invalid("AAC ELD extension length overflow"))?;
+                    if count>b.remaining() {return Err(invalid("truncated AAC ELD extension payload"));}
+                    let end=b.position().checked_add(count).ok_or_else(||invalid("AAC ELD extension length overflow"))?;
+                    let mut payload=BitReader::with_bit_len(b.source_bytes(),end)?;
+                    payload.skip(b.position())?;
+                    let rate=sampling_frequency(&mut payload)?;
+                    if payload.read(4)?!=0 {return Err(invalid("nonzero AAC ELD downscale fill nibble"));}
+                    eld_downscale_sample_rate=Some(rate);
+                }
                 for _ in 0..bytes {b.read(8)?;}
             }
-            let protection=match b.read(2)? {
-                0=>None,2=>{let (ep,used)=super::aac_ep::Config::read_prefix(b.source_bytes(),b.position())?;b.skip(used)?;Some(ep)},
+            let ep_config=b.read(2)?;
+            let protection=match ep_config {
+                0|1=>None,2|3=>{let (ep,used)=super::aac_ep::Config::read_prefix(b.source_bytes(),b.position())?;b.skip(used)?;Some(ep)},
                 _=>return Err(invalid("AAC ELD epConfig separate ESC stream mapping is not yet implemented")),
             };
+            let direct_mapping=ep_config==3;
+            if direct_mapping && !b.bit()? {return Err(invalid("reserved AAC EP3 directMapping value"));}
             super::aac_ld_bands::LdBands::for_eld(sample_rate,frame_samples as usize)?;
-            return Ok((Self{channel_configuration:config as u8,object_type,sample_rate,channels,frame_samples,core_coder_delay:None,section_data_resilience,scalefactor_data_resilience,spectral_data_resilience},None,eld_sbr,protection));
+            return Ok((Self{channel_configuration:config as u8,object_type,sample_rate,channels,frame_samples,core_coder_delay:None,section_data_resilience,scalefactor_data_resilience,spectral_data_resilience},None,eld_sbr,protection,direct_mapping,ep_config==1,eld_downscale_sample_rate,ld_mps));
         }
         if !matches!(object_type, 1 | 2 | 3 | 4 | 17 | 19 | 23) {
             return Err(invalid(
@@ -83,6 +104,7 @@ impl AacConfig {
             1..=6 => config as u8,
             7 | 12 | 14 => 8,
             11 => 7,
+            13 => 24,
             _ => return Err(invalid("unsupported AAC channel configuration")),
         };
         let mut frame_samples = if b.bit()? { 960 } else { 1024 };
@@ -126,9 +148,29 @@ impl AacConfig {
         if extension_flag && b.bit()? {
             return Err(invalid("AAC extensionFlag3 must be zero"));
         }
-        if matches!(object_type,17|19|23) && b.read(2)? != 0 {
-            return Err(invalid(if object_type == 23 {"ER AAC LD epConfig is not yet implemented"} else if object_type == 19 {"ER AAC LTP epConfig is not yet implemented"} else {"ER AAC LC epConfig is not yet implemented"}));
-        }
+        let mut direct_mapping = false;
+        let mut separate_esc = false;
+        let protection = if matches!(object_type,17|19|23) {
+            match b.read(2)? {
+                0 => None,
+                1 => { separate_esc = true; None },
+                // EP2 output reassembles the epConfig=0 access unit for
+                // every ER core; entropy resilience remains core metadata.
+                2 => {
+                    let (ep, used) = super::aac_ep::Config::read_prefix(b.source_bytes(), b.position())?;
+                    b.skip(used)?;
+                    Some(ep)
+                }
+                3 => {
+                    let (ep, used) = super::aac_ep::Config::read_prefix(b.source_bytes(), b.position())?;
+                    b.skip(used)?;
+                    if !b.bit()? {return Err(invalid("reserved AAC EP3 directMapping value"));}
+                    direct_mapping = true;
+                    Some(ep)
+                }
+                _ => return Err(invalid(if object_type == 23 {"ER AAC LD epConfig is not yet implemented"} else if object_type == 19 {"ER AAC LTP epConfig is not yet implemented"} else {"ER AAC LC epConfig is not yet implemented"})),
+            }
+        } else { None };
         Ok((
             Self {
                 channel_configuration: config as u8,
@@ -142,6 +184,10 @@ impl AacConfig {
                 spectral_data_resilience,
             },
             program,
+            None,
+            protection,
+            direct_mapping,
+            separate_esc,
             None,
             None,
         ))
@@ -160,7 +206,17 @@ pub struct AudioSpecificConfig {
     pub ps_present: Option<bool>,
     pub extension_sample_rate: Option<u32>,
     pub eld_sbr: Option<super::aac_eld_sbr::Config>,
+    /// Parsed spatial metadata; a spatial renderer is required for its output.
+    pub ld_mps: Option<super::aac_ld_mps_config::Config>,
+    /// ELD extension-3 adaptation hint. Full-rate native reconstruction keeps
+    /// the ASC core/SBR clock; optimized downscaled output is not implied.
+    pub eld_downscale_sample_rate: Option<u32>,
     pub protection: Option<super::aac_ep::Config>,
+    /// EP3 one-to-one EP-class/ESC-instance mapping; EP2 is false.
+    pub direct_mapping: bool,
+    /// EP1: separately transported AUs carrying consecutive ESC instances,
+    /// optionally grouped within each AU.
+    pub separate_esc: bool,
 }
 fn sampling_frequency(b: &mut BitReader<'_>) -> Result<u32> {
     let index = b.read(4)? as usize;
@@ -177,13 +233,38 @@ fn sampling_frequency(b: &mut BitReader<'_>) -> Result<u32> {
     Ok(rate)
 }
 impl AudioSpecificConfig {
+    /// Core-clock samples represented by one compressed packet. EP source
+    /// concatenation changes this clock, not the core transform geometry.
+    pub fn core_packet_samples(&self) -> u32 {
+        u32::from(self.core.frame_samples) * u32::from(self.protection.as_ref().map_or(1, |ep| ep.frames))
+    }
     pub fn output_sample_rate(&self) -> u32 {
         self.extension_sample_rate.unwrap_or(self.core.sample_rate)
     }
-    /// Resolve a container output clock without turning an explicit SBR=false
-    /// into implicit signalling. Unspecified SBR may use double core rate.
+    /// Supported native ELD-core output adaptation, separate from LD-SBR.
+    pub fn eld_core_downscale_factor(&self, declared:u32) -> Option<u8> {
+        if self.eld_sbr.is_some() {None} else {self.eld_downscale_factor(declared)}
+    }
+    /// downscaleInfo describes the adapted core clock; LD-SBR may double it.
+    pub fn eld_downscale_factor(&self, declared:u32) -> Option<u8> {
+        let hint=self.eld_downscale_sample_rate?;
+        let multiplier=if self.eld_sbr.as_ref().is_some_and(|s|s.double_rate){2}else{1};
+        if self.core.object_type!=39 || hint==0 || hint.checked_mul(multiplier)!=Some(declared) || !self.core.sample_rate.is_multiple_of(hint) {return None;}
+        match self.core.sample_rate/hint {2=>Some(2),3 if self.eld_sbr.is_none() && self.core.frame_samples.is_multiple_of(3)=>Some(3),4=>Some(4),8=>Some(8),_=>None}
+    }
+    /// AAC-LD has no ELD downscaleInfo: callers explicitly request a lower
+    /// container/output clock, while entropy and prediction retain the source.
+    pub fn ld_downscale_factor(&self,declared:u32)->Option<u8> {
+        if self.core.object_type!=23 || declared==0 || self.sbr_present==Some(true) || self.ps_present==Some(true) || !self.core.sample_rate.is_multiple_of(declared) {return None;}
+        let factor=self.core.sample_rate/declared;
+        if matches!(factor,2|3|4|8) && u32::from(self.core.frame_samples).is_multiple_of(factor) {Some(factor as u8)}else{None}
+    }
+    pub fn output_downscale_factor(&self,declared:u32)->Option<u8> {
+        self.eld_downscale_factor(declared).or_else(||self.ld_downscale_factor(declared))
+    }
+    /// Resolve explicit output clocks without guessing SBR or downscale modes.
     pub fn resolve_output_rate(&self, declared: u32) -> Result<u32> {
-        if declared == self.output_sample_rate() {
+        if declared == self.output_sample_rate() || self.output_downscale_factor(declared).is_some() {
             return Ok(declared);
         }
         if self.sbr_present.is_none() && self.core.sample_rate.checked_mul(2) == Some(declared) {
@@ -192,6 +273,7 @@ impl AudioSpecificConfig {
         Err(invalid("AAC output clock disagrees with configuration"))
     }
     pub fn output_channels(&self) -> u8 {
+        if let Some(spatial)=&self.ld_mps {return spatial.output_channels();}
         if self.ps_present == Some(true) {
             2
         } else {
@@ -215,7 +297,7 @@ impl AudioSpecificConfig {
         } else {
             signaled_object_type
         };
-        let (core, program, eld_sbr, protection) =
+        let (core, program, eld_sbr, protection, direct_mapping, separate_esc, eld_downscale_sample_rate, mut ld_mps) =
             AacConfig::read_core(&mut b, core_object_type, sample_rate, configuration)?;
         if core.object_type == 39 && !explicit {
             // ELD's own ldSbrPresentFlag was zero. It does not permit the
@@ -224,7 +306,10 @@ impl AudioSpecificConfig {
             ps_present=Some(false);
             if let Some(ld)=&eld_sbr {extension_sample_rate=Some(ld.output_rate(core.sample_rate)?);}
         }
-        if !explicit && eld_sbr.is_none() && b.remaining() >= 16 {
+        let ld_spatial_tail = core.object_type == 23 && b.remaining() >= 12 && {
+            let mut probe = b.clone(); probe.read(11)? == 0x7cc
+        };
+        if !explicit && !ld_spatial_tail && eld_sbr.is_none() && b.remaining() >= 16 {
             if b.read(11)? != 0x2b7 {
                 return Err(invalid("unsupported AAC trailing extension"));
             }
@@ -240,6 +325,27 @@ impl AudioSpecificConfig {
                         return Err(invalid("unsupported AAC trailing PS extension"));
                     }
                     ps_present = Some(b.bit()?);
+                }
+            }
+        }
+        // A false SBR discovery can still be followed by false PS metadata.
+        if !explicit && core.object_type == 23 && b.remaining() >= 12 {
+            let mut probe = b.clone();
+            if probe.read(11)? == 0x548 { b = probe; ps_present = Some(b.bit()?); }
+        }
+        // ISO/IEC14496-3:2009/Amd2 Table1.15 attaches LD-MPS to an AAC-LD
+        // core through sync extension0x7cc. AOT44 itself is spatial-only.
+        if !explicit && core.object_type == 23 && b.remaining() >= 12 {
+            let mut probe = b.clone();
+            if probe.read(11)? == 0x7cc {
+                b = probe;
+                if b.bit()? {
+                    let mut bytes = b.read(8)? as usize;
+                    if bytes == 255 { bytes += b.read(16)? as usize; }
+                    if bytes == 0 { return Err(invalid("empty AAC LD spatial configuration")); }
+                    if bytes > b.remaining()/8 { return Err(invalid("truncated AAC LD spatial configuration")); }
+                    ld_mps = Some(super::aac_ld_mps_config::Config::read_prefix(b.source_bytes(), b.position(), bytes)?.0);
+                    b.skip(bytes*8)?;
                 }
             }
         }
@@ -265,7 +371,11 @@ impl AudioSpecificConfig {
             ps_present,
             extension_sample_rate,
             eld_sbr,
+            ld_mps,
+            eld_downscale_sample_rate,
             protection,
+            direct_mapping,
+            separate_esc,
         })
     }
 }
@@ -281,8 +391,9 @@ mod ld_tests {
         }
         let c=AacConfig::parse(&[0xbb,0x09,0xe0]).unwrap();
         assert!(c.section_data_resilience && c.scalefactor_data_resilience && c.spectral_data_resilience);
-        assert!(AacConfig::parse(&[0xbb,0x08,0x40]).unwrap_err().to_string().contains("LD epConfig"));
+        assert!(AacConfig::parse(&[0xbb,0x08,0x40]).unwrap_err().to_string().contains("separate ESC"));
         assert!(AacConfig::parse(&[0xbb,0x00,0]).is_err());
-        assert!(AacConfig::parse(&[0xbc,0x08,0]).unwrap_err().to_string().contains("LD band geometry"));
+        let c=AacConfig::parse(&[0xbc,0x08,0]).unwrap();
+        assert_eq!((c.object_type,c.sample_rate,c.channels,c.frame_samples),(23,16000,1,512));
     }
 }

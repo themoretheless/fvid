@@ -1,0 +1,8 @@
+{
+  "scope": "Explicit unmodified ISO C research generation, separate from ordinary tests.",
+  "byte_exact_regeneration": true,
+  "sha256": {
+    "tests/fixtures/playback-errors/aac-ld-mps-ttt-tree/expected.bin": "2ab269ad6da34649788630be8a1c803ac595fd783d7d1d457f8663f3cda6306c",
+    "tests/fixtures/playback-errors/aac-ld-mps-ttt-tree/manifest.json": "ad929f6b4b0ca4f4124f8e21893e4c2f587f20448634b4259cc8c8b9a3ec621b"
+  }
+}

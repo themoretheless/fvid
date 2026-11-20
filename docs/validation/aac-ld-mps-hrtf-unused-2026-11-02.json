@@ -1,0 +1,42 @@
+{
+  "scope": "Unused HRTF in full-output OTT-only trees 0/1/5/6; no active grid conversion or binaural rendering claim",
+  "before": {
+    "executable_sha256": "3902e1c066b373f0305653390b9339e92bc8bb42ae8cff96a5940285e47106e3",
+    "runs": [
+      {
+        "file": "plain32-tree0-b23-hrtf4.mp4",
+        "exit_code": 1,
+        "stdout": "",
+        "stderr": "Error: \"player read the container and a track coded mp4a, and has no decoder arm for it: AAC LD-MPS spatial reconstruction: LD-MPS arbitrary-downmix/HRTF matrix composition is not yet implemented\"\n"
+      },
+      {
+        "file": "plain32-tree0-b23-control.mp4",
+        "exit_code": 0,
+        "stdout": "codec=mp4a rate=24000 channels=6\npackets=3 decoded=3 frames=768\nstamped=0.032s\naudio=0.032s first=0ns last=21.333333ms\n",
+        "stderr": ""
+      }
+    ]
+  },
+  "programmes": 1512,
+  "controls": 168,
+  "deterministic_generated_files": 3362,
+  "source_reference": "aac-ld-mps-hrtf-unused-reference-2026-11-02.json",
+  "device": "aac-ld-mps-hrtf-unused-device-2026-11-02.json",
+  "device_runs": 12,
+  "device_phases": 48,
+  "joint_adg_hrtf_component_streams": 144,
+  "ordinary_tests_require_ffmpeg": false,
+  "full_codec_completion": false,
+  "focused_gate": {
+    "exit_code": 0,
+    "passed": 27,
+    "per_target": {
+      "aac_ld_mps_3d": 9,
+      "aac_ld_mps_hrtf_all_grids": 6,
+      "aac_ld_mps_hrtf_priority": 5,
+      "aac_ld_mps_hrtf_unused": 7
+    },
+    "log_sha256": "7d25624bec77d474b16892af024a47e05d2a6920b163d038b47385cb93998ef9",
+    "command": "CARGO_TARGET_DIR=../target CARGO_BUILD_JOBS=2 cargo --config profile.dev.package.fvid-media.opt-level=2 test --offline --no-default-features --features player --test aac_ld_mps_hrtf_unused --test aac_ld_mps_hrtf_priority --test aac_ld_mps_hrtf_all_grids --test aac_ld_mps_3d"
+  }
+}

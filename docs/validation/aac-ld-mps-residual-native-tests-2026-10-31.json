@@ -1,0 +1,122 @@
+{
+  "scope": "Native compressed residual AAC in the qualified complex64-bin LD-SBR15/16-slot path; playback/navigation/atomic source integration. Not complete AAC or an independent whole-decoder oracle.",
+  "baseline": "0ff4a9324d",
+  "gates": [
+    {
+      "gate": "media",
+      "status": 0,
+      "seconds": 67.8367121219635,
+      "log": "/tmp/fvid-residual-native-final-gate-media.log",
+      "passed": 587,
+      "failed": 0,
+      "ignored": 1,
+      "log_sha256": "63f84249983aca43be9549067144238342e327b3ae729020ef59eb5052795e65"
+    },
+    {
+      "gate": "root",
+      "status": 0,
+      "seconds": 450.0790557861328,
+      "log": "/tmp/fvid-residual-native-final-gate-root.log",
+      "passed": 1061,
+      "failed": 0,
+      "ignored": 26,
+      "log_sha256": "6dccc57eb1057f580ac0b30220f3ea7baf5760da5a8b1e697970d7876c51d700"
+    },
+    {
+      "gate": "integration",
+      "status": 0,
+      "seconds": 308.13210797309875,
+      "log": "/tmp/fvid-residual-native-final-gate-integration.log",
+      "passed": 121,
+      "failed": 0,
+      "ignored": 0,
+      "log_sha256": "10f3f570f2ee1b438035ff95f987511f813aa20416a4e9084dd05023ce33c555"
+    }
+  ],
+  "total_passed": 1769,
+  "total_failed": 0,
+  "preexisting_ignored": 27,
+  "integration_targets": [
+    "aac_ld_mps_assemble",
+    "aac_ld_mps_config",
+    "aac_ld_mps_entropy",
+    "aac_ld_mps_frame",
+    "aac_ld_mps_ges",
+    "aac_ld_mps_grid",
+    "aac_ld_mps_inband",
+    "aac_ld_mps_matrix_apply",
+    "aac_ld_mps_parameters",
+    "aac_ld_mps_pcm",
+    "aac_ld_mps_prepare",
+    "aac_ld_mps_qmf",
+    "aac_ld_mps_residual",
+    "aac_ld_mps_residual_native",
+    "aac_ld_mps_route",
+    "aac_ld_mps_session",
+    "aac_ld_mps_stp",
+    "aac_ld_mps_stp_energy",
+    "aac_ld_mps_transport",
+    "aac_ld_mps_tree_matrix",
+    "aac_ld_mps_ttt",
+    "aac_ld_mps_ttt_tree",
+    "aac_ld_mps_upmix",
+    "aac_eld_mps_native",
+    "aac_eld_mps_core",
+    "aac_eld_spatial_tail",
+    "aac_eld_spatial_sbr",
+    "aac_mps_mdct_qmf",
+    "aac_mps_residual_icc"
+  ],
+  "native_movies": 397,
+  "source_frames_per_movie": 12,
+  "corrupt_movies": 4,
+  "domain_refusals": 2,
+  "whole_chain_samples": 31736832,
+  "whole_chain_maximum_difference": 2.3005817303273224e-10,
+  "whole_chain_tolerance": 2e-07,
+  "activity_controls": {
+    "cases": 22,
+    "residual_signal_minimum_max_difference": 8.21757272645198e-06,
+    "icc_minimum_max_difference": 4.007567640810459e-06
+  },
+  "navigation": [
+    "live playback and EOF drain",
+    "owned/public identical PCM",
+    "rewind/reset",
+    "forward/backward/EOF seek",
+    "repeated ranges",
+    "delayed/fragmented transport",
+    "repeated headers",
+    "cutoff changes",
+    "residual-mask disable/re-enable"
+  ],
+  "atomicity": [
+    "late truncated residual AAC",
+    "late outer spatial trailing byte",
+    "out-of-grid ICC difference",
+    "late delayed-run trailing byte",
+    "checkpoint restore and exact subsequent PCM",
+    "retained memory unchanged on error"
+  ],
+  "boundaries": [
+    "independent whole LD residual conformance oracle remains open",
+    "32/128-bin residual domains unqualified",
+    "update8 frequency window absent",
+    "active residual LFE routing unqualified",
+    "nonzero sacTimeAlign refused",
+    "not all residual AAC tools/profiles"
+  ],
+  "sources": {
+    "crates/fvid-media/src/owned_aac/aac_ld_mps_session.rs": "a2ae8782c40e7ecbc462ec0c6df1dc36bf6e8ebb8620a37c0b482e29ae9628ab",
+    "crates/fvid-media/src/owned_aac/aac_mps_mdct_qmf.rs": "6549ceacd1bbb168633da6187a565457e3eeda96761533d4f2747e324bdd1377",
+    "crates/fvid-media/src/owned_aac/aac_ld_mps_qmf.rs": "f24e4a6fbf621a98cad5645ef3d852cff126c643788bbcadbc2b14bc5e7e2646",
+    "crates/fvid-media/src/owned_aac/aac_ld_mps_residual_native.rs": "981aec05d8f6b0f5a730a1ce939e73f094756210c1c17ad8f81982489b61ff33",
+    "crates/fvid-media/src/owned_aac/mod.rs": "70f1bb168307be53aea24dba5f40947edc7d5cfcd1d88b48755fd06e22ed480b",
+    "crates/fvid-media/src/owned_aac/aac_ld_mps_assemble.rs": "421bfdf21d88399ca402d6ad2c34253aff4067c5cadcc2d63d16aa2e26bca32f",
+    "crates/fvid-media/src/owned_aac/aac_ld_mps_pcm.rs": "a4775815e660cc1d1a617ac901f5384a9f4a45f0f962554d10bc293dcd28cc33",
+    "tests/aac_ld_mps_residual_native.rs": "0866d5db9ef5df2633e51b925f57524b4739c23f5feb4fe554a5a54d53fe55bc",
+    "tests/aac_ld_mps_residual.rs": "b04d5ce0bf969354f192575ecc6632723bf80b290d1c6fd3be144d72429bdccf",
+    "scripts/generate_aac_ld_mps_residual_native_fixtures.py": "d9eb7fb42514db6c79fbd2fc057c62bc156b90872c2dae30e930687198b8b4ab"
+  },
+  "command": "CARGO_TARGET_DIR=<isolated target> cargo --config profile.dev.package.fvid-media.opt-level=2 test --offline; media: -p fvid-media --lib; root: --no-default-features --features player --lib; integrations: --no-default-features --features player --test <each integration_targets> -- --nocapture"
+}

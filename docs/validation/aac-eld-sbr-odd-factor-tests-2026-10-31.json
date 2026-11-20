@@ -1,0 +1,39 @@
+{
+  "date": "2026-10-31",
+  "base_commit": "aa0583cdddc0bf196379e0774022361491eedd69",
+  "goal_status": "active",
+  "change": "Source audit and correction of pending-mode classification;no runtime changes",
+  "command": [
+    "cargo",
+    "--config",
+    "profile.dev.package.fvid-media.opt-level=2",
+    "test",
+    "--offline",
+    "--no-default-features",
+    "--features",
+    "player",
+    "--test",
+    "aac_eld_third",
+    "--test",
+    "aac_ld_mps_downscaled",
+    "--",
+    "--nocapture"
+  ],
+  "status": 0,
+  "passed": 13,
+  "failed": 0,
+  "ignored": 0,
+  "log": "/tmp/fvid-aac-eld-sbr-odd-factor-tests.log",
+  "log_sha256": "84cf8d8101580be5591f701b4da03b7ec4185d356dbab834d7ca8a8b0cd118aa",
+  "tested_committed_sources": {
+    "crates/fvid-media/src/owned_aac/config_impl.rs": "61c392017135ee2d25d42537579b5be28e437f0f949d03c8643bbcb9c5669c26",
+    "crates/fvid-media/src/owned_aac/aac_eld_sbr.rs": "3540dc4f957d9bc96de289faf676b948ffb5bb67daa91e6f2068f7a354b9818a",
+    "crates/fvid-media/src/owned_aac/aac_ld_mps_native.rs": "7ee47f4cf577cac7484f60c0464d278847c8107a8383e003de07dc43c1ee4b53",
+    "crates/fvid-media/src/owned_aac/aac_eld_synthesis.rs": "904d18d2ce6b74e0c433c3dd9d65044e8a3b63054ea9ea96e823f4019068d478",
+    "tests/aac_eld_third.rs": "ce2d17810a7a940002ea7aa0567d9e9cb044bd7fd9453903925406d1229475ee",
+    "tests/aac_ld_mps_downscaled.rs": "f1f66692d795a3466d754a6ef6753b1906ea7b653cd90c98b1d1d2a54d399ae0"
+  },
+  "source_audit_sha256": "a69c1bd4c4b16f627ccbe99b47053b692080d345a244c9f5433f59316533cb36",
+  "qualification": "Existing authored fixtures distinguish plain ELD factor3 acceptance from LD-SBR requested-clock refusal and invalid512-sample geometry. Direct native spatial/SBR factor3 also refuses explicitly. Refusal is not playback acceptance. No newly discovered media failure required a new fixture.",
+  "normative_limits": "Primary implementation rejects odd ratios with SBR;full ISO text still needed before asserting universal normative prohibition. Full-rate metadata handling is a distinct FVid API policy,not proof of profile conformance."
+}

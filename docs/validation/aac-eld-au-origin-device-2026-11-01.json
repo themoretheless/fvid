@@ -1,0 +1,124 @@
+{
+  "complete": true,
+  "scope": "Real macOS default output playback and navigation;not listening or full codec conformance",
+  "probe_sha256": "b2a56d987af72eeb60ff7c9412504d0afced7b1eaa9f753aa87d43dc60cf4f9a",
+  "cases": [
+    {
+      "fixture": "tests/fixtures/playback-errors/aac-eld-au-origin/n480-c2-both.mp4",
+      "fixture_sha256": "66a3eeceb4190c96409d489fa25b2f867d5db012527c4c68f0c3c097dd9a384d",
+      "device": "platform_device=started source_channels=2 rate=24000 duration=0.160000",
+      "phases": [
+        {
+          "phase": "full",
+          "generation": "0",
+          "from": "0.000000",
+          "position": "0.160000",
+          "wall": "0.179995",
+          "device_drain": "complete"
+        },
+        {
+          "phase": "seek-quarter",
+          "generation": "1",
+          "from": "0.040000",
+          "position": "0.160000",
+          "wall": "0.151673",
+          "device_drain": "complete"
+        },
+        {
+          "phase": "seek-60-percent",
+          "generation": "2",
+          "from": "0.096000",
+          "position": "0.160000",
+          "wall": "0.088331",
+          "device_drain": "complete"
+        },
+        {
+          "phase": "rewind",
+          "generation": "3",
+          "from": "0.000000",
+          "position": "0.160000",
+          "wall": "0.176179",
+          "device_drain": "complete"
+        }
+      ]
+    },
+    {
+      "fixture": "tests/fixtures/playback-errors/aac-eld-au-origin/n512-c1-last.mp4",
+      "fixture_sha256": "4ab918911c705b12a540934f61b135764f3aa82d9fded36a0f0d208de201cd5e",
+      "device": "platform_device=started source_channels=1 rate=24000 duration=0.170667",
+      "phases": [
+        {
+          "phase": "full",
+          "generation": "0",
+          "from": "0.000000",
+          "position": "0.170667",
+          "wall": "0.193069",
+          "device_drain": "complete"
+        },
+        {
+          "phase": "seek-quarter",
+          "generation": "1",
+          "from": "0.042667",
+          "position": "0.170667",
+          "wall": "0.145867",
+          "device_drain": "complete"
+        },
+        {
+          "phase": "seek-60-percent",
+          "generation": "2",
+          "from": "0.102400",
+          "position": "0.170667",
+          "wall": "0.093673",
+          "device_drain": "complete"
+        },
+        {
+          "phase": "rewind",
+          "generation": "3",
+          "from": "0.000000",
+          "position": "0.170667",
+          "wall": "0.196321",
+          "device_drain": "complete"
+        }
+      ]
+    },
+    {
+      "fixture": "tests/fixtures/playback-errors/aac-eld-cldfb-phase/n512-c2-x2.mp4",
+      "fixture_sha256": "211f348312f3b105cc19c51551d91638442cbf5d00bab2299864f1aa32086b6a",
+      "device": "platform_device=started source_channels=2 rate=48000 duration=0.170667",
+      "phases": [
+        {
+          "phase": "full",
+          "generation": "0",
+          "from": "0.000000",
+          "position": "0.170667",
+          "wall": "0.194109",
+          "device_drain": "complete"
+        },
+        {
+          "phase": "seek-quarter",
+          "generation": "1",
+          "from": "0.042667",
+          "position": "0.170667",
+          "wall": "0.145050",
+          "device_drain": "complete"
+        },
+        {
+          "phase": "seek-60-percent",
+          "generation": "2",
+          "from": "0.102400",
+          "position": "0.170667",
+          "wall": "0.094552",
+          "device_drain": "complete"
+        },
+        {
+          "phase": "rewind",
+          "generation": "3",
+          "from": "0.000000",
+          "position": "0.170667",
+          "wall": "0.199624",
+          "device_drain": "complete"
+        }
+      ]
+    }
+  ]
+}

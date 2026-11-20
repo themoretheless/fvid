@@ -1,0 +1,19 @@
+{
+  "complete": true,
+  "scope": "Five related Rust integration targets,one real worker corpus regression,nine pure-Python source-pin tests;not a full workspace or codec-conformance gate",
+  "integration_tests": 13,
+  "worker_tests": 1,
+  "source_pin_tests": 9,
+  "total_passed": 23,
+  "failed": 0,
+  "ignored": 0,
+  "offline": true,
+  "source_git_tree": {
+    "commit": "ee76460efbdb147e26d804c798949c23f174460b",
+    "archive_sha256": "d018f6356b7d7bca5af4df9eca076fe21ece81e5251854882989c51e37af6286",
+    "git_tree_sha1": "c3900d70bbdf4129d37f8cd5ab4a6589a34eb95b",
+    "files": 425,
+    "source_bytes": 9746870
+  },
+  "foreign_codec_required_for_ordinary_tests": false
+}

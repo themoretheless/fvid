@@ -1,0 +1,66 @@
+{
+  "base_commit": "fd1b36851a",
+  "scope": "Shared AAC extension parser with opt-in ELD spatial dispatch, bounded DATA_LENGTH children, complete-message collection and final alignment transaction. Composition acceptance only; native factory refusal remains.",
+  "results": [
+    {
+      "log": "/tmp/fvid-eld-spatial-tail-final-media.log",
+      "sha256": "23e8eda65bbac1fb0fc42f2c9233ae8d06bf56e22e86195db194293b5b9a1b6a",
+      "passed": 577,
+      "ignored": 1
+    },
+    {
+      "log": "/tmp/fvid-eld-spatial-tail-final-all.log",
+      "sha256": "d940596702cd91f3bf279c484719643aa4eb031f1e77e1f31513d933bcc12d2a",
+      "passed": 74,
+      "ignored": 4
+    },
+    {
+      "log": "/tmp/fvid-eld-spatial-tail-regression.log",
+      "sha256": "61c36e008341d8557578f9a6001ec00776ca015197437d2c6613c9361c583553",
+      "passed": 28,
+      "ignored": 1
+    }
+  ],
+  "overlap_note": "Regression log includes five mixed-tail and eight session tests also present in final-all. Four legacy AAC/SBR suites contribute 15 additional distinct passing tests.",
+  "synthetic_movies": 44,
+  "valid_component_programmes": 38,
+  "specific_failure_programmes": 6,
+  "accepted_native_spatial_movies": 0,
+  "pending_native_acceptance_tests": 4,
+  "coverage": [
+    "direct tags9/12",
+    "bounded spatial children and following DRC",
+    "bounded ordinary DRC/ancillary/unknown children",
+    "ELD implicit SBR13/14 opacity preserves following parent records",
+    "short, escaped8 and escaped16 child lengths through65805",
+    "joint assembler/cursor rollback after late bad DRC and bad final alignment",
+    "nested, overlong, empty and orphan controls fail specifically",
+    "all eight storage bit offsets and frontend/owned cursor bridge",
+    "existing FIL opaque syntax preserved",
+    "actual scheduled access units now use joint dispatcher instead of manual envelope loop"
+  ],
+  "source_report": "aac-eld-spatial-tail-source-2026-10-30.json",
+  "generation_audit": "aac-eld-spatial-tail-generation-2026-10-30.json",
+  "sha256": {
+    "crates/fvid-media/src/owned_aac/aac_pce_impl.rs": "744fc091cb91a885dda3e962f7585d599b11ddb1b2a5aa1e84739c62879c32f4",
+    "crates/fvid-media/src/owned_aac/aac_ld_mps_transport.rs": "a616123e082cd89cd88bf75f98b9bf8804430ff37487b0d6d70a223702063646",
+    "src/codec/mod.rs": "957f1b99b1d7d261b98481dc40fa26a4bb5643d769e993f237eacc604171bc28",
+    "tests/aac_eld_spatial_tail.rs": "b6cf60fdca7becbc14640c47dc44939b174cae48078b7efc46e227f61f029637",
+    "tests/aac_ld_mps_session.rs": "f04a0b31e847ca387e569852bbfaa8b5e56d891684e0167a01a56fe73f81cc48",
+    "scripts/generate_aac_eld_spatial_tail_fixtures.py": "ff127e8b0b446598eda339226fd8a76befbcf2c93bc68d018c0c1593afcdd7f3"
+  },
+  "rejected_attempt": {
+    "log": "/tmp/fvid-eld-spatial-tail-tests.log",
+    "reason": "First frontend build revealed its separate bit cursor type and missing owned transport facade. Added byte/absolute-bit bridge to the one owned assembler and verified cross-facade continuation."
+  },
+  "remaining": [
+    "native factory admission and output speaker masks",
+    "native timed decode/checkpoint/reset/EOF wiring",
+    "source association after lost or replaced fragments",
+    "in-band config admission",
+    "coupled LD-SBR bank selection",
+    "residual codecs",
+    "active spatial tools",
+    "128-bin DSP"
+  ]
+}

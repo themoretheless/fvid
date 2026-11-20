@@ -1,0 +1,22 @@
+{
+  "date": "2026-10-31",
+  "primary_url": "https://www.iis.fraunhofer.de/content/dam/iis/de/doc/ame/conference/AES-128-Convention_ANewParametricStereo-AndMultichannelExtension_AES8099.pdf",
+  "pdf_sha256": "a2647072c9db1732409c4b180c8ef8a3f48bb77847b6fe879e4bfa075adf7ade",
+  "finding": "Authors describe time-domain PCM and shared-QMF interfaces. This change uses owned LD-SBR CLDFB PCM synthesis followed by LD-MPS PCM analysis/synthesis; it does not reinterpret CLDFB samples as shared LD QMF.",
+  "reference_pcm_contract": {
+    "audit": "docs/validation/aac-ld-mps-downscaled-source-2026-10-31.json",
+    "source_sha256": "03322c8bd0b0c67c9ec1f9a1781fa19e239986569608b4b6eacd2244b9c81fde",
+    "finding": "spatial_frontend passes actual PCM sampleFreq to SpatialDecOpen and asserts sampleFreq==ourDec->samplingFreq when input is PCM. Current new ingress keeps this match using explicitly adapted SSC and short core clock."
+  },
+  "scope": "SSC must already match actual adapted PCM frequency. Factors2/4/8, single/dual rate,480/512 ELD tested. Existing nominal shared-QMF route retained.",
+  "unqualified": [
+    "nominal-rate SSC remapping",
+    "direct downscaled shared-QMF banks",
+    "factor-three SBR",
+    "independent whole-codec/profile conformance",
+    "physical audio output and realtime performance"
+  ],
+  "full_annex_b_obtained": false,
+  "external_decoder_or_resampler": false,
+  "primary_locator": "Table1, printed page5: time-domain and frequency-domain interfaces between AAC-ELD and LD MPEG Surround. Table distinguishes dual-rate SBR delays."
+}

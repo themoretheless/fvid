@@ -1,0 +1,16 @@
+{
+  "scope": "Owned extension/ancillary and transport-to-PCM controls only; not native AAC transport acceptance.",
+  "byte_exact_regeneration": true,
+  "process_and_socket_creation": "denied by audit hook",
+  "files": {
+    "envelopes.bin": {
+      "bytes": 2168246,
+      "sha256": "f1dc6073dd2cc5c778c67488b025b8058247c6bc0c330769acbfe017390c082f"
+    },
+    "manifest.json": {
+      "bytes": 139595,
+      "sha256": "6e0ad8ae063d8a30d7299d636f2d803594b95b03400e0e77683f76b637a6a066"
+    }
+  },
+  "generator_sha256": "cc7e7a04b59bb2abb5c007ba357f94b4dd0ed157c49481e01d9dde662a88ff03"
+}

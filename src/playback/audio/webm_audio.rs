@@ -61,12 +61,12 @@ fn setup_data(track: &Track) -> Result<Vec<u8>> {
 /// short form, so the wrapper is rebuilt around it; a track whose setup block is
 /// too short to name a coding is refused by the reason the config parser gives.
 fn aac_setup(private: &[u8]) -> Result<Vec<u8>> {
-    let Some(esds) = crate::playback_aac::esds_for(private) else {
-        return Err(unsupported(&format!(
-            "AAC in WebM names its setup block {} bytes, and a config shorter than two states no coding",
-            private.len()
-        )));
-    };
+    if private.len() < 2 {
+        return Err(unsupported(&format!("AAC CodecPrivate is {} bytes; at least two are required", private.len())));
+    }
+    let esds = crate::playback_aac::esds_for(private).ok_or_else(|| {
+        unsupported(&format!("AAC CodecPrivate is {} bytes and cannot be wrapped in MPEG-4 ES descriptors", private.len()))
+    })?;
     // Let the decoder's own parser judge the rebuilt box, so a config this
     // reader wraps wrongly is refused here rather than two frames in.
     crate::codec::config::aac_specific_config(&esds)?;
@@ -663,11 +663,16 @@ impl<R: Read + Seek> WebmAudioReader<R> {
         };
         let mut in_band_ps = false;
         if let Some(mut probe) = candidate {
+            // Losing an initial protected SBR header can hide PS forever.
+            // Preserve its error if no later PS discovery establishes dispatch.
+            let retain_probe_error = probe.requires_in_band_ps() && (track.channels == 2 || probe.requires_ep_recovery());
+            let mut first_error = None;
             let mut index = 0;
             while index < demuxer.packets.len() || demuxer.scan_more()? {
                 if demuxer.packets[index].track == track_number {
                     let payload = demuxer.read_packet(index)?;
-                    if probe.read(&payload).is_err() {
+                    if let Err(error) = probe.read(&payload) {
+                        first_error.get_or_insert_with(|| error.to_string());
                         probe.reset();
                     } else if probe.ps_detected() {
                         in_band_ps = true;
@@ -675,6 +680,9 @@ impl<R: Read + Seek> WebmAudioReader<R> {
                     }
                 }
                 index += 1;
+            }
+            if retain_probe_error && !in_band_ps && let Some(error) = first_error {
+                return Err(invalid(&error));
             }
         }
         let mut source=Self {

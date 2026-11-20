@@ -1,0 +1,60 @@
+{
+  "base_commit": "98d3051f04",
+  "scope": "Controlled ordinary QMF chain only; decoded residuals supplied synthetically. No PCM/movie/playback/seek acceptance.",
+  "results": [
+    {
+      "log": "/tmp/fvid-ld-mps-qmf-all-tests.log",
+      "sha256": "0dabd5431e948c559fe074f78e84cf7896025b9d536faeddc631a9b19e6bb471",
+      "passed": 50,
+      "ignored": 0
+    },
+    {
+      "log": "/tmp/fvid-ld-mps-qmf-media-tests.log",
+      "sha256": "cab33fba81243ff330a9c5ebeef2ee883a5c649c9628d44d563e7a217842db22",
+      "passed": 575,
+      "ignored": 1
+    }
+  ],
+  "sequences": 224,
+  "frames": 672,
+  "scalar_outputs": 6709248,
+  "max_abs_original_stage_error": 2.6617822951324754e-07,
+  "absolute_test_ceiling": 2e-06,
+  "nonzero_zero_input_tail_sequences": 224,
+  "filter_modes": [
+    "real coefficients on complex QMF",
+    "complex coefficients on complex QMF"
+  ],
+  "reference_report": "aac-ld-mps-qmf-reference-2026-10-30.json",
+  "generation_audit": "aac-ld-mps-qmf-generation-2026-10-30.json",
+  "sha256": {
+    "crates/fvid-media/src/owned_aac/aac_ld_mps_qmf.rs": "eb31bf1c6407ccd4e6ab4eca0b9675fe67fda3352467add4c2cc59a1bd307ccd",
+    "tests/aac_ld_mps_qmf.rs": "e8706a2ce4c7ab162bb6fe18905c28767444efc452f6c4b6b83f6ee89ff201f9",
+    "scripts/generate_aac_ld_mps_qmf_reference.py": "f9cdda4fce355ba963a33b8c7b3e208426ca4fa92e09bf39527c18de687bd13f",
+    "scripts/support/aac_ld_mps_qmf_reference_probe.c": "904bdc11f5b8b7246b22f33df3e06758a43bd79e703b9e3980d6716be269670c"
+  },
+  "coverage": [
+    "eight trees and seven resolutions",
+    "32/64 QMF bins",
+    "joint parser/matrix/filter checkpoints",
+    "full reset replay",
+    "TTT residual basis before M1",
+    "OTT residuals at W",
+    "late missing OTT residual after filtering rolls back every history and reader",
+    "missing TTT input and nonfinite rejection",
+    "128-bin DSP refusal"
+  ],
+  "reference_limits": "Controlled saved assembly endpoints and padded W geometry; not original frontend automatic channel counts. Unselected HRTF branch aborts. Known 212 semantic endpoint fields are documented in assembly oracle.",
+  "ordinary_tests": "Saved controls only; no FFmpeg, network, generation, compiler or reference software.",
+  "accepted_spatial_movies": 0,
+  "native_spatial_refusal": "Verified in aac_native_impl.rs:310; remains enabled.",
+  "remaining": [
+    "fixed gains and temporal shaping",
+    "PCM synthesis/LD-SBR integration",
+    "residual AAC codecs",
+    "arbitrary downmix/HRTF",
+    "unqualified profile/tool combinations",
+    "128-bin DSP",
+    "synthetic movie playback/seek/rewind"
+  ]
+}

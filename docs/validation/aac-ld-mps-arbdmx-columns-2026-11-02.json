@@ -1,0 +1,122 @@
+{
+  "date": "2026-11-02",
+  "scope": "OTT-only arbitrary-downmix column compensation on trees5/6/7; not complete codec conformance",
+  "before_fix": {
+    "executable_sha256": "e46cb854de81983cd016bba359616e105259289f63df3c6595e898a1b08a6eba",
+    "runs": [
+      {
+        "file": "plain32-tree5-b4-varying.mp4",
+        "exit_code": 1,
+        "stdout": "",
+        "stderr": "Error: \"player read the container and a track coded mp4a, and has no decoder arm for it: AAC LD-MPS spatial reconstruction: LD-MPS arbitrary-downmix/HRTF matrix composition is not yet implemented\"\n"
+      },
+      {
+        "file": "plain32-tree5-b4-control.mp4",
+        "exit_code": 0,
+        "stdout": "codec=mp4a rate=24000 channels=8\npackets=3 decoded=3 frames=768\nstamped=0.032s\naudio=0.032s first=0ns last=21.333333ms\n",
+        "stderr": ""
+      }
+    ]
+  },
+  "corpus": {
+    "accepted_programmes": 378,
+    "disabled_controls": 126,
+    "access_units": 3,
+    "trees": [
+      5,
+      6,
+      7
+    ],
+    "parameter_grids": [
+      4,
+      5,
+      7,
+      9,
+      12,
+      15,
+      23
+    ],
+    "patterns": [
+      "unity",
+      "varying",
+      "switch"
+    ],
+    "domains": [
+      "plain32",
+      "plain64",
+      "shared32",
+      "shared64",
+      "sbr-pcm64",
+      "sbr-pcm128"
+    ],
+    "deterministic_files": 1011,
+    "process_and_network_forbidden_during_authored_regeneration": true,
+    "manifest": {
+      "path": "tests/fixtures/playback-errors/aac-ld-mps-arbdmx-columns/manifest.json",
+      "sha256": "94473a541d802af078d8b7ecd6240bb27bf9450a8c11ae31f2e32f4ac440a105"
+    }
+  },
+  "matrix_oracle": {
+    "kind": "Independent80-digit Decimal sparse-M1 endpoint and slot recurrence",
+    "compared_coefficients": 10054800,
+    "maximum_absolute_error": 8.881784197001252e-16,
+    "tolerance": 2e-10,
+    "m2_unchanged": true,
+    "in_band_gain_mode_history_preserved": true,
+    "original_gain_conversion": {
+      "path": "docs/validation/aac-ld-mps-arbdmx-columns-reference-2026-11-02.json",
+      "sha256": "9dc8584d4290a1bf28d15fdcd1226b2d007d1e02233406a7788732d9f5891989"
+    },
+    "foreign_full757_212_composition_compared": false
+  },
+  "tests": {
+    "unique_passed": 26,
+    "failed_in_qualified_final_targets": 0,
+    "ignored": 0,
+    "new_command": "CARGO_TARGET_DIR=/Users/themoretheless/.codex/worktrees/aac-eld-extension-gaps/target CARGO_BUILD_JOBS=2 cargo --config profile.dev.package.fvid-media.opt-level=2 test --offline --no-default-features --features player --test aac_ld_mps_arbdmx_columns -- --nocapture",
+    "new_log": {
+      "path": "/tmp/fvid-arbdmx-columns-final.log",
+      "sha256": "96b143cc7de8c119c36d2fa4ca7b91c74662fda4a453c86e25c43bf158d7bf84"
+    },
+    "new_passed": 6,
+    "ttt_command": "CARGO_TARGET_DIR=/Users/themoretheless/.codex/worktrees/aac-eld-extension-gaps/target CARGO_BUILD_JOBS=2 cargo --config profile.dev.package.fvid-media.opt-level=2 test --offline --no-default-features --features player --test aac_ld_mps_arbdmx_ttt -- --nocapture",
+    "ttt_log": {
+      "path": "/tmp/fvid-arbdmx-columns-ttt-final.log",
+      "sha256": "21030a2df818e0130db2b9307df628c6b2902f9aa193c7bdfdf652c77fcbf7cd"
+    },
+    "ttt_passed": 7,
+    "legacy_command": "CARGO_TARGET_DIR=/Users/themoretheless/.codex/worktrees/aac-eld-extension-gaps/target CARGO_BUILD_JOBS=2 cargo --config profile.dev.package.fvid-media.opt-level=2 test --offline --no-default-features --features player --test aac_ld_mps_arbdmx_columns --test aac_ld_mps_arbdmx --test aac_ld_mps_arbdmx_ttt --test aac_ld_mps_arbdmx_switch -- --nocapture",
+    "legacy_log": {
+      "path": "/tmp/fvid-arbdmx-columns-gate-final.log",
+      "sha256": "e1cdee197a909506ade7c0da5e8205c45cbd9a0d04e85671f8ef0e6da17f2a04"
+    },
+    "qualified_legacy_targets": {
+      "aac_ld_mps_arbdmx": 5,
+      "aac_ld_mps_arbdmx_switch": 8
+    },
+    "legacy_overall_exit_code": 101,
+    "legacy_failure_reason": "Former5/6/7 constructor-refusal expectation was obsolete after implementation; replaced by admission. Final TTT run supersedes failed TTT target. Final378-case columns run supersedes initial252-case columns target.",
+    "scope": "Focused qualification, not full-current-tree gate"
+  },
+  "device": {
+    "runs": 12,
+    "completed_phases": 48,
+    "report": {
+      "path": "docs/validation/aac-ld-mps-arbdmx-columns-device-2026-11-02.json",
+      "sha256": "2ea753a63c77c89714e93d939d7cc17da0eb3706dab2167561013506c00666e0"
+    },
+    "final_build_log": {
+      "path": "/tmp/fvid-arbdmx-columns-device-build-final.log",
+      "sha256": "3fa068386e776d8c25d1037aa7e382b1a1ca22c298dbb15624fbcc1eba217d38"
+    }
+  },
+  "remaining": [
+    "HRTF combinations beyond current builders",
+    "active unequal HRTF grids",
+    "nonzero EBQ with active arbitrary trees",
+    "active-uncovered arbitrary bands",
+    "undefined dormant history",
+    "sparse positions and topology changes"
+  ],
+  "whole_codec_goal_complete": false
+}

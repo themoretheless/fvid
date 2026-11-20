@@ -1,0 +1,196 @@
+{
+  "base_commit": "b7d3296358",
+  "scope": "Native ordinary AAC-ELD spatial admission, canonical-core ownership, WAVE channel masks/reorder, transactional decode/checkpoint/reset, individually stamped ready frames and EOF drain. Coupled LD-SBR and remaining active tools stay explicit unsupported.",
+  "results": [
+    {
+      "log": "/tmp/fvid-native-mps-final-media.log",
+      "sha256": "1c45e84b3f8c12e615cb5088e35bbe0aa39cfd84dfdf762d4c17dddf6c7b3d31",
+      "passed": 577,
+      "ignored": 1,
+      "ignored_names": [
+        "owned_exposure::integer_conversion_gap::complete_integer_float_rgb_pipeline_matches_reference"
+      ]
+    },
+    {
+      "log": "/tmp/fvid-native-mps-final-root.log",
+      "sha256": "2be77ed765c8373e8750d4d7de9ca2a58f4e17a2c33b81c07b163dfe686eda38",
+      "passed": 1061,
+      "ignored": 26,
+      "ignored_names": [
+        "audio::cpal_backend::explicit_aac_speaker_route_regressions::real_device_aac_pce_layout_smoke",
+        "audio::cpal_backend::physical_layout_smoke::real_device_flac_layout_smoke",
+        "player::gpu_option_tests::metal_player_presents_shared_main10_and_can_snapshot_it",
+        "player::http_input_tests::native_player_hls_decodes_all_frames_and_seeks",
+        "player::http_input_tests::native_player_http_input_retains_file_for_reopen_and_seek",
+        "player_gpu::tests::display_shader_converts_to_native_encoder_yuv",
+        "player_gpu::tests::display_shader_executes_after_colour_conversion",
+        "player_gpu::tests::encoder_chroma_averages_aligned_pixels_including_odd_edges",
+        "player_gpu::tests::encoder_crop_matches_independent_rgb_crop_in_all_planes",
+        "player_gpu::tests::encoder_rgb_scaling_matches_independent_bilinear_source_sampling",
+        "player_gpu::tests::encoder_rotates_output_geometry_and_chroma_sampling",
+        "player_gpu::tests::encoder_scales_native_output_and_aligns_chroma_to_output_pixels",
+        "player_gpu::tests::hardware_export_copies_mp4_audio_with_gapless_timing",
+        "player_gpu::tests::hardware_surfaces_render_with_colour_and_custom_shader",
+        "player_gpu::tests::hardware_video_mux_interleaves_subtitles_and_preserves_tail",
+        "player_gpu::tests::metal_output_surface_initializes_native_encoder_planes",
+        "player_gpu::tests::metal_p010_output_initializes_exact_codes_and_encodes_main10",
+        "player_gpu::tests::native_crop_scaling_matches_cropped_rotated_packed_source",
+        "player_gpu::tests::native_shader_export_stream_encodes_muxes_and_reopens",
+        "player_gpu::tests::odd_native_crop_matches_independent_float_reference",
+        "player_gpu::tests::rgb_frames_run_display_shader_and_gpu_adjustment",
+        "player_gpu::tests::rgba_frames_composite_after_adjustment_without_transparent_color_bleeding",
+        "player_gpu::tests::sequential_1d_grading_preserves_float_nodes_and_long_tables",
+        "player_gpu::tests::sequential_3d_grading_preserves_authored_domains",
+        "player_gpu::tests::shader_renders_into_native_encoder_surface",
+        "player_gpu::tests::source_precision_planes_use_gpu_conversion_and_display_shader"
+      ]
+    },
+    {
+      "log": "/tmp/fvid-native-mps-final-all.log",
+      "sha256": "5b16eb0f0f5433cc4a54858df63b640b03fcb5a08c7d552077fd22dc3f30d5c0",
+      "passed": 108,
+      "ignored": 0,
+      "ignored_names": []
+    },
+    {
+      "log": "/tmp/fvid-native-mps-current-fixtures.log",
+      "sha256": "ac60b72ae690c261d593c040942a3287461834b0aba0ebc01f28ab254ff8bdb2",
+      "passed": 28,
+      "ignored": 0,
+      "ignored_names": []
+    },
+    {
+      "log": "/tmp/fvid-native-mps-source-clock-tests.log",
+      "sha256": "8f10b4c85aee304a706fb21ace979797ba9e7c427f37ec999489037ae62cac79",
+      "passed": 6,
+      "ignored": 0,
+      "ignored_names": []
+    }
+  ],
+  "overlap_note": "current-fixtures is a focused rerun after descriptive fixture-scope updates; its tests overlap final-all. Compressed, ASC and PCM fixture bytes did not change during those updates. The source-clock log requalifies the six native tests after adding the 90-kHz source-clock movie and extending live-reset/seek coverage; production Rust code was unchanged.",
+  "accepted_native_movies": 88,
+  "accepted_movie_folders": {
+    "aac-eld-mps-core": 8,
+    "aac-ld-mps-session": 24,
+    "aac-eld-spatial-tail": 38,
+    "aac-eld-mps-native": 18
+  },
+  "native_playback_rewind_seek_controls": 88,
+  "live_partial_playback_reset_seek_controls": 71,
+  "enabled_previous_acceptance_tests": 4,
+  "pending_native_acceptance_tests_in_these_suites": 0,
+  "independent_core_input_spatial_samples": 154752,
+  "maximum_absolute_pcm_difference": 1.4539377460234121e-11,
+  "numeric_scope": "Independent direct-cosine core PCM fed to the previously qualified owned spatial component; not an independent full-decoder conformance oracle.",
+  "qualified_geometry": [
+    {
+      "rate": 48000,
+      "core_samples": 512,
+      "qmf_bands": 64,
+      "trees": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7
+      ]
+    },
+    {
+      "rate": 24000,
+      "core_samples": 480,
+      "qmf_bands": 32,
+      "trees": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7
+      ]
+    },
+    {
+      "rate": 24000,
+      "core_samples": 512,
+      "qmf_bands": 32,
+      "trees": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7
+      ]
+    }
+  ],
+  "coverage": [
+    "all eight ordinary trees",
+    "correct core vs output channel metadata",
+    "distinct front-wide and rear-surround WAVE layouts",
+    "immediate, late, fragmented and mixed ER tails",
+    "one source window per response with EOF ready-queue drain",
+    "public and owned PCM equality",
+    "AudioStream playback, rewind, seek, repeated ranges and live reset",
+    "core/noise/QMF/fragment/timestamp rollback after rejection",
+    "checkpoint mismatch validation before mutation",
+    "ready-frame retained allocations and snapshots"
+  ],
+  "source_report": "aac-eld-mps-native-source-2026-10-30.json",
+  "generation_audit": "aac-eld-mps-native-generation-2026-10-30.json",
+  "sha256": {
+    "crates/fvid-media/src/owned_aac/aac_native_impl.rs": "5820616fe459ee6ba0ecda0fa326f0c7ee84aa3086acc2af1fb8f62fb6be2498",
+    "crates/fvid-media/src/owned_aac/aac_native.rs": "b150725abe4410fd7766454f7c7a290d0c8c291b52f2804760505c2f53d26c3c",
+    "crates/fvid-media/src/owned_aac/aac_eld_native_impl.rs": "cba733d559c0f3574fa5741177888850569c2512cf224a7fb13a3dabdaf563ff",
+    "crates/fvid-media/src/owned_aac/aac_ld_mps_native.rs": "92a3493c8bf72c94620cd19af3a6417df2a02067362280d905a84228c5836660",
+    "crates/fvid-media/src/owned_aac/aac_ld_mps_transport.rs": "5fdbd9f498ca562251d9c4505defe002c4408ca9c6ba9f96142d09cdabc22079",
+    "crates/fvid-media/src/owned_aac/config_impl.rs": "e2ca4597336cd85e99376e011babef60cf4b398ada9b3f555344858552b88454",
+    "crates/fvid-media/src/owned_aac/mod.rs": "6eab388596f66efad9bf570c94876b58d3cabcb4189339330c9d66ecd65292f6",
+    "src/codec/mod.rs": "370bd6617fef9d4c619a804a99d0129df88158b2351d2fd715de639e09b4b815",
+    "tests/aac_eld_mps_core.rs": "51a5d71b3844514f5ff74ba055917aa076f1f9d02ff0e6bc0399d563bd015b9c",
+    "tests/aac_eld_spatial_tail.rs": "1611615089a668760ecfc604ae12bcbb27a1d9f72165be7e5dc8fd5ee34a1ee9",
+    "tests/aac_ld_mps_session.rs": "70246baf5055b2ecfba410c39f19da7c9768c1a743657d21114bd62df93e0a80",
+    "tests/aac_eld_mps_native.rs": "916efb79cf4f832a9f0873eeb4fba61d865e64b6291bdcb84788106c029e40c9",
+    "scripts/generate_aac_eld_mps_native_fixtures.py": "f31047c6ebbbcac48c7ae257da548ce8ae6eaa4df3ec20b95f63e45fbdc33070",
+    "scripts/generate_aac_eld_mps_core_fixtures.py": "49c3d9e4f1ba46c93531e8b63194405f2ba6531db36510d243676a6f754c5c5c",
+    "scripts/generate_aac_ld_mps_session_fixtures.py": "72a7781b20a8d0dc2818f5434cfc01bb7e77c523f4d65e751dfde58c2f9b44a8",
+    "scripts/generate_aac_eld_spatial_tail_fixtures.py": "a4d699ae4a4741f5d0419130479c5cf01eca64dba416af88317caf355d6b4adb",
+    ".gitattributes": "a7b31c393ef0c5982f1cfa9ce9b02724a17b0847fa96201ac8e8da59be6d0b32"
+  },
+  "rejected_attempts": [
+    {
+      "log": "/tmp/fvid-native-mps-acceptance.log",
+      "reason": "Shared native implementation needed an owned spatial context instead of private cross-crate allocation visitors."
+    },
+    {
+      "log": "/tmp/fvid-native-mps-admission.log",
+      "reason": "Aggregate ready PCM left MP4 source windows undrained; replaced aggregation by separately stamped ready frames and EOF drain."
+    },
+    {
+      "log": "/tmp/fvid-native-mps-player-tests.log",
+      "reason": "New 480-sample fixture initially signaled a 512-sample ASC core. Corrected authored frame-length bit before qualification; no production guard weakened."
+    }
+  ],
+  "remaining": [
+    "coupled LD-SBR spatial QMF domain",
+    "spatial output downscale",
+    "native in-band config and AAC-LD spatial signalling",
+    "source association after lost/replaced fragments",
+    "delayed spatial output across concatenated EP sources",
+    "residual AAC codecs",
+    "active temporal/spatial tools and arbitrary/HRTF composition",
+    "128-bin DSP",
+    "broader codec-profile and performance qualification"
+  ],
+  "source_clock_contract": "One native spatial stream keeps its source timescale until reset; per-frame PTS and duration remain in that clock.",
+  "source_timescales": [
+    24000,
+    48000,
+    90000
+  ]
+}

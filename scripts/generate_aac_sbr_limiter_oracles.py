@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """Offline original limiter geometries; Decimal ratio comparison oracle.
-Figure 4.40 uses log2(ratio)*density < .49; range endpoints are retained
+Figure 4.41 uses log2(ratio)*density < .49; range endpoints are retained
 so the Cor.1 gain k(m) exists for every m<M even after a short patch discard.
 This oracle instead compares ratio
 with the high-precision exponential threshold, without floating logarithms.
@@ -12,7 +12,9 @@ root=Path(__file__).resolve().parents[1]/"tests/fixtures/playback-errors"
 def reference(low,patches,mode,threshold):
     if any(p[0]+p[2]>min(low[0],32) for p in patches):return None
     if mode==0:return [low[0],low[-1]]
-    protected={low[0],low[-1],*(p[1]+p[2] for p in patches)}
+    # Only boundaries between retained patches are internal patch borders.
+    # The outer border is the full synthesis end, including an unpatched tail.
+    protected={low[0],low[-1],*(p[1] for p in patches[1:])}
     values=sorted(low+[p[1] for p in patches[1:]])
     cursor=1
     while cursor<len(values):
@@ -39,5 +41,5 @@ with localcontext() as ctx:
                     low=list(range(start,end,step))+[end]
                     for mode in range(4):
                         cases.append({"low":low,"patches":patches,"mode":mode,"expected":reference(low,patches,mode,thresholds)})
-(root/"aac-sbr-limiter-decimal.json").write_text(json.dumps({"source":"ISO SBR Figure 4.40 and Cor.1 4.6.18.7.5 covering k(m); GOST R53556.4-2013 6.18.3.2.3", "precision":80,"cases":cases},separators=(",",":"))+"\n")
+(root/"aac-sbr-limiter-decimal.json").write_text(json.dumps({"source":"ISO SBR Figure 4.41 ratio flow and Cor.1 covering k(m); complete synthesis endpoints and internal retained-patch boundaries", "precision":80,"cases":cases},separators=(",",":"))+"\n")
 print(len(cases),"original limiter geometries")

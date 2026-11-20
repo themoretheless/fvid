@@ -1,0 +1,64 @@
+{
+  "date": "2026-10-28T23:17:27.767762+00:00",
+  "before_fix": "codec=mp4a rate=24000 channels=1\npackets=2 decoded=2 frames=1024\nstamped=0.043s\naudio=0.043s first=0ns last=21.333333ms\n",
+  "cases": [
+    {
+      "file": "tests/fixtures/playback-errors/aac-eld-sbr-eighth/n512-c1-x1-crc1-ds8.mp4",
+      "sha256": "32187b975a68db22d69c78bcb4bcd41013644d2705000673853519a6a2a6396a",
+      "exit": 0,
+      "stdout": "platform_device=started source_channels=1 rate=3000 duration=0.256000\nphase=full generation=0 from=0.000000 position=0.256000 wall=0.278796 device_drain=complete\nphase=seek-quarter generation=1 from=0.064000 position=0.256000 wall=0.211267 device_drain=complete\nphase=seek-60-percent generation=2 from=0.153600 position=0.256000 wall=0.123748 device_drain=complete\nphase=rewind generation=3 from=0.000000 position=0.256000 wall=0.273908 device_drain=complete\n",
+      "stderr": ""
+    },
+    {
+      "file": "tests/fixtures/playback-errors/aac-eld-sbr-eighth/n480-c7-x2-crc1-ds8.mka",
+      "sha256": "97ea966f02eb4e09903980b537b66d6b691c1eb783ca63d5bd27e7e5e52ff346",
+      "exit": 0,
+      "stdout": "platform_device=started source_channels=8 rate=6000 duration=0.240000\nphase=full generation=0 from=0.000000 position=0.240000 wall=0.262884 device_drain=complete\nphase=seek-quarter generation=1 from=0.060000 position=0.240000 wall=0.201031 device_drain=complete\nphase=seek-60-percent generation=2 from=0.144000 position=0.240000 wall=0.122138 device_drain=complete\nphase=rewind generation=3 from=0.000000 position=0.240000 wall=0.261367 device_drain=complete\n",
+      "stderr": ""
+    },
+    {
+      "file": "tests/fixtures/playback-errors/aac-eld-sbr-eighth/n512-r96000-c2-x2-ds8.mp4",
+      "sha256": "bf7cae6a44d538141f34509c4d7625c63d54e31925de1230f3a9d51ce471100c",
+      "exit": 0,
+      "stdout": "platform_device=started source_channels=2 rate=24000 duration=0.064000\nphase=full generation=0 from=0.000000 position=0.064000 wall=0.083328 device_drain=complete\nphase=seek-quarter generation=1 from=0.016000 position=0.064000 wall=0.072677 device_drain=complete\nphase=seek-60-percent generation=2 from=0.038400 position=0.064000 wall=0.047255 device_drain=complete\nphase=rewind generation=3 from=0.000000 position=0.064000 wall=0.084089 device_drain=complete\n",
+      "stderr": ""
+    },
+    {
+      "file": "tests/fixtures/playback-errors/aac-eld-sbr-eighth/n480-r96000-c1-x1-ds8.mka",
+      "sha256": "56e863db96c14dbbfa16f3ff5d747ded29adb63db4b66f22d1be694052af9e66",
+      "exit": 0,
+      "stdout": "platform_device=started source_channels=1 rate=12000 duration=0.060000\nphase=full generation=0 from=0.000000 position=0.060000 wall=0.082759 device_drain=complete\nphase=seek-quarter generation=1 from=0.015000 position=0.060000 wall=0.069713 device_drain=complete\nphase=seek-60-percent generation=2 from=0.036000 position=0.060000 wall=0.038858 device_drain=complete\nphase=rewind generation=3 from=0.000000 position=0.060000 wall=0.082005 device_drain=complete\n",
+      "stderr": ""
+    },
+    {
+      "file": "tests/fixtures/playback-errors/aac-eld-sbr-eighth/ep3-n512-c2-invf-ds8.mp4",
+      "sha256": "f513e6c589f963afd5ff9270f1a6b5c8053a5487d1be5b3132fd7f3e92a24f3d",
+      "exit": 0,
+      "stdout": "platform_device=started source_channels=2 rate=6000 duration=0.256000\nphase=full generation=0 from=0.000000 position=0.256000 wall=0.272426 device_drain=complete\nphase=seek-quarter generation=1 from=0.064000 position=0.256000 wall=0.215723 device_drain=complete\nphase=seek-60-percent generation=2 from=0.153600 position=0.256000 wall=0.128610 device_drain=complete\nphase=rewind generation=3 from=0.000000 position=0.256000 wall=0.282249 device_drain=complete\n",
+      "stderr": ""
+    },
+    {
+      "file": "tests/fixtures/playback-errors/aac-eld-sbr-eighth/ep1-n480-c2-transient8-ds8.mp4",
+      "sha256": "4271b4d57e7db5a09b22deb864130e08961dc6683d6559c04c97e3292209e0b4",
+      "exit": 0,
+      "stdout": "platform_device=started source_channels=2 rate=6000 duration=0.240000\nphase=full generation=0 from=0.000000 position=0.240000 wall=0.262950 device_drain=complete\nphase=seek-quarter generation=1 from=0.060000 position=0.240000 wall=0.208328 device_drain=complete\nphase=seek-60-percent generation=2 from=0.144000 position=0.240000 wall=0.115583 device_drain=complete\nphase=rewind generation=3 from=0.000000 position=0.240000 wall=0.263121 device_drain=complete\n",
+      "stderr": ""
+    },
+    {
+      "file": "tests/fixtures/playback-errors/aac-eld-sbr-eighth/core/core-n480-c1-ds8.mka",
+      "sha256": "7e5d96c1a981dbd3375393c900ab97ef18eff90ab3c1206c8ebffbe7da8bdcca",
+      "exit": 0,
+      "stdout": "platform_device=started source_channels=1 rate=3000 duration=0.240000\nphase=full generation=0 from=0.000000 position=0.240000 wall=0.263353 device_drain=complete\nphase=seek-quarter generation=1 from=0.060000 position=0.240000 wall=0.204686 device_drain=complete\nphase=seek-60-percent generation=2 from=0.144000 position=0.240000 wall=0.121515 device_drain=complete\nphase=rewind generation=3 from=0.000000 position=0.240000 wall=0.257542 device_drain=complete\n",
+      "stderr": ""
+    },
+    {
+      "file": "tests/fixtures/playback-errors/aac-eld-sbr-eighth/core/core-n512-c2-ds8.mp4",
+      "sha256": "bc06f6a6362bcff73ec7ac4e86ba8ab497c287215ceb62314f8036449955a808",
+      "exit": 0,
+      "stdout": "platform_device=started source_channels=2 rate=3000 duration=0.256000\nphase=full generation=0 from=0.000000 position=0.256000 wall=0.275145 device_drain=complete\nphase=seek-quarter generation=1 from=0.064000 position=0.256000 wall=0.214496 device_drain=complete\nphase=seek-60-percent generation=2 from=0.153600 position=0.256000 wall=0.124221 device_drain=complete\nphase=rewind generation=3 from=0.000000 position=0.256000 wall=0.280138 device_drain=complete\n",
+      "stderr": ""
+    }
+  ],
+  "limits": "Actual default PlatformBackend drain and generation positions. No subjective listening or physical multichannel speaker qualification.",
+  "linkage": "/Users/themoretheless/.codex/worktrees/aac-eld-extension-gaps/target/debug/examples/audio_probe:\n\t/System/Library/Frameworks/AppKit.framework/Versions/C/AppKit (compatibility version 45.0.0, current version 2775.10.103)\n\t/System/Library/Frameworks/VideoToolbox.framework/Versions/A/VideoToolbox (compatibility version 1.0.0, current version 3350.77.5)\n\t/System/Library/Frameworks/CoreFoundation.framework/Versions/A/CoreFoundation (compatibility version 150.0.0, current version 5027.0.69)\n\t/System/Library/Frameworks/CoreMedia.framework/Versions/A/CoreMedia (compatibility version 1.0.0, current version 3350.77.5)\n\t/System/Library/Frameworks/CoreVideo.framework/Versions/A/CoreVideo (compatibility version 1.2.0, current version 758.27.0)\n\t/System/Library/Frameworks/ApplicationServices.framework/Versions/A/ApplicationServices (compatibility version 1.0.0, current version 66.0.0)\n\t/System/Library/Frameworks/CoreGraphics.framework/Versions/A/CoreGraphics (compatibility version 64.0.0, current version 2050.0.0)\n\t/System/Library/Frameworks/Carbon.framework/Versions/A/Carbon (compatibility version 2.0.0, current version 170.0.0)\n\t/System/Library/Frameworks/Foundation.framework/Versions/C/Foundation (compatibility version 300.0.0, current version 5027.0.69)\n\t/usr/lib/libSystem.B.dylib (compatibility version 1.0.0, current version 1359.0.0)\n\t/usr/lib/libobjc.A.dylib (compatibility version 1.0.0, current version 228.0.0)\n\t/System/Library/Frameworks/QuartzCore.framework/Versions/A/QuartzCore (compatibility version 1.2.0, current version 1223.2.2)\n\t/System/Library/Frameworks/Metal.framework/Versions/A/Metal (compatibility version 1.0.0, current version 382.5.3)\n\t/usr/lib/libiconv.2.dylib (compatibility version 7.0.0, current version 7.0.0)\n\t/System/Library/Frameworks/AudioUnit.framework/Versions/A/AudioUnit (compatibility version 1.0.0, current version 1.0.0)\n\t/System/Library/Frameworks/CoreAudio.framework/Versions/A/CoreAudio (compatibility version 1.0.0, current version 1.0.0)\n\t/System/Library/Frameworks/ColorSync.framework/Versions/A/ColorSync (compatibility version 1.0.0, current version 3929.0.0)\n\t/System/Library/Frameworks/CoreServices.framework/Versions/A/CoreServices (compatibility version 1.0.0, current version 1226.0.0)\n"
+}

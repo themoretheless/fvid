@@ -1,0 +1,220 @@
+{
+  "platform": "macOS-26.7.2-arm64-arm-64bit-Mach-O",
+  "machine": "arm64",
+  "scope": "External RGB conversion isolation, not native integer-conversion acceptance or a decoder fix",
+  "ffmpeg": "ffmpeg version 9.0.2 Copyright (c) 2000-2026 the FFmpeg developers\nbuilt with Apple clang version 21.0.0 (clang-2100.3.34.2)\nconfiguration: --prefix=/opt/homebrew/Cellar/ffmpeg/9.0.2_1 --enable-shared --enable-pthreads --enable-version3 --cc=clang --host-cflags= --host-ldflags= --enable-ffplay --enable-gpl --enable-libsvtav1 --enable-libopus --enable-libx264 --enable-libmp3lame --enable-libdav1d --enable-libvmaf --enable-libvpx --enable-libx265 --enable-openssl --enable-videotoolbox --enable-audiotoolbox --enable-neon\nlibavutil      61.  1.102 / 61.  1.102\nlibavcodec     63.  1.102 / 63.  1.102\nlibavformat    63.  1.102 / 63.  1.102\nlibavdevice    63.  1.102 / 63.  1.102\nlibavfilter    12.  1.102 / 12.  1.102\nlibswscale     10.  1.102 / 10.  1.102\nlibswresample   7.  1.102 /  7.  1.102\n\nExiting with exit code 0\n",
+  "executable": "/opt/homebrew/Cellar/ffmpeg/9.0.2_1/bin/ffmpeg",
+  "executable_sha256": "768609fb3f463ff9272bebac61478515f19e43c5343b0c60dde2e6230c40013e",
+  "cases": [
+    {
+      "depth": 8,
+      "half_pipeline_rgb_exact": true,
+      "converted_float_sha256": "e1a9ff960f6d636a5e229689b061bc4d12e65941b99fa10f2efd3ceebb8b03c1",
+      "half_float_sha256": "a08558f62b41a5d0a0aa70b40b77edf15a3f6bc0973acc7e74b53ef96b65b521",
+      "half_roundtrip_sha256": "593949f6a21664520f0a5360b03f24aad770422480f29b260b896fc63898db1c",
+      "input_sha256": "a6e353a9f84371218051082a9b681f3aed1a4a4306caa667782d1bc481470501",
+      "input_samples": 576,
+      "identity_changed_samples": 0,
+      "identity_max_delta": 0,
+      "matching_float_roundtrips": [
+        "float_rgb_roundtrip",
+        "float_rgba_roundtrip"
+      ],
+      "stored_identity_rgb_matches_current": true,
+      "equal_code_value_variants_across_channels": 0,
+      "outputs_sha256": {
+        "null": "a6e353a9f84371218051082a9b681f3aed1a4a4306caa667782d1bc481470501",
+        "exposure_identity": "4ef1550d4908e644f808280cbadb16911cb787c516b885f26b7ca6694e0fb0c6",
+        "float_rgb_roundtrip": "4d4b3189358c64b77abbc8cec872b3eeca38cf9b52abec7fcce755617f9d0d27",
+        "float_rgba_roundtrip": "4ef1550d4908e644f808280cbadb16911cb787c516b885f26b7ca6694e0fb0c6",
+        "exposure_half": "593949f6a21664520f0a5360b03f24aad770422480f29b260b896fc63898db1c"
+      },
+      "conversion_graphs": {
+        "null": [
+          "[graph -1 input from stream 0:0 @ <instance>] w:8 h:8 pixfmt:rgba tb:1/25 fr:25/1 sar:0/1 csp:unknown range:unknown alpha:unspecified"
+        ],
+        "exposure_identity": [
+          "[graph -1 input from stream 0:0 @ <instance>] w:8 h:8 pixfmt:rgba tb:1/25 fr:25/1 sar:0/1 csp:unknown range:unknown alpha:unspecified",
+          "[auto_scale_0 @ <instance>] w:iw h:ih flags:'' interl:0",
+          "[Parsed_exposure_0 @ <instance>] auto-inserting filter 'auto_scale_0' between the filter 'graph -1 input from stream 0:0' and the filter 'Parsed_exposure_0'",
+          "[auto_scale_1 @ <instance>] w:iw h:ih flags:'' interl:0",
+          "[format @ <instance>] auto-inserting filter 'auto_scale_1' between the filter 'Parsed_exposure_0' and the filter 'format'",
+          "[auto_scale_0 @ <instance>] w:8 h:8 fmt:rgba csp:gbr range:pc sar:0/1 -> w:8 h:8 fmt:gbrapf32le csp:gbr range:unknown sar:0/1 flags:0x00000004",
+          "[auto_scale_0 @ <instance>] [framesync @ <instance>] Selected 1/25 time base",
+          "[auto_scale_0 @ <instance>] [framesync @ <instance>] Sync level 1",
+          "[auto_scale_1 @ <instance>] w:8 h:8 fmt:gbrapf32le csp:gbr range:unknown sar:0/1 -> w:8 h:8 fmt:rgba csp:gbr range:pc sar:0/1 flags:0x00000004",
+          "[auto_scale_1 @ <instance>] [framesync @ <instance>] Selected 1/25 time base",
+          "[auto_scale_1 @ <instance>] [framesync @ <instance>] Sync level 1",
+          "[auto_scale_0 @ <instance>] [framesync @ <instance>] Sync level 0",
+          "[auto_scale_1 @ <instance>] [framesync @ <instance>] Sync level 0"
+        ],
+        "float_rgb_roundtrip": [
+          "[graph -1 input from stream 0:0 @ <instance>] w:8 h:8 pixfmt:rgba tb:1/25 fr:25/1 sar:0/1 csp:unknown range:unknown alpha:unspecified",
+          "[auto_scale_0 @ <instance>] w:iw h:ih flags:'' interl:0",
+          "[Parsed_format_0 @ <instance>] auto-inserting filter 'auto_scale_0' between the filter 'graph -1 input from stream 0:0' and the filter 'Parsed_format_0'",
+          "[auto_scale_1 @ <instance>] w:iw h:ih flags:'' interl:0",
+          "[format @ <instance>] auto-inserting filter 'auto_scale_1' between the filter 'Parsed_format_0' and the filter 'format'",
+          "[auto_scale_0 @ <instance>] w:8 h:8 fmt:rgba csp:gbr range:pc sar:0/1 -> w:8 h:8 fmt:gbrpf32le csp:gbr range:unknown sar:0/1 flags:0x00000004",
+          "[auto_scale_0 @ <instance>] [framesync @ <instance>] Selected 1/25 time base",
+          "[auto_scale_0 @ <instance>] [framesync @ <instance>] Sync level 1",
+          "[auto_scale_1 @ <instance>] w:8 h:8 fmt:gbrpf32le csp:gbr range:unknown sar:0/1 -> w:8 h:8 fmt:rgba csp:gbr range:pc sar:0/1 flags:0x00000004",
+          "[auto_scale_1 @ <instance>] [framesync @ <instance>] Selected 1/25 time base",
+          "[auto_scale_1 @ <instance>] [framesync @ <instance>] Sync level 1",
+          "[auto_scale_0 @ <instance>] [framesync @ <instance>] Sync level 0",
+          "[auto_scale_1 @ <instance>] [framesync @ <instance>] Sync level 0"
+        ],
+        "float_rgba_roundtrip": [
+          "[graph -1 input from stream 0:0 @ <instance>] w:8 h:8 pixfmt:rgba tb:1/25 fr:25/1 sar:0/1 csp:unknown range:unknown alpha:unspecified",
+          "[auto_scale_0 @ <instance>] w:iw h:ih flags:'' interl:0",
+          "[Parsed_format_0 @ <instance>] auto-inserting filter 'auto_scale_0' between the filter 'graph -1 input from stream 0:0' and the filter 'Parsed_format_0'",
+          "[auto_scale_1 @ <instance>] w:iw h:ih flags:'' interl:0",
+          "[format @ <instance>] auto-inserting filter 'auto_scale_1' between the filter 'Parsed_format_0' and the filter 'format'",
+          "[auto_scale_0 @ <instance>] w:8 h:8 fmt:rgba csp:gbr range:pc sar:0/1 -> w:8 h:8 fmt:gbrapf32le csp:gbr range:unknown sar:0/1 flags:0x00000004",
+          "[auto_scale_0 @ <instance>] [framesync @ <instance>] Selected 1/25 time base",
+          "[auto_scale_0 @ <instance>] [framesync @ <instance>] Sync level 1",
+          "[auto_scale_1 @ <instance>] w:8 h:8 fmt:gbrapf32le csp:gbr range:unknown sar:0/1 -> w:8 h:8 fmt:rgba csp:gbr range:pc sar:0/1 flags:0x00000004",
+          "[auto_scale_1 @ <instance>] [framesync @ <instance>] Selected 1/25 time base",
+          "[auto_scale_1 @ <instance>] [framesync @ <instance>] Sync level 1",
+          "[auto_scale_0 @ <instance>] [framesync @ <instance>] Sync level 0",
+          "[auto_scale_1 @ <instance>] [framesync @ <instance>] Sync level 0"
+        ],
+        "exposure_half": [
+          "[graph -1 input from stream 0:0 @ <instance>] w:8 h:8 pixfmt:rgba tb:1/25 fr:25/1 sar:0/1 csp:unknown range:unknown alpha:unspecified",
+          "[auto_scale_0 @ <instance>] w:iw h:ih flags:'' interl:0",
+          "[Parsed_exposure_0 @ <instance>] auto-inserting filter 'auto_scale_0' between the filter 'graph -1 input from stream 0:0' and the filter 'Parsed_exposure_0'",
+          "[auto_scale_1 @ <instance>] w:iw h:ih flags:'' interl:0",
+          "[format @ <instance>] auto-inserting filter 'auto_scale_1' between the filter 'Parsed_exposure_0' and the filter 'format'",
+          "[auto_scale_0 @ <instance>] w:8 h:8 fmt:rgba csp:gbr range:pc sar:0/1 -> w:8 h:8 fmt:gbrapf32le csp:gbr range:unknown sar:0/1 flags:0x00000004",
+          "[auto_scale_0 @ <instance>] [framesync @ <instance>] Selected 1/25 time base",
+          "[auto_scale_0 @ <instance>] [framesync @ <instance>] Sync level 1",
+          "[auto_scale_1 @ <instance>] w:8 h:8 fmt:gbrapf32le csp:gbr range:unknown sar:0/1 -> w:8 h:8 fmt:rgba csp:gbr range:pc sar:0/1 flags:0x00000004",
+          "[auto_scale_1 @ <instance>] [framesync @ <instance>] Selected 1/25 time base",
+          "[auto_scale_1 @ <instance>] [framesync @ <instance>] Sync level 1",
+          "[auto_scale_0 @ <instance>] [framesync @ <instance>] Sync level 0",
+          "[auto_scale_1 @ <instance>] [framesync @ <instance>] Sync level 0"
+        ]
+      },
+      "constant_red_control": {
+        "input_red": 127,
+        "output_red_min": 127,
+        "output_red_max": 127,
+        "distinct_output_red": 1,
+        "input_sha256": "12880e0ca12e965045c064f3aff20ba919726caa38de30980cf1cee13f482f33",
+        "float_sha256": "493ef6fea06da9ddbdb9319226901fb09cf761275c13c6d1438bbf3a646b4316",
+        "output_sha256": "12880e0ca12e965045c064f3aff20ba919726caa38de30980cf1cee13f482f33",
+        "scope": "Own192-pixel three-frame arithmetic input; red constant, green/blue varied. Isolates conversion context sensitivity without the exposure kernel."
+      }
+    },
+    {
+      "depth": 16,
+      "half_pipeline_rgb_exact": true,
+      "converted_float_sha256": "00913360566e5a76c36ebacc32266690f39dc738d96c2dd3cd1f65b15a5f4c82",
+      "half_float_sha256": "e91b23890c6964db7c7fbd8890257c298d54ec19a039a19f297238ca2fe35d3f",
+      "half_roundtrip_sha256": "0459f5d9917bedb4dc58d7eff16914aab0f1a2e971fc6dcd7b6ef0610d29ca1b",
+      "input_sha256": "04daca231fae5db279ecdf24938102ee5d74ad8a34f59c98bc6dabe9e084e6bb",
+      "input_samples": 576,
+      "identity_changed_samples": 548,
+      "identity_max_delta": 65,
+      "matching_float_roundtrips": [
+        "float_rgb_roundtrip",
+        "float_rgba_roundtrip"
+      ],
+      "stored_identity_rgb_matches_current": true,
+      "equal_code_value_variants_across_channels": 80,
+      "outputs_sha256": {
+        "null": "04daca231fae5db279ecdf24938102ee5d74ad8a34f59c98bc6dabe9e084e6bb",
+        "exposure_identity": "c4ce045419c878e4ab7c695038bc30be1408d42fc54042b425562bf879cc77f5",
+        "float_rgb_roundtrip": "229c01c2fdedf2ee36398cc34e96201e0c21baab6ed7edf3d04f6f90952cf26f",
+        "float_rgba_roundtrip": "c4ce045419c878e4ab7c695038bc30be1408d42fc54042b425562bf879cc77f5",
+        "exposure_half": "0459f5d9917bedb4dc58d7eff16914aab0f1a2e971fc6dcd7b6ef0610d29ca1b"
+      },
+      "conversion_graphs": {
+        "null": [
+          "[graph -1 input from stream 0:0 @ <instance>] w:8 h:8 pixfmt:rgba64le tb:1/25 fr:25/1 sar:0/1 csp:unknown range:unknown alpha:unspecified"
+        ],
+        "exposure_identity": [
+          "[graph -1 input from stream 0:0 @ <instance>] w:8 h:8 pixfmt:rgba64le tb:1/25 fr:25/1 sar:0/1 csp:unknown range:unknown alpha:unspecified",
+          "[auto_scale_0 @ <instance>] w:iw h:ih flags:'' interl:0",
+          "[Parsed_exposure_0 @ <instance>] auto-inserting filter 'auto_scale_0' between the filter 'graph -1 input from stream 0:0' and the filter 'Parsed_exposure_0'",
+          "[auto_scale_1 @ <instance>] w:iw h:ih flags:'' interl:0",
+          "[format @ <instance>] auto-inserting filter 'auto_scale_1' between the filter 'Parsed_exposure_0' and the filter 'format'",
+          "[auto_scale_0 @ <instance>] w:8 h:8 fmt:rgba64le csp:gbr range:pc sar:0/1 -> w:8 h:8 fmt:gbrapf32le csp:gbr range:unknown sar:0/1 flags:0x00000004",
+          "[auto_scale_0 @ <instance>] [framesync @ <instance>] Selected 1/25 time base",
+          "[auto_scale_0 @ <instance>] [framesync @ <instance>] Sync level 1",
+          "[auto_scale_1 @ <instance>] w:8 h:8 fmt:gbrapf32le csp:gbr range:unknown sar:0/1 -> w:8 h:8 fmt:rgba64le csp:gbr range:pc sar:0/1 flags:0x00000004",
+          "[auto_scale_1 @ <instance>] [framesync @ <instance>] Selected 1/25 time base",
+          "[auto_scale_1 @ <instance>] [framesync @ <instance>] Sync level 1",
+          "[auto_scale_0 @ <instance>] [framesync @ <instance>] Sync level 0",
+          "[auto_scale_1 @ <instance>] [framesync @ <instance>] Sync level 0"
+        ],
+        "float_rgb_roundtrip": [
+          "[graph -1 input from stream 0:0 @ <instance>] w:8 h:8 pixfmt:rgba64le tb:1/25 fr:25/1 sar:0/1 csp:unknown range:unknown alpha:unspecified",
+          "[auto_scale_0 @ <instance>] w:iw h:ih flags:'' interl:0",
+          "[Parsed_format_0 @ <instance>] auto-inserting filter 'auto_scale_0' between the filter 'graph -1 input from stream 0:0' and the filter 'Parsed_format_0'",
+          "[auto_scale_1 @ <instance>] w:iw h:ih flags:'' interl:0",
+          "[format @ <instance>] auto-inserting filter 'auto_scale_1' between the filter 'Parsed_format_0' and the filter 'format'",
+          "[auto_scale_0 @ <instance>] w:8 h:8 fmt:rgba64le csp:gbr range:pc sar:0/1 -> w:8 h:8 fmt:gbrpf32le csp:gbr range:unknown sar:0/1 flags:0x00000004",
+          "[auto_scale_0 @ <instance>] [framesync @ <instance>] Selected 1/25 time base",
+          "[auto_scale_0 @ <instance>] [framesync @ <instance>] Sync level 1",
+          "[auto_scale_1 @ <instance>] w:8 h:8 fmt:gbrpf32le csp:gbr range:unknown sar:0/1 -> w:8 h:8 fmt:rgba64le csp:gbr range:pc sar:0/1 flags:0x00000004",
+          "[auto_scale_1 @ <instance>] [framesync @ <instance>] Selected 1/25 time base",
+          "[auto_scale_1 @ <instance>] [framesync @ <instance>] Sync level 1",
+          "[auto_scale_0 @ <instance>] [framesync @ <instance>] Sync level 0",
+          "[auto_scale_1 @ <instance>] [framesync @ <instance>] Sync level 0"
+        ],
+        "float_rgba_roundtrip": [
+          "[graph -1 input from stream 0:0 @ <instance>] w:8 h:8 pixfmt:rgba64le tb:1/25 fr:25/1 sar:0/1 csp:unknown range:unknown alpha:unspecified",
+          "[auto_scale_0 @ <instance>] w:iw h:ih flags:'' interl:0",
+          "[Parsed_format_0 @ <instance>] auto-inserting filter 'auto_scale_0' between the filter 'graph -1 input from stream 0:0' and the filter 'Parsed_format_0'",
+          "[auto_scale_1 @ <instance>] w:iw h:ih flags:'' interl:0",
+          "[format @ <instance>] auto-inserting filter 'auto_scale_1' between the filter 'Parsed_format_0' and the filter 'format'",
+          "[auto_scale_0 @ <instance>] w:8 h:8 fmt:rgba64le csp:gbr range:pc sar:0/1 -> w:8 h:8 fmt:gbrapf32le csp:gbr range:unknown sar:0/1 flags:0x00000004",
+          "[auto_scale_0 @ <instance>] [framesync @ <instance>] Selected 1/25 time base",
+          "[auto_scale_0 @ <instance>] [framesync @ <instance>] Sync level 1",
+          "[auto_scale_1 @ <instance>] w:8 h:8 fmt:gbrapf32le csp:gbr range:unknown sar:0/1 -> w:8 h:8 fmt:rgba64le csp:gbr range:pc sar:0/1 flags:0x00000004",
+          "[auto_scale_1 @ <instance>] [framesync @ <instance>] Selected 1/25 time base",
+          "[auto_scale_1 @ <instance>] [framesync @ <instance>] Sync level 1",
+          "[auto_scale_0 @ <instance>] [framesync @ <instance>] Sync level 0",
+          "[auto_scale_1 @ <instance>] [framesync @ <instance>] Sync level 0"
+        ],
+        "exposure_half": [
+          "[graph -1 input from stream 0:0 @ <instance>] w:8 h:8 pixfmt:rgba64le tb:1/25 fr:25/1 sar:0/1 csp:unknown range:unknown alpha:unspecified",
+          "[auto_scale_0 @ <instance>] w:iw h:ih flags:'' interl:0",
+          "[Parsed_exposure_0 @ <instance>] auto-inserting filter 'auto_scale_0' between the filter 'graph -1 input from stream 0:0' and the filter 'Parsed_exposure_0'",
+          "[auto_scale_1 @ <instance>] w:iw h:ih flags:'' interl:0",
+          "[format @ <instance>] auto-inserting filter 'auto_scale_1' between the filter 'Parsed_exposure_0' and the filter 'format'",
+          "[auto_scale_0 @ <instance>] w:8 h:8 fmt:rgba64le csp:gbr range:pc sar:0/1 -> w:8 h:8 fmt:gbrapf32le csp:gbr range:unknown sar:0/1 flags:0x00000004",
+          "[auto_scale_0 @ <instance>] [framesync @ <instance>] Selected 1/25 time base",
+          "[auto_scale_0 @ <instance>] [framesync @ <instance>] Sync level 1",
+          "[auto_scale_1 @ <instance>] w:8 h:8 fmt:gbrapf32le csp:gbr range:unknown sar:0/1 -> w:8 h:8 fmt:rgba64le csp:gbr range:pc sar:0/1 flags:0x00000004",
+          "[auto_scale_1 @ <instance>] [framesync @ <instance>] Selected 1/25 time base",
+          "[auto_scale_1 @ <instance>] [framesync @ <instance>] Sync level 1",
+          "[auto_scale_0 @ <instance>] [framesync @ <instance>] Sync level 0",
+          "[auto_scale_1 @ <instance>] [framesync @ <instance>] Sync level 0"
+        ]
+      },
+      "constant_red_control": {
+        "input_red": 32767,
+        "output_red_min": 32766,
+        "output_red_max": 32777,
+        "distinct_output_red": 12,
+        "input_sha256": "ae606dd616ff699879d938e10b254602b783253e0257f6ef97ec3b5c87b7b11d",
+        "float_sha256": "e1c102e21cac3a88c59ce54591a7bed8ab8405fc0b3b6ce29cc6134b71568532",
+        "output_sha256": "b7bc275386a8992130f26963b43f4ef3ea3655bda31c9a21ead71f11d2de0a49",
+        "scope": "Own192-pixel three-frame arithmetic input; red constant, green/blue varied. Isolates conversion context sensitivity without the exposure kernel."
+      }
+    }
+  ],
+  "diagnostic_sha256": "5ae92861d6cfc569cea38c9b58d1a4c58ab09097d1d88924995779add597c212",
+  "fixtures_written": false,
+  "native_tests": {
+    "command": "CARGO_TARGET_DIR=../target CARGO_BUILD_JOBS=2 cargo --config profile.dev.package.fvid-media.opt-level=2 test --offline --manifest-path crates/fvid-media/Cargo.toml --no-default-features --lib owned_exposure",
+    "exit_code": 0,
+    "passed": 8,
+    "ignored": 1,
+    "log_sha256": "16b1cde3706375c28d50bb83bcdc7c559eac2b36ab6e68059c5a95818a3eb3cf",
+    "source_sha256": "532e2b56f3a6d5b347dc5be4deeea72fd8d93f2dd95fac117f09ddbcbbe9a9da",
+    "runtime_kernel_changes": false,
+    "full_integer_conversion_compatibility": false
+  }
+}

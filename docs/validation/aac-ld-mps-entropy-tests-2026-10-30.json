@@ -1,0 +1,50 @@
+{
+  "base_commit": "cd6e4fa229",
+  "scope": "LD-MPS parameter-pair entropy component only. No spatial frame or movie playback acceptance.",
+  "pairs": 8094,
+  "pair_bit_offsets": 8,
+  "full_band_coding_contexts": 512,
+  "short_prefix_checks": 237735,
+  "codebooks": 34,
+  "numeric_prefix_leaves": 1504,
+  "original_reference_agree": 8052,
+  "retained_reference_defect_cases": 42,
+  "escape_shape_control_agree": 8094,
+  "media_unit_passed": 573,
+  "media_unit_ignored": 1,
+  "integration_passed": 9,
+  "all_test_compilation": "offline no-default-features player passed",
+  "accepted_spatial_programmes": 0,
+  "closed_codec_gaps": 0,
+  "checks": [
+    {
+      "log": "/tmp/fvid-ld-mps-entropy-final.log",
+      "sha256": "a6b62f73a48a76b99bc0a5609997763b9cd8891f9678a8b0e27252ca159df33c",
+      "results": [
+        "test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.07s",
+        "test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.87s"
+      ],
+      "finished": [
+        "    Finished `test` profile [unoptimized + debuginfo] target(s) in 24.59s"
+      ]
+    },
+    {
+      "log": "/tmp/fvid-ld-mps-entropy-media-final.log",
+      "sha256": "17d0b6c4ede9a4eaf4e028739d29dd0118562d3edecaef0894f94dba0925b4ff",
+      "results": [
+        "test result: ok. 573 passed; 0 failed; 1 ignored; 0 measured; 0 filtered out; finished in 1.42s"
+      ],
+      "finished": [
+        "    Finished `test` profile [unoptimized + debuginfo] target(s) in 53.19s"
+      ]
+    },
+    {
+      "log": "/tmp/fvid-ld-mps-entropy-all-check-final.log",
+      "sha256": "cb8c370003b8a1492a99579a1f62cbb409f058d4dc0148e8c313c9381c0fe898",
+      "results": [],
+      "finished": [
+        "    Finished `dev` profile [unoptimized + debuginfo] target(s) in 27.66s"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,56 @@
+{
+  "base": "daca71ddb27ffc09d3a8b77260550549d815f0b7",
+  "counts": {
+    "passed": 613,
+    "failed": 0,
+    "ignored": 1
+  },
+  "before_scope": "22 initial zero controls pass; nonzero padding movie fails specifically at the original alignment check. Final corpus subsequently extended to33 programmes.",
+  "runs": {
+    "media": {
+      "log": "/tmp/fvid-aac-alignment-media.log",
+      "sha256": "9aa54c8615419bc94e18fafafc0c27985e4fafbdcc1ce116139d97c5c562450f",
+      "results": [
+        "test result: ok. 588 passed; 0 failed; 1 ignored; 0 measured; 0 filtered out; finished in 1.28s"
+      ]
+    },
+    "root": {
+      "log": "/tmp/fvid-aac-alignment-final-root.log",
+      "sha256": "2fa7efb911a244079e1e8ae119ed4595e730efa787716d8c59dda0d67eeba196",
+      "results": [
+        "test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 1101 filtered out; finished in 13.01s"
+      ]
+    },
+    "integration": {
+      "log": "/tmp/fvid-aac-alignment-final-integration.log",
+      "sha256": "159444bb68ff305096598729c865c92cc12dba910e6f43137aaebc52697b9899",
+      "results": [
+        "test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 2.57s",
+        "test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.66s",
+        "test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.16s",
+        "test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 24.53s"
+      ]
+    },
+    "before": {
+      "log": "/tmp/fvid-aac-alignment-before.log",
+      "sha256": "1d054131f03a4377f383d9c150b2ae36b4f05a465192bcf87d6b7d4c2f67d18d",
+      "results": [
+        "test result: FAILED. 1 passed; 1 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.07s"
+      ],
+      "failure": "\"eld-tree0-ones\": nonzero AAC ELD alignment bits"
+    }
+  },
+  "sources": {
+    "crates/fvid-media/src/owned_aac/aac_eld_native_impl.rs": "d9403221a8f8187d1eb6ccbdeea837ead76d8424928dcb811002838485f26f35",
+    "crates/fvid-media/src/owned_aac/aac_pce_impl.rs": "4f4d3d2fc227f0b8346460e1563042e20daede96968844063b2b4961bccea221",
+    "crates/fvid-media/src/owned_aac/aac_native.rs": "d56194391e1fc437346e09e30d12394668e8fa7cc891fc044eb173bdde1f064c",
+    "src/playback/audio/ep1_worker_tests.rs": "0074924882fd31b79b47845e191e4c143a00cdbe79b41fd86b880948180afbaf",
+    "tests/aac_alignment.rs": "a3696ed04c707f0b9ac088481eea9947143a0828b2f70d57408e7a1ebec1521c",
+    "tests/aac_eld_spatial_tail.rs": "3fa512ed3ca74bd7001bd0031e932cea9f0d5add1a9a18713fcb76fed0125aef",
+    "tests/aac_eld_mps_native.rs": "68514bd7fe79f98f2838034d57cedc430f964babb190ee7df4790ceb0bf702af",
+    "scripts/generate_aac_alignment_fixtures.py": "c088c853d37a76244f374a20f4a50e540ad193aa182d098967abe090b1d5cc9c",
+    "scripts/generate_aac_eld_spatial_tail_fixtures.py": "953831d49144757cb1f80063131a74d37528e5650c02ab310cd7b9de3f663a76",
+    "scripts/fetch_iso_ld_mps_conformance.py": "b3f0edfcf7a7d79b88d8813e43f264ca46245a1c0d71d9b6b7f65919ee892ec5"
+  },
+  "parent_movie_and_packet_bytes_unchanged": 45
+}

@@ -1,0 +1,28 @@
+{
+  "scope": "Residual ICC parameter metadata and explicit external-residual matrix application. Native residual audio admission remains refused.",
+  "source_sha256": {
+    "crates/fvid-media/src/owned_aac/aac_ld_mps_parameters.rs": "863434f4835051e12fca178993b0e3ed7c1833c48655891054f86547332a926e",
+    "crates/fvid-media/src/owned_aac/aac_ld_mps_frame.rs": "82199db27ef9178540d5fc0542f308734fef896eefa6c618ec9abef5f81d4ec9",
+    "crates/fvid-media/src/owned_aac/aac_ld_mps_residual_icc.rs": "a5b738f1cfa460e8f722e7e2fb114862e6e0432fee00f29d396d26c17782486b",
+    "crates/fvid-media/src/owned_aac/aac_ld_mps_assemble.rs": "f838c8feb2921285ca617b5bc17834e3941520fa6803f5767fd0c1186eb8352a",
+    "crates/fvid-media/src/owned_aac/mod.rs": "0070e358cdcb17b738b2d905d5e7d696781e4f6896d18b2976fafb70b9f65617",
+    "tests/aac_mps_residual_icc.rs": "021461506a969e35adda3a11c7f024802a7f818c5f9b944c3e19e068392cf54a",
+    "scripts/generate_aac_mps_residual_icc_fixtures.py": "d89a5504206486512cc6663f1729080842d6314bf52ef9291b8ec6e7602e7510",
+    "scripts/generate_aac_mps_residual_icc_reference.py": "3a07e1e30db70062a42f6c775cd0f1ffcfd6446a533e6527a39204ffbf6a6fb4",
+    "scripts/support/aac_mps_residual_icc_reference_probe.c": "9d68cfaba3c0fdea7c5d644decfbf2823c902d2b29cc9a07fa16fcb3c5c67ae5"
+  },
+  "preserved": [
+    "Legacy Parameters::decode fine-index API and state transitions",
+    "Raw Frame syntax and entropy/mapped histories",
+    "Original shared-ICC row; corrected rows materialize per non-LFE OTT box",
+    "Existing matrix/PCM path without explicit residual corrections",
+    "Held endpoint propagation after encoded-set correction"
+  ],
+  "reference_order": "ISO sac_bitdec.c::mapIndexData adds diffIdxData before coarse2fine, after updating the base idxPrev history. C reference uses only non-interpolated and in-range values.",
+  "failure_policy": "Reject out-of-grid ICC rather than guess saturation from an unchecked reference lookup. A failed explicit correction/assembly retains caller bits and all decoder histories.",
+  "remaining": [
+    "Native source association and residual QMF dispatch",
+    "LD phase/bank qualification",
+    "Residual PCM playback/seek acceptance"
+  ]
+}

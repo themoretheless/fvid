@@ -1,0 +1,45 @@
+{
+  "scope": "Residual spectral-to-QMF component only. Native residual playback admission remains refused; no full codec completion or native LD phase qualification.",
+  "tests": {
+    "programmes": 24,
+    "scalar_values": 907776,
+    "maximum_absolute_difference": 3.080261185596511e-07,
+    "tolerance": 5e-07,
+    "zero_output_negative_control_gap": 0.04170691967010498,
+    "carried_silent_frames": 16,
+    "media_unit_tests_passed": 587,
+    "media_preexisting_ignored": 1,
+    "integration_tests_passed": 4,
+    "log": "/tmp/fvid-mdct-qmf-test.log"
+  },
+  "generation": "Independent ISO C extraction, original numeric windows, own dense/silent/impulse spectra. Repeated generation of facts/input/reference is byte-identical. Ordinary tests do not compile or execute external code.",
+  "owned_lifecycle": [
+    "Per-instance overlap across all long/short transitions",
+    "Exact checkpoint/replay and reset",
+    "Late malformed or nonfinite spectral block leaves all overlap unchanged",
+    "Raw input spectra are borrowed immutably",
+    "Retained-memory accounting"
+  ],
+  "native_fixture_update": "The previous residual refusal movie used8 spatial slots. Although8 has a reference constant, its frequency window is absent. The own candidate now uses the matched512-core double-rate LD-SBR path with16 slots and64 bins. All frame/payload grammar passes independently; the specific native refusal remains.",
+  "open": [
+    "Native LD phase and32/128-bin domain qualification",
+    "Source-frame association and final pipeline wiring",
+    "ICC correction application",
+    "Native PCM/playback/seek acceptance",
+    "Unqualified update8 and other profile/tool behavior"
+  ],
+  "source_sha256": {
+    "crates/fvid-media/src/owned_aac/aac_mps_mdct_qmf.rs": "2abe647c099871429ba0a453740032594c3112257e91e38c02257ccc3293e0ff",
+    "crates/fvid-media/src/owned_aac/aac_mps_mdct_qmf_facts.rs": "73f382f0e254d47e1c1eb0e55713b95d55fe471aee0bc4729031fd2c75e99e0e",
+    "crates/fvid-media/src/owned_aac/mod.rs": "27b6a5d830b693f919959d0ed474c455423e082ff162fd57222170bc282ec20b",
+    "tests/aac_mps_mdct_qmf.rs": "f3294d948b4dd48ba260418003fc181fa11aa47a8a7c39646d06c37bbc485329",
+    "scripts/generate_aac_mps_mdct_qmf_reference.py": "0cd5b7eb02feb86567356fd1356621e689fe436e95e3bc80dcba5b224f4db8db",
+    "scripts/generate_aac_ld_mps_residual_fixtures.py": "c2891219f437f93984582dec1db5a5eaa5acdb8891684ca7f0333a611ebd8096"
+  },
+  "fixture_sha256": {
+    "README.md": "b173f713060deeac9fd3a84f204c1037f29f0743221d90da461e595141b9fd06",
+    "expected.f32le": "36bfc1b311e3440f95e2f16be44f1262dee813a2eaa816699c56ad4c19fff296",
+    "input.f32le": "0f8208d1ce612ab9795d35f6f4aebb230daa0d01282a853866a8e5dc8a6a5481",
+    "manifest.json": "53c81657530ee31dd8e60f02794b462c499ca286053cf7bab9690b87cf6eae15"
+  }
+}

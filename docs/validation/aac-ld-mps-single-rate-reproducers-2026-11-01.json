@@ -1,0 +1,141 @@
+{
+  "cases": [
+    {
+      "name": "n480-x1",
+      "bands": 32,
+      "gain_switch": false,
+      "before": {
+        "decoded": true,
+        "max_error": 0.0004949880676576868,
+        "byte_exact": false,
+        "probe_sha256": "f694c2c6658aa8eb4c22edc8f3ee153773d1e58335196975529d31d7e10c5477"
+      },
+      "after": {
+        "decoded": true,
+        "max_error": 0.0,
+        "byte_exact": true,
+        "probe_sha256": "8d8c90621ea95b93882c0e499d8577d42aa5e12a28680a0c2bbd40d39ab298ed"
+      }
+    },
+    {
+      "name": "n480-x1-gain",
+      "bands": 32,
+      "gain_switch": true,
+      "before": {
+        "decoded": true,
+        "max_error": 0.0006591593846678734,
+        "byte_exact": false,
+        "probe_sha256": "f694c2c6658aa8eb4c22edc8f3ee153773d1e58335196975529d31d7e10c5477"
+      },
+      "after": {
+        "decoded": true,
+        "max_error": 0.0,
+        "byte_exact": true,
+        "probe_sha256": "8d8c90621ea95b93882c0e499d8577d42aa5e12a28680a0c2bbd40d39ab298ed"
+      }
+    },
+    {
+      "name": "n480-x2",
+      "bands": 64,
+      "gain_switch": false,
+      "before": {
+        "decoded": true,
+        "max_error": 0.0,
+        "byte_exact": true,
+        "probe_sha256": "f694c2c6658aa8eb4c22edc8f3ee153773d1e58335196975529d31d7e10c5477"
+      },
+      "after": {
+        "decoded": true,
+        "max_error": 0.0,
+        "byte_exact": true,
+        "probe_sha256": "8d8c90621ea95b93882c0e499d8577d42aa5e12a28680a0c2bbd40d39ab298ed"
+      }
+    },
+    {
+      "name": "n480-x2-gain",
+      "bands": 64,
+      "gain_switch": true,
+      "before": {
+        "decoded": true,
+        "max_error": 0.0,
+        "byte_exact": true,
+        "probe_sha256": "f694c2c6658aa8eb4c22edc8f3ee153773d1e58335196975529d31d7e10c5477"
+      },
+      "after": {
+        "decoded": true,
+        "max_error": 0.0,
+        "byte_exact": true,
+        "probe_sha256": "8d8c90621ea95b93882c0e499d8577d42aa5e12a28680a0c2bbd40d39ab298ed"
+      }
+    },
+    {
+      "name": "n512-x1",
+      "bands": 32,
+      "gain_switch": false,
+      "before": {
+        "decoded": true,
+        "max_error": 0.00046931716497056186,
+        "byte_exact": false,
+        "probe_sha256": "f694c2c6658aa8eb4c22edc8f3ee153773d1e58335196975529d31d7e10c5477"
+      },
+      "after": {
+        "decoded": true,
+        "max_error": 0.0,
+        "byte_exact": true,
+        "probe_sha256": "8d8c90621ea95b93882c0e499d8577d42aa5e12a28680a0c2bbd40d39ab298ed"
+      }
+    },
+    {
+      "name": "n512-x1-gain",
+      "bands": 32,
+      "gain_switch": true,
+      "before": {
+        "decoded": true,
+        "max_error": 0.0006210138380993158,
+        "byte_exact": false,
+        "probe_sha256": "f694c2c6658aa8eb4c22edc8f3ee153773d1e58335196975529d31d7e10c5477"
+      },
+      "after": {
+        "decoded": true,
+        "max_error": 0.0,
+        "byte_exact": true,
+        "probe_sha256": "8d8c90621ea95b93882c0e499d8577d42aa5e12a28680a0c2bbd40d39ab298ed"
+      }
+    },
+    {
+      "name": "n512-x2",
+      "bands": 64,
+      "gain_switch": false,
+      "before": {
+        "decoded": true,
+        "max_error": 0.0,
+        "byte_exact": true,
+        "probe_sha256": "f694c2c6658aa8eb4c22edc8f3ee153773d1e58335196975529d31d7e10c5477"
+      },
+      "after": {
+        "decoded": true,
+        "max_error": 0.0,
+        "byte_exact": true,
+        "probe_sha256": "8d8c90621ea95b93882c0e499d8577d42aa5e12a28680a0c2bbd40d39ab298ed"
+      }
+    },
+    {
+      "name": "n512-x2-gain",
+      "bands": 64,
+      "gain_switch": true,
+      "before": {
+        "decoded": true,
+        "max_error": 0.0,
+        "byte_exact": true,
+        "probe_sha256": "f694c2c6658aa8eb4c22edc8f3ee153773d1e58335196975529d31d7e10c5477"
+      },
+      "after": {
+        "decoded": true,
+        "max_error": 0.0,
+        "byte_exact": true,
+        "probe_sha256": "8d8c90621ea95b93882c0e499d8577d42aa5e12a28680a0c2bbd40d39ab298ed"
+      }
+    }
+  ],
+  "scope": "8 wholly authored MP4 videos,old and corrected decoder both admit all packets. Dual-rate controls pass before/after;single-rate phase PCM fails before and matches direct convolution after."
+}

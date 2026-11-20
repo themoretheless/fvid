@@ -1,0 +1,65 @@
+{
+  "date": "2026-11-01",
+  "base_commit": "2f6b44b07d",
+  "scope": "Zero-width TTT EBQ qualification only; no new DSP or general EBQ semantics",
+  "command": "CARGO_TARGET_DIR=/Users/themoretheless/.codex/worktrees/aac-eld-extension-gaps/target CARGO_BUILD_JOBS=2 cargo --config profile.dev.package.fvid-media.opt-level=2 test --offline --no-default-features --features player --test aac_ld_mps_empty_ttt --test aac_ld_mps_prepare -- --nocapture",
+  "exit_code": 0,
+  "passed": 10,
+  "failed": 0,
+  "ignored": 0,
+  "log": "/tmp/fvid-empty-ttt-final.log",
+  "log_sha256": "b470d1a4a107959210c130c68371e230761d9193a42018dcf9fd43379dd29ce2",
+  "programmes": 112,
+  "controls": 14,
+  "containers": [
+    "MP4",
+    "Matroska"
+  ],
+  "decorrelation_modes": 2,
+  "seek_points": [
+    1,
+    255,
+    256,
+    257,
+    384,
+    511,
+    512,
+    513,
+    768
+  ],
+  "parameter_bands": [
+    23,
+    15,
+    12,
+    9,
+    7,
+    5,
+    4
+  ],
+  "quantization_modes": [
+    1,
+    2
+  ],
+  "inactive_modes": [
+    2,
+    3,
+    4,
+    5
+  ],
+  "inactive_regions": [
+    "upper",
+    "lower"
+  ],
+  "generator": {
+    "files": 254,
+    "deterministic": true,
+    "subprocess_and_socket_creation_forbidden": true
+  },
+  "before_fix": {
+    "log": "/tmp/fvid-empty-ttt-before.log",
+    "passed": 1,
+    "failed": 2,
+    "error": "energy quantization for this tree/TTT/arbitrary-tree configuration is not yet qualified"
+  },
+  "oracle": "Byte-exact equivalence to all-predictive quant0 controls; not a new independent whole-spatial oracle"
+}

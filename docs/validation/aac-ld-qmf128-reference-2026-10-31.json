@@ -1,0 +1,99 @@
+{
+  "source": "https://standards.iso.org/iso-iec/23003/-2/ed-2/en/SAOC_IS7_ReferenceSoftware__20160603.zip",
+  "archive_sha256": "b6b27e2f9af6ee8f950af8d7074afc467e66d93372328c0ec55282fff71d1f83",
+  "members": {
+    "sac_polyphase.c": "7d5c4f41ebfb9c9ed789af3ec3cb8892f1ee6ec89037fc31fb3077a73d3b30df",
+    "sac_polyphase.h": "72389c5e037ce65468433399f6ca731561e2d39393f01d52d7eb55e449928ba7",
+    "sac_sbrconst.h": "bc3338fbd3800bac6e0187c9b415b832ffb32a415d502c354b69318d8e5d5d6e"
+  },
+  "probe_sha256": "0f1df0a4a35198d8491d17703b3ae44ffb937ab634b3b6a3f008504dcacaa229",
+  "validator_sha256": "9f856190769a3768e09df82f4d52d39571cb88e281af14783ece19660dbf7a55",
+  "scope": "Unmodified ISO LD_MPS polyphase routines at128 bands. Precise control overrides the PI macro in the translation unit only; not a whole codec/conformance oracle.",
+  "coefficient_rule": "Non64 source branch averages C[floor(k*64/128)] and next cell.640 explicit LD values in a1280-sized zero-initialized array; C[640] is implicit0.",
+  "results": [
+    {
+      "name": "impulse",
+      "control": "original",
+      "analysis_float_model_error": 0.0,
+      "synthesis_float_model_error": 8.881784197001252e-16,
+      "analysis_scalar_f64_difference": 9.784938910689742e-06,
+      "synthesis_scalar_f64_difference": 1.1335079095407044e-06
+    },
+    {
+      "name": "tones",
+      "control": "original",
+      "analysis_float_model_error": 0.0,
+      "synthesis_float_model_error": 0.0,
+      "analysis_scalar_f64_difference": 1.54865144708638e-05,
+      "synthesis_scalar_f64_difference": 2.5160940876622906e-07
+    },
+    {
+      "name": "dense",
+      "control": "original",
+      "analysis_float_model_error": 0.0,
+      "synthesis_float_model_error": 0.0,
+      "analysis_scalar_f64_difference": 9.710689468800382e-05,
+      "synthesis_scalar_f64_difference": 2.7890405798203233e-06
+    },
+    {
+      "name": "low-real",
+      "control": "original",
+      "synthesis_float_model_error": 0.0,
+      "synthesis_scalar_f64_difference": 1.1578473197576544e-09
+    },
+    {
+      "name": "high-imag",
+      "control": "original",
+      "synthesis_float_model_error": 0.0,
+      "synthesis_scalar_f64_difference": 1.8964019522435538e-07
+    },
+    {
+      "name": "complex-dense",
+      "control": "original",
+      "synthesis_float_model_error": 0.0,
+      "synthesis_scalar_f64_difference": 1.9806280824249956e-06
+    },
+    {
+      "name": "impulse",
+      "control": "precise",
+      "analysis_float_model_error": 0.0,
+      "synthesis_float_model_error": 1.2387221578883702e-16,
+      "analysis_scalar_f64_difference": 1.4609441767454712e-08,
+      "synthesis_scalar_f64_difference": 8.17789502782773e-09
+    },
+    {
+      "name": "tones",
+      "control": "precise",
+      "analysis_float_model_error": 0.0,
+      "synthesis_float_model_error": 0.0,
+      "analysis_scalar_f64_difference": 2.309601108363424e-06,
+      "synthesis_scalar_f64_difference": 6.857654721859063e-08
+    },
+    {
+      "name": "dense",
+      "control": "precise",
+      "analysis_float_model_error": 0.0,
+      "synthesis_float_model_error": 0.0,
+      "analysis_scalar_f64_difference": 4.159835711448068e-06,
+      "synthesis_scalar_f64_difference": 1.7302550194301866e-07
+    },
+    {
+      "name": "low-real",
+      "control": "precise",
+      "synthesis_float_model_error": 0.0,
+      "synthesis_scalar_f64_difference": 4.655816496224041e-10
+    },
+    {
+      "name": "high-imag",
+      "control": "precise",
+      "synthesis_float_model_error": 0.0,
+      "synthesis_scalar_f64_difference": 4.6558192891288375e-10
+    },
+    {
+      "name": "complex-dense",
+      "control": "precise",
+      "synthesis_float_model_error": 0.0,
+      "synthesis_scalar_f64_difference": 1.2924708803208063e-08
+    }
+  ]
+}

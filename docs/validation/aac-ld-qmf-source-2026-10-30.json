@@ -1,0 +1,8 @@
+{
+  "source": "https://standards.iso.org/iso-iec/23003/-2/ed-2/en/SAOC_IS7_ReferenceSoftware__20160603.zip",
+  "archive_sha256": "b6b27e2f9af6ee8f950af8d7074afc467e66d93372328c0ec55282fff71d1f83",
+  "member": "mp4spatialdec/src/sac_polyphase.c",
+  "member_sha256": "7d5c4f41ebfb9c9ed789af3ec3cb8892f1ee6ec89037fc31fb3077a73d3b30df",
+  "facts": "640 numeric QMF LD-256 window samples, reference single-precision realization. No implementation code transcribed.",
+  "scope": "LD-QMF foundation; not LD-MPS spatial playback acceptance"
+}

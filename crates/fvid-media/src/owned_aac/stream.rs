@@ -324,7 +324,7 @@ impl AdtsOutputDecoder {
     fn decode(&mut self, packet: &[u8]) -> Result<Vec<f32>> {
         match self {
             Self::Core(d) => Ok(d
-                .decode_timed(packet, 0, u64::from(d.core_frame_samples()))?
+                .decode_timed(packet, 0, u64::from(d.core_packet_samples()))?
                 .map_or_else(Vec::new, |f| f.samples)),
             Self::Ps(d) => Ok(d.decode(packet)?.map_or_else(Vec::new, |f| f.pcm)),
         }
@@ -474,7 +474,7 @@ pub fn negotiate_adts_aac_reader<R: std::io::Read, C: AudioDecodeControl>(
             }
             storage.push(&packet, &[])?;
             position = position
-                .checked_add(u64::from(parsed.core.frame_samples))
+                .checked_add(u64::from(parsed.core_packet_samples()))
                 .ok_or_else(|| invalid("audio position overflow"))?;
             control.packet(packet.len())?;
         }
@@ -525,7 +525,7 @@ pub fn negotiate_adts_aac_reader<R: std::io::Read, C: AudioDecodeControl>(
                 break;
             };
             let samples = decoder
-                .decode_timed(&packet, 0, u64::from(decoder.core_frame_samples()))?
+                .decode_timed(&packet, 0, u64::from(decoder.core_packet_samples()))?
                 .map_or_else(Vec::new, |f| f.samples);
             let frames = (samples.len() / channels) as u64;
             let core_frames = if decoder.sample_rate() == config.sample_rate {

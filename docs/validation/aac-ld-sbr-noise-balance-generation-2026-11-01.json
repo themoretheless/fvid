@@ -1,0 +1,22 @@
+{
+  "processes": false,
+  "network": false,
+  "deterministic": true,
+  "files": {
+    "packets.bin": "ca988071cd50183b43e462f489ca3e029127ab3045d467a1f5f8b65d61c9e726",
+    "n480-coupled.mkv": "dd172efdbd2cc93a9320e724899dbc18e04b4492362f79157cc54925bb59153f",
+    "n512-coupled.f32le": "834ab272d669e630a6fb6c7593f2af164fc5fa99341cc156573adfb722dae454",
+    "n512-coupled-pan.f32le": "f26a9635210b41835667b00e81507783a517d795f99d37946ee6f0058c930fe0",
+    "n480-coupled.mp4": "1175373114e8311d436df3984dc2e83928f42b2450b16c01e3cbfe67ce389a80",
+    "README.md": "40f9b05c677ba68317cd831d4a762c1af6c776ba4b092560a5cc5d835d6150b3",
+    "n480-coupled-pan.mp4": "50743d78eab0f832a27e83704ab6e868e2029652dbeafc769980f049795f421a",
+    "n480-coupled-pan.f32le": "3df58099514c3c469807f0245efe1dcfb2b738f5ad4b0ce9ca314e091fa6bf4e",
+    "n480-coupled-pan.mkv": "9adad625f22f00a6949a4ae40905d401225e033fcc682792165e18e0f01005e8",
+    "manifest.json": "b623ff879aff3080a215e40fcbd66d28ea49b741db48f045bff9b2281bb10977",
+    "n480-coupled.f32le": "7d2e3f568fdb3b042675efe9c0b2f1d5ad4ab6b6976ad5501af44fdb99955f3e",
+    "n512-coupled-pan.mkv": "7c871b6a126adfafbb38f9b8b37d9acf90a5ba0ca9b346a7907bdf0a77bbfc4e",
+    "n512-coupled.mkv": "7ace2e993f8bbc8a843a26acb7c5732b66b246be92af1b1ae854a3cd1e6c3a97",
+    "n512-coupled-pan.mp4": "f7e6569a564b9a30fb854da24013fb707ad3d96eb2cf3af11ad55a502d1ae240",
+    "n512-coupled.mp4": "ba97cbc6d9030ca8ba9da16d8e7c83a5dff6a83b99955f5092f5dae15a074124"
+  }
+}

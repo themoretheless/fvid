@@ -1,0 +1,90 @@
+{
+  "before_head": "99271cb578",
+  "before_tests": {
+    "centered": "passed",
+    "asymmetric": "failed",
+    "error": 4.7067264e-05,
+    "decoder_refusal": false
+  },
+  "after_tests": {
+    "centered": "passed",
+    "asymmetric": "passed",
+    "player_seek_rewind": "passed"
+  },
+  "source": {
+    "specification": "ISO/IEC 14496-3:2009",
+    "clause": "4.6.18.3.5",
+    "printed_page": 236,
+    "pdf_page": 712,
+    "sha256": "913b72c340ba90bc9f4fc3bbc2edad8005369076c78a51f147bbbbbe6b5cf20d"
+  },
+  "scope": "Own480/512 eight-AU stereo videos;center controls and asymmetric coupling;MP4 and Matroska. PCM acceptance,not refusal.",
+  "before_probe_sha256": "5f050a5565b7165a840a6e25dd1ece6c6604b3a24c5c89b76676cee505dbe3fa",
+  "before_probe_scope": "Frozen causal-origin decoder before limiter change;own mode0 limiter fixtures isolate balance with no dependence on the discarded-tail fix.",
+  "cases": [
+    {
+      "name": "n480-coupled",
+      "mode": "coupled",
+      "before": {
+        "decoded": true,
+        "max_error": 0.0,
+        "acceptance": true,
+        "sha256": "7d2e3f568fdb3b042675efe9c0b2f1d5ad4ab6b6976ad5501af44fdb99955f3e"
+      },
+      "after": {
+        "decoded": true,
+        "max_error": 0.0,
+        "acceptance": true,
+        "sha256": "7d2e3f568fdb3b042675efe9c0b2f1d5ad4ab6b6976ad5501af44fdb99955f3e"
+      }
+    },
+    {
+      "name": "n480-coupled-pan",
+      "mode": "coupled-pan",
+      "before": {
+        "decoded": true,
+        "max_error": 4.7067263949429616e-05,
+        "acceptance": false,
+        "sha256": "f97933c98d9ef267e411fcd71e1f7db7375f3ce7a871b8cf9070f2d12a8ecf55"
+      },
+      "after": {
+        "decoded": true,
+        "max_error": 0.0,
+        "acceptance": true,
+        "sha256": "3df58099514c3c469807f0245efe1dcfb2b738f5ad4b0ce9ca314e091fa6bf4e"
+      }
+    },
+    {
+      "name": "n512-coupled",
+      "mode": "coupled",
+      "before": {
+        "decoded": true,
+        "max_error": 0.0,
+        "acceptance": true,
+        "sha256": "834ab272d669e630a6fb6c7593f2af164fc5fa99341cc156573adfb722dae454"
+      },
+      "after": {
+        "decoded": true,
+        "max_error": 0.0,
+        "acceptance": true,
+        "sha256": "834ab272d669e630a6fb6c7593f2af164fc5fa99341cc156573adfb722dae454"
+      }
+    },
+    {
+      "name": "n512-coupled-pan",
+      "mode": "coupled-pan",
+      "before": {
+        "decoded": true,
+        "max_error": 4.7843786887824535e-05,
+        "acceptance": false,
+        "sha256": "aa90674738748e74b2c339c6f6524f7782eb1a5f8299227f927b8e988549d89d"
+      },
+      "after": {
+        "decoded": true,
+        "max_error": 0.0,
+        "acceptance": true,
+        "sha256": "f26a9635210b41835667b00e81507783a517d795f99d37946ee6f0058c930fe0"
+      }
+    }
+  ]
+}

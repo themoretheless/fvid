@@ -1,0 +1,96 @@
+{
+  "date": "2026-11-02",
+  "scope": "Unchanged ArbitraryTree full-grid resolution changes; not general topology or partial-grid conversion",
+  "before_fix": {
+    "exit_code": 1,
+    "stdout": "",
+    "stderr": "Error: Invalid(\"AAC decode: LD-MPS arbitrary-tree layout/grid change requires stream reconfiguration\")\n",
+    "exe_sha256": "211f7d895213b23670972a9387d44e1783db735c6e2ce5cd846aaff16943075f"
+  },
+  "corpus": {
+    "programmes": 546,
+    "access_units": 3,
+    "grids": [
+      23,
+      15,
+      12,
+      9,
+      7,
+      5,
+      4
+    ],
+    "component_programmes": 252,
+    "deterministic_files": 1097,
+    "authored_regeneration_process_and_network_forbidden": true
+  },
+  "gate": {
+    "command": "CARGO_TARGET_DIR=/Users/themoretheless/.codex/worktrees/aac-eld-extension-gaps/target CARGO_BUILD_JOBS=2 cargo --config profile.dev.package.fvid-media.opt-level=2 test --offline --no-default-features --features player --test aac_ld_mps_arbitrary_grids --test aac_ld_mps_arbitrary_partial --test aac_ld_mps_arbitrary_reindex --test aac_ld_mps_arbitrary_permutations",
+    "results": [
+      [
+        "6",
+        "0",
+        "0"
+      ],
+      [
+        "7",
+        "0",
+        "0"
+      ],
+      [
+        "4",
+        "0",
+        "0"
+      ],
+      [
+        "4",
+        "0",
+        "0"
+      ]
+    ],
+    "passed": 21,
+    "failed": 0,
+    "ignored": 0,
+    "log": {
+      "path": "/tmp/fvid-arbitrary-grids-gate.log",
+      "sha256": "69b44591c5d77a8922ee4528561de2f087457fec6ebcd9264bd10832363cf031"
+    },
+    "scope": "Focused gate, not full-current-tree qualification"
+  },
+  "component": {
+    "scalars": 1185408,
+    "maximum_absolute_error": 1.4688040332611063e-09,
+    "tolerance": 2e-08,
+    "final_filter": "grid_history_matches_original_c_for_every_pair_and_return -- --nocapture",
+    "final_log": {
+      "path": "/tmp/fvid-arbitrary-grids-component-final.log",
+      "sha256": "fd1ef2509769fe3706b0e4a97ffc388e82d7041d06c04b9079ea04ec2f65699b"
+    },
+    "includes_final_reset_assertions": true,
+    "not_added_to_unique_test_total": true,
+    "source_receipt": {
+      "path": "docs/validation/aac-ld-mps-arbitrary-grids-reference-2026-11-02.json",
+      "sha256": "1c59e08852399645b786bb933b37fcffe86135bafab7879febc63b9679213ed8"
+    }
+  },
+  "device": {
+    "runs": 12,
+    "completed_phases": 48,
+    "report": {
+      "path": "docs/validation/aac-ld-mps-arbitrary-grids-device-2026-11-02.json",
+      "sha256": "a3a0a67616d287a2a77ba99e7b5fd3984810744b2b9d4f610513d14f6c45d51f"
+    },
+    "build_log": {
+      "path": "/tmp/fvid-arbitrary-grids-device-build.log",
+      "sha256": "5241fe90ff8c24cd53d15d50be119b5a4a42996ab81750f5b6eea65affa2d7ea"
+    }
+  },
+  "remaining": [
+    "partial-grid conversion",
+    "changed topology/source paths",
+    "sparse output positions",
+    "active-uncovered bands",
+    "nonzero EBQ with active arbitrary trees",
+    "active unequal-grid HRTF"
+  ],
+  "whole_codec_goal_complete": false
+}

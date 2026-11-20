@@ -1,0 +1,32 @@
+{
+  "scope": "Source-grounded indexed matrix-history continuity in ordinary LD-MPS; raw matrix extraction is a separate independent reference step.",
+  "sources": [
+    {
+      "url": "https://standards.iso.org/iso-iec/23003/-2/ed-2/en/SAOC_IS7_ReferenceSoftware__20160603.zip",
+      "archive_sha256": "b6b27e2f9af6ee8f950af8d7074afc467e66d93372328c0ec55282fff71d1f83"
+    },
+    {
+      "url": "https://android.googlesource.com/platform/external/aac/+/ee76460efbdb147e26d804c798949c23f174460b/libSACdec/src/sac_dec_lib.cpp"
+    },
+    {
+      "url": "https://github.com/mstorsjo/fdk-aac/blob/c41c3c7516ea8d0d78a53b96b30bed3a29745cc6/cpp/libSACdec/src/sac_bitdec.cpp"
+    }
+  ],
+  "sha256": {
+    "iso/mp4spatialdec/src/sac_dec.h": "6843210a6a157963f22440393fd9e57ef1accbd44abb98d81d5ecddd7218c620",
+    "iso/mp4spatialdec/src/sac_calcM1andM2.c": "ebdb752a1d74a5f7e5638366867b3b477918aa9f4d94169ee3b2e30bfbce6153",
+    "iso/mp4spatialdec/src/sac_bitdec.c": "d9a8655b4e5efa1329d629f88bde962b640efe9d1a5c22f24f84df56eadfa64e",
+    "fdk-sac.cpp": "04fd313411472d5cee4723fbcc25cf84037f529c4129e15e025127caf4225b76",
+    "fdk-source-pin.cpp": "cf5092c174dfbfb6d027ff0d1a252e94d69a09341520fe593ac48609f89ed60e",
+    "saoc-reference.zip": "b6b27e2f9af6ee8f950af8d7074afc467e66d93372328c0ec55282fff71d1f83"
+  },
+  "facts": [
+    "ISO sac_dec.h lines77-81 selects MAX_PARAMETER_BANDS23 in LD_MPS and declares fixed indexed M1/M2 previous arrays.",
+    "ISO sac_calcM1andM2.c bufferM1andM2 updates only pb<numParameterBands, leaving other allocated rows retained.",
+    "ISO sac_bitdec.c ordinary mode uses bitstreamParameterBands; its separate expanded binaural mode is outside this implementation.",
+    "Pinned FDK sac_dec_lib.cpp CalcInitFlags keeps M1/M2 state for unchanged tree and sample rate; sac_bitdec.cpp uses the coded parameter-band count."
+  ],
+  "qualified_scope": "Indexed23-row ordinary M1/M2 history, all7 coded resolutions, same tree/rate/frame geometry. Full live foreign-decoder reconfiguration conformance is not claimed.",
+  "reference_generation": "aac-ld-mps-grid-reference-2026-10-30.json",
+  "ordinary_test_invariants": "No foreign decoder, C compiler, process, network or FFmpeg invocation in ordinary tests."
+}

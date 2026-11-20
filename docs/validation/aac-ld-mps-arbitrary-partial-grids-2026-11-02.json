@@ -1,0 +1,82 @@
+{
+  "date": "2026-11-02",
+  "scope": "Covered uniform-cutoff ArbitraryTree grid changes; mixed-cutoff conversion still explicit refusal",
+  "before_fix": {
+    "exit_code": 1,
+    "stderr": "Error: Invalid(\"AAC decode: LD-MPS arbitrary-tree layout/grid change requires stream reconfiguration\")\n",
+    "stdout": "",
+    "exe_sha256": "b833102f18668811ff89b4bf8c7a1dd2996dca9dfc2dd5298ebcaefe91d6ad54"
+  },
+  "corpus": {
+    "accepted_programmes": 218,
+    "mixed_cutoff_refusals": 2,
+    "access_units": 3,
+    "component_programmes": 148,
+    "ordered_state_pairs": 74,
+    "deterministic_files": 445,
+    "generation_process_and_network_forbidden": true
+  },
+  "gate": {
+    "command": "CARGO_TARGET_DIR=/Users/themoretheless/.codex/worktrees/aac-eld-extension-gaps/target CARGO_BUILD_JOBS=2 cargo --config profile.dev.package.fvid-media.opt-level=2 test --offline --no-default-features --features player --test aac_ld_mps_arbitrary_partial_grids --test aac_ld_mps_arbitrary_grids --test aac_ld_mps_arbitrary_partial",
+    "results": [
+      [
+        "6",
+        "0",
+        "0"
+      ],
+      [
+        "7",
+        "0",
+        "0"
+      ],
+      [
+        "7",
+        "0",
+        "0"
+      ]
+    ],
+    "passed": 20,
+    "failed": 0,
+    "ignored": 0,
+    "log": {
+      "path": "/tmp/fvid-arbitrary-partial-grids-gate.log",
+      "sha256": "29e9cde4a00b02af8265d8a2b79dd16bb97378dd3fdc09dfeda9863c5d9e27b3"
+    },
+    "scope": "Focused gate, not a full-current-tree gate"
+  },
+  "component": {
+    "scalars": 298368,
+    "maximum_absolute_error": 1.4688040332611063e-09,
+    "tolerance": 2e-08,
+    "source_report": {
+      "path": "docs/validation/aac-ld-mps-arbitrary-partial-grids-reference-2026-11-02.json",
+      "sha256": "6ab1f00395fbcefd227e4293cddb123958977ffcd6afcbcd02c8ff1572dc55fd"
+    },
+    "target_repeat_with_nocapture": {
+      "path": "/tmp/fvid-arbitrary-partial-grids-final.log",
+      "sha256": "3f3d3c8e7b9019d63adc9b5587f4988dce05dba8153e3acfb4b3d1f2e1c3f1d1"
+    },
+    "repeat_not_added_to_unique_count": true
+  },
+  "device": {
+    "runs": 12,
+    "complete_phases": 48,
+    "report": {
+      "path": "docs/validation/aac-ld-mps-arbitrary-partial-grids-device-2026-11-02.json",
+      "sha256": "a19691432fdcb420a84cc1926c2d6a0ddadd3dbee1efe6aacf5f12297d117eb9"
+    },
+    "build_log": {
+      "path": "/tmp/fvid-arbitrary-partial-grids-device-build.log",
+      "sha256": "55a9ba329f9d770a3f16f058ad3ee737b31ee55099725506eef782586c227fb5"
+    }
+  },
+  "remaining": [
+    "mixed-cutoff grid conversion",
+    "topology/source path changes",
+    "sparse positions",
+    "active-uncovered bands",
+    "nonzero EBQ with active arbitrary trees",
+    "active unequal-grid HRTF"
+  ],
+  "whole_codec_goal_complete": false
+}

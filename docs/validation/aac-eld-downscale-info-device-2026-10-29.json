@@ -1,0 +1,135 @@
+{
+  "date": "2026-10-29",
+  "platform": "Darwin",
+  "base_commit": "3b160122f4df5dbef477c11484473c4cde0beadc",
+  "probe_sha256": "cc03d34921b7a9aaa544c08d5930eeb95ed6950ae1c669f47a5bd17e43034d88",
+  "scope": "Actual default platform output, quarter and 60-percent seek and rewind. Full-rate reconstruction; no optimized short transform or downscaled PCM. No subjective listening or eight-speaker qualification.",
+  "cases": [
+    {
+      "input": "tests/fixtures/playback-errors/aac-eld-downscale-info/aac-eld-n512-c1-half.mp4",
+      "sha256": "34fb90712e4dcd8aed2cd6e1e394cf00d2cc334d4b6e68dd3d60905e9808589b",
+      "hint_sample_rate": 12000,
+      "source_channels": 1,
+      "actual_pcm_sample_rate": 24000,
+      "duration_seconds": 0.256,
+      "phases": [
+        {
+          "phase": "full",
+          "generation": "0",
+          "from": "0.000000",
+          "position": "0.256000",
+          "wall": "0.275182",
+          "device_drain": "complete"
+        },
+        {
+          "phase": "seek-quarter",
+          "generation": "1",
+          "from": "0.064000",
+          "position": "0.256000",
+          "wall": "0.214154",
+          "device_drain": "complete"
+        },
+        {
+          "phase": "seek-60-percent",
+          "generation": "2",
+          "from": "0.153600",
+          "position": "0.256000",
+          "wall": "0.123786",
+          "device_drain": "complete"
+        },
+        {
+          "phase": "rewind",
+          "generation": "3",
+          "from": "0.000000",
+          "position": "0.256000",
+          "wall": "0.272628",
+          "device_drain": "complete"
+        }
+      ]
+    },
+    {
+      "input": "tests/fixtures/playback-errors/aac-eld-downscale-info/ep1-n480-c7-x2-crc1.mp4",
+      "sha256": "a598eeff10974e625ea6c60a14f0d16ee59b73678ca7bd302d7caade8168a842",
+      "hint_sample_rate": 12000,
+      "source_channels": 8,
+      "actual_pcm_sample_rate": 48000,
+      "duration_seconds": 0.24,
+      "phases": [
+        {
+          "phase": "full",
+          "generation": "0",
+          "from": "0.000000",
+          "position": "0.240000",
+          "wall": "0.263987",
+          "device_drain": "complete"
+        },
+        {
+          "phase": "seek-quarter",
+          "generation": "1",
+          "from": "0.060000",
+          "position": "0.240000",
+          "wall": "0.222413",
+          "device_drain": "complete"
+        },
+        {
+          "phase": "seek-60-percent",
+          "generation": "2",
+          "from": "0.144000",
+          "position": "0.240000",
+          "wall": "0.149734",
+          "device_drain": "complete"
+        },
+        {
+          "phase": "rewind",
+          "generation": "3",
+          "from": "0.000000",
+          "position": "0.240000",
+          "wall": "0.256832",
+          "device_drain": "complete"
+        }
+      ]
+    },
+    {
+      "input": "tests/fixtures/playback-errors/aac-eld-downscale-info/aac-eld-esc-sbr-n480-c7-x2-crc1-half.mp4",
+      "sha256": "f135dadbc06467ad676021920b84eb7be903dfafc5380b9042dfb6854a8ebdb5",
+      "hint_sample_rate": 12000,
+      "source_channels": 8,
+      "actual_pcm_sample_rate": 48000,
+      "duration_seconds": 0.24,
+      "phases": [
+        {
+          "phase": "full",
+          "generation": "0",
+          "from": "0.000000",
+          "position": "0.240000",
+          "wall": "0.258420",
+          "device_drain": "complete"
+        },
+        {
+          "phase": "seek-quarter",
+          "generation": "1",
+          "from": "0.060000",
+          "position": "0.240000",
+          "wall": "0.252823",
+          "device_drain": "complete"
+        },
+        {
+          "phase": "seek-60-percent",
+          "generation": "2",
+          "from": "0.144000",
+          "position": "0.240000",
+          "wall": "0.166954",
+          "device_drain": "complete"
+        },
+        {
+          "phase": "rewind",
+          "generation": "3",
+          "from": "0.000000",
+          "position": "0.240000",
+          "wall": "0.261605",
+          "device_drain": "complete"
+        }
+      ]
+    }
+  ]
+}

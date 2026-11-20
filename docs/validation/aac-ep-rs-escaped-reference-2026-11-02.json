@@ -1,0 +1,132 @@
+{
+  "scope": "Original unmodified RetrieveHeader after already recovered header bits; no foreign FEC or full audio decode acceptance",
+  "source_file": "audio/natural/epTool/src/eptool.c",
+  "source_sha256": "2413bf67abc56c4b635c428dd4599cd1dcdc39e17a101103f27dcb0b473be94c",
+  "function_sha256": "90a78abd222b1fe855eb6fd6acb4a998c2ddb40c4a478585a615666245e12137",
+  "source_changes": [],
+  "driver_sha256": "558603001d2b34b00223c19fba3ebb10e2e00bc429ae6cae050d7baac2db27c5",
+  "header_fec_stub": "Identity for recovered bits; original FECDecodeHeader not exercised",
+  "compiler": "Apple clang version 21.0.0 (clang-2100.3.34.2)\nTarget: arm64-apple-darwin25.6.0\nThread model: posix\nInstalledDir: /Library/Developer/CommandLineTools/usr/bin\n",
+  "cases": [
+    {
+      "fec": 0,
+      "code": 0,
+      "rate": 0
+    },
+    {
+      "fec": 0,
+      "code": 1,
+      "rate": 3
+    },
+    {
+      "fec": 0,
+      "code": 2,
+      "rate": 4
+    },
+    {
+      "fec": 0,
+      "code": 3,
+      "rate": 6
+    },
+    {
+      "fec": 0,
+      "code": 4,
+      "rate": 8
+    },
+    {
+      "fec": 0,
+      "code": 5,
+      "rate": 12
+    },
+    {
+      "fec": 0,
+      "code": 6,
+      "rate": 16
+    },
+    {
+      "fec": 0,
+      "code": 7,
+      "rate": 24
+    },
+    {
+      "fec": 1,
+      "code": 0,
+      "rate": 0
+    },
+    {
+      "fec": 1,
+      "code": 1,
+      "rate": 3
+    },
+    {
+      "fec": 1,
+      "code": 2,
+      "rate": 4
+    },
+    {
+      "fec": 1,
+      "code": 3,
+      "rate": 6
+    },
+    {
+      "fec": 1,
+      "code": 4,
+      "rate": 8
+    },
+    {
+      "fec": 1,
+      "code": 5,
+      "rate": 12
+    },
+    {
+      "fec": 1,
+      "code": 6,
+      "rate": 16
+    },
+    {
+      "fec": 1,
+      "code": 7,
+      "rate": 24
+    },
+    {
+      "fec": 2,
+      "code": 0,
+      "rate": 0
+    },
+    {
+      "fec": 2,
+      "code": 1,
+      "rate": 3
+    },
+    {
+      "fec": 2,
+      "code": 2,
+      "rate": 4
+    },
+    {
+      "fec": 2,
+      "code": 3,
+      "rate": 6
+    },
+    {
+      "fec": 2,
+      "code": 4,
+      "rate": 8
+    },
+    {
+      "fec": 2,
+      "code": 5,
+      "rate": 12
+    },
+    {
+      "fec": 2,
+      "code": 6,
+      "rate": 16
+    },
+    {
+      "fec": 2,
+      "code": 7,
+      "rate": 24
+    }
+  ]
+}

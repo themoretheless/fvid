@@ -37,7 +37,7 @@ fn weights(position: ChannelPosition, total: u16) -> [f32; 2] {
         [0., gain]
     }
 }
-/// Preserve explicit PCE positions even when duplicate/bottom/side positions
+/// Preserve PCE/configuration13 positions even when duplicate/bottom/side roles
 /// cannot be represented in a WAVE mask. Parametric stereo emits FL/FR.
 pub fn stereo_router(
     asc: &[u8],

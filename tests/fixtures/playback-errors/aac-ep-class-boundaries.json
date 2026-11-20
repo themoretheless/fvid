@@ -1,0 +1,2215 @@
+{
+  "vectors": [
+    {
+      "total": 0,
+      "config": "01090c0000000804000060040000b800",
+      "packet": "1d00",
+      "classes": [
+        {
+          "class_index": 0,
+          "bits": ""
+        },
+        {
+          "class_index": 1,
+          "bits": ""
+        },
+        {
+          "class_index": 2,
+          "bits": ""
+        }
+      ]
+    },
+    {
+      "total": 0,
+      "config": "01090c0000000804000060040000b800",
+      "packet": "fd00",
+      "classes": [
+        {
+          "class_index": 0,
+          "bits": ""
+        },
+        {
+          "class_index": 2,
+          "bits": ""
+        }
+      ]
+    },
+    {
+      "total": 1,
+      "config": "01090c0000004804000080040002c800",
+      "packet": "0b7ace96a93f2d3c",
+      "classes": [
+        {
+          "class_index": 0,
+          "bits": ""
+        },
+        {
+          "class_index": 1,
+          "bits": ""
+        },
+        {
+          "class_index": 2,
+          "bits": "1"
+        }
+      ]
+    },
+    {
+      "total": 1,
+      "config": "01090c0000004804000080040002c800",
+      "packet": "eb7ace96a93f2d3c",
+      "classes": [
+        {
+          "class_index": 0,
+          "bits": ""
+        },
+        {
+          "class_index": 2,
+          "bits": "1"
+        }
+      ]
+    },
+    {
+      "total": 2,
+      "config": "01090c00000088040000a0040004d800",
+      "packet": "160f28da6b1bf175e0",
+      "classes": [
+        {
+          "class_index": 0,
+          "bits": ""
+        },
+        {
+          "class_index": 1,
+          "bits": ""
+        },
+        {
+          "class_index": 2,
+          "bits": "01"
+        }
+      ]
+    },
+    {
+      "total": 2,
+      "config": "01090c00000088040000a0040004d800",
+      "packet": "f60f28da6b1bf175e0",
+      "classes": [
+        {
+          "class_index": 0,
+          "bits": ""
+        },
+        {
+          "class_index": 2,
+          "bits": "01"
+        }
+      ]
+    },
+    {
+      "total": 3,
+      "config": "01090c000008c8040000c0040004e800",
+      "packet": "1d62d8252695de3fd380",
+      "classes": [
+        {
+          "class_index": 0,
+          "bits": "1"
+        },
+        {
+          "class_index": 1,
+          "bits": ""
+        },
+        {
+          "class_index": 2,
+          "bits": "10"
+        }
+      ]
+    },
+    {
+      "total": 3,
+      "config": "01090c000008c8040000c0040004e800",
+      "packet": "fd62d8252695de3fd380",
+      "classes": [
+        {
+          "class_index": 0,
+          "bits": "1"
+        },
+        {
+          "class_index": 2,
+          "bits": "10"
+        }
+      ]
+    },
+    {
+      "total": 4,
+      "config": "01090c00000908040000e0040006f800",
+      "packet": "059b27ef5bbc7ed055f0",
+      "classes": [
+        {
+          "class_index": 0,
+          "bits": "0"
+        },
+        {
+          "class_index": 1,
+          "bits": ""
+        },
+        {
+          "class_index": 2,
+          "bits": "010"
+        }
+      ]
+    },
+    {
+      "total": 4,
+      "config": "01090c00000908040000e0040006f800",
+      "packet": "e59b27ef5bbc7ed055f0",
+      "classes": [
+        {
+          "class_index": 0,
+          "bits": "0"
+        },
+        {
+          "class_index": 2,
+          "bits": "010"
+        }
+      ]
+    },
+    {
+      "total": 5,
+      "config": "01090c00000948040001000400090800",
+      "packet": "0ee9660886d04431e519c0",
+      "classes": [
+        {
+          "class_index": 0,
+          "bits": "1"
+        },
+        {
+          "class_index": 1,
+          "bits": ""
+        },
+        {
+          "class_index": 2,
+          "bits": "1011"
+        }
+      ]
+    },
+    {
+      "total": 5,
+      "config": "01090c00000948040001000400090800",
+      "packet": "eee9660886d04431e519c0",
+      "classes": [
+        {
+          "class_index": 0,
+          "bits": "1"
+        },
+        {
+          "class_index": 2,
+          "bits": "1011"
+        }
+      ]
+    },
+    {
+      "total": 6,
+      "config": "01090c00001188040001200400091800",
+      "packet": "139ad6e22f7dea369c7caf80",
+      "classes": [
+        {
+          "class_index": 0,
+          "bits": "01"
+        },
+        {
+          "class_index": 1,
+          "bits": ""
+        },
+        {
+          "class_index": 2,
+          "bits": "0100"
+        }
+      ]
+    },
+    {
+      "total": 6,
+      "config": "01090c00001188040001200400091800",
+      "packet": "f39ad6e22f7dea369c7caf80",
+      "classes": [
+        {
+          "class_index": 0,
+          "bits": "01"
+        },
+        {
+          "class_index": 2,
+          "bits": "0100"
+        }
+      ]
+    },
+    {
+      "total": 7,
+      "config": "01090c000011c80400014004000b2800",
+      "packet": "166e8cd822836cc0c4f3467800",
+      "classes": [
+        {
+          "class_index": 0,
+          "bits": "10"
+        },
+        {
+          "class_index": 1,
+          "bits": ""
+        },
+        {
+          "class_index": 2,
+          "bits": "10110"
+        }
+      ]
+    },
+    {
+      "total": 7,
+      "config": "01090c000011c80400014004000b2800",
+      "packet": "f66e8cd822836cc0c4f3467800",
+      "classes": [
+        {
+          "class_index": 0,
+          "bits": "10"
+        },
+        {
+          "class_index": 2,
+          "bits": "10110"
+        }
+      ]
+    },
+    {
+      "total": 8,
+      "config": "01090c000012080400016004000d3800",
+      "packet": "189a6b3895d41ba53c01f14669c0",
+      "classes": [
+        {
+          "class_index": 0,
+          "bits": "01"
+        },
+        {
+          "class_index": 1,
+          "bits": ""
+        },
+        {
+          "class_index": 2,
+          "bits": "010010"
+        }
+      ]
+    },
+    {
+      "total": 8,
+      "config": "01090c000012080400016004000d3800",
+      "packet": "f89a6b3895d41ba53c01f14669c0",
+      "classes": [
+        {
+          "class_index": 0,
+          "bits": "01"
+        },
+        {
+          "class_index": 2,
+          "bits": "010010"
+        }
+      ]
+    },
+    {
+      "total": 9,
+      "config": "01090c00001a480400018004000d4800",
+      "packet": "18f7a18f40942530d129b8a1774fc0",
+      "classes": [
+        {
+          "class_index": 0,
+          "bits": "101"
+        },
+        {
+          "class_index": 1,
+          "bits": ""
+        },
+        {
+          "class_index": 2,
+          "bits": "101101"
+        }
+      ]
+    },
+    {
+      "total": 9,
+      "config": "01090c00001a480400018004000d4800",
+      "packet": "f8f7a18f40942530d129b8a1774fc0",
+      "classes": [
+        {
+          "class_index": 0,
+          "bits": "101"
+        },
+        {
+          "class_index": 2,
+          "bits": "101101"
+        }
+      ]
+    },
+    {
+      "total": 10,
+      "config": "01090c00001a88040001a004000f5800",
+      "packet": "188dd0b4e114611ae510c8d727e00000",
+      "classes": [
+        {
+          "class_index": 0,
+          "bits": "010"
+        },
+        {
+          "class_index": 1,
+          "bits": ""
+        },
+        {
+          "class_index": 2,
+          "bits": "0100100"
+        }
+      ]
+    },
+    {
+      "total": 10,
+      "config": "01090c00001a88040001a004000f5800",
+      "packet": "f88dd0b4e114611ae510c8d727e00000",
+      "classes": [
+        {
+          "class_index": 0,
+          "bits": "010"
+        },
+        {
+          "class_index": 2,
+          "bits": "0100100"
+        }
+      ]
+    },
+    {
+      "total": 11,
+      "config": "01090c00001ac8040001c00400116800",
+      "packet": "18f75463d8134e1b2e93b58932343b63c0",
+      "classes": [
+        {
+          "class_index": 0,
+          "bits": "101"
+        },
+        {
+          "class_index": 1,
+          "bits": ""
+        },
+        {
+          "class_index": 2,
+          "bits": "10110110"
+        }
+      ]
+    },
+    {
+      "total": 11,
+      "config": "01090c00001ac8040001c00400116800",
+      "packet": "f8f75463d8134e1b2e93b58932343b63c0",
+      "classes": [
+        {
+          "class_index": 0,
+          "bits": "101"
+        },
+        {
+          "class_index": 2,
+          "bits": "10110110"
+        }
+      ]
+    },
+    {
+      "total": 12,
+      "config": "01090c00002308040001e00400117800",
+      "packet": "188d84535384a8e21a13bb2ecbcafe000000",
+      "classes": [
+        {
+          "class_index": 0,
+          "bits": "0100"
+        },
+        {
+          "class_index": 1,
+          "bits": ""
+        },
+        {
+          "class_index": 2,
+          "bits": "01001001"
+        }
+      ]
+    },
+    {
+      "total": 12,
+      "config": "01090c00002308040001e00400117800",
+      "packet": "f88d84535384a8e21a13bb2ecbcafe000000",
+      "classes": [
+        {
+          "class_index": 0,
+          "bits": "0100"
+        },
+        {
+          "class_index": 2,
+          "bits": "01001001"
+        }
+      ]
+    },
+    {
+      "total": 13,
+      "config": "01090c00002348040002000400138800",
+      "packet": "18f7a5164f60269fc3e69c1b2ec9da9fc00000",
+      "classes": [
+        {
+          "class_index": 0,
+          "bits": "1011"
+        },
+        {
+          "class_index": 1,
+          "bits": ""
+        },
+        {
+          "class_index": 2,
+          "bits": "101101101"
+        }
+      ]
+    },
+    {
+      "total": 13,
+      "config": "01090c00002348040002000400138800",
+      "packet": "f8f7a5164f60269fc3e69c1b2ec9da9fc00000",
+      "classes": [
+        {
+          "class_index": 0,
+          "bits": "1011"
+        },
+        {
+          "class_index": 2,
+          "bits": "101101101"
+        }
+      ]
+    },
+    {
+      "total": 14,
+      "config": "01090c00002388040002200400140800",
+      "packet": "0e8ec21492541400",
+      "classes": [
+        {
+          "class_index": 0,
+          "bits": "0100"
+        },
+        {
+          "class_index": 1,
+          "bits": ""
+        },
+        {
+          "class_index": 2,
+          "bits": "0100100100"
+        }
+      ]
+    },
+    {
+      "total": 14,
+      "config": "01090c00002388040002200400140800",
+      "packet": "ee8ec21492541400",
+      "classes": [
+        {
+          "class_index": 0,
+          "bits": "0100"
+        },
+        {
+          "class_index": 2,
+          "bits": "0100100100"
+        }
+      ]
+    },
+    {
+      "total": 15,
+      "config": "01090c00002bc8040002400400141800",
+      "packet": "1d77aa5470e824fc38b980",
+      "classes": [
+        {
+          "class_index": 0,
+          "bits": "10110"
+        },
+        {
+          "class_index": 1,
+          "bits": ""
+        },
+        {
+          "class_index": 2,
+          "bits": "1011011011"
+        }
+      ]
+    },
+    {
+      "total": 15,
+      "config": "01090c00002bc8040002400400141800",
+      "packet": "fd77aa5470e824fc38b980",
+      "classes": [
+        {
+          "class_index": 0,
+          "bits": "10110"
+        },
+        {
+          "class_index": 2,
+          "bits": "1011011011"
+        }
+      ]
+    },
+    {
+      "total": 16,
+      "config": "01090c00002c08040002600400162800",
+      "packet": "058ece6ec7588864883800",
+      "classes": [
+        {
+          "class_index": 0,
+          "bits": "01001"
+        },
+        {
+          "class_index": 1,
+          "bits": ""
+        },
+        {
+          "class_index": 2,
+          "bits": "01001001001"
+        }
+      ]
+    },
+    {
+      "total": 16,
+      "config": "01090c00002c08040002600400162800",
+      "packet": "e58ece6ec7588864883800",
+      "classes": [
+        {
+          "class_index": 0,
+          "bits": "01001"
+        },
+        {
+          "class_index": 2,
+          "bits": "01001001001"
+        }
+      ]
+    },
+    {
+      "total": 17,
+      "config": "01090c00002c48040002800400183800",
+      "packet": "0b7bd52a5e1d04af72f01ad0",
+      "classes": [
+        {
+          "class_index": 0,
+          "bits": "10110"
+        },
+        {
+          "class_index": 1,
+          "bits": ""
+        },
+        {
+          "class_index": 2,
+          "bits": "101101101101"
+        }
+      ]
+    },
+    {
+      "total": 17,
+      "config": "01090c00002c48040002800400183800",
+      "packet": "eb7bd52a5e1d04af72f01ad0",
+      "classes": [
+        {
+          "class_index": 0,
+          "bits": "10110"
+        },
+        {
+          "class_index": 2,
+          "bits": "101101101101"
+        }
+      ]
+    },
+    {
+      "total": 18,
+      "config": "01090c00003488040002a00400184800",
+      "packet": "1387675c3add71111310a80000",
+      "classes": [
+        {
+          "class_index": 0,
+          "bits": "010010"
+        },
+        {
+          "class_index": 1,
+          "bits": ""
+        },
+        {
+          "class_index": 2,
+          "bits": "010010010010"
+        }
+      ]
+    },
+    {
+      "total": 18,
+      "config": "01090c00003488040002a00400184800",
+      "packet": "f387675c3add71111310a80000",
+      "classes": [
+        {
+          "class_index": 0,
+          "bits": "010010"
+        },
+        {
+          "class_index": 2,
+          "bits": "010010010010"
+        }
+      ]
+    },
+    {
+      "total": 19,
+      "config": "01090c000034c8040002c004001a5800",
+      "packet": "13fbca97059276093dc6381d8d70",
+      "classes": [
+        {
+          "class_index": 0,
+          "bits": "101101"
+        },
+        {
+          "class_index": 1,
+          "bits": ""
+        },
+        {
+          "class_index": 2,
+          "bits": "1011011011011"
+        }
+      ]
+    },
+    {
+      "total": 19,
+      "config": "01090c000034c8040002c004001a5800",
+      "packet": "f3fbca97059276093dc6381d8d70",
+      "classes": [
+        {
+          "class_index": 0,
+          "bits": "101101"
+        },
+        {
+          "class_index": 2,
+          "bits": "1011011011011"
+        }
+      ]
+    },
+    {
+      "total": 20,
+      "config": "01090c00003508040002e004001c6800",
+      "packet": "188763ae4eb6ae251882c17825acc0",
+      "classes": [
+        {
+          "class_index": 0,
+          "bits": "010010"
+        },
+        {
+          "class_index": 1,
+          "bits": ""
+        },
+        {
+          "class_index": 2,
+          "bits": "01001001001001"
+        }
+      ]
+    },
+    {
+      "total": 20,
+      "config": "01090c00003508040002e004001c6800",
+      "packet": "f88763ae4eb6ae251882c17825acc0",
+      "classes": [
+        {
+          "class_index": 0,
+          "bits": "010010"
+        },
+        {
+          "class_index": 2,
+          "bits": "01001001001001"
+        }
+      ]
+    },
+    {
+      "total": 21,
+      "config": "01090c00003d480400030004001c7800",
+      "packet": "18fb654bbf35e1e814fbd6180cd23ec0",
+      "classes": [
+        {
+          "class_index": 0,
+          "bits": "1011011"
+        },
+        {
+          "class_index": 1,
+          "bits": ""
+        },
+        {
+          "class_index": 2,
+          "bits": "10110110110110"
+        }
+      ]
+    },
+    {
+      "total": 21,
+      "config": "01090c00003d480400030004001c7800",
+      "packet": "f8fb654bbf35e1e814fbd6180cd23ec0",
+      "classes": [
+        {
+          "class_index": 0,
+          "bits": "1011011"
+        },
+        {
+          "class_index": 2,
+          "bits": "10110110110110"
+        }
+      ]
+    },
+    {
+      "total": 22,
+      "config": "01090c00003d880400000004001e8800",
+      "packet": "1d07b1d765cb0e9c226104c31c26b4ce00",
+      "classes": [
+        {
+          "class_index": 0,
+          "bits": "0100100"
+        },
+        {
+          "class_index": 1,
+          "bits": ""
+        },
+        {
+          "class_index": 2,
+          "bits": "010010010010010"
+        }
+      ]
+    },
+    {
+      "total": 22,
+      "config": "01090c00003d880400000004001e8800",
+      "packet": "fd07b1d765cb0e9c226104c31c26b4ce00",
+      "classes": [
+        {
+          "class_index": 0,
+          "bits": "0100100"
+        },
+        {
+          "class_index": 2,
+          "bits": "010010010010010"
+        }
+      ]
+    },
+    {
+      "total": 23,
+      "config": "01090c00003dc8040000200400209800",
+      "packet": "1d7b65a5efcd793d8127de563412305e0000",
+      "classes": [
+        {
+          "class_index": 0,
+          "bits": "1011011"
+        },
+        {
+          "class_index": 1,
+          "bits": ""
+        },
+        {
+          "class_index": 2,
+          "bits": "1011011011011011"
+        }
+      ]
+    },
+    {
+      "total": 23,
+      "config": "01090c00003dc8040000200400209800",
+      "packet": "fd7b65a5efcd793d8127de563412305e0000",
+      "classes": [
+        {
+          "class_index": 0,
+          "bits": "1011011"
+        },
+        {
+          "class_index": 2,
+          "bits": "1011011011011011"
+        }
+      ]
+    },
+    {
+      "total": 24,
+      "config": "01090c0000460804000040040020a800",
+      "packet": "1d07b1ebb54354353844c90654c4c069a2ae00",
+      "classes": [
+        {
+          "class_index": 0,
+          "bits": "01001001"
+        },
+        {
+          "class_index": 1,
+          "bits": ""
+        },
+        {
+          "class_index": 2,
+          "bits": "0100100100100100"
+        }
+      ]
+    },
+    {
+      "total": 24,
+      "config": "01090c0000460804000040040020a800",
+      "packet": "fd07b1ebb54354353844c90654c4c069a2ae00",
+      "classes": [
+        {
+          "class_index": 0,
+          "bits": "01001001"
+        },
+        {
+          "class_index": 2,
+          "bits": "0100100100100100"
+        }
+      ]
+    },
+    {
+      "total": 25,
+      "config": "01090c0000400804000060040022b800",
+      "packet": "005b6d8abf7adc359309d3c000",
+      "classes": [
+        {
+          "class_index": 0,
+          "bits": "10110110"
+        },
+        {
+          "class_index": 1,
+          "bits": ""
+        },
+        {
+          "class_index": 2,
+          "bits": "10110110110110110"
+        }
+      ]
+    },
+    {
+      "total": 25,
+      "config": "01090c0000400804000060040022b800",
+      "packet": "e05b6d8abf7adc359309d3c000",
+      "classes": [
+        {
+          "class_index": 0,
+          "bits": "10110110"
+        },
+        {
+          "class_index": 2,
+          "bits": "10110110110110110"
+        }
+      ]
+    },
+    {
+      "total": 26,
+      "config": "01090c0000404804000080040024c800",
+      "packet": "00126691192864d21102c2f1c7af",
+      "classes": [
+        {
+          "class_index": 0,
+          "bits": "01001001"
+        },
+        {
+          "class_index": 1,
+          "bits": ""
+        },
+        {
+          "class_index": 2,
+          "bits": "010010010010010010"
+        }
+      ]
+    },
+    {
+      "total": 26,
+      "config": "01090c0000404804000080040024c800",
+      "packet": "e0126691192864d21102c2f1c7af",
+      "classes": [
+        {
+          "class_index": 0,
+          "bits": "01001001"
+        },
+        {
+          "class_index": 2,
+          "bits": "010010010010010010"
+        }
+      ]
+    },
+    {
+      "total": 27,
+      "config": "01090c00004888040000a0040024d800",
+      "packet": "18edd36c127f75562f7a79dc8c1c99c0",
+      "classes": [
+        {
+          "class_index": 0,
+          "bits": "101101101"
+        },
+        {
+          "class_index": 1,
+          "bits": ""
+        },
+        {
+          "class_index": 2,
+          "bits": "101101101101101101"
+        }
+      ]
+    },
+    {
+      "total": 27,
+      "config": "01090c00004888040000a0040024d800",
+      "packet": "f8edd36c127f75562f7a79dc8c1c99c0",
+      "classes": [
+        {
+          "class_index": 0,
+          "bits": "101101101"
+        },
+        {
+          "class_index": 2,
+          "bits": "101101101101101101"
+        }
+      ]
+    },
+    {
+      "total": 28,
+      "config": "01090c000048c8040000c0040026e800",
+      "packet": "189595642231103554aeb19cb5d90f3800",
+      "classes": [
+        {
+          "class_index": 0,
+          "bits": "010010010"
+        },
+        {
+          "class_index": 1,
+          "bits": ""
+        },
+        {
+          "class_index": 2,
+          "bits": "0100100100100100100"
+        }
+      ]
+    },
+    {
+      "total": 28,
+      "config": "01090c000048c8040000c0040026e800",
+      "packet": "f89595642231103554aeb19cb5d90f3800",
+      "classes": [
+        {
+          "class_index": 0,
+          "bits": "010010010"
+        },
+        {
+          "class_index": 2,
+          "bits": "0100100100100100100"
+        }
+      ]
+    },
+    {
+      "total": 29,
+      "config": "01090c00004908040000e0040028f800",
+      "packet": "13eef4ecc12bfdd55c2ea3b1d78f10c7da70",
+      "classes": [
+        {
+          "class_index": 0,
+          "bits": "101101101"
+        },
+        {
+          "class_index": 1,
+          "bits": ""
+        },
+        {
+          "class_index": 2,
+          "bits": "10110110110110110110"
+        }
+      ]
+    },
+    {
+      "total": 29,
+      "config": "01090c00004908040000e0040028f800",
+      "packet": "f3eef4ecc12bfdd55c2ea3b1d78f10c7da70",
+      "classes": [
+        {
+          "class_index": 0,
+          "bits": "101101101"
+        },
+        {
+          "class_index": 2,
+          "bits": "10110110110110110110"
+        }
+      ]
+    },
+    {
+      "total": 30,
+      "config": "01090c00005148040001000400290800",
+      "packet": "0e9acd166c4431141a952e645bac3cb73699c0",
+      "classes": [
+        {
+          "class_index": 0,
+          "bits": "0100100100"
+        },
+        {
+          "class_index": 1,
+          "bits": ""
+        },
+        {
+          "class_index": 2,
+          "bits": "01001001001001001001"
+        }
+      ]
+    },
+    {
+      "total": 30,
+      "config": "01090c00005148040001000400290800",
+      "packet": "ee9acd166c4431141a952e645bac3cb73699c0",
+      "classes": [
+        {
+          "class_index": 0,
+          "bits": "0100100100"
+        },
+        {
+          "class_index": 2,
+          "bits": "01001001001001001001"
+        }
+      ]
+    },
+    {
+      "total": 31,
+      "config": "01090c000051880400012004002b1800",
+      "packet": "05ef6d75a6c12bfdb5570bca3b264c2fa31728ce",
+      "classes": [
+        {
+          "class_index": 0,
+          "bits": "1011011011"
+        },
+        {
+          "class_index": 1,
+          "bits": ""
+        },
+        {
+          "class_index": 2,
+          "bits": "101101101101101101101"
+        }
+      ]
+    },
+    {
+      "total": 31,
+      "config": "01090c000051880400012004002b1800",
+      "packet": "e5ef6d75a6c12bfdb5570bca3b264c2fa31728ce",
+      "classes": [
+        {
+          "class_index": 0,
+          "bits": "1011011011"
+        },
+        {
+          "class_index": 2,
+          "bits": "101101101101101101101"
+        }
+      ]
+    },
+    {
+      "total": 32,
+      "config": "01090c000051c80400014004002d2800",
+      "packet": "1d1a6b44d6e221c45035152f0914c313cea57b943380",
+      "classes": [
+        {
+          "class_index": 0,
+          "bits": "0100100100"
+        },
+        {
+          "class_index": 1,
+          "bits": ""
+        },
+        {
+          "class_index": 2,
+          "bits": "0100100100100100100100"
+        }
+      ]
+    },
+    {
+      "total": 32,
+      "config": "01090c000051c80400014004002d2800",
+      "packet": "fd1a6b44d6e221c45035152f0914c313cea57b943380",
+      "classes": [
+        {
+          "class_index": 0,
+          "bits": "0100100100"
+        },
+        {
+          "class_index": 2,
+          "bits": "0100100100100100100100"
+        }
+      ]
+    },
+    {
+      "total": 33,
+      "config": "01090c00005a080400016004002d3800",
+      "packet": "13ef365b351e8135ff7952e15d64eb7450cd04ae50ebf0",
+      "classes": [
+        {
+          "class_index": 0,
+          "bits": "10110110110"
+        },
+        {
+          "class_index": 1,
+          "bits": ""
+        },
+        {
+          "class_index": 2,
+          "bits": "1011011011011011011011"
+        }
+      ]
+    },
+    {
+      "total": 33,
+      "config": "01090c00005a080400016004002d3800",
+      "packet": "f3ef365b351e8135ff7952e15d64eb7450cd04ae50ebf0",
+      "classes": [
+        {
+          "class_index": 0,
+          "bits": "10110110110"
+        },
+        {
+          "class_index": 2,
+          "bits": "1011011011011011011011"
+        }
+      ]
+    },
+    {
+      "total": 34,
+      "config": "01090c00005a480400018004002f4800",
+      "packet": "0b0d35993b34c228c2344da4a4e497344d97286bebac6afc",
+      "classes": [
+        {
+          "class_index": 0,
+          "bits": "01001001001"
+        },
+        {
+          "class_index": 1,
+          "bits": ""
+        },
+        {
+          "class_index": 2,
+          "bits": "01001001001001001001001"
+        }
+      ]
+    },
+    {
+      "total": 34,
+      "config": "01090c00005a480400018004002f4800",
+      "packet": "eb0d35993b34c228c2344da4a4e497344d97286bebac6afc",
+      "classes": [
+        {
+          "class_index": 0,
+          "bits": "01001001001"
+        },
+        {
+          "class_index": 2,
+          "bits": "01001001001001001001001"
+        }
+      ]
+    },
+    {
+      "total": 35,
+      "config": "01090c00005a88040001a00400315800",
+      "packet": "18f795976751ec09affdb2a5d15cb24ecf001f29ffcaea3b63c0",
+      "classes": [
+        {
+          "class_index": 0,
+          "bits": "10110110110"
+        },
+        {
+          "class_index": 1,
+          "bits": ""
+        },
+        {
+          "class_index": 2,
+          "bits": "101101101101101101101101"
+        }
+      ]
+    },
+    {
+      "total": 35,
+      "config": "01090c00005a88040001a00400315800",
+      "packet": "f8f795976751ec09affdb2a5d15cb24ecf001f29ffcaea3b63c0",
+      "classes": [
+        {
+          "class_index": 0,
+          "bits": "10110110110"
+        },
+        {
+          "class_index": 2,
+          "bits": "101101101101101101101101"
+        }
+      ]
+    },
+    {
+      "total": 36,
+      "config": "01090c000062c8040001c00400316800",
+      "packet": "138d9966447ad4e254710d03b4564f0cb8a13c3d786437961d3f80",
+      "classes": [
+        {
+          "class_index": 0,
+          "bits": "010010010010"
+        },
+        {
+          "class_index": 1,
+          "bits": ""
+        },
+        {
+          "class_index": 2,
+          "bits": "010010010010010010010010"
+        }
+      ]
+    },
+    {
+      "total": 36,
+      "config": "01090c000062c8040001c00400316800",
+      "packet": "f38d9966447ad4e254710d03b4564f0cb8a13c3d786437961d3f80",
+      "classes": [
+        {
+          "class_index": 0,
+          "bits": "010010010010"
+        },
+        {
+          "class_index": 2,
+          "bits": "010010010010010010010010"
+        }
+      ]
+    },
+    {
+      "total": 37,
+      "config": "01090c00006308040001e00400337800",
+      "packet": "00774ac5d50cc9ec04d3ff6cb4bc35cb127a3c03e6a35432f503428f",
+      "classes": [
+        {
+          "class_index": 0,
+          "bits": "101101101101"
+        },
+        {
+          "class_index": 1,
+          "bits": ""
+        },
+        {
+          "class_index": 2,
+          "bits": "1011011011011011011011011"
+        }
+      ]
+    },
+    {
+      "total": 37,
+      "config": "01090c00006308040001e00400337800",
+      "packet": "e0774ac5d50cc9ec04d3ff6cb4bc35cb127a3c03e6a35432f503428f",
+      "classes": [
+        {
+          "class_index": 0,
+          "bits": "101101101101"
+        },
+        {
+          "class_index": 2,
+          "bits": "1011011011011011011011011"
+        }
+      ]
+    },
+    {
+      "total": 38,
+      "config": "01090c00006348040002000400358800",
+      "packet": "160eccb9888f2d4e12a384342768964f265c69a35d43842afe1ec7b1e000",
+      "classes": [
+        {
+          "class_index": 0,
+          "bits": "010010010010"
+        },
+        {
+          "class_index": 1,
+          "bits": ""
+        },
+        {
+          "class_index": 2,
+          "bits": "01001001001001001001001001"
+        }
+      ]
+    },
+    {
+      "total": 38,
+      "config": "01090c00006348040002000400358800",
+      "packet": "f60eccb9888f2d4e12a384342768964f265c69a35d43842afe1ec7b1e000",
+      "classes": [
+        {
+          "class_index": 0,
+          "bits": "010010010010"
+        },
+        {
+          "class_index": 2,
+          "bits": "01001001001001001001001001"
+        }
+      ]
+    },
+    {
+      "total": 39,
+      "config": "01090c00006b88040002200400340800",
+      "packet": "18f7a5717aa64387824db6d8f66540",
+      "classes": [
+        {
+          "class_index": 0,
+          "bits": "1011011011011"
+        },
+        {
+          "class_index": 1,
+          "bits": ""
+        },
+        {
+          "class_index": 2,
+          "bits": "10110110110110110110110110"
+        }
+      ]
+    },
+    {
+      "total": 39,
+      "config": "01090c00006b88040002200400340800",
+      "packet": "f8f7a5717aa64387824db6d8f66540",
+      "classes": [
+        {
+          "class_index": 0,
+          "bits": "1011011011011"
+        },
+        {
+          "class_index": 2,
+          "bits": "10110110110110110110110110"
+        }
+      ]
+    },
+    {
+      "total": 40,
+      "config": "01090c00006bc8040002400400361800",
+      "packet": "160ece6e622050dd622324c917c1d4a0",
+      "classes": [
+        {
+          "class_index": 0,
+          "bits": "0100100100100"
+        },
+        {
+          "class_index": 1,
+          "bits": ""
+        },
+        {
+          "class_index": 2,
+          "bits": "010010010010010010010010010"
+        }
+      ]
+    },
+    {
+      "total": 40,
+      "config": "01090c00006bc8040002400400361800",
+      "packet": "f60ece6e622050dd622324c917c1d4a0",
+      "classes": [
+        {
+          "class_index": 0,
+          "bits": "0100100100100"
+        },
+        {
+          "class_index": 2,
+          "bits": "010010010010010010010010010"
+        }
+      ]
+    },
+    {
+      "total": 41,
+      "config": "01090c00006c08040002600400382800",
+      "packet": "0ef7aab85ea4c8b87412bbbb776f318fc0",
+      "classes": [
+        {
+          "class_index": 0,
+          "bits": "1011011011011"
+        },
+        {
+          "class_index": 1,
+          "bits": ""
+        },
+        {
+          "class_index": 2,
+          "bits": "1011011011011011011011011011"
+        }
+      ]
+    },
+    {
+      "total": 41,
+      "config": "01090c00006c08040002600400382800",
+      "packet": "eef7aab85ea4c8b87412bbbb776f318fc0",
+      "classes": [
+        {
+          "class_index": 0,
+          "bits": "1011011011011"
+        },
+        {
+          "class_index": 2,
+          "bits": "1011011011011011011011011011"
+        }
+      ]
+    },
+    {
+      "total": 42,
+      "config": "01090c00007448040002800400383800",
+      "packet": "0b0767375c44310b1d622222a3331f4bcccc",
+      "classes": [
+        {
+          "class_index": 0,
+          "bits": "01001001001001"
+        },
+        {
+          "class_index": 1,
+          "bits": ""
+        },
+        {
+          "class_index": 2,
+          "bits": "0100100100100100100100100100"
+        }
+      ]
+    },
+    {
+      "total": 42,
+      "config": "01090c00007448040002800400383800",
+      "packet": "eb0767375c44310b1d622222a3331f4bcccc",
+      "classes": [
+        {
+          "class_index": 0,
+          "bits": "01001001001001"
+        },
+        {
+          "class_index": 2,
+          "bits": "0100100100100100100100100100"
+        }
+      ]
+    },
+    {
+      "total": 43,
+      "config": "01090c00007488040002a004003a4800",
+      "packet": "007bd52e15d49242c876093b94ea657dc31f94",
+      "classes": [
+        {
+          "class_index": 0,
+          "bits": "10110110110110"
+        },
+        {
+          "class_index": 1,
+          "bits": ""
+        },
+        {
+          "class_index": 2,
+          "bits": "10110110110110110110110110110"
+        }
+      ]
+    },
+    {
+      "total": 43,
+      "config": "01090c00007488040002a004003a4800",
+      "packet": "e07bd52e15d49242c876093b94ea657dc31f94",
+      "classes": [
+        {
+          "class_index": 0,
+          "bits": "10110110110110"
+        },
+        {
+          "class_index": 2,
+          "bits": "10110110110110110110110110110"
+        }
+      ]
+    },
+    {
+      "total": 44,
+      "config": "01090c000074c8040002c004003c5800",
+      "packet": "188763add7128710b1ab888c42b18c625416db6000",
+      "classes": [
+        {
+          "class_index": 0,
+          "bits": "01001001001001"
+        },
+        {
+          "class_index": 1,
+          "bits": ""
+        },
+        {
+          "class_index": 2,
+          "bits": "010010010010010010010010010010"
+        }
+      ]
+    },
+    {
+      "total": 44,
+      "config": "01090c000074c8040002c004003c5800",
+      "packet": "f88763add7128710b1ab888c42b18c625416db6000",
+      "classes": [
+        {
+          "class_index": 0,
+          "bits": "01001001001001"
+        },
+        {
+          "class_index": 2,
+          "bits": "010010010010010010010010010010"
+        }
+      ]
+    },
+    {
+      "total": 45,
+      "config": "01090c00007d08040002e004003c6800",
+      "packet": "13fbca9745759275b5887a053dedadc729f0c5bba580",
+      "classes": [
+        {
+          "class_index": 0,
+          "bits": "101101101101101"
+        },
+        {
+          "class_index": 1,
+          "bits": ""
+        },
+        {
+          "class_index": 2,
+          "bits": "101101101101101101101101101101"
+        }
+      ]
+    },
+    {
+      "total": 45,
+      "config": "01090c00007d08040002e004003c6800",
+      "packet": "f3fbca9745759275b5887a053dedadc729f0c5bba580",
+      "classes": [
+        {
+          "class_index": 0,
+          "bits": "101101101101101"
+        },
+        {
+          "class_index": 2,
+          "bits": "101101101101101101101101101101"
+        }
+      ]
+    },
+    {
+      "total": 46,
+      "config": "01090c00007d480400030004003e7800",
+      "packet": "0587b1d6d5c250e2f9aee9844c212c30c71af03fd8d696",
+      "classes": [
+        {
+          "class_index": 0,
+          "bits": "010010010010010"
+        },
+        {
+          "class_index": 1,
+          "bits": ""
+        },
+        {
+          "class_index": 2,
+          "bits": "0100100100100100100100100100100"
+        }
+      ]
+    },
+    {
+      "total": 46,
+      "config": "01090c00007d480400030004003e7800",
+      "packet": "e587b1d6d5c250e2f9aee9844c212c30c71af03fd8d696",
+      "classes": [
+        {
+          "class_index": 0,
+          "bits": "010010010010010"
+        },
+        {
+          "class_index": 2,
+          "bits": "0100100100100100100100100100100"
+        }
+      ]
+    },
+    {
+      "total": 47,
+      "config": "01090c00007d88040000000400408800",
+      "packet": "1d7b654bd15cb24f5b5443d814fbcd96d1c53e80beefe16b80",
+      "classes": [
+        {
+          "class_index": 0,
+          "bits": "101101101101101"
+        },
+        {
+          "class_index": 1,
+          "bits": ""
+        },
+        {
+          "class_index": 2,
+          "bits": "10110110110110110110110110110110"
+        }
+      ]
+    },
+    {
+      "total": 47,
+      "config": "01090c00007d88040000000400408800",
+      "packet": "fd7b654bd15cb24f5b5443d814fbcd96d1c53e80beefe16b80",
+      "classes": [
+        {
+          "class_index": 0,
+          "bits": "101101101101101"
+        },
+        {
+          "class_index": 2,
+          "bits": "10110110110110110110110110110110"
+        }
+      ]
+    },
+    {
+      "total": 48,
+      "config": "01090c000085c8040000200400409800",
+      "packet": "1387b1ebb570951c215cb0d4e2261065862638c5e0afe7eed2c0",
+      "classes": [
+        {
+          "class_index": 0,
+          "bits": "0100100100100100"
+        },
+        {
+          "class_index": 1,
+          "bits": ""
+        },
+        {
+          "class_index": 2,
+          "bits": "01001001001001001001001001001001"
+        }
+      ]
+    },
+    {
+      "total": 48,
+      "config": "01090c000085c8040000200400409800",
+      "packet": "f387b1ebb570951c215cb0d4e2261065862638c5e0afe7eed2c0",
+      "classes": [
+        {
+          "class_index": 0,
+          "bits": "0100100100100100"
+        },
+        {
+          "class_index": 2,
+          "bits": "01001001001001001001001001001001"
+        }
+      ]
+    },
+    {
+      "total": 49,
+      "config": "01090c0000860804000040040042a800",
+      "packet": "007b65a5e8d72c49ec04d449ec0a7ef5b16c8e14fdc8ba6bf13d60",
+      "classes": [
+        {
+          "class_index": 0,
+          "bits": "1011011011011011"
+        },
+        {
+          "class_index": 1,
+          "bits": ""
+        },
+        {
+          "class_index": 2,
+          "bits": "101101101101101101101101101101101"
+        }
+      ]
+    },
+    {
+      "total": 49,
+      "config": "01090c0000860804000040040042a800",
+      "packet": "e07b65a5e8d72c49ec04d449ec0a7ef5b16c8e14fdc8ba6bf13d60",
+      "classes": [
+        {
+          "class_index": 0,
+          "bits": "1011011011011011"
+        },
+        {
+          "class_index": 2,
+          "bits": "101101101101101101101101101101101"
+        }
+      ]
+    },
+    {
+      "total": 50,
+      "config": "01090c0000800804000060040044b800",
+      "packet": "0024926a446483268c4e2c62b4957efade3893",
+      "classes": [
+        {
+          "class_index": 0,
+          "bits": "0100100100100100"
+        },
+        {
+          "class_index": 1,
+          "bits": ""
+        },
+        {
+          "class_index": 2,
+          "bits": "0100100100100100100100100100100100"
+        }
+      ]
+    },
+    {
+      "total": 50,
+      "config": "01090c0000800804000060040044b800",
+      "packet": "e024926a446483268c4e2c62b4957efade3893",
+      "classes": [
+        {
+          "class_index": 0,
+          "bits": "0100100100100100"
+        },
+        {
+          "class_index": 2,
+          "bits": "0100100100100100100100100100100100"
+        }
+      ]
+    },
+    {
+      "total": 51,
+      "config": "01090c0000884804000080040044c800",
+      "packet": "13edab615849fdd2b1754342afdf54dc43d0754980",
+      "classes": [
+        {
+          "class_index": 0,
+          "bits": "10110110110110110"
+        },
+        {
+          "class_index": 1,
+          "bits": ""
+        },
+        {
+          "class_index": 2,
+          "bits": "1011011011011011011011011011011011"
+        }
+      ]
+    },
+    {
+      "total": 51,
+      "config": "01090c0000884804000080040044c800",
+      "packet": "f3edab615849fdd2b1754342afdf54dc43d0754980",
+      "classes": [
+        {
+          "class_index": 0,
+          "bits": "10110110110110110"
+        },
+        {
+          "class_index": 2,
+          "bits": "1011011011011011011011011011011011"
+        }
+      ]
+    },
+    {
+      "total": 52,
+      "config": "01090c00008888040000a0040046d800",
+      "packet": "00132a24d42230206aa2c272e146f5fe2e9b9fcb53af",
+      "classes": [
+        {
+          "class_index": 0,
+          "bits": "01001001001001001"
+        },
+        {
+          "class_index": 1,
+          "bits": ""
+        },
+        {
+          "class_index": 2,
+          "bits": "01001001001001001001001001001001001"
+        }
+      ]
+    },
+    {
+      "total": 52,
+      "config": "01090c00008888040000a0040046d800",
+      "packet": "e0132a24d42230206aa2c272e146f5fe2e9b9fcb53af",
+      "classes": [
+        {
+          "class_index": 0,
+          "bits": "01001001001001001"
+        },
+        {
+          "class_index": 2,
+          "bits": "01001001001001001001001001001001001"
+        }
+      ]
+    },
+    {
+      "total": 53,
+      "config": "01090c000088c8040000c0040048e800",
+      "packet": "13eeeae60b6093fdd5585d48682afef56983cbfb33569980",
+      "classes": [
+        {
+          "class_index": 0,
+          "bits": "10110110110110110"
+        },
+        {
+          "class_index": 1,
+          "bits": ""
+        },
+        {
+          "class_index": 2,
+          "bits": "101101101101101101101101101101101101"
+        }
+      ]
+    },
+    {
+      "total": 53,
+      "config": "01090c000088c8040000c0040048e800",
+      "packet": "f3eeeae60b6093fdd5585d48682afef56983cbfb33569980",
+      "classes": [
+        {
+          "class_index": 0,
+          "bits": "10110110110110110"
+        },
+        {
+          "class_index": 2,
+          "bits": "101101101101101101101101101101101101"
+        }
+      ]
+    },
+    {
+      "total": 54,
+      "config": "01090c00009108040000e0040048f800",
+      "packet": "1d159a84401b110c4a0d4a8e13cac28d74f1deaadf6823ef4f80",
+      "classes": [
+        {
+          "class_index": 0,
+          "bits": "010010010010010010"
+        },
+        {
+          "class_index": 1,
+          "bits": ""
+        },
+        {
+          "class_index": 2,
+          "bits": "010010010010010010010010010010010010"
+        }
+      ]
+    },
+    {
+      "total": 54,
+      "config": "01090c00009108040000e0040048f800",
+      "packet": "fd159a84401b110c4a0d4a8e13cac28d74f1deaadf6823ef4f80",
+      "classes": [
+        {
+          "class_index": 0,
+          "bits": "010010010010010010"
+        },
+        {
+          "class_index": 2,
+          "bits": "010010010010010010010010010010010010"
+        }
+      ]
+    },
+    {
+      "total": 55,
+      "config": "01090c000091480400010004004b0800",
+      "packet": "0eef7adce4dcd04aff7aab85ea43a095fef55772b0bef5265bed38",
+      "classes": [
+        {
+          "class_index": 0,
+          "bits": "101101101101101101"
+        },
+        {
+          "class_index": 1,
+          "bits": ""
+        },
+        {
+          "class_index": 2,
+          "bits": "1011011011011011011011011011011011011"
+        }
+      ]
+    },
+    {
+      "total": 55,
+      "config": "01090c000091480400010004004b0800",
+      "packet": "eeef7adce4dcd04aff7aab85ea43a095fef55772b0bef5265bed38",
+      "classes": [
+        {
+          "class_index": 0,
+          "bits": "101101101101101101"
+        },
+        {
+          "class_index": 2,
+          "bits": "1011011011011011011011011011011011011"
+        }
+      ]
+    },
+    {
+      "total": 56,
+      "config": "01090c000091880400012004004d1800",
+      "packet": "189ad690c4016e22188a06a54bc27958546ba7e0795ff96439ceb4ce00",
+      "classes": [
+        {
+          "class_index": 0,
+          "bits": "010010010010010010"
+        },
+        {
+          "class_index": 1,
+          "bits": ""
+        },
+        {
+          "class_index": 2,
+          "bits": "01001001001001001001001001001001001001"
+        }
+      ]
+    },
+    {
+      "total": 56,
+      "config": "01090c000091880400012004004d1800",
+      "packet": "f89ad690c4016e22188a06a54bc27958546ba7e0795ff96439ceb4ce00",
+      "classes": [
+        {
+          "class_index": 0,
+          "bits": "010010010010010010"
+        },
+        {
+          "class_index": 2,
+          "bits": "01001001001001001001001001001001001001"
+        }
+      ]
+    },
+    {
+      "total": 57,
+      "config": "01090c000099c80400014004004d2800",
+      "packet": "006f36b68e54d4f4135ff7aa5c2ba9274095ff7ad5c29f0f2c3b24e9e000",
+      "classes": [
+        {
+          "class_index": 0,
+          "bits": "1011011011011011011"
+        },
+        {
+          "class_index": 1,
+          "bits": ""
+        },
+        {
+          "class_index": 2,
+          "bits": "10110110110110110110110110110110110110"
+        }
+      ]
+    },
+    {
+      "total": 57,
+      "config": "01090c000099c80400014004004d2800",
+      "packet": "e06f36b68e54d4f4135ff7aa5c2ba9274095ff7ad5c29f0f2c3b24e9e000",
+      "classes": [
+        {
+          "class_index": 0,
+          "bits": "1011011011011011011"
+        },
+        {
+          "class_index": 2,
+          "bits": "10110110110110110110110110110110110110"
+        }
+      ]
+    },
+    {
+      "total": 58,
+      "config": "01090c00009a080400016004004f3800",
+      "packet": "0e9a6b24984142d308a311a26d2a4e4972b42c65d3f01ef2df9a38edaeefda38",
+      "classes": [
+        {
+          "class_index": 0,
+          "bits": "0100100100100100100"
+        },
+        {
+          "class_index": 1,
+          "bits": ""
+        },
+        {
+          "class_index": 2,
+          "bits": "010010010010010010010010010010010010010"
+        }
+      ]
+    },
+    {
+      "total": 58,
+      "config": "01090c00009a080400016004004f3800",
+      "packet": "ee9a6b24984142d308a311a26d2a4e4972b42c65d3f01ef2df9a38edaeefda38",
+      "classes": [
+        {
+          "class_index": 0,
+          "bits": "0100100100100100100"
+        },
+        {
+          "class_index": 2,
+          "bits": "010010010010010010010010010010010010010"
+        }
+      ]
+    },
+    {
+      "total": 59,
+      "config": "01090c00009a48040001800400514800",
+      "packet": "16779b2ed1c2a6a3d026bff7952e8aeb24ec094ffb6b5786f51db3c7ca7fe6c3a7e0",
+      "classes": [
+        {
+          "class_index": 0,
+          "bits": "1011011011011011011"
+        },
+        {
+          "class_index": 1,
+          "bits": ""
+        },
+        {
+          "class_index": 2,
+          "bits": "1011011011011011011011011011011011011011"
+        }
+      ]
+    },
+    {
+      "total": 59,
+      "config": "01090c00009a48040001800400514800",
+      "packet": "f6779b2ed1c2a6a3d026bff7952e8aeb24ec094ffb6b5786f51db3c7ca7fe6c3a7e0",
+      "classes": [
+        {
+          "class_index": 0,
+          "bits": "1011011011011011011"
+        },
+        {
+          "class_index": 2,
+          "bits": "1011011011011011011011011011011011011011"
+        }
+      ]
+    },
+    {
+      "total": 60,
+      "config": "01090c0000a288040001a00400515800",
+      "packet": "1d0d32cc91850942d4e250e21a0751593c33c5345435eafe03b12ecd1fde26fcd1c00000",
+      "classes": [
+        {
+          "class_index": 0,
+          "bits": "01001001001001001001"
+        },
+        {
+          "class_index": 1,
+          "bits": ""
+        },
+        {
+          "class_index": 2,
+          "bits": "0100100100100100100100100100100100100100"
+        }
+      ]
+    },
+    {
+      "total": 60,
+      "config": "01090c0000a288040001a00400515800",
+      "packet": "fd0d32cc91850942d4e250e21a0751593c33c5345435eafe03b12ecd1fde26fcd1c00000",
+      "classes": [
+        {
+          "class_index": 0,
+          "bits": "01001001001001001001"
+        },
+        {
+          "class_index": 2,
+          "bits": "0100100100100100100100100100100100100100"
+        }
+      ]
+    },
+    {
+      "total": 61,
+      "config": "01090c0000a2c8040001c00400536800",
+      "packet": "05f74acbaa1c2a8aa4f604d3ff6d69786b9449e809affef2d2e8d757ff34ffe57d757ae57e",
+      "classes": [
+        {
+          "class_index": 0,
+          "bits": "10110110110110110110"
+        },
+        {
+          "class_index": 1,
+          "bits": ""
+        },
+        {
+          "class_index": 2,
+          "bits": "10110110110110110110110110110110110110110"
+        }
+      ]
+    },
+    {
+      "total": 61,
+      "config": "01090c0000a2c8040001c00400536800",
+      "packet": "e5f74acbaa1c2a8aa4f604d3ff6d69786b9449e809affef2d2e8d757ff34ffe57d757ae57e",
+      "classes": [
+        {
+          "class_index": 0,
+          "bits": "10110110110110110110"
+        },
+        {
+          "class_index": 2,
+          "bits": "10110110110110110110110110110110110110110"
+        }
+      ]
+    },
+    {
+      "total": 62,
+      "config": "01090c0000a308040001e00400557800",
+      "packet": "0b0d9973223250ca2b5384a8e21a13b4564f265c53456197abf807b1d79cbbd1439b1ff2a1a9fc",
+      "classes": [
+        {
+          "class_index": 0,
+          "bits": "01001001001001001001"
+        },
+        {
+          "class_index": 1,
+          "bits": ""
+        },
+        {
+          "class_index": 2,
+          "bits": "010010010010010010010010010010010010010010"
+        }
+      ]
+    },
+    {
+      "total": 62,
+      "config": "01090c0000a308040001e00400557800",
+      "packet": "eb0d9973223250ca2b5384a8e21a13b4564f265c53456197abf807b1d79cbbd1439b1ff2a1a9fc",
+      "classes": [
+        {
+          "class_index": 0,
+          "bits": "01001001001001001001"
+        },
+        {
+          "class_index": 2,
+          "bits": "010010010010010010010010010010010010010010"
+        }
+      ]
+    },
+    {
+      "total": 63,
+      "config": "01090c0000ab48040002000400558800",
+      "packet": "1d77a562f5434257f290f093ffb65a5e8d72c49ec04d3ffb65a5e8d72c4e5d947fb65def66c78000",
+      "classes": [
+        {
+          "class_index": 0,
+          "bits": "101101101101101101101"
+        },
+        {
+          "class_index": 1,
+          "bits": ""
+        },
+        {
+          "class_index": 2,
+          "bits": "101101101101101101101101101101101101101101"
+        }
+      ]
+    },
+    {
+      "total": 63,
+      "config": "01090c0000ab48040002000400558800",
+      "packet": "fd77a562f5434257f290f093ffb65a5e8d72c49ec04d3ffb65a5e8d72c4e5d947fb65def66c78000",
+      "classes": [
+        {
+          "class_index": 0,
+          "bits": "101101101101101101101"
+        },
+        {
+          "class_index": 2,
+          "bits": "101101101101101101101101101101101101101101"
+        }
+      ]
+    },
+    {
+      "total": 64,
+      "config": "01090c0000ab88040002200400560800",
+      "packet": "1d0eccdcc44625064a8dd4444924924927affc80",
+      "classes": [
+        {
+          "class_index": 0,
+          "bits": "010010010010010010010"
+        },
+        {
+          "class_index": 1,
+          "bits": ""
+        },
+        {
+          "class_index": 2,
+          "bits": "0100100100100100100100100100100100100100100"
+        }
+      ]
+    },
+    {
+      "total": 64,
+      "config": "01090c0000ab88040002200400560800",
+      "packet": "fd0eccdcc44625064a8dd4444924924927affc80",
+      "classes": [
+        {
+          "class_index": 0,
+          "bits": "010010010010010010010"
+        },
+        {
+          "class_index": 2,
+          "bits": "0100100100100100100100100100100100100100100"
+        }
+      ]
+    }
+  ],
+  "provenance": "Own exact-bit information, independent CRC/SRCPC polynomial arithmetic and BCH headers. Includes zero-bit and absent optional classes; no codec, process, network or private media."
+}

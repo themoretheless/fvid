@@ -1,0 +1,31 @@
+{
+  "scope": "Shared normalized LD-SBR to LD-MPS QMF domain for matched 32/64-bin banks; factual source inspection only, no foreign decoder dependency.",
+  "commit": "ee76460efbdb147e26d804c798949c23f174460b",
+  "sources": [
+    {
+      "url": "https://android.googlesource.com/platform/external/aac/+/ee76460efbdb147e26d804c798949c23f174460b/libSACdec/src/sac_dec_lib.cpp",
+      "local": "fdk-sac.cpp"
+    },
+    {
+      "url": "https://standards.iso.org/iso-iec/23003/-2/ed-2/en/SAOC_IS7_ReferenceSoftware__20160603.zip",
+      "local": "saoc-reference.zip"
+    }
+  ],
+  "sha256": {
+    "fdk-sac.cpp": "04fd313411472d5cee4723fbcc25cf84037f529c4129e15e025127caf4225b76",
+    "fdk-sac_dec.cpp": "e753d7660c6e99798afd32b7fb2e8513d154f77e323218b987c13e7b99bca2d3",
+    "fdk-aacdecoder.cpp": "8886d6d8934467ea553bd1f5e9c92ea7291bb160cef141a08691eb740774b7fa",
+    "saoc-reference.zip": "b6b27e2f9af6ee8f950af8d7074afc467e66d93372328c0ec55282fff71d1f83"
+  },
+  "facts": [
+    "Pinned sac_dec_lib.cpp lines1097-1098 selects MPSLDFB and clears CLDFB for ELD.",
+    "Out-of-band effective sample rate and output frame size must agree with SSC; core480/512 with double-rate output960/1024 retains15/16 slots.",
+    "Spatial path uses LD-QMF32 analysis, normalized SBR32/64 subbands and a single LD-MPS synthesis. Ordinary LD-SBR CLDFB path remains separate."
+  ],
+  "qualified_geometry": "24-kHz core, 480/512 samples, single-rate24-kHz/32-bin or double-rate48-kHz/64-bin, all8 standard trees.",
+  "limits": [
+    "No claim that copyrighted full ISO standard was obtained; primary reference-source archive and pinned public source inform implementation.",
+    "Other coupled bank geometries, output downscale and remaining spatial tools are not qualified by this gate."
+  ],
+  "pinned_source_refetched_and_byte_equal": true
+}

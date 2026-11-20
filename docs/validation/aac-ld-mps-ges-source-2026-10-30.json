@@ -1,0 +1,21 @@
+{
+  "scope": "Factual LD-MPS GES equations, normalized energy domains, channel association and selective state initialization; no foreign source implementation enters production.",
+  "primary_source": "https://standards.iso.org/iso-iec/23003/-2/ed-2/en/SAOC_IS7_ReferenceSoftware__20160603.zip",
+  "sha256": {
+    "iso/mp4spatialdec/src/sac_reshapeBBEnv.c": "d81fec8970a18fd8445531dbcf64a84d79132c214815c0a347b62160af66f857",
+    "iso/mp4spatialdec/src/sac_calcM1andM2.c": "ebdb752a1d74a5f7e5638366867b3b477918aa9f4d94169ee3b2e30bfbce6153",
+    "iso/mp4spatialdec/src/sac_dec.h": "6843210a6a157963f22440393fd9e57ef1accbd44abb98d81d5ecddd7218c620",
+    "iso/mp4spatialdec/src/sac_dec.c": "06b308c62ee31705d47a37d779e2ac8ba6ce7acad9c668624ae14c242a36438b",
+    "fdk-sac.cpp": "04fd313411472d5cee4723fbcc25cf84037f529c4129e15e025127caf4225b76",
+    "saoc-reference.zip": "b6b27e2f9af6ee8f950af8d7074afc467e66d93372328c0ec55282fff71d1f83"
+  },
+  "facts": [
+    "GES follows M2 and precedes synthesis; only the guided dry rows at QMF bin6 and above are scaled.",
+    "Normalized envelope energy floors are1e-9; initial normalized norm history is1. The dimensionless envelope divisor also uses1e-9.",
+    "Energy tracking uses the fixed LD kernel groups10..18, alpha exp(-64/(.4*44100)) and beta exp(-64/(.04*44100)), independent of coded matrix resolution.",
+    "Guided gain includes the wet/dry energy ratio and clamps to[.25,4].",
+    "Envelope histories advance with inactive signalling. In-band changes preserve histories within GES, and shape-mode changes reinitialize the envelope state."
+  ],
+  "reference_note": "The reference harness links the unmodified ISO GES routine and unmodified ISO channel mapper in separate translation units, preserving each energy normalization macro. Its envelope workspace initializes all23 groups. Reference generation is not ordinary-test execution.",
+  "qualified_scope": "All8 standard trees, 32/64 QMF bins, normalized full-complex data and native plain/coupled LD-SBR paths. Active STP and nonzero transport alignment remain separate tools."
+}

@@ -1,0 +1,237 @@
+{
+  "complete": true,
+  "platform": "macOS-26.7.2-arm64-arm-64bit-Mach-O",
+  "passed": 693,
+  "failed": 0,
+  "ignored": 1,
+  "media": {
+    "passed": 590,
+    "failed": 0,
+    "ignored": 1,
+    "log_sha256": "492d48be64f0036f00cad8cb54c05b3ebb8d182eac43789b399d8fd6c4a20abe"
+  },
+  "worker": {
+    "passed": 1,
+    "failed": 0,
+    "ignored": 0,
+    "log_sha256": "f06a163a3538eec444f11ff4ef9dc90599b7dfd2d1ba682a12474ccabf07d6d5"
+  },
+  "integration": {
+    "complete": true,
+    "targets": 20,
+    "cases": [
+      {
+        "name": "aac_ld_mps_single_rate",
+        "exit_code": 0,
+        "seconds": 1.3679242079997493,
+        "passed": 4,
+        "failed": 0,
+        "ignored": 0,
+        "binary_sha256": "a66f5ae477661e2ad8772c99908b27fdf06a70dd0420b49aed3e71223f88bd82",
+        "initial_gate_binary_sha256": "363e2c226c7f8ebc76938dd84d0a5c29fd1d6ed0f7b6dc9a52f876d8a0ef52a4",
+        "final_test_log": {
+          "passed": 4,
+          "failed": 0,
+          "ignored": 0,
+          "log_sha256": "7036f5554a992aa76583e3d383a52429071006085bb6cb3e64f002c663cfa1f9"
+        },
+        "note": "Final rerun after making only frozen-gold tolerance portable;checkpoint/frontend/replay equality stays exact. Production sources and fixtures unchanged."
+      },
+      {
+        "name": "aac_eld_spatial_sbr",
+        "exit_code": 0,
+        "seconds": 15.011703666999892,
+        "passed": 7,
+        "failed": 0,
+        "ignored": 0,
+        "binary_sha256": "bf2a8fd777d029dfea7844e0333a27959f8265735f57ee465276eee78d04d34f"
+      },
+      {
+        "name": "aac_ld_mps_source_slices",
+        "exit_code": 0,
+        "seconds": 249.77804204200038,
+        "passed": 9,
+        "failed": 0,
+        "ignored": 0,
+        "binary_sha256": "1ac66f856d3c6cfa5f70c1ca3aeff848d1d4b38f782123847b39fbda30a741e8"
+      },
+      {
+        "name": "aac_ld_mps_inband",
+        "exit_code": 0,
+        "seconds": 21.896997582998665,
+        "passed": 5,
+        "failed": 0,
+        "ignored": 0,
+        "binary_sha256": "9b6b5db79dec8d45feccc854f94376c3ffbc151551c01b373e90ab1c74abad87"
+      },
+      {
+        "name": "aac_ld_mps_frame_length",
+        "exit_code": 0,
+        "seconds": 133.90862891599863,
+        "passed": 9,
+        "failed": 0,
+        "ignored": 0,
+        "binary_sha256": "af72365033544d1f2c585476aa21b036a9ba1f574c95b0a4142e5e346db7c995"
+      },
+      {
+        "name": "aac_ld_mps_arbdmx_switch",
+        "exit_code": 0,
+        "seconds": 147.35671195900068,
+        "passed": 8,
+        "failed": 0,
+        "ignored": 0,
+        "binary_sha256": "fe02c038abe5c62dbd89ff0b16922db8a792e8eeff048b8fe16d36b16c3f1462"
+      },
+      {
+        "name": "aac_ld_mps_stp",
+        "exit_code": 0,
+        "seconds": 66.18111549999958,
+        "passed": 5,
+        "failed": 0,
+        "ignored": 0,
+        "binary_sha256": "cc42db2b8828b1ff17f2803d53e1bbf828ed8aaddb9a6789896c5dfd59eb7c65"
+      },
+      {
+        "name": "aac_ld_mps_ges",
+        "exit_code": 0,
+        "seconds": 71.63701799999944,
+        "passed": 5,
+        "failed": 0,
+        "ignored": 0,
+        "binary_sha256": "268e13c494898622f82a998e018b68199eb2edc9e11de8656639c31f67975d16"
+      },
+      {
+        "name": "aac_ld_mps_grid",
+        "exit_code": 0,
+        "seconds": 35.17788666600063,
+        "passed": 4,
+        "failed": 0,
+        "ignored": 0,
+        "binary_sha256": "13d7ba8ca5090b883da70dd0c61bc46317b320f1b31fc2e39ed398e8a5281998"
+      },
+      {
+        "name": "aac_ld_mps_empty_groups",
+        "exit_code": 0,
+        "seconds": 66.20270062499912,
+        "passed": 7,
+        "failed": 0,
+        "ignored": 0,
+        "binary_sha256": "049138502a1aee72717b8c1f59a5aaa3c04c6b449724ca24cc64f7970bb86997"
+      },
+      {
+        "name": "aac_ld_mps_discard",
+        "exit_code": 0,
+        "seconds": 278.243966334001,
+        "passed": 6,
+        "failed": 0,
+        "ignored": 0,
+        "binary_sha256": "8afdcaf7f36f36d2d67b64e69275f1f5160e2f08e0d21c561fb8cc28b25a587c"
+      },
+      {
+        "name": "aac_ld_mps_pcm",
+        "exit_code": 0,
+        "seconds": 1.7098000000005413,
+        "passed": 2,
+        "failed": 0,
+        "ignored": 0,
+        "binary_sha256": "06101bde6427f31ee27a03b650af64a82148f3089366d25edf109cd889c56750"
+      },
+      {
+        "name": "aac_ld_mps_shared128",
+        "exit_code": 0,
+        "seconds": 11.669860957999845,
+        "passed": 1,
+        "failed": 0,
+        "ignored": 0,
+        "binary_sha256": "6d8d04a590b2bd1320162a868aa5392235b49c6e747aeabb3693a85c27f1d49d"
+      },
+      {
+        "name": "aac_eld_mps_core",
+        "exit_code": 0,
+        "seconds": 0.5239364170010958,
+        "passed": 3,
+        "failed": 0,
+        "ignored": 0,
+        "binary_sha256": "a4b053e62e1465b6bda94f44fbd296d812f200e7fd3be0cfa7f080176a46d3b9"
+      },
+      {
+        "name": "aac_alignment",
+        "exit_code": 0,
+        "seconds": 3.7837369999997463,
+        "passed": 2,
+        "failed": 0,
+        "ignored": 0,
+        "binary_sha256": "c66b9596527fa93f9fc426acb425781933f3f4d6d5978a67f9c5dbc8e40b657a"
+      },
+      {
+        "name": "aac_ld_mps_sbr_pcm",
+        "exit_code": 0,
+        "seconds": 69.03984325000056,
+        "passed": 5,
+        "failed": 0,
+        "ignored": 0,
+        "binary_sha256": "561a9c2eec824faca24f0193e35e95e03cf16a7ad9d966d5319059f9d06206e6"
+      },
+      {
+        "name": "aac_ld_mps_sbr_rates",
+        "exit_code": 0,
+        "seconds": 22.537290958000085,
+        "passed": 4,
+        "failed": 0,
+        "ignored": 0,
+        "binary_sha256": "7f77a84038b488dcf0db37d8a3610d2bbc031e53856b159409182781b4994b92"
+      },
+      {
+        "name": "aac_eld_sbr",
+        "exit_code": 0,
+        "seconds": 62.15723979100039,
+        "passed": 9,
+        "failed": 0,
+        "ignored": 0,
+        "binary_sha256": "908a1141aca02f3e1f74d2bd584e5e38d6255241c0bf9841369c060fa850b209"
+      },
+      {
+        "name": "aac_eld_cldfb_phase",
+        "exit_code": 0,
+        "seconds": 0.4957909170007042,
+        "passed": 2,
+        "failed": 0,
+        "ignored": 0,
+        "binary_sha256": "6cafb8f8c5b7966bf8233695bd67ff5e9776c5b19e0fd72996fecf50a04ffc35"
+      },
+      {
+        "name": "aac_ld_mps_residual_native",
+        "exit_code": 0,
+        "seconds": 77.28402300000016,
+        "passed": 5,
+        "failed": 0,
+        "ignored": 0,
+        "binary_sha256": "82f6d42874051347a0fcae8fa74eeb58ca74aad853051ddcfc5b4b9928afedfd"
+      }
+    ]
+  },
+  "ffmpeg_and_ffprobe_blocked": true,
+  "forbidden_invocations": 0,
+  "build_network": "offline",
+  "device": [
+    {
+      "name": "n480-x1-gain",
+      "exit_code": 0,
+      "output": "platform_device=started source_channels=2 rate=24000 duration=0.160000\nphase=full generation=0 from=0.000000 position=0.160000 wall=0.180645 device_drain=complete\nphase=seek-quarter generation=1 from=0.040000 position=0.160000 wall=0.142997 device_drain=complete\nphase=seek-60-percent generation=2 from=0.096000 position=0.160000 wall=0.082081 device_drain=complete\nphase=rewind generation=3 from=0.000000 position=0.160000 wall=0.184846 device_drain=complete\n"
+    },
+    {
+      "name": "n512-x1-gain",
+      "exit_code": 0,
+      "output": "platform_device=started source_channels=2 rate=24000 duration=0.170667\nphase=full generation=0 from=0.000000 position=0.170667 wall=0.192407 device_drain=complete\nphase=seek-quarter generation=1 from=0.042667 position=0.170667 wall=0.147923 device_drain=complete\nphase=seek-60-percent generation=2 from=0.102400 position=0.170667 wall=0.086153 device_drain=complete\nphase=rewind generation=3 from=0.000000 position=0.170667 wall=0.189124 device_drain=complete\n"
+    },
+    {
+      "name": "n512-x2-gain",
+      "exit_code": 0,
+      "output": "platform_device=started source_channels=2 rate=48000 duration=0.170667\nphase=full generation=0 from=0.000000 position=0.170667 wall=0.185182 device_drain=complete\nphase=seek-quarter generation=1 from=0.042667 position=0.170667 wall=0.151048 device_drain=complete\nphase=seek-60-percent generation=2 from=0.102400 position=0.170667 wall=0.100838 device_drain=complete\nphase=rewind generation=3 from=0.000000 position=0.170667 wall=0.189138 device_drain=complete\n"
+    }
+  ],
+  "previous_fixtures_modified": [],
+  "ignored_tests": [
+    "test owned_exposure::integer_conversion_gap::complete_integer_float_rgb_pipeline_matches_reference ... ignored, acceptance pending complete integer-float RGB conversion compatibility"
+  ]
+}

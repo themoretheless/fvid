@@ -1,0 +1,64 @@
+{
+  "base_head": "fbcace39c1",
+  "scope": "Stateful LD-MPS parameter component only. No accepted spatial movie, playback/seek/rewind result, conformance certificate, or closed codec gap.",
+  "results": {
+    "media": {
+      "sha256": "6f6d02a02a67376da358aa6621016f26cc4a9b9f1ef5a868998c2693199a4094",
+      "result": "574 passed; 0 failed; 1 ignored"
+    },
+    "parameters": {
+      "sha256": "e927f33f93c7358446f572533078b22b87c93c1502f1cc5d60f77f194f44218f",
+      "result": "4 passed; 0 failed"
+    },
+    "existing_config_entropy": {
+      "sha256": "64b8b03793ec4117b5b4375b8e7f76fac810241ebbe65d5d9a66f7d077234faa",
+      "result": "5 passed; 0 failed"
+    },
+    "all_test_compile": {
+      "sha256": "01a3b7e09ed56654db73436f0f7da1d46e52d50fa584d4381e0d807606580998",
+      "result": "Finished `dev` profile"
+    }
+  },
+  "sequence_count": 552,
+  "block_count": 4416,
+  "bit_offsets": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7
+  ],
+  "truncated_prefix_count": 280719,
+  "truncated_offsets": [
+    0,
+    3,
+    7
+  ],
+  "new_integration_tests": 4,
+  "original_reference_blocks": 3864,
+  "initialized_reference_blocks": 4416,
+  "rejected_first_attempt": {
+    "case": "CLD-6-stride5-coarse0:first paired fine block",
+    "actual_first_output": [
+      -15,
+      -15,
+      -15,
+      15,
+      15,
+      15
+    ],
+    "initial_wrong_expected_output": [
+      -15,
+      -15,
+      -15,
+      -15,
+      15,
+      15
+    ],
+    "cause": "Generator initially used entropy-history mapping for output; runtime initially used balanced output mapping for history too.",
+    "correction": "Unmodified ISO sources confirm separate maps. Corrected generator output, runtime history expansion, and added direct saved-history and changing-stride checks. Initial failure is not counted as playback acceptance."
+  }
+}

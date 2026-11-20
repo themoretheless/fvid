@@ -1,0 +1,28 @@
+{
+  "date": "2026-10-31",
+  "archive_sha256": "b6b27e2f9af6ee8f950af8d7074afc467e66d93372328c0ec55282fff71d1f83",
+  "reference_audit": "docs/validation/aac-ld-mps-arbdmx-ttt-reference-2026-10-31.json",
+  "members": {
+    "mp4spatialdec/src/sac_calcM1andM2.c": "ebdb752a1d74a5f7e5638366867b3b477918aa9f4d94169ee3b2e30bfbce6153",
+    "mp4spatialdec/src/sac_bitdec.c": "d9a8655b4e5efa1329d629f88bde962b640efe9d1a5c22f24f84df56eadfa64e"
+  },
+  "routines": [
+    "CalculateArbDmxMtx",
+    "SpatialDecCalculateM1andM2_5251",
+    "SpatialDecCalculateM1andM2_7271",
+    "SpatialDecCalculateM1andM2_7272"
+  ],
+  "finding": "For ordinary arbitrary-downmix mode1,the L/R gains multiply the first two columns of M_pre after CalculateTTT and before the inverse matrix. Gains are decoded CLD dB converted to linear amplitude. The third TTT basis column and M2 are not independently scaled. Odd energy modes still bypass signalled inversion.",
+  "runtime_change": "Expose build_with_downmix preserving old unity build API;apply gains to raw TTT before inversion and composition. Assembler reads DownmixGain(0/1) per set/band. Admit arbitrary downmix for trees0..4;retain refusal for5/6/7,HRTF and unsupported extensions.",
+  "negative_control": "Incorrect final M1 column scaling differs by0.2831099985159896 in a deterministic inverted example;cannot substitute that ordering.",
+  "qualification": "Trees2/3/4,all six TTT modes,23/9/4 parameter bands,asymmetric time/frequency-varying gains and initial unity.5 own stereo input controls;270 MP4/MKV pairs.108 unique clock-independent matrix geometries checked with original C plus80-digit Decimal smoothing. Authored native matrix corpus uses quantization mode0;combined energy-quantization profiles are not newly qualified.",
+  "not_newly_qualified": [
+    "trees5/6/7 arbitrary-downmix",
+    "HRTF",
+    "arbitrary-tree/downmix-residual extensions",
+    "shared-QMF LD-SBR ingress",
+    "dynamic SSC gain-mode enable/disable",
+    "whole-codec/profile or complete Annex B conformance",
+    "physical output and realtime performance"
+  ]
+}

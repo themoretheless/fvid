@@ -1,4 +1,5157 @@
+## Predictive TTT default/hold ICC acceptance, 2026-11-01
+
+Removed an incorrect native default-data prohibition. ICC default index0 maps
+to physical coherence1;physical coherence0 is a different index and remains
+rejected by the predictive matrix.36 own three-AU programmes with explicit-unity
+controls cover three TTT trees,modes0/1,grids4/9/23,initial and reset/hold history,
+MP4/Matroska,checkpoints and playback seek/rewind/ranges. Unmodified original
+spatial decoding produces byte-identical default/control PCM in both modes;
+owned maximum difference is1.15e-9 over811008 scalars.13 focused tests pass and
+three actual-device cases complete full/seek/rewind drain. Wider profile gaps
+remain open.
+[Evidence](validation/aac-ld-mps-ttt-default-2026-11-01.md).
+
+## LD-MPS zero-alignment profile restriction, 2026-11-01
+
+Corrected the native diagnostic for nonzero `ldsacTimeAlign`: the2014 LD-MPS
+conformance amendment requires zero,so these values are profile violations
+rather than a pending decoder feature. A new three-AU movie family covers zero,
+1,32767,32768 and65535. Zero plays;each nonzero case reports the profile error
+and preserves state for a valid-packet retry. Raw header diagnostics retain
+the signalled field. No valid-stream PCM or timing algorithm changes.
+[Evidence](validation/aac-ld-mps-alignment-profile-2026-11-01.md).
+
+## Unequal HRTF-grid refusal reproduction, 2026-11-01
+
+Added18 authored one-AU movies covering unequal pairs of spatial grids4/9/23
+and all seven HRTF grids,with three equal-grid playback controls. Every spatial
+frame parses before the specific native mapping refusal is checked. Equal
+controls preserve the original first-AU PCM byte-for-byte. Regeneration is
+deterministic;the targeted21-case test passes. These are refusal reproductions,
+not unequal-grid playback acceptance. The conversion algorithm remains open;
+no production math or supported-codec claim changes.
+[Evidence](validation/aac-ld-mps-hrtf-grid-repro-2026-11-01.md).
+
+## Independent original AAC-LD core and full LD5151 chain, 2026-11-01
+
+All2820 isolated original core AUs now decode through the unmodified ISO AAC-LD
+core and generic frontend. All1443840 float samples agree with FVid at RMS1.504e-9,
+max2.981e-8. The complete original core+spatial chain agrees at worst-channel
+RMS1.787e-8 across both modes and reproduces the historical WAV residual itself.
+That residual therefore does not establish an owned core/spatial bug on this
+input. Reference-generation settings remain unverified; wider codec tools and
+profile conformance remain open. No production math changes or new acceptance
+fixtures arise from this diagnostic.
+[Evidence](validation/aac-ld-original-core-2026-11-01.md).
+
+## Original LD5151 spatial decoder isolation, 2026-11-01
+
+The full original ISO spatial parser and renderer now process the identical
+isolated core PCM and original spatial messages for all2820 AUs. Both modes
+agree with FVid within worst-channel RMS1.789e-8, without fitted gain/delay.
+The original Real renderer reproduces the remaining WAV residual at1.087e-5
+RMS. Independent AAC-LD core/reference-generation comparison remains open;
+the spatial math is not changed to fit that residual. No new production defect
+or whole-profile conformance claim follows from this diagnostic.
+[Evidence](validation/aac-ld-mps-original-spatial-2026-11-01.md).
+
+## AAC-LD original core/PNS diagnostic, 2026-11-01
+
+New bounded mono core inspector and optional offline audit qualify source
+geometry480/512 and distinguish PNS waveform randomness from deterministic
+PCM differences. The24kHz control has full RMS3.46e-8;the48kHz non-PNS-current/
+previous partition has RMS3.40e-8 while its complete raw result stays recorded.
+No production bug or new codec acceptance is inferred from this partition.
+Original LD5151 core has no PNS/LTP;its numerical residual remains open.
+[Evidence](validation/aac-ld-core-original-2026-11-01.md).
+
+## Shared single-rate AAC LD-QMF synthesis, 2026-11-01
+
+Corrected the AAC LD-SBR/MPS32 synthesis convention from generic2n-127 to2n-31.
+The unmodified original AAC function independently establishes the phase;all20480
+matrix scalars match the direct precise-PI control. Eight own short programmes
+isolate the waveform failure,with dual-rate controls,independent complete PCM,
+in-band gain resets,checkpoints/reset,both frontends/renderers and navigation.
+Original24kHz LD-QMF2 RMS falls0.0965→7.77e-6,with no alignment/gain fitting;
+the other six original renderer comparisons stay byte-identical. Generic
+PCM/default QMF conventions and old frozen fixtures remain unchanged.693 scoped
+checks pass,0 fail,1 existing ignored;FFmpeg/ffprobe blocked.
+[Evidence](validation/aac-ld-mps-single-rate-2026-11-01.md).
+
+## Original LD-MPS timing re-audit, 2026-11-01
+
+Fresh zero-lag/no-fit comparisons confirm the causal ELD-origin correction also
+resolves original ELD5151 timing: maximum-channel RMS0.0536 before vs8.17e-6
+now,max absolute error1.5451e-5.48-kHz LD-QMF also matches at approximately
+PCM16 quantization scale. AAC-LD5151 numerical residual and24-kHz LD-QMF
+remain open;the latter differs from ISO WAVs in both owned and external FDK
+outputs. New optional offline validator verifies all8 original MP4/WAV pins,
+both renderer modes,full geometry and unchanged source media. No production
+math/defaults or synthetic media change in this audit.
+[Evidence](validation/aac-ld-mps-original-pcm-2026-11-01.md).
+
+## Coupled SBR noise orientation, 2026-11-01
+
+Corrected a reversed noise balance in coupled stereo. All26 ordinary LD-SBR
+original PCM24 WAV comparisons now have per-channel RMS at most2.016e-7 at
+zero lag,without gain fitting. The three S2 outputs improve to around9e-8;
+other23 outputs stay byte-identical. New own480/512 centered/asymmetric short
+videos reproduce the exact PCM error before the fix and accept complete PCM,
+both transport paths and playback navigation after it.661 scoped tests pass,
+0 fail,1 existing ignored;FFmpeg/ffprobe blocked. Broader LD-MPS/AnnexB
+and codec/profile qualification remain open.
+[Evidence](validation/aac-ld-sbr-noise-balance-2026-11-01.md).
+
+## Complete-range SBR limiter partition, 2026-11-01
+
+Corrected protection of a retained patch end that coincides with a low-resolution
+border after a short final HF patch was discarded. Only boundaries between
+retained patches and the complete synthesis endpoints are protected. Six original
+GH outputs now match ISO WAVs with RMS1.23e-7–1.46e-7;the other20 native outputs
+are byte-identical.23/26 original streams now have RMS at most2.016e-7;stereo S2
+still needs investigation. Eight own short programmes reproduce the specific
+numeric failure,with mode0 controls passing before/after.606 scoped checks pass,
+including legacy SBR,all1680 geometry inputs and actual worker/device navigation.
+[Evidence](validation/aac-ld-sbr-limiter-tail-2026-11-01.md).
+
+## Causal AAC-ELD origin, 2026-11-01
+
+Removed the extra quarter-frame delay from ELD synthesis while retaining the
+same history hop. Complete original24/48-kHz core WAV comparisons now match
+within one PCM24 LSB at zero lag,including startup/EOF. Twelve own programmes
+isolate the original PCM failure and qualify immediate frame emission and the
+nonzero EOF quarter. Independent dependent PCM oracles are regenerated;original
+compressed inputs are preserved. Worker/device navigation is qualified separately.
+The24 nonzero-core LD-SBR reference errors improve137–16259x;remaining waveform
+differences are open and no full-codec conformance is claimed.
+[Evidence](validation/aac-eld-au-origin-2026-11-01.md).
+
+## Explicit complex LD-SBR reference and silent-core harmonics, 2026-11-01
+
+Corrected the optional FDK reference configuration:automatic ordinary ELD selects
+Low Power,whereas FVid ordinary LD-SBR uses complex QMF. The probe/workflows now
+select complex explicitly and retain auto/Low Power as labelled controls. With
+unchanged native/input/AU bytes,the two ISO zero-core twi comparisons improve
+from0.0074/0.0165 RMSE to9e-6/1e-5. The other24 original raw comparisons still
+require AAC-core time-origin qualification. No native DSP is changed to fit FDK.
+
+24 own programmes/48 movies qualify independent zero-core harmonic PCM,exact8x
+amplitude scaling,480/512 single/dual-rate CRC and actual worker/device navigation.
+Ordinary tests use frozen independent assets with no foreign codec or network.
+23 scoped tests pass. Original reference sources are pinned by their complete
+immutable Git tree,independent of download-time archive metadata;all425 files
+match and nine pure-stdlib pin tests pass. Full codec scope remains open.
+[Evidence](validation/aac-ld-sbr-qmf-reference-2026-11-01.md).
+
+## Canonical nominal LD-SBR CLDFB phase, 2026-10-31
+
+Corrected the nominal analysis matrix from 2n-96 to canonical 2n-95
+(ISO/IEC14496-3:2009,4.6.19.4.1). The centered factor-one analysis already used
+this phase. Eight own programmes/16 movies reproduce the specific PCM defect
+and match an independent direct-convolution oracle after the fix. Existing
+compressed inputs remain unchanged; dependent PCM oracles are regenerated
+independently. Actual macOS device full/seek/seek/rewind drain passes.
+Raw zero-lag PCM differences against original FDK remain: this correction does
+not qualify full waveform conformance or resolve decoder time-origin coupling.
+Scoped gates:1138 pass,0 fail,1 existing ignored. See [evidence](validation/aac-cldfb-phase-2026-10-31.md).
+
+## Exact LD-SBR Q31 interoperability with strict validation, 2026-10-31
+
+Closed all six observed original ISO LD-SBR Q31 refusals:26/26 inputs now decode
+fully with unchanged source checksums. Default LD-only NoisePolicy::AllowQ31
+uses exact2^(6-Q),retains31 for temporal deltas and does not clamp/substitute
+output. AacDecodeOptions::ld_sbr_noise=Strict preserves normative0..30 admission;
+legacy SBR,coupled balance and Q32 refusal retain their previous bounds. Policy
+survives reset and incompatible-policy checkpoint restore is transactional.
+
+18 own480/512 inverse-filter/centered-coupled/asymmetric-coupled programmes in
+MP4/Matroska match independent direct PCM. Q31-to-Q7 temporal history detects
+clamping;Q32 controls retain history for retries. Original Q31 refusal movie/AU
+bytes remain unchanged and now have default acceptance plus explicit Strict
+refusal. Worker navigation and a real macOS full/seek/seek/rewind drain pass.
+Scoped gates:618 unique pass,0 fail,1 pre-existing ignored. This is not a new
+normative noise range,full LD-SBR/LD-MPS waveform conformance or completion of
+all codec gaps. [Evidence](validation/aac-ld-sbr-q31-2026-10-31.md).
+
+## Separate ISO LD-SBR admission and Q31 boundary, 2026-10-31
+
+Audited all26 public `er_eld_sbr_*` inputs with the normal edited-track playback
+reader.20 decode completely;all six inverse-filter inputs fail specifically on
+noise Q31. AAC2009 section4.6.18.3.6 limits reconstructed noise to0..30;original
+FDK uses a different0..35 robustness clamp. No guessed widening or clamp is
+introduced. Production diagnostics now expose the offending reconstructed value.
+
+Two own480/512 controls and two CRC-correct Q31 counterexamples (both containers)
+qualify frozen PCM,strict refusal,transactional retry,worker playback/seek/rewind
+and timestamps. Refusal is explicitly not intended-playback acceptance.601
+scoped tests pass,one pre-existing ignored. The optional checksum-pinned ISO
+admission tool reports all failures and exits nonzero;it is outside normal tests.
+All128 separate ISO ELD core inputs decode completely in the discovery run and
+a second offline run with a frozen native binary;this is admission,not waveform
+conformance. Original FDK also admits all AUs of the six Q31 LD-SBR inputs
+without concealment flags,confirming a real decoder-policy difference. Raw
+packet export now supports edited constant-description tracks while retaining
+the PCM-mode edit guard. Codec-gap objective stays open. See [evidence](validation/aac-eld-sbr-noise-range-2026-10-31.md).
+
+## AAC-LD nearest-defined rate tables, 2026-10-31
+
+Fixed a real ISO16-kHz core-admission failure using the nearest-defined table
+rule in ISO/IEC14496-3 section4.5.1.1. Existing LD outer band/TNS tables now
+cover the remaining nominal/explicit frequency groups; zero rate stays invalid.
+360 own programmes/720 movies verify frozen cosine PCM,spatial composition,
+actual audio-worker playback,live-history seeks,rewind and timestamps. All50
+public ISO LD-MPS MP4 inputs now decode fully,versus49 before. This is not
+whole-profile waveform conformance. Scoped gates:601 pass,0 fail,1 pre-existing
+ignored. Full LD-SBR/LD-MPS reference qualification remains open.
+
+Evidence: [validation](validation/aac-ld-nearest-rate-2026-10-31.md),
+`validation/aac-ld-nearest-rate-{iso,tests}-2026-10-31.json`.
+
+## Independent LD-QMF32 phase cross-check, 2026-10-31
+
+The large24-kHz ISO WAV difference is not isolated to FVid: an independently
+built,pinned AOSP FDK decoder also differs substantially from that WAV. Its
+full-stream RMS is0.096575,versus the earlier FVid/ISO0.096510. FVid/FDK full
+RMS is0.001770; after sample2048 it is0.000013925,max0.000037640. Full startup
+differences remain in the report. Later windows are observations,not a
+normative prefix exclusion or a passing conformance test. The48-kHz vector
+also has startup differences between the floating and fixed-point decoders.
+
+The independent FDK640-window numbers agree with the reversed owned window
+within5e-12. Its320-window uses the same adjacent-pair interpolation; observed
+rounding differences are below3e-8. This rules out changing the prototype
+coefficients merely to fit this WAV. It does not qualify the shared-SBR phase
+convention or establish that either implementation meets the normative procedure.
+The original ISO decoder can receive external fi/beta twiddles; the appropriate
+reference coupling/timing remains to be established before changing production.
+
+The optional `validate_aac_ld_mps_fdk_reference.py` builds the original decoder
+from pinned source,checks both official MP4/WAV inputs,decodes all47 AUs each,
+and reports full and explicitly named later-window comparisons. No source math
+patches,concealment flags,phase/delay fitting or automatic accuracy verdict are
+used. The `aac_spatial_reference packets` mode exports original ASC/AUs with
+checked lengths for this external probe. External sources and media remain
+outside the repository and ordinary tests require neither them nor a network.
+
+Two builds reproduce identical native and FDK PCM bytes. Five protocol controls
+reject bad magic,zero ASC length,truncation,trailing data and an actual FDK
+decode error. The existing own3-AU tree7 ELD/MPS movie is also accepted by FDK;
+this is syntax/decode admission,not new waveform accuracy qualification.
+Five focused Rust regression tests pass. Production codec behavior is unchanged
+in this milestone. The full codec-gap objective and LD-MPS reference qualification
+remain open.
+
+Evidence: `docs/validation/aac-ld-qmf-fdk-{crosscheck,tests}-2026-10-31.json`
+and [reproduction instructions](validation/aac-ld-qmf-fdk-reference-2026-10-31.md).
+
+## Explicit native LD-MPS decorrelation and reference diagnosis, 2026-10-31
+
+`NativeAacDecoder::new_with_options` now accepts `AacDecodeOptions` containing
+an optional output sample-rate hint and explicit spatial decorrelation mode.
+The existing constructors retain Complex as their default. Both modes use
+the same owned spatial/core implementations; this is a renderer choice,not
+a new coded syntax tool or a foreign-decoder fallback. Reset retains the
+selected mode. Cross-mode checkpoints are rejected before any history changes.
+The shared native frontend and fvid-media entrypoint both support this policy.
+
+Three acceptance tests use existing authored movies/parameters. All8 trees
+match the explicitly selected PCM spatial renderer; the default still equals
+Complex. The33-programme alignment corpus checks both modes with negotiated
+output clocks,packet checkpoints,replay and reset,including coupled spatial
+LD-SBR and downscaled PCM ingress. Existing output-rate constructors match
+the new default options exactly. No private/reference parameter sets are copied.
+
+The ISO reference frontend defaults to decType0 (real coefficients),whereas
+native playback defaults to complex coefficients. This explains most of the
+large waveform difference in the LD tree5151 input: selecting Real reduces its
+full-stream normalized RMS error from0.018207 to0.000009233 (about0.303 PCM16
+LSB); maximum error is0.000057945. These are measurements,not an assigned
+normative accuracy category. A diagnostic256-sample lag reduces the ELD
+tree5151 difference,but its remaining RMS0.001642 is still unresolved; that
+lag is not established normative compensation. Single-rate LD-QMF32 waveform
+alignment also remains open. Full Annex B conformance is not established.
+
+The `aac_spatial_reference` example selects either owned renderer for unedited,
+constant-description MP4 inputs and publishes raw f32le. All four ISO inputs
+decode fully in both modes; outputs match the preceding diagnostic builds
+byte-for-byte. `scripts/compare_aac_reference_pcm.py` measures PCM16 WAV error
+at an explicitly supplied lag,without searching for a better fit or declaring
+conformance. Exact,known1-LSB error,explicit-delay and nonfinite controls pass.
+
+Validation:626 passed,0 failed,1 existing ignored:full media library,
+32 integration tests and6 root alignment/worker tests. The codec-gap goal
+remains open; next reference work must isolate ELD timing and shared32-bin
+phase/window behavior independently of this renderer-choice diagnosis.
+
+Evidence: `docs/validation/aac-decorrelation-{iso,comparison-controls,tests}-2026-10-31.json`.
+
+## AAC transport byte alignment and public ISO inputs, 2026-10-31
+
+Official ISO LD-MPS streams exposed a false rejection of nonzero terminal AAC
+byte-alignment bits. AAC er_raw_data_block_eld ends with byte_alignment(),
+not a zero-valued field (ISO/IEC14496-3:2009,4.4.2.9,Table4.75). Pinned FDK
+`libAACdec/src/aacdecoder.cpp` also consumes alignment without a zero check:
+commit `ee76460efbdb147e26d804c798949c23f174460b`,source SHA-256
+`8886d6d8934467ea553bd1f5e9c92ea7291bb160cef141a08691eb740774b7fa`.
+The spatial extension owner is shared by LD/ELD; the plain ELD owner now uses
+the same terminal-padding rule. Internal spatial frame alignment,CRC fields,
+fill-data bytes and ASC downscale fill nibbles retain their checks.
+
+An authored movie reproduces exactly `nonzero AAC ELD alignment bits` before
+the change; all22 initial zero controls pass unchanged owners. The final corpus
+has33 programmes/four padding patterns in MP4 and Matroska (132 variants,
+264 movies):LD/ELD trees0–7,plain480/512 ELD,coupled shared LD-SBR32/64,and
+adapted/high-rate LD-SBR through PCM ingress. Tests prove every syntax bit and
+ASC is unchanged,then compare exact whole PCM,player playback,seek and rewind.
+The actual worker also exercises both containers. All254 possible nonempty
+sub-byte padding values pass direct spatial assembly controls.
+The older tree7-alignment refusal becomes acceptance without changing any of
+its movie/packet bytes. Five malformed-tail cases remain specific errors.
+
+`scripts/fetch_iso_ld_mps_conformance.py OUTPUT` independently fetches four
+public ISO streams and four reference WAVs using bounded HTTP ranges,ZIP CRCs
+and the pinned ISO checksum inventory. No full9-GiB download is needed. No ISO
+media or codec parameter sets enter synthetic fixtures or ordinary tests.
+All four inputs previously fail the alignment check; after the fix they decode
+fully (2820/1410 AAC packets for the two30.08-second tree5151 inputs,and47 each
+for LD-QMF1/2). This is admission/finite-output evidence,not a conformance claim.
+Same-position normalized PCM16 comparisons show rounding-scale error for
+LD-QMF1 and larger differences for the other three. Those observations still
+need normative delay,channel-order and waveform investigation. They must not
+be treated as validated full-codec accuracy or as diagnosed DSP defects yet.
+
+Validation:613 passed,0 failed,1 pre-existing ignored across the full media
+library,19 targeted integration tests and6 root alignment/worker tests.
+Fixture generation reproduced312 generated artifacts with network/process
+creation denied. Both independent ISO extractions yield identical verified bytes.
+Full Annex B qualification and the codec-gap objective remain open.
+
+Evidence: `docs/validation/aac-alignment-{generation,iso,iso-fetch,tests}-2026-10-31.json`.
+
+## Discarded split-TTT grouped parameters, 2026-10-31
+
+Zero-width grouped regions now consume their one entropy datum without
+materializing a numeric parameter index. The prior split-TTT refusal is removed.
+Original C reads Huffman syntax before consulting numeric history,then reads a
+fixed CPC LSB count. getStrideMap gives [start,start),so history gathering is a
+self-assignment and expansion writes no band. Only cursor and data/quantization
+flags are observable; the unused numeric result can vary with the active high
+region or exceed the current quantization bounds. Normal nonempty indices keep
+their bounds; unused PCM codewords and malformed syntax remain invalid.
+
+936 authored standalone units have10,920 comparisons with unmodified original
+C under UBSan,across seeded histories and previous quantization flags. All bit
+positions match;1,632 unused numeric results exceed current index bounds. The
+fine-CPC raw-history -20 row is excluded because some original C paths left-shift
+a negative unused MSB. No source correction or wraparound flag is used to turn
+undefined arithmetic into a numerical oracle. Native admission is not restricted
+by these reference exclusions. Component cursor evidence and the source's fixed
+read structure do not establish independent whole-codec PCM conformance.
+
+756 own MP4/MKV programmes and84 unit-stride controls cover trees2/3/4,480/512
+LD/ELD cores,PCM32/64/128 and shared LD-SBR QMF32/64. Empty low CLD or CPC+ICC
+regions share a virtual history cell with an active same-kind high region whose
+coarse/fine domain changes. Strides2/5/23,PCM/Huffman1D/2D,paired/unpaired and
+dependent/independent frames are covered. Deliberate time deltas require nonzero
+history for an in-range dummy index; reconstructing from a fake zero would fail.
+All35,354,880 PCM values match controls exactly. This comparison shares spatial
+DSP and is not an external whole-codec waveform oracle.
+
+The original84 controls pass unchanged production owners; movie/parameter
+acceptance reproduces both the old TTT refusal and the discarded-index range
+error. Removing only the TTT guard still fails the native Huffman movie. The
+old split-TTT refusal movie is renamed as an acceptance fixture with identical
+movie and packet bytes. 84 malformed movies insert unused CLD31/CPC63 PCM words
+with valid recomputed CRC and require transactional correct-packet retry.
+
+Generation and the optional C reference remain separate from ordinary tests.
+No private media,frames,audio or codec parameter sets are copied. Unequal HRTF
+grids,changed frequency/layout,nonzero alignment,remaining energy profiles and
+full Annex B qualification remain open. The codec-gap objective stays active.
+
+Fresh offline gates: 1834 passed, 0 failed, 27 ignored.
+Media/player libraries and 36 targeted integration binaries passed.
+
+Evidence: `docs/validation/aac-ld-mps-discard-{source,reference,generation,tests}-2026-10-31.json`.
+
+## Empty grouped LD-MPS regions, 2026-10-31
+
+The split-TTT refusal described in this historical milestone is superseded by
+the discarded-parameter milestone above.
+
+Zero-width grouped parameter regions now consume their one entropy datum and
+produce no visible parameter bands. This follows unmodified C getStrideMap and
+ecDataDec: signed division yields one group with range [0,0), while expansion
+never writes history. Real C initialization also sets compressed history cells
+to zero. The virtual datum therefore uses zero history independently of a
+region's default. Independent zero-width regions are admitted; split TTT empty grouped regions
+retain a specific refusal because their virtual cell can belong to the active
+neighboring region in the C compressed-history array. Unit-stride empty PCM and
+invalid empty Huffman retain their existing behavior. Bounds, prefix rollback and invalid PCM codewords remain
+checked by the owned entropy reader.
+
+252 own MP4/MKV programmes cover empty LFE OTT CLD regions in trees0/1 with
+strides2/5/23, paired/unpaired, fine/coarse PCM and 1D/2D Huffman data. LD/ELD
+480/512 core sources include PCM32/64/128 and shared LD-SBR QMF32/64 ingress.
+All 9,642,240 output PCM values match 28 unit-stride controls exactly. Native
+checkpoint/reset, original media stamps, opaque source IDs, both-container
+sample-boundary seek/rewind and audio-worker playback are exercised. These are
+control/association checks with shared DSP, not an independent whole-codec PCM
+oracle or a physical-device/realtime claim.
+
+864 standalone CLD/ICC/CPC units match original C consumed bits, dummy values,
+empty stride map and unchanged zero history. Every shorter prefix restores the
+reader and parameter decoder. The original Rust owner accepts all 28 controls
+and fails the parameter/movie acceptance tests at precisely its old grouped
+refusal; the tested owner is then restored byte-for-byte. 28 malformed movies
+carry unused fine CLD PCM codeword31 in a later spatial frame with valid CRC;
+correct-packet retry must preserve the complete waveform. The older frame
+corpus replaces its grouped refusal with this specific malformed-codeword
+expectation, while positive configuration/frame blobs remain unchanged. A separate
+split-TTT movie requires the specific shared-history refusal and successful
+correct-packet retry; its unit-stride control is accepted. This is explicitly a
+refusal regression, not split-TTT grouped playback acceptance.
+
+Fixture and original-C oracle generation are explicit, separate from tests.
+Both regenerate identically twice with network disabled; movie generation also
+disallows process creation. No private media, frames, audio or codec parameter
+sets are copied. Full Annex B/profile qualification, unequal HRTF grids,
+arbitrary trees, remaining energy-quantization profiles and changed-rate/layout
+or nonzero-time-alignment SSCs remain open. The codec-gap objective stays active.
+
+Fresh offline gates: 1827 passed, 0 failed, 27 ignored.
+Media/player libraries and 35 targeted integration binaries passed.
+
+Evidence: `docs/validation/aac-ld-mps-empty-groups-{source,reference,generation,tests}-2026-10-31.json`.
+
+## Spatial frames crossing native source windows, 2026-10-31
+
+Native LD-MPS no longer requires a spatial frame to cover whole AAC input
+chunks. SourceSpan carries offset,full source size and original unsliced stamp.
+A native partial-window owner collects contiguous spans and exposes each complete
+submitted source window with its original PTS/duration. Container edits/padding
+and opaque packet IDs therefore retain the same association. Ordinary Session
+opaque-ID clients retain the old strict whole-chunk contract;native explicitly
+opts in. Partial PCM participates in checkpoint ownership,retained-capacity
+accounting,reset and EOF validation.
+
+Shared LD-SBR ingress now depends on actual clock/bank compatibility,not an SSC
+frame-length coincidence. Matched-clock long initial SSCs use shared LD-QMF in
+place of the old PCM-interface fallback. Frozen independent spatial-bank SBR QMF
+qualifies that intentional domain choice;unmatched clocks keep PCM ingress.
+
+448 own MP4/MKV programmes plus112 unchanged fixed controls and42 saved input
+references cover all8 trees,480/512 cores and PCM32/64/128/shared-QMF32/64. There
+are112 staggered,112 batched,112 initial and112 straddling schedules. Initial
+SSCs include56 sub-core and56 multi-core frames. Straddling frames combine a
+partial head,several whole sources and a tail. Original production owners pass
+all112 fixed controls and reproduce both the initial and in-band geometry
+refusals on the selected three-test wrapper. Full sources are restored exactly.
+
+Direct saved-input composition bypasses native scheduling/reassembly and checks
+18570240 PCM values with max absolute error3.5527137e-15 (bound1e-9). Remaining
+spatial DSP is shared,so this is component/association evidence,not independent
+whole-codec truth. Non-initial schedules additionally preserve fixed-control
+waveforms exactly. Checks include100 Hz media clocks with zero-tick slices,
+opaque IDs near i64::MAX,partial checkpoint/reset,MP4/MKV seek/rewind and late
+failure/retry with an already retained prefix. A library unit checks exact spare
+capacity accounting and partial completion/reset. SourceSpan users in the prior
+spatial-SBR tests are updated for the new explicit metadata.
+
+Four malformed movies exercise the bounded trailing-byte error. Two older
+frame-length fixtures intentionally omit final spatial parameters:they now fail
+at EOF instead of codec refusal and have updated expectations. Their binary
+movies/inputs remain unchanged. Generation is separate from tests:1056 new and
+962 parent artifacts regenerate identically twice with process/network creation
+denied. Source provenance and unused shared golden metadata are clarified.
+
+Rate/layout changes,nonzero time alignment,nominal-SSC downscale remapping and
+remaining codec/profile limits stay open. This does not establish physical
+playback,realtime performance or complete Annex B/profile conformance. The
+original codec-gap goal remains active.
+
+Fresh offline gates: 1819 passed,0 failed,27 ignored.
+Media/player libraries and34 targeted integration binaries passed.
+
+Evidence: `docs/validation/aac-ld-mps-source-slices-{source,generation,tests}-2026-10-31.json`.
+
+## Same-format SSC frame-length transitions, 2026-10-31
+
+LD-MPS now accepts in-band frame_slots changes without treating them as an
+output-format change. PCM/QMF banks and matrix interpolation history remain
+continuous. The queue previously tested readiness and sliced input using the
+old frame length before examining the pending header. It now derives each
+head frame's sample count from that header,waits for enough input,and uses the
+same count for slicing and retirement. Reset restores the initial length before
+a headerless initial frame. Native AAC preserves whole-core packet association
+and rejects replacement lengths that split an access unit.
+
+336 own transition programmes,each in MP4 and MKV,cover all8 trees,480/512
+AAC-LD/ELD cores,PCM32/64/128 and shared LD-SBR QMF32/64. Early,late and fully
+batched headers exercise grow/shrink at8/15/16/30/32 slots.112 independently
+decodable fixed-partition controls use the same constant coded parameters and
+common initial frame;the waveform must remain exactly equal after partitioning.
+30 saved analytical bare-core controls isolate ingress. This is partition
+invariance,not independent whole-codec PCM truth. Original production owners
+accept fixed/bare controls and reproduce the exact old format refusal on the
+transition acceptance test.
+
+New integration checks compare13927680 PCM values exactly,cover MP4/MKV source
+windows and seek/rewind,checkpoint replay and opaque packet IDs. Reset is checked
+from a completed longer frame with pending ready output into a headerless first
+frame. Two malformed batched suffix movies fail after earlier changed-length
+frames render;exact Session queues/DSP and native retry behavior are retained.
+Two other movies specifically refuse partial-core native association. Incorrect
+full bank reset at every header changes PCM by0.000011949642,so it cannot replace
+history retention. Generation is separate from tests and reproduces962 artifacts
+identically twice with process/network creation denied.
+
+Still open: frequency/channel-layout transitions,nonzero time alignment,
+fractional-core native AAC spatial frames,other quantization/combined shaping
+and HRTF configurations and complete Annex B/profile qualification. No physical
+audio or realtime-performance claim. The overall codec-gap goal remains open.
+
+Fresh offline gates: 1800 passed,0 failed,27 ignored.
+Media/player libraries and32 targeted integration binaries passed. New frame-
+length integration8 and audio worker1 passed,including seek/rewind.
+
+Evidence: `docs/validation/aac-ld-mps-frame-length-{source,generation,tests}-2026-10-31.json`.
+
+## Signalled 3D-stereo TTT inversion, 2026-10-31
+
+Owned LD-MPS now applies SSC HRTF set0 to the TTT inverse for trees2/3/4.
+The flag means signalled 3D-stereo inversion, not binaural output selection:
+six/eight output channels are retained. The transform includes five-direction
+levels/IPD, energy-weighted cross-ear phase below band12, surround energy,
+arbitrary-downmix before inversion and standard-inverse priority. Regularization
+floors determinant magnitude to0.1 through singular values, with explicit
+rank-deficient orthogonal completion and finite-result guards. Shape checks in
+the per-band projection are constant-size; full grid validation is at admission.
+
+540 own twelve-packet programmes in MP4 and MKV cover all six modes, equal
+23/9/4 grids, symmetric/asymmetric responses and five ELD/LD-SBR input clocks
+through32/64/128-bin PCM ingress. Five saved independent stereo controls isolate
+spatial admission. Replacing the assembler and TTT owner with base104373aff7
+makes the initial three spatial tests fail at the exact old HRTF refusal while
+the bare control passes. The extra valid unequal-grid movie reproduces the
+specific remaining mapping refusal in both ASC and first in-band SSC.
+
+Independent component evidence combines original pinned MPEG C raw bases/M2
+with an owned80-digit Decimal polar inverse and smoothing, for every selected
+3D branch. Rust uses a separate Hermitian eigenbasis formulation. The stock
+float C SVD loses orthogonality near rank deficiency:5072 nonfinite terms and
+large finite deviations are recorded, not promoted to golden truth. Analytic
+rank-one,zero and diagonal controls independently check the determinant floor.
+The9538560 endpoint comparison has max absolute error0.000212200326 with a
+fixed3e-4 bound reflecting amplified C float basis error. Native compositional
+PCM is exact over24330240 values; it is not independent whole-codec truth.
+Movie/input artifacts and C/Decimal gold each regenerate identically twice,
+separately from tests. Ordinary tests require no FFmpeg,network or C compiler.
+
+Still open: unequal HRTF grids,other HRTF trees and newly unqualified parameter
+resolutions/quantization modes,nominal-SSC downscale remapping,direct downscaled
+shared-QMF,binaural rendering and whole-profile qualification. Full Annex B and
+table A.21 were not obtained from the official ISO catalogue/sample. No physical
+audio or realtime performance claim. The overall codec-gap goal remains open.
+
+Fresh offline gates: 1791 passed,0 failed,27 ignored.
+Media587;player1076;31 targeted integration binaries. New3D integration8
+and worker1 passed,including seek/rewind and exact source-window stamps.
+
+Evidence: `docs/validation/aac-ld-mps-3d-{source,reference,generation,tests}-2026-10-31.json`.
+
+## In-band arbitrary-downmix mode transitions qualified, 2026-10-31
+
+The existing runtime now has acceptance evidence for enabling/disabling ordinary
+arbitrary-downmix compensation inside a stream. No decoder implementation changed.
+330 own MP4/MKV programmes cover trees0..4,all six TTT modes through three paired
+configurations,23/9/4 parameter bands,quantization0 and512-sample ELD/LD-SBR PCM
+at12/24/48/96kHz (32/64/128 spatial banks). Both initial mode states alternate at
+packets3/6/9;identical headers repeat at2/5/8/11.
+
+Dependent gain sets hold prior values across identical SSCs. Re-enabled parameter
+contexts must instead hold their default0dB. Absolute-coded continuous always-on
+control movies use zero dB when the changing mode is disabled;they avoid the
+reconfiguration and hold paths. All14,376,960 compositional PCM values match
+exactly. The original C/Decimal matrix oracle checks5,253,120 endpoints over132
+unique geometries,maximum error2.9541119e-6. A full-filter reset negative control
+changes PCM by3.0249619e-4,so accidentally resetting everything cannot pass.
+
+Eight own short movies truncate frame data after a valid changed SSC,including
+returning to a previously used gain mode. Prefix publication and valid retry must
+retain AAC core,spatial,configuration and timing state. Reader checks cover both
+transports,source/spatial-edge seeks,rewind/EOF and checkpoints. AudioWorker
+qualification is recorded with the final focused gates.
+
+Movie/input and original C/Decimal generation are separately byte-identical twice
+in isolated folders. Ordinary tests use frozen outputs without generation,FFmpeg,
+network or C reference compilation. The prior1765-test media/player and targeted-integration gate remains the
+unchanged-runtime baseline;new focused qualification is reported separately.
+
+Shared-QMF ingress,480-sample cores,energy-quantization combinations and combined
+STP/GES gain-mode transitions are not newly qualified. Trees5/6/7 remain explicit
+refusals:absence of matching gain application in available reference routines is
+not a normative prohibition and is not permission to ignore coded parameters.
+The wider no-codec-gaps objective remains active.
+
+Fresh focused checks:9 passed,0 failed,0 ignored (8 integration tests and1
+AudioWorker test over all660 dynamic transports). Production-source hashes match
+the previous baseline;the added Rust runtime-path module is cfg(test) only.
+
+Evidence: `docs/validation/aac-ld-mps-arbdmx-switch-{source,reference,generation,tests}-2026-10-31.json`.
+
+## Stereo arbitrary-downmix before TTT inversion, 2026-10-31
+
+Native LD-MPS now accepts independent L/R arbitrary-downmix gains for TTT trees
+2/3/4. Gain multiplies the raw TTT input basis before the inverse,then ordinary
+OTT composition and matrix smoothing/interpolation continue. Existing unity
+builder API is preserved. M2 and already rendered PCM are not scaled instead.
+A deterministic negative control shows0.28311 error for the wrong post-column
+ordering. Odd energy modes retain their existing inversion bypass.
+
+270 own MP4/MKV pairs cover all six TTT mode combinations,signalled inversion/
+bypass,23/9/4 parameter bands,initial unity and unequal time/frequency-varying
+L/R gains at quantization mode0. Five independent saved stereo PCM controls span
+short plain ELD and
+LD-SBR PCM at12/24/48/96kHz with32/64/128 spatial banks. Before the fix bare
+controls pass and three spatial tests reproduce the exact old admission refusal.
+After the fix,12,165,120 compositional PCM values match exactly. The original
+525/7271/7272 C routines plus80-digit Decimal smoothing independently qualify
+4,769,280 endpoints (108 unique matrix geometries),maximum error3.4774853e-6
+at tolerance1e-5. Repeated matrices are not duplicated across PCM clocks.
+
+Checks cover timed/untimed decode,exports,MP4/MKV playback,source/spatial edge
+seeks,rewind/EOF,checkpoints,suffix retry and late truncated-gain rollback. Direct
+builder checks include all six modes with inversion on/off,unity identity,
+unchanged M2 and invalid gains. The old TTT constructor refusal expectation is
+updated to acceptance;trees5/6/7 retain executable refusals. AudioWorker checks
+queue/source stamps and live-history navigation.
+
+This is component integration,not complete independent whole-codec/profile
+conformance. Trees5/6/7,HRTF,arbitrary-tree/downmix-residual extensions remain
+unfinished. Shared-QMF ingress,dynamic SSC gain-mode changes and physical/realtime
+output are not newly qualified. The no-codec-gaps objective remains active.
+
+Fresh offline gates: 1765 passed, 0 failed, 27 ignored.
+Evidence: `docs/validation/aac-ld-mps-arbdmx-ttt-{source,reference,generation,tests}-2026-10-31.json`.
+
+## Mono arbitrary-downmix compensation, 2026-10-31
+
+Native ordinary LD-MPS now admits mono arbitrary-downmix gains for trees0/1
+(5.1). The decoded dB compensation multiplies M1 coefficients before smoothing
+and interpolation,following original5151/5152 routines. M2 and already rendered
+PCM are not substitutes for this stage. Other trees/HRTF and downmix-residual
+extensions still refuse explicitly;TTT requires gain before inversion.
+
+60 own MP4/MKV pairs cover23/9/4 parameter bands,unity and time/frequency-varying
+gains. Five independent saved core/LD-SBR PCM controls cover12/24/48/96kHz and
+32/64/128-band spatial PCM ingress. Before the fix all bare controls pass and
+three spatial tests refuse at the exact old arbitrary-downmix admission.
+With the fix,2,211,840 compositional PCM values match exactly. Original C raw
+matrices plus80-digit Decimal temporal smoothing independently qualify1,209,600
+matrix endpoints,maximum difference8.9097386e-7 (tolerance2e-6).
+
+Checks cover timed/untimed native decode,MP4/MKV exports and playback,source/
+spatial edge seeks,rewind/EOF,checkpoint replay,suffix-error retry and rollback
+of truncated gain data with an unchanged assembler/cursor. AudioWorker tests
+qualify queues/source stamps and live-history navigation. Movie/input generation
+and C/Decimal oracle generation are separately byte-identical twice in isolated
+folders. Ordinary offline tests consume frozen files without generation or C.
+
+This is component integration,not independent whole-decoder/profile conformance.
+Dynamic SSC enable/disable,shared-QMF LD-SBR ingress and physical/realtime output
+are not newly qualified by this corpus. The wider codec-gap objective stays open.
+
+Fresh offline gates: 1757 passed, 0 failed, 27 ignored.
+Evidence: `docs/validation/aac-ld-mps-arbdmx-{source,reference,generation,tests}-2026-10-31.json`.
+
+## Odd LD-SBR downscale audit, 2026-10-31
+
+Factor3 SBR was previously listed too broadly as a pending codec feature.
+A pinned upstream Fraunhofer transport parser explicitly rejects odd downscale
+ratios other than1 when SBR headers are present. FVid separately accepts
+plain ELD factor3. This is primary implementation evidence,not proof of a universal
+normative restriction without the relevant full ISO text. Retain the explicit
+SBR refusal;do not invent fractional CLDFB geometry or count refusal as playback
+acceptance. Nominal SSC adaptation and documented remaining tools stay open.
+
+Existing own `aac-eld-third` movies already distinguish accepted480-sample
+plain ELD at factor3 from rejected512 geometry and LD-SBR requests. The
+`aac-ld-mps-downscaled` test also checks explicit native spatial/SBR refusal.
+No new media failure or new runtime behavior was introduced by this audit.
+Fresh offline verification:13 passed,0 failed,0 ignored;existing frozen fixtures
+need no network,FFmpeg or generation.
+
+Evidence: `docs/validation/aac-eld-sbr-odd-factor-{source,tests}-2026-10-31.json`.
+
+## Nominal high-rate LD-SBR through LD-MPS PCM, 2026-10-31
+
+The native owner now selects shared LD-QMF only when its actual bank and
+per-packet geometry match SSC. Other supported geometries use complete owned
+CLDFB SBR PCM followed by owned MPS PCM analysis/synthesis.48kHz ELD with
+single/dual-rate SBR now reaches64/128-band spatial output at48/96kHz.
+480-sample cores group two packets;512-sample cores group one.
+
+32 own MP4/MKV pairs cover all8 trees and mono/stereo/5.1 downmix input.
+12 independent bare controls pass before the fix;three spatial tests reproduce
+the old admission failure. All2,476,032 compositional PCM values match exactly
+with the fix. Tests cover timed/untimed output,playback,seek,rewind,EOF,
+checkpoint replay and malformed suffix retry. Generation reproduces90 files
+byte-identically twice under network/process denial,separately from tests.
+
+Fresh offline gates: 1746 passed, 0 failed, 27 pre-existing ignored.
+Media:587/0/1; player:1072/0/26;16 targeted integration suites:87/0/0.
+
+Evidence: `docs/validation/aac-ld-mps-sbr-rates-{source,generation,tests}-2026-10-31.json`.
+Physical output,realtime performance and whole-profile conformance are not
+qualified here. Nominal SSC downscale remapping,direct downscaled shared-QMF
+and factor-three SBR remain open;the codec-gap objective remains active.
+
+## Downscaled LD-SBR through the LD-MPS PCM interface, 2026-10-31
+
+Owned LD-SBR CLDFB synthesis now feeds ordinary LD-MPS PCM analysis/synthesis
+for factors2/4/8 with an explicitly adapted SSC. Both single/dual-rate modes,
+480/512 ELD, all8 trees, stereo coupling, CRC and changing wide-LF crossover
+are covered. Nominal streams retain the existing shared LD-QMF path.
+
+152 own MP4/MKV pairs and55 bare independent PCM controls qualify component
+composition.7,147,264 spatial PCM values differ by at most1.5544533e-26.
+Tests exercise untimed/timed decode, playback readers, seek/rewind/EOF,
+checkpoint replay, malformed spatial suffix and SBR CRC failure followed by
+valid retry. The AudioWorker test covers queue stamps and live-history seeks.
+Before this fix, the same bare controls pass but three spatial tests fail at
+exactly the old downscaled-bank admission refusal. The CRC test is separately
+qualified after the fix. Frozen generation reproduces418 generated files twice
+under network/process denial, separately from ordinary offline tests.
+
+This is component integration evidence, not complete independent whole-codec
+or profile conformance. Nominal-rate SSC remapping, direct downscaled shared-QMF
+banks and factor-three SBR remain open. Physical audio output/realtime performance
+are not established by these tests. Full ISO23003-2 Annex B has not been obtained.
+The codec-gap objective stays open.
+
+Fresh offline gates: 1741 passed, 0 failed, 27 pre-existing ignored.
+Media:587/0/1; player:1071/0/26;15 targeted integration suites: 83/0/0.
+
+Evidence: `docs/validation/aac-ld-mps-sbr-pcm-{source,generation,tests}-2026-10-31.json`.
+
+## Explicit short-core PCM ingress for LD-MPS,2026-10-31
+
+Native AAC-LD/ELD without SBR can now hand short core PCM to ordinary LD-MPS
+when the SSC explicitly describes that adapted clock. The owner validates integral
+sample-rate/frame reductions, retains nominal core prediction/entropy geometry,
+and uses adapted sample counts for spatial frame grouping and input admission.
+Nominal-rate SSC remapping and downscaled coupled LD-SBR remain unsupported.
+This is an input-interface integration slice,not completion of LD-SBR or codec
+profile conformance.
+
+112 own MP4/MKV pairs cover both cores,480/512 nominal lengths,all8 trees and
+factors2/3/4/8 where integral.42 bare controls independently reconstruct short
+core PCM.3,421,184 compositional spatial PCM values match exactly. The old runtime
+passes all bare controls but rejects the two spatial acceptance tests specifically
+at downscaled-bank admission. Current tests additionally check packet/source
+edges,seek,rewind,EOF,checkpoint replay and suffix-error retry. Root AudioWorker
+qualification is recorded separately with the final gates.
+
+Frozen generation is isolated from tests and reproducible under network/process
+denial. It uses own analytical short core PCM and previously qualified spatial
+stages,not an independent whole-codec oracle. Source audit also records why
+arbitrary-downmix gain integration needs further all-tree normative verification;
+no speculative change to that mode was made.
+
+Fresh offline gates:1718 passed,0 failed,27 pre-existing ignored. Media:587/0/1;
+player:1070/0/26;11 targeted AAC integrations:61/0/0. The new worker test passed
+all224 transport programmes with live-history navigation.
+
+Evidence: `docs/validation/aac-ld-mps-downscaled-{source,generation,tests}-2026-10-31.json`.
+
+## LD-MPS profile correction — residual coding boundary,2026-10-31
+
+Earlier residual64 "native qualification" was a classification error. The
+LD-MPS authors exclude residual coding;see `docs/LD_MPS_PROFILE.md` and the
+pinned primary source audit. Those synthetic LD-filter/residual combinations
+are now negative codec-profile cases. Their separately checked numerical
+components remain useful,but do not establish LD-MPS or ordinary MPS conformance.
+
+Native AAC validates initial spatial configuration and replacement headers
+before admitting residual extension types 0/1, including absent/zero bands. Invalid initial profiles publish no PCM;
+late invalid replacement retains native spatial history and permits a valid retry.
+An own ordinary/initial/late-header video family reproduces the missing validation,
+including empty-band and downmix-residual cases and a reserved-type skip control.
+ISO/IEC 14496-26:2010/Amd.3:2014 independently confirms the extension-type boundary.
+The formerly ignored residual32/128 LD acceptance is replaced with an executable
+profile-refusal test;this is not implementation of ordinary MPEG Surround/HQ.
+
+The no-gap objective remains open:ordinary MPEG Surround/HQ residual integration
+and other codec/profile gaps are not completed by rejecting invalid LD profiles.
+Earlier sections below retain their historical revisions/counts,subject to this
+correction. Numerical fixtures are labelled nonconforming and native positive
+expectations were replaced,rather than being counted as codec acceptance.
+
+Evidence: `docs/validation/ld-mps-profile-source-2026-10-31.json` and
+`docs/validation/ld-mps-profile-tests-2026-10-31.json`.
+
+The broader AAC gate also exposed a stale ER AAC-LC/epConfig1 refusal test.
+Two existing own videos now have positive independent-PCM and typed player
+rewind/seek expectations. The byte-only decoder still correctly requires ESC
+association; playback tests use AudioStream::decode_source_packet. No ER-LC
+production runtime changed. Invalid extensionFlag3 and truncated epConfig2/3
+refusals remain. See the separate ER-LC reclassification generation audit.
+
+Final offline qualification: 2445 passed, 0 failed, 27 pre-existing ignored.
+Media library: 587/0/1; player library: 1069/0/26; 178 AAC/container integration
+targets: 789/0/0. Nested cold-stack child harness results are not counted twice.
+The earlier ER-LC failure and successful continuation are retained in the report.
+These counts distinguish negative native-profile tests from numerical/ordinary
+positive tests; they do not establish whole-codec conformance.
+
+## Historical nonconforming LD/residual numerical experiments,2026-10-31
+
+At9415fba54d the runtime accepted these nonconforming numerical combinations.
+That result was incorrectly described as codec-profile qualification. Current
+native decoding rejects them;the numerical component results below are historical. The root change adds a test-only AudioWorker entrypoint;
+fixture helpers add optional24-frame/temporal-control generation while preserving
+their original defaults.
+
+132 own programmes cover48kHz,480/512 ELD cores,two source packets per15/16-slot
+spatial frame,all8 trees,both TTT variants and23 parameter bands. Plain,repeated
+headers,delayed bursts,fragmentation,STP and GES are exercised. Residual MP4/MKV
+pairs provide264 nonconforming numerical movies;132 paired ordinary MP4 controls and6 bare
+24-frame scalar-core controls are separate.
+
+Complete residual output matches10,570,752 compositional-oracle samples within
+2.669e-11. Minimum isolated signal effects are8.217e-6 for residual spectra and
+2.534e-6 for ICC correction. The oracle uses analytical ELD core,separate
+residual parsing/qualified MDCT-QMF state and explicitly pre-corrected matrix
+syntax. STP/GES temporal controls are independently encoded. This is not an
+independent full-decoder or normative-profile conformance oracle.
+
+Both owned/frontend container exports,AudioStream playback,forward/backward/
+middle/EOF seek,rewind and repeated ranges compare exact PCM. AudioWorker
+capture checks264 programmes and16 live-history seeks each,including both sides
+of three source boundaries,with exact MP4 clocks and<1ns Matroska publication
+rounding. Physical audio output and real-time performance remain unqualified.
+
+Final gate:19 passed,0 failed,1 explicitly pending residual32/128 acceptance
+across five selected integration targets and the new AudioWorker test. The
+full player/media unit suites are not presented as freshly rerun here,as no
+production source changed. The test-only worker module is cfg(test).
+
+Own generation reproduces411 files under process/network denial and preserves
+706 ordinary128-band and115 residual32/128 reproduction files byte-for-byte.
+Tests use frozen files,without FFmpeg,network or C reference compilation.
+Additional core grouping/rates,other parameter grids,protected spatial AAC,
+residual32/128,LFE residual and time alignment remain unqualified here.
+Evidence: `docs/validation/aac-eld-residual64-multicore-{generation,tests}-2026-10-31.json`.
+
+## Shared normalized QMF128 — corrected input admission,2026-10-31
+
+A constructor/validator mismatch rejected valid128-band input:the constructor
+selected128-band banks,but decode_qmf still validated rows as64. Its band
+selection now uses the same27713/55426 thresholds as construction. Existing
+32/64 selection is unchanged. This is a runtime admission fix,not residual32/128
+or coupled LD-SBR128 qualification.
+
+66 own short AAC-ELD/MPS videos cover all8 trees,both TTT variants,
+64/88.2/96kHz and480/512 cores. The first movie passes native PCM decoding
+before the pre-fix shared-QMF call refuses specifically with invalid shared QMF
+frame. After the fix,2,642,688 shared-input output values match PCM-session
+analysis exactly and complete native movie PCM within1e-9.
+
+The session test checks identical full-window stamps/source spans,slot-edge
+splitting with two conserved source spans,checkpoint cloning,nonfinite bin127
+and late spatial-corruption rollback,EOF drain,reset and complete replay.
+These are direct normalized-input/session checks; no new physical-device or GUI
+seek claim is made. The independent frozen ISO128-band bank/chain oracles are
+rerun separately. Full compressed-stream comparison uses analytical core plus
+qualified owned spatial stages,not independent whole-codec conformance.
+
+Final offline gate:635 passed,0 failed,2 ignored across all media library
+units and11 selected AAC/MPS integration targets. The ignored cases are one
+existing media test and the explicitly pending residual32/128 acceptance;
+neither is counted as accepted playback. This is not a fresh full-player suite.
+
+Own generation copies only separately authored synthetic media and scalar core
+traces from the existing corpus;69 files regenerate byte-for-byte with process
+and network creation forbidden. Ordinary tests require no FFmpeg,network or
+reference C compilation. Residual32/128,unqualified coupled-SBR geometries,
+profile output adaptation and the wider no-gap objective remain open.
+Evidence: `docs/validation/aac-ld-mps-shared128-{generation,tests}-2026-10-31.json`.
+
+## Historical residual32/128 bank diagnosis — not allowed LD modes,2026-10-31
+
+The following records the earlier diagnosis at4634f23be3. Its ignored native
+acceptance expectation is now retired:these are forbidden LD combinations,not
+missing LD modes. This historical diagnosis was not a decoder fix. Production
+sources remain identical to e7daf503b9.44 own residual MP4 reproducers cover
+24kHz/32-band and96kHz/128-band output,480/512 cores,all8 trees and both TTT
+variants. Each has a paired ordinary movie;12 additional bare ELD movies match
+the scalar core oracle. All44 ordinary controls decode complete nonzero PCM,
+including four-core512-sample high-rate spatial windows.
+
+All1872 compressed residual spectral blocks parse independently. Residual movies
+refuse specifically at the full-complex64-bin native bank guard without publishing
+PCM. Two tests pass; one NEW acceptance test is explicitly ignored. Invoking
+that acceptance test directly still fails at the same specific guard (exit101).
+Passing reproduction tests are not accepted residual32/128 playback.
+
+The pinned primary residual MDCT-to-QMF code fixes projection to64 bands;
+the LD frontend branch does not supply a complete residual32/128 oracle.
+External twiddle support does not independently establish default phases for
+these banks. Normative bank/phase/scaling mapping and independent signal evidence
+remain required before changing runtime admission. No guessed crop,zero-pad or
+PCM substitute has been admitted. Full Annex B was not obtained in this audit.
+
+Own fixture generation reproduced115 files byte-for-byte under process/network
+denial. Ordinary tests use frozen data and require no FFmpeg,network or C compiler.
+The source audit records primary archive/member hashes and the precise pending
+acceptance failure. No claim of closed residual/profile or whole-codec gaps.
+Evidence: `docs/validation/aac-ld-mps-residual-bank-repro-2026-10-31.json`.
+
+##128-band LD-MPS GES — guided envelope shaping,2026-10-31
+
+The owned GES constructor now accepts128 bands. Existing full-complex envelope
+analysis,channel mapping,wet/dry energy ratio and gain limiting match frozen
+unmodified ISO GES outputs,including upper-only signals in bins64..127.
+The runtime change admits geometry; it does not replace the shaping formula.
+
+396 own programmes in MP4 and Matroska (792 acceptance movies) cover
+64/88.2/96kHz,480/512 core geometry,all8 trees,both TTT variants,parameter grids,
+repeat/delayed/fragmented transport and in-band GES -> ordinary -> GES switches.
+18 bare controls and36 late-corruption refusals are separate from acceptance;
+reshape runs exceeding4/15 slots reach their specific parser error and preserve
+state for retries.66 paired ordinary movies prove active GES changes PCM.
+The initial pre-fix movie refused specifically with invalid GES geometry.
+
+48 independent component sequences cover1,837,056 scalar outputs,including
+silence,cancellation,low/high/upper-only signals,disabled history,chunking,
+checkpoints,reset and atomic rejection. The complete compressed-stream PCM
+comparison covers15,856,128 samples using analytical core plus qualified
+spatial session. This is not independent whole-codec conformance. The C oracle
+uses the original GES algorithm and mapper with a fully initialized23-band
+envelope workspace; reference compilation is an optional separate research step.
+Own generators and ordinary tests require no FFmpeg,network or external process.
+
+Final offline checks:626 passed,0 failed,1 pre-existing ignored across all
+media library units,the new AudioWorker case and9 integration targets. This
+is not a freshly rerun entire player library suite. Own generation reproduced
+854 new,706 retained ordinary and841 retained STP fixture files byte-for-byte
+under process/network denial; retained bytes match their committed reports.
+
+This supersedes earlier GES128 refusals only for the listed raw native-rate
+full-complex domain. Residual32/128,update8,LFE/time alignment,HRTF/arbitrary
+downmix,profile-specific output adaptation and whole-codec conformance remain
+open. Physical audio-device output and real-time throughput remain unqualified.
+Evidence: `docs/validation/aac-eld-mps128-ges-{reference,generation,tests}-2026-10-31.json`.
+
+##128-band LD-MPS STP — active temporal shaping,2026-10-31
+
+The owned STP constructor now accepts128 bands. The existing full-complex
+frequency weights,energy refresh,limiting/smoothing and complete-bank mixing
+match the independently frozen audited ISO STP extraction. The runtime change
+is geometry admission; this is not a replacement shaping formula.
+
+396 own programmes in both MP4 and Matroska (792 acceptance videos) cover
+64/88.2/96kHz,480/512 core geometry,all8 trees,both TTT variants,parameter-grid
+changes,repeat/delayed/fragmented transport and in-band STP -> ordinary -> STP
+switches.18 bare controls and24 precise corruption refusals remain distinct.
+The first pre-fix movie refused specifically with invalid STP geometry.
+Acceptance requires PCM/layout/count,owned/frontend exports,playback,seek,
+rewind,repeated ranges and source-window rollback.66 paired ordinary movies
+separately prove active STP has an actual signal effect.
+
+The component oracle covers1,384,448 scalars including upper-bank output and
+history refresh boundaries; the full PCM composition covers15,856,128 samples.
+The former is an adapted ISO component reference with the explicitly retained
+reference-only UB removals; the latter is analytical core plus qualified spatial
+session,not independent whole-codec PCM conformance. Frozen ordinary tests use
+no FFmpeg,network or C compilation. Optional research regeneration is separate.
+
+Final offline checks:614 passed,0 failed,1 pre-existing ignored across all
+media library units,the new AudioWorker case and7 integration targets. This
+is not a freshly rerun entire player library suite. Own generation reproduced
+841 new and706 retained ordinary fixture files byte-for-byte under process/
+network denial; retained bytes also match the previous committed report.
+
+This supersedes older STP128 refusals only in the listed full-complex native-rate
+domain. GES128,residual128,profile output-rate adaptation and the other codec
+limitations remain open; physical output and real-time performance are unqualified.
+Evidence: `docs/validation/aac-eld-mps128-stp-{reference,generation,tests}-2026-10-31.json`.
+
+## Ordinary128-band AAC-ELD / LD-MPS — native-rate reconstruction,2026-10-31
+
+The owned decoder now accepts ordinary no-SBR128-band LD-MPS on AAC-ELD
+at64/88.2/96kHz. Analysis/synthesis use the reference non64 coefficient rule;
+ordinary decorrelator rows71..127 retain their one-slot delay and bypass
+all-pass/duck gain while remaining in energy estimation.512-sample core frames
+and integral four-core480-sample windows are supported. Coupled-SBR and
+unqualified downscale geometries retain their explicit refusals.
+
+330 own programmes in both MP4 and Matroska (660 acceptance movies) exercise
+all8 trees,TTT variants,parameter-grid changes,repeat/delayed/fragmented
+transport.18 independent bare-core controls and24 precise late-corruption
+refusals remain separate from playback acceptance. AudioStream and AudioWorker
+checks cover playback,forward/backward/EOF seek,rewind,repeated ranges and
+live-history source windows. These are captured PCM/timestamp tests,not physical
+audio-device or real-time throughput qualification.
+
+Independent frozen ISO C outputs qualify the128-band bank and112 controlled
+QMF-chain sequences. The complete compressed-stream PCM oracle composes the
+analytical core with the separately qualified spatial session; it is not an
+independent full-decoder conformance oracle. Ordinary tests run offline without
+FFmpeg,network access or a C compiler; optional reference regeneration is separate.
+
+This supersedes older blanket128-bin refusals only for this ordinary domain.
+Residual128,STP/GES128,update8,LFE/time alignment,HRTF/arbitrary-downmix and
+profile-specific output-rate adaptation remain open. Raw native-rate output
+above48kHz is not full Low Delay AAC v2 profile conformance; the audited profile
+requires output adaptation to at most48kHz. Full Annex B/conformance remains
+unqualified.
+
+Final offline gate:1810 passed,0 failed,27 pre-existing ignored across all
+media/player library tests and39 AAC/Matroska integration targets. Native
+fixture regeneration reproduced706 files byte-for-byte under process/network
+denial; the scalar bank generator reproduced35 files under the same restriction.
+
+Evidence: `docs/validation/aac-eld-mps128-{source,generation,tests}-2026-10-31.json`,
+`docs/validation/aac-ld-{qmf128,mps-qmf128}-reference-2026-10-31.json`.
+
+## Multi-core AAC-LD / LD-MPS — extended acceptance,2026-10-31
+
+The previously unqualified multi-core geometries already work in the owned
+runtime. The suspected Matroska timestamp refusal was not reproduced; this
+milestone changes tests/fixtures and adds a test-only worker entrypoint,without
+changing production behavior. It must not be reported as a decoder bug fix.
+
+All six additional integral2/3/4-core spatial geometries within32 slots at
+24/48kHz are now exercised:480/24kHz/group2,480/48kHz/group4,
+512/24kHz/group2,and512/48kHz/groups2/3/4.462 MP4 and606 MKV acceptance movies
+cover all8 trees,TTT variants,STP/GES,parameter grids,repeat/burst/fragmented
+transport,1ns/1us/1ms clocks and floor/ceil/absent DefaultDuration.
+
+Extended raw AAC-LD history matches306,432 scalar-oracle samples within
+4.548e-13. Complete spatial output matches17,636,864 compositional-oracle
+samples within7.258e-12. This remains analytical core plus separately qualified
+spatial session,not independent complete-decoder conformance.
+Both Matroska export APIs,AudioStream playback,forward/backward/EOF seeks,
+rewind and repeat ranges match paired MP4 PCM byte-for-byte.24 corrupt movies
+are distinct refusal/rollback cases. Complete controlled prefixes drain;
+incomplete spatial windows refuse without publishing PCM.
+
+Nine selected Rust tests passed with0 failures,including three AudioWorker
+source-window tests exercising1238 programmes (606 new plus632 retained
+controls),live-history navigation/checkpoints and<1ns published timestamp
+rounding. Production sources remain identical to9da0339bf1,whose previous
+full runtime gate was1694 passed/0 failed/27 ignored; that old count is not
+presented as a freshly rerun full suite.
+
+Other rates,128-bin/residual/profile domains,protected AAC+MPS,
+CodecDelay/DiscardPadding combinations,independent full conformance,
+physical output and real-time throughput remain unqualified here.
+Evidence: `docs/validation/aac-ld-mps-multicore-{generation,tests}-2026-10-31.json`.
+
+## Matroska AAC-LD / LD-MPS — delayed source windows,2026-10-31
+
+The AAC-LD spatial path now keeps Matroska packet association in both owned and
+frontend export. The sample-only decoder adapter no longer invents overlapping
+positive-duration windows at PTS0. Spatial delay remains a stream capability;
+the timeline queues original packet metadata until its PCM arrives,including
+bursts spanning more than three source windows. Other codecs retain their
+existing delay bounds. Source-window allocation is fallible and existing
+caller controls/cancellation remain in force.
+
+314 own MKV acceptance movies pair the previous AAC-LD/MPS packets with the
+same MP4 controls and an own AVC video track. PCM matches byte-for-byte through
+both exports,AudioStream playback,rewind,forward/backward/EOF seek and repeated
+ranges. The actual AudioWorker capture checks PCM and integer-nanosecond PTS:
+rounding is downward by less than1ns,without cumulative sample-clock drift.
+Two flag-off controls and six precise corruption rejections are separate from
+acceptance. Complete controlled prefixes drain; incomplete spatial windows
+refuse publication of unfinished PCM.
+
+This qualifies the listed EP0,no-SBR,24/48kHz,480/512 geometries in Matroska.
+The paired MP4 reference is a previously qualified compositional chain,not an
+independent full LD-MPS decoder. CodecDelay/DiscardPadding combinations,
+arbitrary container clocks,protected AAC+MPS and device output remain outside
+this new corpus. Other LD-MPS residual/profile gaps listed below remain open.
+
+Evidence: `docs/validation/aac-ld-mps-matroska-{generation,tests}-2026-10-31.json`.
+Relevant gates:1694 passed,0 failed,27 pre-existing ignored,including all
+media/root units and12 AAC/Matroska integration targets. All run offline.
+The then-open multi-core geometries are qualified in the newer section above;
+this older gate retains its original revision and scope.
+
+## AAC-LD with attached LD-MPS — source-window playback,2026-10-31
+
+AOT23 now reads the normative ASC sync extension0x7cc and dispatches its ER
+spatial payload through the owned LD-MPS session. AOT44 remains a separate
+spatial-only object. Core LD overlap/LTP/noise and spatial history commit as one
+packet transaction; late suffix errors leave both unchanged.
+
+Spatial PCM retains its original source spans. At480 samples/48kHz one spatial
+frame covers two core packets, which must remain separate for container padding
+and packet association. The reader explicitly identifies opaque packet IDs;
+ordinary timestamp mode still rejects discontinuous or cross-clock spans.
+MP4 export holds delayed spatial windows until their matching PCM is available.
+
+318 own acceptance movies cover480/512,24/48kHz,all8 trees,TTT variants,
+STP/GES,grid changes,delayed/burst/fragmented transport,escaped SSC,interior
+padding and a3kHz container clock. Tests exercise the AudioWorker reader protocol,
+rewind/reset,forward/backward/EOF seek,repeated ranges and transactional retry.
+PCM comparison uses the frozen analytical LD core plus the separately qualified
+spatial session:8,300,064 samples,max difference7.258e-12,tolerance1e-9.
+This is compositional qualification,not independent complete LD-MPS conformance.
+EP0 without SBR at the listed geometries is covered; broader protection modes,
+residual domains,device output and real-time throughput are not newly qualified.
+
+Primary-source baseline: `docs/validation/aac-ld-mps-aac-ld-source-2026-10-31.json`.
+Corpus and gate evidence: `docs/validation/aac-ld-mps-ld-core-{generation,tests}-2026-10-31.json`.
+Final gates:1779 passed,0 failed,27 pre-existing ignored tests across media/root
+units and31 AAC/LD-MPS integration targets. Tests run offline without FFmpeg.
+
+## MPEG-2 residual syntax boundary — corrected diagnostic,2026-10-31
+
+ISO/IEC23003-1 §4.3.1.2 specifies MPEG-2 AAC LC syntax for residual signals.
+MPEG-4 AAC adds PNS; book13 is reserved in the implemented MPEG-2 residual path.
+Residual parsing now reports that invalid codebook explicitly, instead of
+claiming noise reconstruction is missing. Ordinary MPEG-4 AAC PNS is unchanged.
+This is a syntax-boundary correction, not a newly supported codec/profile.
+
+One own twelve-frame movie introduces book13 in residual frame3. A direct test
+proves the same ICS parses and reconstructs PNS through the existing MPEG-4
+channel tool, but the residual reader rejects it and preserves its cursor.
+The native corruption/retry test also checks unchanged core/SBR/residual/source
+history, checkpoint restore and subsequent PCM. The corpus now has397 acceptance
+movies,5 corrupt movies and2 explicit unqualified-domain refusals. Invalid-book
+rejection is not counted as playback acceptance.
+
+Sources and gate evidence:
+`docs/validation/aac-ld-mps-residual-mpeg2-{generation,tests}-2026-10-31.json`.
+Full gates: 1770 passed,0 failed,27 pre-existing ignored tests
+across media/root units and29 AAC/LD-MPS integration targets.
+Earlier sections retain evidence for their original committed corpus revisions.
+
+## Historical residual64 composition — not LD profile qualification,2026-10-31
+
+Compressed residual AAC is now wired into the native source-window session.
+Each active OTT/TTT box owns its MDCT-to-QMF overlap. Residual ICC corrections
+are applied before M1/M2 assembly; residual QMF then enters the existing router,
+STP/GES and LD synthesis without a PCM roundtrip. All histories and source queues
+commit atomically, including errors after multiple delayed frames were prepared.
+Repeated identical headers retain overlap, cutoff-only changes retain compatible
+banks, and disabled/re-enabled residual boxes start fresh.
+
+The64-bin phase is selected from the pinned ISO default full-complex LD bank:
+analysis/synthesis formulas and gains match the owned LD bank, and the converter
+uses the same default post-rotation. This is compositional phase qualification,
+not a new independent complete-decoder oracle. The cached ISO LD_MPS hybrid
+analysis branch omits residual preparation, so it cannot validate complete LD
+residual routing; independent whole-decoder conformance remains open.
+32/128-bin residual domains,
+update8, residual LFE routing and nonzero sacTimeAlign remain unqualified/refused;
+this milestone does not claim complete LD-SBR/LD-MPS or AAC profile coverage.
+
+397 own synthetic movies cover all8 trees,480/512 cores,15/16 QMF slots,
+4/9/23 parameter grids, OTT/TTT, partial/full cutoffs, shared ICC, all4 window
+sequences and both shapes. Whole native PCM matches a separately composed chain
+with independently encoded corrected-ICC controls across31,736,832 samples;
+maximum difference2.3005817303273224e-10 at unchanged2e-7 tolerance. Residual
+signal and ICC omission controls both alter PCM (minimum maximum differences
+8.21757272645198e-6 and4.007567640810459e-6 across the23-band plain variants).
+The reference adapter correctly zero-fills unstored high QMF bands. A new
+acceptance regression verifies nonzero residual fill bits and extra fill bytes;
+the pinned ISO parser skips the complete bounded remainder without value checks.
+
+Public/owned export, live playback/drain, reset/rewind, forward/backward/EOF seek,
+repeat ranges, delayed/fragmented delivery and in-band residual-mask transitions
+have automated acceptance checks. Four distinct corrupt runs test rollback;
+two explicit domain refusals stay separate from playback acceptance. The old
+`native-residual-refusal.mp4` filename is retained with an enabled acceptance test.
+Generated files repeat byte-identically with process/network APIs denied, and
+ordinary tests require no FFmpeg/compiler/network. See
+`docs/validation/aac-ld-mps-residual-native-{phase,generation,tests}-2026-10-31.json`.
+Full gates: 1769 passed,0 failed,27 pre-existing ignored tests
+across media/root units and29 AAC/LD-MPS integration targets.
+Earlier sections below retain the evidence boundaries of their dated milestones.
+
+## Residual ICC quantization and matrix application — component qualified,2026-10-31
+
+Parameter decoding now exposes the original coarse/fine flag per output set,
+including held/default and paired sets. The legacy fine-index API retains its
+behavior. Frame syntax carries the flag into preparation. Residual ICC adds the
+difference in that original domain before coarse-to-fine conversion; raw syntax
+and entropy history stay unchanged. Out-of-grid sums are invalid rather than
+saturated. Applying the physical correction a second time is idempotent.
+
+The explicit `assemble::Decoder::decode_residual_icc` entry point applies already
+decoded residual corrections before matrix interpolation, in one transaction.
+Shared ICC materializes per non-LFE OTT box; the original shared row remains
+available to siblings without corrections. A held final physical endpoint
+inherits the corrected last encoded row. Invalid later correction data preserves
+parser/smoothing/matrix contexts and the caller cursor.
+
+12 own programmes/84 frames compare1,568 corrected integer indices against
+unmodified ISO ecDataDec/mapIndexData.192 external-residual matrix controls cover
+all8 trees,4/9/23 parameter bands,32/64 QMF domains, shared/per-box ICC,
+coarse/fine and held/final endpoints.384 assembled frames match separately
+encoded ordinary fine controls, and all384 change relative to the uncorrected
+matrices.168 frames exercise shared ICC and552 OTT endpoints exercise held-row
+propagation. These matrix controls use owned assembly stages rather than an
+independent full decoder. The compressed native candidate's actual residual ICC
+prefix is also read separately and mapped to the expected physical table entries.
+
+Full gates: 1762 passed,0 failed,27 pre-existing ignored tests across
+media/root units and28 AAC/LD-MPS integration targets.
+
+This does not enable native residual playback. Source-window association,
+LD phase/bank qualification and native residual QMF dispatch/PCM/navigation
+acceptance remain open. Own fixture generation denies network/process APIs;
+ordinary tests use saved bytes only. See
+`docs/validation/aac-mps-residual-icc-tests-2026-10-31.json`.
+
+## Residual MDCT-to-QMF and overlap — component qualified,2026-10-30
+
+Added owned full-complex64-bin MDCT-to-QMF projection for updates15/16/18/24/30/32.
+It implements frequency/time windows, safe spectral folding, complex transform
+and post-rotation, short-block schedules (including update15 interleaving and
+extra18/24/30 spectra), normalized output and per-instance overlap carry.
+Malformed late blocks leave all overlap unchanged; checkpoints/reset replay
+exactly. Window coefficients are factual f32 realizations from the pinned ISO
+insert; no external implementation is linked into FVid.
+
+The unchanged ISO conversion routines and original numeric tables supply an
+independent default-phase oracle.24 own programmes cover dense/silent/edge
+impulses and long/start/short/stop transitions, including zero-input frames that
+must retain overlap.907,776 scalars have maximum difference3.080261185596511e-7
+at tolerance5e-7; the f32 reference and f64 owned arithmetic differ. A zero-output
+negative control differs by0.04170691967010498;16 non-silent programmes carry
+history into their zero-input frame.587 media unit tests and4 integration tests
+passed, with one pre-existing media test ignored. Facts, stimuli and reference
+outputs regenerate byte-identically. Ordinary tests require no FFmpeg/compiler
+or network.
+
+This is component qualification, not native residual playback acceptance. The
+oracle uses `twiddleExtern=NULL`; native LD phase/bank selection, ICC correction
+application, source-window integration and PCM/navigation tests remain open.
+Update8 is explicitly unqualified: its reference constant exists but its frequency
+window is absent. The own native residual candidate now uses the matched512-core
+double-rate LD-SBR16-slot/64-bin path, with independently valid frame grammar;
+the current native residual refusal stays enabled. See
+`docs/validation/aac-mps-mdct-qmf-tests-2026-10-30.json`.
+
+## Residual AAC extension syntax and MDCT spectra — partial,2026-10-30
+
+The owned `aac_ld_mps_residual` stage parses bounded kind0 residual payloads:
+OTT ICC differences per parameter set, one-to-four AAC-LC individual-channel
+streams per active residual box, TTT without an ICC prefix, and extra short ICS
+for18/24/30-slot update schedules. It restores1024 spectral coefficients per
+ICS through existing owned inverse quantization and TNS. It starts at
+global_gain without element IDs/tags and preserves the outer reader on any
+failure. It does not enable native residual playback or perform MDCT-to-QMF.
+
+The capped unary ICC reader is checked for all256 leading bytes at every bit
+offset and every truncated prefix, including the eighth-bit consumption at7.
+416 own analytical payloads cover eight trees,13 rates,four window sequences,
+both shapes and every residual-frame count.2,349,056 coefficients match exact
+analytical values;54 extra short spectra and84 active TTT cases are exercised.
+Truncation/retry and a specific extra-window mismatch preserve the reader.
+The spectral corpus uses ordinary codebook1; this is not all-tool residual AAC
+or independent full-decoder conformance.587 media unit tests and3 integration
+tests passed; one pre-existing media test remains ignored.
+
+A new twelve-frame own video contains nonzero residual AAC. Its ASC, all spatial
+frames and residual payloads parse separately, while the native player still
+returns the specific residual-reconstruction refusal. This is deliberately a
+refusal/reproduction regression, not PCM playback acceptance. Remaining work:
+Native use of the MDCT-to-QMF overlap stage, ICC correction application, per-source residual
+association, and native PCM/navigation acceptance. Explicit generation is byte
+identical with network and child-process APIs denied; ordinary tests need no
+FFmpeg, compiler or network. See
+`docs/validation/aac-ld-mps-residual-syntax-2026-10-30.json`.
+
+## Native LD-MPS STP playback, 2026-10-30
+
+STP now runs in the owned full-complex QMF chain before PCM synthesis. Low wet bins0..11
+merge into dry before energy analysis; the defined ISO LD active-bin formula
+weights bins12..15 with BP[bin-7] and higher bins with the smoothed gain. The
+native output-row map and dry grouping cover all eight trees at32/64 bins.
+Disabled frame flags still advance energy/gain history. Reset, checkpoints,
+retained-memory accounting and same-domain grid changes include STP state;
+leaving temporal mode1 removes it and re-entering starts fresh.
+
+400 own twelve-frame MP4 movies cover plain ELD and coupled LD-SBR,480/512 core
+frames,23/9/4 parameter grids, warm-disabled and alternating flags, and40 SSC
+transition controls. ASC explicitly signals STP and ordinary first headers agree
+with it. Transition controls remain owned-API/robustness tests rather than strict
+baseline transport-conformance evidence. The previously failing acceptance movie
+reached the specific active-STP PCM refusal; that refusal is removed and its old
+test now expects PCM while retaining invalid-input rollback coverage.
+
+All400 movies pass native/owned PCM comparison, live playback, rewind/reset,
+forward/backward/EOF seeks and repeated ranges. Two own malformed movies fail on
+late trailing bytes and preserve core/SBR/STP/source history across retry and
+checkpoint restore. A separate qualified-stage assembly compares21,765,120 PCM
+samples; maximum difference is1.4551897610081549e-11. It is not an independent
+full-decoder oracle.
+
+A frozen adapted ISO component oracle covers16 programmes, all8 trees,32/64
+bins and104 slots each (including refresh boundaries33/65/97). Across1,038,336
+scalars the maximum difference is5.874768574387623e-9 at tolerance2e-7;
+85,436 real components differ from identity by more than1e-8. Disabled output
+and low-bin sums are exact; block splitting and checkpoint replay are exact.
+Malformed/nonfinite input and late bin0 overflow preserve all caller buffers and
+histories. Independent scalar-prefix and closed-form energy tests remain.
+
+The reference adaptations are explicit: final mixing skips the already-zero wet
+interval0..11, absent tree7 C/LFE indices initialize to-1, and tree5/6 process only
+the two populated dry-energy groups. The valid active-bin formula is unchanged.
+This is adapted-reference equivalence, not a claim that the original ISO C has
+no undefined behavior or that unavailable normative Annex B was independently
+checked. Frozen fixtures run without FFmpeg, a compiler or network access;
+reference compilation is an explicit separate generation step.
+
+Full gates: 1753 passed,0 failed,27 pre-existing ignored tests across
+media/root units and25 AAC/LD-MPS integration targets.
+
+See `docs/validation/aac-ld-mps-stp-reference-2026-10-30.json` and
+`docs/validation/aac-ld-mps-stp-tests-2026-10-30.json`. Other unqualified codec
+profiles/tools, nonzero time alignment and remaining broader codec gaps stay
+open; this closes the qualified native STP playback path only.
+
+## Native LD-MPS guided envelope shaping (GES), 2026-10-30
+
+GES now runs in the FVid-owned QMF chain after M2 and before synthesis. It
+tracks normalized downmix and dry+wet broadband energy, derives the signalled
+envelope target, accounts for the wet/dry energy ratio and limits dry gain to
+[0.25,4]. Bins 0..5 and wet rows retain their data. State advances when frame
+signalling disables shaping, and is preserved across same-domain parameter-grid
+changes. Changing SSC from GES to disabled removes the context; enabling GES
+again starts fresh. Checkpoints, reset and retained-memory inspection include
+all owned envelope histories. Prepared metadata retains the signalled envelopes;
+the QMF dry output already includes GES processing. The newer STP milestone
+above replaces its earlier PCM refusal.
+
+400 own twelve-frame movies cover all eight trees, plain 48-kHz ELD and coupled
+LD-SBR with 480/512-sample 24-kHz cores and 32/64-bin output. Matrix resolutions
+23, 9 and 4 exercise active, warm-disabled and alternating masks. Forty additional
+transition controls within that count disable and restore GES through in-band
+SSC. The common corpus explicitly signals GES in ASC and repeats an identical
+first header. Configuration-change controls exercise owned-stream robustness,
+without claiming strict baseline MPEG-4 transport conformance. Every movie
+checks owned/public PCM, AudioStream playback, live rewind/reset, forward/backward
+and EOF seek, and repeated ranges across active/disabled boundaries. Four saved
+error movies reach a specific reshape-run overflow or a trailing-byte error
+after DSP processing; valid retry and checkpoint restore preserve core, SBR,
+spatial/GES and source history.
+
+The independent component reference executes the unmodified ISO GES routine and
+unmodified channel mapper, with source energy domains preserved in separate
+translation units. On 1,148,160 scalar values, maximum difference is
+1.047865317432839e-8. Low bins and disabled blocks retain exact bits; splitting
+blocks and checkpoint replay retain exact Rust state and output. An identity
+negative control differs by 0.06299999915063381, with 132,384 changed reference
+scalars and both gain clamps exercised. A separately assembled qualified chain
+checks 21,765,120 native PCM samples, with maximum difference
+1.4551891321708949e-11; it is not an independent full-decoder oracle. Ordinary
+tests read saved fixtures without a compiler, external decoder, network or FFmpeg.
+Explicit fixture regeneration denies process/network APIs and is byte identical.
+
+Nonzero time alignment remains open. New primary-source research establishes a
+magnitude restriction but does not establish sign encoding, direction and PCM/QMF
+association well enough to implement it safely. Its results are saved separately;
+no guessed shift has been introduced. STP, residual AAC, other bank geometries,
+spatial downscale and the other remaining codec tools still require work.
+Validation: media: 582 passed, 1 existing ignored; root: 1061 passed, 26 existing ignored; integration: 100 passed, 0 existing ignored.
+See docs/validation/aac-ld-mps-ges-*-2026-10-30.json and
+docs/validation/aac-ld-mps-time-alignment-research-2026-10-30.json.
+
+## Native LD-MPS resolution changes with indexed matrix history, 2026-10-30
+
+Same-format in-band SSCs may now change the coded parameter resolution between
+4, 5, 7, 9, 12, 15 and 23 bands. Ordinary M1/M2 history occupies the fixed 23-band
+workspace. Processing updates only active rows; rows temporarily outside the
+current resolution survive. Changing resolution selects a new active prefix,
+without frequency averaging, clearing history or resizing away dormant rows.
+Reset clears the whole workspace, and checkpoints include dormant rows.
+This supersedes the grid-refusal limitation in the earlier in-band entry below.
+
+560 saved own movies cover all 42 ordered resolution changes and returns for
+all eight plain 48-kHz trees, plus seven cyclic resolution changes/returns for each
+of 32 coupled LD-SBR base configurations (all eight trees, 480/512-sample 24-kHz cores,
+single 24-kHz/32-bin and double 48-kHz/64-bin output). Immediate, delayed and
+fragmented messages associate the appropriate grid with its source frame.
+Every movie checks public/owned PCM, AudioStream playback, live rewind/reset,
+forward/backward/EOF seek and repeated ranges crossing header boundaries.
+
+An independent explicit reference step freezes raw ISO matrix coefficients for
+all 56 tree/resolution combinations. Ordinary tests read those bytes and assemble
+the temporal/QMF/synthesis chain separately; no external decoder, compiler,
+process, network or FFmpeg runs in tests. On 6,604,416 native PCM samples, maximum
+absolute difference is 5.55645391351646e-11. The comparison does not claim full
+live foreign-decoder reconfiguration conformance. A separate Fraction oracle
+covers 196 transition sequences and 66,150 exact scalar endpoints, first-slot
+interpolation, checkpoint replay and late-error rollback. A resize-with-zero-fill
+negative control detects loss of dormant rows; retained-memory inspection counts
+the complete workspace even while only four bands are active.
+
+The parent Session implementation specifically refuses a valid new changing-grid
+movie. Its old negative fixture only changed SSC while leaving mismatched frame
+syntax: that fixture remains a malformed-payload control with a specific frame
+parser error, rather than becoming a false acceptance. Fresh correct header/frame
+pairs provide the new acceptance coverage. Fixture regeneration is byte identical
+with network/process APIs denied after the reference extraction step.
+
+Nonzero time alignment, output-format changes, residual AAC and the other open
+spatial tools/bank geometries/downscale remain separate requirements.
+Validation: media: 581 passed, 1 existing ignored; root: 1061 passed, 26 existing ignored; integration: 95 passed, 0 existing ignored.
+See docs/validation/aac-ld-mps-grid-*-2026-10-30.json.
+
+## Native in-band LD-MPS configuration and selective state continuity, 2026-10-30
+
+HeaderAndFrame messages now carry a byte-bounded spatial configuration into
+the source-frame FIFO. The prefix reads the alignment flag, 7-bit byte count,
+16-bit extension for count127, the declared SSC and optional 16-bit alignment.
+Following spatial-frame bytes remain bounded separately. Flagged zero alignment
+is accepted; nonzero alignment stays an explicit unsupported timing feature.
+Output-rate/tree/frame-geometry changes require stream reconfiguration, and
+parameter-grid changes still require qualified matrix-history remapping.
+
+Identical SSCs preserve every history. A changed SSC reinitializes parameter
+contexts while preserving same-grid M1/M2 interpolation. A fixed downmix-gain
+change clears synthesis but preserves analysis and unchanged decorrelators;
+a decorrelator-design change clears its own state. Reset/rewind restores the
+ASC configuration, not whichever header happened to arrive last. Parsed queued
+configurations and spare FIFO capacity participate in retained-memory accounting.
+
+280 saved own movies cover 40 base configurations: all eight plain 48-kHz trees plus
+all eight coupled LD-SBR trees at 24-kHz core, 480/512 samples, single 24-kHz/32-bin and
+double 48-kHz/64-bin output. Cases cover identical/repeated SSCs, extended lengths
+with bounded unknown extensions, flagged zero alignment, gain change/restore,
+three-frame delayed delivery and fragmented headers. All play through both
+native frontends, rewind/reset a used decoder, seek forward/backward/to EOF and
+repeat ranges. Eighteen negative controls distinguish malformed syntax from
+explicit unsupported timing/format/grid changes and retry without state loss.
+
+A separately assembled analysis/QMF/synthesis reference keeps the qualified
+QMF chain continuous and applies the selective synthesis reset explicitly;
+coupled input uses the saved independent LD-QMF/scalar-SBR oracle. Maximum
+native/reference PCM difference is 1.4551482360649487e-11. A deliberately wrong
+all-state reset differs by 2.9669260094689076e-4, proving that continuity matters.
+This is a state-transition oracle built from qualified components, not a foreign
+full-decoder conformance claim. Private unit checks also inspect which bank and
+decorrelator states survive or clear. Offline fixture regeneration denies
+process/network APIs and is byte identical. The saved parent-session reproduction
+fails specifically at its blanket in-band-configuration refusal.
+Validation: media: 580 passed, 1 existing ignored; root: 1061 passed, 26 existing ignored; integration: 91 passed, 0 existing ignored.
+See docs/validation/aac-ld-mps-inband-*-2026-10-30.json.
+
+## Native coupled AAC-ELD LD-SBR/LD-MPS, 2026-10-30
+
+Native AAC now passes normalized LD-SBR subbands directly into LD-MPS.
+The spatial path uses LD-QMF analysis and one final spatial synthesis;
+it does not synthesize CLDFB PCM and analyse it again. Ordinary LD-SBR
+retains its separate CLDFB path. Both domains share HF generation and gain,
+noise, harmonic and inverse-filter processing, with explicit domain guards.
+
+152 saved own synthetic movies cover all eight spatial trees, 480/512-sample
+24-kHz cores, 15/16 slots, single-rate 32-bin and double-rate 64-bin output.
+Controls include CRC, mono/stereo/coupled stereo, LFE, header changes,
+transients, inverse filtering, smoothing, harmonics and nonzero bands above32.
+Four malformed movies reach the specific CRC/truncation failure.
+The independent absolute-time convolution and scalar SBR oracle checks
+5,428,224 QMF scalars; maximum difference is 3.651050815844936e-17.
+A wrong CLDFB analysis negative control differs by 0.01993681909956761.
+The QMF golden then feeds the previously qualified spatial consumer and
+compares full native PCM; this is not an independent full-decoder oracle.
+
+Each valid movie checks owned/frontend PCM equality, AudioStream playback,
+rewind, reset of an already-used decoder, forward/backward seek including EOF,
+and repeated ranges. Split QMF chunks conserve fractional source-clock
+endpoints. Parameters delayed across three source frames drain with identical
+PCM and timestamps. Malformed input leaves histories and queued chunks unchanged;
+whole-native CRC/truncation recovery and checkpoint replay match continuous PCM.
+Offline fixture regeneration denies network/process APIs and is byte identical.
+
+This gate does not establish every LD-SBR/LD-MPS combination: other bank
+geometries, spatial output downscale and remaining unsupported spatial tools
+still need separate implementation and synthetic acceptance evidence.
+Validation without production FFmpeg/libav: media: 577 passed, 1 existing ignored; root: 1061 passed, 26 existing ignored; integration: 180 passed, 0 existing ignored.
+See docs/validation/aac-eld-spatial-sbr-*-2026-10-30.json.
+
+## Native ordinary AAC-ELD spatial playback and navigation, 2026-10-30
+
+The native factory now admits matching ordinary AAC-ELD/LD-MPS configurations.
+Spatial state lives entirely in fvid-media and is shared by the frontend's AAC
+facade. The coded core layout stays separate from output layout. ASC output
+channel metadata, native channel count and WAVE mask agree with the spatial tree;
+front-wide and rear-surround 7.1 trees have distinct masks and channel ordering.
+Rate, downmix-channel and frame geometry disagreements remain specific errors.
+Coupled LD-SBR, output downscale and remaining unsupported tools do not fall back
+to rendering the core downmix as spatial output.
+
+Core/noise histories, ER-tail assembly, spatial parsing/DSP, source metadata and
+ready PCM commit together after validation. Complete spatial frames retain one
+source window each. When parameters arrive late, one frame returns from decode
+and remaining ready frames drain individually at EOF; concatenating them had
+left the MP4 source-window queue undrained and is now a regression. Checkpoints
+include the owned spatial state; incompatible SSC restore is rejected before
+mutation. Reset clears PCM, parameters, ancillary fragments, ready output and
+source-clock state. Unmatched PCM/parameters at EOF are explicit errors. Replacing
+an unfinished fragment sequence still refuses specifically, retaining all state;
+a valid continuation can be retried and produce the complete reference PCM.
+
+All four previously ignored native acceptance tests are enabled. Old ordinary
+factory-refusal checks now assert playback or the specific malformed-stream
+error. 88 saved own movies are accepted: eight original core controls, 24
+immediate/late/fragmented programmes, 38 mixed-tail controls and 18 new native
+controls. AudioStream playback, rewind and seek match full decoded PCM for all
+88; 71 also reset and seek an already-used decoder. The new controls cover all
+eight trees at 24 kHz with 32-bin banks and 480/512-sample cores, alongside the
+48-kHz/64-bin/512-sample controls. A delayed 48-kHz programme in a distinct
+90-kHz MP4 source clock also preserves PCM, ranges and live navigation. The
+native stream's source timescale stays fixed until reset. Repeated range export
+remains exact.
+
+154752 native spatial samples match the previously qualified spatial component
+fed by independent direct-cosine core PCM, with maximum absolute difference
+1.4539377460234121e-11. This qualifies the integration and channel order; it is
+not an independent full-decoder conformance certificate. Performance remains
+separate qualification work.
+
+Validation passed: 577 media units (one existing ignored), 1061 frontend units
+(26 existing ignored), and 108 scoped codec integration checks with zero ignored.
+A focused rerun covers the descriptive fixture-scope updates; compressed packet,
+ASC, PCM and movie bytes of the earlier controls are unchanged. New fixture
+regeneration is byte-identical with Python process/spawn and socket APIs denied.
+Ordinary tests require no FFmpeg, network, fixture generation or external codec.
+See [source facts](validation/aac-eld-mps-native-source-2026-10-30.json), the
+[generation audit](validation/aac-eld-mps-native-generation-2026-10-30.json) and
+[test report](validation/aac-eld-mps-native-tests-2026-10-30.json).
+
+Remaining work includes the coupled LD-SBR QMF domain, output downscale, in-band
+configuration/AAC-LD signalling, dropped/replaced-fragment source association,
+delayed spatial output inside concatenated EP sources, residual AAC, active
+spatial tools, arbitrary/HRTF composition and 128-bin DSP. These tests do not
+close the full codec-coverage goal or performance qualification.
+
+## Bounded AAC-ELD spatial-tail dispatch, 2026-10-30
+
+The shared AAC extension parser now offers opt-in ELD spatial dispatch alongside
+its unchanged ordinary FIL/ER entry points. Spatial tags9/12 reach the owned
+ancillary assembler. EXT_DATA_LENGTH children use their declared bit bound and
+preserve following parent records, including DRC and ancillary data. Unknown
+compatible children consume their own bound. Nested/empty/overlong wrappers are
+refused. Direct spatial records consume the supplied parent remainder.
+
+The ELD entry point assumes the explicit LD-SBR prefix has already been parsed.
+Implicit SBR tags13/14 in this tail stay opaque, matching the pinned primary
+reference's ELD branch; a bounded implicit child preserves later parent records.
+Generic AAC ER SBR behavior and ordinary FIL opacity are retained. Completed
+messages, fragment assembly and final zero alignment form one transaction:
+late DRC or alignment errors restore the cursor and pending ancillary history.
+The frontend's separate cursor uses a buffer/absolute-bit bridge to the same
+owned assembler; no second ancillary implementation or source-buffer copy is
+introduced. The scheduling composition suite now uses this dispatcher instead
+of manually extracting each spatial envelope.
+
+44 own short movies provide 38 valid mixed-tail programmes and six specific
+failure controls. All valid variants preserve spatial PCM for the eight ordinary
+trees, both direct tags, bounded children and escaped lengths through65805 bytes.
+Late bad DRC, nested/empty/overlong lengths, bad final alignment and orphan stop
+reach their intended errors. Cross-facade continuation and all eight storage bit
+offsets are checked. These are parser/core/session composition checks: native
+spatial admission is still refused, and the new native mixed-tail playback test
+is explicitly ignored pending that integration.
+
+All 577 media units pass (one existing ignored), along with 74 scoped ELD/LD-MPS
+integration tests (four pending native acceptance tests ignored). The four
+additional legacy AAC ER/SBR suites pass 15 distinct tests. Fixture regeneration
+is byte-identical with Python process/spawn and socket APIs denied. Ordinary
+tests use saved fixtures without FFmpeg, network or runtime fixture generation.
+See the [source facts](validation/aac-eld-spatial-tail-source-2026-10-30.json),
+[generation audit](validation/aac-eld-spatial-tail-generation-2026-10-30.json) and
+[test report](validation/aac-eld-spatial-tail-tests-2026-10-30.json).
+
+Native factory admission, output speaker masks and timed decode/checkpoint/EOF
+wiring remain open. Dropped/replaced-fragment source association, in-band config,
+coupled LD-SBR bank selection, residual codecs, active tools and 128-bin DSP
+remain open. Zero native spatial movies are counted as accepted.
+
+## LD-MPS PCM/timestamp association and owned allocation accounting, 2026-10-30
+
+A spatial session now associates canonical decoded core PCM with completed
+spatial messages in FIFO order. Parameter arrival may lag PCM, a packet may
+supply several spatial frames, and a spatial frame may consume multiple input
+chunks. Only complete frame-sized PCM windows render; leftovers remain queued.
+Every output retains its source timescale, PTS and duration. Integer endpoint
+mapping conserves duration when splitting packets, including sub-tick prefixes,
+negative PTS and untimed input. A single output cannot silently combine different
+clocks, timed/untimed input or timestamp discontinuities. Failures roll back the
+entire submit call, including earlier renders in a batch. EOF reports unmatched
+PCM/parameters without discarding them. Clone/reset cover queues and all DSP.
+
+26 own short scheduling movies and saved access units cover immediate, late and
+ancillary-fragmented parameter delivery for all eight ordinary trees, plus a
+malformed late spatial tail and unmatched PCM EOF. The 24 valid programmes
+produce 72 component-composed spatial frames, bit-identical across scheduling
+variants with unchanged source timestamps. Actual native ELD decoding supplies
+the nonzero core. Compressed AAC and ancillary extraction are exercised, but the
+native spatial factory remains refused: these are composition checks, not
+accepted native movie playback. A new ignored acceptance test requires the
+complete native paths to produce matching PCM for all scheduling variants.
+
+Retained allocation visitors now cover the spatial session, pending ancillary
+bytes, both QMF banks, configurations, parameter histories, matrix histories and
+all decorrelator storage. Queue/vector spare capacity and independent checkpoints
+are included; alias inspection counts the same object once. The no-allocation
+inspection excludes stack, allocator headers, process-static QMF modulation
+caches, caller-owned input/output and peak working memory. This introduces no
+fixed memory budget. Native accounting integration remains part of admission.
+
+All 577 media units pass (one existing ignored), along with 63 LD-MPS integration
+checks and six ELD/core checks. Three native spatial acceptance tests remain
+ignored. Fixture regeneration is byte-identical with Python subprocess/spawn
+and socket APIs denied; ordinary tests do not run generation, FFmpeg, external
+codecs, compilers or network operations. See the
+[generation audit](validation/aac-ld-mps-session-generation-2026-10-30.json) and
+[test report](validation/aac-ld-mps-session-tests-2026-10-30.json).
+
+Native dispatch/output masks and delayed-output API/EOF integration remain open.
+The session requires ordered complete frames; transport resynchronization after
+lost/replaced fragments still needs source association. In-band configuration,
+coupled LD-SBR bank selection, residual decoding, active spatial tools and
+128-bin DSP remain open. Zero native spatial movies are counted as accepted.
+
+## Transactional AAC-ELD core boundary for LD-MPS integration, 2026-10-30
+
+ELD core parsing/synthesis now has a private preparation step which reports the
+exact consumed bit count and keeps synthesis, companion synthesis, LD-SBR and
+noise histories pending. Existing native ELD playback commits them only after
+ER extension and final alignment validation. Canonical core channel ordering is
+preserved, including the six-channel downmix used by spatial trees5/6.
+
+Eight owned short MP4 reproducers and 24 saved access units pair nonzero ELD
+cores with wrapped LD-MPS frames for all eight spatial trees. The cores use
+mono/stereo/six-channel configurations; suffixes begin at bit offsets2/3/4/5.
+Core samples match the independent direct-cosine/window/overlap controls.
+Composition tests feed this actual core PCM to the ordinary spatial component,
+compare against the independent core-input path, and verify exact component
+checkpoint replay. Invalid suffix bounds and nonzero final alignment preserve
+core history. These are component composition checks, not native spatial
+playback or seek acceptance.
+
+The existing ELD container playback, rewind and sample-seek suite passes.
+All 576 media units and all 55 LD-MPS integration tests pass (one existing media
+unit ignored). The additional ELD-SBR/CLDFB/downscale regression suites pass
+all 17 tests, including playback/seek/rewind. New spatial movies still reproduce the specific native factory
+refusal; explicit playback and timestamp/checkpoint acceptance tests remain
+ignored until production admission is implemented. Zero spatial movies are
+counted as accepted. Ordinary tests require neither generation nor FFmpeg,
+network access or reference software. Fixture regeneration is byte-identical
+with Python subprocess/spawn and socket APIs denied. See the
+[generation audit](validation/aac-eld-mps-core-generation-2026-10-30.json) and
+[test report](validation/aac-eld-mps-core-tests-2026-10-30.json).
+
+Native spatial dispatch, retained-memory accounting, PCM/PTS association,
+in-band configuration and correct coupled LD-SBR filter banks remain open.
+Residual decoding, active spatial tools and 128-bin DSP also remain open.
+
+## Owned AAC ER/MPS ancillary transport assembly, 2026-10-30
+
+The transport component now handles spatial extension tags9/12 directly and
+inside ER EXT_DATA_LENGTH envelopes, including both escaped length forms.
+Length-delimited children stop at their own bound and preserve following
+extensions; direct payloads consume the supplied parent bound. Ancillary
+frame/header-and-frame kinds are retained with opaque bytes. Start, continue,
+stop and complete-message flags assemble payloads across fragments. A complete
+message may replace a pending sequence. Orphan continue/stop fragments are
+explicitly refused rather than attempting unsynchronized recovery.
+
+All reads, bounds, type/order checks and allocation precede pending-content
+changes. Continuations reserve then append without copying the whole pending
+prefix on every fragment. Errors retain pending bytes and reader position.
+Clone captures a component checkpoint, reset discards pending state, and finish
+reports incomplete messages without losing them. No fixed 2048-byte limit from
+the reference implementation is inherited.
+
+224 synthetic cases cover two tags, two kinds, both envelope forms, four
+fragment patterns and seven lengths through the maximal 65805-byte child.
+All eight starting bit offsets, checkpoint replay, following-extension
+sentinels, malformed/nested bounds, reserved kinds and invalid order are tested.
+224 additional controlled sequences reassemble 672 saved spatial frames and
+feed the PCM component; all 1677312 golden samples remain unchanged. This
+supplies decoded synthetic downmix/residual inputs, not compressed core AAC,
+actual access-unit timing or accepted movie playback.
+
+Primary grammar facts are frozen from AOSP FDK AAC commit
+`ee76460efbdb147e26d804c798949c23f174460b`; source content was re-fetched at
+that commit and verified. Numeric facts, source hashes and scope are in the
+[source report](validation/aac-ld-mps-transport-source-2026-10-30.json).
+No foreign implementation or runtime dependency enters production. Fixture
+regeneration is byte-identical with process/socket creation denied; see the
+[generation audit](validation/aac-ld-mps-transport-generation-2026-10-30.json).
+Ordinary tests need no FFmpeg, network, generation, reference software or compiler.
+
+All 55 LD-MPS integration tests and 575 media unit tests passed (one existing
+unit ignored); see the [test report](validation/aac-ld-mps-transport-tests-2026-10-30.json).
+
+Native AAC ER-extension dispatch, PCM/timestamp association across access units,
+in-band configuration admission and coupled LD-SBR filter-bank integration
+remain open, alongside residual codecs, active spatial tools and 128-bin DSP.
+Native spatial renderer refusal remains enabled. Component tests count zero
+accepted spatial movies or closed playback failures.
+
+## Owned ordinary LD-MPS PCM chain and fixed gains, 2026-10-30
+
+The PCM component now connects downmix analysis, the complete spatial QMF chain
+and synthesis. It accepts exactly the configured planar decoded-PCM frame,
+applies clip-protection gain before analysis, and supplies decoded residual QMF
+separately without that downmix gain. Dry/wet outputs combine only when temporal
+shaping is disabled. Synthesis histories persist across frames. Outputs are
+reordered into canonical LF/RF/C/LFE/LS/RS[/AL/AR] (or L/R), then LFE/surround
+fixed gains are applied. Additional channels retain their tree-specific AL/AR
+meaning rather than guessing an external speaker mask. Samples are interleaved
+unclamped normalized f64 values with filter latency, not transport-trimmed audio.
+
+Every stage participates in one transaction: analysis, spatial parser/matrices,
+decorrelators, synthesis and the reader. Clone checkpoints and reset replay
+retain the joint state. Active temporal shaping explicitly refuses after QMF
+processing; an existing synthetic STP packet verifies that this late failure
+retains the complete previous state and cursor. A subsequent valid frame agrees
+with checkpoint replay. This is a passing refusal/rollback test, not active-STP
+acceptance. Residual codecs remain external to this component contract.
+
+224 controlled sequences/672 frames cover eight trees, seven resolutions,
+32/64-bin banks, both filter coefficient modes and every clip/surround/LFE table
+index. All 1677312 PCM samples match the double-PI reference control within
+2.37158e-6 absolute error (test ceiling 5e-6); the retained archived-PI baseline
+differs by at most 2.79820e-5 (ceiling 5e-5). Complete checkpoint/reset replay
+agrees exactly. These controls use original analysis/synthesis and original
+matrix-apply/decorrelate/merge functions on the already-qualified saved endpoint
+interface, with the documented 212 semantic fields and padded W layout.
+
+The precise control uses a separate translation unit overriding only PI for the
+polyphase implementation; archived sources are unchanged and original.bin
+retains the original PI baseline. It is not a replacement or correction of the
+original reference output. Source/control/endpoint hashes and the original vs
+precise difference are retained in the
+[reference report](validation/aac-ld-mps-pcm-reference-2026-10-30.json).
+Explicit regeneration of both controls is byte-identical; see the
+[generation audit](validation/aac-ld-mps-pcm-generation-2026-10-30.json).
+Ordinary tests load saved data without FFmpeg, network, regeneration, a compiler
+or reference software.
+
+All 52 LD-MPS integration tests and 575 media unit tests passed (one existing
+unit ignored); see the [test report](validation/aac-ld-mps-pcm-tests-2026-10-30.json).
+
+Native AAC/LD-SBR transport dispatch, sample timing/preroll, actual residual AAC
+decoding, active STP/GES, arbitrary-downmix/HRTF tools, other unqualified profile
+combinations and 128-bin DSP remain open. Actual synthetic movie playback/seek
+acceptance is still missing; the native spatial renderer refusal stays enabled.
+This PCM component qualification counts zero accepted spatial movies.
+
+## Transactional ordinary LD-MPS QMF chain, 2026-10-30
+
+A single QMF decoder now joins spatial-frame assembly, complex M1 application,
+per-channel decorrelation, W routing and both M2 applications. Downmix inputs
+have the configured channel count; the separate decoded TTT residual basis is
+inserted into M1 only below its cutoff. OTT residuals enter W instead. Output
+keeps dry/wet planes separate and carries prepared metadata for downstream
+gains/temporal shaping/PCM. No residual codec or PCM playback is implied.
+
+Full-complex seed scheduling follows the reference frontend branch: sequential
+indices with tree2's TTT auxiliary using seed3 and stereo using seed2. Both
+real/complex coefficient modes are explicit implementation choices on complex
+QMF samples, not stream flags or partially-complex alias-lock processing.
+All parser, smoothing/matrix and decorrelator histories plus the reader commit
+only after the entire frame succeeds. Clone captures their joint checkpoint;
+reset restores the initial state. The 128-bin decorrelator refusal remains.
+
+224 controlled sequences/672 frames cover eight trees, seven resolutions,
+32/64 bins and both filter modes. All 6709248 dry/wet scalar outputs match the
+original stage-function chain within 2.66179e-7 absolute error (test ceiling
+2e-6). Every sequence retains a nonzero wet tail on the third, zero-input frame.
+Checkpoint and complete reset replay agree exactly. Missing OTT residuals are
+detected after filters have run; the original parser/matrix/filter histories
+and reader remain unchanged, and the valid retry matches checkpoint replay.
+Missing TTT input and nonfinite sample errors also preserve state.
+
+The research harness calls unmodified original M1 apply, decorrelate, W merge
+and M2 apply routines on the separately qualified saved matrix endpoints,
+including the documented 212 residual-basis fields. Padded W geometry follows
+that controlled interface; this does not qualify the original frontend's
+automatic V/W channel-count selection or its full decoder. The unselected HRTF
+branch aborts, and is not implemented by a stub fallback. Its 64MiB thread stack
+belongs only to the research harness; neither C nor that requirement enters
+production. Source/archive/driver and endpoint hashes are retained in the
+[reference report](validation/aac-ld-mps-qmf-reference-2026-10-30.json).
+Explicit regeneration is byte-identical; see the
+[generation audit](validation/aac-ld-mps-qmf-generation-2026-10-30.json).
+Ordinary tests load saved data without FFmpeg, network, generation, a compiler
+or reference software.
+
+All 50 LD-MPS integration tests and 575 media unit tests passed (one existing
+unit ignored); see the [test report](validation/aac-ld-mps-qmf-tests-2026-10-30.json).
+
+The chain still needs fixed gains and temporal shaping, synthesis/LD-SBR PCM
+integration, residual AAC decoding, arbitrary-downmix/HRTF and unqualified
+profile/tool combinations. Actual synthetic movie playback/seek/rewind remains
+open. The native spatial renderer refusal stays enabled; component outputs
+count zero accepted spatial movies or closed player failures.
+
+## Transactional LD-MPS spatial-frame matrix assembly, 2026-10-30
+
+The frame assembler now connects physical parameter decoding with the ordinary
+matrix builders for all eight trees. It selects shared/per-box ICC, dequantized
+CLD/CPC, low/high TTT modes at the native-band boundary, residual regions and
+LFE cutoff. It packs complex M1 and both M2 planes for their independent temporal
+histories and returns interpolated slot matrices, the W router, residual cutoffs
+and prepared metadata for later audio stages. Held final endpoints retain the
+preparation layer's parameter and smoothing state. Fixed gains/temporal tools
+remain metadata for the downstream stage; they are not silently applied here.
+
+Decoding is one transaction over the reader, parameter/entropy histories,
+smoothing state and all three matrix histories. Clone captures a full component
+checkpoint; reset restores the initial state. Constructor refusal explicitly
+preserves the unimplemented arbitrary-downmix/HRTF matrix scope. Existing
+physical preparation restrictions on other quantization/tool combinations
+remain authoritative. This is not full spatial audio decoding.
+
+336 synthetic ordinary configurations and 1008 frames cover eight trees,
+seven resolutions, shared ICC, all six TTT modes, boundaries at zero/middle/end,
+inversion, LFE and residual regions, smoothing/keep history and held endpoints.
+All 3339000 endpoint coefficients and every interpolated time slot match the
+saved original-matrix/Decimal-temporal oracle within 8.47429e-7 absolute error
+(test ceiling 5e-6). Endpoint storage is f32; temporal generation uses 80-digit
+Decimal. The known original 212 residual-column discrepancy is explicitly
+separated for 6300 auxiliary fields using the previously qualified residual
+basis. Raw original outputs remain identified by hash; no reference source is
+patched. See the [reference report](validation/aac-ld-mps-assemble-reference-2026-10-30.json).
+
+Whole-frame checkpoint replay, three-frame reset replay and truncated-packet
+rollback pass across all cases. A separate synthetic packet first parses fully
+through physical preparation, then fails specifically at singular TTT coherence;
+the complete assembler retains the original cursor and all histories, and the
+next valid frame agrees with checkpoint replay. This is a refusal/transaction
+regression, not intended playback acceptance. Native spatial renderer refusal
+remains enabled; zero accepted spatial movies are counted.
+
+Syntax regeneration is byte-identical with process/socket creation denied;
+see the [syntax audit](validation/aac-ld-mps-assemble-generation-2026-10-30.json).
+Explicit original-C/Decimal oracle regeneration is also byte-identical; see the
+[oracle audit](validation/aac-ld-mps-assemble-oracle-generation-2026-10-30.json).
+Ordinary tests load saved controls without FFmpeg, network, generation, a C
+compiler or reference software.
+
+All 48 LD-MPS integration tests and 575 media unit tests passed (one existing
+unit ignored); see the [test report](validation/aac-ld-mps-assemble-tests-2026-10-30.json).
+
+The next integration must supply actual downmix/residual QMF inputs, maintain
+decorrelator and synthesis state, apply fixed gains and temporal shaping, and
+produce qualified PCM. Residual AAC, arbitrary-downmix/HRTF tools, unsupported
+quantization/profile combinations, 128-bin DSP and actual synthetic movie
+playback/seek/rewind remain open.
+
+## Owned LD-MPS W-signal routing, 2026-10-30
+
+The W router now selects direct, decoded-residual and decorrelated complex QMF
+signals for all eight trees. Direct dry signals copy the leading M1 virtual
+channels; direct wet signals are zero. Each OTT auxiliary chooses decoded
+residual below its parameter-band cutoff, otherwise its decorrelator output.
+Optional absent residual inputs are accepted only when not needed by W.
+Supplied planes are fully validated; borrowed inputs remain unchanged on errors.
+
+Mode0 TTT W mixing combines original decorrelator outputs 3/4/5 before applying
+OTT residual masks. This order matters: an OTT wet channel muted by its own
+residual region still contributes to the separate TTT mixture. TTT residual
+samples themselves enter M1, not W column5. Original residual-index lookup
+maps W column5 to the unused LFE box; active LFE residual routing remains an
+explicit refusal. Its TTT residual cutoff must not mute/replace the W mixture.
+A targeted test verifies independence from both supplied TTT residual samples
+and their cutoff, alongside OTT-mask ordering.
+
+504 synthetic cases cover eight trees, seven parameter resolutions,
+32/64/128-bin routing and three cutoff/mode patterns. All 1881600 scalar outputs
+match an independent 80-digit Decimal oracle: dry values exactly, wet values
+within 1e-15. Per-slot and whole-frame routing agree. A separate comparison
+uses unmodified original SpatialDecMergeResDecor and residual-index lookup;
+its maximum absolute error is 1.66798e-7. The owned path uses exact 1/sqrt(2),
+where the original C uses 0.707107f and float samples. Per-bin C calls permit
+adversarial mode patterns and qualify routing rather than complete two-region
+stream configurations. See the
+[reference report](validation/aac-ld-mps-route-reference-2026-10-30.json).
+
+An initial unpublished design conflated TTT residual input with the W column5
+auxiliary. That design and its oracle were rejected after checking the original
+lookup table. Their hashes remain in the
+[rejected-design report](validation/aac-ld-mps-route-rejected-2026-10-30.json).
+The final independent original-function comparison qualifies the corrected
+mapping. No production player failure or accepted movie is counted here.
+
+Fixture regeneration is byte-identical with process/socket creation denied;
+see the [generation audit](validation/aac-ld-mps-route-generation-2026-10-30.json).
+Ordinary tests load saved controls without FFmpeg, network, regeneration,
+reference software or a C compiler. Missing residuals, nonfinite later values,
+geometry and TTT-mixture overflow are refused. Empty frames are no-ops.
+
+All 45 LD-MPS integration tests and 575 media unit tests passed (one existing
+unit ignored); a final focused routing run also passed all three tests. See the
+[test report](validation/aac-ld-mps-route-tests-2026-10-30.json).
+
+The route is not yet wired into a complete spatial decoder. Frame low/high-mode
+assembly, residual AAC decoding and its M1 inputs, fixed output gains, temporal
+shaping, arbitrary-downmix/HRTF tools, 128-bin QMF/decorrelation DSP, LD-SBR PCM
+integration and actual synthetic movie playback/seek remain open. Native
+spatial refusal stays enabled; zero accepted spatial movies are counted.
+
+## Owned full-output TTT tree matrices, 2026-10-30
+
+The TTT tree builder now composes trees 2/3/4 using the shared symbolic OTT
+basis graph. M1 includes the two downmix inputs and decoded TTT residual basis,
+with optional complex downmix inversion. Modes 3/5 bypass inversion; mode0
+creates the center-fed TTT decorrelator path. Both M2 planes carry the proper
+OTT residual injection, CLD-only energy feeds, front-channel coherence scaling,
+TTT diffuse contributions and LFE cutoff. Native tree-specific output orders
+are explicit. This supplies ordinary full-output per-band matrix construction
+for the three trees, complementing the existing five OTT-only tree builders.
+
+6912 synthetic sets cover all six modes, both TTT residual regions, inversion
+flags, LFE regions and every non-LFE OTT residual mask with four varied physical
+parameter trials. All 1164288 scalar coefficients match unmodified original
+ISO tree routines within 9.21347e-7 absolute error (test ceiling 5e-6). Frozen
+archive/source/driver hashes and raw output hashes are retained in the
+[reference report](validation/aac-ld-mps-ttt-tree-reference-2026-10-30.json).
+Explicit regeneration is byte-identical; see the
+[generation audit](validation/aac-ld-mps-ttt-tree-generation-2026-10-30.json).
+Ordinary tests read saved outputs without regeneration, FFmpeg, network, a C
+compiler or external reference software.
+
+An initial comparison exposed a missing dormant dry-plane TTT coefficient in
+tree2. The builder now retains it, matching the wet-plane value in mode0 outside
+TTT residual bands; the W-dry sample itself is zero there. The original failing
+comparison remains identified in validation evidence. No comparison values or
+error ceilings were changed to hide the mismatch. Additional tests verify
+mode-dependent feeds, inversion bypass, dry/wet residual basis gating and LFE
+silence above cutoff. A separate analytic case applies constructed M1 and M2
+through the existing complex-QMF executor and verifies native output channel
+orders for all three trees.
+
+All 42 LD-MPS integration tests and 575 media unit tests passed (one existing
+unit ignored); see the [test report](validation/aac-ld-mps-ttt-tree-tests-2026-10-30.json).
+
+These are per-band matrix checks. Frame low/high-mode endpoint assembly,
+W-signal routing, residual AAC decoding, fixed output gains, temporal shaping,
+arbitrary downmix, HRTF/3D-stereo transforms, 128-bin DSP, full LD-SBR spatial
+PCM and actual synthetic movie playback/seek remain open. Singular nonresidual
+zero-coherence prediction and LFE residual routing stay explicit refusals.
+Native spatial playback refusal remains enabled; no accepted spatial movies
+or closed player failures are counted by the matrix component tests.
+
+## Owned TTT transform and complex downmix inversion, 2026-10-30
+
+The TTT primitive now implements predictive modes 0/1, center-subtraction
+modes 2/3 and energy modes 4/5. Its three columns represent the two downmix
+channels and decoded residual basis; its center output includes sqrt(2).
+Predictive coherence normalization is bypassed inside residual bands. Energy
+modes use normalized channel powers and conditional covariance rather than
+copying the reference's unnormalized matrix expressions. This is the band
+transform, not yet the complete matrix builder for trees 2/3/4.
+
+The inversion primitive derives weights from OTT CLDs and TTT CPC/CLD values,
+constructs the complex forward downmix and solves its inverse by pivoted
+elimination. This differs from the original implementation's explicit
+adjugate/determinant arithmetic. Real-only alias-lock processing remains
+separate and unqualified. Inputs are bounded physical parameters with explicit
+nonfinite/range/mode checks; no external implementation enters production.
+
+An independent 80-digit Decimal corpus covers 40937 transforms: all 51x51 CPC
+pairs with ICC/residual combinations except singular nonresidual ICC=0, and
+all 31x31 CLD pairs in each energy family. Tests also verify mode aliases.
+7688 inversion cases cover every pair of OTT CLDs with four deterministic
+TTT parameter trials in each family. The Decimal inverse uses an adjugate;
+Rust elimination matches it within 3e-12 absolute error and both multiplication
+orders recover identity. All 2601 singular CPC pairs are checked for a specific
+coherence refusal in both predictive modes, while their residual-region
+transforms remain accepted at component level. This refusal is not playback
+acceptance or a closed spatial codec gap.
+
+Unmodified original ISO functions agree with the Decimal corpus within
+5.99847e-7 for transforms and 3.48264e-7 for inversion weights/coefficients;
+all compared reference values are finite. The frozen archive, source and
+harness hashes are in the
+[reference report](validation/aac-ld-mps-ttt-reference-2026-10-30.json).
+Fixture regeneration is byte-identical with process and socket creation
+denied; see the [generation audit](validation/aac-ld-mps-ttt-generation-2026-10-30.json).
+Ordinary tests read saved data without regeneration, FFmpeg, network, a C
+compiler or reference software.
+
+All 38 LD-MPS integration tests and 575 media unit tests passed (one existing
+unit test ignored); see the [test report](validation/aac-ld-mps-ttt-tests-2026-10-30.json).
+An initial analytic assertion used a twice-rounded sqrt(2)/3 expression; its
+correctly rounded high-precision constant passed without runtime or tolerance
+changes. The rejected attempt hash is preserved in the report.
+
+Full TTT tree composition including mode-dependent routing/decorrelation,
+optional inversion wiring, residual AAC, STP/GES, arbitrary downmix/HRTF,
+LD-SBR/PCM integration and actual synthetic movie playback/seek remain open.
+The native spatial renderer refusal remains enabled. These primitive tests
+count zero new accepted spatial programmes.
+
+## Owned OTT-only LD-MPS tree matrices, 2026-10-30
+
+The matrix builder now composes the five OTT-only trees 0/1/5/6/7 from a
+symbolic signal graph. Each split propagates direct, decorrelated and residual
+basis vectors separately; CLD-only energy paths feed M1 and the direct LFE
+branch. Tree topology supplies auxiliary-column order and native output order.
+The builder returns M1 and both M2 planes; it does not decode residual audio or
+apply fixed output gains. Above the LFE cutoff, center uses unity and LFE is
+silent. Trees 2/3/4 require a TTT builder and are explicitly refused. LFE
+residual routing is also explicitly unqualified rather than silently ignored.
+
+1184 synthetic cases cover all non-LFE residual masks, both LFE regions and
+varied CLD/ICC including extremes. Original unmodified ISO tree routines
+produce 89408 saved scalar coefficients. Excluding the 64 identified 212
+residual-plane fields below, the owned graph differs by at most 1.47447e-7.
+Ordinary tests read saved data without FFmpeg, generation, network, external
+reference software or a C compiler. The frozen archive/source/driver hashes
+and raw output hash are retained in the
+[reference report](validation/aac-ld-mps-tree-matrix-reference-2026-10-30.json).
+Explicit regeneration is byte-identical; see its
+[audit](validation/aac-ld-mps-tree-matrix-generation-2026-10-30.json).
+
+The original 212 routine writes H12/H22 into M2resid rather than the separately
+computed H12_res/H22_res. All 64 raw fields remain unchanged in the saved
+reference data. Nonresidual dry auxiliary signals are zero, so the dormant
+nonzero coefficients do not affect routed output. In residual bands its zero
+column would discard the residual. The owned builder uses signed-unit residual
+injection from the independently qualified OTT covariance kernel. A separate
+analytic equal-power/zero-coherence case requires [X/2+R, X/2-R], demonstrating
+the intended basis independently of the reference write. This is a reference
+component discrepancy; it is not claimed as a fixed player media failure.
+
+Validation passed: all 34 LD-MPS integration tests and 575 media unit tests
+(one existing ignored). A final focused run passed all four tree tests; see the
+[test report](validation/aac-ld-mps-tree-matrix-tests-2026-10-30.json).
+
+Additional checks verify dimensions, direct input identity, absent dry/wet
+basis columns outside/inside residual regions, LFE silence above cutoff,
+passthrough center/LFE for the six-input trees, and invalid input refusal.
+All are component qualification. Full spatial W routing, TTT, arbitrary-downmix
+and HRTF composition, residual AAC, STP/GES, LD-SBR/PCM integration and actual
+synthetic movie playback/seek/rewind are still open. The native spatial refusal
+remains enabled and no accepted spatial programmes are counted by these tests.
+
+## Owned LD-MPS complex QMF matrix application, 2026-10-30
+
+The interpolated matrix planes now have an owned QMF application kernel.
+It selects separate real/imaginary planes from the common seven-plane layout,
+expands parameter bands with the native QMF map and performs complex channel
+mixing into a separate output buffer. Real-only matrices support M0 and ordinary
+M2 arithmetic; paired planes support M1 and complex M2 arithmetic. This is the
+application primitive, not a tree matrix builder or a complete spatial pipeline.
+
+An independent integer complex-product oracle covers 63 cases: seven parameter
+resolutions, 32/64/128 bins, and 1x1, 3x2 and 8x13 matrix shapes. Stimuli are
+dyadic rationals and all 75264 scalar outputs agree exactly. The largest layout
+selects planes five/six, exercising nonadjacent-to-zero plane offsets. Whole
+frames and individually applied slots agree. A noncommuting M1/M2 composition
+with a complex rotation verifies stage order, imaginary signs and connection
+to matrix interpolation/reset. Invalid geometry, later nonfinite coefficients
+(including unused planes), invalid samples and overflow are refused. Inputs
+and coefficient frames are borrowed, so errors cannot modify their histories.
+
+All 30 LD-MPS integration tests and 575 media unit tests passed (one existing
+unit test remains ignored); see the [test report](validation/aac-ld-mps-matrix-apply-tests-2026-10-30.json).
+
+Fixture regeneration is byte-exact with process and socket creation denied;
+ordinary tests load saved expectations without regeneration, FFmpeg or network.
+See the [generation audit](validation/aac-ld-mps-matrix-apply-generation-2026-10-30.json).
+128-bin matrix arithmetic does not qualify 128-bin analysis/synthesis or the
+still-refused decorrelator. Tree-specific M0/M1/M2 construction, decorrelation
+and residual routing, STP/GES, LD-SBR integration and actual spatial movie
+playback/seek remain open. The native spatial renderer refusal stays enabled;
+this stage closes zero spatial programme acceptance gaps.
+
+## Owned LD-MPS OTT mixing and QMF decorrelation, 2026-10-30
+
+The owned OTT kernel constructs output rows [direct, decorrelated, residual]
+from the channel covariance and mono-sum constraint. Decorrelated contributions
+cancel when the two outputs are summed; nonresidual row power and cross-channel
+coherence match the CLD/ICC targets. This independently derived algebra avoids
+copying the reference's trigonometric implementation. Residual bands use the
+specified inverse mono-sum gain limit 1.2, zero decor coefficients and residual
+columns +1/-1. This consumes supplied complex residual samples; it does not
+decode residual AAC. Complex basis-output checks verify row/column orientation.
+
+The new decorrelator implements the LD Schur all-pass designs for 32/64 QMF
+bins, all three reverb partitions, ten seeds and both real/complex coefficient
+modes. These modes are explicit implementation choices, not stream flags.
+Used filters have orders 15/6/3 and delays 7/2/1 slots. Reflection/phase facts
+are separately frozen from the official ISO insert. Four LD reflection rows are
+explicit; the six implicit zero rows are preserved as pure all-pass delays.
+The owned engine uses independent input/output rings and direct convolution,
+not the reference's transposed filter state.
+
+Ducking pools energies in the fixed 23 parameter groups, independent of the
+stream's selected CLD/ICC resolution. Direct/diffuse energies retain their
+histories, with alpha 0.8, gamma 1.5, an upper gain of two and a normalized
+energy floor 1e-9. Input/output QMF amplitudes are explicitly full-scale-one.
+The unmodified reference uses 16-bit PCM units and ABS_THR=1e-9*32768^2;
+its probe scales samples accordingly rather than changing the algorithm.
+All filter, delay and energy state commits atomically per bounded LD chunk.
+Invalid/nonfinite later samples, geometry and overflow preserve the original
+state. Empty chunks are no-ops, and reset restores all histories/cursors.
+
+The independent 80-digit Decimal corpus contains 496 matrices (all CLD/ICC
+indices, with/without residual mode), and 120 burst/tail sequences covering
+552960 complex samples. Covariance, residual inverse-gain limits and complex
+basis application match the saved oracle. Decorrelated signals match it within
+3e-11 absolute error. Whole/partitioned processing, checkpoint replay at slot 48
+and reset/replay agree bit-for-bit, including float sign bits. The actual filter
+polynomials also undergo inverse-Schur margin checks and unit-magnitude transfer
+checks; the recovered reflection magnitude squared remains below 0.251.
+These are component-state checks, not actual player seeking/rewinding evidence.
+
+The explicit comparison uses unmodified ISO OTT/decorrelation functions. Across
+all 496 matrices its maximum coefficient error is 1.32695e-7; across all 120
+complex signal sequences its maximum error is 6.34142e-7. The independent
+Decimal oracle qualifies the owned f64 path; original float comparison results,
+per-sequence maxima/RMS, source/archive/driver hashes and unit conversion are
+retained in the [reference report](validation/aac-ld-mps-upmix-reference-2026-10-30.json).
+No C or external DSP/codec implementation enters production, and this is not
+formal ISO conformance or a completed spatial renderer.
+
+Validation passed: 575 media unit tests (one existing ignored), all 27 LD-MPS
+integration tests, and offline compilation of all player test targets. See the
+[test report](validation/aac-ld-mps-upmix-tests-2026-10-30.json) and
+[byte-exact generation audit](validation/aac-ld-mps-upmix-generation-2026-10-30.json).
+
+Ordinary tests load saved fixtures without FFmpeg, network, reference software
+or regeneration. Numeric extraction, fixture generation and optional reference
+compilation are separate commands. The broad codec goal remains active: full
+M0/M1/M2 construction/routing for the trees, residual AAC, arbitrary-tree and
+HRTF/binaural composition, STP/GES audio processing, 128-bin decorrelation/DSP,
+LD-SBR/QMF integration and synthetic movie playback/seek/rewind remain open.
+The native spatial renderer refusal remains enabled. Zero accepted spatial
+programmes or closed spatial codec gaps are counted by these primitive tests.
+
+## LD-MPS physical parameters, matrix smoothing and interpolation, 2026-10-30
+
+The owned preparation layer now couples spatial-frame parsing with physical
+CLD/ICC/CPC grids, CLD energy quantization/propagation, persistent smoothing
+controls, temporal-shape levels, fixed gain lookups and native QMF band maps.
+Energy-adjusted indices are separate from raw entropy/mapped history. The two
+1->5.1 tree energy graphs propagate the correct left/right ancestor levels;
+LFE regions remain independently rooted. A cloned preparation decoder is a
+complete syntax/physical-control checkpoint, and reset restores both histories.
+An incomplete later frame leaves both histories and the caller cursor intact.
+
+LD-MPS has its own grids: in particular ICC's last entry is -0.99, whereas the
+existing PS component uses -1.0. Native QMF assignments are preserved for each
+4/5/7/9/12/15/23-band resolution and 32/64/128 QMF bins. They must not be
+replaced by the separate 23-band expansion used for optional stereo downmix.
+Rate boundaries at 27713 and 55426 Hz are tested on both sides. Mapping 128 bins
+is metadata preparation, not a claim that LD-QMF 128 DSP/routing is implemented.
+Surround/LFE/clip-protection gain values are returned as grid values; their
+application/compensation belongs to matrix construction.
+
+The smoothing state resolves all four modes, four times and all LD strides.
+Leading keep retains the initial inactive mask/time zero without dividing by
+zero. Explicit mode zero selects inactive/256. Mask expansion uses balanced
+output groups, then carries the last encoded set across frames. A held final
+endpoint is appended when a variable frame ends before its final time slot.
+GES indices become physical envelope levels; STP flags are retained. Neither
+STP nor GES has yet been applied to audio.
+
+The matrix-time component smooths actual coefficients, not CLD/ICC/CPC values.
+It covers all seven real/imaginary M0/M1/M2 planes, up to the base workspace's
+8 rows and 13 columns, and bypasses smoothing below the residual cutoff.
+Each slot interpolates from the previous frame's final matrix through the
+smoothed endpoints. Held final endpoints participate in the same update.
+Geometry, nonfinite coefficients, invalid controls and later failures preserve
+matrix history. Maximum layout and residual bypass have explicit controls.
+This is a matrix temporal stage, not a matrix builder or a PCM upmixer.
+
+Energy propagation uses stable log-domain arithmetic. The saved independent
+Decimal oracle covers 1116 splits with all 31 CLD indices, three quant modes
+and parents down to -1000 dB. Original ISO float functions return 186 nonfinite
+energy values on that set; their largest finite energy error is 1.465332 dB.
+These original outcomes are retained. A separate research control widens only
+the four branch-local energy functions from float to double; all indices agree
+and its maximum energy error is 1.13687e-13. Both controls keep the original
+float matrix code: its largest error against exact-Fraction traces is 2.38419e-7.
+The owned f64 temporal stage matches the independent oracle within 2e-12 scaled
+absolute tolerance. This is internal precision qualification, not formal ISO
+conformance or reference-code incorporation into FVid.
+
+The corpus positively covers 161 base configurations / 483 frames, plus 56
+quant-zero active-arbitrary-tree overrides / 168 frames. All eight trees have
+physical acceptance controls; replay at eight bit offsets and reset are exact.
+Another 175 base configurations remain explicit physical-constructor refusals.
+Nonzero quant modes on unqualified tree/TTT combinations and active arbitrary
+trees are not silently treated as mode zero. The old arbitrary-tree mapper has
+no EBQ input energy and asserts on that path; its normative semantics require
+clarification before enabling it. These refusals are not positive acceptance
+or proof that the corresponding syntax is a legal full programme.
+
+A separate coupled ISO parse/decode/mapping probe checks 483 qualified
+nonopaque-residual frames: encoded-set energy-adjusted indices agree exactly,
+and physical levels differ by at most 1.00001e-7 (float-grid precision). It
+retains the previous explicit parser controls and separates the arbitrary-tree
+namespace in the physical mapper too. Two additional empty-region controls
+bypass an energy assertion where no bands exist, and skip an individual empty
+TTT region without abandoning its nonempty high region. Exact source changes,
+hashes, earlier rejected assertions and exclusions are retained. The C mapper
+extends physical levels only; its unused held index row is not an index oracle.
+The owned derived held indices remain independently tested.
+
+The saved oracle also contains 112 rational matrix frames and 1400 rate/gain
+controls. Ordinary tests read saved data only; generation, source extraction
+and optional C comparisons are explicit separate steps without FFmpeg.
+
+The full fvid-media unit suite passes 575 checks (one existing ignored),
+and all 23 LD-MPS integration checks pass. Offline all-test compilation passes.
+Fixture regeneration is byte-exact with process/socket creation denied. The
+[test report](validation/aac-ld-mps-prepare-tests-2026-10-30.json),
+[precision/matrix comparison](validation/aac-ld-mps-prepare-reference-2026-10-30.json),
+[coupled comparison](validation/aac-ld-mps-physical-frame-reference-2026-10-30.json)
+and [generation report](validation/aac-ld-mps-prepare-generation-2026-10-30.json)
+retain the exact scope, controls, exclusions and hashes.
+
+The broad codec goal remains active. Spatial matrix construction, decorrelation/
+upmix, residual AAC integration, HRTF/binaural processing, STP/GES application,
+LD-QMF/LD-SBR routing and LD-QMF 128 DSP still require work. Unqualified energy
+combinations and empty grouped/Huffman syntax remain open. The native spatial
+renderer refusal stays enabled; zero spatial programmes, actual playback/seek/
+rewind checks or closed spatial codec gaps are counted by this component work.
+
+## LD-MPS spatial-frame syntax and complete tree dispatch, 2026-10-30
+
+The owned frame parser now schedules parameter blocks for all eight LD trees:
+OTT CLD, shared/per-OTT ICC, low/high TTT CPC/CLD/ICC, arbitrary-downmix gains
+and arbitrary-tree CLD extension regions. It reads implicit/explicit parameter
+slots, independence, all smoothing modes/masks and STP/GES metadata. Forty
+numeric GES reshape codewords cover all five values and run lengths 1..8.
+Every codeword is separately checked at eight bit offsets with a following
+sentinel. Frame alignment is relative to the frame's own syntactic-element
+origin, including unaligned enclosing readers.
+
+All tree/extension histories and the caller position commit only after the
+entire frame succeeds. A failure in the final child cannot leave earlier OTT,
+TTT, downmix or arbitrary-tree states advanced. A clone is a syntax/parameter
+checkpoint, and reset restores all region histories. Independent keep modes,
+invalid/repeated slots, overflowing GES runs and
+truncated extension children are rejected specifically. The residual-coding
+restriction is presence-aware: interpolation is forbidden when the residual
+configuration exists even when all its bands are zero.
+
+The historical predictive-TTT default prohibition is superseded by the
+November1 default/hold acceptance correction documented above.
+
+Zero-width regions still carry data modes. Unit-stride empty PCM and empty
+ordinary default/keep regions now have positive acceptance fixtures; the old
+constructor-level zero-width refusal is updated. Empty Huffman vectors remain
+refused. Zero-width grouped coding at strides 2/5/23 is explicitly unqualified:
+the old C expression `(stop-start-1)/stride+1` yields a scalar for an empty
+region and can consult a neighboring region's storage. This needs normative
+clarification and an appropriate coupled-history test before acceptance; the
+parser must not silently consume the zero-vector representation instead.
+
+Frame extensions are byte-length bounded, including the 255+16-bit length
+form. Arbitrary-tree parameters use independent state per region. Residual AAC
+and unknown payloads are preserved as opaque bytes. Parsing those bytes does
+not decode or accept residual audio, nor authorize a spatial PCM output.
+Configuration topology/region metadata are validated before state allocation.
+
+The own inverse-coded corpus contains 336 configurations and 1008 frames,
+covering every tree/resolution, both quantizers, four strides, zero-width
+regions, shared ICC, dual-mode TTT, explicit nonfinal slots, smoothing masks,
+STP/GES and nested arbitrary-tree payloads. All expected fine indices and tool
+metadata match at eight starting offsets; checkpoint replay is exact. Every
+frame prefix is checked at offsets 0/3/7: 777384 truncations preserve the whole
+state and cursor despite later bits in backing storage. Five saved error
+payloads exercise run overflow, active/zero residual restrictions and the two
+empty-coding refusals. Additional mutations verify exact slot/predictive-ICC
+errors and that a shortened child cannot read the next extension. These remain
+component fixtures, not synthetic movie/playback acceptance.
+
+The [reference report](validation/aac-ld-mps-frame-reference-2026-10-30.json)
+retains original ISO results and separate research controls. Of 1008 frames,
+168 opaque-residual frames are excluded from reference audio parsing. Original
+safe paths check 714 frames: 661 match and 53 index mismatches are retained.
+The latter arise when arbitrary-tree lossless metadata aliases downmix/TTT
+metadata indices. Original leading interpolation and enabled tree7 temporal
+shaping paths are not executed because of the old uninitialized anchor and
+missing table column. A separate control initializes the anchor, adds the two
+numeric tree7 channel counts from the later original-author table and separates
+the arbitrary-tree metadata namespace. All 840 nonopaque-residual frames then
+match exact consumed bit counts, slots, fine parameter rows, smoothing and
+STP/GES metadata. The C probe aborts if asked to execute residual AAC decoding.
+All original/control source hashes, exact changes, mismatching values, exclusions
+and output hashes are retained. This is internal qualification, not formal ISO
+conformance. No reference implementation or FDK dependency enters production.
+
+The full fvid-media suite passes 575 unit checks (one existing ignored),
+and all 17 configuration/entropy/parameter/frame integration checks pass.
+Offline all-test compilation passes. Fixture regeneration is byte-exact with
+process/socket creation denied. The [test report](validation/aac-ld-mps-frame-tests-2026-10-30.json)
+and [generation report](validation/aac-ld-mps-frame-generation-2026-10-30.json)
+retain exact scope and hashes.
+
+Full spatial PCM is still unsupported: CLD energy quantization/dequantization,
+smoothing application, matrix interpolation, decorrelation/upmix, residual AAC
+integration and LD-QMF/LD-SBR routing remain. The native renderer refusal is
+unchanged. Synthetic movie playback, seeking and rewinding acceptance are still
+required; there are zero accepted spatial programmes or closed spatial codec
+gaps. The full codec goal remains active.
+
+## LD-MPS stateful parameter indices, 2026-10-30
+
+The owned parameter layer now handles all LD data modes, single/paired coded
+sets, stride 1/2/5/23, coarse/fine transitions and separate entropy/mapped
+histories for CLD, ICC and CPC. Output rows contain fine indices before energy
+quantization, dequantization, smoothing or spatial matrix processing. A cloned
+instance is a component checkpoint; reset restores both histories and their
+quantization domains. The full block and caller cursor commit together only
+on success. Independent first-set keep/interpolate, trailing interpolation,
+unpaired coded geometry, bad slots, unused PCM ordinals and truncated fields
+are refused transactionally. One or two strictly ordered parameter sets are
+bounded by a 1..32-slot frame. Zero-width regions remain the responsibility of
+the enclosing dispatcher; this positive-region component accepts 1..23 bands.
+
+The two band maps must remain distinct. For six bands at stride five, entropy
+history expands as 4+2, while mapped output expands as 3+3. The first
+comparison exposed
+inconsistent assumptions: the initial generator used the history map for
+expected output while the initial Rust component used the output map for both
+histories. The independent ISO comparison confirms the two separate maps;
+the generator output and Rust parse-history mapping were corrected separately.
+A dedicated check now verifies parse history after every block. Subsequent
+frames switch strides to expose
+incorrect history reuse. CLD fine-to-coarse division truncates toward zero,
+whereas CPC uses arithmetic shift; coarse CLD endpoints expand to -15/+15.
+
+The old ISO insert leaves the interpolation left-anchor index uninitialized.
+The later [original-author implementation](https://github.com/mstorsjo/fdk-aac/blob/c41c3c7516ea8d0d78a53b96b30bed3a29745cc6/cpp/libSACdec/src/sac_bitdec.cpp)
+explicitly initializes it to zero. With LD's maximum of two sets and no final
+interpolated set, a leading interpolated row retains its previous indices at
+its own first slot; this layer does not invent a previous-frame slot. The
+reference harness runs 3864 noninterpolated blocks against unmodified ISO
+sources. A separate research control changes only that anchor initialization
+and matches all 4416 blocks, including their exact consumed bit counts and
+parse histories. It does not execute the original undefined interpolation path.
+The original/control source hashes and results are retained in the
+[reference report](validation/aac-ld-mps-parameters-reference-2026-10-30.json).
+No reference C/FDK implementation is included in the production decoder.
+
+The saved corpus contains 552 eight-block sequences / 4416 blocks covering all
+positive band counts, four strides, both initial quantizers and all three
+parameter kinds. Expected output rows, parse histories and quantization are
+independently inverse-generated. Ordinary Rust tests only read saved fixtures;
+generation and reference compilation remain separate research commands.
+Checkpoint replay is bit- and state-exact at eight starting bit offsets.
+Every block prefix is checked at offsets 0/3/7: 280719 failures preserve both
+histories and the caller position, even with later bits present in storage.
+Additional controls cover first/final legal slots, leading interpolation with
+default/keep anchors and reset. Regeneration matches both outputs byte-for-byte
+with process/socket creation denied, recorded in the
+[generation report](validation/aac-ld-mps-parameters-generation-2026-10-30.json).
+
+The full fvid-media unit suite passes 574 checks (one existing ignored),
+and all 13 configuration/entropy/parameter integration checks pass. Offline
+compilation of all test targets passes. Exact scope is recorded in the
+[test report](validation/aac-ld-mps-parameters-tests-2026-10-30.json).
+
+This is component qualification, not spatial playback or seek acceptance.
+There are still zero accepted spatial programmes and zero closed spatial codec
+gaps. Full spatial-frame dispatch, residual restrictions, smoothing, CLD energy
+quantization, decorrelation/upmix, LD-QMF/LD-SBR routing and synthetic movie
+playback/seek/rewind acceptance remain open. The native decoder's existing
+spatial-renderer refusal remains enabled. The broader codec goal remains active.
+
+## LD-MPS parameter-pair entropy and index reconstruction, 2026-10-30
+
+The owned parameter-pair component now reconstructs CLD, ICC and CPC indices
+from grouped-radix PCM or Huffman 1D/2D syntax, including both difference
+contexts, every LD LAV, signed symmetry restoration, odd-vector tails, escaped
+pairs, coarse/fine alphabets and fine-CPC LSBs. LD mode uses frequency pairing
+and no pilot-coding flag; this does not claim generic non-LD MPEG Surround
+pilot/time-pair support. Numeric prefix facts are separately frozen: 34 books,
+1504 reachable codewords, with no reference implementation in the runtime.
+
+The caller supplies history already in the requested quantization domain.
+Independent/frequency vectors do not read irrelevant history; a second vector
+may depend on the first vector's MSBs before either vector receives CPC LSBs.
+The initial independent pair also supports the LD time-codebook/frequency-
+reconstruction rule. Cursor and input history remain unchanged on failure,
+including a later vector or the last CPC LSB. Unused PCM ordinals and out-of-
+alphabet reconstructed indices are refused. Positive vectors cover 1..23
+bands; zero-band PCM consumes its coding flag and returns empty rows. Empty
+Huffman vectors are explicitly refused, without claiming normative acceptance
+of that representation.
+
+The own inverse-coded corpus has 8094 blocks. It covers every meaningful
+independence/set/difference-flag combination, single/paired vectors, seven
+positive region sizes, empty PCM, every reconstructible signed LAV symmetry
+pair and repeated escapes. All 8094 blocks match the independent expected
+indices at eight bit offsets with an immediately following sentinel. Full-band
+coding contexts undergo every bit truncation at offsets 0/3/7, including the
+sentinel in backing storage but outside the declared bit limit. Every numeric
+leaf is separately checked at eight offsets; codeword uniqueness and complete
+prefix mass are checked without regenerating fixtures.
+
+The [official ISO insert](https://standards.iso.org/iso-iec/23003/-2/ed-2/en/SAOC_IS7_ReferenceSoftware__20160603.zip)
+provides an additional comparison. Original sources agree on 8052 cases and
+consume the expected number of bits on all 8094, without changing history.
+There are 42 retained value mismatches: the original CLD escape scratch array
+has shape `esc_data[MAXBANDS][2]` while its two row pointers are used as separate
+vectors of escape values. They overlap for three or more escapes. A research-
+only control changes that single declaration to `esc_data[2][MAXBANDS]`; all
+8094 then agree, including the original 8052 controls. The original results,
+exact declaration change, archive/member/input/output hashes and mismatching
+values are retained in [the reference report](validation/aac-ld-mps-entropy-reference-2026-10-30.json).
+No corrected or original C decoder is incorporated into FVid. This evidence
+qualifies this implementation internally, not the full standard or an official
+ISO conformance certificate.
+
+The fixture generator regenerates two output files / 4716104 bytes byte-exact
+with process/socket creation denied. Codeword JSON is a separate numeric input;
+its complete contents are also verified against the frozen ISO archive by the
+explicit research validator. Ordinary tests use saved data only, without
+FFmpeg, reference software, compiler, process creation or network.
+
+This is a parameter-pair component, not complete spatial-frame/playback support.
+No accepted spatial movie or closed codec gap is counted here. Frame data modes,
+stride expansion, coarse/fine history transitions, interpolation/smoothing,
+frame checkpoint/reset, decorrelation/upmix and LD-QMF/LD-SBR routing still
+require implementation and synthetic playback/seek/rewind acceptance. The
+broader codec goal remains active.
+
+The complete fvid-media unit suite passes 573 checks (one existing ignored).
+All five new entropy integration checks and four configuration checks pass;
+offline all-test compilation also passes. The
+[test report](validation/aac-ld-mps-entropy-tests-2026-10-30.json) records exact
+scope, 512 full-band coding contexts and the short-prefix check count.
+
+## LD-MPS configuration metadata and bounded ELD integration, 2026-10-30
+
+`LDSpatialSpecificConfig` now has an owned typed parser. It covers all eight
+standard tree descriptions, seven parameter resolutions, indexed/explicit
+frequencies, frame-slot counts, quantization, gains, one-ICC and matrix flags,
+temporal/decorrelation modes, single/dual TTT regions, symmetric/asymmetric HRTF
+levels/phases and length-delimited residual, downmix-residual, arbitrary-tree
+and unknown extension records. Optional fields retain presence independently
+of explicit zero. Unknown payload bytes are retained for later consumers.
+
+Every child parser is limited to its declared payload; parsing commits the
+caller cursor only on complete success. Malformed frequency/tree/tool values,
+invalid band counts, zero-length residual children, unfinished arbitrary trees,
+oversized declared extents and every bit truncation of a complex outer extent preserve the
+caller position. Standalone metadata is tested at all eight bit offsets.
+
+ELD extension type 2 now populates `AudioSpecificConfig.ld_mps` in both root and
+media APIs. The baseline `54afcc2531` rejects an own tree-7 ASC with
+`AAC ELD extension tool is not yet implemented`; the new ASC parser accepts
+its spatial metadata. Native reconstruction still explicitly refuses with
+`AAC LD-MPS spatial reconstruction is not yet implemented`. Core-only parsing
+also refuses spatial configurations. This prevents interpreting a downmix as
+finished spatial output while the renderer is under construction.
+
+The own corpus has 336 configurations and eight short nonzero AAC-ELD MP4
+configuration controls, 361 files / 966634 bytes. All 336 expected metadata
+records match the unchanged [official ISO reference insert](https://standards.iso.org/iso-iec/23003/-2/ed-2/en/SAOC_IS7_ReferenceSoftware__20160603.zip),
+including HRTF and known extension fields. The
+[reference report](validation/aac-ld-mps-config-reference-2026-10-30.json)
+freezes archive, reference members, driver and individual payload hashes.
+The insert's nested AAC `flex_mux.c` also confirms that an ELD configuration
+payload is extracted as its own byte array; its internal byte alignment is
+relative to that payload origin. Reference code is used only by an explicit
+research validator, never by ordinary tests or the FVid runtime.
+
+The movies deliberately contain core payload only, without spatial parameter
+frames. They prove ASC metadata acceptance and specific renderer refusal before
+PCM output; they are not complete spatial programmes, playback acceptance,
+seek/rewind qualification or closed codec gaps. Those require encoded spatial
+frames, parameter reconstruction, decorrelation/upmix and actual LD-QMF routing.
+ELD extension type 1 (SAOC), AAC-LD sync-extension/AOT-44 transport integration,
+and other broader codec requirements remain open.
+
+Four new integration checks pass. The saved generator regenerates all files
+byte-exact with process creation and sockets denied; ordinary tests require no
+FFmpeg, network, reference archive or C compiler. The complete root/media unit
+suites pass 1061/572 checks (26/1 existing ignored), and 43 integration checks
+pass, including the new four. Offline all-test compilation passes; both root
+and media metadata/MP4 paths are covered. The
+[test report](validation/aac-ld-mps-config-tests-2026-10-30.json) separates
+configuration acceptance from renderer refusal and records zero accepted
+spatial programmes and zero closed codec gaps for this foundation stage.
+
+## LD-MPS filterbank foundation, 2026-10-30
+
+The spatial extensions remain open. This step implements the owned 32/64-band
+LD-QMF analysis and synthesis required for LD-MPS, not spatial frame decoding,
+upmix or movie playback. ELD extension 1/2 refusal is unchanged; no newly
+accepted codec programme or closed codec gap is counted for this component.
+
+The [Fraunhofer guide](https://www.iis.fraunhofer.de/content/dam/iis/de/doc/ame/wp/FraunhoferIIS_Application-Bulletin_AAC_ELDv2_Implementation_Guide.pdf)
+identifies LD-QMF for active LD-MPS and distinguishes it from plain LD-SBR's
+CLDFB. The [official ISO insert](https://standards.iso.org/iso-iec/23003/-2/ed-2/en/SAOC_IS7_ReferenceSoftware__20160603.zip)
+is now available for research qualification. No reference implementation code
+or library has been incorporated into FVid. The 640 window values are numeric
+facts from its single-precision realization of ISO 23003-2 table A.21; that
+realization, rather than the full-precision normative decimal table, is explicit
+in the source and [provenance report](validation/aac-ld-qmf-source-2026-10-30.json).
+
+Owned scalar traces cover first-sample impulses, dense bursts and mixed tones
+at both widths over 40 slots, including their complete tails. Six additional
+synthesis traces exercise low real, high imaginary and dense arbitrary complex
+subbands, as required after spatial upmix. Absolute sample
+and slot timelines use direct complex modulation without production shifting.
+Rust analysis/synthesis agrees within 3e-12; whole-call/chunked operation, cloned
+checkpoints, reset and malformed/finite-overflow rollback pass. The impulse
+peak occurs at sample 128/256 under chronological block indexing; this is not
+a claim about device/framing latency. The saved fixture generator regenerates
+31 files / 508181 bytes byte-exact with process/socket creation denied; the
+numeric table is a separately tracked input.
+
+An explicit research validator compiles unmodified ISO reference source files
+in a temporary directory. It retains the original reference comparison and a
+separate translation-unit control using double-precision pi. Original reference
+arithmetic rounds pi, intermediate analysis products/accumulators, subbands and
+final PCM to float. The independent rounding realization matches all 24 original/
+pi-control cases: analysis exactly, synthesis within 3.6e-15. Original f64-oracle
+differences reach 5.81e-5 in analysis and 3.51e-6 in PCM; they are retained in
+[the report](validation/aac-ld-qmf-reference-2026-10-30.json), not hidden by
+reducing Rust precision. Ordinary Rust tests read saved fixtures and require no
+reference archive, C compiler, FFmpeg, process creation or network.
+
+The full no-default-features/player fvid-media unit suite passes 572 checks
+(one existing ignored), and the root player library checks offline. This is
+component qualification only. Next requirements remain spatial configuration,
+parameter/frame decoding, decorrelation/upmix, LD-SBR routing through LD-QMF,
+then synthetic movie playback, exact PCM/ranges and seek/rewind acceptance.
+
+## AAC-LD explicit lower-rate reconstruction, 2026-10-30
+
+The previous explicit-output constructor refused the new own AAC-LD movie with
+`AAC output clock disagrees with configuration` (baseline `ed57ba391a`).
+AOT 23 now accepts exact integer factors 2/3/4/8 when both source rate and
+480/512-sample source frame divide exactly. Factor three requires 480 samples.
+The default constructor remains nominal-rate. SBR/PS and incompatible clocks
+are excluded from this AAC-LD path.
+
+This implementation retains the full nominal synthesis and LTP history, including
+odd lag 1023/13, retained lag, TNS and original SFB geometry. A separate short
+sine/low-overlap inverse filterbank reconstructs the low spectral prefix at the
+requested output rate, with source spectral normalization. It does not resample
+nominal PCM. Both banks participate in checkpoints, reset and packet rollback.
+Retaining nominal LTP deliberately provides no CPU or memory saving claim.
+
+The saved synthetic corpus contains 310 programmes, 310 EP1 movie variants and
+120 nominal PCM controls (1362 files, 23712504 bytes). The independent oracle
+uses an absolute nominal prediction timeline, direct cosine transforms and
+analytical windows. It covers both source frame sizes, ten layouts, alternating
+windows, all LTP gains and odd/reused lag. No private media or foreign decoder
+was used. Regeneration was byte-exact with process creation and sockets denied;
+ordinary tests load the saved corpus without generating it.
+
+Six integration tests pass, including oracle PCM, MP4/Matroska ranges, EP1,
+playback frame-edge seeks, repeated ranges, EOF and rewind. Two additional
+channel tests verify unchanged nominal prediction and state after invalid
+synthesis or cross-mode restore. The real PlatformBackend passes 32 phases across eight ordinary/EP1 movies:
+full playback, two seeks and rewind with queue drain. This covers 11025, 8000,
+and 6000-Hz output and an eight-channel input routed through the default device.
+The [device report](validation/aac-ld-downscaled-device-2026-10-30.json) saves
+input hashes, output positions, drain results and binary linkage without libav.
+This does not establish subjective listening quality or eight-speaker wiring.
+Worker navigation additionally passes all 620 ordinary/EP1 programmes. The full
+root/media suites pass 1061/569 checks (26/1 existing ignored); 44 selected
+LD/ELD/LD-SBR integration checks and offline all-test compilation pass.
+The [test report](validation/aac-ld-downscaled-tests-2026-10-30.json) separates
+initial refusal evidence from acceptance and compatibility qualification. These results are internal regression
+qualification, not a formal ISO conformance certificate or completion of the
+broader codec coverage goal.
+
+Current source audit still finds explicit ELD extension type 1/2 refusal in
+`config_impl.rs`; spatial rendering remains a separate open requirement. The
+[Fraunhofer implementation guide](https://www.iis.fraunhofer.de/content/dam/iis/de/doc/ame/wp/FraunhoferIIS_Application-Bulletin_AAC_ELDv2_Implementation_Guide.pdf)
+distinguishes AOT 39 including LD-SBR from AOT 44 LD MPEG Surround. Successful
+LD-SBR playback does not qualify the spatial reconstruction tool.
+
+## Factor-three ELD core adaptation, 2026-10-30
+
+A new own 480-sample ELD movie advertises 8 kHz from a nominal 24-kHz source.
+The previous explicit-output constructor refused it with
+`AAC output clock disagrees with configuration`. The native ELD core now
+supports an exact factor-three hint/output pair for 480-sample source frames,
+producing 160 samples per source AU. Source entropy, SFB and TNS geometry,
+packet clock and spectral-level normalization retain the nominal source values.
+Default native reconstruction remains nominal/full-rate. There is no added
+PCM resampler or foreign decoder.
+
+The own inverse transform adds 160-point plans, checked by the existing direct
+cosine/transpose/dense-spectrum tests. Independent 40-value spline segments
+produce the short window from the 512-reference numeric facts; the production
+Thomas solver and the oracle's dense pivoted solve/Hermite evaluation agree
+within 2e-12. The independent short cosine/overlap PCM agrees within 1e-7.
+
+There are 22 ordinary, 22 EP3 and 22 EP1 programmes, covering all eligible
+480-frame source controls: 8/16-kHz output, layouts, resilience, PNS/MS/intensity
+and TNS. Generation and a separate fixture-integrity check assert source AU
+bytes (including the saved protected transport bytes) are unchanged. Every
+programme's PCM oracle is explicitly nonzero. Shared qualification checks cover
+checkpoints/reset, smaller retained native payload, MP4/Matroska export and
+repeated ranges, frame-edge/repeated/EOF/past-EOF seek/rewind, EP1 groups, and
+WAVE crop/gain/stereo/32-kHz transforms.
+
+A further 22 ordinary and 22 EP1 high-band programmes cover 11 standard/explicit
+source clocks. Outputs include 32000, 29400, 16000, 14700, 8000, 7350, 4000,
+3675, 2450, 12522 and 4115 Hz. First and final source SFBs are coded; the high
+coefficients must be parsed at the source geometry and discarded by short
+synthesis. These cases also qualify fractional-nanosecond packet/seek timing.
+There are 110 accepted programmes across both corpora.
+
+Four additional own movies qualify refusal of the requested short mode: two
+512-sample core programmes would require a noninteger output frame, and two
+LD-SBR programmes would require a fractional CLDFB width. The tests parse the
+actual movie's ESDS/ASC, verify strict output negotiation, and retain default
+nominal native construction. These are refusal/guard tests, not acceptance of
+playback at the requested invalid output clock. The low-level synthesis
+constructor also rejects non-divisible source geometry before truncating sizes.
+
+The new 139 artifacts (1119149 bytes) and all 660 previous short-core artifacts
+(5482463 bytes) regenerate byte-exact with process/socket creation forbidden;
+[the generator report](validation/aac-eld-third-generation-2026-10-30.json) saves
+hashes and measurements. Ordinary tests read committed data without FFmpeg or
+network access. Nine actual PlatformBackend cases pass all 36 full/quarter-seek/
+60-percent-seek/rewind phases, including EP3/EP1, resilience/TNS/PNS, eight-
+channel sources and the 2450/4115/14700-Hz output clocks. [The device report](validation/aac-eld-third-device-2026-10-30.json)
+saves input hashes, positions/drain measurements and linkage. The binary has no
+FFmpeg/libav linkage. Eight-channel inputs use normal stereo routing; subjective
+listening and physical eight-speaker output are not established.
+
+The additional rate corpus has 90 artifacts / 813869 bytes, also regenerated
+byte-exact under the same process/socket guard. Fourteen new integration
+checks (including strict refusal/fixture-quality checks) and 33 selected prior
+ELD/LD-SBR checks pass, 47 total. The complete root/media suites pass 1631 unit
+checks, plus the added rate-worker check (1632 unique checks; 29 existing ignored).
+Worker navigation covers 5527 programmes. Offline all-test compilation passes.
+[The test report](validation/aac-eld-third-tests-2026-10-30.json) records the
+before-fix diagnostic and separately executed qualification checks.
+
+The [published lower-rate/ELD window construction](https://data.epo.org/publication-server/rest/v1.2/patents/EP4231287NWA1/document.pdf),
+sections A.0/A.1, distinguishes integer core-only frame geometry from LD-SBR's
+band geometry. This implementation and numerical/device qualification are not
+an official ISO conformance certificate. Other adaptation ratios, AAC-LD output
+adaptation and SAOC/LD MPEG Surround remain open; the broader codec-gap goal
+stays active.
+
+## LD-SBR crossover predictor continuity, 2026-10-30
+
+Own nonzero movies alternate the crossover between kx=4 and kx=5 at source
+frames 4 and 8, crossing the factor-eight short analysis width. The previous
+native decoder disagreed with the independent PCM oracle by 0.0000030056835
+on `n480-c1-start0-invf3-x2`; the same controls with inverse filtering off and
+single-rate output passed before that failing case. This is a numerical
+acceptance failure, not an unsupported-format/refusal result.
+
+The HF predictor requires the two LF columns actually emitted before the current
+frame. Previously the decoder selected the new analysis bank's cached past
+columns, replacing the actual predecessor signal when the bank changed. It now
+retains one emitted LF tail, with the previous crossover cutoff. Both short and
+full analysis histories continue advancing. Checkpoint/reset/transactional
+clones retain the actual signal history. Removing the redundant full-bank tail
+also removes its duplicate inline storage; no throughput or RSS gain is claimed.
+A focused unit invariant checks the exact predecessor rows in both directions.
+
+Across two corpora there are 96 ordinary, 96 EP3 and 96 EP1 twelve-frame
+programmes (288 total): 480/512 source samples, mono/stereo, both starting banks,
+off/high inverse filtering and single/double-rate output. Factor 2 crosses
+kx=16/17, factor 4 crosses kx=8/9 and factor 8 crosses kx=4/5. EP3 uses variable-length header/control categories with
+reversed wire order. Source spectra, packets, headers, CRC and FEC are entirely
+own synthetic data. Independent PCM uses direct convolution, chronological
+selected LF rows, scalar complex covariance/gain/noise, and modulated-column
+superposition. Ordinary tests only read saved fixtures. Ten new integration
+checks cover numerical acceptance, checkpoint/reset and malformed-packet
+rollback, MP4/Matroska export/crops/WAVE transforms, frame-edge and repeated
+seek, EOF/past-EOF and rewind, including EP1 group transport.
+
+All 36 selected prior ELD/LD-SBR integration checks pass as well (46 integration
+checks total). The complete root/media suites pass 1629 unit checks, and the
+additional wide-crossover worker check passes (1630 unique checks; 29 existing
+ignored tests). Worker navigation covers 5417 programmes. Offline all-test
+compilation passes. [The test report](validation/aac-eld-crossover-tests-2026-10-30.json)
+records the before-fix failure and separately executed qualification checks.
+
+All 580 artifacts (3583011 bytes) regenerate byte-exact while process and socket
+creation are forbidden; [the generator report](validation/aac-eld-crossover-generation-2026-10-30.json)
+saves hashes and measurements. Ten actual PlatformBackend cases pass all 40
+full/quarter-seek/60-percent-seek/rewind phases in both switching directions,
+including EP1/EP3; [the device report](validation/aac-eld-crossover-device-2026-10-30.json)
+saves input hashes and positions/drain times. The binary has no FFmpeg/libav
+linkage. This is not subjective listening or an official codec conformance
+certificate. The broader codec-gap goal, other adaptation ratios and spatial
+SAOC/LD MPEG Surround remain open.
+
+## Factor-eight ELD/LD-SBR adaptation, 2026-10-29
+
+A new own nonzero mono movie declares a 3-kHz LD-SBR output from a nominal
+24-kHz source. Before this change the native explicit-output constructor failed
+with `AAC output clock disagrees with configuration`, and the player selected
+24 kHz / 512 samples instead of the declared 3 kHz / 64 samples. The new
+acceptance test reproduces that exact constructor failure before the fix.
+
+Exact downscaleInfo/output-clock negotiation now also admits factor 8. Own
+IMDCT plans add 60/64 lengths and short-window interpolation uses independent
+15/16-point segments. Centered CLDFB adds 4-band analysis/synthesis; the immutable
+matrix cache is indexed across all admitted widths. The previous full companion
+continues to supply coded LF above the short analysis width, including LFE. No
+new resampler or foreign decoder is introduced, and this is not a throughput or
+memory-reduction claim. Unsupported factors still fail explicit negotiation.
+
+The 258 saved LD-SBR source programmes each have ordinary, EP3 and EP1 factor-
+eight variants. Sixteen further 48/96-kHz core programmes exercise crossover
+above the short width and genuine 4-band analysis plus HF reconstruction. Two
+bare ELD core movies independently qualify factor-eight playback without SBR.
+There are 792 accepted programmes total. All saved source AUs are asserted
+unchanged. A separate four-case CLDFB corpus uses direct convolution/modulated-
+column superposition; dense-solved windows and direct cosine reconstruction
+supply independent PCM, rather than the production spline solver or FFT.
+Shared qualification code runs the same exact-frame/EOF/repeated seek, rewind,
+checkpoint, malformed-packet rollback, exports, interval and WAVE-transform
+checks for both the previous and new downscale corpora.
+
+All seven new integration checks and 31 selected prior ELD/LD-SBR checks pass
+(38 unique checks). The complete root/media suites pass 1627 unit tests, with
+29 existing ignored tests. Worker navigation covers 5129 programmes. Both old
+and new PCM oracles are explicitly required to be nonzero. Offline all-test
+compilation with the player feature passes. [The test report](validation/aac-eld-eighth-tests-2026-10-29.json)
+records the before-fix diagnostic, qualified checks and timings.
+
+All 1617 new artifacts (10464136 bytes) regenerate byte-exact while process and
+socket creation are forbidden; [hashes and generation measurements](validation/aac-eld-eighth-generation-2026-10-29.json)
+are saved. Generalizing the generator preserves all 3146 previous factor-2/4
+artifacts (33802643 bytes), as [the preservation report](validation/aac-eld-eighth-preservation-2026-10-29.json)
+records. Ordinary tests read saved fixtures and never generate them.
+
+Eight actual PlatformBackend source cases pass all 32 full/quarter-seek/
+60-percent-seek/rewind phases at 3–24 kHz, including EP3/EP1 and bare core.
+[The device report](validation/aac-eld-eighth-device-2026-10-29.json) records hashes,
+positions and drain measurements. The exercised binary has no FFmpeg/libav
+linkage. Eight-channel sources use normal stereo routing; subjective listening
+and physical eight-speaker output are not established.
+
+This additional own mode follows the integer band/window geometry of the
+[published downscaled ELD/CLDFB construction](https://data.epo.org/publication-server/rest/v1.2/patents/EP4231287NWA1/document.pdf).
+[FDK's public encoder documentation](https://android.googlesource.com/platform/external/aac/+/master/libAACenc/include/aacenc_lib.h)
+limits that implementation to factors 2/4; it is not evidence for factor-eight
+conformance. No foreign codec implementation was copied. The own numerical,
+regression and device evidence is not a formal ISO conformance certificate.
+Other adaptation ratios and SAOC/LD MPEG Surround remain open; the broader
+codec-gap goal stays active.
+
+## Centered downscaled LD-SBR reconstruction and navigation, 2026-10-29
+
+Own nonzero MP4/Matroska movies reproduce the missing adapted LD-SBR output:
+the previous player selected 48 kHz / 1024 samples for a declared 24-kHz /
+512-sample output. Explicit native output negotiation refused the same mode.
+The native decoder now honors exact downscaleInfo/output-clock pairs at core
+factors 2/4, including single- and double-rate LD-SBR. The hint describes the
+adapted core rate; double-rate output is twice that rate. Unadvertised modes
+remain refused and default native reconstruction remains nominal/full-rate.
+
+Own centered CLDFB analysis supports 8/16/32 bands, and synthesis supports
+8/16/32/64 with the nominal 64-band normalization. Short ELD core samples are
+restored to nominal spectral-domain units before analysis. Syntax, frequency
+tables, patches, noise and envelope timing retain the source clock. When coded
+crossover exceeds the short analysis width (including LFE), a separately advanced
+centered full-band companion supplies the coded LF bins. Both histories and
+core overlaps participate in reset/checkpoints, transaction rollback and retained
+memory accounting. This currently retains and executes the full companion; no
+end-to-end speedup or memory reduction is claimed for adapted LD-SBR.
+
+Matroska's legacy SBR core-clock inference now preserves a frequency that exactly
+matches the advertised adapted output, including double-rate adaptation whose
+output happens to equal the nominal core rate. The same synthetic programmes
+cover that previously failing reader path. Unknown rates do not gain a fallback.
+
+The independent oracle uses time-indexed direct convolution and modulated-column
+superposition, dense-solved short windows and direct cosine reconstruction. A
+13-case primitive corpus covers impulses at block boundaries, dense/tonal input,
+all adapted widths, split processing, reset, finite output and rejected-input
+state preservation. The encoded corpus extends all 258 saved LD-SBR programmes
+at both factors, with matching EP3 and EP1. Sixteen additional 48-kHz-core movies
+exercise real short 8-band analysis below the coded crossover. Core/SBR source
+AU bits are asserted unchanged against their saved source controls. The tests
+compare independent PCM within 1e-7 and cover MP4/Matroska exports and repeated
+crops, frame-edge/EOF/past-EOF/repeated seeks, rewind, checkpoint replay,
+truncation/alignment rollback and crop/gain/stereo/32-kHz WAVE output.
+
+There are 1048 ordinary/EP3 and 516 EP1 programmes (1564 total). All five new
+encoded integration checks, the primitive check and the previous selected ELD/OD
+checks pass: 78 integration tests altogether. Root/media pass 1625 existing unit
+tests (29 ignored), plus the new worker check. Worker navigation now covers 4337
+programmes. Offline all-test compilation with the player feature also passes.
+[The test report](validation/aac-eld-sbr-downscaled-tests-2026-10-29.json) records
+the independently executed checks.
+
+The new 27-file primitive corpus (383977 bytes) and 3146-file movie corpus
+(33802643 bytes) regenerate byte-exact with process/socket creation forbidden.
+The generalized scalar oracle also preserves all 1038 saved full-rate LD-SBR
+artifacts (27871422 bytes). [Hashes and generator measurements](validation/aac-eld-sbr-downscaled-generation-2026-10-29.json)
+are saved separately; ordinary tests only read committed data.
+
+Actual PlatformBackend output passes six source cases and all 24 full,
+quarter-seek, 60-percent-seek and rewind phases, including EP3/EP1, mono/stereo/
+eight-channel source layouts and real 8-band analysis. Hashes and measured
+positions/drain times are in [the device report](validation/aac-eld-sbr-downscaled-device-2026-10-29.json).
+The exercised binary has no FFmpeg/libav linkage. Eight-channel sources use the
+normal stereo router; subjective listening and physical eight-speaker output
+are not established.
+
+Reference construction: [published downscaled ELD window and CLDFB description](https://data.epo.org/publication-server/rest/v1.2/patents/EP4231287NWA1/document.pdf),
+sections A.0/A.1. Implementation and oracle are own code. These numerical,
+regression and device results are not an official codec conformance certificate.
+Other adaptation ratios and spatial SAOC/LD MPEG Surround remain separate open
+scope. The broader codec-gap goal stays active.
+
+## Native short ELD core transforms and declared low-rate output, 2026-10-29
+
+A new own ELD movie declares a 12-kHz output and downscaleInfo on a 24-kHz,
+512-sample source. The previous native explicit-output constructor refused it
+with `AAC output clock disagrees with configuration`; the previous file reader
+instead fell back to full-rate 24-kHz/512-sample decoding. The new supported
+core modes honor exact advertised factors 2/4: 256/240/128/120 output samples,
+with the source entropy/TNS geometry and core packet clock retained. Default
+`NativeAacDecoder::new` still reconstructs at the nominal full rate. Unadvertised ELD
+downscale rates and downscaled LD-SBR remain refused by explicit-output negotiation.
+
+The own short filterbank uses an independently solved not-a-knot cubic window
+for each 128-value segment of the normative 512 reference. Half-sample-centered
+evaluation does not mix discontinuities or the leading zero region. The 240/120
+windows also use that reference, rather than decimating the 480 window. The
+inverse transform is genuinely short; source-level normalization is retained and
+TNS runs before the high-frequency spectrum is discarded. The own IMDCT adds
+240-point support and passes the existing direct-cosine/transpose checks.
+
+There are 109 ordinary, 109 matching EP3 and 109 whole-group EP1 twelve-frame
+programmes. They use the eligible factor-2/4 cases of the existing 60 core
+controls: 480/512 geometry, layouts, resilience, PNS/MS/intensity/TNS and high-
+spectrum controls. Independent generation uses a dense pivoted spline solve,
+Hermite evaluation and direct short cosine/overlap arithmetic, not the production
+Thomas solve or FFT. Every encoded source AU is asserted identical to its saved
+nominal-source control. Four saved window arrays agree within 2e-12; PCM agrees
+within 1e-7. Six integration checks cover checkpoint/reset and cross-mode refusal,
+smaller retained native payload, owned/public MP4/Matroska and repeated exact
+ranges, typed EP1, playback/frame-edge/repeated/EOF/past-EOF seek/rewind and WAVE
+crop/gain/stereo/32-kHz resampling. This is not an RSS or throughput benchmark.
+
+All 660 artifacts / 5482463 bytes regenerate byte-exact with process/socket
+creation forbidden. The generalized core generator preserves the saved 242-file
+core corpus, plus the saved LD-SBR/EP3 corpora (1038, 524 and 1236 artifacts) and
+the 685-file downscaleInfo corpus. The LD-SBR audit uses its saved generation
+mode `include_header_switch=True`. Ordinary tests need no FFmpeg or network.
+Root/media suites pass: 1625 tests, 29 ignored; captured worker navigation covers
+2773 programmes. All 64 previous selected ELD/OD integration checks and six new
+checks pass (70 integration tests). Offline all-test compilation passes with
+`--no-default-features --features player`.
+
+Six actual PlatformBackend cases cover all four short transform lengths plus
+EP3 and EP1, at 12/24 kHz and mono/stereo/eight-channel source layouts. All 24
+full/quarter-seek/60-percent-seek/rewind phases drain to their expected end
+position. Input hashes and phase measurements are in
+[the device report](validation/aac-eld-short-device-2026-10-29.json). The exercised
+binary has no FFmpeg/libav linkage. Eight-channel sources use normal stereo
+routing; subjective listening and eight physical speakers are not established.
+
+Reference construction: [published downscaled ELD window and CLDFB description](https://data.epo.org/publication-server/rest/v1.2/patents/EP4231287NWA1/document.pdf),
+sections A.0/A.1. The spline/FFT implementation is own code. Numerical/regression
+and device evidence here is not an official codec conformance certificate.
+Downscaled LD-SBR analysis/synthesis CLDFB, other adaptation factors, SAOC/LD
+MPEG Surround and broader codec gaps remain open. The full codec-gap goal stays
+active.
+
+## ELD downscaleInfo parsing with full-rate reconstruction, 2026-10-29
+
+The new own mono ELD movie reproduced `AAC ELD extension tool is not yet
+implemented` before the fix. Extension ID 3 was grouped with spatial tools 1/2.
+It is now parsed as sample-rate adaptation information and exposed separately as
+`AudioSpecificConfig.eld_downscale_sample_rate`. Indexed and explicit frequency
+forms use a reader bounded by the declared extension length; reserved/zero
+frequencies, truncated fields and nonzero fill nibbles keep specific failures.
+The core and LD-SBR output clocks, transform sizes and histories remain those
+of the full-rate ASC. The hint does not silently change packet durations or PCM.
+
+This implements acceptance and full-rate reconstruction of these streams, not
+an optimized short-transform/downscaled-output renderer. That optimization
+remains open, as do downscaled-output negotiation variants and spatial SAOC/
+LD MPEG Surround tools. Keeping this boundary explicit avoids claiming that a
+successful metadata parse implements another rendering model.
+
+There are 320 ordinary/EP3 and sixteen separate-ESC EP1 twelve-frame programmes,
+covering 480/512 frames, all 60 existing core fixture controls (layouts, tools,
+resilience and standard/explicit clocks), and mono/stereo/eight-channel LD-SBR with
+core/double output rate and CRC off/on. Their full PCM matches unhinted controls
+exactly and saved independent cosine/CLDFB PCM within 1e-7. Six tests cover native
+checkpoint replay, owned/public MP4/Matroska output, repeated exact ranges,
+AudioStream playback/frame-edge/repeated/EOF/past-EOF seek/rewind, typed EP1 groups
+and WAVE gain/crop/stereo/32-kHz resampling. Twelve malformed movies verify
+specific ASC errors before any caller-owned PCM is written.
+
+The 685 artifacts / 4859925 bytes regenerate byte-exact with process and socket
+creation forbidden. Ordinary tests use saved own files without FFmpeg/network.
+Root/media suites pass: 1623 tests, 29 ignored; captured worker navigation now
+covers 2446 programmes. All 58 selected previous ELD/OD integration checks and
+six new checks pass (64 integration tests). All-test compilation passes offline
+with `--no-default-features --features player`.
+
+Three new ordinary/EP1/EP3 hint-bearing files also complete twelve actual
+PlatformBackend phases: full playback, quarter/60-percent seek and rewind.
+The PCM clocks stay 24/48 kHz despite a 12-kHz adaptation hint. The device report
+is [saved here](validation/aac-eld-downscale-info-device-2026-10-29.json).
+The exercised example binary has no FFmpeg/libav linkage. This is device
+callback/drain qualification, not subjective listening or full ELD conformance.
+
+Wire references: [AOSP transport descriptor definitions](https://android.googlesource.com/platform/external/aac/+/master/libMpegTPDec/include/tp_data.h),
+[bounded-field crosscheck](https://android.googlesource.com/platform/external/aac/+/master/libMpegTPDec/src/tpdec_asc.cpp),
+and [FDK AAC downscaled-mode documentation](https://github.com/mstorsjo/fdk-aac/blob/master/libAACenc/include/aacenc_lib.h).
+Only the wire-field meaning and full-rate compatibility were crosschecked;
+no foreign codec or decoder implementation was copied or linked. The full
+codec-gap goal remains active.
+
+## LD-SBR actual platform-output qualification, 2026-10-29
+
+The example now has a distinct `--play-device` mode. Unlike the existing `--play`
+mode's silent modelled device, it creates PlatformBackend on the real audio
+thread, waits for device initialization, then runs full playback, quarter seek,
+60-percent seek (inside the second OD showing here) and rewind. Generation-tagged
+EOF events, callback-derived final position and actual backend drain must finish;
+start and drain failures/timeouts return errors. `--check-device` remains the
+separate open-without-PCM probe. This diagnostic mode is not an ordinary test and
+does not make CI depend on an output device.
+
+Four own synthetic OD-context movies passed all sixteen phases on this macOS
+host: mono/48 kHz indexed, mono/24 kHz hybrid, eight-channel/48 kHz fragmented,
+and eight-channel/24 kHz indexed, covering 480/512 source frames. Full-pass wall
+times were 0.503..0.550 seconds for 0.490..0.523-second presentations. Every phase
+ended at the source presentation duration without a device/drain error. The
+observed default output after the runs was an Apple Bluetooth device, two output
+channels at nominal 48 kHz. Eight-channel source playback uses the normal stereo
+router; it does not qualify eight physical speakers. These observations establish
+actual OS output/callback/drain/navigation on this host, not subjective listening,
+speaker wiring, all devices/platforms or full LD-SBR numerical conformance.
+
+The per-case input hashes and measured phase results are saved in
+[the device report](validation/ld-sbr-device-2026-10-29.json). Reproduce with:
+
+```sh
+cargo --config 'profile.dev.package.fvid-media.opt-level=2' run --offline --no-default-features --features player --example audio_probe -- --play-device tests/fixtures/playback-errors/mp4-ep1-od-context/n480-c1-snapshots-indexed.mp4
+```
+
+The changed example compiles offline; its exercised binary has no FFmpeg/libav
+linkage. No codec or ordinary-test behavior changes in this qualification step.
+Known ELD extension-tool refusals, broader codec/profile conformance and the
+remaining OD/scene/streaming restrictions still require work. The full codec-gap
+goal remains active.
+
+## Presentation-context OD dispatch for repeated LD-SBR sources, 2026-10-29
+
+The own repeated-source movie first reproduced `MP4 OD edits require
+presentation-dependent membership` in the previous export pipeline. Root and OD
+edits now reach the EP1 reader with the current root edit identity. The exact
+mapping selects the OD source domain belonging to that showing, including
+boundary-edit extrapolation for decoder preroll/lookahead. Coverage and empty
+OD-window checks remain strict; time is never rounded into another frame.
+The source-only API still refuses ambiguous edit relations instead of guessing
+an occurrence. The new explicit-context API distinguishes an implicit unedited
+root from omitted context, and rejects missing or empty root edit identities.
+
+Both shared PCM export paths and player AudioStream dispatch propagate the edit
+identity. Export checkpoints are keyed by that identity for OD-controlled audio.
+Generic worker checkpoints currently carry only source identity, so edited OD
+streams do not expose that checkpoint optimization; they rebuild decoder history
+through the selected edit's preroll. Static/non-OD checkpoint behavior is retained.
+
+There are 144 accepted twelve-frame LD-SBR programmes: 480/512 core samples,
+mono/eight-channel, core/double output rate (24/48 kHz), three OD command forms,
+indexed/fragmented/hybrid storage, with absent or retained inactive tails. An
+initial silence precedes two showings of the same source. Each showing has its
+own OD source domain and object ID (2 then 3); six real OD AUs, differently split
+edits and a one-OD-tick CTS offset are inspected. Exact fractional membership
+boundaries and unchanged source AU bytes are checked in both showings. Complete
+owned/public PCM, repeated ranges, independent scalar/CLDFB PCM, separate controls,
+playback/seek/EOF/rewind and second-showing WAVE crop/gain/32-kHz resampling pass.
+
+Twenty-four wrong-second-context movies declare extra active members only in the
+second showing. The first showing remains byte-exact, while the second produces
+the specific missing simultaneous ESC AU error. Direct contextual queries prove
+the different widths; retry/checkpoint replay preserves native decoder state.
+These are refusal regressions, distinct from the 144 accepted programmes.
+
+All 185 new artifacts / 6248972 bytes regenerate byte-exact with process and
+socket creation forbidden; all fourteen earlier EP1 corpora remain byte-exact.
+Ordinary tests use saved own media without FFmpeg or network. Five new checks,
+ten previous OD checks and 89 MP4 integration checks pass (104 integration tests).
+Root/media unit suites pass: 1623 tests, 29 ignored, including captured worker
+navigation across 2110 programmes. All-test compilation passes offline with
+`--no-default-features --features player`; the new integration binary has no
+FFmpeg/libav linkage. Physical-device output, full LD-SBR conformance, arbitrary OD dependency graphs,
+URL/OCI/IPMP, multiple controllers, root deactivation/general scene composition
+and live OD refresh remain open. The codec-gap goal remains active.
+
+## LD-SBR OD/edit clock mapping, 2026-10-29
+
+A new own LD-SBR movie reproduces `MP4 OD edit mapping is not implemented`
+on the previous implementation. The reader now compiles the relation between
+root audio and OD source clocks over every presented root window. Arithmetic
+uses checked exact common-clock coordinates, including sub-root-tick OD offsets;
+it does not round an OD event into a neighboring audio frame. Empty root windows
+schedule silence. Nonempty root windows require an active covering OD edit.
+The edit scan is linear and allocates no additional heap storage. A single
+source-clock relation also covers native decoder preroll before cropped windows.
+
+There are 76 accepted twelve-frame programmes: 480/512 samples, mono/eight-channel,
+three OD update forms, indexed/fragmented/hybrid storage, with absent or retained
+inactive ESC tails. Seventy-two use initial silence, half-frame crop and repeated
+source windows, with different root/OD edit partitions; four isolate a one-OD-tick
+CTS/edit offset without root edits. Tests verify the actual track edits and OD
+PTS, exact half-root-tick membership boundaries and unchanged source AU bytes.
+Complete owned/public exports, repeated ranges and separate transport agree;
+PCM agrees with saved independent scalar/CLDFB output within 1e-7. AudioStream
+playback, seeks around silence/crops/repeated windows/EOF/past-EOF and rewind
+preserve the complete expected PCM. The worker corpus includes all 76 cases.
+
+Sixteen explicit refusal movies cover OD silence overlapping active audio,
+uncovered tails, inconsistent repeated OD mappings and an independently edited
+root. These remain refusal tests: source-only decoding cannot yet select different
+membership for different presentations of the same source AU. That requires
+presentation-context dispatch, not a choice of the first occurrence.
+
+All 105 new artifacts / 2857317 bytes regenerate byte-exact with process and
+socket access forbidden; all thirteen earlier EP1 corpora remain byte-exact.
+Ordinary tests use saved own media without FFmpeg or network. Four new acceptance/
+refusal checks, six previous OD checks and 89 MP4 integration regressions pass
+(99 integration checks). Root/media unit suites pass: 1623 tests, 29 ignored,
+including captured worker navigation for 1966 programmes. Offline all-test
+compilation passes with `--no-default-features --features player`; the new
+integration binary has no FFmpeg/libav linkage. Playback qualification here
+uses AudioStream and captured worker output; physical-device listening and full
+LD-SBR conformance remain unproven. General presentation-dependent OD membership,
+URL/OCI/IPMP, multiple OD controllers, root deactivation and live OD refresh
+remain open. The codec-gap goal is still active.
+
+## Same-ASC LD-SBR membership through MP4 OD events, 2026-10-29
+
+The own indexed mono LD-SBR reproducer failed at frame 0 before this change
+with `EP1 MP4 missing simultaneous ESC access unit`. An ASC alone cannot tell
+an inactive dependency from a lost AU. The reader now indexes explicit file
+Object Descriptor events reachable through `iods` ES_ID_Inc references and
+`mpod` ES_ID_Ref tables; the EP1 reader selects the declared dependency prefix
+at the exact rational source time. Missing active AUs still refuse, and orphan
+OD tracks do not relax the existing static-membership checks.
+
+The own parser implements file ObjectDescriptorUpdate, ObjectDescriptorRemove,
+ESDUpdate and ESRemoveRef. ESDUpdate descriptors begin immediately after the
+10-bit object ID, with final bit alignment. Tests cover unaligned descriptors,
+four-byte expandable lengths and reversed reference lists. A complete command
+AU applies atomically; malformed late commands cannot commit an earlier update.
+Immutable indexed state supports navigation without changing codec history.
+Retained timelines, event snapshots and references enter the reader's index
+accounting; indexing checks the existing configurable metadata budget.
+
+There are 72 twelve-frame programmes: 480/512 core samples, mono/eight-channel,
+three update forms, indexed/fragmented/hybrid storage, each with either absent
+inactive tails or physically retained inactive data. Every programme keeps the
+same ASC while changing physical grouping 1 -> 4/27 -> 1. Complete native PCM
+matches saved independent scalar/CLDFB references; exact logical AU bits, sample
+offsets, fragment defaults/overrides and 72-kHz OD clock boundaries are checked.
+Six acceptance tests cover continuous decoding and checkpoint replay, public
+and owned PCM/ranges, WAVE crop/gain/resampling, AudioStream playback,
+frame-edge/repeated/EOF/past-EOF seek and rewind. Another 130 malformed files
+exercise specific parser/selection/missing-AU failures, atomic OD state and
+codec retry/history preservation. Worker capture includes these 72 programmes.
+
+All 207 new artifacts / 4014350 bytes regenerate byte-exact with process and
+socket access forbidden; all twelve prior EP1 corpora remain byte-exact.
+Ordinary tests read saved own synthetic media without FFmpeg or network.
+Root/media unit suites pass: 1623 tests, 29 ignored, including worker capture
+of 1890 programmes. All-test compilation passes offline with
+`--no-default-features --features player`; 27 additional MP4 container checks
+pass. All 123 previous selected AAC/ESC/MP4 integration checks and six new
+OD checks pass (156 integration checks including the container gate). The new
+integration binary has no FFmpeg/libav linkage.
+
+Wire references: [ISO/IEC 14496-14:2020](https://www.iso.org/standard/79110.html),
+file OD references and Systems stream bindings; [GPAC OD command source](https://github.com/gpac/gpac/blob/master/src/odf/odf_command.c),
+used to crosscheck bit alignment, without copying implementation.
+
+This qualifies the exercised LD-SBR transport and software playback/seek slice.
+It does not establish complete LD-SBR conformance or physical-device output.
+OD edit mapping, URL/OCI/IPMP descriptors, multiple controlling OD streams,
+root deactivation/general scene semantics and live OD refresh remain unsupported.
+Earlier dated sections below are historical qualification records, not a current
+aggregate list of open gaps.
+
+## Grouped PS discovery, PCE and ancillary/DRC transport, 2026-10-28
+
+The own grouped PS MP4 `sbr-ps-aot17-1024-24000-explicit-whole-indexed`
+reproduced `missing AAC ESC instance`. NativePsAacDecoder::decode_esc and
+InBandPsProbe::read_esc still used the strict recovered-class reassembler.
+Both EP1-only entrypoints now use grouped ER reassembly; the EP3 materialization
+path remains strict. This fixes both delayed PS decoding and in-band discovery,
+including explicit tagged PCE programmes.
+
+The PS corpus has 432 six-frame programmes: 24 original profile/length/rate/
+signaling controls, each with ordinary or explicit mono PCE/tag3 configuration,
+whole/core/pairwise grouping, and indexed/fragmented/edit-list storage. PCE ASCs
+are authored with epConfig=1 and matching unprotected reference ASCs. Retagged
+logical references differ only in the declared SCE tag. Every physical AU's exact
+bits are checked against separate controls in all storage/edit forms. All 384
+possible category-boundary partitions of the 48 indexed controls match raw
+unprotected decoding and independent syntax-only discovery through header
+changes and EOF. Checkpoints preserve delayed frame identity and the final
+flushed frame. Twenty-four saved absent-tag movies fail at frame 1 with the exact
+PCE error; retry/restore and later frames preserve PS PCM and discovery state.
+
+All PS programmes pass owned/public complete PCM and repeated exact crops,
+WAVE export with crop/gain, AudioStream playback, frame-edge/repeated/EOF/
+past-EOF seek, delayed checkpoint replay and rewind, including silence and
+repeated edit windows. Independent core PCM plus a separate invocation of the
+shared PS stage agrees within 2e-6. This is a transport/routing and independent-
+core crosscheck, not an independent numerical oracle for the complete PS DSP.
+
+A second corpus qualifies 198 three-frame ER programmes across 66 controls.
+It covers categories 5..8, opaque/reserved/fill data, 0/7/255/510-byte ancillary
+lengths, DRC metadata and chained DRC/ancillary/fill; plus explicit PCE core and
+PCE+metadata variants for ER-LC/LTP/LD, with matching native speaker order and
+nontrivial tags 3/5/7/9. Both separate and grouped reconstructions preserve exact
+logical bytes and saved independent scalar PCM. Authored PCE tags are checked
+against the parsed roster. Ninety saved malformed movies cover invalid fill
+nibbles/bytes, oversized ancillary lengths and absent PCE tags, including a late
+LFE tag error. Errors preserve retry/checkpoint/subsequent history. All 2032
+boundary partitions of mono and PCE controls pass; wide PCE chain cases exhaust
+the extension region with the core kept separate. Owned/public full and repeated
+crops, stereo/gain/32-kHz WAVE transforms, software playback, frame-edge/repeated/
+EOF/past-EOF seek and rewind pass. DRC is parsed as metadata; optional DRC gain
+application is unchanged. No additional production change was required for these
+ancillary/PCE grouping cases.
+
+Worker capture now covers 1824 programmes, including all 432 PS and 198 metadata/
+PCE programmes, with exact queued PCM and rational timestamps after live partial
+playback and navigation. The PS corpus has 553 artifacts / 3767625 bytes; the
+metadata corpus has 421 / 5153014. Both regenerate byte-exact with process/socket
+creation forbidden by an audit hook; all ten older EP1 corpora remain unchanged.
+The PCE ASC helper's new optional ep_config argument defaults to the original 0;
+144 default configurations compare byte-exact against the previous helper.
+Ordinary tests require neither FFmpeg nor network. The 1623 root/media unit
+tests pass (29 ignored), as do 123 selected integration checks: 15 new PS/metadata
+checks and the prior 108 AAC/ESC/MP4 checks. All-test compilation passes offline
+with `--no-default-features --features player`; both new integration binaries
+have no FFmpeg/libav linkage.
+
+Still open: same-ASC changes to physical MP4 dependency membership, external
+SL/OD updates, live/partial transport, other codec/profile/tool gaps and physical
+output-device checks. This qualifies the exercised grouped PS/PCE/metadata
+transport and navigation, not universal codec or independent PS DSP conformance.
+
+## Grouped EP1 ER-LC/LTP/LD core and standard SBR, 2026-10-28
+
+A saved own MP4 reproduced `missing AAC ESC instance` before the fix for
+`aac-er-lc-960-1-0-0-whole`. ER-LC/LTP/LD EP1 now selects the semantic grouped
+category reader; EP3 keeps the strict separate-class entrypoint. The ER extension
+reader includes the meaningful residue of a current grouped AU, parses each
+extension ID before its payload, and carries remaining data into the following
+extension. Standard SBR uses its grammar-delimited payload and known four-bit
+ID/whole-byte geometry, without scanning bytes or retrying failed offsets.
+Strict EP3 still requires the declared SBR class to end exactly there.
+
+A second own control exposed `unconsumed AAC ESC instances`: a final empty
+ER-LTP spectral category held only four required alignment bits. Zero-bit category
+handling now retains that declared terminal AU when its size exactly equals the
+logical AAC alignment requirement. Corrupt values are retained for explicit
+`nonzero AAC ESC alignment bits` refusal, with retry/checkpoint/history checks.
+
+The corpus has 94 native controls, stored as 282 three-frame programmes: one
+complete AU, grouped core with separate extension instances, and consecutive
+category pairs. It covers AOT17/19/23, 480/512/960/1024 source samples, native
+mono/multichannel layouts, resilience/predictors, and standard SBR with core/double
+rate and explicit/sync signaling. All have saved independent scalar PCM.
+The three-frame matrix keeps physical dependency membership stable; it does not
+silently skip later source frames with changed TNS instance membership.
+Instead, six additional single-track grouped movies retain all 76 original
+source frames (12 or 16 per programme), including TNS appearance/disappearance
+and longer predictor history. Their authored bytes match every complete logical
+reference packet exactly, and their native/export/playback PCM matches the full
+independent reference. Checkpoints replay every frame; repeated and boundary
+seeks cross the TNS/history changes, EOF/past-EOF and rewind.
+
+All 282 short programmes pass independent PCM (1e-7), bit-exact reassembly,
+authored AU membership, alternating packetization without DSP reset, owned/public
+full/range exports, stereo/gain/crop/32-kHz WAVE transforms, AudioStream playback,
+frame-edge/repeated/EOF/past-EOF seek and rewind. All 672 category-boundary masks
+of nine representative predictive/SBR controls preserve exact continuous PCM.
+There are 258 frame-1 alignment corruptions plus a dedicated frame-0 terminal
+empty-category alignment movie, with specific error and transactional replay.
+Worker capture includes all 282 short programmes, bringing its total to 1194;
+the six full sequences have separate AudioStream/navigation qualification.
+Export tests supply a 256-MiB caller budget for multichannel ER-LTP predictor
+storage; production/default memory policy is unchanged.
+
+All 736 artifacts / 12232050 bytes regenerate byte-exact with process/socket
+creation forbidden by an audit hook. All nine older EP1 corpora remain unchanged
+after generalizing the helper for three/six frames and explicit authored bit
+edits. Ordinary tests require neither FFmpeg nor network. The 1623 root/media
+unit tests pass (29 ignored), as do 108 selected integration checks: nine new ER
+checks, seven prior grouped ELD/SBR checks, 61 existing AAC/ESC checks and 31
+existing MP4 EP1 checks. All-test compilation passes offline with
+`--no-default-features --features player`; the new integration binary has no
+FFmpeg/libav linkage.
+
+Still open: grouped PS and broader ancillary/DRC/PCE extension qualification,
+variable physical MP4 dependency membership within the same ASC, external SL/OD
+updates, broader codec/profile gaps and physical output-device checks. This
+qualifies the exercised ER/core/standard-SBR grouping, not universal codec parity.
+
+## Grouped ELD core, RVLC/HCR, TNS and LD-SBR transport, 2026-10-28
+
+Running the old decoder against a saved own six-frame MP4 reproduced
+`missing AAC ESC instance` for `n512-c1-x1-crc0-whole`: the complete ELD core
+and LD-SBR region occupied one EP1 AU. The EP1 category reader now defers
+physical AU assignment until each category's syntax is first read. A category
+continues at the preceding consumed position when meaningful bits remain, or
+advances to the next AU when exhausted. A syntax-proven zero-bit category does
+not claim the following nonempty AU; explicitly transported empty AUs retain
+their own boundaries. No failing parse is retried at another guessed offset.
+
+ELD's logical TNS position precedes remaining category-1 HCR header fields and
+RVLC data, whereas transport category order puts those fields before TNS.
+For EP1 the shared channel reader completes category-1/RVLC parsing before
+binding TNS, and restores the TNS span to its original logical bit order.
+Raw logical decoding and strict EP3 class parsing keep their previous ordering.
+Only the ELD EP1 entrypoint enables grouped binding; other ER profiles are not
+yet opted into this new path.
+
+The new corpus adds 546 programmes from 182 controls: 480/512 core samples,
+channel configurations 1..7, core/double LD-SBR rate, CRC off/on, TNS and all
+seven resilience flag combinations. Each is stored as one complete AU, a grouped
+core followed by separate SBR instances, and consecutive pairs across the full
+category list. Within this matrix four controls combine TNS with RVLC/HCR (flags 3/7);
+two more have an exactly empty spectral category. Their PCM is independently
+generated by scalar entropy/TNS/cosine/overlap arithmetic and direct CLDFB, not
+by the production decoder. Existing saved independent PCM is reused elsewhere.
+All 722 accepted programmes retain independent PCM agreement, exact logical AU
+reconstruction and authored physical AU membership. The native partition test
+covers 2512 layouts: all SBR boundaries from the previous matrix plus every
+core/SBR boundary of eight controls covering combined tools and empty categories.
+
+There are 458 new malformed movies, making 858 across the grouped corpora:
+late-element CRC, truncated final data and extra meaningful bits preserve the
+specific errors and decoder history for retry, checkpoint restore and later
+frames. Public/owned full PCM and repeated crops, stereo/gain/32-kHz WAVE export,
+AudioStream playback, frame-edge/repeated/EOF/past-EOF seek and rewind are covered.
+Worker capture now exercises 912 programmes, asserting complete queued PCM and
+rational timestamps after partial playback and navigation.
+
+All 1257 new artifacts / 11892545 bytes regenerate byte-exact with process and
+socket creation forbidden by a Python audit hook. All eight previous EP1 corpora
+remain byte-exact after generalizing the shared fixture helpers. Ordinary tests
+use saved own files only and require no FFmpeg or network. The 1623 root/media
+unit tests pass (29 ignored), as do 99 selected integration checks: seven expanded
+grouped-ELD/SBR checks, 61 previous AAC/ESC checks and 31 previous MP4 EP1 checks.
+All-test compilation passes offline with `--no-default-features --features player`;
+the exercised integration binary has no FFmpeg/libav linkage.
+
+Still open: grouped core transport for ER-LC/LTP/LD profiles, broader extension
+and PCE grouping, same-ASC dynamic MP4 track membership, external SL/OD changes,
+other codec/profile gaps and physical output-device qualification. This closes
+the exercised ELD category-grouping milestone, not all codec or LD-SBR conformance.
+
+## Consecutive LD-SBR elements sharing EP1 AUs, 2026-10-28
+
+The next own six-frame MP4 reproduced `missing AAC ESC instance` before this
+fix: several consecutive SBR elements shared one transported AU. The previous
+reader could continue from prefix9 to data10 but allocated a new AU for the next
+element unconditionally. The EP1 reader now continues from the exact consumed
+data position into the next prefix when that AU has remaining meaningful bits.
+An exhausted AU still advances to the next dependency-ordered stream. This also
+supports an AU holding data10 of one element plus prefix9 of the next, with
+prefix/data split on either side. No stream-count guesses, byte scans or padding
+skips choose these boundaries. EP3 remains on its strict separate-class path.
+
+A new own corpus adds 80 programmes: 480/512 core samples, configurations 3..7
+(two through four SBR elements), core/double output rate and CRC off/on. Each
+control is authored both with its entire SBR region in one AU and with AU
+boundaries crossing SBR element boundaries. Tests assert actual bit-for-bit AU
+membership against the declared partition, as well as exact reconstructed
+logical packets. All 1856 possible category-boundary partitions of these controls
+also pass six-frame native decoding with continuous history and exact PCM versus
+independent separate-transport decoder runs. This exhaustive category-boundary
+matrix does not include arbitrary splits inside a category.
+
+The existing acceptance suite now covers 176 programmes and 400 malformed
+variants. The 160 additional malformed movies cover final-data truncation, extra
+meaningful bits and late-element CRC failure, including a CRC located in the
+middle of a cross-element AU. The error leaves history intact for retry,
+checkpoint restore and subsequent frames. Full independent PCM, AudioStream
+playback, repeated/frame-edge/EOF/past-EOF seeks, rewind, public/owned exports,
+exact crops and stereo/gain/32-kHz WAVE transformations pass. Worker tests now
+capture 366 programmes with exact PCM and rational queue-clock assertions.
+
+All 241 new artifacts / 3840325 bytes regenerate byte-exact with external
+process/socket creation forbidden. The seven prior EP1 corpora remain byte-exact;
+controls and independent scalar PCM are referenced rather than duplicated.
+Ordinary tests read saved own synthetic files and require no FFmpeg/network.
+The 1623 root/media unit tests pass (29 ignored), as do 99 selected integration
+checks: seven grouped-SBR checks, 61 previous AAC/ESC checks and 31 previous MP4
+EP1 checks. All-test compilation passes offline with
+`--no-default-features --features player`. The exercised integration binary has
+no FFmpeg/libav linkage.
+
+Still open: grouping that includes core/RVLC/TNS instances, same-ASC dynamic
+physical track membership, external SL/OD changes, other codec/profile gaps and
+physical output-device qualification. The added exhaustive partition check
+qualifies the consecutive SBR region, not general arbitrary ESC grouping or
+complete LD-SBR conformance.
+
+## EP1 grouped LD-SBR prefix/data AUs, 2026-10-28
+
+A saved own six-frame MP4 reproduced `missing AAC ESC instance` before the
+fix: one transported EP1 AU held adjacent LD-SBR instances 9 and 10 instead of
+placing each in a separate track. The native reader now lets the prefix syntax
+parser establish the exact bit boundary before assigning the data reader. This
+works per SBR element, including separate earlier pairs and a grouped last pair;
+meaningful trailing bits are still validated and transport padding is excluded.
+Only the EP1 native path enables this behavior. The EP3 recovered-class path
+retains its declared separate-instance boundaries and existing strict entrypoint.
+The general successive-instance grouping rule is described in ISO/IEC 14496-3
+working draft w2803, section 10.5.2 (the older draft is not an ELD syntax oracle):
+https://www.lpi.tel.uva.es/~nacho/docencia/ing_ond_1/trabajos_01_02/formatos_audio_digital/archivos/w2803_n.pdf
+
+The new corpus contains 96 programmes across 480/512 core samples, channel
+configurations 1..7, core/double output rates and CRC off/on. Native complete
+PCM matches independently authored scalar references within 1e-7; reconstructed
+logical AUs are byte-exact against separate-instance controls. Alternating
+separate/grouped packetization preserves continuous DSP history and checkpoint
+replay without a reset. The strict recovered-class entrypoint refuses grouped
+input rather than silently relaxing EP3 class boundaries.
+
+All 240 malformed programmes reach their intended failure: truncated data,
+eight extra meaningful bits, or a corrupted CRC in the final SBR element.
+A failed decode preserves history: retry without reset, checkpoint replay and
+subsequent frames match an independent continuous separate-instance decoder.
+Full public/owned PCM exports, repeated millisecond ranges, stereo WAVE export
+with gain/crop/32-kHz resampling, AudioStream playback, frame-edge/repeated/EOF/
+past-EOF seek and rewind match the separate controls. Worker capture now covers
+286 programmes, including these 96, with queued PCM and rational-clock checks.
+This qualifies software playback/navigation, not physical-device listening.
+
+All 449 new artifacts / 10080435 bytes regenerate byte-exact with process/socket
+creation forbidden and an exact inventory. All six older EP1 corpora regenerate
+unchanged after generalizing the shared control helper. Ordinary tests use saved
+own files only and require neither FFmpeg nor network. Root/media unit suites
+pass: 1623 tests, 29 ignored. All-test compilation passes offline with
+`--no-default-features --features player`; the new integration binary has no
+FFmpeg/libav linkage. All 98 selected integration checks pass: six new grouped-
+pair checks, 61 existing AAC/ESC checks and 31 existing MP4 EP1 checks.
+
+Scope remains bounded: this supports adjacent LD-SBR prefix/data pairs, not
+arbitrary core/RVLC/TNS grouping or multiple SBR pairs inside one transported AU.
+Same-ASC changes to physical MP4 track membership, external SL/OD updates,
+physical output and broader codec/profile conformance remain open. This milestone
+does not assert full LD-SBR conformance or completion of all codec gaps.
+
+## Fragmented and hybrid LD-SBR active-prefix qualification, 2026-10-28
+
+The active-chain corpus now covers indexed, fully fragmented and hybrid
+index-plus-fragments storage. Each form includes a 4/27/4 mono/8-channel/mono
+programme and an equivalent unused-tail-description variant, plus missing-active
+and internal-gap refusal controls. The existing decoder and fragment parser
+accepted these complete sparse-track files; no production decoder change was
+needed for this storage extension.
+
+The new fragment authoring keeps only four trafs in mono epochs and 27 in the
+middle epoch. A hybrid retains the first six samples in each prefix track's
+index; the other 23 initial indexes are empty and receive their six AUs from the
+middle fragment. Explicit tfhd description/duration fields override deliberately
+different trex defaults. Version-1 tfdt and per-row trun composition offsets
+preserve indexed DTS as well as PTS, including the delayed start of tail tracks. Tail DTS=0 and PTS=2880 times the
+per-track scale factor are checked against the authored clock independently of
+the indexed parser comparison.
+Exact padding flags preserve non-byte ESCs and their nonzero excluded low bits.
+
+A structural acceptance test verifies actual moof/traf counts, empty/initial stsz
+counts, and that each packet references its declared old-index or post-moov
+fragment storage. All audio sample DTS/PTS, duration, size, effective description,
+bit length and stored bytes compare exactly to indexed controls. All eighteen
+active groups retain identical stream IDs, dependencies, bits and rational source
+clocks. Missing required final AUs and internal activity gaps keep their specific
+refusals after valid initial mono groups in every storage form.
+
+All six programmes pass independent native PCM checks, complete AudioStream
+playback and native 1/8/1 geometry/routing, frame-edge/repeated/EOF/past-EOF seek
+and rewind. Worker capture now reads the manifest rather than a hardcoded indexed
+pair, covering 190 programmes in total. It retains exact packet-clock assertions
+and independent native PCM checks after partial playback and navigation.
+Default mono and explicit stereo exports, exact repeated/cross-boundary crops,
+owned/public agreement and unused-description equivalence pass in all forms.
+Static f32 fold versus changing-geometry f64-matrix comparisons retain the prior
+1e-9 numerical bound; same-path byte equality and native reference bounds are
+unchanged. Per-case temporary export directories preserve overwrite refusal
+while allowing the expanded matrix to run in one test.
+
+All 17 active-chain artifacts / 539260 bytes regenerate byte-exact with process/
+socket creation forbidden and an exact directory inventory. The prior indexed
+media/control payloads and five other EP1 corpora remain unchanged. Ordinary
+tests read checked-in own synthetic files only, without FFmpeg/network. The 57
+selected integration checks, 1623 root/media unit tests (29 ignored), and all-test
+compilation pass offline with --no-default-features --features player.
+
+This qualifies complete-file fragmented/hybrid active-prefix layout changes;
+it does not establish partial live-fragment opening or physical device output.
+Grouped successive ESC instances inside an AU, same-ASC repartitioning, arbitrary
+OD/stream-map parent updates and broader codec conformance remain open. The
+codec-gap goal remains active.
+
+## Active ESC chain width across LD-SBR layout epochs, 2026-10-28
+
+The new short own mono/8-channel/mono movie first reproduced `EP1 MP4 missing
+simultaneous ESC access unit` on its first mono frame. A static dpnd union had
+27 streams, although only its four-stream prefix supplied mono frames. The other
+23 tracks supplied AUs only during the middle 8-channel configuration.
+
+Group now records which sample descriptions are actually used. At an exact root
+timestamp, a missing tail stream may be inactive only when none of its used ASCs
+matches the root's active ASC. Unused matching table entries do not require an
+AU. A missing stream which does use the active ASC still refuses; a subsequent
+present stream after an inactive node refuses as an active-chain gap. Present
+AUs retain exact ASC, bit-boundary, dependency and rational-clock checks. Live
+used-description metadata is checked against the group's saved configurations
+before an inactive decision. Admission and retained-memory accounting include the
+new used-description table. stream_count documents maximum union width; a frame
+may return a shorter active prefix.
+
+The file binding remains a static track-reference graph. ISO/IEC 14496-14:2020
+stores ES_ID and streamDependenceFlag as zero, derives ES IDs from track IDs and
+uses dpnd references for dependencies; multiple sample descriptions represent
+ES_DescriptorUpdate operations. This milestone schedules an active prefix inside
+that binding; it does not put changing parent IDs into stored ESDescriptors.
+Primary reference: [ISO/IEC 14496-14:2020](https://www.joak.org/_media/public%3Ait%3Aiso_iec_14496-14-2020.pdf).
+
+The two acceptance variants exercise 4/27/4 active streams, 480/512/480 windows,
+native 1/8/1 output channels, exact per-track rational clocks and a 24 kHz movie
+clock. One variant adds unused mono descriptions to every tail track. Native
+PCM for all three fresh epochs agrees with the independent scalar references
+within 1e-7. AudioStream and worker capture check native PCM, exact packet clocks,
+frame-edge/repeated/EOF/past-EOF seeks and rewind after live partial playback.
+The backend capture verifies mono and 8-channel routing, including the expected
+source role masks (0x4 and 0xff). Missing required last AUs and internal
+activity gaps have specific refusal controls after valid initial mono groups.
+
+Default export retains the initial mono destination; explicit stereo export is
+also tested. Owned/public default output, equivalent variants and repeated crops
+across both epoch boundaries compare byte-for-byte on the same normalization
+path. Static control exports use an existing f32 fold while changing geometry
+uses a f64 matrix: their numerical crosscheck uses 1e-9 (observed worst difference
+4.4e-11), rather than claiming different floating-point routes are bit-identical.
+The independent native PCM checks and all prior regression checks remain intact.
+
+All nine artifacts / 334569 bytes regenerate byte-exact with process/socket
+creation forbidden and exact directory inventory. All five earlier EP1 corpora
+remain byte-identical. The 56 selected integration checks, 1623 root/media unit
+tests (29 ignored), and all-test-target compilation pass offline with
+--no-default-features --features player. Worker capture covers 186 programmes,
+including the two variable-layout activity variants. No external codec or private
+media is used; physical output is not inferred from software capture.
+
+Still open: same-ASC ESC repartitioning, grouped successive instances within one
+AU, arbitrary OD/stream-map parent updates, fragmented activity-tail variants,
+external SL sources and broader codec/physical-output conformance. This closes
+the exercised indexed MP4 active-prefix/layout changes, not the full codec-gap
+goal.
+
+## Bidirectional ordinary/EP1 transport epochs and exact trimmed clocks, 2026-10-28
+
+A short own ordinary/EP1/ordinary movie first reproduced `EP1 requires separately
+associated ESC access units`: group dispatch was decided once from the first AU.
+The shared group now detects separate transport among used descriptions, retains
+stable ES bindings across ordinary AAC descriptions, and exposes a fingerprinted
+per-sample `requires_esc` decision. Owned/root export, PS discovery and AudioStream
+use ordinary byte decoding or complete typed ESC groups according to that active
+description. Inactive auxiliary AUs are neither required nor read. Active groups
+still require exact ASC agreement, simultaneous source clocks and complete AUs;
+no damaged-ESC fallback is introduced. Header-based dependency ordering stays
+stable; changing dependency graphs remains a different open contract.
+
+The 64-programme acceptance matrix covers both ordinary/EP1/ordinary and
+EP1/ordinary/EP1, AOT17/19 PS with explicit/sync/implicit signaling and
+960/1024/960 windows, plus mono/8-channel LD-SBR 480/512/480. Indexed, fragmented,
+hybrid and sparse-auxiliary indexed forms each have 18 root AUs. Sparse auxiliaries
+contain only the 6 or 12 active AUs; source composition offsets preserve the exact
+phase boundaries. Full and repeated/cross-boundary interval PCM agrees exactly
+with already qualified all-EP1 fresh-epoch controls through owned and public
+exports. LD controls inherit the independent scalar reference; PS equivalence is
+not an independent PS DSP oracle. Stereo WAV exports at 48 and 32 kHz match
+normalized/resampled controls byte-for-byte under caller-owned admission limits.
+
+Sixteen partial-active-AU controls reproduce `missing simultaneous ESC access
+unit` at the exact required frame while earlier groups stay readable. Another
+sixteen wholly unsupplied auxiliary-track controls remain parser refusals (`MP4
+track states no samples`), using real hybrid root fragments; these are structural
+incompleteness controls, not acceptance for absent active streams. A first attempt
+without fragment metadata hit the unrelated empty-sample-table refusal and was
+replaced by the real hybrid witnesses before saving this qualification.
+
+Extending live worker seeks to both sides of each epoch edge exposed another
+actual failure: after a trimmed seek, PCM matched but packet timestamps were
+floored to nanoseconds. For the 11518/48000 witness, cross-multiplied time was
+11517999984000 instead of 11518000000000. The changing-description trim branch
+now uses the existing reduced rational EditTime stamp path, preserving exact
+sample-grid timestamps when representable. Wider-than-packet clocks retain that
+existing helper's documented nanosecond emission limit; the internal rational
+clock is not replaced by a nanosecond cursor. Tests retain exact equality without
+loosening tolerances. Worker capture now covers 184 programmes and epoch-edge,
+repeated, EOF and rewind seeks after live partial decoding.
+
+All 101 new artifacts / 1278743 bytes regenerate byte-exact with process/socket
+creation forbidden and exact directory inventories; the four previous EP1 corpora
+remain byte-identical. Ordinary tests read checked-in own fixtures only. The 52
+selected integration checks, 1622 root/media unit tests (29 ignored), and all-test
+compilation pass offline with `--no-default-features --features player`.
+
+Still open: changing dependency graphs, wider codec/profile and clock combinations,
+external SL sources and physical output qualification. This closes the exercised
+ordinary/separate AAC transport transitions with a stable dependency graph; the
+complete codec-gap goal remains active.
+
+## Fragmented EP1 epochs and first-used description binding, 2026-10-28
+
+Extended the own epoch corpus from four to 24 programmes: indexed, fully
+fragmented and hybrid initial-index-plus-fragments, each with and without an
+unused ordinary-AAC description prepended to stsd. PS AOT17/19 960/1024/960 and
+mono/8-channel LD-SBR 480/512/480 retain the same independent LD controls and
+fresh-epoch PS equivalence controls. Each programme has 18 source AUs. Fragment
+metadata deliberately uses different trex defaults and explicit tfhd description/
+duration, version-1 tfdt, exact padding flags and per-track rational clocks.
+
+Fragment/hybrid playback already accepted the synchronized epochs; no extra DSP
+or fragment-parser change was necessary. New acceptance compares all 18 complete
+ESC groups byte-for-byte and bit-for-bit with indexed controls, checks actual
+moof counts, selected description indexes and source timing, and exercises full
+owned/public PCM export, intervals across an epoch edge, frame-edge/repeated/
+EOF/past-EOF seeks and rewind. Mismatching child ASCs retain exact boundary
+refusals in all forms. These are actual fragmented acceptance tests, not merely
+parser refusal checks.
+
+The unused-first witness reproduced `select exactly one audio stream`: EP1
+selection read the convenience header for stsd[0] even though every actual sample
+selected later entries. Group detection, dependency binding, child scanning and
+memory admission now use the first real sample's description, retaining the
+header fallback for header-only tracks. Unused ordinary AAC entries therefore do
+not turn dependent ESC tracks into independent audio programmes or bypass exact
+selected-description checks. Used descriptions still must retain separate-ESC
+coding and a stable dependency binding.
+
+All 57 epoch artifacts / 1260556 bytes regenerate exactly with process/socket
+creation forbidden; the three earlier EP1 corpora remain byte-identical. Ordinary
+tests read fixtures offline, without FFmpeg/libav or a generator. The 37 selected
+integration checks, 1622 root/media unit tests (29 ignored), and all-test-target
+compilation pass. Worker capture exercises 120 programmes, including all 24 epoch
+variants, with exact queued PCM/rational clocks after live partial playback,
+seek, EOF and rewind.
+
+Still open: changing dependency graphs, separate/ordinary transport transitions,
+external SL/clock bindings, physical output qualification and wider codec tools/
+profiles. This qualifies the exercised stable-graph EP1 epochs across indexed,
+fragmented and hybrid storage, not universal codec completion.
+
+## EP1 sample-description epochs and LD-SBR reconfiguration, 2026-10-28
+
+A saved synthetic 960/1024/960 PS movie first reproduced `MP4 sample description
+changes require decoder reconfiguration` at group creation. Group construction
+now retains a bounded snapshot of each description, validates used descriptions'
+separate-ESC coding and stable dependency bindings, and indexes source clocks
+across epochs. Validation runs at description transitions rather than reparsing
+ASC for every sample. Each simultaneous AU group must use the active root ASC;
+a different child ASC fails at the exact epoch boundary before decoder dispatch.
+Reading a different movie with matching initial headers but changed later stsd
+also fails the saved fingerprint, without invalidating subsequent valid reads.
+Admission and retained-storage estimates include the new description snapshots.
+
+The authored corpus contains AOT17/19 PS 960/1024/960 and mono/8-channel LD-SBR
+480/512/480 movies. Each of three epochs has six AUs, including empty LD-SBR ESCs,
+canonical dpnd and exact padding/source clocks. LD controls match independent
+scalar PCM to 1e-7. Whole-movie output equals the concatenated fresh-epoch controls
+exactly through both owned and public export. PS delayed final frames are drained
+before changing configuration. This is transport/navigation equivalence for PS,
+not a new independent PS synthesis oracle.
+
+AudioStream acceptance covers complete playback, both sides of each epoch edge,
+repeated seeks, EOF/past-EOF seeks and rewind. Millisecond export windows cross
+the first boundary and repeat after a different interval. Worker capture now
+includes 100 programmes, with live partial playback before seeks and exact queued
+PCM/rational timing checks. Four malformed child-ASC movies preserve valid first
+epochs and then refuse the mismatching group; these are refusal controls, not
+acceptance for incompatible elementary configurations.
+
+All 17 artifacts / 598969 bytes regenerate exactly with process/socket creation
+forbidden; ordinary tests only read checked-in fixtures. The selected 33
+integration checks and 1622 root/media unit tests pass (29 unit tests ignored).
+
+This closes exercised indexed-MP4 configuration epochs with a stable dependency
+graph and synchronized separate-ESC ASCs. It does not yet qualify fragmented
+epoch transitions, changing dependency graphs, transitions between separate and
+ordinary transport, unused-first-description binding, external SL/clock sources,
+physical audio output or complete codec conformance. The codec-gap goal remains
+open.
+
+## ISO MP4 dependency binding, PS and LD-SBR navigation, 2026-10-28
+
+The new canonical MP4 corpus first reproduced `select exactly one audio stream`:
+all stored ES_ID fields were zero and the parser ignored trak/tref/dpnd.
+The shared root/media parser now retains dependency track IDs, preserves them in
+decoder headers and accounts for their allocated storage in index admission.
+EP1 grouping derives ES identifiers from actual track IDs, resolves dpnd parents,
+and validates the binding again when reading. Zero/misaligned/duplicate tables,
+missing/self dependencies and multiple-parent graphs have specific refusal tests.
+Multiple-parent refusal is not playback acceptance.
+
+This follows ISO/IEC 14496-14 sections 3.1.2, 3.2 and 5.2: stored ES_ID and
+streamDependenceFlag are zero; file dependencies use dpnd, and elementary track
+IDs supply ES identifiers. Primary reference:
+https://ossrs.io/lts/zh-cn/assets/files/ISO_IEC_14496-14-MP4-2003-9a3eb04879ded495406399602ff2e587.pdf
+Earlier mp4-ep1 and mp4-ep1-empty fixtures carry dependencies in noncanonical
+ESDescriptor fields. They remain explicit compatibility tests, not proof of ISO
+file binding. Authoritative dpnd cannot be mixed with those descriptor bindings.
+
+The new 72-programme PS matrix covers AOT17/19, 960/1024, 24/48 kHz,
+explicit/sync/implicit signaling, indexed/fragments/edit lists, changed SBR
+headers and active LTP history. Full PCM, exact interval export, WAV/gain,
+delayed source identity, checkpoint rollback, final EOF frame, repeated/frame-edge
+seek and rewind pass through native groups, owned/public export and AudioStream.
+Four additional canonical LD-SBR programmes cover mono/8 channels and indexed/
+fragmented MP4, six AUs including empty ESCs, independent PCM, playback and
+frame-edge/repeated/EOF/rewind navigation. Worker capture includes these four,
+all 72 PS programmes and the previous 20 programmes: 96 complete programmes,
+with exact queued PCM and rational clocks after partial playback and seeks.
+
+PS transport acceptance uses unprotected AUs as the equivalent decoder baseline.
+An independent core PCM oracle plus the separate owned PS synthesis stage
+crosschecks output, but the PS DSP itself has no independent oracle here.
+LD-SBR output uses the existing independent scalar reference. No physical-device
+listening or external conformance corpus is inferred from software capture.
+
+The 113 new artifacts / 956213 bytes regenerate byte-exact with process/socket
+creation forbidden. Both earlier corpora remain byte-identical. Ordinary tests
+read checked-in synthetic assets only; no FFmpeg/network. The PS test executable
+has no FFmpeg/libav linkage. 72 distinct selected integration checks and 1622
+root/media unit tests pass offline (29 unit tests ignored).
+
+Still open: changing dependent sample descriptions, external SL/clock bindings,
+physical output qualification and broader codec combinations. This closes the
+exercised canonical MP4 EP1 PS/LD-SBR transport/navigation milestone; it does not
+assert that every codec gap or all LD-SBR conformance is complete.
+
+## Explicit empty ESC AUs in indexed and fragmented MP4, 2026-10-28
+
+The shared MP4 index now retains zero-sized samples when their selected sample
+description declares AAC separate ESC transport (epConfig=1). Zero bytes still
+represent a real timed AU: sample count, source clocks, dependencies and packet
+identity remain present. Ordinary AAC/other zero-sized coding refusals remain;
+an unused EP1 description cannot authorize an empty sample in another selected
+entry. Mixed MACE/other-description indexing uses the same selected-entry gate.
+
+Fragment indexing accepts explicit zero per-row sizes, zero tfhd size overriding
+a nonzero trex default, and inherited zero trex size for declared EP1 ESCs.
+The absence of a size/default outside this binding retains its prior refusal.
+Impossible nonzero padding on zero-byte fragment samples now fails during
+indexing, matching the stbl/padb check. Raw reads clear reused output buffers
+and return zero bits without dropping the sample or treating it as EOF.
+
+The first saved ER-LTP movie reproduced `zero MP4 sample size` before the fix.
+The new corpus has twelve accepted real AVC/ER-LTP/SBR MP4s, using mixed empty/
+nonempty classes and all-empty auxiliary streams in indexed, per-row fragment,
+tfhd-zero and trex-zero forms. Three independent PCM references cover complete
+source output. Owned/public PCM export, AudioStream playback, frame-edge and
+repeated seeks, checkpoint replay, EOF seek and rewind pass on every variant.
+Five refusal controls distinguish missing empty AUs, impossible stbl/fragment
+padding, ordinary AAC zero samples and unused EP1 sample descriptions.
+
+The worker capture acceptance now includes all twelve new programs as well as
+the previous eight EP1 programs. After live partial decoding, seek/checkpoint
+preroll and rewind, queued PCM and rational packet clocks remain exact.
+
+All 21 new assets / 378,474 bytes regenerate exactly with process/socket
+creation forbidden. The existing 25 EP1 assets remain byte-identical. Ordinary
+tests read saved assets; no foreign codec, network or generator is invoked.
+All 34 selected integration checks and 1,622 root/media unit tests pass
+offline (29 unit tests ignored).
+
+**Still open:** actual EP1 PS movie qualification, changing dependent sample
+descriptions, physical audio output, external SL/clock bindings and wider codec
+coverage. This completes the tested empty-ESC container/playback path, not the
+full codec-gap objective or generic acceptance of empty codec byte packets.
+
+## Typed EP1 AudioStream playback and worker navigation, 2026-10-28
+
+`AudioStream::decode_source_packet` now provides a container-owned decoding
+hook. Its default preserves ordinary byte-packet dispatch; the MP4 override
+reads a complete typed ESC group by exact root source time and checks that the
+yielded root bytes/duration match the index. `AudioDecode::decode_esc_packet`
+defaults to an explicit refusal. AAC and PS adapters accept the typed group;
+AAC validates original source-clock agreement before assigning the reader's
+association stamp. The worker uses this hook without inventing serialized
+multi-stream payloads or changing EncodedPacket's byte layout.
+
+MP4 program lists exclude dependent EP1 ESs. Both ordinary and coarse-clock
+reader construction, probing and decoding preserve the same group. Native
+PS bridge source timing remains checkpointed and queued by original frame
+identity. Actual EP1 PS movie acceptance still needs a dedicated corpus.
+
+Eight existing real MP4 programs (ER-LC, ER-LD, mono/7.1 LD-SBR and repeated/
+silent edits) now pass complete AudioStream playback, EOF validation, forward/
+backward/repeated seeks, EOF seek and rewind using one decoder. The old bare-
+root byte path still refuses specifically; a changed root packet refuses before
+decoder mutation and the correct packet can immediately be retried. These
+controls do not masquerade as acceptance of bare EP1 byte framing.
+
+A worker acceptance test exercises the real decoding thread's synchronous
+queueing path with a capture backend. It compares complete queued PCM and exact
+rational packet clocks with uninterrupted owned export, including edits and
+seeks after live partial decoding, checkpoint-assisted preroll and rewind.
+Existing ordinary AAC/PS workers and all root/media unit tests pass.
+
+All 39 selected integration checks and 1,622 root/media unit tests pass offline
+(29 unit tests ignored). The 25 original EP1 assets / 437,631 bytes regenerate
+identically with process/socket creation forbidden. Ordinary tests only read
+saved synthetic assets and invoke no foreign codecs.
+
+**Still open:** physical output-device qualification, actual EP1 PS movies,
+changing dependent descriptions, empty ESC MP4 samples, external-clock/SL
+bindings, wider tool combinations and the overall codec-gap objective. Capture-
+backend queue acceptance is not a listening test or full codec coverage.
+
+## EP1 group export through shared MP4 presentation scheduling, 2026-10-28
+
+The owned and native compatibility PCM exporters now read complete EP1 groups
+instead of decoding the root track as a byte-framed AAC packet. The existing
+ordinary/normalized presentation schedules, decoder checkpoints, preroll,
+empty edits, repeated media edits and interval trimming consume that group.
+In-band PS discovery also reads exact ESCs. One shared group implementation
+binds both demuxer wrappers; no invented packet serialization or foreign decoder
+was introduced. Automatic selection excludes dependent EP1 ESs before applying
+enabled-track preference; unrelated independent programs still need selection.
+
+The saved ordinary EP1 MP4s reproduced `EP1 requires separately associated ESC
+access units` in export before this connection. Four additional movies now
+exercise one movie-clock tick of silence followed by two repeated/reversed
+source windows, with independent edited PCM. Raw owned/native exports and
+published WAVE files match complete independent PCM, including mono/7.1 LD-SBR,
+intervals, repeated targets and interval gain. Signed source movies separately
+reproduced `negative audio timestamp`; valid negative PTS now select the
+existing signed rational normalization path. Their requested nonnegative
+presentation windows match the exact independently calculated source suffix.
+Default full-duration export of an unedited negative-PTS source with a missing
+presentation tail is not qualified by those interval checks.
+
+Controlled admission includes the group timing/configuration index and a
+conservative complete-input working-set bound before allocation/decoding.
+There is no new implicit memory limit. Explicit memory/packet limits, positive
+admission, mid-group cancellation with valid retry, cancellation hooks and
+logical AU limits have checks. Progress counts one complete source AU group
+and all of its ES payload bytes. Raw decoding never claims publication.
+
+A wider existing resampling check initially failed because its expected WAVE
+omitted the Matroska default language: actual PCM sizes matched, while export
+correctly retained literal LIST/INFO/ILNG=eng. The independent source-WAVE oracle
+now includes that literal metadata; the whole-file equality assertion remains
+unchanged and passes for Matroska ALAC and precise PCM. No resampler was changed.
+
+All 25 saved EP1 assets / 437,631 bytes regenerate exactly with process/socket
+creation forbidden. Ordinary tests only read saved assets. The 57 selected
+integration checks and 1,621 root/media unit tests pass (29 ignored).
+
+**Still open:** automatic grouped AudioStream/device playback and navigation,
+changing dependent descriptions, empty ESC MP4 samples, actual EP1 PS movie
+qualification, external-clock/SL bindings and full codec/tool coverage. Export
+scheduling acceptance does not establish these remaining playback paths or
+complete the codec-gap objective.
+
+## Real MP4 EP1 ES groups and exact sample bit ends, 2026-10-28
+
+The shared MP4 reader now retains packed `stbl/padb` and fragment padding
+from the effective trex/tfhd/trun flags. `packet_bit_len` returns coded bits
+without modifying raw packet bytes. Padding metadata participates in retained
+index accounting. Version/flags, reserved bits, exact table size/count,
+duplicate tables and impossible sample bit ends are validated. Odd trailing
+pad2 values are ignored until a later fragment fills that sample position;
+the fragment overwrites that unused nibble rather than inheriting it.
+
+Before the fix the saved short synthetic `count.mp4` opened successfully while
+its padb count contradicted stsz. The new test reproduced that acceptance.
+Both public/owned demuxers, the owned export path and AudioStream now refuse
+all seven malformed movies at their specific table errors, before any PCM is
+written. Metadata-only padding vectors do not claim valid truncated AAC/VP9
+playback. Five fragment vectors separately cover trex inheritance, explicit
+zero tfhd override, first-sample/per-row flags and odd-count hybrid tables.
+
+`owned_mp4_ep1::Group` explicitly selects a root ES, follows self-contained
+AAC dependencies with SL configuration 2, indexes exact reduced rational PTS
+and reads a complete simultaneous source group with exact bit ends. Missing
+or differently timed AUs, forks, duplicate ES IDs, changed track setup,
+external URLs and unsupported SL bindings have explicit errors. It neither
+serializes invented AU framing nor decodes an incomplete group. Source sample
+selection uses a compact sorted index rather than a full scan on every AU.
+
+Eight saved MP4 movies carry actual separate ESC tracks: ER-LC, ER-LD and
+mono/7.1 LD-SBR, each with ordinary and negative PTS. Dependent tracks use
+different rational timescales, non-byte AU ends and deliberately nonzero
+excluded low bits. Reading and native decode_esc match independent complete
+PCM for their first three AUs; reverse/repeated target reads with decoder
+preroll and rewind preserve the exact suffix. Four malformed group movies
+exercise missing/mistimed AUs, dependency forks and duplicate ES IDs.
+These are real MP4 group-read/decode checks, beyond earlier logical projections.
+
+All 32 new saved assets / 317,417 bytes regenerate exactly with process and
+socket creation forbidden. Ordinary tests only read saved assets. The 33
+selected integration checks and 1,621 root/media unit tests pass offline
+(29 unit tests ignored).
+
+**Still open:** automatic group selection in AudioStream and owned export,
+root edit-list scheduling/navigation, changing dependent descriptions, empty
+ESC MP4 sample support, external-clock/SL bindings and grouped legacy-audio
+padding. Group helper navigation is not device playback acceptance or a claim
+that the EP1 player or the overall codec-gap objective is complete.
+
+Normative container fields: ISO/IEC 14496-12:2012 sections 8.7.6 and 8.8.3,
+https://ossrs.io/lts/zh-cn/assets/files/ISO_IEC_14496-12-base-format-2012-b70dd5f101daecd072700609842c9649.pdf
+
+## Exact SL modular clock coordinates, 2026-10-28
+
+`owned_sl::Counter` now resolves 1–64-bit raw counters into checked signed
+128-bit coordinates. It permits forward wrap and composition-time reordering,
+retains the epoch in checkpoints, guards incompatible restore and supports an
+explicit external anchor after navigation. Reset discards the epoch. A jump
+of exactly half a period is ambiguous and refuses without state mutation;
+out-of-width input and coordinate overflow also leave the clock unchanged.
+The helper does not invent a wall-clock origin, clock rate or inter-ES offset.
+
+The saved assembly corpus now includes forty fragmented AAC programs: the ten
+existing logical codec sources with explicit boundaries, end-only boundaries,
+16-bit positive-epoch wrap and 16-bit negative-epoch wrap. Every stream resolves
+its raw CTS against the supplied common anchor before EP1 association; complete
+PCM still matches the independently calculated reference. Per-stream clock and
+fragment checkpoints replay exactly, including native LD-SBR. Separate unit
+checks cover every width, both wrap directions, reverse CTS, ambiguity, signed
+coordinate overflow, reset and incompatible checkpoints.
+
+All nine saved assembly assets / 2,421,174 bytes regenerate exactly with process
+and socket creation forbidden. The earlier 110 SL syntax assets remain byte-
+identical. Ordinary tests read saved assets and require no generator, FFmpeg,
+foreign codec or network. All 22 selected SL/EP1/ESDS integration checks and
+1,621 root/media unit tests pass (29 ignored).
+
+**Still open:** transport-owned clock recovery and shared epoch selection,
+implicit duration/start-clock scheduling, extended SL descriptors, container
+ES dependency routing and player/export navigation. This is exact anchored
+counter arithmetic and codec composition, not completed synchronized EP1
+container playback or the overall codec-gap objective.
+
+## Stateful base SL access-unit assembly, 2026-10-28
+
+`owned_sl::Assembler` reconstructs per-ES access units across arbitrary bit
+boundaries. It checks packet/AU sequence continuity modulo the configured
+width, declared AU byte lengths, explicit and implicit boundaries and immediate
+packet retransmissions. Retransmissions may update only OCR; repeated random-
+access AUs are consumed without emitting a second AU, while equal AU sequence
+numbers without RAP remain processable. Idle/padding packets advance packet
+continuity without creating audio. Clean EOF resolves an omitted end; explicit
+unfinished AUs refuse EOF and remain retryable. Successful EOF is latched.
+
+The end-only flag regression reproduced `SL padding exceeds packet payload`
+on an identical retransmission: parsing with the already advanced implicit
+start context changed the packet header. Retransmissions now use the context
+saved before the original packet. The saved synthetic transport sequence and
+twenty fragmented ordinary/end-only AAC programs cover exact payload bits,
+per-ES checkpoint replay and independent complete PCM, including native LD-SBR.
+Their short reference movies remain logical codec projections; this is not an
+EP1 container-playback claim. Empty ESC AUs are also transported explicitly.
+
+Sequence gaps, altered duplicate payloads and premature EOF are checked as
+refusals followed by valid continuation without restoration hiding mutation.
+Explicit caller AU limits have separate refusal checks; no implicit global
+media-size cap was introduced. Wide OCR/clock/priority and up-to-255-bit bitrate
+metadata remain exact. Checkpoints retain pending fragments and packet context;
+reset and configuration/policy mismatch guards are tested.
+
+The eight new saved assets / 1,213,729 bytes regenerate exactly with process
+and socket creation forbidden; the existing 110 SL assets remain unchanged.
+Ordinary tests read saved assets, never invoke a generator or foreign codec.
+All 22 selected SL/EP1/ESDS integration checks and 1,619 root/media unit
+tests pass offline (29 unit tests ignored). The new integration executable
+has no FFmpeg/libav linkage.
+
+**Still open:** counter unwrapping and synchronized timeline state, extended SL
+descriptors, container dependency-group routing, player/export navigation and
+fragmented PS composition. Base AU assembly advances the transport layer but
+does not complete the EP1 player or the overall codec-gap objective.
+
+## LD-SBR navigation with live decoder history, 2026-10-28
+
+The navigation acceptance now retains one decoder object across interrupted
+playback, forward/backward/repeated seeks and rewind. After each navigation it
+uses the reader's production `reset_decoder` contract rather than constructing
+a fresh decoder in the test. Targets straddle frames 4 and 8, including their
+header changes, and include a non-frame-aligned repeated target. Emitted PCM
+and the exact requested seek position are compared with uninterrupted decoding.
+
+Both ordinary and EP3/direct-mapping LD-SBR corpora run this matrix: 258 own
+synthetic sources each, in MP4 and Matroska. The existing independent complete
+PCM tests remain separate from this history/navigation comparison. No private
+media, new external codec, test-time generator or FFmpeg is required.
+
+All 40 selected integration checks pass, including both new live-history tests,
+ordinary/EP3 navigation, RS protection, interleaving and protection-set switching.
+The 1,614 root/media unit tests pass offline (27 ignored). The player test
+binary has no FFmpeg/libav linkage.
+
+This qualifies AudioStream navigation and synthesis history. It does not
+qualify physical audio-device output, EP1 container dependency-group routing,
+or the known separate ELD extension tools still refused in `config_impl.rs`.
+Those remaining paths must not be represented as complete LD-SBR transport
+coverage.
+
+## Base SL configuration and bounded packet syntax, 2026-10-28
+
+The new owned `owned_sl` module parses custom and predefined base SL
+configuration and externally framed packet headers. It retains duration/start
+clock metadata and raw timestamp/OCR counters, exact payload bit boundaries,
+AU-length/sequence/priority fields and arbitrary-width bitrate fields. Bitrate
+values above 64 bits remain bounded borrowed bit views; they are not refused
+or truncated to a machine word. Malformed widths, missing fields, reserved
+configuration bits, zero active clock resolutions and bad payload stuffing
+have explicit errors. No decoder or foreign transport library is used.
+
+`parse_packet` handles explicit and implicit AU boundary flags, including a
+required previous-end context when start flags are omitted. An unresolved end
+remains None. Idle and padding-only packets do not expose an AU payload.
+`mp4_sample` is a separate binding for predefined configuration 2: it retains
+bare sample bytes and takes the container's exact bit length, without stripping
+an SL header or inferring a clock from codec bytes. These APIs follow base
+ISO/IEC 14496-1:2010 sections 7.3.2.3–7.3.2.4:
+https://ossrs.io/lts/zh-cn/assets/files/ISO_IEC_14496-1-System-2010-d28d1ab7f929c646bb7317698f2386d6.pdf
+
+The offline corpus has 35 wide-field packet vectors, optional-field/implicit-
+boundary/idle/padding controls, malformed configurations, ten ordinary codec
+programs and two PS programs transported as complete separately framed ESC AUs.
+Tests compare every source information bit, complete independent ordinary PCM,
+checkpoints and reset. PS composition matches original raw-AU decoding,
+including delayed original frame identity and EOF output. Logical MP4 reference
+movies remain projections; they are not EP1 container-playback acceptance.
+The wide-field configuration and header prefixes are also checked for truncation.
+All 110 files / 1,617,547 bytes regenerate exactly with process/socket creation
+forbidden. Ordinary tests only read saved assets. The five new checks, fourteen
+existing EP1/ESDS integration checks and 1,614 root/media unit tests pass
+(27 ignored). The integration executable has no FFmpeg/libav linkage.
+
+**Still open:** packet continuity/duplicate handling, fragmented AU assembly,
+counter unwrapping and synchronized timeline state, extended SL descriptors,
+container dependency-group routing and player/export navigation. This stage
+supplies bounded base syntax and complete-AU codec composition; it does not
+claim the full SL runtime, EP1 container playback or the codec-gap objective.
+
+## MPEG-4 Audio ES dependency and SL metadata, 2026-10-28
+
+`aac_stream_descriptor` now returns the ES_ID, dependency, OCR stream ID,
+URL bytes, stream priority, nested ASC and optional raw SL configuration.
+`aac_specific_config` delegates to this parser, preserving the existing AAC
+object/stream checks, length bounds, missing/duplicate decoder checks and the
+cleared reserved-bit compatibility. Only nested DecoderSpecificInfo supplies
+ASC; unknown sibling descriptors cannot masquerade as codec initialization.
+SL contents remain opaque here: this API does not claim SL packet parsing.
+
+A duplicated SL descriptor now fails with `duplicate SL configuration`.
+The previous extractor from the parent commit was compiled independently and
+accepted the exact saved duplicate-SL descriptor. The fixed public and owned
+parsers, MP4 audio export and actual AudioStream player all reject its short
+synthetic MP4 with that specific error. Root ES_ID zero/65535 and priority
+zero/31 movies retain unchanged AAC PCM. Metadata-only descriptors cover all
+optional ES flag combinations, long/binary URL fields, absent SL, opaque custom
+SL bytes and every truncated prefix; these do not qualify URL resolution or
+EP1 dependency routing in a container.
+
+The explicit offline generator reproduces all 19 files / 62,091 bytes with
+process/socket creation forbidden. Ordinary tests read saved fixtures only.
+All 25 selected integration checks (four new, ten EP1 and eleven SBR/PS)
+and 1,614 root/media unit tests pass (27 ignored). The new test executable
+has no FFmpeg/libav linkage. No foreign codec was introduced.
+
+**Still open:** interpret SL configuration and AU headers, retain dependency
+metadata in the selected container stream group, synchronize separate ESC AUs,
+and connect that group to player/export navigation. This metadata milestone
+advances EP1 routing; it does not complete EP1 container playback or the overall
+codec-gap objective.
+
+## EP1 native separate-ESC input, 2026-10-28
+
+ASC parsing now retains epConfig=1 as `separate_esc`, independently of EP2
+protection and EP3 direct mapping. The new `aac_ep1::AccessUnit` carries a
+stream ID, dependency, exact bit length and source clock. `associate` validates
+a complete dependency chain and equal rational source times, then supplies
+exact ESC instances in dependency order. Transport padding outside bit_len is
+ignored; logical AAC alignment inside the final ESC remains checked normally.
+This follows ISO/IEC 14496-3:2009 sections 1.6.3.6 and 4.5.2.4.2:
+https://ossrs.io/lts/zh-cn/assets/files/ISO_IEC_14496-3-AAC-2009-90cda427e845cc176293bffee3f92f99.pdf
+
+Native AAC, native PS and PS discovery expose `decode_esc` / `read_esc` paths.
+Existing owned ESC parsers supply ER-LC/LTP/LD, ELD, ordinary SBR and LD-SBR
+syntax; synthesis alone commits histories. Byte packet entrypoints explicitly
+refuse EP1 input, and restoring between otherwise equivalent EP0/EP1 decoders
+is forbidden. This prevents silently interpreting one partial ESC as a raw AU.
+
+The synthetic corpus contains 96 ordinary and 24 PS streams. It covers
+480/512/960/1024 cores, AOT17/19/23/39, resilience/prediction, multichannel
+layouts, SBR/LD-SBR and explicit/sync/in-band PS. Individual ESC AUs arrive in
+rotated/reversed order with unequal but equivalent clocks and deliberately
+nonzero unused bits outside their bit boundary. Native AAC returns signed root timestamps and
+caller durations; PS retains its delayed original source index for the caller
+to associate with the input clock. Ordinary PCM matches independent saved
+sparse-core/QMF/CLDFB gold; PS uses independent sparse core PCM through the
+separately qualified owned SBR/PS component pipeline, plus normal raw-AU
+composition checks and delayed source identity/EOF checks.
+
+Duplicate/missing streams, multiple roots, forks, cycles, disconnected cycles,
+wrong bit storage and mismatched source times refuse before synthesis. Late
+standard-SBR/LD-SBR CRC errors also preserve prior histories, pending PS PCM
+and discovery state; a valid retry agrees exactly with a pristine decoder.
+Checkpoints, reset and public/owned decoder parity are checked separately.
+The ten native integration checks pass offline. All 480 files / 11,321,038
+bytes regenerate identically with process/socket creation forbidden.
+
+A newly reproduced shared ESC bug accepted missing final logical AAC alignment
+and silently supplied zero bits. `Reader::finish` now requires those bits.
+Eight short EP3 MP4/Matroska controls carry valid FEC but omit exactly the
+required final AAC alignment. Recovery succeeds, then native/public exports
+and both player bridges report `incomplete AAC ESC alignment bits`. A valid
+retry preserves the previous decoder history. The pre-fix native reproducer
+accepted the same missing-alignment source instead of refusing it.
+
+The stricter rule exposed omitted AAC alignment in the old standalone ELD
+and LD-SBR EP3 fixture wrappers. Their generators now assign it to the last
+ESC; intermediate traces still exclude it before appending further syntax.
+The 116 ELD and 258 LD-SBR source corpora, and their fractional-RS derivative,
+were regenerated. Independent PCM remains byte-identical. The extension
+corpus remains fully byte-identical after removing final AAC alignment before
+composing its appended metadata records. Saved logical_bits metadata keeps
+that composition explicit.
+
+Final qualification passes 98 selected integration checks across EP1, ELD,
+LD-SBR/header history, ER-LC/LTP/LD predictors, large HCR, extensions, standard
+SBR/PS and fractional RS, plus 1,614 root/media unit tests (27 ignored).
+The new integration executable has no FFmpeg/libav linkage. The refreshed
+ELD, LD-SBR and RS corpora also regenerate exactly with process/network
+creation forbidden.
+
+**Still open:** this is the native transport-facing input, not EP1 MP4/Systems
+or Matroska routing in the player. Saved short MP4/Matroska files deliberately
+use epConfig=0 logical projections as references. They do not qualify EP1
+container playback or seeking. Resolving container stream dependencies,
+extracting the transport's exact AU bit boundaries, synchronized input queues
+and player navigation remain required before claiming full EP1 support.
+At this milestone the ESDS ASC extractor discarded ES_ID/dependency and SL
+configuration; the subsequent descriptor-retention milestone above supplies
+that metadata, while routing remains open.
+Other AAC rendering extensions and the overall codec-gap objective remain open.
+
+## EP3 standard ER SBR category 9, 2026-10-28
+
+Owned ER-LC/LTP ESC reconstruction now parses EXT_SBR_DATA in category 9.
+Each class is bounded independently, with AAC alignment outside the SBR body.
+The syntax-only reader uses the current header for that coded channel offset;
+LFE advances that offset but does not consume an SBR group. Missing/excess
+SBR groups, extensions after SBR, forbidden ER SBR CRC and unconsumed class
+bits retain explicit errors. Native synthesis alone commits actual histories.
+The previous category-9 branch explicitly refused these standard ER SBR AUs.
+
+Native AAC, PS decoding and PS discovery now materialize each EP3 source AU
+immediately before decoding it. This matters when a packet's first source
+introduces a header and its second omits it: reconstructing the whole packet
+up front loses that header. Multi-source PS still commits the full packet
+atomically, including pending PCM, source identity and presence state.
+
+The offline `aac-esc-sbr` corpus contains 88 ordinary SBR sources, 24 PS
+sources, 24 ordinary SBR and 24 PS multi-source movies, plus 88 malformed
+single-source movies and 48 late-child malformed multi-source movies, each
+saved in MP4 and Matroska. AOT17/19, 960/1024 cores, 24/48 kHz output,
+explicit/sync/in-band PS, mono through eight channels, separate CPE groups,
+LFE, header omission, 2/3/7 source AUs and sequential/recursive SRCPC are covered.
+
+The ordinary sources use existing independently calculated direct-QMF PCM.
+PS sources feed independent sparse core PCM through the separately exercised
+owned SBR/PS component pipeline. Multi-source composition is compared against
+normal source-AU decoding; that comparison is not a new independent DSP oracle.
+A stale-context control specifically fails with `missing initial SBR header`
+on a valid second child. Late ER-SBR-CRC failures roll back all preceding
+children, both in decoder and PS discovery; a valid retry matches reference PCM.
+Player checks cover complete playback, EOF, rewind, repeated/backwards seek,
+frame and internal source-AU edges, negative and past-EOF targets in both
+containers. Returned seek positions through EOF equal the requested clamped
+timestamp; matching PCM alone does not qualify an arbitrary landing point.
+
+The eleven new integration checks and 38 existing ER-LC, LD-SBR, extension
+and EP2/PS checks pass offline with the player feature. Root and media
+libraries pass 1,614 unit tests (27 ignored). The player integration binary
+has no FFmpeg/libav dynamic linkage.
+
+All 800 files / 12,998,426 bytes regenerate identically with process/socket
+creation forbidden. Ordinary tests only read saved fixtures. EP1, other AAC
+rendering extensions and the broader codec-gap objective remain open.
+
+## LD-SBR header-epoch playback acceptance, 2026-10-28
+
+The ordinary LD-SBR corpus now saves its two independently calculated
+header-switch sources as well as the previous 256 cases. Both 480/512 stereo
+sources change amplitude precision at frame 4 and restore it at frame 8;
+CRC-protected packets and independent scalar CLDFB/SBR PCM are saved in MP4
+and Matroska. These cases were already generated for EP3, but were absent
+from the ordinary player acceptance matrix. No production decoder change was
+needed to admit them.
+
+The player test now seeks immediately before, at and after both header epochs,
+repeats those targets in reverse epoch order, and compares the complete PCM
+suffix against uninterrupted decoding. For targets through EOF it also checks
+that the returned position equals the requested nonnegative timestamp, rather
+than accepting any position with matching PCM. Existing EOF, past-EOF, rewind,
+negative and repeated-target checks remain in the matrix.
+
+All 1,038 saved files / 27,871,422 bytes regenerate identically with process
+and socket creation forbidden. All previous positive per-source ASC, PCM,
+MP4 and Matroska assets remain byte-identical. Ordinary tests only read saved
+assets; the linked player integration binary has no FFmpeg/libav dependencies.
+
+All 27 integration checks across ordinary LD-SBR, EP3 LD-SBR, and EP3
+multi-AU header history pass offline with `--no-default-features --features
+player`. The stricter exact-position seek check also passes separately.
+
+This is native decoder and AudioStream acceptance, not a listening test on a
+physical audio device or a claim that every AAC transport/rendering extension
+is implemented. EP1 separate-stream mapping and known ELD extension tools
+still have explicit unsupported paths in config_impl.rs.
+
 # Собственные контейнеры и кодеки: состояние реализации
+
+## EP3 extension categories 5..8, 2026-10-28
+
+ER LC/LTP/LD and ELD reconstruction now consumes the non-SBR extended payload
+after the main syntax (and after ELD's existing LD-SBR instances). Category 5
+provides extension type/version, 6 provides DRC syntax, 7 fill/compatible opaque
+data, and 8 ancillary length parts and bytes. Whole-byte extension area bounds
+are derived after the consumed main payload; final AAC alignment stays outside
+that area and is still checked for zero bits. Each field/skip also remains
+bounded by its own category. Missing or surplus category bits cannot be borrowed
+from the next instance to complete a malformed record.
+
+Logical payloads and ESC payloads now share the same DRC field parser, including
+PCE tags, excluded-channel continuation masks, all 16 bands and program-reference
+fields. DRC evaluation retains the existing default policy preserving original
+dynamics. Ancillary zero/short lengths and 255-byte continuation escapes are
+supported, as are compatible unknown versions/types and fill syntax. Recognized
+SBR/MPEG-Surround extension tools keep explicit refusals until their own mapping
+is implemented; ER SBR CRC remains forbidden.
+
+The offline `generate_aac_esc_extensions_fixtures.py` corpus contains 72 valid
+movies across eight independent-reference sources: ER-LC mono/5.1, ER-LTP
+mono/stereo with all resilience tools enabled, LD mono/stereo, and ELD mono/7.1
+with double-rate CRC-protected LD-SBR. Nine metadata variants cover fill, zero/
+7/255/510-byte ANC, unknown versions, DRC, chained records and every compatible
+reserved type in 3..10/15. Complete logical AUs and original class bits are saved;
+existing own scalar core/prediction/TNS/CLDFB PCM remains the numerical oracle.
+
+The 64 malformed movies isolate short type/DRC classes, invalid fill nibble/byte,
+ANC lengths, category-boundary spill and final alignment. Sixteen spill controls
+are independently decoded as valid logical audio with the same PCM, while their
+EP3 category partition must fail with `AAC ESC extension exceeds category boundary`.
+These passing refusal controls prove the specific dependency-boundary failure;
+separate positive movies provide intended playback acceptance. Checkpoints and
+both container bridges require the same specific errors during opening/decoding.
+A frozen pre-change executable rejects the complete positive source with
+`unconsumed AAC ESC instances`.
+
+All 11 new checks passed offline with `--no-default-features --features player`,
+including exact reconstruction, independent finite PCM, MP4/Matroska exports and
+intervals, EOF/rewind/repeated/frame-edge/negative/past-EOF player navigation,
+checkpoint identity, malformed rollback, mono discovery and PS candidate transport.
+The 31 existing extension/ER-LC/LD-SBR integration checks also passed, together
+with 1,052 root unit tests (26 ignored) and 562 media unit tests (one ignored).
+The linked executable has no FFmpeg/libav dynamic dependencies. All 356 files /
+7,419,982 bytes regenerated identically with process/network creation forbidden;
+ordinary tests consume saved assets without generation.
+
+Normative mapping: ISO/IEC 14496-3 table 4.149,
+[extended-payload category assignment](https://ossrs.net/lts/zh-cn/assets/files/ISO_IEC_14496-3-AAC-2009-90cda427e845cc176293bffee3f92f99.pdf).
+ER SBR category 9, EP1 stream association, separate ELD extension tools, wider
+PCE/layout and multi-AU/protection combinations remain open. The full codec goal
+is not complete; this milestone supplies syntax/transport metadata acceptance.
+
+
+## EP3 large independent HCR regions, 2026-10-28
+
+The four large independent-window ER-LTP HCR sources excluded from the preceding
+EP3 matrix now have their own acceptance corpus, `aac-er-esc-large-hcr`.
+It covers 960/1024 with the large region in either CPE channel. Each region is
+10,192 bits; the complete source AU remains within the pair buffer allowance.
+Independent side/spectral category construction is checked against the original
+own source bytes, with the existing scalar cosine/window PCM retained as oracle.
+No production decoder change was necessary for these cases.
+
+A focused geometry check restores the logical AU, parses it with pair context,
+and verifies all 416 escape coefficients (208 positive and 208 negative values
+of magnitude 8191). A deliberately wrong SCE context clips the same region and
+must fail specifically with `AAC HCR incomplete nonpriority codeword`. This is
+a passing refusal control demonstrating the target boundary, separate from
+actual EP3 CPE acceptance through complete PCM, exports and playback.
+
+Sixteen malformed movies isolate bounded side fields, truncation of the actual
+large spectral instance, EP CRC and final alignment after valid prefixes.
+Nine integration checks passed offline with `--no-default-features --features
+player`: exact class/logical bits, independent finite PCM, native MP4/Matroska
+exports and intervals, checkpoints/mapping identity, exact malformed failures,
+and player audio-stream EOF/rewind/repeated/frame-edge/negative/past-EOF seeks.
+The original unprotected large-HCR acceptance test also passed as a control.
+The integration executable has no FFmpeg/libav dynamic dependencies.
+
+The explicit offline generator produced 52 files / 493,799 bytes, reproduced
+byte-for-byte with process/network creation forbidden. Its default mode still
+matches every byte of the preceding 864-file / 17,837,502-byte corpus. Ordinary
+tests consume saved assets and do not generate fixtures or invoke foreign codecs.
+This closes the four-source qualification gap stated in the preceding milestone.
+Wider PCE/layout, multi-AU/protection combinations, extended-payload categories
+and EP1 association remain open; the full codec goal is not complete.
+
+
+## ER AAC-LTP/LD EP3 predictors and resilience, 2026-10-28
+
+AOT19 and AOT23 now admit epConfig=3/directMapping=1 and restore their main
+payload through the shared bounded ESC reader. Common CPE headers and masks
+stay in category 0; each deferred predictor is parsed from its own category 1
+before that channel's gain and payload. Independent-window predictors remain
+inside their own ICS header. The existing LTP/LD ICS and predictor syntax
+parsers validate these spans; reconstruction itself does not alter predictor
+history. Normal transactional synthesis alone commits reconstructed source AUs.
+The public ER-LC helper remains available with its AOT17 guard, forwarding to
+the general ER helper. ELD keeps its separate LD-SBR reconstruction path.
+
+Native decoding, mono PS discovery and PS candidate transport recovery use the
+same ER semantic reconstruction. Reserved directMapping remains invalid;
+checkpoint identity continues to distinguish raw EP2 from semantic EP3.
+This extends main-payload support, not the unimplemented extended-payload ESC
+categories or separate elementary-stream EP1 association.
+
+The explicit offline `generate_aac_er_predictive_esc_fixtures.py` corpus has
+160 acceptance movies: 90 ER-LTP and 70 ER-LD. It covers 960/1024 and 480/512,
+mono/stereo, independent/common windows, MS modes 0/1/2, all eight resilience
+flag combinations, virtual books, RVLC escapes, HCR, TNS, long/start/short/stop
+transitions, sine/KBD or LD low-overlap windows, LD lag update/reuse/absence and
+independent deferred predictor activity. Logical fields are independently traced,
+then checked byte-for-byte against the existing own source packets. Numerical
+references retain the independent sparse cosine/window/prediction/TNS oracles.
+The shared generator's optional category output is checked against its ordinary
+channel spelling for every traced resilience source.
+
+There are 110 malformed movie controls for bounded side/predictor or spectrum
+truncation, EP CRC, final alignment and an ER-LTP lag exceeding two frames.
+HCR spectrum truncation specifically requires `truncated AAC HCR spectral region`,
+not a generic bit-field error. The first negative run exposed that inaccurate
+expectation; the intended HCR failure was verified and the generator corrected.
+All 864 files / 17,837,502 bytes regenerated identically with process/network
+creation forbidden; ordinary tests only read saved assets.
+
+Frozen pre-change executables reject the same complete positive AOT19 and AOT23
+ASCs with the old epConfig-not-implemented errors. New checks restore every class
+bit and complete logical AU, compare finite independent PCM, validate checkpoints,
+EP2/EP3 identity and reserved mapping, exports/intervals in MP4/Matroska, native
+player audio-stream EOF/rewind/repeated/frame-edge/negative/past-EOF navigation,
+malformed rollback and exact errors during opening or decoding. Mono AOT19
+PS discovery/candidates also exercise all resilience combinations without
+claiming that these main-only sources contain PS audio.
+
+Qualification passed offline with `--no-default-features --features player`:
+all nine new checks and 40 existing ER-LC/ELD/LTP/LD integration checks,
+1,052 root unit tests (26 ignored) and 562 media unit tests (one ignored).
+The new linked integration executable has no FFmpeg/libav dynamic dependencies.
+
+Normative mapping: ISO/IEC 14496-3 tables 4.94/4.95/4.148,
+[ER channel-dependent predictor assignment](https://ossrs.net/lts/zh-cn/assets/files/ISO_IEC_14496-3-AAC-2009-90cda427e845cc176293bffee3f92f99.pdf).
+The four existing large independent HCR-region sources remain outside this new
+EP3 corpus, as do wider PCE/layout and multi-AU/protection cross-products.
+Those qualification gaps, extended-payload categories and EP1 remain open;
+the full codec goal is not complete.
+
+
+## ER AAC-LC EP3 main-payload reconstruction, 2026-10-28
+
+AOT17 now admits epConfig=3 with directMapping=1 and reconstructs its main
+payload from exact ESC instances. Category 0 holds CPE tags/common-window side
+information; category 1 holds tagged SCE/LFE or individual channel side data;
+optional categories 2/3 hold RVLC/TNS and category 4 holds the spectrum.
+New channel/pair entry points reuse the normal geometry, mask and payload
+parsers. The existing bounded category reader records original logical spans,
+so TNS placement, final alignment and reordered transport classes are restored
+before the normal transactional decoder performs synthesis. Reserved
+`directMapping=0` remains invalid. EP2 behavior is unchanged.
+
+Mono PS discovery also carries directMapping metadata and performs this semantic
+reconstruction before syntax probing. Treating EP3 classes as a byte raw AU
+previously masked the bounded short-side failure with an unrelated raw-AU
+alignment error. Both discovery and the PS candidate decoder now share the
+correct recovery path. PS candidate checkpoints distinguish EP2 and EP3 even
+when their core/protection descriptors match. This does not implement the
+remaining extended-payload ESC categories or claim EP3 PS audio acceptance.
+
+The explicit offline `generate_aac_er_lc_esc_fixtures.py` corpus traces the own
+saved ER-LC logical fields independently, checks original source bytes, and
+protects the resulting categories. It contains 42 acceptance movies: 960/1024,
+mono/stereo/3.0/5.1, common MS modes 0/1/2, independent-window stereo, long/start/
+short/stop transitions, alternating sine/KBD and deferred TNS. Independent sparse
+IMDCT/window/TNS PCM references are retained. There are also 24 late malformed
+movies isolating empty side/spectrum instances, EP CRC and nonzero final alignment.
+All 220 files / 8,903,388 bytes regenerated identically with process/network
+creation forbidden. The updated old generator likewise matched its 55 outputs.
+
+A frozen pre-change executable rejects the same complete positive ASC with
+`ER AAC LC epConfig is not yet implemented`. Nine new acceptance checks now
+cover exact recovered class bits and logical AUs, independent complete finite
+PCM, checkpoints/identity, public and owned MP4/Matroska exports and intervals,
+actual player audio-stream EOF/rewind/repeated/frame-edge/negative/past-EOF seeks,
+malformed errors/history and discovery/PS candidate paths. Mono discovery can
+report malformed syntax during opening; other layouts report it after the three
+valid prefix packets. Both phases require the same specific semantic error.
+Qualification passed offline with `--no-default-features --features player`:
+all nine new checks, 39 existing ER-LC/ER-EP/ELD/LD-SBR/EP2-PS integration checks,
+1,052 root unit tests (26 ignored) and 562 media unit tests (one ignored).
+The new executable has no FFmpeg/libav dynamic dependencies.
+Two old EP3 refusal fixtures lack a protection descriptor: they remain malformed
+input controls with a truncation error, rather than unsupported valid streams.
+
+Normative mapping: ISO/IEC 14496-3 tables 4.94/4.95/4.148,
+[ER AAC category assignment and dependency order](https://ossrs.net/lts/zh-cn/assets/files/ISO_IEC_14496-3-AAC-2009-90cda427e845cc176293bffee3f92f99.pdf).
+The numerical matrix above does not qualify every resilience/PCE combination.
+ER-LTP/LD EP3, EP1 association and extended-payload categories remain open;
+the full codec goal is not complete.
+
+
+## EP3 LD-SBR header epochs inside multi-AU packets, 2026-10-28
+
+The new `aac-eld-esc-multi-history` corpus combines semantic ESC reconstruction
+with changing LD-SBR header history inside fixed-parameter multi-AU EP packets.
+Each pair of sources sends a header, then omits it. Header amplitude precision
+alternates between pairs. Single-envelope fixed and two-envelope transient grids,
+reserved CPE nibbles, legal frequency deltas and a reserved extension-id area
+keep category 9 and 10 lengths fixed without inserting unconsumed class padding.
+Only final logical-AU alignment is appended to the final category.
+
+The synthetic core is repeated intentionally. Its changing SBR syntax is generated
+independently of the decoder, and the saved logical AUs in source order form the
+transport/semantic composition reference. This is not a new independent numerical
+DSP oracle; existing scalar LD-SBR acceptance remains required separately.
+The 276 valid movie variants (252 clean, 24 corrected) cover 480/512 stereo,
+2..7 AUs, joined/independent/mixed flags, SRCPC, independent RS with fractional
+information/CRC boundaries, grouped RS, predefined-set transmission permutations,
+and sequential/recursive/mixed interleaving. All three protection families also
+have late-child SBR-CRC, class-CRC and truncated-body controls: 18 malformed movies.
+
+A dedicated test reconstructs sources with current context, compares every logical
+byte, advances the SBR context after every source, and checks each header epoch.
+Changing only that context to the ASC initial header produces the specific
+`truncated SBR Huffman codeword` refusal on four header-omission probes. The first
+fixture draft used zero opaque extension bytes and accidentally allowed an alternate
+valid stale-header parse; nonzero opaque tail bytes remove that ambiguity while
+preserving valid reference decoding and correctly regenerated SBR/EP protection.
+Thus the negative control demonstrates the intended history dependency rather than
+an unrelated malformed stream. No production decoder changes were needed here.
+
+The ten integration checks also cover exact source/class identity, complete finite
+PCM, exports and intervals in MP4/Matroska, checkpoints, timestamp-overflow rollback,
+remux, actual player audio-stream EOF/rewind/repeated seeks, negative and past-EOF
+positions, and exact malformed failures through both player container bridges.
+The generator is explicit and offline; ordinary tests only read saved assets.
+All 844 files / 5,276,729 bytes regenerated identically with process/network creation
+forbidden. The shared generator extension leaves both earlier multi-AU corpora
+unchanged (4,160 original and 1,499 grouped files, separately audited).
+All ten integration checks passed offline with `--no-default-features --features
+player`. The linked executable contains no FFmpeg/libav dynamic dependencies.
+
+This qualifies the selected EP3 LD-SBR history/transport combinations, not all
+codec profiles, all EP3 categories, or subjective hardware audio-device output.
+EP1, other ER-core semantic mappings, additional extension categories and wider
+layout/resilience combinations remain explicit open scope.
+
+
+## Restructured multi-AU RS groups, 2026-10-28
+
+The new `aac-ep-rs-group-concatenated` acceptance corpus qualifies RS grouping
+after class-wise source-frame restructuring: 2..7 AUs per packet, joined,
+independent and mixed class flags, 480/512 ELD cores, mono/stereo, and LD-SBR
+on/off. Three predefined sets vary class transmission order and correction
+capability. Interleaving includes sequential, recursive octet and mixed modes.
+Zero-length classes retain their original identity; nonempty information and CRC
+boundaries can fall inside an octet. Mixed/independent flags leave independent
+terminating RS words after the initial protected group.
+
+The explicit offline generator extends the existing multi-AU encoder with group
+formation before parity/interleaving. Its default output remains byte-for-byte
+identical across all 4,160 saved original files. The new corpus has 432 clean
+and 24 correctable-error movies, 48 malformed controls, and eight independently
+referenced scalar PCM sources: 1,499 files / 7,775,242 bytes. Both generator
+outputs were audited with process/network creation forbidden. Tests never run
+the generator and use no foreign decoder or private media.
+
+Nine acceptance checks compare every recovered AU and original class bit,
+complete finite PCM against independent references, public/owned MP4 and
+Matroska exports and intervals, retained checkpoints, timestamp-overflow rollback,
+MP4-to-Matroska remux, and native player audio-stream EOF/rewind/repeated seeks
+at source-frame and packet boundaries. Malformed CRC is introduced before valid
+RS encoding; truncated parity retains valid protected headers. Both exact
+errors and decoder-history recovery are checked, including exports and both
+player container bridges. The first qualification run exposed an inaccurate
+fixture error expectation (generic rather than RS-specific length mismatch),
+which was corrected; no production decoder change was required for this matrix.
+All nine checks passed offline with `--no-default-features --features player`;
+the integration executable has no FFmpeg/libav dynamic dependencies.
+
+This closes the unqualified EP2 grouped multi-frame combination described below.
+It does not qualify EP1, every EP3 category/multi-frame combination, additional
+extensions, or subjective output-device playback. The full codec goal remains open.
+
+
+## RS bit boundaries for LD-SBR EP2/EP3, 2026-10-28
+
+RS recovery now preserves exact information bits when a class or its CRC ends
+inside an octet. CRC is appended before FEC; octet alignment applies to the
+combined RS information word, including all members of a protected group.
+Fixed ASC lengths are consequently validated after CRC and group selection.
+Until-end inference searches lengths congruent to minus the CRC width. A group
+cannot infer fewer bits than its declared nonempty members require, including
+when its coded tail is empty.
+
+The offline `generate_aac_ep_rs_bits_fixtures.py` corpus contains 352 valid
+synthetic movies (336 EP2 and 16 EP3 LD-SBR), 56 malformed controls, and 475
+primitive vectors covering every supported CRC width and RS shortening. The
+saved corpus has 1,238 files / 5,672,692 bytes. Regeneration with process/network
+creation forbidden matched every saved file. Sources and scalar PCM references
+are synthetic; ordinary tests consume saved assets without fixture generation.
+
+Acceptance covers independent and grouped protection, fractional member/CRC
+boundaries, fixed and until-end lengths, interleaving and correctable RS errors.
+It checks exact recovered class bits, independent complete PCM, MP4/Matroska
+exports, actual player audio streams, EOF, rewind, repeated/frame-edge seeks,
+checkpoints and transactional malformed-input failures. EP3 includes changing
+LD-SBR headers. A raw byte-AU API refusal for non-byte-sized aggregate data is
+an explicit API-contract test, separate from successful exact-bit recovery.
+Malformed cases isolate class CRC, truncated FEC, invalid aggregate alignment,
+and empty grouped tails after three valid packets.
+
+Before the fix, a frozen executable reproduced the original octet-boundary
+refusal. An intermediate executable also reproduced the newly discovered empty
+group acceptance; the saved empty-tail regressions now require a precise length
+error in class recovery, exports and both player container bridges.
+
+Qualification passed offline without default features, with `player`: all ten
+new integration checks (nine together plus the focused final bridge check),
+36 existing EP/LD-SBR integration checks, 562 media unit tests (one ignored),
+and 1,052 root unit tests (26 ignored). The new integration executable has no
+FFmpeg/libav dynamic dependencies. This is native audio-stream acceptance,
+not a claim of subjective GUI/audio-device qualification.
+
+Normative basis: ISO/IEC 14496-3 sections 1.8.4.5 and 1.8.4.7,
+[CRC before FEC and concatenated RS classes](https://ossrs.net/lts/zh-cn/assets/files/ISO_IEC_14496-3-AAC-2009-90cda427e845cc176293bffee3f92f99.pdf).
+This closes this RS boundary gap, not universal codec conformance: EP1,
+additional ER-core EP3 mappings and extension categories, and further grouped
+multi-frame qualification remain open.
+
+
+## EP3 LD-SBR ESC 9/10, 2026-10-28
+
+The owned ELD EP3 path now also reconstructs low-delay SBR categories 9 and 10.
+Category 9 contains CRC/header, grids and delta flags; category 10 contains
+inverse filtering, envelope/noise words, harmonics and extension data. Logical
+and separated syntax share the same SBR prefix/tail parser. Both frontend and
+backend use exact bit bounds and preserve original inter-element bit positions;
+LFE has no LD-SBR instances and retains its independent upsampler.
+
+Reconstruction reads current headers from the existing LD-SBR decoder, with
+explicit core geometry validation. It does not mutate SBR/PNS/synthesis history.
+Only the normal transactional decoder commits the reconstructed AU. Current
+headers are obtained separately before each source AU, including within an EP
+packet containing multiple AUs. Raw EP2 sources retain borrowed byte access.
+An error or timestamp overflow in any later child restores the whole original
+packet checkpoint and emits no partial packet PCM.
+
+The new offline `generate_aac_eld_esc_sbr_fixtures.py` corpus contains 258
+nonzero/decay sources with independent scalar/CLDFB PCM, 48 transport composition
+controls and 28 malformed controls, each with MP4/Matroska variants. Numerical
+coverage retains the existing layouts, LFE, 480/512 cores, single/double output
+rate, CRC on/off, resilience and stereo tools, grids, coupling, inverse filtering,
+smoothing and harmonics. Two new two-envelope sequences change header amplitude
+resolution at frames 4/8 and omit it between updates; an initial-header shortcut
+cannot parse those intervening values correctly.
+
+The 48 composition controls repeat valid plain source AUs with fixed EP class
+lengths, 2..7 AUs per packet and original packet clocks. Their reference is the
+ordered plain-AU decode, isolating transport composition; they do not replace
+independent numerical references. Four late controls fail in the last child of
+the second seven-source packet. Other malformed controls independently isolate
+empty category 9, one-bit category 10, LD-SBR CRC and EP class CRC after valid
+prefixes, with header-switch negatives occurring after the changed header.
+Protection recovery itself succeeds for the category/SBR negatives.
+
+The ten integration tests verify full independent PCM, class information,
+current-header reconstruction, public/owned exports, repeated ranges, signed
+clocks, overflow/late-error rollback, real AudioStream playback/EOF/rewind,
+negative/repeated/source-edge/packet-edge/past-EOF seeks, and reset/restore while
+the current header differs from ASC. Both exports and player bridges preserve
+precise category/CRC errors. The earlier constructor refusal on the same new
+header-switch ASC was reproduced using a frozen pre-fix decoder. Its old refusal
+test now rejects a physically missing SBR-instance sequence instead of valid
+EP3 LD-SBR admission.
+
+The generator reproduces all 1,236 new files (35,672,795 bytes), and all 1,030
+legacy LD-SBR files remain byte-identical, with process/socket creation forbidden.
+Ordinary tests only read saved fixtures and require no FFmpeg/network. All ten
+new integration tests, 562 media unit tests (one ignored), 1,052 root unit tests
+(26 ignored), and 41 previous ELD/LD-SBR/EP2/PS integration tests pass in this
+checkout. The test binary has no FFmpeg/libav linkage. This is software
+PCM/navigation qualification, not physical audio-device or 60 fps qualification. EP1 stream association, other ER-core EP3 mappings, further
+extension categories/tools and generic protection alignment edges remain open;
+the broad codec-gap objective is not closed.
+
+Primary definition: [ISO/IEC 14496-3:2009](https://ossrs.net/lts/zh-cn/assets/files/ISO_IEC_14496-3-AAC-2009-90cda427e845cc176293bffee3f92f99.pdf), sections 4.5.2.4/4.6.19 and table 4.149.
+
+## EP3 direct ESC mapping for ELD core, 2026-10-28
+
+Native AAC-ELD now accepts epConfig=3 with directMapping=1 for core-only
+payloads. ASC retains mapping identity; checkpoint restore distinguishes EP2
+and EP3 even when their core and protection descriptors are otherwise identical.
+The reserved directMapping=0 value remains an error. A frozen old decoder
+refused the same valid new mono ASC specifically at the separate-ESC mapping.
+
+The semantic mapper consumes category 0 per common CPE, category 1 channel
+side information, category 2 RVLC when enabled, category 3 TNS when present,
+and category 4 spectrum. It preserves logical syntax order even when that
+requires returning to category 1 after reading TNS. Both frontend and owned
+backend share this mapper and the same channel payload parser; the ordinary
+logical-AU route keeps its transactional cursor. Spectral, HCR, RVLC, TNS and
+section validation are reused. Parsed logical bytes then enter the existing
+transactional ELD synthesis path; syntax reconstruction does not draw PNS noise
+or mutate synthesis history.
+
+A bounded BitReader hides storage padding beyond each instance's exact bit
+length. Intermediate classes must be completely consumed. Only the last
+instance may carry the exact zero bits needed for final byte alignment;
+omitted alignment is restored. Extra instances, trailing information and
+nonzero alignment fail explicitly. The five shared video-codec bit-reader tests
+also pass, including exact-boundary checks for fields, short reads, skip and
+clones.
+
+`scripts/generate_aac_eld_esc_fixtures.py` saves 116 own nonzero/decay acceptance
+sources and 28 malformed controls as short MP4 and Matroska files. The matrix
+covers 480/512 cores, all existing indexed layouts/rates, all resilience flags,
+and every flag combination with stereo TNS/PNS/correlated PNS/intensity. Both
+single-set headers and set changes with reversed class transmission order are
+used. Independent scalar ELD PCM is retained. The source writer now excludes
+non-spectral PNS/intensity books from HCR word emission; this also enables those
+combined synthetic controls without changing its legacy output.
+
+Eight acceptance/regression tests verify exact per-class information and
+reassembled logical AUs, independent PCM, public/owned container exports,
+intervals, signed packet clocks, checkpoint replay, rollback, real AudioStream
+playback, EOF, rewind and negative/repeated/frame-edge/past-EOF seeks. Malformed
+controls fail after three valid frames: a CRC error, or a seven-bit side instance
+with valid FEC/CRC that fails exactly at global_gain. Both owned/public exports
+and player bridges preserve those errors. The ninth test initially recorded the
+LD-SBR ESC 9/10 constructor refusal. The subsequent milestone above replaces it
+with acceptance and retains an exact refusal for missing SBR instances.
+
+Qualification passes 562 media unit tests (one ignored), 1,052 root unit tests
+(26 ignored), and 29 existing ELD/LD-SBR/ER-PS/LTP-PS/Main-PS/SSR-PS integration
+tests. The generator reproduces all 524 new files (10,155,593 bytes) and all 242
+legacy ELD files byte-for-byte with process/socket creation forbidden. Ordinary
+tests only read saved data. This is offline PCM playback qualification, not a
+physical audio-device or performance result. EP1 stream association, EP3 for
+other ER cores, LD-SBR categories 9/10, extension categories and separate ELD
+extension tools remain open.
+
+Primary definition: [ISO/IEC 14496-3:2009](https://ossrs.net/lts/zh-cn/assets/files/ISO_IEC_14496-3-AAC-2009-90cda427e845cc176293bffee3f92f99.pdf), sections 1.6.3.6–1.6.3.7 and 4.5.2.4,
+tables 4.148–4.149.
+
+## Exact EP class recovery for ESC mapping, 2026-10-28
+
+`Config::decode_class_frames()` now returns original predefined-set identity
+and exact, separately recovered class bits for each source frame. Class indices
+follow original output order after undoing the configured wire permutation.
+Absent optional classes are omitted; present zero-bit classes remain explicit.
+CRC/FEC, optional selection, grouped RS, recursive interleaving and 1..7 source
+frame restructuring all complete before any result is exposed. Class output
+has no invented octet padding. The existing raw-AU methods use this shared
+recovery and retain their octet-alignment requirement.
+
+This boundary is necessary for EP3: its direct mapping associates each EP class
+with a distinct error sensitivity category instance. Concatenating physical
+classes into an epConfig=0 AU would lose the semantic category boundaries.
+EP1 additionally requires dependent elementary-stream association. This
+checkpoint did not yet enable AAC ASC admission or ESC-to-logical-payload
+decoding. EP3 ELD core is enabled in the subsequent semantic-mapping milestone
+above; EP1 and other EP3 paths still require their own integration.
+
+`scripts/generate_aac_ep_class_boundaries.py` authors 130 saved protection
+vectors with exact information lengths 0..64 bits, all SRCPC puncture rates,
+CRC, optional absence and present-empty classes. The four new tests check those
+vectors, class identity and exact bits on all 3,483 existing concatenated,
+optional, grouped-RS and multiclass movie sources, and precise failures on 704
+malformed protection controls. These are class-recovery acceptance checks,
+not acceptance of EP1/EP3 audio playback. The generator reproduces its saved
+49,171 bytes with subprocess and socket creation forbidden. Ordinary tests
+read saved fixtures offline. All 26 class/concatenated/optional/grouped-RS
+integration checks pass, including existing AudioStream playback/rewind/seek.
+The protected PS complete-PCM/checkpoint regression also passes. Media and root
+unit qualification passes 561 and 1,052 tests respectively (1/26 ignored).
+The class-recovery test binary has no FFmpeg/libav linkage.
+
+Primary definition: [ISO/IEC 14496-3:2009](https://ossrs.net/lts/zh-cn/assets/files/ISO_IEC_14496-3-AAC-2009-90cda427e845cc176293bffee3f92f99.pdf), sections 1.6.3.6–1.6.3.7,
+1.8.1 and 4.5.2.4; tables 4.148–4.149 distinguish common CPE information,
+per-channel side information, RVLC, TNS, spectrum and extension instances.
+
+## Protected ER-AAC Parametric Stereo, 2026-10-28
+
+The owned PS decoder and syntax-only presence probe now retain and recover
+EP2 before interpreting AAC. Previously the valid protected source recovered
+its raw AU successfully but PS parsed the protection bits as AAC and failed
+with `AAC section exceeds max_sfb`. For transport packets containing two through
+seven source AUs, PS's source-AU lookahead is assembled into complete original
+transport packets. Public output/pending indices, timestamps and durations keep
+that transport identity. EOF drains the final complete aggregate. A failure in
+any child rolls back synthesis, PS/SBR state, coupling and partial packet PCM,
+even when the preceding packet became ready during that failing call.
+
+Implicit PS negotiation preserves the initial protected parsing error if no
+later PS discovery succeeds. Otherwise losing the initial SBR header could
+mask CRC failure as incompatible mono layout or unsupported SBR synthesis.
+Successful mono protected streams retain the ordinary fallback; explicit PS
+and valid later PS discovery retain their existing dispatch.
+
+`scripts/generate_aac_ep_ps_fixtures.py` saves 672 acceptance sources and 360
+malformed controls in MP4/Matroska: ER-LC/LTP, 960/1024 cores, single/double
+output rates, explicit/sync/implicit PS and 1..7 source AUs with SRCPC, RS and
+mixed-class protection. Late negatives fail in the second seven-source packet.
+Ancillary padding precedes SBR and all 24 original/padded plain sequences have
+bit-exact PCM. Scalar core references and independently authored PS payloads
+feed the established component oracle. The baseline old binary independently
+confirmed that padding was valid before protected dispatch was enabled.
+
+All eight `tests/aac_ep_ps_playback.rs` tests pass: full PCM, public/owned
+exports, repeated intervals, actual AudioStream playback/EOF/rewind/seek,
+source and packet edges, signed packet clocks, checkpoint replay, error rollback
+and protected mono fallback. Existing concatenated EP2 and plain ER-PS tests
+also pass, along with 561 media and 1,052 root unit tests. Offline generator
+controls match 2,743 new files (24,223,960 bytes), all 4,160 previous concatenated
+EP2 files and all 82 original PS files with subprocess/network creation forbidden.
+EP1/EP3, escaped RS correction rates and separate ELD extension tools remain
+open; these finite checks do not establish universal codec conformance.
+
+## LD-SBR core-tool integration and navigation, 2026-10-28
+
+The owned LD-SBR acceptance matrix now contains 256 nonzero/decay sources
+(previously 104). The additional 152 sources combine both 480/512 cores,
+mono/stereo, single/double output rate and CRC on/off with every nonzero
+combination of section/RVLC/HCR resilience flags. Stereo sources additionally
+combine LD-SBR with full MS, independent/correlated PNS, intensity and TNS.
+The ASC flag checks ensure these fixtures exercise the intended resilient
+syntax. Independent core cosine/window arithmetic feeds the existing direct
+CLDFB, patch/energy/gain/noise and synthesis oracle; production decoding is
+not used to create reference PCM.
+
+All 256 sources pass the six `tests/aac_eld_sbr.rs` checks: complete PCM,
+public/owned MP4 and Matroska export, repeated interval extraction, checkpoint
+replay, malformed-packet rollback and actual AudioStream decoding through EOF.
+Player navigation includes rewind, repeated/backwards seeks, samples immediately
+before/at/after output-frame edges, negative targets, past-EOF targets and a
+return from EOF. PCM after navigation equals the corresponding uninterrupted
+suffix. Timed decoding also preserves signed PTS and caller duration independently
+of 480/512/960/1024 output geometry, including checkpoint replay.
+
+The generator reproduces all 1,030 saved files (27,668,255 bytes) with subprocess
+and socket creation forbidden. All 416 original positive assets remain
+byte-identical. Ordinary tests read saved fixtures offline. Current qualification
+also passes 561 media unit tests (one ignored), 1,052 root library tests
+(26 ignored), and existing ELD/CLDFB acceptance. The LD-SBR player test binary
+has no FFmpeg/libav linkage. AudioStream qualification does not verify a physical
+audio device. EP1/EP3 separate-stream mappings and known ELD extension tools
+remain open; this milestone qualifies LD-SBR core-tool integration rather than
+closing the general codec-gap goal.
+
+## EP2 concatenated source frames, 2026-10-28
+
+The EP2 assembler now restores two through seven source AUs from one protected
+frame. Fixed source-class parameters are restructured before CRC/FEC decoding:
+a concatenated class becomes one N-times-long class; an independent class
+becomes N adjacent classes. Existing SRCPC chains, RS protection and recursive
+interleaving operate on those restructured classes. Recovery then transposes
+class-major data back into source-frame order and packs each original AU
+separately, including bit-class boundaries. Original descriptors are retained;
+expanded parameters are temporary and can reach 441 entries (63 classes × 7).
+No escaped length/rate/CRC parameters are allowed in this mode, as required by
+ISO 1.8.4.4. Reserved frame counts remain errors.
+
+`Config::decode_raw_access_units()` returns the ordered source units. The old
+singular API remains explicit: it refuses multiple units and points callers to
+the plural API. Single-source recovery retains its existing behavior. Native
+AAC decodes each recovered source AU through the same owned core/SBR pipeline,
+returns one contiguous PCM frame with the original transport PTS/duration, and
+restores the complete packet-boundary checkpoint if any child fails. Child
+clock boundaries are computed with wide integer arithmetic. Timestamp overflow
+after a successful child must also restore history. MP4 coded sample counts now
+multiply core geometry by the number of source frames; playback cannot crop an
+N-source packet to one source frame by its inferred clock.
+
+ASC and native decoders expose `core_packet_samples()` for transport clocks;
+`core_frame_samples()` retains the single-source DSP geometry. All existing
+AAC packet-clock consumers use the packet value, including compressed/PCM
+companion windows, Matroska export and MP4-to-Matroska planning. The first
+implementation exposed a second exact failure on the same valid movie:
+`AAC edit exceeds packet index` during remux, because the plan still counted
+one core frame. Its regression now remuxes all 84 profile/frame-count pairs,
+compares PCM, and checks remuxed playback/seek. Two media unit regressions
+require a seven-source LD-SBR packet to contain 7,168 output samples and its
+7–35 ms companion window to retain exactly 1,344 samples with correct delay
+and tail padding. Transform geometry remains unchanged.
+
+`scripts/generate_aac_ep_concatenated_fixtures.py` saves 1,263 acceptance sources,
+132 malformed controls and three forbidden-escape configurations in short
+MP4/Matroska movies. Sources include 480/512 ELD, mono/stereo LD-SBR ×2, ER-LC,
+ER-LTP and ER-LD at 480/512/960/1024 core frame sizes. Every frame count 2..7,
+all joined/all independent/mixed class flags, bit-class continuous SRCPC,
+RS/mixed classes, all three interleave modes, zero classes and source-class
+permutations are exercised. The 63-class/seven-source case verifies 441
+expanded independent classes without widening the original descriptor table.
+
+The source frames are padded only by valid ER EXT_FILL to fixed lengths. The
+original pre-fix binary decodes all 14 padded source sequences to the saved
+independent PCM, while refusing the corresponding concatenated setups at the
+exact old `EP concatenated frame routing is not yet implemented` error. Thus
+the reproducer does not depend on unrelated invalid AAC padding. Normal tests
+read saved assets; explicit generation needs no foreign codec, process or
+network and reproduces all 4,160 files (20,335,425 bytes) byte-for-byte with
+process/socket creation forbidden.
+
+`tests/aac_ep_concatenated_playback.rs` verifies exact per-source AU recovery,
+complete independent PCM, native reset, full core metadata, MP4 packet clocks,
+public/owned container export and ranges, playback/drain, rewind, repeated seek
+at internal source boundaries, whole-packet boundaries and EOF. CRC and declared
+truncation controls isolate transport failures. Another movie has valid EP
+protection around a wrong alignment bit in the final AAC child: transport
+recovery must succeed before the exact AAC error, and the following good packet
+must match checkpoint replay. Saved invalid configurations separately test the
+normative escape restriction. None is counted as successful playback.
+
+This is owned PCM/navigation qualification, not physical speaker output or a
+throughput benchmark. Broader tool combinations, EP1/EP3 mappings and remaining
+ELD extensions still require implementation or qualification; the codec-gap
+goal is not complete.
+
+Qualification: 561 media unit tests (one ignored), 1,052 root library tests
+(26 ignored) and 50 integration tests passed: 1,663 passed, zero failures,
+27 ignored. All eight concatenation tests pass on the final packet-clock
+implementation, alongside complete ELD/CLDFB/LD-SBR, single-source EP,
+multiclass, optional-class and RS-group regressions. The 1,040-source ER EP2
+native/reset/raw-AU regression was rerun on this same final implementation.
+Checks use offline `--no-default-features --features player`; the current
+concatenated-playback test binary has no FFmpeg/libav linkage. Build profiles
+were not changed. This is a finite qualification boundary, not universal codec
+coverage.
+
+Primary definition: [ISO/IEC 14496-3:2009, section 1.8.4.4 and Figure 1.9](https://ossrs.net/lts/zh-cn/assets/files/ISO_IEC_14496-3-AAC-2009-90cda427e845cc176293bffee3f92f99.pdf).
+
+## EP2 integration for ER AAC LC, LTP and LD, 2026-10-28
+
+The shared ASC reader now parses ErrorProtectionSpecificConfig for epConfig=2
+in AOT17/19/23 and retains it beside the original core configuration. The
+existing extension-aware decoder recovers the epConfig=0 raw access unit before
+ER-LC/LTP/LD entropy parsing and synthesis. Frame geometry, channel mapping,
+section/HCR/RVLC resilience flags and prediction history remain core state.
+The core-only AacConfig parser still refuses protected input and directs callers
+to the extension-aware decoder; it cannot silently discard the EP requirement.
+Separate ESC-stream mappings (epConfig1/3) remain explicit refusals.
+
+The original binary reproduces the exact `ER AAC LC/LTP/LD epConfig is not yet
+implemented` refusal on the corresponding new protected synthetic inputs.
+`scripts/generate_aac_er_ep_fixtures.py` wraps 260 saved own synthetic source
+cases: ordinary ER-LC, ER-LTP, mono/stereo LD, ER-LTP resilience, HCR, RVLC and
+section resilience. Their saved independent spectra/filterbank/prediction PCM
+oracles are retained, with no private media or foreign decoder. Four protection
+variants per source yield 1,040 acceptance streams: bit-class continuous SRCPC,
+mixed SRCPC/RS with class-wise interleaving, grouped RS and corrected grouped
+RS. All three predefined sets change rates and permutations across packets;
+zero classes and until-end/fixed/in-band lengths remain exercised.
+
+The 520 negative controls recompute valid FEC around a wrong CRC in the first
+nonempty protected member, or cut declared coded data before interleaving. Each
+first decodes three valid packets; rollback controls retain byte-identical ASC.
+The output directory contains 4,943 assets (49,800,552 bytes), including short
+MP4/Matroska movies, original raw packets and exact independent PCM. Explicit
+regeneration reproduces every saved byte with process/socket creation forbidden;
+ordinary tests only read saved fixtures and require no FFmpeg or network.
+
+`tests/aac_er_ep_playback.rs` verifies exact recovered AU bytes, independent
+complete PCM, preservation of the original full core configuration, native
+reset/checkpoint accounting, public/owned container export and ranges,
+AudioStream playback/drain, rewind, repeated/frame-edge/EOF seek in both
+containers, and integrity-error rollback. The old ER-LC epConfig2 examples did
+not contain any EP config at all: they remain malformed setup refusals, now
+with the precise truncation expectation, separately from full EP2 acceptance.
+Their original generator and classification were updated together.
+
+This qualifies the saved fixed-channel core/resilience combinations; EP-protected
+PCE and SBR/PS combinations still need their own qualification. Source-frame
+concatenation, EP1/EP3 routing and broader codec tools remain open. Navigation
+checks do not establish physical output-device behavior or real-time throughput.
+
+Qualification passed 559 media unit tests (one ignored), 1,052 root library
+tests (26 ignored) and 57 integration tests across the eight source families,
+EP optional classes, RS groups and the new protected ER matrix: 1,668 passed,
+zero failures, 27 ignored. All seven new tests pass, including full navigation
+across all 1,040 streams in both containers. The original ER-LC generator also
+reproduces all 55 saved assets with process/socket creation forbidden. Tests run
+offline with `--no-default-features --features player`; the current test binary
+has no FFmpeg/libav linkage. Repository build profiles were not changed.
+
+Primary definition: [ISO/IEC 14496-3:2009, Table 1.20 and section 1.8.1](https://ossrs.net/lts/zh-cn/assets/files/ISO_IEC_14496-3-AAC-2009-90cda427e845cc176293bffee3f92f99.pdf).
+
+## EP2 grouped shortened Reed-Solomon recovery, 2026-10-28
+
+The owned EP2 assembler now combines successive FEC=2 members with their
+terminating FEC=1 member before RS geometry and recursive interleaving. Each
+nonempty member contributes its own information and CRC; zero-length members
+contribute neither CRC nor parity. Recovered group information is split at
+member boundaries, each CRC is checked, and raw bits return to the original
+output slots. The group is one interleaving stage. Multiple independent groups
+can coexist with standalone classes. An until-end final member is inferred from
+the complete group's encoded size. No new retained decoder state is introduced.
+
+The implementation follows ISO/IEC 14496-3:2009 sections 1.8.3.1 and 1.8.4.7:
+FEC=2 continues a group, FEC=1 terminates it, and member correction capabilities
+must agree. This milestone requires equal member interleave switches and
+byte-aligned information/CRCs. Unequal switches remain an explicit refusal;
+escaped RS rates, source-frame concatenation, EP1/EP3 association and other
+codec tools are not claimed here.
+
+`scripts/generate_aac_ep_rs_group_fixtures.py` uses the shared owned fixture
+writer with an explicit group mode. Its 240 acceptance and 160 negative sources
+cover 480/512 ELD and LD-SBR, mono/stereo, natural/cyclic/reversed transmission
+orders, zero members, fixed/in-band/until-end lengths, independent groups and
+standalone RS classes, interleave modes 0/1/2 (switches 0/1/3), corrected wire
+errors and per-member CRCs. Correction capability 120 forces groups to span multiple shortened RS
+codewords in the high-protection controls. Saved synthetic MP4
+and Matroska movies contain no private media. CRC controls recompute valid RS
+parity around a wrong member CRC; declared truncations are cut before
+interleaving. All negative cases first decode three good packets.
+
+`tests/aac_ep_rs_group_playback.rs` enables native complete PCM and exact raw-AU
+acceptance, public/owned export, both containers and repeated ranges,
+AudioStream playback/drain, rewind, repeated/frame-edge/EOF seek, checkpoints
+and error rollback. Saved PCM comes from the independently authored ELD/LD-SBR
+sources. Rebuilding the original HEAD assembler with this acceptance test fails
+at the exact `EP RS concatenated class routing is not yet implemented` refusal,
+not an unrelated codec error. A separate transport unit test covers multiple
+groups, exact parity geometry, zero groups and malformed group boundaries.
+
+Qualification: 559 media unit tests (one ignored), 1,052 root library tests
+(26 ignored), and 62 ELD/CLDFB/LD-SBR/EP integration tests passed: 1,673 total,
+zero failures, 27 ignored. All seven grouped-RS acceptance tests passed over
+240 valid and 160 negative sources. The original multiclass corpus and the new
+corpus regenerate byte-identically with process/socket creation forbidden.
+Tests are offline with `--no-default-features --features player`; the test
+binary has no FFmpeg/libav linkage. This qualifies saved PCM and navigation,
+not physical speakers, throughput or universal EP/codec coverage.
+
+Primary definition: [ISO/IEC 14496-3:2009, sections 1.8.3.1 and 1.8.4.7](https://ossrs.net/lts/zh-cn/assets/files/ISO_IEC_14496-3-AAC-2009-90cda427e845cc176293bffee3f92f99.pdf).
+
+## EP2 optional classes and large setup playback, 2026-10-28
+
+Owned EP2 recovery derives wire sets from optional descriptors. Each original
+set contributes 2^N variants in original-set order; zero presence-mask bits
+retain the corresponding optional classes. The decoder selects the original
+set and active class indices directly, then filters the wire order and class
+attributes. Output slots preserve original class identity while absent classes
+contribute no bits. No expanded table is allocated. The public
+`Config::predefined_set_count()` exposes the derived cardinality as u128.
+Original limits allow 255 sets of 63 optional classes: 255 * 2^63 variants and
+a 71-bit selector. Both selector and attribute headers honour extended
+protection when their length exceeds 16 bits. Checkpoints and retained-memory
+accounting keep original descriptors, including optional flags.
+
+A transport-label regression reproduces the ten sets in ISO Table 1.58 and
+checks exact reassembly with a filtered nontrivial output permutation. Sparse
+selection controls cover 0..63 optional flags, original-set transitions beyond
+u64 and the largest legal descriptor count. Empty derived sets successfully
+recover an empty EP payload; AAC playback refuses the missing audio data with
+its truncation error. This refusal is explicitly separate from playback
+acceptance and is checked after successful empty transport recovery.
+
+`scripts/generate_aac_ep_optional_fixtures.py` saves 780 own acceptance sources
+and 168 negative controls in MP4/Matroska. It covers 480/512 ELD with/without
+LD-SBR, mono/stereo, SRCPC/RS mixtures, dynamic parameters, reordered and zero
+classes, both interleave modes, and selector lengths 1..18/32/64/71 bits.
+The largest configurations have 255 original sets, 63 optional classes each,
+and ASC lengths up to 55,474 bytes. Original sets in this case have different
+rates, CRCs and permutations, so high-index truncation cannot pass by selecting
+an equivalent set. Basic and extended long-header protection are both covered.
+Negative movies first decode three valid packets, then isolate an unused
+selector, class CRC mismatch, declared-length truncation or empty AAC data.
+Decoder rollback controls retain byte-identical ASC.
+
+The playback gate exposed the old 4,096-byte cutoff in the shared ESDS wrapper:
+Matroska playback refused a valid 55,469-byte setup that native and export paths
+already decoded. The wrapper now checks all nested 28-bit descriptor payload
+lengths before one fallible output allocation and preserves the complete ASC.
+It retains the two-byte minimum and reports the actual setup length on refusal.
+Independent descriptor parsing round-trips sizes across one/two/three length
+bytes up to 262,144 bytes; pure length controls check the full four-byte format
+boundary without allocating huge buffers. The same tests compile through the
+media library and root compatibility entrypoint.
+
+`tests/aac_ep_optional_playback.rs` checks exact recovered AU bytes and saved
+independent PCM, native/public/owned paths, MP4/Matroska ranges, playback/drain,
+rewind, repeated/frame-edge/EOF seeks, checkpoint replay and retained accounting.
+The saved large Matroska movie reproduces the wrapper refusal and its enabled
+navigation acceptance requires the fix. Both generation and ordinary tests
+use no private media or foreign codec; generators reproduce every saved byte
+with process and socket creation disabled, while normal tests never generate
+fixtures or require FFmpeg/network.
+
+Qualification passed 558 media unit tests (one ignored), 1,052 root library
+tests (26 ignored), and 55 integration tests across ELD, CLDFB, ordinary LD-SBR,
+SRCPC, RS, set switching, interleaving, multiclass and optional-class recovery.
+All seven optional tests pass over 780 acceptance and 168 negative sources.
+The test player has no libav linkage. Tests use `--no-default-features
+--features player` and `--config 'profile.dev.package.fvid-media.opt-level=2'`;
+repository build settings were not changed. The initial failed large-ASC
+Matroska navigation gate was replaced by passing playback/seek acceptance
+with the wrapper fix.
+
+RS groups, concatenated source frames, EP1/EP3 association, non-ELD EP routing
+and remaining ELD extension tools are still separate gaps. This qualification
+is offline PCM/navigation, not physical output-device or throughput validation.
+
+Primary definition: [ISO/IEC 14496-3:2009, section 1.8.4.2 and Table 1.58](https://ossrs.net/lts/zh-cn/assets/files/ISO_IEC_14496-3-AAC-2009-90cda427e845cc176293bffee3f92f99.pdf).
+
+## EP2 bit-class assembly and continuous SRCPC, 2026-10-28
+
+Owned EP2 decoding now reassembles multiple mandatory classes into the original
+AAC AU, including non-octet class boundaries. ISO/IEC 14496-3 section 1.8.1
+requires the concatenated EP decoder output to equal epConfig=0 data; the
+previous one-class restriction unnecessarily rejected this valid mapping.
+The wire class order is decoded with its signalled output permutation, and
+bits are concatenated before byte packing. Classes retain independent lengths,
+CRC/FEC parameters and interleave controls; an until-end class must be last in
+transmission order. A zero-information class has no CRC, parity, tail or
+SRCPC state advance.
+
+SRCPC now uses one joint trellis across non-terminated sections. Termination
+constrains the boundary to state zero and restarts the encoder. Puncture masks
+carry across partial periods; the next requested rate takes effect at the next
+eight-bit boundary. The independent polynomial writer reproduces 327 chain
+controls across all rates, partial periods, delayed rate transitions, zero-bit
+sections and termination combinations. A separate noisy control exhaustively
+establishes a unique maximum-likelihood path whose first section is recovered
+using later parity. The old single-section 500-vector/tail/distance controls
+continue to exercise the same implementation.
+
+Both interleave modes now reverse multiple class stages. SRCPC uses bitwise
+row/column geometry; RS uses eight occupied cells per octet column, allowing
+later SRCPC data to have a non-octet length. Mode 2 separately restores the
+non-interleaved buffer, recursive stages and concatenated buffer. An independent
+occupied-cell matrix supplies 1,353 mixed-unit RS stage controls, in addition
+to the existing 19,438 bit-stage controls.
+
+`scripts/generate_aac_ep_multiclass_fixtures.py` saves 1,200 own acceptance
+sources and 112 malformed videos in MP4 and Matroska. The matrix covers
+480/512 cores, mono/stereo, ELD and LD-SBR, 2..63 classes, three selectable sets,
+fixed/variable/until-end lengths, zero classes, natural/reversed/cyclic output
+order, SRCPC/RS mixtures and all interleave modes. Additional mode-2 sources
+mix per-class switches 0/1/2/3 in one packet. Further streams signal rate and
+CRC changes independently for multiple classes in every packet. Continuous bit-class sources change
+rate off a puncture boundary; corrected-chain movies damage an early weak
+section and recover it through later parity. A pre-fix linked decoder reproduced
+both the explicit-assembler refusal and the partial-period rate-change refusal
+on these authored LD-SBR sources.
+
+`tests/aac_ep_multiclass_playback.rs` requires exact recovered raw-AU bytes
+before matching independent complete PCM. It then checks native/public/owned
+exports, MP4/Matroska ranges, complete AudioStream playback/drain, rewind,
+repeated/output-frame-edge/EOF seek, checkpoint replay and retained allocation
+accounting. Malformed movies decode three valid packets before a late class CRC
+or declared-length failure. Rollback controls use byte-identical ASC; declared
+length truncation is authored before interleaving. CRC and class recovery finish
+before any AAC/LD-SBR synthesis history can change. Normal tests only read saved
+synthetic data and never generate fixtures or require FFmpeg/network.
+
+Qualification passed 554 media unit tests (one ignored), 1,050 root library
+tests (26 ignored), and 48 integration tests across ELD, CLDFB, ordinary LD-SBR,
+SRCPC, RS, set switching, interleaving and multiclass recovery. The final
+multiclass gate covers all 1,200 acceptance sources, including per-class escaped
+rate/CRC controls, plus 112 exact malformed/rollback controls. The test player
+has no libav linkage. Tests use `--no-default-features --features player` and
+`--config 'profile.dev.package.fvid-media.opt-level=2'`; repository build
+settings were not changed. Both generators reproduce all saved bytes with
+process and socket creation disabled.
+
+Grouped RS (FEC=2), non-octet RS CRC mapping,
+concatenated source frames, EP1/EP3 ESC routing and non-ELD EP integration remain
+open. This is offline PCM/navigation qualification, not physical output-device
+or throughput qualification.
+
+Primary definition: [ISO/IEC 14496-3:2009, sections 1.8.1, 1.8.4.6 and 1.8.4.8–9](https://ossrs.net/lts/zh-cn/assets/files/ISO_IEC_14496-3-AAC-2009-90cda427e845cc176293bffee3f92f99.pdf).
+
+## EP2 recursive interleaving modes 1/2, 2026-10-28
+
+The initial single-class raw-AU route qualified interleave_type 1 and 2;
+the multiclass route above extends both modes.
+Selector and class-attribute stages are reversed separately before interpreting
+subsequent fields. The inverse recursive interleaver handles incomplete final
+rows without padding; short repetition headers use width 3, BCH/Golay headers
+their shortened codeword width, and long SRCPC headers width 28. The SRCPC
+class stage uses width 28 in mode 1 or mode-2 switch 2. All four mode-2 switches
+are supported for SRCPC; RS accepts switches 0/1/3 and rejects reserved switch 2.
+For a lone RS class, octets occupy separate columns without an intraclass
+transpose. Stuffing is removed after header stages and before class reversal.
+
+`scripts/generate_aac_ep_interleave_fixtures.py` implements an independent
+occupied-cell matrix with explicit row/column traversal. Its 19,438 saved
+primitive vectors cover X/Y boundaries, zero-length streams, incomplete rows,
+widths larger than the input and byte-labelled permutations. Separate controls
+check impossible lengths, zero width and usize::MAX width without overflow.
+Ordinary tests never generate fixtures.
+
+The new playback matrix has 560 own acceptance sources and 120 malformed
+videos, each in MP4 and Matroska: 480/512 ELD, mono/stereo, LD-SBR on/off,
+selector widths 0..8, up to 255 sets, all mode/switch combinations, multiple
+class-header shapes, fixed/dynamic CRC/rates, SRCPC/RS and repaired selector,
+attribute and class errors. Malformed videos first decode three valid packets,
+then isolate an independently protected unused selector, a wrong CRC encoded
+with fresh valid FEC, or a shortened declared RS class. An old linked decoder
+reproduced the interleave dispatch refusal on the new LD-SBR configuration.
+
+`tests/aac_ep_interleave_playback.rs` checks independently saved complete PCM,
+public/owned exports, MP4/Matroska ranges, AudioStream playback and drain,
+rewind, repeated/frame-edge/EOF seek, checkpoint replay, retained accounting
+and transactional error rollback. Source video, audio and parameter sets are
+synthetic; no private media or foreign codec is used. Both interleave generators
+and the existing set-switching generator reproduce saved bytes with external
+process and socket creation forbidden.
+
+Qualification in this checkout passed 552 media unit tests (one ignored),
+1,050 root library tests (26 ignored), and all 41 integration tests across
+ELD, CLDFB, ordinary LD-SBR, SRCPC, RS, set switching and recursive interleaving.
+The playback sweep uses `--config 'profile.dev.package.fvid-media.opt-level=2'`;
+no repository build setting was changed. This is not a throughput benchmark.
+
+This section records the initial one-class interleave qualification. The
+multiclass section above extends it to bit-class reassembly; RS groups and
+concatenated source frames remain separate codec gaps. Playback qualification is offline PCM;
+physical output-device and performance qualification are separate.
+
+Primary definition: [ISO/IEC 14496-3:2009, section 1.8.4.8](https://ossrs.net/lts/zh-cn/assets/files/ISO_IEC_14496-3-AAC-2009-90cda427e845cc176293bffee3f92f99.pdf).
+
+## EP2 predefined-set switching and short headers, 2026-10-28
+
+The initial raw-AU qualification accepted 1..255 predefined EP sets with one
+mandatory complete AAC access unit each. The multiclass route above extends
+this to multiple bit classes per set. Every packet first recovers the separately
+protected selector; its selected set determines the subsequent attribute-header
+length, class length, CRC and SRCPC/RS parameters. Out-of-range selectors fail
+before class interpretation. No previous selection is cached across packets,
+rewind or checkpoint restore. Config validation and retained-memory accounting
+cover every set. EP1/EP3 class-to-ESC association remains separate work.
+
+The 1/2-bit headers now recover each information bit from its three repetitions
+(information first, then parity). Longer selectors retain BCH/Golay protection;
+extended header protection applies independently to long attribute headers.
+A repetition header cannot detect every error beyond its correction radius.
+
+`scripts/generate_aac_ep_sets_fixtures.py` saves 136 own nonzero ELD/LD-SBR
+acceptance sources and 24 malformed videos, with MP4 and Matroska versions.
+The matrix covers 480/512 cores, mono/stereo, all selector widths 1..8, power-of-two
+and non-power-of-two set counts through 255, SRCPC/RS switches, different header
+lengths and fixed/dynamic CRC/rates. Corrected streams damage both independently
+protected headers. Malformed packets isolate a validly protected unused selector,
+CRC failure and a truncated selector after three valid packets.
+
+The independent header oracle contains every possible selector word of widths
+1..8 (510 words). Unit controls check every transmitted-bit error, all 64
+received two-bit majority codewords, every count 1..255 with every legal and
+unused selector, and truncated prefixes. `tests/aac_ep_sets_playback.rs` checks
+independent full PCM, both container/export paths, repeated ranges, playback,
+rewind, repeated/frame-edge/EOF seeks, checkpoint replay and error rollback.
+The MP4 fixture writer now emits variable-length ES descriptors, allowing the
+935-byte ASC required by the largest saved configuration.
+
+The old decoder refusal was reproduced on the new synthetic LD-SBR MP4's ASC
+before enabling this acceptance route. All fixtures are authored offline and
+ordinary tests only read saved data. The generators reproduce both the new
+files and the existing SRCPC/RS matrices byte-for-byte with process and socket
+creation forbidden.
+
+Qualification: the default dev build passed 550 media unit tests (one ignored),
+1,050 root library tests (26 ignored), all seven new set-switching integration
+tests, and existing public/owned export tests over the 276 SRCPC and 217 RS
+sources. The final navigation sweep additionally uses actual output-frame
+lengths (480/512/960/1024 samples), checking the sample before, at and after
+each boundary, repeated targets and a return from EOF. This sweep builds the
+owned media dependency with `--config 'profile.dev.package.fvid-media.opt-level=2'`;
+it does not change repository or production build settings. All 20 integration
+tests in the final LD-SBR/RS/set-switching sweep passed (104/217/136
+acceptance sources, respectively).
+
+Primary definition: [ISO/IEC 14496-3:2009, tables 1.51/1.59 and section 1.8.4.3](https://ossrs.net/lts/zh-cn/assets/files/ISO_IEC_14496-3-AAC-2009-90cda427e845cc176293bffee3f92f99.pdf).
+
+## LD-SBR: RS-protected playback and navigation, 2026-10-28
+
+The owned EP2 single raw-AU mapping now also recovers FEC=1 shortened
+Reed–Solomon classes over GF(256), polynomial 0x11d, roots alpha^1 through
+alpha^(2k), for every fixed correction count k=0..127. Information and parity
+use the normative lowest-coefficient-first order; all part parity trailers
+follow the complete information class. Recovery uses owned Berlekamp–Massey,
+Chien and Forney algorithms, validates residual syndromes and the recovered
+class CRC before submitting AAC to the transactional ELD/LD-SBR decoder.
+
+The saved synthetic matrix has 217 acceptance sources and six malformed
+videos: 480/512 cores, mono/stereo, ELD with/without LD-SBR, declared/until-end
+lengths, corrected header and class errors, fixed CRC24/CRC32 and dynamic
+CRC0/8/16/32. Independent polynomial long division generates reference RS
+words; primitive controls cover all 128 correction counts, shortening and
+multipart boundaries. Saved PCM references are independent ELD/LD-SBR results.
+Normal tests neither generate fixtures nor invoke FFmpeg/network.
+
+`tests/aac_ep_rs_playback.rs` verifies PCM, MP4/Matroska export and ranges,
+AudioStream playback, EOF, rewind and seeks. Navigation regressions also test
+repeated targets, frame-edge positions and seeking back after EOF. The same
+expanded navigation sequence covers all 104 ordinary LD-SBR acceptance sources
+in `tests/aac_eld_sbr.rs`. Malformed videos isolate CRC mismatch, uncorrectable
+RS and declared-length truncation; failed recovery preserves decoder history.
+
+Qualification in this checkout: 548 media unit tests passed (one ignored),
+plus 27 integration tests across ELD, CLDFB, ordinary LD-SBR, SRCPC and RS.
+The final LD-SBR/RS run passed all 13 tests with expanded navigation on the
+104 ordinary and 217 RS acceptance sources. All six RS malformed sources
+(including three LD-SBR streams) passed exact-error and rollback checks.
+Both independent RS generators reproduced every saved byte with process and
+socket creation forbidden. The player test binary has no libav linkage.
+
+This RS route requires octet-aligned information/CRC and fixed correction
+counts. RS concatenated classes (FEC=2), escaped RS correction rates and
+non-octet CRC handling remain explicit refusals. Other EP mappings, grouped RS and separate ELD extension
+tools remain open; multiclass recovery is described above. These tests
+qualify offline PCM playback and seek, not physical speaker output or universal
+AAC-ELD conformance.
 
 ## MPEG-4 EP2 raw-AU playback, 2026-10-28
 
@@ -38,10 +5191,9 @@ network. An until-end class with a small CRC does not guarantee rejection of
 arbitrary truncation; length-refusal tests use explicitly declared lengths.
 
 This closes the reproduced EP2 single-class ELD dispatch failure, not the full
-EP tool or the codec-gap goal. EP1/EP3 separate ESC association, arbitrary EP2
-application assemblers, multiple/optional classes and concatenated frames,
-streaming puncture state, RS, interleaving, short majority headers and non-ELD
-EP integration remain open. Playback qualification is offline AudioStream PCM,
+EP tool or the codec-gap goal. EP1/EP3 separate ESC association and concatenated frames,
+grouped RS and non-ELD EP integration remain open. Bit-class assembly,
+continuous puncture state and multiclass interleaving are described above. Playback qualification is offline AudioStream PCM,
 not physical audio output-device qualification.
 
 Primary definition: [ISO/IEC 14496-3:2009, sections 1.6.3.6 and 1.8](https://ossrs.net/lts/zh-cn/assets/files/ISO_IEC_14496-3-AAC-2009-90cda427e845cc176293bffee3f92f99.pdf).
@@ -19284,3 +24436,135 @@ creation forbidden. Six role-map patterns exercise raw/container controls and
 index metadata, 16-role padding and the AAC 2 MiB stack regression pass.
 These gates qualify the explicitly negotiated output contract, not universal
 codec completion or automatic layout discovery.
+
+### 2026-11-01: LD-MPS predictive split-region evidence
+
+Twelve additional authored split-TTT programmes and coded controls now test
+low/high default/hold histories through both MP4 and Matroska navigation.
+The full original ISO spatial frontend matches92/96 outputs; four TREE_525
+lower0/upper1 outputs specifically reproduce its configuration-loop overwrite
+of the global decorrelator count. A separate modified-source count diagnostic
+isolates the difference; it is not presented as normative conformance.
+All original outputs remain available. See
+`validation/aac-ld-mps-ttt-split-2026-11-01.md`. Unequal HRTF grids, remaining
+EBQ configurations and replaced-fragment association remain open. The global
+codec-gap goal is not complete.
+
+### 2026-11-01: owned AAC configuration13 /22.2
+
+Configuration13 no longer fails metadata admission. The owned native, LD and
+ELD element sequences support24 channels, explicit ordered positions, two LFEs
+and height/bottom roles. LD-SBR now maintains separate filter histories for
+both LFEs. The16th ER element's synthetic tag no longer exceeds the tag domain.
+Authored before-fix reproductions become playback acceptance on14 programmes,
+with independent scalar PCM and MP4/Matroska rewind/seek/device evidence.
+See `validation/aac-22-2-2026-11-01.md`. Additional tool/profile combinations
+and the separate LD-MPS HRTF/EBQ/fragment-association gaps remain open.
+
+### 2026-11-01: protected AAC22.2 acceptance
+
+EP3 ELD22.2 now has authored acceptance for56 reordered/protected classes and
+specific CRC failure/retry. EP1 adds80-instance RVLC/resilience and84-instance
+LD-SBR cases with40/42 dependency groups, exact bit bounds and rational clocks.
+Independent scalar PCM, checkpoints, exports, rewind/seek and12 actual macOS
+output-device phases pass. These are qualification of configured layouts
+implemented in5e5f059b99; production DSP is unchanged in this extension.
+See `validation/aac-22-2-esc-2026-11-01.md`. This does not complete the full
+codec/profile objective or qualify combined RVLC+LD-SBR22.2.
+
+### 2026-11-01: native LD-MPS local-fragment admission
+
+The native owner distinguishes replacement of a current-tail fragment from
+replacement of an inherited fragment. Local replacement now plays, including
+after completing an inherited block earlier in that tail. The inherited-discard
+result is sticky and preserves the existing source-association refusal.
+120 authored acceptance programmes, five explicit inherited-refusal movies,
+20 related tests and16 actual macOS device phases qualify the change. PCM and
+completed message data remain byte-identical to parent controls. See
+`validation/aac-ld-mps-local-replacement-2026-11-01.md`.
+This does not close cross-AU replacement, HRTF/EBQ or the full codec-gap goal.
+
+### 2026-11-02: EP RS escaped correction strengths
+
+The previous escaped-RS-rate gap is closed for single-source-frame EP classes.
+The descriptor may defer strength to the three-bit frame header; all eight
+values are qualified with own ELD/LD-SBR media, error correction, container
+exports and navigation. Grouped RS members resolve their individual values
+before requiring group equality. Source-frame concatenation still forbids
+escaped parameters. See [qualification](validation/aac-ep-rs-escaped-2026-11-02.md).
+Earlier progress entries describing escaped RS as open are historical.
+
+### 2026-11-02: full-grid ArbitraryTree resolution changes
+
+Full splits with unchanged source/split paths can now change among all seven
+parameter grids without discarding dormant indexed gain history. Qualification
+covers all 42 ordered pairs and returns, original-C post-shaping components,
+546 own MP4/Matroska programmes, clocks, checkpoints and player navigation.
+Partial-grid conversion, sparse outputs and topology changes remain open.
+See [qualification](validation/aac-ld-mps-arbitrary-grids-2026-11-02.md). Earlier
+full-grid refusal statements are historical.
+
+### 2026-11-02: covered uniform-cutoff ArbitraryTree grid changes
+
+Covered partial splits can now change parameter grids while preserving dormant
+gain history, provided all extra splits within each header share one cutoff.
+Qualification includes218 own playback programmes,148 original-C component
+scenarios, precise mixed-cutoff refusal/retry videos and both container readers.
+Mixed-cutoff grid conversion remains open. See [qualification](validation/aac-ld-mps-arbitrary-partial-grids-2026-11-02.md).
+
+### 2026-11-02: defined mixed-cutoff ArbitraryTree history
+
+Mixed-cutoff grid changes now depend on actual per-band history definedness,
+replacing the blanket rejection. Preorder pushes/pops carry optional gains and
+update indexed history with defined-band masks; unknown history is never used.
+648 independent C scenarios qualify;48 retain precise later-frame refusals.
+1,716 own playback programmes and96 refusal programmes cover container decode,
+clocks, checkpoint/retry, seek and rewind. See [qualification](validation/aac-ld-mps-arbitrary-defined-2026-11-02.md). General active-uncovered semantics and
+other codec gaps remain open.
+
+### 2026-11-02: arbitrary-downmix input columns for OTT-only trees5/6/7
+
+Trees7571/7572 and212 now compensate every input column before M1 temporal
+smoothing and interpolation. Six-input cases use six independent gain regions;
+mono uses one. Same-format assembler reconfiguration preserves interpolation
+history for in-band ADG on/off/on. Qualification includes378 own programmes,
+126 disabled controls, seven grids and six PCM/shared-LD-SBR domains, an
+independent80-digit sparse-M1 oracle, unity PCM equality and reader navigation.
+The former constructor-refusal expectation is replaced by admission plus this
+acceptance corpus. Original C qualifies gain conversion only; no foreign full
+757/212 ADG composition comparison is claimed. See [qualification](validation/aac-ld-mps-arbdmx-columns-2026-11-02.md). HRTF and other gaps remain open.
+
+### 2026-11-02: unused HRTF metadata in full-output OTT trees
+
+Trees 0/1/5/6 now admit valid unused HRTF metadata, including unequal grids and
+in-band metadata changes, without changing multichannel PCM. Qualification
+uses 1,512 own programmes, 168 controls, source-C equivalence and device playback.
+Active HRTF projection and binaural rendering are outside this milestone;
+metadata validation remains enforced. See [qualification](validation/aac-ld-mps-hrtf-unused-2026-11-02.md).
+
+### 2026-11-02: active HRTF source-oracle limitation reproduced
+
+An explicit original-C diagnostic shows that 21 of 49 resolution pairs depend
+on untransmitted HRTF tail values. This changes the qualification approach:
+the original direct-index function alone cannot qualify unequal-grid mapping.
+No production refusal was removed. See [diagnostic](validation/aac-ld-mps-hrtf-tail-reference-2026-11-02.md).
+
+### 2026-11-02: broader native baseline and admission-route audit
+
+The offline player-feature library gate passed 1,686 tests with 29 explicit
+skips; five selected video integration targets passed another 26 tests.
+Dependency-tree/direct-link checks contain no FFmpeg/libav. The skipped exposure
+integer/float conversion acceptance is pending compatibility work, not a
+physical-device-only skip. Active LD-MPS gaps remain open. See
+[baseline](validation/codec-library-audit-2026-11-02.md) and
+[admission routes](validation/codec-admission-route-audit-2026-11-02.md).
+
+### 2026-11-02: external exposure conversion isolated from native kernel
+
+The explicit benchmark reproduces the stored RGB16 identity difference with
+only packed/float conversion, and matches half exposure using an independent
+half operation between the external converters. Native identity preservation
+now has acceptance over the authored RGB8/RGB16 videos. Eight focused tests
+passed; complete external integer-conversion compatibility remains explicitly
+ignored. No runtime kernel or codec admission was changed. See
+[diagnostic](validation/exposure-conversion-isolation-2026-11-02.md).

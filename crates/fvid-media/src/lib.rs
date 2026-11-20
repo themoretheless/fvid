@@ -305,6 +305,8 @@ pub mod owned_matroska_pcm;
 mod owned_matroska_pcm_export;
 
 pub mod owned_mp4;
+pub mod owned_mp4_od;
+pub mod owned_mp4_ep1;
 
 pub mod owned_mp4_matroska;
 pub mod owned_mp4_remux;
@@ -387,3 +389,6 @@ mod owned_ogg_joint_export;
 mod owned_g711_wave_export;
 
 pub mod owned_mp4_audio_packet_frames;
+
+/// Owned MPEG-4 Systems Sync Layer syntax.
+pub mod owned_sl;

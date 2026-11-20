@@ -1,0 +1,16 @@
+{
+  "scope": "80-digit Decimal W-routing component oracle only.",
+  "byte_exact_regeneration": true,
+  "process_and_socket_creation": "denied by Python audit hook",
+  "files": {
+    "expected.bin": {
+      "bytes": 15052800,
+      "sha256": "163e0eadcbde1c5959215b5335fbd800c209c26ea9f7495a2387c27e857a9d7c"
+    },
+    "manifest.json": {
+      "bytes": 62390,
+      "sha256": "f3b327a101a75a79f584044270b048a028e941327eee4e2b392762ae58047cba"
+    }
+  },
+  "generator_sha256": "7fe41645eba34394799274dc63777c582381b74e916cea24f8379fd52869f9d4"
+}

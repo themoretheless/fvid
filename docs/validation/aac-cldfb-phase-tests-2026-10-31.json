@@ -1,0 +1,37 @@
+{
+  "complete": true,
+  "scope": "Scoped CLDFB/ELD/LD-MPS/EP1 gates;not all workspace tests or codec conformance",
+  "media_lib": {
+    "passed": 589,
+    "failed": 0,
+    "ignored": 1
+  },
+  "player_worker": {
+    "passed": 1,
+    "failed": 0,
+    "ignored": 0
+  },
+  "integrations": {
+    "targets": 101,
+    "passed": 548,
+    "failed": 0,
+    "ignored": 0
+  },
+  "unique_total": {
+    "passed": 1138,
+    "failed": 0,
+    "ignored": 1
+  },
+  "phase_regression_already_included": {
+    "passed": 2,
+    "failed": 0,
+    "ignored": 0
+  },
+  "before_phase_fix": {
+    "passed": 0,
+    "failed": 2,
+    "first_movie_max_pcm_error": 0.00013408763
+  },
+  "offline": true,
+  "production_or_normal_test_external_codec_dependencies": false
+}

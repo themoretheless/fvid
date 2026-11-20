@@ -1,0 +1,87 @@
+{
+  "base": "911b98c245e6ff54eea95ce8b52c8a4d33225a59",
+  "runs": {
+    "media": {
+      "log": "/tmp/fvid-decor-mode-media.log",
+      "log_sha256": "9d2c0a3a0066962980412a0f449f7d0fffc308811b100aa7b5782aeb4efcf39d",
+      "counts": [
+        [
+          588,
+          0,
+          1
+        ]
+      ]
+    },
+    "integration": {
+      "log": "/tmp/fvid-decor-mode-integration.log",
+      "log_sha256": "e031ed1b393b28981be106a41334eec8e3ae5e64562b06397108e9e858f37520",
+      "counts": [
+        [
+          2,
+          0,
+          0
+        ],
+        [
+          6,
+          0,
+          0
+        ],
+        [
+          1,
+          0,
+          0
+        ],
+        [
+          6,
+          0,
+          0
+        ],
+        [
+          6,
+          0,
+          0
+        ],
+        [
+          5,
+          0,
+          0
+        ],
+        [
+          3,
+          0,
+          0
+        ],
+        [
+          3,
+          0,
+          0
+        ]
+      ]
+    },
+    "root": {
+      "log": "/tmp/fvid-decor-mode-root.log",
+      "log_sha256": "2650b5b5c9c2dc1810f5a0d682801bb8d5569c3fbeae767b6407f30e623e0297",
+      "counts": [
+        [
+          6,
+          0,
+          0
+        ]
+      ]
+    }
+  },
+  "sources": {
+    "Cargo.toml": "e746bc499eff6317a0ef82f3e8c3402d0d970c7e6702ceae91464de59dce87a7",
+    "crates/fvid-media/src/owned_aac/mod.rs": "263e3f325b682391529cad0b885899109deb8451e414bc34d73b251ed1e53dd4",
+    "crates/fvid-media/src/owned_aac/aac_native_impl.rs": "55aaba075754890beeff87d21bad99de2ac15ce3f646e8d5090ca33718ed6d86",
+    "crates/fvid-media/src/owned_aac/aac_ld_mps_native.rs": "d21317ebc31eede069bddd95ffe9e55b07b74f40d27a01d84fd38be3432e4307",
+    "tests/aac_spatial_decorrelation.rs": "31c0daf4f4629ad7af2fd93829f52a520dfe0fc9d3509d45bfb9a1fbf76a84d7",
+    "examples/aac_spatial_reference.rs": "5278787c629c48c8b8d537795b560c95139685db995f4a529f1f8e278fd7b582",
+    "scripts/compare_aac_reference_pcm.py": "4d2cb1af5edae4e6aafe0332eb0fe24e986c151c2d4f8d6b4d34e08528d92e2e"
+  },
+  "counts": {
+    "passed": 626,
+    "failed": 0,
+    "ignored": 1
+  }
+}

@@ -286,6 +286,7 @@ pub mod aac_gain_control;
 pub use fvid_media::owned_aac::aac_main_predictor;
 pub use fvid_media::owned_aac::{aac_ssr_synthesis,aac_ssr_alignment};
 pub mod aac_channel;
+pub mod aac_esc;
 
 pub mod aac_pair;
 
@@ -308,5 +309,12 @@ pub mod ffv1_decoder;
 pub mod aac_coupling;
 
 // LD transforms/history are owned by the media library.
-pub use fvid_media::owned_aac::{aac_ep,aac_eld_sbr,aac_eld_synthesis,aac_ld_bands,aac_ld_channel,aac_ld_ltp,aac_ld_synthesis};
+pub use fvid_media::owned_aac::{aac_ep,aac_ep1,aac_eld_sbr,aac_eld_synthesis,aac_ld_bands,aac_ld_channel,aac_ld_ltp,aac_ld_synthesis};
 pub mod aac_ld_syntax;
+
+pub use fvid_media::owned_sl as sl;
+
+pub use fvid_media::owned_aac::aac_ld_mps_config;
+pub use fvid_media::owned_aac::aac_ld_mps_transport;
+
+pub use fvid_media::owned_aac::aac_ld_mps_native;

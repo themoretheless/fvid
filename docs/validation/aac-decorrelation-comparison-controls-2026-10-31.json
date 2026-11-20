@@ -1,0 +1,73 @@
+[
+  {
+    "name": "exact",
+    "expected_error": 0,
+    "result": {
+      "conformance_verdict": null,
+      "reference_sha256": "02fbd1b1bc05810deee65aa729f754512ffceb17413a5910a63eef73ec23bdf1",
+      "actual_sha256": "faa93de74c163fa582cefb35b8f684a301eb61ca7e3e6f1defbf0f6ef01f73ab",
+      "rate": 48000,
+      "channels": 1,
+      "input_frames": 5,
+      "compared_frames": 5,
+      "explicit_lag": 0,
+      "per_channel": [
+        {
+          "channel": 0,
+          "rmse": 0.0,
+          "max_abs_error": 0.0,
+          "snr_db": null
+        }
+      ]
+    }
+  },
+  {
+    "name": "one-lsb",
+    "expected_error": 3.0517578125e-05,
+    "result": {
+      "conformance_verdict": null,
+      "reference_sha256": "02fbd1b1bc05810deee65aa729f754512ffceb17413a5910a63eef73ec23bdf1",
+      "actual_sha256": "bd6090806c0aadf164cb0f97593440c5bc12d981dc504233f15f42c1e1cf4767",
+      "rate": 48000,
+      "channels": 1,
+      "input_frames": 5,
+      "compared_frames": 5,
+      "explicit_lag": 0,
+      "per_channel": [
+        {
+          "channel": 0,
+          "rmse": 3.0517578125e-05,
+          "max_abs_error": 3.0517578125e-05,
+          "snr_db": 86.329466080361
+        }
+      ]
+    }
+  },
+  {
+    "name": "explicit-delay",
+    "expected_error": 0,
+    "result": {
+      "conformance_verdict": null,
+      "reference_sha256": "02fbd1b1bc05810deee65aa729f754512ffceb17413a5910a63eef73ec23bdf1",
+      "actual_sha256": "12cf220d1780be818bf54a612821918d550c940ea5562a7a5073479b8f40d40e",
+      "rate": 48000,
+      "channels": 1,
+      "input_frames": 5,
+      "compared_frames": 4,
+      "explicit_lag": 1,
+      "per_channel": [
+        {
+          "channel": 0,
+          "rmse": 0.0,
+          "max_abs_error": 0.0,
+          "snr_db": null
+        }
+      ]
+    }
+  },
+  {
+    "name": "non-finite",
+    "status": 1,
+    "refused": true
+  }
+]

@@ -1,0 +1,637 @@
+{
+  "scope": "Complex matrix component only; no spatial movie or player acceptance.",
+  "coefficient_denominator": 32,
+  "sample_denominator": 16,
+  "cases": [
+    {
+      "bands": 4,
+      "bins": 32,
+      "rows": 1,
+      "columns": 1,
+      "planes": 1,
+      "real": 0,
+      "imag": null,
+      "offset": 0
+    },
+    {
+      "bands": 4,
+      "bins": 32,
+      "rows": 3,
+      "columns": 2,
+      "planes": 2,
+      "real": 0,
+      "imag": 1,
+      "offset": 1024
+    },
+    {
+      "bands": 4,
+      "bins": 32,
+      "rows": 8,
+      "columns": 13,
+      "planes": 7,
+      "real": 5,
+      "imag": 6,
+      "offset": 4096
+    },
+    {
+      "bands": 4,
+      "bins": 64,
+      "rows": 1,
+      "columns": 1,
+      "planes": 1,
+      "real": 0,
+      "imag": null,
+      "offset": 12288
+    },
+    {
+      "bands": 4,
+      "bins": 64,
+      "rows": 3,
+      "columns": 2,
+      "planes": 2,
+      "real": 0,
+      "imag": 1,
+      "offset": 14336
+    },
+    {
+      "bands": 4,
+      "bins": 64,
+      "rows": 8,
+      "columns": 13,
+      "planes": 7,
+      "real": 5,
+      "imag": 6,
+      "offset": 20480
+    },
+    {
+      "bands": 4,
+      "bins": 128,
+      "rows": 1,
+      "columns": 1,
+      "planes": 1,
+      "real": 0,
+      "imag": null,
+      "offset": 36864
+    },
+    {
+      "bands": 4,
+      "bins": 128,
+      "rows": 3,
+      "columns": 2,
+      "planes": 2,
+      "real": 0,
+      "imag": 1,
+      "offset": 40960
+    },
+    {
+      "bands": 4,
+      "bins": 128,
+      "rows": 8,
+      "columns": 13,
+      "planes": 7,
+      "real": 5,
+      "imag": 6,
+      "offset": 53248
+    },
+    {
+      "bands": 5,
+      "bins": 32,
+      "rows": 1,
+      "columns": 1,
+      "planes": 1,
+      "real": 0,
+      "imag": null,
+      "offset": 86016
+    },
+    {
+      "bands": 5,
+      "bins": 32,
+      "rows": 3,
+      "columns": 2,
+      "planes": 2,
+      "real": 0,
+      "imag": 1,
+      "offset": 87040
+    },
+    {
+      "bands": 5,
+      "bins": 32,
+      "rows": 8,
+      "columns": 13,
+      "planes": 7,
+      "real": 5,
+      "imag": 6,
+      "offset": 90112
+    },
+    {
+      "bands": 5,
+      "bins": 64,
+      "rows": 1,
+      "columns": 1,
+      "planes": 1,
+      "real": 0,
+      "imag": null,
+      "offset": 98304
+    },
+    {
+      "bands": 5,
+      "bins": 64,
+      "rows": 3,
+      "columns": 2,
+      "planes": 2,
+      "real": 0,
+      "imag": 1,
+      "offset": 100352
+    },
+    {
+      "bands": 5,
+      "bins": 64,
+      "rows": 8,
+      "columns": 13,
+      "planes": 7,
+      "real": 5,
+      "imag": 6,
+      "offset": 106496
+    },
+    {
+      "bands": 5,
+      "bins": 128,
+      "rows": 1,
+      "columns": 1,
+      "planes": 1,
+      "real": 0,
+      "imag": null,
+      "offset": 122880
+    },
+    {
+      "bands": 5,
+      "bins": 128,
+      "rows": 3,
+      "columns": 2,
+      "planes": 2,
+      "real": 0,
+      "imag": 1,
+      "offset": 126976
+    },
+    {
+      "bands": 5,
+      "bins": 128,
+      "rows": 8,
+      "columns": 13,
+      "planes": 7,
+      "real": 5,
+      "imag": 6,
+      "offset": 139264
+    },
+    {
+      "bands": 7,
+      "bins": 32,
+      "rows": 1,
+      "columns": 1,
+      "planes": 1,
+      "real": 0,
+      "imag": null,
+      "offset": 172032
+    },
+    {
+      "bands": 7,
+      "bins": 32,
+      "rows": 3,
+      "columns": 2,
+      "planes": 2,
+      "real": 0,
+      "imag": 1,
+      "offset": 173056
+    },
+    {
+      "bands": 7,
+      "bins": 32,
+      "rows": 8,
+      "columns": 13,
+      "planes": 7,
+      "real": 5,
+      "imag": 6,
+      "offset": 176128
+    },
+    {
+      "bands": 7,
+      "bins": 64,
+      "rows": 1,
+      "columns": 1,
+      "planes": 1,
+      "real": 0,
+      "imag": null,
+      "offset": 184320
+    },
+    {
+      "bands": 7,
+      "bins": 64,
+      "rows": 3,
+      "columns": 2,
+      "planes": 2,
+      "real": 0,
+      "imag": 1,
+      "offset": 186368
+    },
+    {
+      "bands": 7,
+      "bins": 64,
+      "rows": 8,
+      "columns": 13,
+      "planes": 7,
+      "real": 5,
+      "imag": 6,
+      "offset": 192512
+    },
+    {
+      "bands": 7,
+      "bins": 128,
+      "rows": 1,
+      "columns": 1,
+      "planes": 1,
+      "real": 0,
+      "imag": null,
+      "offset": 208896
+    },
+    {
+      "bands": 7,
+      "bins": 128,
+      "rows": 3,
+      "columns": 2,
+      "planes": 2,
+      "real": 0,
+      "imag": 1,
+      "offset": 212992
+    },
+    {
+      "bands": 7,
+      "bins": 128,
+      "rows": 8,
+      "columns": 13,
+      "planes": 7,
+      "real": 5,
+      "imag": 6,
+      "offset": 225280
+    },
+    {
+      "bands": 9,
+      "bins": 32,
+      "rows": 1,
+      "columns": 1,
+      "planes": 1,
+      "real": 0,
+      "imag": null,
+      "offset": 258048
+    },
+    {
+      "bands": 9,
+      "bins": 32,
+      "rows": 3,
+      "columns": 2,
+      "planes": 2,
+      "real": 0,
+      "imag": 1,
+      "offset": 259072
+    },
+    {
+      "bands": 9,
+      "bins": 32,
+      "rows": 8,
+      "columns": 13,
+      "planes": 7,
+      "real": 5,
+      "imag": 6,
+      "offset": 262144
+    },
+    {
+      "bands": 9,
+      "bins": 64,
+      "rows": 1,
+      "columns": 1,
+      "planes": 1,
+      "real": 0,
+      "imag": null,
+      "offset": 270336
+    },
+    {
+      "bands": 9,
+      "bins": 64,
+      "rows": 3,
+      "columns": 2,
+      "planes": 2,
+      "real": 0,
+      "imag": 1,
+      "offset": 272384
+    },
+    {
+      "bands": 9,
+      "bins": 64,
+      "rows": 8,
+      "columns": 13,
+      "planes": 7,
+      "real": 5,
+      "imag": 6,
+      "offset": 278528
+    },
+    {
+      "bands": 9,
+      "bins": 128,
+      "rows": 1,
+      "columns": 1,
+      "planes": 1,
+      "real": 0,
+      "imag": null,
+      "offset": 294912
+    },
+    {
+      "bands": 9,
+      "bins": 128,
+      "rows": 3,
+      "columns": 2,
+      "planes": 2,
+      "real": 0,
+      "imag": 1,
+      "offset": 299008
+    },
+    {
+      "bands": 9,
+      "bins": 128,
+      "rows": 8,
+      "columns": 13,
+      "planes": 7,
+      "real": 5,
+      "imag": 6,
+      "offset": 311296
+    },
+    {
+      "bands": 12,
+      "bins": 32,
+      "rows": 1,
+      "columns": 1,
+      "planes": 1,
+      "real": 0,
+      "imag": null,
+      "offset": 344064
+    },
+    {
+      "bands": 12,
+      "bins": 32,
+      "rows": 3,
+      "columns": 2,
+      "planes": 2,
+      "real": 0,
+      "imag": 1,
+      "offset": 345088
+    },
+    {
+      "bands": 12,
+      "bins": 32,
+      "rows": 8,
+      "columns": 13,
+      "planes": 7,
+      "real": 5,
+      "imag": 6,
+      "offset": 348160
+    },
+    {
+      "bands": 12,
+      "bins": 64,
+      "rows": 1,
+      "columns": 1,
+      "planes": 1,
+      "real": 0,
+      "imag": null,
+      "offset": 356352
+    },
+    {
+      "bands": 12,
+      "bins": 64,
+      "rows": 3,
+      "columns": 2,
+      "planes": 2,
+      "real": 0,
+      "imag": 1,
+      "offset": 358400
+    },
+    {
+      "bands": 12,
+      "bins": 64,
+      "rows": 8,
+      "columns": 13,
+      "planes": 7,
+      "real": 5,
+      "imag": 6,
+      "offset": 364544
+    },
+    {
+      "bands": 12,
+      "bins": 128,
+      "rows": 1,
+      "columns": 1,
+      "planes": 1,
+      "real": 0,
+      "imag": null,
+      "offset": 380928
+    },
+    {
+      "bands": 12,
+      "bins": 128,
+      "rows": 3,
+      "columns": 2,
+      "planes": 2,
+      "real": 0,
+      "imag": 1,
+      "offset": 385024
+    },
+    {
+      "bands": 12,
+      "bins": 128,
+      "rows": 8,
+      "columns": 13,
+      "planes": 7,
+      "real": 5,
+      "imag": 6,
+      "offset": 397312
+    },
+    {
+      "bands": 15,
+      "bins": 32,
+      "rows": 1,
+      "columns": 1,
+      "planes": 1,
+      "real": 0,
+      "imag": null,
+      "offset": 430080
+    },
+    {
+      "bands": 15,
+      "bins": 32,
+      "rows": 3,
+      "columns": 2,
+      "planes": 2,
+      "real": 0,
+      "imag": 1,
+      "offset": 431104
+    },
+    {
+      "bands": 15,
+      "bins": 32,
+      "rows": 8,
+      "columns": 13,
+      "planes": 7,
+      "real": 5,
+      "imag": 6,
+      "offset": 434176
+    },
+    {
+      "bands": 15,
+      "bins": 64,
+      "rows": 1,
+      "columns": 1,
+      "planes": 1,
+      "real": 0,
+      "imag": null,
+      "offset": 442368
+    },
+    {
+      "bands": 15,
+      "bins": 64,
+      "rows": 3,
+      "columns": 2,
+      "planes": 2,
+      "real": 0,
+      "imag": 1,
+      "offset": 444416
+    },
+    {
+      "bands": 15,
+      "bins": 64,
+      "rows": 8,
+      "columns": 13,
+      "planes": 7,
+      "real": 5,
+      "imag": 6,
+      "offset": 450560
+    },
+    {
+      "bands": 15,
+      "bins": 128,
+      "rows": 1,
+      "columns": 1,
+      "planes": 1,
+      "real": 0,
+      "imag": null,
+      "offset": 466944
+    },
+    {
+      "bands": 15,
+      "bins": 128,
+      "rows": 3,
+      "columns": 2,
+      "planes": 2,
+      "real": 0,
+      "imag": 1,
+      "offset": 471040
+    },
+    {
+      "bands": 15,
+      "bins": 128,
+      "rows": 8,
+      "columns": 13,
+      "planes": 7,
+      "real": 5,
+      "imag": 6,
+      "offset": 483328
+    },
+    {
+      "bands": 23,
+      "bins": 32,
+      "rows": 1,
+      "columns": 1,
+      "planes": 1,
+      "real": 0,
+      "imag": null,
+      "offset": 516096
+    },
+    {
+      "bands": 23,
+      "bins": 32,
+      "rows": 3,
+      "columns": 2,
+      "planes": 2,
+      "real": 0,
+      "imag": 1,
+      "offset": 517120
+    },
+    {
+      "bands": 23,
+      "bins": 32,
+      "rows": 8,
+      "columns": 13,
+      "planes": 7,
+      "real": 5,
+      "imag": 6,
+      "offset": 520192
+    },
+    {
+      "bands": 23,
+      "bins": 64,
+      "rows": 1,
+      "columns": 1,
+      "planes": 1,
+      "real": 0,
+      "imag": null,
+      "offset": 528384
+    },
+    {
+      "bands": 23,
+      "bins": 64,
+      "rows": 3,
+      "columns": 2,
+      "planes": 2,
+      "real": 0,
+      "imag": 1,
+      "offset": 530432
+    },
+    {
+      "bands": 23,
+      "bins": 64,
+      "rows": 8,
+      "columns": 13,
+      "planes": 7,
+      "real": 5,
+      "imag": 6,
+      "offset": 536576
+    },
+    {
+      "bands": 23,
+      "bins": 128,
+      "rows": 1,
+      "columns": 1,
+      "planes": 1,
+      "real": 0,
+      "imag": null,
+      "offset": 552960
+    },
+    {
+      "bands": 23,
+      "bins": 128,
+      "rows": 3,
+      "columns": 2,
+      "planes": 2,
+      "real": 0,
+      "imag": 1,
+      "offset": 557056
+    },
+    {
+      "bands": 23,
+      "bins": 128,
+      "rows": 8,
+      "columns": 13,
+      "planes": 7,
+      "real": 5,
+      "imag": 6,
+      "offset": 569344
+    }
+  ]
+}

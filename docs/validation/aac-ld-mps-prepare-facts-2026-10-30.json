@@ -1,0 +1,6 @@
+{
+  "archive_sha256": "b6b27e2f9af6ee8f950af8d7074afc467e66d93372328c0ec55282fff71d1f83",
+  "member": "mp4spatialdec/src/sac_bitdec.c",
+  "member_sha256": "d9a8655b4e5efa1329d629f88bde962b640efe9d1a5c22f24f84df56eadfa64e",
+  "scope": "Numeric facts only, no foreign runtime."
+}

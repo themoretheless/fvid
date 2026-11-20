@@ -1,5 +1,190 @@
 # Audio Implementation Status
 
+Predictive TTT ICC now accepts default coding: index0 means coherence1.
+The previous default prohibition confused entropy coding with physical zero
+correlation.36 authored programmes cover trees525/7271/7272,modes0/1,grids4/9/23,
+initial/default-reset/hold histories,MP4/Matroska and playback navigation.
+Both original ISO renderers produce byte-identical default/coded-unity controls;
+owned PCM differs by at most1.15e-9 over811008 scalars.13 focused tests pass;
+three actual-device runs drain full/seek/rewind. Physical zero coherence remains
+rejected. See validation/aac-ld-mps-ttt-default-2026-11-01.md.
+
+The original AAC-LD core is now independently decoded through the ISO generic
+frontend: all1443840 LD5151 core samples agree with FVid at RMS1.504e-9,
+max2.981e-8. The complete original core+spatial chain also agrees at worst-channel
+RMS1.787e-8 across both modes, while independently reproducing the historical
+Real WAV residual (~1.087e-5 RMS). No core/spatial production defect is established
+by that residual. Historical reference-generation settings remain unverified;
+other LD-MPS tools/profiles are still open. See
+validation/aac-ld-original-core-2026-11-01.md.
+
+Original LD5151 spatial reconstruction is now independently compared on the
+identical isolated core PCM: the complete ISO spatial parser/renderer agrees
+with FVid within worst-channel RMS1.789e-8 across both modes. The original Real
+renderer reproduces the remaining ~1.087e-5 RMS against the original WAV on that
+same core. The subsequent independent core audit above also reproduces that
+residual; historical reference generation remains unverified. This does not
+certify the complete profile. No production arithmetic changes in these audits.
+See validation/aac-ld-mps-original-spatial-2026-11-01.md.
+
+Shared AAC LD-SBR/MPS single-rate synthesis now uses its own32-band phase2n-31,
+qualified against the original AAC function and eight own short programmes.
+The formerly large24kHz LD-QMF2 discrepancy falls from RMS0.0965 to7.77e-6,
+max error1.52514e-5,without delay/gain fitting. Other original renderer outputs
+stay byte-identical. Generic MPS PCM/default QMF banks retain their conventions.
+693 scoped checks pass,0 fail,1 existing ignored;FFmpeg/ffprobe blocked.
+See validation/aac-ld-mps-single-rate-2026-11-01.md. The AAC-LD5151 historical
+reference discrepancy is reproduced by the original chain above; broader
+LD-MPS tools/profiles remain open.
+
+
+Original AAC-LD core controls now have an explicit offline PNS-aware diagnostic.
+The480-sample24kHz control has full PCM24 RMS3.46e-8. The512-sample48kHz
+control's large raw-wave difference is confined to PNS-dependent AUs;the
+syntax-derived deterministic partition has RMS3.40e-8. Full-stream metrics stay
+visible;this is not a weaker conformance gate. LD5151 has no PNS/LTP; its small
+numerical residual is independently reproduced by the complete original chain.
+See validation/aac-ld-core-original-2026-11-01.md.
+
+Coupled SBR noise now follows the normative L/R balance orientation. This
+closes the three remaining ordinary LD-SBR S2 waveform discrepancies: all26
+original ISO PCM24 streams have per-channel RMS at most2.016e-7,with zero lag
+and no gain fitting. Only S2 outputs change;the other23 are byte-identical.
+Four own short stereo programmes cover centered/asymmetric480/512,both
+transports,player seek/rewind and actual device navigation.661 scoped tests pass,
+0 fail,1 existing ignored;FFmpeg/ffprobe blocked. Full LD-MPS/profile
+qualification remains open. See validation/aac-ld-sbr-noise-balance-2026-11-01.md.
+
+The following opening notes describe earlier qualification milestones.
+
+
+LD-SBR now uses only internal retained-patch boundaries and complete synthesis
+endpoints for limiter partitions. This removes all six GH waveform discrepancies
+caused by a discarded short HF tail.23/26 original ISO PCM24 streams now have
+RMS at most2.016e-7;the three stereo S2 differences remain open. Eight own short
+programmes qualify all limiter modes,480/512,both transports and worker/device
+navigation.606 scoped checks pass,0 fail,1 existing ignored.
+See validation/aac-ld-sbr-limiter-tail-2026-11-01.md.
+
+AAC-ELD now emits the causal AU interval after the window's zero leading quarter,
+including the known EOF quarter. Both original24-bit ISO core references match
+at zero lag over their complete streams within one PCM24 LSB. The24 nonzero-core
+LD-SBR comparisons improve137–16259x;the two zero-core controls stay unchanged.
+Remaining LD-SBR waveform differences and broader codec qualification remain
+open. See validation/aac-eld-au-origin-2026-11-01.md. Earlier reports below retain
+their historical results and do not describe the corrected core origin.
+
+Four original PCM24 LD-SBR WAV controls corroborate complex reference rendering.
+The large e1_32 EOF error versus FDK is not native:against the original WAV,native
+maximum error is4e-6 versus FDK0.02586. The GH differences observed in that earlier
+audit are corrected by the limiter fix above. Stereo S2 remains open;no full
+waveform conformance is claimed.
+
+The preceding explicit-QMF reference audit selected complex in FDK because its
+automatic ordinary ELD mode is Low Power. At that checkpoint,the two zero-core
+twi comparisons improved to about9e-6/1e-5 RMS without changing native PCM.
+Its24 own programmes qualified zero-core harmonic energy,exact8x amplitude
+steps,both transports and worker/device navigation;23 scoped tests passed then.
+The current core-origin correction is a separate native DSP fix.
+See validation/aac-ld-sbr-qmf-reference-2026-11-01.md for that earlier audit.
+
+Nominal LD-SBR analysis uses canonical CLDFB phase2n-95. Own nonzero PCM
+regressions qualify the correction. The October31 scoped gate passed1138 tests,
+with one existing ignored. See validation/aac-cldfb-phase-2026-10-31.md.
+
+All128 separately audited ISO ELD core inputs decode completely through the
+presented audio reader in two runs. This is admission,not waveform conformance.
+All26 original ISO LD-SBR inputs now decode completely,including the six
+previous Q31 failures. Default LD-SBR reconstructs Q31 exactly as a bounded
+interoperability extension;AacDecodeOptions::ld_sbr_noise=NoisePolicy::Strict
+retains normative0..30 admission. Legacy SBR and coupled balance bounds retain
+their strict contracts.18 own programmes (36 movies) qualify independent PCM,
+temporal Q31 history,worker playback/seek/rewind and checkpoints. Q32 remains
+refused. One real macOS output-device run completes full/seek/seek/rewind drain.
+See validation/aac-ld-sbr-q31-2026-10-31.md. This is not full waveform conformance.
+
+AAC-LD now applies nearest-defined band/TNS tables at low/high AAC rates,
+including16 kHz. 360 own programmes (720 MP4/Matroska movies) cover frozen-core
+PCM,spatial composition and worker playback/seek/rewind. All50 public ISO
+LD-MPS MP4 inputs decode fully; this is admission,not waveform conformance.
+See validation/aac-ld-nearest-rate-2026-10-31.md.
+
+Native AAC construction now exposes both owned spatial decorrelators through
+`AacDecodeOptions`,alongside an optional output clock. The default stays Complex.
+Mode selection survives reset and is checked before restoring checkpoints.
+The current original-reference re-audit closes the former ELD5151 timing
+mismatch: Real-renderer full PCM16 comparison has maximum-channel RMS8.17e-6,
+max error1.5451e-5,without alignment or gain fitting. The frozen pre-origin
+probe has RMS0.0536 on the same input. The48-kHz LD-QMF input also matches at
+approximately the PCM16 quantization scale. AAC-LD tree5151's residual is now
+independently reproduced by the original core+spatial chain above. The24-kHz shared-QMF
+phase discrepancy is now corrected separately;see the single-rate synthesis
+report above. The prior uncorrected audit remains available at
+validation/aac-ld-mps-original-pcm-2026-11-01.md.
+
+AAC-LD/ELD terminal byte alignment now accepts arbitrary padding values.
+33 authored programmes (132 variants in MP4/Matroska) preserve exact PCM,
+playback and navigation, including coupled LD-SBR and adapted PCM ingress.
+Four public ISO LD-MPS streams decode fully after this fix. Their raw
+PCM comparisons are observations,not full conformance qualification. The fresh
+November1 audits resolve ELD5151 timing and24-kHz shared-QMF synthesis phase.
+Remaining numerical differences and broader profile qualification still require work.
+
+Native LD/ELD supports explicitly adapted short-core PCM clocks into LD-MPS.
+Downscaled LD-SBR additionally uses owned CLDFB PCM synthesis followed by the
+LD-MPS PCM interface, including stereo coupling. The existing shared LD-QMF
+path is retained when bank and packet geometry match SSC. Nominal48kHz ELD
+with single/dual-rate SBR now uses the PCM interface at48/96kHz,including
+64/128-band spatial output. Nominal-rate SSC remapping and direct shared-QMF
+downscale remain unsupported. Odd-factor SBR is explicitly refused, consistent
+with the pinned Fraunhofer parser; it is not an established valid missing mode.
+The codec-gap objective stays open. See CODEC_PROGRESS.md for the source audit.
+
+Ordinary mono arbitrary-downmix compensation is now integrated for LD-MPS
+5.1 trees0/1: decoded dB gain enters M1 before temporal smoothing/interpolation.
+Independent C/Decimal matrices and own playback/seek fixtures cover PCM ingress.
+Stereo TTT trees2/3/4 now also accept independent L/R gains before matrix
+inversion,with all six modes checked. Signalled 3D-stereo HRTF set0 now enters
+the TTT inverse for trees2/3/4 with equal23/9/4 parameter grids. This retains
+six/eight output channels; it does not select binaural output. Phase cutoff,
+standard-inverse priority and determinant-floor regularization have independent
+component controls plus owned playback/seek movies. Unequal HRTF grids,other
+HRTF trees,trees5/6/7 arbitrary-downmix and residual/arbitrary-tree extensions
+remain unfinished.
+
+Same-format in-band gain-mode enable/disable is now qualified for PCM-ingress
+ELD/LD-SBR trees0..4,including dependent held gains,default reset on re-enable,
+identical-header continuation and failure/retry. Continuous absolute-coded
+controls preserve the same waveform without using that reconfiguration path.
+
+Same-format in-band spatial frame-length changes now retain filter history and
+resolve queued input using the next frame's SSC before testing readiness.
+Owned480/512 AAC-LD/ELD,LD-SBR PCM32/64/128 and shared-QMF32/64 movies cover
+grow/shrink,early/late/batched headers,opaque source windows,seek/rewind and reset.
+Native AAC now reassembles spatial slices into complete submitted source windows,
+including sub-core and multi-core initial SSCs. Original sample counts,PTS/duration
+and opaque IDs survive slicing. SourceSpan exposes offset,full size and original
+stamp;ordinary Session opaque-ID clients keep their strict contract. Shared SBR
+uses actual rate/mode compatibility independently of spatial frame length.
+Frequency/layout transitions remain unfinished. LD-MPS nonzero time alignment
+is forbidden by the profile,not a pending decode feature; zero alignment with
+the flag present remains accepted. Ordinary MPEG Surround/HQ alignment is a
+separate integration. See validation/aac-ld-mps-alignment-profile-2026-11-01.md.
+
+Zero-width grouped CLD/ICC/CPC regions now consume entropy syntax and discard
+unused numeric results. This includes empty LFE OTT and split-TTT low regions
+with nonzero shared history; their former refusal is removed. Numeric bounds
+remain enforced for real output bands,while unused PCM words and malformed
+Huffman syntax still fail transactionally. Owned movies cover playback,
+seek/rewind,checkpoints/reset and both PCM/shared-LD-SBR QMF ingress. Original
+C cursor comparisons run under UBSan with undefined reference rows excluded.
+This does not establish full LD-MPS profile or Annex B conformance.
+
+LD-MPS rejects residual extension types0/1, including absent/zero bands, at
+native initial/replacement headers.
+Historical LD/residual numerical tests are not codec acceptance;ordinary MPEG
+Surround/HQ residual integration remains unfinished. See [profile boundary](LD_MPS_PROFILE.md).
+
 Ordinary AAC LTP (AOT4) is now admitted by the native decoder and MP4 path.
 Mono/stereo, dependent/independent CCE, and 960/1024 long/short transitions
 are qualified on authored PCM fixtures. Mono LTP/SBR explicit/sync/implicit
@@ -3170,3 +3355,60 @@ Tests cover native decode, checkpoint rollback, both MP4 APIs and player
 ranges/rewind/seek. The pre-fix acceptance failure was specifically
 `SBR extended audio/PS synthesis is not yet implemented`. Fixtures are
 original and generated offline, separately from ordinary test execution.
+
+### 2026-11-01: predictive TTT split-region validation
+
+The default/hold corpus adds twelve low/high predictive-region programmes,
+bringing it to48 programmes and48 coded controls in both MP4 and Matroska.
+Native complete PCM, checkpoint replay, both container readers' rewind/seek,
+and repeated MP4 intervals are covered. Six actual macOS device runs complete
+24 playback/navigation drain phases.
+
+The unmodified full ISO spatial frontend matches92 of96 programme/mode outputs
+within1e-7. Four TREE_525 lower0/upper1 outputs reproduce its global decorrelator
+count overwrite. A separately labelled single-assignment source diagnostic
+isolates that discrepancy and matches native PCM; original PCM is retained.
+This is not normative qualification of that combination or complete LD-MPS
+support. No production DSP changes are made for this reference discrepancy.
+See `validation/aac-ld-mps-ttt-split-2026-11-01.md` for exact boundaries.
+
+### 2026-11-01: indexed AAC22.2 and separate LD-SBR LFE histories
+
+The owned ASC/native/LD/ELD paths now admit configuration13 and retain all24
+channels with explicit positions. Both LFEs remain separate and both bypass
+LD-SBR HF generation. Per-LFE filter histories replace the previous single
+LFE owner. Indexed ER's16th synthetic tag stays inside the four-bit domain.
+
+Fourteen authored six-AU programmes provide1,723,392 independent scalar PCM
+comparisons across Main/LC/LTP/ER-LC/ER-LTP/LD/ELD and CRC/non-CRC LD-SBR.
+MP4/Matroska playback, rewind/seek, checkpoint rollback and stereo role routing
+are checked. Four actual macOS device runs complete16 drain phases.
+See `validation/aac-22-2-2026-11-01.md` for precise tools, evidence and remaining
+qualification boundaries; complete codec/profile parity is still open.
+
+### 2026-11-01: protected22.2 ESC qualification
+
+Eight EP3 programmes now qualify56 protected/reordered ELD classes; eight EP1
+RVLC/resilience programmes qualify80 instances in40 dependency groups, and two
+LD-SBR/CRC programmes qualify84 instances in42 groups with separate LFEs.
+The18 authored programmes compare952320 independent scalar samples, exercise
+checkpoint/dependency/CRC rollback and container playback/rewind/seek.
+Three actual macOS runs complete12 device-drain phases. This adds evidence
+for the existing configuration13 implementation, not new DSP. See
+`validation/aac-22-2-esc-2026-11-01.md` for transport boundaries and remaining
+unqualified combinations. The global codec-gap objective remains open.
+
+### 2026-11-01: LD-MPS local fragment replacement
+
+Native playback now admits incomplete ancillary fragments created and replaced
+inside the current logical AAC extension tail. Completing an inherited block
+also clears its provenance before subsequent local fragments. The parser reports
+inherited replacement explicitly; a later local discard cannot erase it.
+This replaces the blanket cumulative-counter guard without changing PCM math.
+
+120 authored programmes preserve parent messages, PCM, native timestamps,
+checkpoint replay and MP4/Matroska navigation; five inherited-replacement movies
+remain explicit refusal/retry tests.20 related tests pass and four actual macOS
+runs complete16 device-drain phases. See
+`validation/aac-ld-mps-local-replacement-2026-11-01.md` for exact scope.
+Inherited cross-AU source association and the other codec gaps remain open.

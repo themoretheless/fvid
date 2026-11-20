@@ -1,0 +1,98 @@
+{
+  "date": "2026-10-30",
+  "base_commit": "6a41310157",
+  "before_fix": "BitstreamError(\"AAC output clock disagrees with configuration\") on own factor-three 480-core movie",
+  "results": {
+    "root_media": [
+      {
+        "passed": 1059,
+        "failed": 0,
+        "ignored": 26,
+        "seconds": 301.95
+      },
+      {
+        "passed": 572,
+        "failed": 0,
+        "ignored": 3,
+        "seconds": 1.55
+      }
+    ],
+    "rate_worker": [
+      {
+        "passed": 1,
+        "failed": 0,
+        "ignored": 0,
+        "seconds": 0.69
+      }
+    ],
+    "basic": [
+      {
+        "passed": 7,
+        "failed": 0,
+        "ignored": 0,
+        "seconds": 4.24
+      }
+    ],
+    "fixture_quality": [
+      {
+        "passed": 1,
+        "failed": 0,
+        "ignored": 0,
+        "seconds": 0.06
+      }
+    ],
+    "rates": [
+      {
+        "passed": 6,
+        "failed": 0,
+        "ignored": 0,
+        "seconds": 0.6
+      }
+    ],
+    "compatibility": [
+      {
+        "passed": 5,
+        "failed": 0,
+        "ignored": 0,
+        "seconds": 7.18
+      },
+      {
+        "passed": 5,
+        "failed": 0,
+        "ignored": 0,
+        "seconds": 15.1
+      },
+      {
+        "passed": 6,
+        "failed": 0,
+        "ignored": 0,
+        "seconds": 74.74
+      },
+      {
+        "passed": 5,
+        "failed": 0,
+        "ignored": 0,
+        "seconds": 193.46
+      },
+      {
+        "passed": 6,
+        "failed": 0,
+        "ignored": 0,
+        "seconds": 87.6
+      },
+      {
+        "passed": 6,
+        "failed": 0,
+        "ignored": 0,
+        "seconds": 18.31
+      }
+    ]
+  },
+  "unique_unit_checks": 1632,
+  "unique_integration_checks": 47,
+  "accepted_programmes": 110,
+  "refusal_only_movies": 4,
+  "worker_programmes": 5527,
+  "all_test_compilation": "cargo check --offline --no-default-features --features player --tests passed",
+  "commands": "CARGO_TARGET_DIR=<worktree-parent>/target cargo --config profile.dev.package.fvid-media.opt-level=2 test/check --offline --no-default-features --features player"
+}

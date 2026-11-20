@@ -237,6 +237,22 @@ impl ChannelPair {
         };
         *bits=cursor; Ok((Self {left,right,mid_side,explicit_mask},prediction))
     }
+    pub(crate) fn read_eld_esc(
+        reader: &mut super::aac_esc::Reader,
+        config: &AacConfig,
+    ) -> Result<Self> {
+        reader.common()?;
+        let info = reader.read(0, |b| ChannelData::eld_info(b, config))?;
+        let (explicit_mask, mid_side) = reader.read(0, |b| Self::read_mask(b, Some(&info)))?;
+        let left = ChannelData::read_eld_esc(reader, config, Some(&info), true)?;
+        let right = ChannelData::read_eld_esc(reader, config, Some(&info), true)?;
+        Ok(Self {
+            left,
+            right,
+            mid_side,
+            explicit_mask,
+        })
+    }
     pub fn read_eld(bits:&mut BitReader<'_>,config:&AacConfig)->Result<Self>{
         let mut cursor=bits.clone();
         let info=ChannelData::eld_info(&mut cursor,config)?;
@@ -244,6 +260,48 @@ impl ChannelPair {
         let left=ChannelData::read_eld(&mut cursor,config,Some(&info),true)?;
         let right=ChannelData::read_eld(&mut cursor,config,Some(&info),true)?;
         *bits=cursor;Ok(Self{left,right,mid_side,explicit_mask})
+    }
+    pub(crate) fn read_er_esc(
+        reader: &mut super::aac_esc::Reader,
+        config: &AacConfig,
+    ) -> Result<Self> {
+        reader.common()?;
+        let (common, deferred) = reader.read(0, |b| {
+            b.read(4)?;
+            if !b.bit()? {
+                return Ok((None, false));
+            }
+            let tables = BandTables::for_config(config)?;
+            let (info, present) = match config.object_type {
+                19 => {
+                    let header = super::aac_ltp_syntax::LtpIcsInfo::read_er_common(
+                        b,
+                        (
+                            (tables.long.len() - 1) as u8,
+                            (tables.short.len() - 1) as u8,
+                        ),
+                        config.frame_samples,
+                    )?;
+                    (header.info, header.predictor_present)
+                }
+                23 => {
+                    let (info, _, present) =
+                        super::aac_ld_syntax::read_ics(b, (tables.long.len() - 1) as u8, true)?;
+                    (info, present)
+                }
+                _ => (tables.read_ics(b)?, false),
+            };
+            Ok((Some(info), present))
+        })?;
+        let (explicit_mask, mid_side) = reader.read(0, |b| Self::read_mask(b, common.as_ref()))?;
+        let left = ChannelData::read_er_esc(reader, config, common.as_ref(), true, deferred)?;
+        let right = ChannelData::read_er_esc(reader, config, common.as_ref(), true, deferred)?;
+        Ok(Self {
+            left,
+            right,
+            mid_side,
+            explicit_mask,
+        })
     }
     fn read_er_prediction(bits: &mut BitReader<'_>, info: &super::aac_ics::IcsInfo, config: &AacConfig)
         -> Result<Option<super::aac_ltp_syntax::LtpData>> {

@@ -1,0 +1,8 @@
+{
+  "command": "cargo --config profile.dev.package.fvid-media.opt-level=2 test --offline -p fvid-media --lib --no-default-features -- --test-threads=2",
+  "passed": 589,
+  "failed": 0,
+  "ignored": 1,
+  "complete": true,
+  "log_sha256": "9aaa9cc202d7761db5b12fbaf383a2ee27a8ce0b43b2369a72069cacff05a767"
+}

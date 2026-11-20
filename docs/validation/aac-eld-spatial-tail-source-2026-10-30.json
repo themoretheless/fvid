@@ -1,0 +1,16 @@
+{
+  "commit": "ee76460efbdb147e26d804c798949c23f174460b",
+  "repository": "https://android.googlesource.com/platform/external/aac",
+  "path": "libAACdec/src/aacdecoder.cpp",
+  "sha256": "8886d6d8934467ea553bd1f5e9c92ea7291bb160cef141a08691eb740774b7fa",
+  "pinned_source_report": "aac-ld-mps-transport-source-2026-10-30.json",
+  "facts": [
+    "CAacDecoder_ExtPayloadParse maps implicit SBR tags13/14 to EXT_FIL for ELD because SBR is explicit",
+    "EXT_DATA_LENGTH tag3 uses 4-bit length plus escaped8/16 fields",
+    "nested data_length child is forbidden",
+    "bounded child payload passes a separate bit count to extension parsing",
+    "direct spatial tags9/12 consume the supplied extension remainder",
+    "explicit ELD SBR prefix precedes ER extension loop; loop continues while more than7 bits remain"
+  ],
+  "scope": "Source grammar facts only; no external decoder or copied implementation enters production. Native admission remains refused."
+}

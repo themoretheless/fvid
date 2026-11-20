@@ -1,0 +1,29 @@
+{
+  "base_commit": "01c4822208",
+  "scope": "LD-QMF component only. No spatial movie playback acceptance or closed codec gap claimed.",
+  "checks": [
+    {
+      "log": "/tmp/fvid-ld-qmf-media-final.log",
+      "sha256": "771db45886a5dcc88953614c4dafb1a859f209353dd98f880a408454bb5dcb6a",
+      "results": [
+        "test result: ok. 572 passed; 0 failed; 1 ignored; 0 measured; 0 filtered out; finished in 1.67s"
+      ],
+      "finished": [
+        "    Finished `test` profile [unoptimized + debuginfo] target(s) in 34.13s"
+      ]
+    },
+    {
+      "log": "/tmp/fvid-ld-qmf-check.log",
+      "sha256": "054b23bc1ccf1b869128c17270678fa2c87bc2a934505a2d9b1ebfafdb2779ea",
+      "results": [],
+      "finished": [
+        "    Finished `dev` profile [unoptimized + debuginfo] target(s) in 17.24s"
+      ]
+    }
+  ],
+  "source": "Frozen official ISO reference insert; no reference implementation included in runtime.",
+  "new_unit_checks": 3,
+  "scalar_cases": 12,
+  "reference_controls": 24,
+  "ordinary_tests": "saved data only; no FFmpeg, C compiler, reference archive or network"
+}

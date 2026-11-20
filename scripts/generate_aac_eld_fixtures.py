@@ -22,7 +22,7 @@ def cosines(n,bins):
     return [[math.cos(math.pi/n*(i+.5-n/2)*(k+.5))for k in bins]for i in range(4*n)]
 def asc(n,configuration,rate,flags=0):
     return packed(field(31,5)+field(7,6)+frequency(rate)+field(configuration,4)+field(n==480,1)+field(flags,3)+'0'+'0000'+'00')
-def body(books,values,bins,scales,common,flags,tns=None,tns_bands=31):
+def body(books,values,bins,scales,common,flags,tns=None,tns_bands=31,categories=False):
     # ELD omits tags, pulse, gain-control, window shape, common_window and LTP.
     section=''.join(field(b,5 if flags&4 else 4)+(''if flags&4 and(b==11 or b>=16)else field(1,5))for b in books)
     if flags&2:sf,rv,_=rvlc_scales(0,books,scales,gain=140)
@@ -37,7 +37,7 @@ def body(books,values,bins,scales,common,flags,tns=None,tns_bands=31):
             else:sf+=sc(value-ordinary);ordinary=value
     q=[values.get(k,0)for k in range(8)]
     if flags&1:
-        data,hint,_=hcr_payload(0,[books],[1],[q]);spectral_header=field(len(data),14)+field(hint,6)
+        data,hint,_=hcr_payload(0,[[0 if b in [13,14,15]else b for b in books]],[1],[q]);spectral_header=field(len(data),14)+field(hint,6)
     else:
         spectral_header='';data=''
         for band,b in enumerate(books):
@@ -45,7 +45,10 @@ def body(books,values,bins,scales,common,flags,tns=None,tns_bands=31):
             width=bins[band+1]-bins[band];dim=4 if b<=4 else 2
             for k in range(bins[band],bins[band]+width,dim):data+=cw(b,[values.get(i,0)for i in range(k,k+dim)])
     tns_bits=''if tns is None else field(1,2)+'0'+field(tns_bands,6)+field(1,5)+field(tns,1)+'0'+'001'
-    return field(140,8)+(''if common else field(len(books),6))+section+sf+field(tns is not None,1)+tns_bits+spectral_header+rv+data
+    prefix=field(140,8)+(''if common else field(len(books),6))+section+sf+field(tns is not None,1)
+    if categories:
+        return [dict(category=1,bits=prefix+spectral_header)]+([dict(category=2,bits=rv)]if flags&2 else [])+([dict(category=3,bits=tns_bits)]if tns is not None else [])+[dict(category=4,bits=data)]
+    return prefix+tns_bits+spectral_header+rv+data
 def mkv(config,packets,rate,n,channels):
     audio=element(0xe1,element(0xb5,struct.pack('>d',float(rate)))+uint(0x9f,channels))
     entry=uint(0xd7,1)+uint(0x83,2)+element(0x86,b'A_AAC')+element(0x63a2,config)+uint(0x23e383,n*1000000000//rate)+audio
@@ -61,11 +64,16 @@ def specifications():
     specs += [(n,24000,2,t,0,1,False)for n in [512,480]for t in ['pns','correlated-pns','intensity','tns']]
     return specs
 
-def generate(include_payload_bits=False, specs=None):
+def generate(include_payload_bits=False, specs=None, include_category_bits=False, output_samples=None, synthesis_window=None, frame_count=12):
     files={};cases=[];blob=bytearray()
     for n,rate,configuration,tool,flags,ms,high in (specifications() if specs is None else specs):
-        elements,mapping,mask=LAYOUTS[configuration];channels=len(mapping);w=window(n)
-        overlap=[[0.]*(3*n)for _ in mapping];noise=Noise();pcm=[];rows=[];packets=[]
+        elements,mapping,mask=LAYOUTS[configuration];channels=len(mapping)
+        sn=n if output_samples is None else output_samples
+        assert sn>0 and n%sn==0 and rate*sn%n==0
+        output_rate=rate*sn//n
+        w=window(sn)if synthesis_window is None else synthesis_window(sn)
+        assert all(v==0 for v in w[:sn//4])
+        overlap=[[0.]*(3*sn)for _ in mapping];noise=Noise();pcm=[];rows=[];packets=[]
         count,last=geometry(n,max(22050,min(48000,rate)))if high else(2,4)
         offsets=[0,4]if count==2 else [0]+[4*i for i in range(1,count)]+[n]
         # Only the first and final bands carry coefficients. Their exact last
@@ -75,9 +83,9 @@ def generate(include_payload_bits=False, specs=None):
             offsets=[0]+[4*i for i in range(1,count-1)]+[last,n]
         if not high:offsets=[0,4,8]
         positions=(0,1,2,3,last,last+1,last+2,last+3)
-        cos=cosines(n,positions)
-        for frame in range(12):
-            bits='';spectra=[];ch=0
+        cos=cosines(sn,positions)
+        for frame in range(frame_count):
+            bits='';spectra=[];ch=0;instances=[]
             for element in elements:
                 width=2 if element==1 else 1
                 band_count=1 if element==3 else count
@@ -100,10 +108,14 @@ def generate(include_payload_bits=False, specs=None):
                     values.append(value)
                 mask_bits=[bool((frame+b)%2)for b in range(band_count)]if ms==1 else[ms==2]*band_count
                 if tool=='correlated-pns'and len(mask_bits)>1:mask_bits[1]=True
-                if width==2:bits+=field(band_count,6)+field(ms,2)+(''.join(field(v,1)for v in mask_bits)if ms==1 else'')
+                if width==2:
+                    common_bits=field(band_count,6)+field(ms,2)+(''.join(field(v,1)for v in mask_bits)if ms==1 else'')
+                    bits+=common_bits
+                    if include_category_bits:instances.append(dict(category=0,bits=common_bits))
                 for c in range(width):
                     tns=(frame+c)%2 if tool=='tns'and frame<7 else None
                     bits+=body(books[c],values[c],offsets[:band_count+1],scales[c],width==2,flags,tns,geometry(n,max(22050,min(48000,rate)))[0])
+                    if include_category_bits:instances.extend(body(books[c],values[c],offsets[:band_count+1],scales[c],width==2,flags,tns,geometry(n,max(22050,min(48000,rate)))[0],True))
                     spectrum={}
                     for band,book in enumerate(books[c]):
                         lo,hi=offsets[band:band+2];value=scales[c][band]
@@ -128,27 +140,31 @@ def generate(include_payload_bits=False, specs=None):
                     direction=signs[c]
                     if direction is not None:
                         spectrum=spectra[-width+c];prior=0.
-                        for k in (range(7,-1,-1)if direction else range(8)):
+                        limit=offsets[band_count]
+                        for k in (range(limit-1,-1,-1)if direction else range(limit)):
                             v=spectrum.get(k,0.)-math.sin(math.pi/7)*prior;spectrum[k]=f32(v);prior=v
                 ch+=width
             payload=packed(bits);packets.append(payload);rows.append(dict(offset=len(blob),bytes=len(payload)));blob.extend(payload)
             if include_payload_bits:rows[-1]['bits']=bits
+            if include_category_bits:rows[-1]['esc']=instances
             outputs=[]
             for c,spectrum in enumerate(spectra):
-                values=[spectrum.get(k,0.)for k in positions]
+                values=[spectrum.get(k,0.)if k<sn else 0. for k in positions]
                 transformed=[-sum(v*x for v,x in zip(values,row))/n for row in cos]
-                accumulated=[x*w[i]+(overlap[c][i]if i<3*n else 0.)for i,x in enumerate(transformed)]
-                outputs.append(accumulated[:n]);overlap[c]=accumulated[n:]
-            for i in range(n):
+                accumulated=[x*w[i]+(overlap[c][i]if i<3*sn else 0.)for i,x in enumerate(transformed)]
+                # The next window's first quarter is identically zero,so the
+                # current AU already determines this entire aligned interval.
+                outputs.append(accumulated[sn//4:sn+sn//4]);overlap[c]=accumulated[sn:]
+            for i in range(sn):
                 row=[0.]*channels
                 for c,target in enumerate(mapping):row[target]=outputs[c][i]/32768
                 pcm.append(struct.pack('<'+'f'*channels,*row))
         name=f'n{n}-c{configuration}'if tool=='base'else f'n{n}-r{rate}-c{configuration}-{tool}-f{flags}'
         config=asc(n,configuration,rate,flags);files[name+'.asc']=config;files[name+'.f32le']=b''.join(pcm)
-        case=dict(name=name,n=n,rate=rate,configuration=configuration,mask=mask,tool=tool,flags=flags,asc=config.hex(),channels=channels,frames=rows,container_rate=rate,container_frame_samples=n,samples=12*n,pcm_offset=0,slots=n//64,bands=32)
+        case=dict(name=name,n=n,rate=output_rate,configuration=configuration,mask=mask,tool=tool,flags=flags,asc=config.hex(),channels=channels,frames=rows,container_rate=output_rate,container_frame_samples=sn,samples=frame_count*sn,pcm_offset=0,slots=n//64,bands=32)
         movie=video_fixture([case],blob,channels,filename=name+'.mp4',write=False)
         files[name+'.mp4']=movie.pop('data');case['video']=name+'.mp4'
-        files[name+'.mka']=mkv(config,packets,rate,n,channels);case['matroska']=name+'.mka'
+        files[name+'.mka']=mkv(config,packets,output_rate,sn,channels);case['matroska']=name+'.mka'
         cases.append(case)
     files['packets.bin']=bytes(blob)
     files['manifest.json']=(json.dumps(dict(cases=cases,provenance='Own ELD header/entropy writer, fixed layout ordering, PNS/MS/intensity/TNS arithmetic and independent direct cosine + normative 4N window + three-block overlap. Nonzero/decay frames; no private media, external decoder, subprocess or network.'),indent=2)+'\n').encode()
